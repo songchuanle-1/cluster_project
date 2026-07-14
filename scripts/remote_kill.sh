@@ -71,8 +71,8 @@ ssh "${SSH_TARGET}" "
         done
     fi
 
-    # Fallback: kill any remaining train/test python processes
-    PIDS=\$(ps aux | grep -E 'python.*tools/(train|test)' | grep -v grep | awk '{print \$2}')
+    # Fallback: kill any remaining train/test python processes UNDER THIS PROJECT
+    PIDS=\$(ps aux | grep -E 'python.*tools/(train|test)' | grep -v grep | grep '${REMOTE_CODE_ROOT}' | awk '{print \$2}')
     if [[ -n \"\${PIDS}\" ]]; then
         echo \"Found remaining training processes: \${PIDS}\"
         for pid in \${PIDS}; do
