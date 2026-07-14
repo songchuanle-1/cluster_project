@@ -57,36 +57,19 @@ if ! git rev-parse --git-dir >/dev/null 2>&1; then
     exit 1
 fi
 
-# ----- 用 git archive + tar 只传输 model 目录 -----
-echo "[1/3] Packaging framework/model/ ..."
+# ----- 用 rsync 只传输 model 目录 -----
+echo "[1/2] Syncing framework/model/ to ${SERVER} ..."
+
 cd "${ROOT_DIR}"
-git add framework/model/ 2>/dev/null || true
-# 只提交 model 改动（如果有的话）
-if git status --porcelain framework/model/ 2>/dev/null | grep -q '.'; then
-    TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-    git add framework/model/
-    git commit -m "Auto-commit model changes [${TIMESTAMP}]" || true
-fi
+rsync -avz --delete \
+    --exclude='__pycache__' \
+    --exclude='*.pyc' \
+    --exclude='build/' \
+    --exclude='*.so' \
+    --exclude='*.egg-info' \
+    --exclude='.ninja_*' \
+    framework/model/ \
+    "${SSH_TARGET}:${REMOTE_CODE_ROOT}/framework/model/"
 
-# 打包最新 commit 中的 framework/model
-git archive --format=tar --prefix=framework/model/ HEAD:framework/model . | gzip > /tmp/cluster_model_sync.tar.gz
-
-echo "[2/3] Uploading to ${SERVER}..."
-scp /tmp/cluster_model_sync.tar.gz "${SSH_TARGET}:/tmp/cluster_model_sync.tar.gz"
-
-echo "[3/3] Extracting on remote..."
-ssh "${SSH_TARGET}" "
-    cd ${REMOTE_CODE_ROOT}
-    # 删除旧的 model 代码
-    rm -rf framework/model
-    # 解压新的
-    tar xzf /tmp/cluster_model_sync.tar.gz
-    rm /tmp/cluster_model_sync.tar.gz
-    # 显示更新了哪些文件
-    echo 'Updated files:'
-    find framework/model -name '*.py' -newer framework/__init__.py 2>/dev/null | head -10 || find framework/model -name '*.py' | head -10
-    echo 'Sync complete.'
-"
-
-rm /tmp/cluster_model_sync.tar.gz
+echo ""
 echo "==== Model sync complete: framework/model/ -> ${SERVER}:${REMOTE_CODE_ROOT}/framework/model/ ===="
