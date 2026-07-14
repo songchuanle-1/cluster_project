@@ -1,0 +1,64 @@
+# ============================================
+# 训练日志路径列表
+# 格式: 模型名称 日志路径
+# 以 # 开头的行为注释
+# ============================================
+
+# --- base2 基准模型 ---
+# model_base2 (base2 baseline, 无 ila)
+model_base2 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2/20260702_233739/20260702_233739.log
+
+# --- base2 quard 系列 ---
+# quard1 (SharedClusterBank + 6层 + P2 matching_masks)
+model_base2_quard1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard1/20260411_152130/20260411_152130.log
+
+# quard2 (P0共享参数 + P1合并投影 + P2互补匹配)
+model_base2_quard2 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2/20260627_171622/20260627_171622.log
+
+# quard2_l1 (单层 Cluster_Attn + P2)
+model_base2_quard2_l1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_l1/20260628_040014/20260628_040014.log
+
+# quard2_l1_nomask (单层 + 去 P2)
+model_base2_quard2_l1_nomask /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_l1_nomask/20260628_123824/20260628_123824.log
+
+# quard2_nomask (6层 + 去 P2)
+model_base2_quard2_nomask /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_nomask/20260628_124909/20260628_124909.log
+
+# quard2_c2f (Coarse-to-Fine 级联, 外挂)
+model_base2_quard2_c2f /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_c2f/20260628_231233/20260628_231233.log
+
+# quard2_c2f_pq (C2F + Per-Query 独立路由)
+model_base2_quard2_c2f_pq /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_c2f_pq/20260629_090714/20260629_090714.log
+
+# quard2_c2f_enc (C2F 嵌入 Encoder_layer, tanh, 6层)
+model_base2_quard2_c2f_enc /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_c2f_enc/20260701_214831/20260701_214831.log
+
+# quard2_c2f_enc_gm1 (同上, gate 初始化 = -1.0)
+model_base2_quard2_c2f_enc_gm1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base2_quard2_c2f_enc_gm1/20260701_235213/20260701_235213.log
+
+# --- base1 基准模型 ---
+# model_base1 (base1 baseline, 有 ila, 无 cluster)
+model_base1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1/20260627_174353/20260627_174353.log
+
+# --- base1 cluster 系列 ---
+# nomask (并行多尺度, 外挂, tanh, 6层)
+model_base1_quard2_nomask /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_nomask/20260704_130243/20260704_130243.log
+
+# c2f (C2F 级联, 外挂, tanh, 6层)
+# (暂无 checkpoint)
+
+# c2f_pq (C2F + Per-Query 独立路由, 外挂)
+model_base1_quard2_c2f_pq /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_pq/20260704_103140/20260704_103140.log
+
+# c2f_enc (C2F 嵌入 Encoder, tanh, 6层, N×Q)
+model_base1_quard2_c2f_enc /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc/20260703_094308/20260703_094308.log
+
+# --- c2f_enc_lite 系列 (轻量优化) ---
+# c2f_enc_lite (sigmoid, 后2层, 不改query, 直接gather) ★ 当前最佳
+model_base1_quard2_c2f_enc_lite /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite/20260703_150030/20260703_150030.log
+
+# c2f_enc_lite_l3 (num_layers=3)
+model_base1_quard2_c2f_enc_lite_l3 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_l3/20260705_021243/20260705_021243.log
+
+# c2f_enc_lite_l4 (num_layers=4)
+model_base1_quard2_c2f_enc_lite_l4 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_l4/20260705_023517/20260705_023517.log

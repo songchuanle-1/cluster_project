@@ -1,0 +1,56 @@
+# ============================================================
+# SERVERS.yaml — Cluster 项目服务器与数据集注册表
+# ============================================================
+# 用法:
+#   同步代码:    bash scripts/sync.sh server-4
+#   远程训练:    bash scripts/remote_train.sh server-4 <config> <gpu_ids>
+#   查看状态:    bash scripts/remote_status.sh server-4
+# ============================================================
+
+# ----- 服务器列表 -----
+servers:
+  # ---- 本地开发机 ----
+  local:
+    host: 192.168.1.175
+    user: songcl
+    role: workstation
+    gpu:
+      count: 0
+      type: none
+    remote_code_root: /home/songcl/3dres/project/Cluster
+    conda_source: /home/songcl/.conda/etc/profile.d/conda.sh
+    conda_env: test
+    data_root: /home/songcl/data/data/
+    work_dir: /data/songcl/3dres/Cluster_project2/Cluster_checkpoints
+
+  # ---- 四号服务器 (192.168.1.137, 2x RTX 5090) ----
+  server-4:
+    host: 192.168.1.137
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX5090
+    remote_code_root: /home/songcl/project
+    conda_source: /home/dl04/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /home/songcl/data/data/
+    work_dir: /data/songcl/Cluster_project/Cluster_checkpoints
+
+# ----- 数据集注册表 -----
+datasets:
+  scanrefer:
+    path: scanrefer/
+  scannetv2:
+    path: scannetv2/
+  multi3drefer:
+    path: multi3drefer/
+  pretrain_backbone:
+    path: sp_unet_backbone.pth
+
+# ----- 路径替换规则 (本地 → 远程) -----
+# remote_train.sh 在远程启动训练前会自动替换这些路径
+path_mappings:
+  work_dir:
+    local: "/data/songcl/3dres/Cluster_project2/Cluster_checkpoints"
+    remote: "/data/songcl/Cluster_project/Cluster_checkpoints"

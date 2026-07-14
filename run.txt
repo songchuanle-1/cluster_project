@@ -1,0 +1,100 @@
+CUDA_VISIBLE_DEVICES=0 python tools/train_song.py configs_song/default_res.yaml
+CUDA_VISIBLE_DEVICES=1 python tools/train_song.py configs_song/model_cross.yaml --gpu_ids 1
+
+
+python tools/train_song.py configs_song/test.yaml --gpu_ids 1
+python tools/train_song.py configs_song/model_new_loss.yaml --gpu_ids 0
+
+python tools/train_song.py configs_song/model_add_Adversarial.yaml --gpu_ids 0
+python tools/train_song.py configs_song/model_cross_add_global_info.yaml --gpu_ids 1
+python tools/train_song.py configs_song/model_add_text_query_contra2.yaml --gpu_ids 1
+
+python tools/train_song.py configs_song/model_no_self.yaml --gpu_ids 0
+python tools/train_song.py configs_song/model_no_sentence_feats.yaml --gpu_ids 1
+
+python tools/train_song.py configs_song/model_add_dynamic_mask.yaml --gpu_ids 1
+python tools/train_song.py configs_song/model_add_dynamic_mask2.yaml --gpu_ids 0
+python tools/train_song.py configs_song/model_add_dynamic_mask2_normal.yaml --gpu_ids 1
+python tools/train_song.py configs_song/model_add_dynamic_mask3.yaml --gpu_ids 0
+python tools/train_song.py configs_song/model_no_scg.yaml --gpu_ids 1  
+python tools/train_song.py configs_song/model_triple_loss.yaml --gpu_ids 0  
+python tools/train_song.py configs_song/model_triple_loss2.yaml --gpu_ids 1  
+
+
+
+
+python tools/train_song3.py configs_song/model_loss/model_triple_loss2.yaml --gpu_ids 1  
+python tools/train_song3.py configs_song/model_loss/model_triple_loss2.yaml --gpu_ids 1  --resume  'path'
+python tools/test_song3.py configs_song/model_loss/model_triple_loss2.yaml --gpu_ids 1  --checkpoint  'path'
+
+
+python tools/train_song3.py configs_song/model_modality_fusion/model_pos_before_sum.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_modality_fusion/model_pos_before_sum2.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_ablation/model_no_self_bs4.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_cross/model_cross_cf.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_cross/model_cross_cf.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_cross/model_cross_cf_bs8.yaml --gpu_ids 0 1  --num_gpus 2
+python tools/train_song3.py configs_song/test.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/default_res_bs4.yaml --gpu_ids 1
+
+
+python tools/train_song3.py configs_song_gres/default_gres.yaml--gpu_ids 0 
+python tools/train_song3.py configs_song_gres/model_cross_cf_gres.yaml--gpu_ids 1 
+python tools/train_song3.py configs_song_gres/model_cross/model_cross_cf2_gres.yaml--gpu_ids 1 
+python tools/train_song3.py configs_song_gres/model_ablation/model_no_self.yaml --gpu_ids 0
+
+python tools/train_song3.py configs_song/model_ablation/model_no_image.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_ablation/model_no_task.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_dynamic/model_learn_pos_offset.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_cross/model_cross_cf_no_image.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_dynamic/model_add_dynamic_mask2_normal_no_self.yaml --gpu_ids 1 --resume /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint/model_add_dynamic_mask2_normal_no_self/20250423_102950/last.pth
+python tools/train_song3.py configs_song/model_dynamic/model_add_dynamic_mask2_normal_no_task_no_self.yaml --gpu_ids 0 --resume /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint/model_add_dynamic_mask2_normal_no_task_no_self/20250423_111112/last.pth
+
+python tools/train_song3.py configs_song/model_ablation/baseline.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_cross/baseline_model_cross_cf.yaml --gpu_ids 1
+python tools/train_song3.py configs_song/model_paper/baseline_model_cross_cf_share.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_paper/baseline_model_cf_share.yaml --gpu_ids 1 --resume /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_3/baseline_model_cf_share/20250428_222818/best.pth
+python tools/train_song3.py configs_song/model_paper/baseline_model_share_cross_cf_share.yaml --gpu_ids 0  --resume /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper/baseline_model_share_cross_cf_share/20250507_233650/last.pth
+python tools/train_song3.py configs_song/model_paper2/baseline2_add_dynamic_mask2_add_offset_multilevel_mi2.yaml --gpu_ids 1 --resume /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper2/baseline2_add_dynamic_mask2_add_offset_multilevel_mi2/20250530_230836/best.pth
+python tools/test_song3.py configs_song/model_paper2/baseline2_add_dynamic_mask2_add_offset_multilevel_mi.yaml --gpu_ids 0
+python tools/train_song3.py configs_song/model_paper2/baseline2_add_dynamic_mask2_add_offset_multilevel_mi3.yaml --gpu_ids 0
+实验计划
+1  先去掉作者的模块构造baseline  task  k8   第二个self
+2  在baseline基础上  构建coarse-fine的过程
+3  在baseline基础上  构建多层级  k过程  在不同层级聚合不同数量的query
+4  在baseline基础上  添加距离敏感的权重注意力
+5  在baseline基础上  添加文本的伪距离
+
+
+baseline_model_share_cross_cf_share_sum_div2_add_dynamic_mask2_add_offset_multilevel_4_521
+
+
+使用ssm去更新
+
+
+
+
+
+
+python tools/test.py configs_song/model_paper5/cf12_4_1_6.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_6/20250831_090918/best0.pth 
+python tools/test.py configs_song/model_paper5/cf12_4_1_10.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_10/20250902_204121/best0.pth
+python tools/test.py configs_song/model_paper5/cf12_4_1_11.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_11/20250902_204714/best0.pth
+python tools/test.py configs_song/model_paper5/cf12_4_1_5.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_5/20250828_041836/best0.pth 
+python tools/test.py configs_song/model_paper5/cf12_4_1_7.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_7/20250901_211925/best0.pth 
+python tools/test.py configs_song/model_paper5/cf12_4_1_8.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_8/20250901_045249/best0.pth 
+python tools/test.py configs_song/model_paper5/cf12_4_1_14.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_14_3/20250911_050718/best0.pth 
+python tools/test.py configs_song/model_paper5/cf12_4_1_3.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1/20250819_212224/best0.pth
+
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_6_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_6/20250831_090918/best0.pth 
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_10_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_10/20250902_204121/best0.pth
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_11_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_11/20250902_204714/best0.pth
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_5_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_5/20250828_041836/best0.pth 
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_7_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_7/20250901_211925/best0.pth 
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_8_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_8/20250901_045249/best0.pth 
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_14_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_14_3/20250911_050718/best0.pth 
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_b1.yaml --gpu_id 1 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1/20250819_212224/best0.pth
+
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_6_new1_b1.yaml --gpu_id 0 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_6_new1/20251004_215512/best0.pth
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_11_new1_b1.yaml --gpu_id 0 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_11_new1/20251004_030506/best0.pth
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_5_new1_b1.yaml --gpu_id 0 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_5_new1/20251001_074551/best0.pth
+python tools/test_par_flop.py configs_song/model_paper5/cf12_4_1_7_new1_b1.yaml --gpu_id 0 --checkpoint /bak_home/songcl/3D_visual_grounding/IPDN/checkpoint_paper5/cf12_4_1_7_new1/20251004_214957/best0.pth
