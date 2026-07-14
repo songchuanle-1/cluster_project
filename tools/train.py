@@ -19,9 +19,11 @@ mp.set_sharing_strategy('file_system')  # 使用文件系统替代共享内存
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # PyTorch 2.6+ 默认 weights_only=True，需要 monkey-patch 以支持加载包含 numpy 对象的 checkpoint
+# Python 3.8 的 pickle 不支持 weights_only 参数，需做版本兼容
 _original_torch_load = torch.load
 def _torch_load_compat(*args, **kwargs):
-    kwargs.setdefault('weights_only', False)
+    if 'weights_only' in kwargs:
+        del kwargs['weights_only']
     return _original_torch_load(*args, **kwargs)
 torch.load = _torch_load_compat 
 

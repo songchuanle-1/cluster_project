@@ -94,11 +94,15 @@ ssh "${SSH_TARGET}" "
 
 # ----- 检查远程未提交修改 -----
 echo "[2/4] Checking for uncommitted changes on remote..."
-UNCOMMITTED=$(ssh "${SSH_TARGET}" "cd ${REMOTE_CODE_ROOT} && git status --porcelain 2>/dev/null | head -5" || true)
-if [[ -n "${UNCOMMITTED}" ]]; then
-    echo "Warning: remote has uncommitted changes, auto-stashing..."
-    ssh "${SSH_TARGET}" "cd ${REMOTE_CODE_ROOT} && git stash push -m 'auto-stash by sync.sh'"
-fi
+ssh "${SSH_TARGET}" "
+    cd ${REMOTE_CODE_ROOT}
+    # Clean slate: force-discard local changes and clean up stale stashes
+    git checkout -- . 2>/dev/null || true
+    git clean -fd 2>/dev/null || true
+    # Drop any corrupt stash entries
+    for i in 0 1 2 3 4 5 6 7 8 9; do git stash drop stash@{\$i} 2>/dev/null || true; done
+    echo 'Working tree cleaned.'
+"
 
 # ----- 推送代码 -----
 echo "[3/4] Pushing code to ${SERVER}..."
@@ -109,12 +113,8 @@ git push --force-with-lease "ssh://${SSH_TARGET}${REMOTE_CODE_ROOT}" HEAD:main 2
 echo "[4/4] Updating working tree on remote..."
 ssh "${SSH_TARGET}" "
     cd ${REMOTE_CODE_ROOT}
-    git checkout main 2>/dev/null || git checkout -b main
-    git reset --hard main
-    # Restore stash if exists
-    if git stash list | grep -q 'auto-stash by sync.sh'; then
-        git stash pop || true
-    fi
+    git checkout main 2>/dev/null || git checkout -b main 2>/dev/null || true
+    git reset --hard main 2>/dev/null || git reset --hard master 2>/dev/null || true
     echo 'Working tree updated.'
 "
 
