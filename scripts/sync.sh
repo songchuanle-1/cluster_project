@@ -22,29 +22,32 @@ if [[ -z "${SERVER}" ]]; then
     exit 1
 fi
 
-# ----- 解析 SERVERS.yaml (简易解析，不依赖 yq) -----
+# ----- 解析 SERVERS.yaml -----
 get_yaml_value() {
     local file="$1" section="$2" key="$3"
-    # 在 [section] 下查找 key:
     python3 -c "
-import sys
-data = open('${file}').read()
-in_section = False
-for line in data.split('\n'):
-    line = line.rstrip()
-    if line.startswith('${section}:'):
-        in_section = True
-        continue
-    if in_section:
-        if line and not line.startswith(' ') and not line.startswith('\t'):
-            break
-        stripped = line.strip()
-        if stripped.startswith('${key}:'):
-            val = stripped.split(':', 1)[1].strip()
-            # 去掉引号
-            val = val.strip('\"').strip(\"'\")
-            print(val)
-            break
+import yaml
+with open('${file}') as f:
+    cfg = yaml.safe_load(f)
+servers = cfg.get('servers', {})
+server = servers.get('${section}', {})
+val = server.get('${key}', '')
+if val is None: val = ''
+print(val)
+" 2>/dev/null
+}
+
+get_path_mapping() {
+    local file="$1" mapping_key="$2" dir_key="$3"
+    python3 -c "
+import yaml
+with open('${file}') as f:
+    cfg = yaml.safe_load(f)
+mappings = cfg.get('path_mappings', {})
+m = mappings.get('${mapping_key}', {})
+val = m.get('${dir_key}', '')
+if val is None: val = ''
+print(val)
 " 2>/dev/null
 }
 

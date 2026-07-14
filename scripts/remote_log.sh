@@ -28,23 +28,14 @@ fi
 get_yaml_value() {
     local file="$1" section="$2" key="$3"
     python3 -c "
-import sys
-data = open('${file}').read()
-in_section = False
-for line in data.split('\n'):
-    line = line.rstrip()
-    if line.startswith('${section}:'):
-        in_section = True
-        continue
-    if in_section:
-        if line and not line.startswith(' ') and not line.startswith('\t'):
-            break
-        stripped = line.strip()
-        if stripped.startswith('${key}:'):
-            val = stripped.split(':', 1)[1].strip()
-            val = val.strip('\"').strip(\"'\")
-            print(val)
-            break
+import yaml
+with open('${file}') as f:
+    cfg = yaml.safe_load(f)
+servers = cfg.get('servers', {})
+server = servers.get('${section}', {})
+val = server.get('${key}', '')
+if val is None: val = ''
+print(val)
 " 2>/dev/null
 }
 
