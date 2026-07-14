@@ -8,7 +8,8 @@ set -euo pipefail
 #
 # 示例:
 #   bash scripts/remote_train.sh server-4 configs/Quard/model_base1_quard2_c2f_enc_lite.yaml 0
-#   bash scripts/remote_train.sh server-4 configs/modelbase2/model_base2.yaml 0,1 2
+#   bash scripts/remote_train.sh dual-3090 configs/modelbase2/model_base2.yaml 0
+#   bash scripts/remote_train.sh server-3 configs/Quard/model_base1_quard2_c2f_enc_lite.yaml 0,1 2
 # ============================================================
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
@@ -22,8 +23,9 @@ NUM_GPUS="${4:-1}"
 
 if [[ -z "${SERVER}" || -z "${CFG}" ]]; then
     echo "Usage: $0 <server> <config> [gpu_ids] [num_gpus]"
+    echo "Available servers: dual-3090, server-3, server-4"
     echo "Example: $0 server-4 configs/Quard/model_base1_quard2_c2f_enc_lite.yaml 0"
-    echo "         $0 server-4 configs/modelbase2/model_base2.yaml 0,1 2"
+    echo "         $0 dual-3090 configs/modelbase2/model_base2.yaml 0"
     exit 1
 fi
 
@@ -42,31 +44,21 @@ print(val)
 " 2>/dev/null
 }
 
-get_path_mapping() {
-    local file="$1" mapping_key="$2" dir_key="$3"
-    python3 -c "
-import yaml
-with open('${file}') as f:
-    cfg = yaml.safe_load(f)
-mappings = cfg.get('path_mappings', {})
-m = mappings.get('${mapping_key}', {})
-val = m.get('${dir_key}', '')
-if val is None: val = ''
-print(val)
-" 2>/dev/null
-}
-
 HOST=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "host")
 USER=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "user")
 REMOTE_CODE_ROOT=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "remote_code_root")
 CONDA_SOURCE=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "conda_source")
 CONDA_ENV=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "conda_env")
+REMOTE_DATA_ROOT=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "data_root")
 REMOTE_WORK_DIR=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "work_dir")
-LOCAL_WORK_DIR=$(get_path_mapping "${SERVERS_YAML}" "work_dir" "local")
-REMOTE_WORK_DIR_MAPPED=$(get_path_mapping "${SERVERS_YAML}" "work_dir" "remote")
+
+# 本地 data_root（从 local 节点取）
+LOCAL_DATA_ROOT=$(get_yaml_value "${SERVERS_YAML}" "local" "data_root")
+LOCAL_WORK_DIR=$(get_yaml_value "${SERVERS_YAML}" "local" "work_dir")
 
 if [[ -z "${HOST}" ]]; then
     echo "Error: server '${SERVER}' not found in SERVERS.yaml"
+    echo "Available servers: dual-3090, server-3, server-4"
     exit 1
 fi
 
@@ -77,10 +69,12 @@ GPU_IDS_EXPANDED="${GPU_IDS//,/ }"
 
 echo "============================================"
 echo "Remote Training: ${SERVER} (${SSH_TARGET})"
-echo "Config:  ${CFG}"
-echo "GPU IDs: ${GPU_IDS} (${NUM_GPUS} GPUs)"
-echo "Remote:  ${REMOTE_CODE_ROOT}"
-echo "Env:     ${CONDA_ENV}"
+echo "Config:      ${CFG}"
+echo "GPU IDs:     ${GPU_IDS} (${NUM_GPUS} GPUs)"
+echo "Remote:      ${REMOTE_CODE_ROOT}"
+echo "Env:         ${CONDA_ENV}"
+echo "data_root:   ${LOCAL_DATA_ROOT} -> ${REMOTE_DATA_ROOT}"
+echo "work_dir:    ${LOCAL_WORK_DIR} -> ${REMOTE_WORK_DIR}"
 echo "============================================"
 
 # ----- Step 1: Check local uncommitted changes -----
@@ -118,7 +112,6 @@ ssh "${SSH_TARGET}" "
             echo 'Conda env ${CONDA_ENV}: OK'
         else
             echo 'WARNING: Conda env ${CONDA_ENV} not found!'
-            echo 'Run: conda create -n ${CONDA_ENV} python=3.10 -y'
         fi
     else
         echo 'WARNING: conda.sh not found at ${CONDA_SOURCE}'
@@ -126,24 +119,60 @@ ssh "${SSH_TARGET}" "
     echo '--- GPU ---'
     nvidia-smi --query-gpu=name,memory.free --format=csv,noheader 2>/dev/null || echo 'nvidia-smi failed'
     echo '--- Data ---'
-    ls -d ${REMOTE_CODE_ROOT}/data_root/ 2>/dev/null || true
+    ls '${REMOTE_DATA_ROOT}'/scanrefer/ 2>/dev/null | head -2 || echo 'WARNING: scanrefer data not found'
+    ls '${REMOTE_DATA_ROOT}'/sp_unet_backbone.pth 2>/dev/null && echo 'pretrain: OK' || echo 'WARNING: pretrain not found'
     echo '--- Disk ---'
-    df -h /data 2>/dev/null | tail -1 || df -h /home 2>/dev/null | tail -1
+    df -h \$(dirname '${REMOTE_WORK_DIR}') 2>/dev/null | tail -1 || df -h / 2>/dev/null | tail -1
 "
 
 # ----- Step 4: Path adaptation -----
 echo ""
 echo "[4/6] Applying path mappings on remote..."
-if [[ -n "${LOCAL_WORK_DIR}" && -n "${REMOTE_WORK_DIR_MAPPED}" ]]; then
-    ssh "${SSH_TARGET}" "
-        cd ${REMOTE_CODE_ROOT}
-        echo 'work_dir: ${LOCAL_WORK_DIR} -> ${REMOTE_WORK_DIR_MAPPED}'
-        grep -rl '${LOCAL_WORK_DIR}' configs/ | while read f; do
-            echo \"  patching: \$f\"
-            sed -i \"s|${LOCAL_WORK_DIR}|${REMOTE_WORK_DIR_MAPPED}|g\" \"\$f\"
+ssh "${SSH_TARGET}" "
+    cd ${REMOTE_CODE_ROOT}
+
+    # data_root 替换（含各种变体：带不带末尾/）
+    if [[ '${REMOTE_DATA_ROOT}' != '${LOCAL_DATA_ROOT}' ]]; then
+        echo \"data_root: ${LOCAL_DATA_ROOT} -> ${REMOTE_DATA_ROOT}\"
+        for pattern in '${LOCAL_DATA_ROOT%/}' '${LOCAL_DATA_ROOT}'; do
+            replacement='${REMOTE_DATA_ROOT%/}'
+            grep -rl \"\${pattern}\" configs/ 2>/dev/null | while read f; do
+                sed -i \"s|\${pattern}|\${replacement}|g\" \"\$f\"
+                echo \"  patched data_root: \$f\"
+            done
         done
-    "
-fi
+    else
+        echo 'data_root: same on both sides, no patching needed'
+    fi
+
+    # work_dir 替换
+    if [[ '${REMOTE_WORK_DIR}' != '${LOCAL_WORK_DIR}' ]]; then
+        echo \"work_dir: ${LOCAL_WORK_DIR} -> ${REMOTE_WORK_DIR}\"
+        grep -rl '${LOCAL_WORK_DIR}' configs/ 2>/dev/null | while read f; do
+            sed -i \"s|${LOCAL_WORK_DIR}|${REMOTE_WORK_DIR}|g\" \"\$f\"
+            echo \"  patched work_dir: \$f\"
+        done
+    else
+        echo 'work_dir: same on both sides, no patching needed'
+    fi
+
+    # pretrain 路径替换（如果 data_root 不同，pretrain 里的本地路径也要改）
+    # pretrain 最常见的值是 \${LOCAL_DATA_ROOT}sp_unet_backbone.pth
+    LOCAL_PRETRAIN='${LOCAL_DATA_ROOT%/}/sp_unet_backbone.pth'
+    REMOTE_PRETRAIN='${REMOTE_DATA_ROOT%/}/sp_unet_backbone.pth'
+    if [[ \"\${LOCAL_PRETRAIN}\" != \"\${REMOTE_PRETRAIN}\" ]]; then
+        echo \"pretrain: \${LOCAL_PRETRAIN} -> \${REMOTE_PRETRAIN}\"
+        grep -rl \"\${LOCAL_PRETRAIN}\" configs/ 2>/dev/null | while read f; do
+            sed -i \"s|\${LOCAL_PRETRAIN}|\${REMOTE_PRETRAIN}|g\" \"\$f\"
+            echo \"  patched pretrain: \$f\"
+        done
+    fi
+
+    # 去掉 .yaml.bak 备份文件（sed -i 在某些系统上可能产生）
+    find configs/ -name '*.bak' -delete 2>/dev/null || true
+
+    echo 'Path adaptation complete.'
+"
 
 # ----- Step 5: Launch training -----
 echo ""
@@ -164,7 +193,6 @@ ssh "${SSH_TARGET}" "
     TRAIN_PID=\$!
     echo \"\${TRAIN_PID}\" > ${REMOTE_LOG_DIR}/.pid_${CFG_BASENAME}
     echo \"PID: \${TRAIN_PID}\"
-    # Wait a moment and check if still running
     sleep 3
     if kill -0 \${TRAIN_PID} 2>/dev/null; then
         echo 'Training started successfully!'

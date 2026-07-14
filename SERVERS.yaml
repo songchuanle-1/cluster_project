@@ -2,9 +2,9 @@
 # SERVERS.yaml — Cluster 项目服务器与数据集注册表
 # ============================================================
 # 用法:
-#   同步代码:    bash scripts/sync.sh server-4
-#   远程训练:    bash scripts/remote_train.sh server-4 <config> <gpu_ids>
-#   查看状态:    bash scripts/remote_status.sh server-4
+#   同步代码:    bash scripts/sync.sh <server>
+#   远程训练:    bash scripts/remote_train.sh <server> <config> <gpu_ids>
+#   查看状态:    bash scripts/remote_status.sh <server>
 # ============================================================
 
 # ----- 服务器列表 -----
@@ -22,6 +22,34 @@ servers:
     conda_env: test
     data_root: /home/songcl/data/data/
     work_dir: /data/songcl/3dres/Cluster_project2/Cluster_checkpoints
+
+  # ---- 双卡服务器 (192.168.1.163, 2x RTX 3090) ----
+  dual-3090:
+    host: 192.168.1.163
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX3090
+    remote_code_root: /home/songcl/project
+    conda_source: /home/dl01/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /bak_home/songcl/3D_visual_grounding/data/ipdn_data/data/
+    work_dir: /bak_home/songcl/Cluster_project/Cluster_checkpoints
+
+  # ---- 三号服务器 (192.168.1.194, 2x RTX 3090) ----
+  server-3:
+    host: 192.168.1.194
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX3090
+    remote_code_root: /home/songcl/project
+    conda_source: /home/sysu311/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /sdc1/songcl/IPDN/data/
+    work_dir: /sdc1/songcl/Cluster_project/Cluster_checkpoints
 
   # ---- 四号服务器 (192.168.1.137, 2x RTX 5090) ----
   server-4:
@@ -47,10 +75,3 @@ datasets:
     path: multi3drefer/
   pretrain_backbone:
     path: sp_unet_backbone.pth
-
-# ----- 路径替换规则 (本地 → 远程) -----
-# remote_train.sh 在远程启动训练前会自动替换这些路径
-path_mappings:
-  work_dir:
-    local: "/data/songcl/3dres/Cluster_project2/Cluster_checkpoints"
-    remote: "/data/songcl/Cluster_project/Cluster_checkpoints"
