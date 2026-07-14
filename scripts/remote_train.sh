@@ -58,7 +58,14 @@ LOCAL_WORK_DIR=$(get_yaml_value "${SERVERS_YAML}" "local" "work_dir")
 
 if [[ -z "${HOST}" ]]; then
     echo "Error: server '${SERVER}' not found in SERVERS.yaml"
-    echo "Available servers: dual-3090, server-3, server-4"
+    echo "Available servers:"
+    python3 -c "
+import yaml
+with open('${SERVERS_YAML}') as f:
+    cfg = yaml.safe_load(f)
+for name in cfg.get('servers', {}):
+    if name != 'local': print(f'  - {name}')
+" 2>/dev/null
     exit 1
 fi
 
