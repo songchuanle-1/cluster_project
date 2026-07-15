@@ -1,55 +1,45 @@
-# ============================================
-# 训练日志路径列表
-# 格式: 模型名称 日志路径
-# 以 # 开头的行为注释
-# ============================================
+# ============================================================
+# Server-4 当前有效训练结果
+# 生成依据: /home/songcl/3dres/project/Checkpoints/server_4
+# 格式: 模型名称 日志绝对路径
+#
+# 选择规则:
+#   1. 只保留至少产生一次验证 mIoU 的日志
+#   2. 同一模型有多个 run 时，保留 Best mIoU 最高的 run
+#   3. 排除仅 profile、启动失败或尚未完成首次验证的日志
+#   4. 当前拉回目录没有 model_base1 baseline 日志，因此未列入
+# ============================================================
 
-# --- base1 基准模型 ---
-# model_base1 (base1 baseline, 有 ila, 无 cluster)
-model_base1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1/20260627_174353/20260627_174353.log
+# --- C2F / Quard 主线 ---
+model_base1_quard2_nomask /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_nomask/20260704_130243/20260704_130243.log
+model_base1_quard2_c2f_pq /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_pq/20260704_103140/20260704_103140.log
+model_base1_quard2_c2f_enc /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc/20260703_094308/20260703_094308.log
+model_base1_quard2_c2f_enc_lite /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite/20260703_150030/20260703_150030.log
+model_base1_quard2_c2f_enc_lite_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_l1/20260706_075740/20260706_075740.log
+model_base1_quard2_c2f_enc_lite_l3 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_l3/20260705_021243/20260705_021243.log
+model_base1_quard2_c2f_enc_lite_l4 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_l4/20260705_023517/20260705_023517.log
+model_base1_quard2_c2f_enc_lite_init0 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_init0/20260706_083447/20260706_083447.log
+model_base1_quard2_c2f_enc_lite_noroute /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_noroute/20260708_115011/20260708_115011.log
+model_base1_quard2_c2f_enc_lite_posA /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posA/20260708_180536/20260708_180536.log
+model_base1_quard2_c2f_enc_lite_posB /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posB/20260708_221940/20260708_221940.log
+model_base1_quard2_c2f_enc_lite_posC /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posC/20260709_073810/20260709_073810.log
+model_base1_quard2_c2f_enc_lite_posenc /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posenc/20260709_214538/20260709_214538.log
+model_base1_quard2_c2f_enc_lite_cag /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_cag/20260707_072811/20260707_072811.log
+model_base1_quard2_c2f_enc_lite_cfe /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_cfe/20260707_072833/20260707_072833.log
+model_base1_quard2_c2f_enc_lite_attnpool /home/songcl/3dres/project/Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_attnpool/20260709_234630/20260709_234630.log
 
-# --- base1 cluster 系列 ---
-# nomask (并行多尺度, 外挂, tanh, 6层)
-# model_base1_quard2_nomask /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_nomask/20260704_130243/20260704_130243.log
+# --- GBCR 主线 ---
+model_base1_gbcr_balanced_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_balanced_l1/20260712_094030/20260712_094030.log
+model_base1_gbcr_local_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_local_l1/20260712_095202/20260712_095202.log
+model_base1_gbcr_pointgate_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_pointgate_l1/20260713_072757/20260713_072757.log
+model_base1_gbcr_adaptive_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_adaptive_l1/20260713_075411/20260713_075411.log
+model_base1_gbcr_langroute_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_langroute_l1/20260713_210702/20260713_210702.log
+model_base1_gbcr_langc2f_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_langc2f_l1/20260714_072105/20260714_072105.log
+model_base1_gbcr_langc2f_scale_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_gbcr_langc2f_scale_l1/20260714_174119/20260714_174119.log
 
-# c2f (C2F 级联, 外挂, tanh, 6层)
-# (暂无 checkpoint)
-
-# c2f_pq (C2F + Per-Query 独立路由, 外挂)
-# model_base1_quard2_c2f_pq /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_pq/20260704_103140/20260704_103140.log
-
-# c2f_enc (C2F 嵌入 Encoder, tanh, 6层, N×Q)
-# model_base1_quard2_c2f_enc /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc/20260703_094308/20260703_094308.log
-
-# --- c2f_enc_lite 系列 (轻量优化) ---
-# c2f_enc_lite (sigmoid, 后2层, 不改query, 直接gather) ★ 当前最佳
-model_base1_quard2_c2f_enc_lite /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite/20260703_150030/20260703_150030.log
-
-# c2f_enc_lite_l3 (num_layers=3)
-# model_base1_quard2_c2f_enc_lite_l3 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_l3/20260705_021243/20260705_021243.log
-
-# c2f_enc_lite_l4 (num_layers=4)
-# model_base1_quard2_c2f_enc_lite_l4 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_l4/20260705_023517/20260705_023517.log
-
-# c2f_enc_lite_l1 (num_layers=1)
-# model_base1_quard2_c2f_enc_lite_l1 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_l1/20260706_075740/20260706_075740.log
-
-# c2f_enc_lite_init0 (num_layers=2)
-# model_base1_quard2_c2f_enc_lite_init0 /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_init0/20260706_083447/20260706_083447.log
-
-
-#model_base1_quard2_c2f_enc_lite_cag /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_cag/20260707_072811/20260707_072811.log
-
-#model_base1_quard2_c2f_enc_lite_cfe /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_cfe/20260707_072833/20260707_072833.log
-
-model_base1_quard2_c2f_enc_lite_noroute /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_noroute/20260708_115011/20260708_115011.log
-
-model_base1_quard2_c2f_enc_lite_posA /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA/20260708_180536/20260708_180536.log
-
-# model_base1_quard2_c2f_enc_lite_posB /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posB/20260708_221940/20260708_221940.log
-
-# model_base1_quard2_c2f_enc_lite_posC /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posC/20260709_073810/20260709_073810.log
-
-model_base1_quard2_c2f_enc_lite_posenc /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posenc/20260709_214538/20260709_214538.log
-
-model_base1_quard2_c2f_enc_lite_attnpool /data/songcl/3dres/Cluster_project2/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_attnpool/20260709_234630/20260709_234630.log
+# --- 早期 cluster / top-k 对照 ---
+model_base1_cluster_fixed_ctx_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_cluster_fixed_ctx_l1/20260711_163848/20260711_163848.log
+model_base1_cluster_fixed_ctx_l1_ls /home/songcl/3dres/project/Checkpoints/server_4/model_base1_cluster_fixed_ctx_l1_ls/20260711_163949/20260711_163949.log
+model_base1_cluster_hier_add_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_cluster_hier_add_l1/20260711_234706/20260711_234706.log
+model_base1_cluster_hier_content_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_cluster_hier_content_l1/20260711_234749/20260711_234749.log
+model_base1_topk_c2f_bottleneck_l1 /home/songcl/3dres/project/Checkpoints/server_4/model_base1_topk_c2f_bottleneck_l1/20260712_015232/20260712_015232.log
