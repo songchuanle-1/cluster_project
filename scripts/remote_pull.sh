@@ -42,7 +42,7 @@ REMOTE_WORK_DIR=$(get_yaml_value "${SERVERS_YAML}" "${SERVER}" "work_dir")
 
 # Allow overriding remote dir
 REMOTE_DIR="${2:-${REMOTE_WORK_DIR}}"
-LOCAL_DIR="${ROOT_DIR}/Checkpoints/$(echo ${SERVER} | tr '-' '_')"
+LOCAL_DIR="$(dirname "${ROOT_DIR}")/Checkpoints/$(echo ${SERVER} | tr '-' '_')"
 
 if [[ -z "${HOST}" ]]; then
     echo "Error: server '${SERVER}' not found in SERVERS.yaml"
