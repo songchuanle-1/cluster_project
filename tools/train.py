@@ -18,13 +18,21 @@ import torch.multiprocessing as mp
 mp.set_sharing_strategy('file_system')  # 使用文件系统替代共享内存
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-# PyTorch 2.6+ 默认 weights_only=True，需要 monkey-patch 以支持加载包含 numpy 对象的 checkpoint
-# Python 3.8 的 pickle 不支持 weights_only 参数，需做版本兼容
+# PyTorch 2.6+ defaults weights_only=True.  This project loads trusted local
+# checkpoints and preprocessed ScanNet .pth files that contain numpy objects,
+# so use the legacy full-pickle loader unless a caller explicitly overrides it.
+# Older PyTorch versions do not accept the weights_only keyword; retry without
+# it only when that compatibility error is raised.
 _original_torch_load = torch.load
 def _torch_load_compat(*args, **kwargs):
-    if 'weights_only' in kwargs:
-        del kwargs['weights_only']
-    return _original_torch_load(*args, **kwargs)
+    kwargs.setdefault('weights_only', False)
+    try:
+        return _original_torch_load(*args, **kwargs)
+    except TypeError as exc:
+        if 'weights_only' not in str(exc):
+            raise
+        kwargs.pop('weights_only', None)
+        return _original_torch_load(*args, **kwargs)
 torch.load = _torch_load_compat 
 
 def _print_results_acc(iou_25, iou_50, logger):
