@@ -124,31 +124,31 @@ class Network(nn.Module):
         lang_feats = self.text_encoder(lang_tokenss, attention_mask=lang_masks)[0]
 
         out = self.dec(sp_feats, fps_seed_sp, batch_offsets, lang_feats, lang_masks, sp_coords_float, feats_2d)
-        
+
         loss, loss_dict = self.criterion(out, gt_spmasks, sp_ref_masks, object_idss, sp_ins_labels, dense_maps, lang_masks, fps_seed_sp, sp_coords_float, batch_offsets)
         # print(loss)
         return loss, loss_dict
-    
+
     @cuda_cast
     def predict(self, ann_ids, scan_ids, voxel_coords, p2v_map, v2p_map, spatial_shape, feats, superpoints, batch_offsets, object_idss, gt_pmasks, gt_spmasks, sp_ref_masks, lang_tokenss, lang_masks, coords_float, sp_ins_labels, dense_maps, scenes_len=None, meta_datas=None, view_dependents=None, feats_2d=None):
         batch_size = len(batch_offsets) - 1
         voxel_feats = pointgroup_ops.voxelization(feats, v2p_map)
         input = spconv.SparseConvTensor(voxel_feats, voxel_coords.int(), spatial_shape, batch_size)
-        
+
         sp_feats = self.extract_feat(input, superpoints, p2v_map)
         sp_coords_float = scatter_mean(coords_float, superpoints, dim=0)
 
         sp_feats, sp_coords_float, fps_seed_sp, batch_offsets, sp_ins_labels, feats_2d = self.expand_and_fps(sp_feats, sp_coords_float, batch_offsets, sp_ins_labels, scenes_len, feats_2d, mode='pred')
         lang_feats = self.text_encoder(lang_tokenss, attention_mask=lang_masks)[0]
-        
-        out = self.dec(sp_feats, fps_seed_sp, batch_offsets, lang_feats, lang_masks, sp_coords_float, feats_2d) 
+
+        out = self.dec(sp_feats, fps_seed_sp, batch_offsets, lang_feats, lang_masks, sp_coords_float, feats_2d)
         ret = self.predict_by_feat(scan_ids, object_idss, ann_ids, out, superpoints, gt_pmasks, gt_spmasks, fps_seed_sp)
-        if meta_datas[0] is not None: 
+        if meta_datas[0] is not None:
             ret['meta_datas'] = meta_datas
             if view_dependents[0] is not None:
                 ret['view_dependents'] = view_dependents
         return ret
-    
+
     def predict_by_feat(self, scan_ids, object_idss, ann_ids, out, superpoints, gt_pmasks, gt_spmasks, fps_seed_sp):
         # B is 1 when predecit
         spious, pious, sp_r_ious, p_r_ious, pred_pmasks, scan_idss = [], [], [], [], [], []
@@ -161,7 +161,7 @@ class Network(nn.Module):
             pred_spmask = out['masks'][i].squeeze()
 
             pred_indis = out['indis'][i] # [n_q, 2]
-            # take the 1 
+            # take the 1
             if self.task_type == 'gres':
                 indicate = pred_indis.argmax(-1) == 1
                 top = indicate.nonzero(as_tuple=False).squeeze(-1)
@@ -221,11 +221,11 @@ class Network(nn.Module):
         elif self.pool == 'max':
             x, _ = scatter_max(x, superpoints, dim=0)  # (B*M, media)
         return x
-    
+
     def expand_and_fps(self, sp_feats, sp_coords_float, batch_offsets, sp_ins_labels, scenes_len, feats_2d, mode=None):
         sp_ins_labels_expand = []
         #feats_2d_expand = feats_2d
-        
+
         batch_offsets_expand = batch_offsets[0:1]
         for i in range(len(scenes_len)):
             s = batch_offsets[i]
@@ -247,5 +247,4 @@ class Network(nn.Module):
                 if sp_ins_labels:
                     sp_ins_labels_expand.append(sp_ins_labels[i])
         return sp_feats_expand, sp_coords_float_expand, fps_seed_sp_expand, batch_offsets_expand, sp_ins_labels_expand, feats_2d_expand
-    
-    
+

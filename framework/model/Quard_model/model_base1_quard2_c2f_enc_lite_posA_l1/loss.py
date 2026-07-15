@@ -340,7 +340,7 @@ class Criterion(nn.Module):
         token_to_box_loss = (
             (entropy + pos_term / nb_pos_obj + neg_term)
         ).masked_fill(~tokens_with_pos, 0)
-        token_to_box_loss = (token_to_box_loss * tmask).sum()   
+        token_to_box_loss = (token_to_box_loss * tmask).sum()
 
         # total loss
         tot_loss = (box_to_token_loss + token_to_box_loss) / 2
@@ -376,7 +376,7 @@ class Criterion(nn.Module):
             if in_obj_id.numel() == 0: continue
             else:
                 matched_inds.extend([(q_id[None], torch.tensor([tgt_id], dtype=torch.int64, device=sampled_pos.device)) for q_id in in_obj_id])
-        
+
         # matched_inds: [(q_id, tgt_id), ...]
         matched_inds_np = np.array([(matched_inds[i][0][0].cpu(),matched_inds[i][1][0].cpu()) for i in range(len(matched_inds))])
         tgt_ids = matched_inds_np[:, 1]
@@ -385,7 +385,7 @@ class Criterion(nn.Module):
         matched_inds = torch.from_numpy(matched_inds_np).transpose(0,1).to(sampled_pos.device)
         matched_inds = (matched_inds[0], matched_inds[1])
         return topk_inds, in_obj_ids, matched_inds, tgt_counts
-    
+
 
     def get_layer_loss(self, layer, aux_outputs, pad_masks, target, indices=None, lang_masks=None):
         loss_out = {}
@@ -411,16 +411,16 @@ class Criterion(nn.Module):
         )
         if is_dist_avail_and_initialized():
             torch.distributed.all_reduce(num_insts)
-        
+
         indi_loss = self.loss_indi(pred_indis, target, indices, num_insts)
-        
+
         mask_bce_loss, mask_dice_loss, score_loss = self.loss_masks(pred_masks, pred_scores, target, indices, num_insts)
-        
+
         if proj_tokens is not None:
             sem_loss = self.loss_sem_align(proj_tokens, proj_queries, lang_masks, target, indices, num_insts)
         else:
             sem_loss = torch.tensor([0.0], device=pred_masks[0].device)
-        
+
         loss_out['score_loss'] = score_loss
         loss_out['mask_bce_loss'] = mask_bce_loss
         loss_out['mask_dice_loss'] = mask_dice_loss
@@ -449,7 +449,7 @@ class Criterion(nn.Module):
             mask[i, :cur_len] = False
         mask.detach()
         return new_feats, mask
-    
+
     def forward(self, pred, gt_spmasks, sp_ref_masks=None, object_idss=None, sp_ins_labels=None, dense_maps=None, lang_masks=None, fps_seed_sp=None, sp_coords_float=None, batch_offsets=None):
         '''
             pred_masks: List[Tensor (1, M)]
@@ -494,7 +494,7 @@ class Criterion(nn.Module):
                 obj_ids = object_idss[b]
                 if len(obj_ids) == 0:
                     indices.append(
-                        (torch.as_tensor([], dtype=torch.int64, device=pred_scores.device), 
+                        (torch.as_tensor([], dtype=torch.int64, device=pred_scores.device),
                          torch.as_tensor([], dtype=torch.int64, device=pred_scores.device))
                     )
                     target.append(
@@ -513,15 +513,15 @@ class Criterion(nn.Module):
                     continue
                 # seed label
                 seed_ins_lbl = sp_ins_labels[b][fps_seed_sp[b]]
-                # query label   
-                sampled_ins_lbl = seed_ins_lbl[sample_inds[b]]   
+                # query label
+                sampled_ins_lbl = seed_ins_lbl[sample_inds[b]]
                 # query pos
                 sampled_pos = seed_pos[b][sample_inds[b]]
                 # masks
                 masks = torch.stack([sp_ins_labels[b]==obj_id for obj_id in obj_ids])
                 obj_pos = torch.stack([
-                    scatter_mean(sp_coords_float[b].masked_select(pad_masks[b].unsqueeze(1)).view(-1,3), 
-                                 mask.long(), 
+                    scatter_mean(sp_coords_float[b].masked_select(pad_masks[b].unsqueeze(1)).view(-1,3),
+                                 mask.long(),
                                  dim=0)[1]
                     for mask in masks
                 ])
@@ -554,28 +554,28 @@ class Criterion(nn.Module):
         )
         if is_dist_avail_and_initialized():
             torch.distributed.all_reduce(num_insts)
-        
+
         indi_loss = self.loss_indi(pred_indis, target, indices, num_insts)
-        
+
         mask_bce_loss, mask_dice_loss, score_loss = self.loss_masks(pred_masks, pred_scores, target, indices, num_insts)
 
         if proj_tokens is not None:
             sem_loss = self.loss_sem_align(proj_tokens, proj_queries, lang_masks, target, indices, num_insts)
         else:
             sem_loss = torch.tensor([0.0], device=pred_masks[0].device)
-    
+
         sample_loss = torch.tensor([0.0], device=pred_masks[0].device)
         # sample loss
         if ref_scores is not None:
             # seed
-            ref_padding_seed_ = ref_padding.gather(1, fps_seed_sp)  
+            ref_padding_seed_ = ref_padding.gather(1, fps_seed_sp)
             ref_padding_seed = ref_padding_seed_ * 0.5
             # [B, M]
             for b in range(len(topk_seed_inds)):
                 if len(matched_seed_inds[b]) == 0:
                     continue
                 dist_seeds = torch.cdist(seed_pos[b], obj_poss[b], p=2)
-                weight = torch.exp(-0.5 * ((dist_seeds) / 1) ** 2)  
+                weight = torch.exp(-0.5 * ((dist_seeds) / 1) ** 2)
                 for idx, obj in zip(matched_seed_inds[b][0], matched_seed_inds[b][1]):
                     ref_padding_seed[b][idx] = weight[idx][obj]
                 ref_padding_seed[b][topk_seed_inds[b]] = 1.0
@@ -593,20 +593,20 @@ class Criterion(nn.Module):
                 sample_loss = sample_loss.unsqueeze(0)
             else:
                 raise NotImplementedError
-        
+
         loss_out['score_loss'] = score_loss
         loss_out['mask_bce_loss'] = mask_bce_loss
         loss_out['mask_dice_loss'] = mask_dice_loss
         loss_out['sem_loss'] = sem_loss
         loss_out['indi_loss'] = indi_loss
         loss_out['sample_loss'] = sample_loss
-        
+
         if sp_ref_masks is not None:
             loss = (
                 self.loss_weight[0] * mask_bce_loss + self.loss_weight[1] * mask_dice_loss +
                 self.loss_weight[2] * score_loss + self.loss_weight[3] * sample_loss + self.loss_weight[4] * indi_loss +
                 self.loss_weight[6] * sem_loss)
-        else:   
+        else:
             loss = (
                 self.loss_weight[0] * mask_bce_loss + self.loss_weight[1] * mask_dice_loss +
                 self.loss_weight[2] * score_loss + self.loss_weight[4] * indi_loss +
@@ -622,5 +622,5 @@ class Criterion(nn.Module):
                 loss_out.update(loss_out_i)
 
         loss_out['loss'] = loss
-        
+
         return loss, loss_out

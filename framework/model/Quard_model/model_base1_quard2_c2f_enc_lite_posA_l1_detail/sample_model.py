@@ -41,7 +41,7 @@ class CrossAttentionMap(nn.Module):
         # Compute attention map
         attn_map = F.softmax(scores, dim=1)
         return attn_map
-    
+
 class SamplingModule(nn.Module):
     """
     Sample object proposal.
@@ -49,7 +49,7 @@ class SamplingModule(nn.Module):
     def __init__(self, num_proposal, pc_dim, lang_dim, d_model):
         super().__init__()
         self.num_proposal = num_proposal
-        
+
         self.camap = CrossAttentionMap(pc_dim, lang_dim, d_model)
 
     def forward(self, pc_feat, lang_feat, pc_mask, lang_mask, gate = None):
