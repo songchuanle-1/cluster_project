@@ -179,7 +179,7 @@ class MultiScale_Gather_Refine(nn.Module):
     替代 C2F_ClusterAttn_Lite / MultiScale_Gather.
     """
 
-    def __init__(self, d_model=256, nhead=8, cluster_layer_nums=None, dropout=0.0):
+    def __init__(self, d_model=256, nhead=8, cluster_layer_nums=None, dropout=0.0, **kwargs):
         super().__init__()
         if cluster_layer_nums is None:
             cluster_layer_nums = [256, 64, 8]
