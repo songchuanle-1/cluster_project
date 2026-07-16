@@ -73,6 +73,7 @@ def get_args():
     parser.add_argument('--skip_validate', action='store_true', help='skip validation')
     parser.add_argument('--skip_training', action='store_true', help='skip training')
     # parser.add_argument('--skip_training', type=bool, default=True, help='skip training')
+    parser.add_argument('--patience', type=int, default=10, help='early stop patience (0=disable)')
     parser.add_argument('--dist', action='store_true', help='if distributed')
     parser.add_argument('--num_gpus', type=int, default=1, help='number of gpus')
     parser.add_argument('--num_machines', type=int, default=1, help='number of machines')
@@ -428,6 +429,7 @@ def main(args):
     # pretrain or resume
     start_epoch = 1
     best_miou = 0.0
+    epochs_no_improve = 0
     miou=0.0
     if args.resume:
         # resume_path = os.path.join(cfg.work_dir,args.resume+'.pth')
@@ -469,14 +471,20 @@ def main(args):
         logger.info('Training')
 
     for epoch in range(start_epoch, cfg.train.epochs + 1):
-        # print(epoch)
         if not args.skip_training:
             train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)
         if not args.skip_validate and (epoch % cfg.train.interval == 0) and gorilla.is_main_process():
             miou = eval(epoch, best_miou, model, val_loader, cfg, logger, writer, not args.skip_training)
-            if gorilla.is_main_process(): 
+            if gorilla.is_main_process():
                 if miou > best_miou:
                     best_miou = miou
+                    epochs_no_improve = 0
+                else:
+                    epochs_no_improve += 1
+                    if args.patience > 0 and epochs_no_improve >= args.patience:
+                        logger.info(f'Early stopping at epoch {epoch}: no improvement for {args.patience} epochs (best={best_miou:.4f})')
+                        print(f'Early stopping at epoch {epoch}: no improvement for {args.patience} epochs (best={best_miou:.4f})')
+                        break
         if gorilla.is_main_process() and args.save_ckpt: 
             # meta = dict(epoch=epoch,best_miou=miou)
             meta = dict(epoch=epoch,best_miou=best_miou)
