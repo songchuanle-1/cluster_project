@@ -443,8 +443,9 @@ def main(args):
                               map_location='cpu')
         start_epoch = meta.get("epoch", 0) + 1
         best_miou = meta.get("best_miou", 0)
-        logger.info(f'resume start_epoch:{start_epoch},best_miou:{best_miou}!')
-        print(f'resume start_epoch:{start_epoch},best_miou:{best_miou}!')
+        epochs_no_improve = meta.get("epochs_no_improve", 0)
+        logger.info(f'resume start_epoch:{start_epoch},best_miou:{best_miou},epochs_no_improve:{epochs_no_improve}!')
+        print(f'resume start_epoch:{start_epoch},best_miou:{best_miou},epochs_no_improve:{epochs_no_improve}!')
         # print(start_epoch)
     elif cfg.train.pretrain:
         if gorilla.is_main_process(): logger.info(f'Load pretrain from {cfg.train.pretrain}')
@@ -487,7 +488,7 @@ def main(args):
                         break
         if gorilla.is_main_process() and args.save_ckpt: 
             # meta = dict(epoch=epoch,best_miou=miou)
-            meta = dict(epoch=epoch,best_miou=best_miou)
+            meta = dict(epoch=epoch,best_miou=best_miou,epochs_no_improve=epochs_no_improve)
             if miou >= best_miou:
                 save_file = osp.join(cfg.work_dir, f'best.pth')
                 gorilla.save_checkpoint(model, save_file,optimizer, lr_scheduler,meta)
