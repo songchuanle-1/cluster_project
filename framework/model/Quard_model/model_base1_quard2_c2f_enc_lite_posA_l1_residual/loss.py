@@ -120,7 +120,7 @@ class SigmoidFocalClassificationLoss(nn.Module):
 
         return loss * weights
 
-@gorilla.LOSSES.register_module()
+@gorilla.LOSSES.register_module(force=True)
 class Criterion(nn.Module):
     def __init__(
         self,
