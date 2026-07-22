@@ -334,6 +334,7 @@ class DEC(nn.Module):
         cluster_mode='legacy',
         cluster_gate_type='sigmoid',
         cluster_message_type='context',
+        orth_weight=0.01,
     ):
         super().__init__()
         self.num_layer = num_layer
@@ -389,7 +390,6 @@ class DEC(nn.Module):
                 f'Unknown cluster_mode: {cluster_mode}. '
                 f'Expected one of {tuple(cluster_att_classes)}')
         self.cluster_mode = cluster_mode
-        orth_weight = kwargs.get('orth_weight', 0.01)
         if cluster_mode == 'ort':
             self.cluster_att = cluster_att_classes[cluster_mode](
                 d_model=d_model, nhead=nhead,
