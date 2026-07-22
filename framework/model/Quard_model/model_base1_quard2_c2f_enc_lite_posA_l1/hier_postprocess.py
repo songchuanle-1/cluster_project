@@ -11,7 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pointnet2.pointnet2_utils import FurthestPointSampling
-from torch_scatter import scatter_mean
+from torch_scatter import scatter_mean, scatter_max
 
 
 def batch2flatten(x, batch_mask):
@@ -33,10 +33,12 @@ def get_batches(x, batch_offsets):
     return new_feats, mask
 
 
-def aggregate_cluster(feats, cluster_ids):
+def aggregate_cluster(feats, cluster_ids, pool_type='mean'):
     if cluster_ids.numel() == 0:
         return feats
     K = int(cluster_ids.max().item()) + 1
+    if pool_type == 'max':
+        return scatter_max(feats, cluster_ids, dim=0, dim_size=K)[0]
     return scatter_mean(feats, cluster_ids, dim=0, dim_size=K)
 
 
@@ -115,11 +117,12 @@ class PointCloudPartitioner(nn.Module):
 class SharedClusterBank(nn.Module):
     """几何划分一次，用当前特征聚合 cluster token"""
 
-    def __init__(self, cluster_layer_nums=None):
+    def __init__(self, cluster_layer_nums=None, cluster_pool_type='mean'):
         super().__init__()
         if cluster_layer_nums is None:
             cluster_layer_nums = [256, 64, 8]
         self.cluster_layer_nums = list(cluster_layer_nums)
+        self.cluster_pool_type = cluster_pool_type
         self.partitioner = PointCloudPartitioner(cluster_layer_nums=self.cluster_layer_nums)
 
     def get_cluster(self, sp_pos, batch_offsets):
@@ -145,7 +148,7 @@ class SharedClusterBank(nn.Module):
                 per_batch_K.append(Kb)
             flat_ids = torch.cat(remapped_ids, dim=0)
             total_K = cum
-            current_feats = aggregate_cluster(current_feats, flat_ids)  # [total_K, C]
+            current_feats = aggregate_cluster(current_feats, flat_ids, pool_type=self.cluster_pool_type)  # [total_K, C]
             # Split back into per-batch tensors and pad
             padded_batches = []
             off = 0
