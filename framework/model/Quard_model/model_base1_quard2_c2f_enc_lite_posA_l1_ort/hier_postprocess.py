@@ -569,6 +569,8 @@ class C2F_ClusterAttn_ORT(C2F_ClusterAttn_Lite):
             orth_loss = orth_loss + self._orth_reg_loss(cf, mask=valid_mask)
 
         orth_loss = orth_loss / len(cluster_feats_list)
-        result[orth_reg_loss] = orth_loss * self.orth_weight
+        # Accumulate to module-level accumulator for dec.py's get_orth_loss()
+        global _orth_loss_accum
+        _orth_loss_accum = _orth_loss_accum + (orth_loss * self.orth_weight).detach().item()
 
         return result
