@@ -3,7 +3,7 @@ import os
 
 ### Quard
 # Default model: lazily loaded only when auto-resolution fails
-_DEFAULT_MODEL = 'framework.model.Quard_model.model_base2_quard1'
+_DEFAULT_MODEL = 'framework.model.Quard_model.model_base1_quard2_c2f_enc_lite_posA_l1'
 
 _network = None
 
