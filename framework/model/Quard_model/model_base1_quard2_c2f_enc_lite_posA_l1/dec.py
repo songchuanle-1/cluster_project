@@ -374,7 +374,7 @@ class DEC(nn.Module):
 
         # ── 共享 Cluster_Attn（仅一个实例）──
         self.cluster_att_num_layers = min(cluster_att_num_layers, num_layer)
-        self.cluster_bank = SharedClusterBank(cluster_layer_nums=cluster_layer_nums, cluster_pool_type=cluster_pool_type)
+        self.cluster_bank = SharedClusterBank(cluster_layer_nums=cluster_layer_nums, cluster_pool_type=cluster_pool_type, d_model=d_model)
         cluster_att_classes = {
             'legacy': Cluster_Attn,
             'noroute': MultiScale_Gather,

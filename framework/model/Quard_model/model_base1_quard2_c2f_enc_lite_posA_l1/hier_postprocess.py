@@ -117,13 +117,21 @@ class PointCloudPartitioner(nn.Module):
 class SharedClusterBank(nn.Module):
     """几何划分一次，用当前特征聚合 cluster token"""
 
-    def __init__(self, cluster_layer_nums=None, cluster_pool_type='mean'):
+    def __init__(self, cluster_layer_nums=None, cluster_pool_type='mean', d_model=None):
         super().__init__()
         if cluster_layer_nums is None:
             cluster_layer_nums = [256, 64, 8]
         self.cluster_layer_nums = list(cluster_layer_nums)
         self.cluster_pool_type = cluster_pool_type
         self.partitioner = PointCloudPartitioner(cluster_layer_nums=self.cluster_layer_nums)
+        if cluster_pool_type == 'dual':
+            assert d_model is not None, "d_model required for dual-branch cluster aggregation"
+            self.dual_proj = nn.Sequential(
+                nn.Linear(2 * d_model, d_model),
+                nn.LayerNorm(d_model),
+                nn.ReLU(),
+                nn.Linear(d_model, d_model),
+            )
 
     def get_cluster(self, sp_pos, batch_offsets):
         self.cluster_ids_list, self.child_cluster_maps = self.partitioner(sp_pos, batch_offsets)
@@ -148,7 +156,12 @@ class SharedClusterBank(nn.Module):
                 per_batch_K.append(Kb)
             flat_ids = torch.cat(remapped_ids, dim=0)
             total_K = cum
-            current_feats = aggregate_cluster(current_feats, flat_ids, pool_type=self.cluster_pool_type)  # [total_K, C]
+            if self.cluster_pool_type == 'dual':
+                mean_feats = aggregate_cluster(current_feats, flat_ids, pool_type='mean')  # [total_K, C]
+                max_feats = aggregate_cluster(current_feats, flat_ids, pool_type='max')    # [total_K, C]
+                current_feats = self.dual_proj(torch.cat([mean_feats, max_feats], dim=-1))  # [total_K, C]
+            else:
+                current_feats = aggregate_cluster(current_feats, flat_ids, pool_type=self.cluster_pool_type)  # [total_K, C]
             # Split back into per-batch tensors and pad
             padded_batches = []
             off = 0
