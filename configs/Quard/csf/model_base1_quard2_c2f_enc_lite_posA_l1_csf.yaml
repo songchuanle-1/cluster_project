@@ -1,0 +1,66 @@
+work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+train:
+  seed: 1999
+  epochs: 50
+  interval: 1
+  pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+  save_epoch: 100
+  grad_clip: 0.1
+
+test:
+  seed: 1999
+  test_topk_per_scene: 100
+  test_score_thresh: 0.0
+  test_npoint_thresh: 100
+
+dataloader:
+  train:
+    batch_size: 2
+    num_workers: 4
+    persistent_workers: True
+  val:
+    batch_size: 1
+    num_workers: 2
+    persistent_workers: True
+  test:
+    batch_size: 1
+    num_workers: 1
+    persistent_workers: True
+
+data:
+  train:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: train
+    suffix: .pth
+    training: True
+    mode: 4
+    aug: True
+    with_elastic: True
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 4
+  val:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: val
+    suffix: .pth
+    training: False
+    mode: 4
+    aug: False
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 4
+
+model: model_base1_quard2_c2f_enc_lite_posA_l1_csf
+model_package: Quard_model
