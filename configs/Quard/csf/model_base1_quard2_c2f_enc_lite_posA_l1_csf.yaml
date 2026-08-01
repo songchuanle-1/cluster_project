@@ -62,5 +62,48 @@ data:
     max_des_len: 78
     lang_num_max: 4
 
-model: model_base1_quard2_c2f_enc_lite_posA_l1_csf
-model_package: Quard_model
+model:
+  data_root: /home/songcl/data/data/
+  input_channel: 6
+  blocks: 5
+  block_reps: 2
+  media: 32
+  normalize_before: True
+  return_blocks: True
+  pool: mean
+  infer_mode: sem
+  fps_num: 256
+  task_type: res
+  sampling_module:
+    num_proposal: 128
+    pc_dim: 256
+    lang_dim: 256
+    d_model: 256
+  dec:
+    num_layer: 6
+    d_model: 256
+    nhead: 8
+    hidden_dim: 1024
+    dropout: 0.0
+    activation_fn: gelu
+    iter_pred: True
+    contrastive_align_loss: True
+    num_proposal_fine: 512
+    cluster_layer_nums: [256, 64, 8]
+    per_layer_topk_list: [32, 16, 8]
+    # PosA ordering with cluster refinement enabled only on encoder layer 6.
+    cluster_att_num_layers: 1
+    cluster_att_init: 0.1
+  criterion:
+    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+    cost_weight: [1.0, 1.0, 0.1]
+    loss_fun: focal
+    match_last_layer: True
+    layer_differ_weight: True
+  test_cfg:
+    topk_insts: 100
+    score_thr: 0.0
+    npoint_thr: 100
+  norm_eval: False
+  fix_module:
+    - text_encoder
