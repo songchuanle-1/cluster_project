@@ -18,6 +18,7 @@ from framework.torch.nn import MultiheadAttention
 from .hier_postprocess import (
     Cluster_Attn,
     C2F_ClusterAttn_TrueRoute,
+    C2F_ClusterAttn_CSF,
     MultiScale_Gather,
     SharedClusterBank,
     batch2flatten,
@@ -379,6 +380,7 @@ class DEC(nn.Module):
             'legacy': Cluster_Attn,
             'noroute': MultiScale_Gather,
             'true_route': C2F_ClusterAttn_TrueRoute,
+            'csf': C2F_ClusterAttn_CSF,
         }
         if cluster_mode not in cluster_att_classes:
             raise ValueError(

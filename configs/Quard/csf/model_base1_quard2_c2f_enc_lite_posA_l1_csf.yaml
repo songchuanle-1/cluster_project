@@ -92,6 +92,7 @@ model:
     cluster_layer_nums: [256, 64, 8]
     per_layer_topk_list: [32, 16, 8]
     # PosA ordering with cluster refinement enabled only on encoder layer 6.
+    cluster_mode: csf
     cluster_att_num_layers: 1
     cluster_att_init: 0.1
   criterion:
@@ -107,3 +108,25 @@ model:
   norm_eval: False
   fix_module:
     - text_encoder
+
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.0005
+  paramwise_cfg:
+    text_encoder:
+      lr_mult: 0.001
+    input_conv:
+      lr_mult: 0.01
+    unet:
+      lr_mult: 0.01
+    output_layer:
+      lr_mult: 0.01
+    dec:
+      lr_mult: 1.0
+
+lr_scheduler:
+  type: PolyLR
+  max_iters: 70
+  power: 4.0
+  constant_ending: 0.0
