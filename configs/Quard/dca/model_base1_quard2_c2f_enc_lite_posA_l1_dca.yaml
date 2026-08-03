@@ -95,6 +95,10 @@ model:
     # PosA ordering with cluster refinement enabled only on encoder layer 6.
     cluster_att_num_layers: 1
     cluster_att_init: 0.1
+    # M51-DCA: Dual-branch Cluster Aggregation (mean+max → concat → MLP).
+    # 与当前批次 baseline (DRP 模式) 对齐; 测试 mean 池化是否丢失显著/离群信号。
+    cluster_mode: drp
+    cluster_message_type: context
     cluster_pool_type: dual
   criterion:
     loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]

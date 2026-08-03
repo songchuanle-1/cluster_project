@@ -1,0 +1,138 @@
+work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+train:
+  seed: 1999
+  epochs: 50
+  interval: 1
+  pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+  save_epoch: 100
+  grad_clip: 0.1
+
+test:
+  seed: 1999
+  test_topk_per_scene: 100
+  test_score_thresh: 0.0
+  test_npoint_thresh: 100
+
+dataloader:
+  train:
+    batch_size: 2
+    num_workers: 4
+    persistent_workers: True
+  val:
+    batch_size: 1
+    num_workers: 2
+    persistent_workers: True
+  test:
+    batch_size: 1
+    num_workers: 1
+    persistent_workers: True
+
+data:
+  train:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: train
+    suffix: .pth
+    training: True
+    mode: 4
+    aug: True
+    with_elastic: True
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 4
+  val:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: val
+    suffix: .pth
+    training: False
+    mode: 4
+    aug: False
+    with_elastic: False
+    use_xyz: True
+    voxel_cfg:
+      scale: 50
+      spatial_shape: [128, 512]
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 32
+
+model:
+  data_root: /home/songcl/data/data/
+  input_channel: 6
+  blocks: 5
+  block_reps: 2
+  media: 32
+  normalize_before: True
+  return_blocks: True
+  pool: mean
+  infer_mode: sem
+  fps_num: 256
+  task_type: res
+  sampling_module:
+    num_proposal: 128
+    pc_dim: 256
+    lang_dim: 256
+    d_model: 256
+  dec:
+    cluster_mode: drp
+    num_layer: 6
+    d_model: 256
+    nhead: 8
+    hidden_dim: 1024
+    dropout: 0.0
+    activation_fn: gelu
+    iter_pred: True
+    contrastive_align_loss: True
+    num_proposal_fine: 512
+    cluster_layer_nums: [256, 64, 8]
+    per_layer_topk_list: [32, 16, 8]
+    # PosA ordering with cluster refinement enabled only on encoder layer 6.
+    cluster_att_num_layers: 1
+    cluster_att_init: 0.1
+    # M52-CCR: Cascade Cluster Refinement — 在 256→64→8 级联聚合的每一层池化后
+    # 用共享 pre-norm FFN 精炼 cluster token, 再送入下一层聚合。
+    cluster_message_type: context
+    cluster_pool_type: mean
+    cascade_refine: True
+  criterion:
+    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+    cost_weight: [1.0, 1.0, 0.1]
+    loss_fun: focal
+    match_last_layer: True
+    layer_differ_weight: True
+  test_cfg:
+    topk_insts: 100
+    score_thr: 0.0
+    npoint_thr: 100
+  norm_eval: False
+  fix_module:
+    - text_encoder
+
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.0005
+  paramwise_cfg:
+    text_encoder:
+      lr_mult: 0.001
+    input_conv:
+      lr_mult: 0.01
+    unet:
+      lr_mult: 0.01
+    output_layer:
+      lr_mult: 0.01
+    dec:
+      lr_mult: 1.0
+
+lr_scheduler:
+  type: PolyLR
+  max_iters: 70
+  power: 4.0
+  constant_ending: 0.0
