@@ -81,6 +81,7 @@ class PointCloudPartitioner(nn.Module):
         per_layer_cluster_ids = [[] for _ in range(num_layers)]
         per_layer_coords = [[] for _ in range(num_layers + 1)]
         child_cluster_maps = [[] for _ in range(num_layers - 1)]  # lvl→lvl-1 的映射
+        self.per_layer_coords = per_layer_coords  # 供 SAC spatial_emb 读取原始点坐标
 
         lens = [(batch_offsets[i + 1] - batch_offsets[i]).item() for i in range(len(batch_offsets) - 1)]
         layer_nums = list(self.cluster_layer_nums)
