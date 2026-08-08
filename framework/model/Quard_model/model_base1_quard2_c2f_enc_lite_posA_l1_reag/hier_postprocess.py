@@ -488,7 +488,7 @@ class C2F_ClusterAttn_TrueRoute(C2F_ClusterAttn_Lite):
 Cluster_Attn = C2F_ClusterAttn_Lite
 
 
-class C2F_ClusterAttn_REAGG(C2F_ClusterAttn_Lite):
+class C2F_ClusterAttn_REAG(C2F_ClusterAttn_Lite):
     """M70 迭代 + 重新聚合: 第1轮回写后, 用更新后的 inst_feats 重新 scatter_mean
     聚合 cluster token (cluster 表示也进化), 第2轮回写用新 cluster feats.
     比 ITER 更进一步: 不仅 feats 精化, cluster token 也随迭代更新.
