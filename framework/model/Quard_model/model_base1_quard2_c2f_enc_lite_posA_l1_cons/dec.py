@@ -19,6 +19,7 @@ from .hier_postprocess import (
     Cluster_Attn,
     C2F_ClusterAttn_TrueRoute,
     C2F_ClusterAttn_ORT,
+    C2F_ClusterAttn_CONS,
     MultiScale_Gather,
     SharedClusterBank,
     batch2flatten,
@@ -384,6 +385,7 @@ class DEC(nn.Module):
             'noroute': MultiScale_Gather,
             'true_route': C2F_ClusterAttn_TrueRoute,
             'ort': C2F_ClusterAttn_ORT,
+            'cons': C2F_ClusterAttn_CONS,
         }
         if cluster_mode not in cluster_att_classes:
             raise ValueError(
