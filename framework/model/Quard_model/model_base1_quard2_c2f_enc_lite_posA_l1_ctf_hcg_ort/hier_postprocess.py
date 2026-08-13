@@ -13,6 +13,21 @@ import torch.nn.functional as F
 from pointnet2.pointnet2_utils import FurthestPointSampling
 from torch_scatter import scatter_mean, scatter_max
 
+# ── Module-level accumulator for orthogonality loss (differentiable) ──
+# 修复 2026-08-14: 原实现把 orth_loss 转为 detached 标量再重建常数 tensor,
+#   梯度完全不回流 → ORT 从未真正训练。改为累积可微 tensor, dec.py 直接取用。
+_orth_loss_accum = None
+
+def reset_orth_accum():
+    global _orth_loss_accum
+    _orth_loss_accum = None
+
+def get_orth_loss():
+    global _orth_loss_accum
+    val = _orth_loss_accum
+    _orth_loss_accum = None
+    return val
+
 
 def batch2flatten(x, batch_mask):
     return x.view(-1, x.size(-1))[~batch_mask.view(-1)]
@@ -651,7 +666,7 @@ class C2F_ClusterAttn_CTF_HCG_ORT(C2F_ClusterAttn_CTF_HCG):
         result = super().forward(point_feats, query, point_mask,
                                  cluster_feats_list, child_cluster_maps,
                                  cluster_ids_list)
-        # ORT loss on cluster tokens (same as C2F_ClusterAttn_ORT)
+        # ORT loss on cluster tokens (differentiable → 累积供 dec.py 取用)
         orth_loss = torch.tensor(0.0, device=point_feats.device)
         for lvl, cf in enumerate(cluster_feats_list):
             B, K, C = cf.shape
@@ -667,4 +682,7 @@ class C2F_ClusterAttn_CTF_HCG_ORT(C2F_ClusterAttn_CTF_HCG):
                 valid_mask = None
             orth_loss = orth_loss + self._orth_reg_loss(cf, mask=valid_mask)
         orth_loss = orth_loss / max(len(cluster_feats_list), 1)
+        global _orth_loss_accum
+        _orth_loss_accum = ((_orth_loss_accum if _orth_loss_accum is not None
+                             else orth_loss.new_zeros(())) + orth_loss * self.orth_weight)
         return result

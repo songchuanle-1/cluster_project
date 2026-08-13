@@ -621,6 +621,11 @@ class Criterion(nn.Module):
                     loss += loss_i
                 loss_out.update(loss_out_i)
 
+        # Add orth_reg_loss if present (ORT mode) — 修复 2026-08-14: 接上可微梯度
+        if 'orth_reg_loss' in pred and pred['orth_reg_loss'] is not None:
+            loss = loss + pred['orth_reg_loss']
+            loss_out['orth_reg_loss'] = pred['orth_reg_loss']
+
         loss_out['loss'] = loss
 
         return loss, loss_out

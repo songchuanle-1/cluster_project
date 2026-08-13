@@ -21,9 +21,12 @@ from .hier_postprocess import (
     C2F_ClusterAttn_DRP,
     C2F_ClusterAttn_CTF,
     C2F_ClusterAttn_CTF_HCG,
+    C2F_ClusterAttn_CTF_HCG_ORT,
     MultiScale_Gather,
     SharedClusterBank,
     batch2flatten,
+    reset_orth_accum,
+    get_orth_loss,
 )
 
 
@@ -334,6 +337,7 @@ class DEC(nn.Module):
         cluster_gate_type='sigmoid',
         cluster_message_type='context',
         cluster_pool_type='mean',
+        orth_weight=0.01,
     ):
         super().__init__()
         self.num_layer = num_layer
@@ -439,6 +443,7 @@ class DEC(nn.Module):
     def forward_iter_pred(self, x, fps_seed_sp, batch_offsets,
                           lang_feats=None, lang_masks=None,
                           sp_pos=None, feats_2d=None):
+        reset_orth_accum()
         lang_feats = self.lang_proj(lang_feats)
         lang_feats = self.lang_norm(lang_feats)
         lang_masks = ~(lang_masks.bool())
@@ -490,7 +495,13 @@ class DEC(nn.Module):
             proj_queries.append(proj_query)
             proj_tokens.append(proj_token)
 
+        # Collect orth_reg_loss if ORT mode (differentiable, gradient flows)
+        orth_reg_loss = None
+        if self.cluster_mode.endswith('_ort'):
+            orth_reg_loss = get_orth_loss()
+
         return {
+            'orth_reg_loss': orth_reg_loss,
             'masks': pred_masks,
             'batch_mask': batch_mask,
             'scores': pred_scores,
