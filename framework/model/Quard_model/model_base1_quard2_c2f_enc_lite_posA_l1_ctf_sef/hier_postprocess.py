@@ -593,9 +593,10 @@ class C2F_ClusterAttn_CTF_SEF(C2F_ClusterAttn_CTF):
 
     def forward(self, point_feats, query, point_mask,
                 cluster_feats_list, child_cluster_maps, cluster_ids_list):
-        # Apply SE after CTF's token refinement (via super's internal logic)
-        # We intercept: refine tokens with SE after parent creates them
+        # Apply SE channel attention to cluster tokens before readback.
+        # (原实现定义了 _apply_se 但从未在 forward 调用 — SE 实际未生效, M93 crash 修复)
+        refined = self._apply_se(cluster_feats_list)
         result = super().forward(point_feats, query, point_mask,
-                                 cluster_feats_list, child_cluster_maps,
+                                 refined, child_cluster_maps,
                                  cluster_ids_list)
         return result

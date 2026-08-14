@@ -14,6 +14,22 @@ from pointnet2.pointnet2_utils import FurthestPointSampling
 from torch_scatter import scatter_mean, scatter_max
 
 
+# ── Module-level accumulator for orthogonality loss (M94-HCG-ORT fix) ──
+_orth_loss_accum = 0.0
+
+
+def reset_orth_accum():
+    global _orth_loss_accum
+    _orth_loss_accum = 0.0
+
+
+def get_orth_loss():
+    global _orth_loss_accum
+    val = _orth_loss_accum
+    _orth_loss_accum = 0.0
+    return val
+
+
 def batch2flatten(x, batch_mask):
     return x.view(-1, x.size(-1))[~batch_mask.view(-1)]
 
@@ -609,4 +625,10 @@ class C2F_ClusterAttn_HCG_ORT(C2F_ClusterAttn_HCG):
                 valid_mask = None
             orth_loss = orth_loss + self._orth_reg_loss(cf, mask=valid_mask)
         orth_loss = orth_loss / max(len(cluster_feats_list), 1)
+        # M94 fix: 累积到 module-level accumulator (保持计算图, 梯度真实回流).
+        # 原实现仅计算 orth_loss 未使用 → ORT 组件恒为 0 梯度 (同 M17 梯度断流 bug).
+        global _orth_loss_accum
+        _orth_loss_accum = ((_orth_loss_accum if _orth_loss_accum is not None
+                             else orth_loss.new_zeros(()))
+                            + orth_loss * self.orth_weight)
         return result

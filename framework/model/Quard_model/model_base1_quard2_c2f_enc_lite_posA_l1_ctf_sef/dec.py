@@ -20,6 +20,7 @@ from .hier_postprocess import (
     C2F_ClusterAttn_TrueRoute,
     C2F_ClusterAttn_DRP,
     C2F_ClusterAttn_CTF,
+    C2F_ClusterAttn_CTF_SEF,
     MultiScale_Gather,
     SharedClusterBank,
     batch2flatten,
@@ -383,6 +384,7 @@ class DEC(nn.Module):
             'true_route': C2F_ClusterAttn_TrueRoute,
             'drp': C2F_ClusterAttn_DRP,
             'ctf': C2F_ClusterAttn_CTF,
+            'ctf_sef': C2F_ClusterAttn_CTF_SEF,
         }
         if cluster_mode not in cluster_att_classes:
             raise ValueError(

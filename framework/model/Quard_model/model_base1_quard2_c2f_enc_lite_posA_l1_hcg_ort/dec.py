@@ -20,9 +20,12 @@ from .hier_postprocess import (
     C2F_ClusterAttn_TrueRoute,
     C2F_ClusterAttn_DRP,
     C2F_ClusterAttn_HCG,
+    C2F_ClusterAttn_HCG_ORT,
     MultiScale_Gather,
     SharedClusterBank,
     batch2flatten,
+    reset_orth_accum,
+    get_orth_loss,
 )
 
 
@@ -437,6 +440,9 @@ class DEC(nn.Module):
     def forward_iter_pred(self, x, fps_seed_sp, batch_offsets,
                           lang_feats=None, lang_masks=None,
                           sp_pos=None, feats_2d=None):
+        # M94 fix: reset/collect orth accumulator for _ort modes (同 champ_ort)
+        if self.cluster_mode.endswith('_ort'):
+            reset_orth_accum()
         lang_feats = self.lang_proj(lang_feats)
         lang_feats = self.lang_norm(lang_feats)
         lang_masks = ~(lang_masks.bool())
@@ -488,7 +494,14 @@ class DEC(nn.Module):
             proj_queries.append(proj_query)
             proj_tokens.append(proj_token)
 
+        # M94 fix: collect orth_reg_loss for _ort modes
+        if self.cluster_mode.endswith('_ort'):
+            orth_reg_loss = get_orth_loss()
+        else:
+            orth_reg_loss = None
+
         return {
+            'orth_reg_loss': orth_reg_loss,
             'masks': pred_masks,
             'batch_mask': batch_mask,
             'scores': pred_scores,

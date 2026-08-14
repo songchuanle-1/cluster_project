@@ -621,6 +621,11 @@ class Criterion(nn.Module):
                     loss += loss_i
                 loss_out.update(loss_out_i)
 
+        # M94 fix: 收集 orth_reg_loss (同 champ_ort/csort), 使 ORT 正则真正进入训练 loss
+        if 'orth_reg_loss' in pred and pred['orth_reg_loss'] is not None:
+            loss = loss + pred['orth_reg_loss']
+            loss_out['orth_reg_loss'] = pred['orth_reg_loss']
+
         loss_out['loss'] = loss
 
         return loss, loss_out
