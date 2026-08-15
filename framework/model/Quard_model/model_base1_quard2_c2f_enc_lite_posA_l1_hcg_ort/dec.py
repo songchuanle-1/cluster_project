@@ -336,6 +336,7 @@ class DEC(nn.Module):
         cluster_gate_type='sigmoid',
         cluster_message_type='context',
         cluster_pool_type='mean',
+        orth_weight=0.01,
     ):
         super().__init__()
         self.num_layer = num_layer

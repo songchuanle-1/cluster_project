@@ -654,13 +654,27 @@ class C2F_ClusterAttn_CTF_HCG_CSORT(C2F_ClusterAttn_CTF_HCG):
 
     @staticmethod
     def _cross_scale_orth_loss(coarse_tokens, fine_tokens, child_maps):
-        """coarse [B,K_c,C] × 其细子簇聚合 [B,K_c,C] 的 abs-cosine 惩罚."""
+        """coarse [B,K_c,C] × 其细子簇聚合 [B,K_c,C] 的 abs-cosine 惩罚.
+
+        child_maps[b]: dict {fine_parent_idx: [coarse_child_idx...]} — partitioner
+        按最近邻把**粗 token** 归属到**细 parent** (子簇中心→父簇归属). 因此要聚合
+        每个 coarse token p 的 fine 子簇, 必须取**逆映射**: {coarse p: [fine f where
+        p ∈ mapping[f]]}. (修复 2026-08-15: 原实现直接 iter mapping, 用 fine 索引
+        当 agg 的行号, 越界 crash — IndexError index 177 > coarse dim 64.)
+        """
         B, K_c, C = coarse_tokens.shape
         agg = torch.zeros_like(coarse_tokens)
         count = torch.zeros(B, K_c, device=coarse_tokens.device, dtype=coarse_tokens.dtype)
         for b in range(B):
             mapping = child_maps[b]
-            for p, children in mapping.items():
+            # 逆映射: coarse token c → 归属到它的 fine tokens
+            fine_of_coarse = [[] for _ in range(K_c)]
+            for fine_idx, coarse_list in mapping.items():
+                for c in coarse_list:
+                    if 0 <= c < K_c:
+                        fine_of_coarse[c].append(fine_idx)
+            for p in range(K_c):
+                children = fine_of_coarse[p]
                 if not children:
                     continue
                 children = torch.tensor(
