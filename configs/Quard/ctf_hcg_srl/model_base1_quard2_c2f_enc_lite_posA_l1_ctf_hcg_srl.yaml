@@ -6,11 +6,13 @@ train:
   pretrain: /home/songcl/data/data/sp_unet_backbone.pth
   save_epoch: 100
   grad_clip: 0.1
+
 test:
   seed: 1999
   test_topk_per_scene: 100
   test_score_thresh: 0.0
   test_npoint_thresh: 100
+
 dataloader:
   train:
     batch_size: 2
@@ -24,6 +26,7 @@ dataloader:
     batch_size: 1
     num_workers: 1
     persistent_workers: True
+
 data:
   train:
     type: scannetv2_sample_graph_edge
@@ -59,6 +62,7 @@ data:
       max_npoint: 2500000
     max_des_len: 78
     lang_num_max: 32
+
 model:
   data_root: /home/songcl/data/data/
   input_channel: 6
@@ -78,6 +82,7 @@ model:
     d_model: 256
   dec:
     cluster_mode: ctf_hcg_srl
+    srl_weight: 0.1
     num_layer: 6
     d_model: 256
     nhead: 8
@@ -89,9 +94,9 @@ model:
     num_proposal_fine: 512
     cluster_layer_nums: [256, 64, 8]
     per_layer_topk_list: [32, 16, 8]
+    # PosA ordering with cluster refinement enabled only on encoder layer 6.
     cluster_att_num_layers: 1
     cluster_att_init: 0.1
-    srl_weight: 0.1
   criterion:
     loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
     cost_weight: [1.0, 1.0, 0.1]
@@ -105,6 +110,7 @@ model:
   norm_eval: False
   fix_module:
     - text_encoder
+
 optimizer:
   type: AdamW
   lr: 0.0001
@@ -120,6 +126,7 @@ optimizer:
       lr_mult: 0.01
     dec:
       lr_mult: 1.0
+
 lr_scheduler:
   type: PolyLR
   max_iters: 70

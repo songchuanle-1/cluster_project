@@ -82,6 +82,8 @@ model:
     d_model: 256
   dec:
     cluster_mode: ctf_hcg_membank
+    memory_bank_num: 64
+    memory_bank_ema_decay: 0.99
     num_layer: 6
     d_model: 256
     nhead: 8
@@ -96,8 +98,6 @@ model:
     # PosA ordering with cluster refinement enabled only on encoder layer 6.
     cluster_att_num_layers: 1
     cluster_att_init: 0.1
-    memory_bank_num: 64
-    memory_bank_ema_decay: 0.99
   criterion:
     loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
     cost_weight: [1.0, 1.0, 0.1]
