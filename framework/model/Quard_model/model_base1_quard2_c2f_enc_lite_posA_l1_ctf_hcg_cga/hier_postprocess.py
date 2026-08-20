@@ -703,16 +703,19 @@ class C2F_ClusterAttn_CTF_HCG_CGA(C2F_ClusterAttn_CTF_HCG):
         normed = F.normalize(cluster_feats, dim=-1)
         sim = torch.bmm(normed, normed.transpose(1, 2))  # [B, K, K]
         # Top-K neighbors (excluding self)
-        sim.fill_diagonal_(-1e9)
+        # NOTE: torch>=2.8 fill_diagonal_ requires all dims equal for 3D
+        # tensors; use eye-mask (version-agnostic) instead.
+        B, K, _ = sim.shape
+        eye = torch.eye(K, dtype=torch.bool, device=sim.device)
+        sim = sim.masked_fill(eye.unsqueeze(0), -1e9)
         _, topk_idx = sim.topk(min(k, sim.shape[-1] - 1), dim=-1)
         # Build mask
-        B, K, _ = sim.shape
         adj = torch.zeros(B, K, K, device=sim.device, dtype=torch.bool)
         for b in range(B):
             for i in range(K):
                 adj[b, i, topk_idx[b, i]] = True
                 adj[b, topk_idx[b, i], i] = True  # symmetric
-        adj.fill_diagonal_(True)  # self-loop
+        adj = adj | eye.unsqueeze(0)  # self-loop (broadcast [1, K, K])
         return adj
 
     def forward(self, point_feats, query, point_mask,
