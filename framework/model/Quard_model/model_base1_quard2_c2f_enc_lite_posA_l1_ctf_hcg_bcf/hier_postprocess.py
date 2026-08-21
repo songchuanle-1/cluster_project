@@ -666,6 +666,17 @@ class BidirectionalContextFlow(nn.Module):
         for lvl in range(self.num_scales):
             cf = cluster_feats_list[lvl]  # [B, K_lvl, C]
             K = cf.shape[1]
+            attn = self.bcf_attn[lvl]
+            # Each point attends to exactly one key — its own cluster token.
+            # With a single key, softmax over the key dim is always 1, so the
+            # MHA output is just the V-inprojected cluster token passed through
+            # the attention out_proj (the Q projection contributes nothing and
+            # receives zero gradient). Replicate that exactly with the module's
+            # own weights, replacing the per-cluster padded attention loop that
+            # OOM'd on server-4 (31.3/31.4 GiB — ~256 clusters x B x 3 scales
+            # of retained autograd graphs).  Forward/backward identical.
+            w_v = attn.in_proj_weight[2 * C:]   # [C, C]
+            b_v = attn.in_proj_bias[2 * C:]     # [C]
             level_bcf = torch.zeros(B, N, C, device=point_feats.device,
                                     dtype=point_feats.dtype)
 
@@ -675,39 +686,13 @@ class BidirectionalContextFlow(nn.Module):
                 if n_pts == 0:
                     continue
                 ids_b = ids_b.clamp(min=0, max=K - 1)
-                pf_b = point_feats[b, :n_pts]  # [N_b, C]
-
-                # Group points by cluster membership
-                for k in range(K):
-                    member_mask = (ids_b == k)
-                    if not member_mask.any():
-                        continue
-                    member_pts = pf_b[member_mask]  # [M_k, C]
-                    n_members = member_pts.shape[0]
-
-                    # Pad to allow batched attention
-                    if n_members < N:
-                        pad = torch.zeros(N - n_members, C,
-                                          device=pf_b.device, dtype=pf_b.dtype)
-                        pts_padded = torch.cat([member_pts, pad], dim=0)
-                    else:
-                        pts_padded = member_pts
-
-                    # Cluster token as K/V (single token, expanded to batch)
-                    cluster_kv = cf[b, k:k+1, :].unsqueeze(0)  # [1, 1, C]
-
-                    # Point features attend to cluster token: Q=points, K=V=cluster
-                    attn_out, _ = self.bcf_attn[lvl](
-                        pts_padded.unsqueeze(0), cluster_kv, cluster_kv)
-                    # attn_out: [1, N, C]
-
-                    # Extract valid (non-padded) outputs
-                    member_out = attn_out[0, :n_members]  # [M_k, C]
-                    member_out = self.bcf_out_proj[lvl](member_out)
-
-                    # Scatter back to original point positions
-                    member_indices = torch.where(member_mask)[0]
-                    level_bcf[b, member_indices] = member_out
+                # Gather each point's cluster token, then apply the V-projection
+                # and the two output projections (attn out_proj + bcf_out_proj).
+                ct_pp = cf[b][ids_b]                          # [N_b, C]
+                v = F.linear(ct_pp, w_v, b_v)                 # [N_b, C]
+                member_out = attn.out_proj(v)                 # [N_b, C]
+                member_out = self.bcf_out_proj[lvl](member_out)  # [N_b, C]
+                level_bcf[b, :n_pts] = member_out
 
             # Residual + LayerNorm fusion with input point features
             bcf_out = bcf_out + level_bcf
