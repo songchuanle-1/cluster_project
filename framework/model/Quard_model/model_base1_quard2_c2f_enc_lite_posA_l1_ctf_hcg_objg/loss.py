@@ -465,8 +465,15 @@ class Criterion(nn.Module):
                 if ref is None or ref.numel() == 0 or float(ref.max()) < 0.6:
                     continue
                 lbls = sp_ins_labels[b]                  # [N_b] per-superpoint instance label
-                cids = cluster_ids_list[lvl][b].long()   # [N_b] superpoint→cluster mapping
-                n_b = cids.shape[0]
+                # 簇 id: 组合映射 (lvl0=超点→细簇 [N_b]; lvl>0 是簇→父簇映射, 需逐级组合回超点)
+                ids_l0 = cluster_ids_list[0][b].long()
+                n_b = ids_l0.shape[0]
+                level_ids = [ids_l0]
+                for lvl_i in range(1, len(cluster_ids_list)):
+                    par = cluster_ids_list[lvl_i][b].long()
+                    par = par.clamp(min=0, max=par.shape[0] - 1)
+                    level_ids.append(par.gather(0, level_ids[-1].clamp(min=0, max=par.shape[0] - 1)))
+                cids = level_ids[lvl]                    # [N_b] 超点→lvl 簇 id
                 if n_b == 0 or lbls.shape[0] != n_b:
                     continue
                 obj_ids = set(object_idss[b])

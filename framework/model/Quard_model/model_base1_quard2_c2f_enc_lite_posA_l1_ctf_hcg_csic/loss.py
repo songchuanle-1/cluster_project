@@ -381,9 +381,16 @@ class Criterion(nn.Module):
                 obj_ids = set(object_idss[b])
                 if not obj_ids:
                     continue
-                cids = cluster_ids_list[lvl][b].long()  # [N_b] local cluster ids
+                # 簇 id: 组合映射 (lvl0=超点→细簇 [N_b]; lvl>0 是簇→父簇映射, 需逐级组合回超点)
+                ids_l0 = cluster_ids_list[0][b].long()
+                n_b = ids_l0.shape[0]
+                level_ids = [ids_l0]
+                for lvl_i in range(1, len(cluster_ids_list)):
+                    par = cluster_ids_list[lvl_i][b].long()
+                    par = par.clamp(min=0, max=par.shape[0] - 1)
+                    level_ids.append(par.gather(0, level_ids[-1].clamp(min=0, max=par.shape[0] - 1)))
+                cids = level_ids[lvl]                    # [N_b] 超点→lvl 簇 id
                 lbls = sp_ins_labels[b]                  # [N_b] per-point instance label
-                n_b = cids.shape[0]
                 if n_b == 0:
                     continue
                 # 有效点 = 属于任一 GT 实例
@@ -456,10 +463,17 @@ class Criterion(nn.Module):
                 obj_ids = set(object_idss[b])
                 if not obj_ids:
                     continue
-                cids_f = cluster_ids_list[lvl][b].long()      # [N_b]
-                cids_c = cluster_ids_list[lvl + 1][b].long()  # [N_b]
+                # 簇 id: 组合映射 (lvl0=超点→细簇 [N_b]; lvl>0 是簇→父簇映射, 需逐级组合回超点)
+                ids_l0 = cluster_ids_list[0][b].long()
+                n_b = ids_l0.shape[0]
+                level_ids = [ids_l0]
+                for lvl_i in range(1, len(cluster_ids_list)):
+                    par = cluster_ids_list[lvl_i][b].long()
+                    par = par.clamp(min=0, max=par.shape[0] - 1)
+                    level_ids.append(par.gather(0, level_ids[-1].clamp(min=0, max=par.shape[0] - 1)))
+                cids_f = level_ids[lvl]                       # [N_b] 超点→细簇
+                cids_c = level_ids[lvl + 1]                   # [N_b] 超点→粗簇
                 lbls = sp_ins_labels[b]                       # [N_b]
-                n_b = cids_f.shape[0]
                 if n_b == 0:
                     continue
                 # 有效点 = 属于任一 GT 实例
