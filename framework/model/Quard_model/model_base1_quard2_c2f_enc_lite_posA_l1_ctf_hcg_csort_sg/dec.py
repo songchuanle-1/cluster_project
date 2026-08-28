@@ -398,7 +398,7 @@ class DEC(nn.Module):
                 f'Unknown cluster_mode: {cluster_mode}. '
                 f'Expected one of {tuple(cluster_att_classes)}')
         self.cluster_mode = cluster_mode
-        if cluster_mode.endswith('_csort'):
+        if '_csort' in cluster_mode:
             self.cluster_att = cluster_att_classes[cluster_mode](
                 d_model=d_model, nhead=nhead,
                 cluster_layer_nums=cluster_layer_nums,
@@ -499,7 +499,7 @@ class DEC(nn.Module):
 
         # Collect diversity loss (CSORT) — 可微, 梯度真实回流
         csort_reg_loss = None
-        if self.cluster_mode.endswith('_csort'):
+        if '_csort' in self.cluster_mode:
             csort_reg_loss = get_orth_loss()
 
         return {
