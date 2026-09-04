@@ -346,12 +346,14 @@ class MaskConditionedQueryRefiner(nn.Module):
         for b in range(point_feats.shape[0]):
             n_valid = int((~point_mask[b]).sum().item())
             probs_b = mask_probs[b, :, :n_valid]
-            point_ids = cluster_bank.cluster_ids_list[0][b].long()
+            point_ids = cluster_bank.cluster_ids_list[0][b].to(
+                device=probs_b.device, dtype=torch.long)
             per_scale = []
 
             for lvl, cluster_feats in enumerate(cluster_feats_list):
                 if lvl > 0:
-                    parent_ids = cluster_bank.cluster_ids_list[lvl][b].long()
+                    parent_ids = cluster_bank.cluster_ids_list[lvl][b].to(
+                        device=probs_b.device, dtype=torch.long)
                     point_ids = parent_ids.gather(
                         0, point_ids.clamp(
                             min=0, max=parent_ids.shape[0] - 1))
@@ -421,12 +423,14 @@ class MaskConditionedQueryRefiner(nn.Module):
         for b in range(point_feats.shape[0]):
             n_valid = int((~point_mask[b]).sum().item())
             probs_b = mask_probs[b, :, :n_valid]
-            point_ids = cluster_bank.cluster_ids_list[0][b].long()
+            point_ids = cluster_bank.cluster_ids_list[0][b].to(
+                device=probs_b.device, dtype=torch.long)
             per_scale_weights = []
 
             for lvl in range(len(cluster_bank.cluster_ids_list)):
                 if lvl > 0:
-                    parent_ids = cluster_bank.cluster_ids_list[lvl][b].long()
+                    parent_ids = cluster_bank.cluster_ids_list[lvl][b].to(
+                        device=probs_b.device, dtype=torch.long)
                     point_ids = parent_ids.gather(
                         0, point_ids.clamp(
                             min=0, max=parent_ids.shape[0] - 1))
