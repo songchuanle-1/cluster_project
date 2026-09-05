@@ -481,15 +481,22 @@ class MaskConditionedQueryRefiner(nn.Module):
 
             bottleneck = torch.stack(branch_scores, dim=0).amin(dim=0)
             selected_fine = bottleneck.argmax(dim=-1)
+            hard_selector = F.one_hot(
+                selected_fine, num_classes=num_fine).to(bottleneck.dtype)
+            soft_selector = torch.softmax(bottleneck, dim=-1)
+            selector = hard_selector + soft_selector - soft_selector.detach()
             branch_feats = [
-                cluster_feats_list[0][b].index_select(0, selected_fine)
+                torch.matmul(selector, cluster_feats_list[0][b, :num_fine])
             ]
             for lvl in range(1, len(cluster_feats_list)):
-                selected_ids = branch_ids[lvl].index_select(
-                    0, selected_fine)
+                num_clusters = cluster_feats_list[lvl].shape[1]
+                branch_to_level = F.one_hot(
+                    branch_ids[lvl], num_classes=num_clusters).to(
+                        selector.dtype)
+                level_selector = torch.matmul(selector, branch_to_level)
                 branch_feats.append(
-                    cluster_feats_list[lvl][b].index_select(
-                        0, selected_ids))
+                    torch.matmul(
+                        level_selector, cluster_feats_list[lvl][b]))
 
             contexts.append(torch.stack(branch_feats, dim=0).mean(dim=0))
 
