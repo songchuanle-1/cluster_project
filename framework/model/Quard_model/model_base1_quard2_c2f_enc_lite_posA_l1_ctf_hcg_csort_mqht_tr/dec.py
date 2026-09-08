@@ -651,13 +651,20 @@ class MaskConditionedQueryRefiner(nn.Module):
         return torch.stack(contexts, dim=0)
 
     def _hierarchy_transport_pool(self, mask_probs, point_feats, point_mask,
-                                  cluster_bank, batch_offsets):
+                                 cluster_bank, batch_offsets):
         flat_feats = batch2flatten(point_feats, point_mask)
         cluster_feats_list = cluster_bank.build_cluster_feats(
             flat_feats, batch_offsets)
+        padded_cluster_feats = cluster_feats_list
         contexts = []
 
         for b in range(point_feats.shape[0]):
+            # Pool only real clusters; batch padding has no parent assignment.
+            cluster_feats_list = [
+                features[:, :int(ids[b].max().item()) + 1]
+                for features, ids in zip(
+                    padded_cluster_feats, cluster_bank.cluster_ids_list)
+            ]
             n_valid = int((~point_mask[b]).sum().item())
             probs_b = mask_probs[b, :, :n_valid]
             point_ids = cluster_bank.cluster_ids_list[0][b].to(
