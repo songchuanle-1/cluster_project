@@ -4,6 +4,7 @@ import copy
 import importlib
 import json
 from pathlib import Path
+import subprocess
 import sys
 import time
 
@@ -127,11 +128,26 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", required=True)
     parser.add_argument("--report-dir", required=True)
+    parser.add_argument("--stage", choices=("all", "topology", "parent", "child"),
+                        default="all")
     args = parser.parse_args()
     report_dir = Path(args.report_dir)
     report_dir.mkdir(parents=True, exist_ok=True)
-    topology_test()
-    results = [profile(name, args.data_root, report_dir) for name in (PARENT, CHILD)]
+    if args.stage == "topology":
+        topology_test()
+        return
+    if args.stage in ("parent", "child"):
+        result = profile(PARENT if args.stage == "parent" else CHILD,
+                         args.data_root, report_dir)
+        (report_dir / f"{args.stage}.json").write_text(json.dumps(result, indent=2))
+        return
+    # Independent model packages register the same legacy Criterion class name.
+    for stage in ("topology", "parent", "child"):
+        subprocess.run([sys.executable, __file__, "--data-root", args.data_root,
+                        "--report-dir", str(report_dir), "--stage", stage],
+                       check=True)
+    results = [json.loads((report_dir / f"{stage}.json").read_text())
+               for stage in ("parent", "child")]
     (report_dir / "hqi_profile.json").write_text(json.dumps(results, indent=2))
     assert results[1]["flops"] <= 10e9, "HQI exceeds FLOPs limit; do not enqueue"
     assert results[1]["peak_allocated_mb"] <= 1.15 * results[0]["peak_allocated_mb"]
