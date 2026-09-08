@@ -70,10 +70,11 @@ def topology_test():
     print("HQI topology: ancestry, uneven padding, repeated seeds, gradients, batch isolation PASS")
 
 
-def profile(name, data_root, report_dir):
+def profile(name, data_root, report_dir, config=None):
     gorilla.set_random_seed(1999)
-    suffix = "ctf_hcg_csort_hqi" if name == CHILD else "ctf_hcg_csort"
-    config = f"configs/Quard/{suffix}/{name}.yaml"
+    if config is None:
+        suffix = "ctf_hcg_csort_hqi" if name == CHILD else "ctf_hcg_csort"
+        config = f"configs/Quard/{suffix}/{name}.yaml"
     cfg = gorilla.Config.fromfile(config)
     cfg.model.data_root = data_root
     cfg.data.val.data_root = data_root
@@ -110,6 +111,7 @@ def profile(name, data_root, report_dir):
         assert all(torch.isfinite(v).all() for v in result["piou"])
         result = {
             "config": config, "flops": total, "flops_g": total / 1e9,
+            "flops_by_module": dict(flop.by_module()),
             "unsupported_ops": dict(flop.unsupported_ops()),
             "params": sum(p.numel() for p in model.parameters()),
             "median_ms": float(np.median(times)),
