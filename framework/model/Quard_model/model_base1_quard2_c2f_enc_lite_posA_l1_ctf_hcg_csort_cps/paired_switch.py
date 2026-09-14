@@ -23,7 +23,16 @@ def paired_switch(indis, seed_ids, instance_labels, object_ids, scene_lengths):
         d = z[..., 1] - z[..., 0]
         total = d.sum() * 0
         counters = dict(eligible_pairs=0, eligible_scenes=0, same_target=0,
-                        multi_target=0, missing_shared_target=0)
+                        multi_target=0, missing_shared_target=0, duplicate_queries=0)
+        physical = []
+        # FPS may repeat seeds when a scene has fewer points than fps_num.
+        # Average observations per physical seed before forming the shared set.
+        for row, ids in zip(d, seed_ids):
+            unique, inverse, counts = torch.unique(
+                ids.long(), sorted=True, return_inverse=True, return_counts=True)
+            means = row.new_zeros(len(unique)).scatter_add(0, inverse, row) / counts
+            physical.append((unique, means))
+            counters["duplicate_queries"] += ids.numel() - unique.numel()
         offset = 0
         for size in lengths:
             pair_losses = []
@@ -38,17 +47,15 @@ def paired_switch(indis, seed_ids, instance_labels, object_ids, scene_lengths):
                 if ta < 0 or tb < 0 or ta == 199 or tb == 199:
                     counters["missing_shared_target"] += 1
                     continue
-                sa, oa = torch.sort(seed_ids[a].long())
-                sb, ob = torch.sort(seed_ids[b].long())
-                if torch.unique(sa).numel() != sa.numel() or torch.unique(sb).numel() != sb.numel():
-                    raise ValueError("Duplicate physical seeds in one expression")
+                sa, da = physical[a]
+                sb, db = physical[b]
                 if sa.numel() == 0 or sb.numel() == 0:
                     counters["missing_shared_target"] += 1
                     continue
                 where = torch.searchsorted(sb, sa)
                 safe = where.clamp(max=sb.numel() - 1)
                 common = (where < sb.numel()) & (sb[safe] == sa)
-                ids, ia, ib = sa[common], oa[common], ob[safe[common]]
+                ids = sa[common]
                 la = instance_labels[a].to(ids.device)
                 lb = instance_labels[b].to(ids.device)
                 if ids.numel() and (ids.min() < 0 or ids.max() >= min(len(la), len(lb))):
@@ -59,7 +66,7 @@ def paired_switch(indis, seed_ids, instance_labels, object_ids, scene_lengths):
                 if not ma.any() or not mb.any():
                     counters["missing_shared_target"] += 1
                     continue
-                change = d[a, ia] - d[b, ib]
+                change = da[common] - db[safe[common]]
                 delta = change[ma].mean() - change[mb].mean()
                 pair_losses.append(F.softplus(-delta))
                 counters["eligible_pairs"] += 1
