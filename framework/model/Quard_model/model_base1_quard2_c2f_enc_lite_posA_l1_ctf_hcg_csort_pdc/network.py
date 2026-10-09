@@ -3,6 +3,7 @@ import pointgroup_ops
 import spconv.pytorch as spconv
 from spconv.core import ConvAlgo
 from spconv.constants import ALL_WEIGHT_IS_KRSC
+from spconv.pytorch.conv import SparseConvolution
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -70,7 +71,7 @@ class Network(nn.Module):
             raise ValueError('Native sparse reproducibility requires uniform KRSC weights')
         # The implicit-GEMM U-Net drift failed the frozen native repeat contract.
         for module in self.modules():
-            if isinstance(module, spconv.SparseConvolution):
+            if isinstance(module, SparseConvolution):
                 module.algo = ConvAlgo.Native
         self.pool = pool
 
