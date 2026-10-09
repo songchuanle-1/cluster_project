@@ -11,7 +11,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pointnet2.pointnet2_utils import FurthestPointSampling
-from torch_scatter import scatter_mean, scatter_max
+from torch_scatter import scatter_max
+from .point_field import scatter_mean
 
 # ── Module-level accumulator for diversity loss (differentiable) ──
 # CSORT (cross-scale orth) 与 ORT 共用同一累积器; dec.py 在 forward 末尾取用。

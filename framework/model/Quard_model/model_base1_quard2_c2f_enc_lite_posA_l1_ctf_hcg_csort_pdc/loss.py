@@ -7,7 +7,8 @@ from torch.nn.utils.rnn import pad_sequence
 from typing import Union
 from scipy.optimize import linear_sum_assignment
 import torch.distributed as dist
-from torch_scatter import scatter_max, scatter_mean
+from torch_scatter import scatter_max
+from .point_field import scatter_mean
 import numpy as np
 def is_dist_avail_and_initialized():
     if not dist.is_available():

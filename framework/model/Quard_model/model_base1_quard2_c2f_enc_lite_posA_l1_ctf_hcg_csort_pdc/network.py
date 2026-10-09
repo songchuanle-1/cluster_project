@@ -4,7 +4,7 @@ import spconv.pytorch as spconv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_scatter import scatter_max, scatter_mean
+from torch_scatter import scatter_max
 import functools
 import numpy as np
 import os
@@ -13,7 +13,7 @@ from .backbone import ResidualBlock, UBlock
 from .loss import Criterion, get_iou
 
 from .dec import DEC
-from .point_field import PointDetailField
+from .point_field import PointDetailField, scatter_mean
 from transformers import RobertaModel
 from pointnet2.pointnet2_utils import FurthestPointSampling
 
