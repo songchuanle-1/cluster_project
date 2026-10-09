@@ -1,9 +1,8 @@
 import functools
 import pointgroup_ops
 import spconv.pytorch as spconv
-from spconv.core import ConvAlgo
-from spconv.constants import ALL_WEIGHT_IS_KRSC
-from spconv.pytorch.conv import SparseConvolution
+from spconv.pytorch import ops as sparse_ops
+from unittest.mock import patch
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -67,12 +66,6 @@ class Network(nn.Module):
             return_blocks=return_blocks,
         )
         self.output_layer = spconv.SparseSequential(norm_fn(media), nn.ReLU(inplace=True))
-        if not ALL_WEIGHT_IS_KRSC:
-            raise ValueError('Native sparse reproducibility requires uniform KRSC weights')
-        # Keep strided/inverse indice generation stable without changing SubM paths.
-        for module in self.modules():
-            if isinstance(module, SparseConvolution) and not module.subm:
-                module.algo = ConvAlgo.Native
         self.pool = pool
 
         self.decoder_param = dec
@@ -234,8 +227,12 @@ class Network(nn.Module):
 
     def extract_feat(self, x, superpoints, v2p_map):
         # backbone
-        x = self.input_conv(x)
-        x, mutil_x = self.unet(x)
+        # Scope sorted indice generation to this single-GPU candidate forward.
+        generate = sparse_ops.get_indice_pairs_implicit_gemm
+        stable_generate = functools.partial(generate, direct_table=False)
+        with patch.object(sparse_ops, 'get_indice_pairs_implicit_gemm', stable_generate):
+            x = self.input_conv(x)
+            x, mutil_x = self.unet(x)
         x = self.output_layer(x)
         x = x.features[v2p_map.long()]  # (B*N, media)
 
