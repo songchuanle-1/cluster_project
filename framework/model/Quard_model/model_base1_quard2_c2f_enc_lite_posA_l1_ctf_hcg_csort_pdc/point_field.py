@@ -1,7 +1,6 @@
 """A query-conditioned detail field in the null space of SP mean pooling."""
 import torch
 import torch.nn as nn
-from torch_scatter import segment_csr
 
 
 def scatter_mean(src, index, dim=0, out=None, dim_size=None):
@@ -11,8 +10,9 @@ def scatter_mean(src, index, dim=0, out=None, dim_size=None):
     size = int(index.max()) + 1 if dim_size is None else dim_size
     order = torch.argsort(index, stable=True)
     counts = torch.bincount(index, minlength=size)
-    offsets = torch.cat((counts.new_zeros(1), counts.cumsum(0)))
-    return segment_csr(src[order], offsets, reduce="mean")
+    means = torch.segment_reduce(src[order], "mean", lengths=counts)
+    populated = counts.reshape((-1,) + (1,) * (src.ndim - 1)) > 0
+    return torch.where(populated, means, torch.zeros_like(means))
 
 
 class PointDetailField(nn.Module):
