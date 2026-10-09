@@ -71,7 +71,7 @@ class Network(nn.Module):
             raise ValueError('Native sparse reproducibility requires uniform KRSC weights')
         # The implicit-GEMM U-Net drift failed the frozen native repeat contract.
         for module in self.modules():
-            if isinstance(module, SparseConvolution):
+            if isinstance(module, SparseConvolution) and not module.conv1x1:
                 module.algo = ConvAlgo.Native
         self.pool = pool
 
