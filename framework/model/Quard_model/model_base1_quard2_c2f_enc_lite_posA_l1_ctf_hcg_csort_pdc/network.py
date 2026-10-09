@@ -69,9 +69,9 @@ class Network(nn.Module):
         self.output_layer = spconv.SparseSequential(norm_fn(media), nn.ReLU(inplace=True))
         if not ALL_WEIGHT_IS_KRSC:
             raise ValueError('Native sparse reproducibility requires uniform KRSC weights')
-        # The implicit-GEMM U-Net drift failed the frozen native repeat contract.
+        # Keep strided/inverse indice generation stable without changing SubM paths.
         for module in self.modules():
-            if isinstance(module, SparseConvolution) and not module.conv1x1:
+            if isinstance(module, SparseConvolution) and not module.subm:
                 module.algo = ConvAlgo.Native
         self.pool = pool
 
