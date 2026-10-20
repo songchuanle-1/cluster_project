@@ -23,8 +23,9 @@ class CoarseConditionedChannelAttention(nn.Module):
         batches = []
         for b in range(fine.shape[0]):
             nf = fine_to_middle[b].numel()
-            nc = int(middle_to_coarse[b].max().item()) + 1
-            context = F.layer_norm(coarse[b, :nc], (self.channels,))
+            coarse_ids = torch.unique(middle_to_coarse[b].long(), sorted=True)
+            nc = coarse_ids.numel()
+            context = F.layer_norm(coarse[b, coarse_ids], (self.channels,))
             z = context.reshape(nc, self.heads, self.width).permute(1, 0, 2)
             affinity = torch.softmax(torch.matmul(z.transpose(-2, -1), z) / math.sqrt(nc), dim=-1)
             values = fine[b, :nf].reshape(nf, self.heads, self.width).permute(1, 0, 2)
