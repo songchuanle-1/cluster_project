@@ -19,7 +19,7 @@ class MiddleDirectionalConvolution(nn.Module):
         self.pointwise = nn.Linear(channels, channels)
         self.activation = nn.GELU()
 
-    def forward(self, features, positions, parent_ids):
+    def forward(self, features, positions, parent_ids, valid_masks):
         if positions is None or len(positions) != features.shape[0]:
             raise RuntimeError('Current-batch middle centroids are required')
         outputs = []
@@ -34,7 +34,8 @@ class MiddleDirectionalConvolution(nn.Module):
             sign = delta.gather(-1, axis.unsqueeze(-1)).squeeze(-1).gt(0)
             sector = 2 * axis + sign.long()
             distance = delta.square().sum(dim=-1)
-            valid = distance.gt(0)
+            occupied = valid_masks[b]
+            valid = distance.gt(0) & occupied.unsqueeze(0) & occupied.unsqueeze(1)
             mixed = values * self.kernel[0]
             for direction in range(6):
                 candidates = distance.masked_fill(~(valid & sector.eq(direction)), float('inf'))
@@ -42,6 +43,7 @@ class MiddleDirectionalConvolution(nn.Module):
                 contribution = values[donor] * self.kernel[direction + 1]
                 mixed = mixed + contribution.masked_fill(~nearest_distance.isfinite().unsqueeze(-1), 0)
             refined = self.activation(self.pointwise(mixed + self.bias))
+            refined = refined.masked_fill(~occupied.unsqueeze(-1), 0)
             padding = features.new_zeros(features.shape[1] - count, features.shape[2])
             outputs.append(torch.cat([refined, padding], dim=0))
         return torch.stack(outputs, dim=0)

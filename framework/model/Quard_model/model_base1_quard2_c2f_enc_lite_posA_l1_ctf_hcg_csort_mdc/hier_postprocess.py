@@ -152,11 +152,14 @@ class SharedClusterBank(nn.Module):
         self.cluster_ids_list, self.child_cluster_maps = self.partitioner(sp_pos, batch_offsets)
         # Geometry follows the original cascading mean memberships, without changing FPS.
         self.middle_positions = []
+        self.middle_valid = []
         for b in range(len(batch_offsets) - 1):
             start, end = int(batch_offsets[b]), int(batch_offsets[b + 1])
             fine = aggregate_cluster(sp_pos[start:end].detach(), self.cluster_ids_list[0][b])
             middle = aggregate_cluster(fine, self.cluster_ids_list[1][b])
             self.middle_positions.append(middle)
+            self.middle_valid.append(torch.bincount(
+                self.cluster_ids_list[1][b].long(), minlength=middle.shape[0]).gt(0))
 
     def build_cluster_feats(self, sp_feats, batch_offsets):
         """级联聚合：lvl0从原始点聚合成256token/batch，lvl1从256聚合成64/batch，lvl2从64聚合成8/batch"""
@@ -572,6 +575,7 @@ class C2F_ClusterAttn_CTF(C2F_ClusterAttn_Lite):
         self.cluster_ffn[1] = nn.Identity()
         self.middle_convolution = MiddleDirectionalConvolution(d_model)
         self.middle_positions = None
+        self.middle_valid = None
 
     def forward(self, point_feats, query, point_mask,
                 cluster_feats_list, child_cluster_maps, cluster_ids_list):
@@ -582,7 +586,8 @@ class C2F_ClusterAttn_CTF(C2F_ClusterAttn_Lite):
             # Pre-norm residual FFN
             if lvl == 1:
                 refined = self.middle_convolution(
-                    self.cluster_ffn_norm[lvl](cf), self.middle_positions, cluster_ids_list[2])
+                    self.cluster_ffn_norm[lvl](cf), self.middle_positions, cluster_ids_list[2],
+                    self.middle_valid)
             else:
                 refined = cf + self.cluster_ffn[lvl](self.cluster_ffn_norm[lvl](cf))
             refined_cluster_feats.append(refined)

@@ -193,6 +193,7 @@ class Encoder_layer(nn.Module):
             cluster_feats_list = self.cluster_bank.build_cluster_feats(
                 batch2flatten(inst_feats, batch_mask), batch_offsets)
             self.cluster_att.middle_positions = self.cluster_bank.middle_positions
+            self.cluster_att.middle_valid = self.cluster_bank.middle_valid
             cluster_outputs = self.cluster_att(
                 inst_feats, query, batch_mask,
                 cluster_feats_list, self.cluster_bank.child_cluster_maps,
