@@ -722,8 +722,9 @@ class C2F_ClusterAttn_RVEC_CSORT(C2F_ClusterAttn_CTF_HCG_CSORT):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from .receiver_vector_exchange import FineLeafReceiverVectorExchange
-        self.fine_exchange = FineLeafReceiverVectorExchange(
-            channels=self.d_model, k=self.per_layer_topk_list[0], heads=self.nhead)
+        with torch.random.fork_rng(devices=[]):
+            self.fine_exchange = FineLeafReceiverVectorExchange(
+                channels=self.d_model, k=self.per_layer_topk_list[0], heads=self.nhead)
         self.cluster_ffn[0] = nn.Identity()
         self.cluster_ffn_norm[0] = nn.Identity()
 
