@@ -25,10 +25,11 @@ def save(path, data):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["native", "resource", "contracts"])
+    parser.add_argument("mode", choices=["native", "resource", "contracts", "localize"])
     parser.add_argument("--root", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--target", choices=["baseline", "champion", "candidate"])
+    parser.add_argument("--group-batch-size", type=int, choices=[1, 2], default=1)
     args = parser.parse_args()
     root = args.root.resolve()
     if (os.name != "posix" or os.environ.get("CUDA_VISIBLE_DEVICES") != "7"
@@ -40,7 +41,10 @@ def main():
     sys.path[:0] = [str(root), str(root / "framework/lib"), str(root / "scripts")]
     config = root / "configs/Quard/pdc" / (NAME + ".yaml")
     if args.mode == "resource":
-        import champion_baseline_resource_gate_20260922 as resource
+        protocol_path = root.parent / "pipeline/pdc_validation_scripts/pdc_predict_resource_protocol_20261009.py"
+        spec = importlib.util.spec_from_file_location("pdc_predict_resource_protocol", protocol_path)
+        resource = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(resource)
         resource.TARGETS["candidate"] = {
             "name": NAME, "config": config.relative_to(root).as_posix(),
             "config_sha256": sha(config),
@@ -99,6 +103,9 @@ def main():
     population = json.loads(population_path.read_text())
     selected = [row["native_group"] for row in population[:2]]
     loader = selected_loader(source, selected, DataLoader)
+    if args.group_batch_size == 2:
+        loader = DataLoader(loader.dataset, batch_size=2, num_workers=0,
+                            shuffle=False, collate_fn=source.collate_fn)
     model = mod.Network(**cfg.model).cuda().train()
     checkpoint = root.parent / "pipeline/scm_admission_20260914/best.pth"
     if sha(checkpoint) != CHECKPOINT_SHA:
@@ -119,6 +126,25 @@ def main():
             lambda module, inputs: pred_held.update(pred=inputs[0]))
         original_masks = None
         original_loss = None
+        stage_values, original_stages = {}, {}
+        stage_hooks = []
+        if args.mode == "localize":
+            def capture_stage(name):
+                def capture(module, inputs, output):
+                    value = output if torch.is_tensor(output) else output.features
+                    stage_values[name] = value.detach().cpu().clone()
+                return capture
+            for name in ("input_conv", "output_layer", "text_encoder"):
+                module = getattr(model, name)
+                if name == "text_encoder":
+                    stage_hooks.append(module.register_forward_hook(
+                        lambda m, i, o: stage_values.update(text=o[0].detach().cpu().clone())))
+                else:
+                    stage_hooks.append(module.register_forward_hook(capture_stage(name)))
+            def capture_decoder(module, inputs):
+                for key, position in (("pooled", 0), ("sp_coordinates", 5)):
+                    stage_values[key] = inputs[position].detach().cpu().clone()
+            stage_hooks.append(model.dec.register_forward_pre_hook(capture_decoder))
         for arm in ("original", "repeat", "broadcast"):
             fields.clear()
             pred_held.clear()
@@ -149,6 +175,7 @@ def main():
             if arm == "original":
                 original_masks = masks
                 original_loss = float(loss)
+                original_stages = dict(stage_values)
             records.append({
                 "batch": bi, "arm": arm, "input_sha256": fp,
                 "scenes": batch["scan_ids"], "ann_ids": batch["ann_ids"],
@@ -159,11 +186,16 @@ def main():
                 "coarse_mask_max_difference": float((masks - original_masks).abs().max()),
                 "native_loss_repeat_difference": float(loss) - original_loss,
                 "peak_allocated_mib": torch.cuda.max_memory_allocated() / 2**20,
+                "stage_repeat_max_differences": {
+                    key: float((value - original_stages[key]).abs().max())
+                    for key, value in stage_values.items()},
             })
             pred_held.clear()
             fields.clear()
             del loss, losses
         pre.remove()
+        for hook in stage_hooks:
+            hook.remove()
     originals = [r for r in records if r["arm"] == "original"]
     controls = [r for r in records if r["arm"] == "broadcast"]
     repeats = [r for r in records if r["arm"] == "repeat"]
@@ -181,8 +213,9 @@ def main():
                            strict_repeat_pass=repeat_pass, script_sha256=sha(__file__),
                            config_sha256=sha(config), checkpoint_sha256=sha(checkpoint),
                            population_manifest_sha256=sha(population_path),
+                           physical_group_batch_size=args.group_batch_size,
                            optimizer_created=False, training_started=False))
-    if not (backward and control_pass and repeat_pass):
+    if args.mode != "localize" and not (backward and control_pass and repeat_pass):
         raise ValueError("Native backward/control/repeat gate failed; evidence preserved")
 
 
