@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T10:07:56.749741+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "9079d9a44e404d488b18b1f196e67b23",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T11:06:11.370352+00:00"
+  },
+  "status": "NO_NEW_ACTIONABLE_BOUNDARY_CHANGE",
+  "baseline": {
+    "path": "pipeline/diagnostic_bundles/tick_2f0a4e82/continuation_integrity_check.json",
+    "sha256": "394df9bef2d1bd6a12129f312a3ca79e6cbdd790aef90e8f7f70e8d2eb48bd19"
+  },
+  "scope": "Only current four records, current local scheduling state, immutable reference signatures, bounded artifact metadata and Git status/index. No historical hold scan.",
+  "four_candidate_snapshot": {
+    "M206-CGCA": {
+      "id": "hierarchy-coarse-conditioned-fine-channel-attention",
+      "stage": "blocked",
+      "resume_stage": "training",
+      "blocker_kind": "human_authorization",
+      "training_status": "paused_by_user",
+      "resume_authorized": false,
+      "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335"
+    },
+    "M207-HAP": {
+      "id": "hierarchy-affine-coarse-to-fine-prolongation",
+      "stage": "training",
+      "resume_stage": "training",
+      "blocker_kind": null,
+      "training_status": "running",
+      "resume_authorized": true,
+      "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0"
+    },
+    "M208-HRC": {
+      "id": "hierarchy-bottom-up-refined-token-composition",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "exclusive_gpu_slot",
+      "training_status": null,
+      "resume_authorized": null,
+      "code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a"
+    },
+    "M209-PSBR": {
+      "id": "hierarchy-parent-segmented-bidirectional-token-state",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "exclusive_gpu_slot",
+      "training_status": null,
+      "resume_authorized": null,
+      "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604"
+    }
+  },
+  "HAP": {
+    "pid": 1063355,
+    "status": "running",
+    "training_status": "running",
+    "gpu": "0",
+    "launch_verified": true,
+    "existing_grant": {
+      "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+      "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+    },
+    "full_checkpoint": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/checkpoint_evidence.json",
+      "sha256": "b89c4bd17158e5455fb12834e497e146b0659b75f7a5c8445070a95487b2ec1d"
+    },
+    "historical_restart_proof": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+      "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+    },
+    "old_crash_prior_runs_and_history_preserved": true,
+    "current_begin_reported_by_root": {
+      "epoch": "24/50",
+      "best_miou": 0.5002,
+      "epochs_no_improve": 2
+    },
+    "fresh_root_observation": {
+      "path": "pipeline/diagnostic_bundles/tick_9079d9a4/hap_progress_observation.json",
+      "sha256": "40e2cb854907a48613cef0a9acb0c7209d3451e561b71cd9c0502f9e7a0c6a73"
+    },
+    "this_reviewer_remote_observation": "NOT_QUERIED",
+    "no_new_launch_or_resume_action": true
+  },
+  "M206": {
+    "manual_before_task_exact_equal": true,
+    "dispatch_hold": "User paused M206 to release GPU1 to others. No automatic resume or GPU0 migration; wait for explicit resume instruction and full source/checkpoint/resource validation.",
+    "resume_authorized": false,
+    "absent_from_running": true
+  },
+  "frozen_reuse": {
+    "M208-HRC": {
+      "source_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+      "reference_signature": "0ec94fa74591a576307e80a14eea5e382a2b7b7f4598151c8aa7a6cd5bad6f8e",
+      "reference_groups": {
+        "worker_preparation": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/preparation.json",
+            "sha256": "4754db1a1c550c869596e0ca57cee99834239e8ed78e87ec65f68142f48c812a"
+          },
+          "worker": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+            "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+          },
+          "runtime": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py",
+            "sha256": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4"
+          },
+          "manifest_template": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json",
+            "sha256": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509"
+          },
+          "root_static_validation": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_static_validation.json",
+            "sha256": "0bb36dff74003c4b5e330365297e1345ee76fdd9048c821607e70338d4662276"
+          },
+          "independent_review": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_independent_review.json",
+            "sha256": "4a1b906dc3b89673f84c04df2b4264e7e4ff822b425983232386fe65b6655189"
+          }
+        },
+        "execution_adapter": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/preparation.json",
+            "sha256": "1ab29434e5a1e4f0144fd38e22d83f1ae561813973ed0468e64f65aac6c9a568"
+          },
+          "release": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter_release.json",
+            "sha256": "f2b3cdfe7a63cacf65e0d38837c4df1211715a31320f4d808d569c855a9e6d83"
+          },
+          "adapter": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter.py",
+            "sha256": "0f0663ec37e8b58ea72e3be39a193bf5b2860bf7fdb2ed51bd611c123a6b63a9"
+          },
+          "remote_ops": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/remote_ops.py",
+            "sha256": "3b9147010d2580423930110807862391cf5814ab846b1770b934d784503416e8"
+          },
+          "README": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/README.md",
+            "sha256": "6be4563f0aa19940f97aff61a9d63930f5ae9d3f8b52bf1163fd37e6f31dfd9e"
+          },
+          "independent_tests": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/independent_review/final_validation_r2.json",
+            "sha256": "14fb3aa82bdb0c5c0ed3f395c1289f933498b104523a2437a1e250b6bbe88413"
+          },
+          "root_review": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_independent_review.json",
+            "sha256": "5f5084265439ca6433328e34d4a6d4e9685bf3e7b8aa49376f4fb43dd82d413d"
+          },
+          "actual_local_guard_integration": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_actual_guard_integration.json",
+            "sha256": "dcd6137ba9d56108d9940e1a1883b1d0b32c68604884637e2aacecbd0d6cce98"
+          }
+        }
+      },
+      "metadata_checked_count": 23,
+      "files_later_than_prior_check": [],
+      "nine_source_bytes": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "prepared_file_bytes": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "native_resources": "NOT_RUN",
+      "pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN"
+    },
+    "M209-PSBR": {
+      "source_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+      "reference_signature": "4acc1b00b60aebd8d87a519605fa24e5a0a0a6a05affbf961d0cd6e54cf49a3b",
+      "reference_groups": {
+        "worker_preparation": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/preparation.json",
+            "sha256": "1e1de105f34ce4f6f87fe862bf35ee2c7c0bf26bf7404b0550559534a0e7472e"
+          },
+          "worker": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/worker.py",
+            "sha256": "05ab6ac1f72f804bf9799e6b6a95127057d330d13302686740cb1acb94343385"
+          },
+          "runtime": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/native_runtime.py",
+            "sha256": "b6698c77ef9956c2d7381fb99164cdbf1d1f4905c13f59d04c6b9778e2bf8e67"
+          },
+          "manifest_template": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/manifest_template.json",
+            "sha256": "f90e2662cb188b838ff7e6d6b60179529a983d91a32cb06187262aee70267263"
+          }
+        },
+        "execution_adapter": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/preparation.json",
+            "sha256": "9d6c98a4c406d052c5ae1d420053103b0ec08bf71fb0ce5c32de88dd49b5bb4b"
+          },
+          "release": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/adapter_release.json",
+            "sha256": "b17d424e493bcd49e1858bc6fc4b897d6fab5970a25240cea143e826f40e20d7"
+          },
+          "adapter": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/adapter.py",
+            "sha256": "c8aee02bc75986972b28b43e30b5333ca2ef30b75bdfc622ec5192e9b195b3a3"
+          },
+          "remote_ops": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/remote_ops.py",
+            "sha256": "9ea6f90d6027b83e92da24dcf0fd85cca548cb9b0aab726d9dd3ace52d1907cd"
+          },
+          "README": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/README.md",
+            "sha256": "5a153c999aa19180bc1cdd97c59bd890429a648377cf08c783f5392980ca1ef0"
+          },
+          "independent_tests": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/fixture_validation_run1.json",
+            "sha256": "971e77d8dc952c4caed993007f531746870b03e0e1d992318877f3a65e40422d"
+          },
+          "independent_review": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/independent_adapter_review.json",
+            "sha256": "7293e9cb23482c1e5ec6b6bd1b2d33a3b906b4d771cf14cfb92452fb86ac64b1"
+          },
+          "result_boundary_review": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/source_result_boundary_review.json",
+            "sha256": "c1338156432db67a903d1ce204e62334fb9d1b2a0f1787103cea9fa0aa56a476"
+          },
+          "actual_local_guard_integration": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_actual_guard_integration.json",
+            "sha256": "41041fc8e0728ccac4376e74b7c453fc9a4248095e2736cc9db51e1ee552a2ef"
+          }
+        }
+      },
+      "metadata_checked_count": 22,
+      "files_later_than_prior_check": [],
+      "nine_source_bytes": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "prepared_file_bytes": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "native_resources": "NOT_RUN",
+      "pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN"
+    }
+  },
+  "worktree": {
+    "HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "index_empty": true,
+    "same_28_statuses": true,
+    "28_bytes": "PRIOR_BYTE_CHECK_REUSED; status and mtime checked now, no repeat content hashing",
+    "byte_equality_limit": "Metadata/status is a bounded drift screen, not a fresh cryptographic proof against timestamp-preserving mutation."
+  },
+  "running_snapshot": {
+    "server-6": {},
+    "server-4": {
+      "0": "M207-HAP"
+    }
+  },
+  "checks": {
+    "current_owner": true,
+    "HAP_queue_exp_running_contract": true,
+    "HAP_work_training": true,
+    "HAP_authorization_reference_unchanged": true,
+    "HAP_authorization_small_artifact_sha": true,
+    "HAP_checkpoint_reference_unchanged": true,
+    "HAP_checkpoint_small_artifact_sha": true,
+    "HAP_progress_reference_unchanged": true,
+    "HAP_progress_small_artifact_sha": true,
+    "HAP_GPU0_only_existing_human_grant": true,
+    "original_receipt_ref": true,
+    "original_receipt_metadata_untouched": true,
+    "old_crash_history_prefix_preserved": true,
+    "old_crash_prior_runs_refs_unchanged": true,
+    "M206_exact_manual_before_task": true,
+    "M206_paused_no_auth_no_running": true,
+    "M208-HRC_exact_external_reference_signature": true,
+    "M208-HRC_commit_unchanged": true,
+    "M208-HRC_still_capacity_hold": true,
+    "M208-HRC_bounded_metadata_no_later_artifact_changes": true,
+    "M208-HRC_prepared_unexecuted_flags": true,
+    "M209-PSBR_exact_external_reference_signature": true,
+    "M209-PSBR_commit_unchanged": true,
+    "M209-PSBR_still_capacity_hold": true,
+    "M209-PSBR_bounded_metadata_no_later_artifact_changes": true,
+    "M209-PSBR_prepared_unexecuted_flags": true,
+    "same_28_worktree_statuses": true,
+    "protected_28_mtimes_not_later_than_prior": true,
+    "HEAD_unchanged_74f": true,
+    "index_empty": true
+  },
+  "blocking_findings": [],
+  "real_reuse_boundary": [
+    "HRC/PSBR exact candidate source/worker/adapter reference signatures and bounded artifact mtimes unchanged; previous complete byte/Git/prepared-map checks are reused, not rerun.",
+    "Only HAP grant/checkpoint/progress small artifacts were rehashed for current authorization binding. Source packages, prepared bundles, and original28 dirty files were not rehashed.",
+    "No HRC/PSBR native training/backward/resources/pairing has run; prior fixtures/static preparation never stand in for native PASS.",
+    "Current epoch24 health is supplied by root/current observation artifact; this reviewer performs no live remote check.",
+    "No new authorization, launch, M206 resume or change of GPU1 permission is inferred from the timer."
+  ],
+  "execution": {
+    "SSH": false,
+    "torch_import": false,
+    "GPU": false,
+    "tests": false,
+    "shared_state_write": false,
+    "old_hold_scan": false
+  },
+  "write_scope": "This new report only."
+}

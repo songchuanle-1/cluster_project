@@ -1,0 +1,394 @@
+"""Constructor/cache coverage only. No worker, sample load, model or operator assay."""
+from pathlib import Path
+import faulthandler
+import hashlib
+import json
+import logging
+import os
+import random
+import resource
+import site
+import socket
+import shutil
+import subprocess
+import stat
+import sys
+import time
+import traceback
+
+ROOT = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+DATA = Path("/home/songcl/data/data")
+PHASE = "bootstrap"
+STOP = None
+GUARDED_FILES = []
+HELPER_POLICY = {}
+HELPER_COUNT = 0
+HELPER_RECORDS = []
+PRIVATE_TMP = {}
+TEMP_OP_COUNT = 0
+IPV6_POLICY = {}
+IPV6_BIND_COUNT = 0
+BIND_DETAIL = None
+OriginalPopen = subprocess.Popen
+
+
+def identity():
+    return Path("/proc/self/stat").read_text().rsplit(")", 1)[1].split()[19]
+
+
+def event(stage, **values):
+    print(json.dumps({"stage": stage, "pid": os.getpid(), **values}), flush=True)
+
+
+def check():
+    assert time.monotonic() < STOP, "CARRIER_SOFT_BUDGET_BEFORE_NEXT_PHASE"
+    assert os.environ.get("CUDA_VISIBLE_DEVICES") == ""
+    assert os.environ.get("TOKENIZERS_PARALLELISM") == "false"
+
+
+def same_file(record):
+    path = Path(record["path"])
+    info = os.stat(path)
+    assert str(path.resolve()) == record["resolved"]
+    assert [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns] == record["identity"]
+
+
+def guard_snapshot():
+    changed = []
+    for record in GUARDED_FILES:
+        try:
+            same_file(record)
+        except BaseException as error:
+            changed.append({"path": record["path"], "error": str(error)[:160]})
+    return {"checked": len(GUARDED_FILES), "unchanged": not changed, "changed_first6": changed[:6]}
+
+
+def forbidden(name):
+    def stop(*args, **kwargs):
+        event("forbidden_operation", status="BLOCKED_FORBIDDEN_OPERATION", phase=PHASE, operation=name,
+              guarded_file_identity_after=guard_snapshot())
+        faulthandler.disable()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(4)
+    return stop
+
+
+def verified_uname():
+    policy = HELPER_POLICY
+    path = Path(policy["path"])
+    assert path.resolve() == path and str(path) == "/usr/bin/uname"
+    info = os.lstat(path)
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o6022
+    assert [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns] == policy["identity"]
+    assert shutil.which("uname") is not None and Path(shutil.which("uname")).resolve() == path
+    with path.open("rb") as stream:
+        digest = hashlib.sha256(stream.read(1024 * 1024 + 1)).hexdigest()
+    assert info.st_size <= 1024 * 1024 and digest == policy["sha256"]
+    return str(path)
+
+
+class ObservedReadonlyPopen(OriginalPopen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)  # Audit permits only authenticated platform uname -p.
+        self.readonly_identity = Path("/proc") / str(self.pid) / "stat"
+        try:
+            ticks = self.readonly_identity.read_text().rsplit(")", 1)[1].split()[19]
+        except FileNotFoundError:
+            ticks = None
+        HELPER_RECORDS.append({"pid": self.pid, "start_ticks": ticks, "argv": ["uname", "-p"]})
+        event("readonly_helper_started", helper=HELPER_RECORDS[-1])
+
+    def communicate(self, input=None, timeout=None):
+        try:
+            value = super().communicate(input=input, timeout=5 if timeout is None else min(timeout, 5))
+        except subprocess.TimeoutExpired:
+            event("readonly_helper_uncertain", status="UNCERTAIN_READONLY_HELPER_PRESERVE_PID_NO_SIGNAL_OR_RETRY",
+                  helper=HELPER_RECORDS[-1])
+            faulthandler.disable()
+            sys.stdout.flush(); sys.stderr.flush()
+            os._exit(5)  # Bypass subprocess.run timeout cleanup; do not signal the unknown helper.
+        HELPER_RECORDS[-1]["returncode"] = self.returncode
+        event("readonly_helper_terminal", helper=HELPER_RECORDS[-1])
+        return value
+
+
+def private_tmp_valid():
+    try:
+        root = Path(PRIVATE_TMP["path"])
+        info = os.lstat(root)
+        return (root.is_absolute() and root.resolve() == root and root.parent == Path("/tmp")
+                and root.name.startswith("m234_constructor_4ecb5020_") and stat.S_ISDIR(info.st_mode)
+                and info.st_uid == 1001 and stat.S_IMODE(info.st_mode) == 0o700
+                and [info.st_dev, info.st_ino] == PRIVATE_TMP["identity"])
+    except (OSError, KeyError):
+        return False
+
+
+def inside_private(path, directory_fd=None):
+    try:
+        if not private_tmp_valid():
+            return False
+        root = Path(PRIVATE_TMP["path"])
+        if isinstance(path, int):
+            raw = os.readlink("/proc/self/fd/" + str(path))
+            path = raw[:-10] if raw.endswith(" (deleted)") else raw
+        else:
+            path = os.fsdecode(path)
+        candidate = Path(path)
+        if not candidate.is_absolute():
+            if isinstance(directory_fd, int) and directory_fd >= 0:
+                base = os.readlink("/proc/self/fd/" + str(directory_fd))
+                candidate = Path(base) / candidate
+            else:
+                candidate = Path.cwd() / candidate
+        candidate = candidate.resolve(strict=False)
+        return candidate != root and candidate.is_relative_to(root)
+    except (OSError, TypeError, ValueError):
+        return False
+
+
+def private_operation(event_name, arguments):
+    if event_name == "open":
+        return inside_private(arguments[0])
+    if event_name in ("os.remove", "os.rmdir"):
+        return inside_private(arguments[0], arguments[1])
+    if event_name in ("os.mkdir", "os.chmod"):
+        return inside_private(arguments[0], arguments[2])
+    if event_name == "os.utime":
+        return inside_private(arguments[0], arguments[3])
+    if event_name == "os.rename":
+        return inside_private(arguments[0], arguments[2]) and inside_private(arguments[1], arguments[3])
+    return False
+
+
+def audit(event_name, arguments):
+    global HELPER_COUNT, TEMP_OP_COUNT, IPV6_BIND_COUNT, BIND_DETAIL
+    blocked = event_name in {
+        "os.mkdir", "os.rmdir", "os.remove", "os.rename", "os.link", "os.symlink", "os.chmod",
+        "os.chown", "os.utime", "os.truncate", "os.chdir", "os.system", "subprocess.Popen",
+        "os.fork", "os.forkpty", "os.posix_spawn", "os.posix_spawnp", "os.kill", "os.killpg",
+        "socket.connect", "socket.bind", "socket.listen", "socket.send", "socket.sendall", "socket.sendto", "socket.sendmsg", "socket.getaddrinfo", "socket.gethostbyname", "socket.gethostbyaddr", "socket.getnameinfo",
+        "pickle.find_class",
+    }
+    if event_name == "open":
+        mode, flags = arguments[1], arguments[2]
+        blocked = (isinstance(mode, str) and any(value in mode for value in ("w", "a", "x", "+")))
+        if isinstance(flags, int):
+            blocked = blocked or bool(flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND))
+    if event_name == "socket.bind":
+        connection, address = arguments
+        BIND_DETAIL = {"address": list(address) if isinstance(address, tuple) else str(address)[:240],
+                       "family": int(connection.family), "socket_type": int(connection.type),
+                       "protocol": connection.proto, "fd": connection.fileno()}
+        stack = traceback.extract_stack(limit=14)
+        caller = next((row for row in stack if row.filename == IPV6_POLICY["path"] and row.name == "_has_ipv6"), None)
+        if (caller is not None and IPV6_BIND_COUNT == 0 and address == ("::1", 0)
+                and connection.family == socket.AF_INET6 and connection.type == socket.SOCK_STREAM
+                and connection.proto == 0 and connection.fileno() >= 0):
+            source = Path(IPV6_POLICY["path"])
+            info = source.stat()
+            assert [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns] == IPV6_POLICY["identity"]
+            with source.open("rb") as stream:
+                assert hashlib.sha256(stream.read(262145)).hexdigest() == IPV6_POLICY["sha256"]
+            IPV6_BIND_COUNT += 1
+            blocked = False
+            event("allowed_loopback_ipv6_capability_bind", address=list(address), family=int(connection.family),
+                  socket_type=int(connection.type), protocol=connection.proto, fd=connection.fileno(),
+                  caller={"file": caller.filename, "line": caller.lineno, "function": caller.name},
+                  source_sha256=IPV6_POLICY["sha256"], listen_connect_send_DNS_allowed=False)
+    if blocked and private_operation(event_name, arguments):
+        blocked = False
+        TEMP_OP_COUNT += 1
+        if TEMP_OP_COUNT <= 12:
+            event("allowed_owned_temporary_operation", phase=PHASE, audit_event=event_name,
+                  target=str(arguments[0])[:240], owned_private_tmp=PRIVATE_TMP["path"])
+    if event_name == "open" and blocked and isinstance(arguments[0], (str, bytes)):
+        if os.fsdecode(arguments[0]) == "/dev/null":
+            info = os.lstat("/dev/null")
+            flags = arguments[2]
+            if (stat.S_ISCHR(info.st_mode) and info.st_rdev == os.makedev(1, 3)
+                    and isinstance(flags, int) and not flags & (os.O_CREAT | os.O_TRUNC | os.O_APPEND)):
+                blocked = False
+                event("allowed_null_device_open", phase=PHASE, rdev_major=1, rdev_minor=3)
+    if event_name == "subprocess.Popen":
+        executable, argv, cwd, environment = arguments
+        stack = traceback.extract_stack(limit=14)
+        authentic_caller = any(row.filename == HELPER_POLICY["platform_path"] and row.name == "from_subprocess"
+                               for row in stack)
+        if (executable == "uname" and isinstance(argv, (list, tuple)) and list(argv) == ["uname", "-p"]
+                and cwd is None and environment is None and authentic_caller and HELPER_COUNT == 0):
+            resolved = verified_uname()
+            HELPER_COUNT += 1
+            blocked = False
+            event("allowed_readonly_helper", argv=["uname", "-p"], resolved=resolved,
+                  sha256=HELPER_POLICY["sha256"], platform_source_sha256=HELPER_POLICY["platform_sha256"])
+    if event_name.startswith(("os.spawn", "os.exec")):
+        blocked = True
+    if blocked:
+        target = str(arguments[0])[:240] if arguments else None
+        event("audit_blocked", status="BLOCKED_AUDIT_EVENT", phase=PHASE, audit_event=event_name,
+              target=target, socket_bind_details=BIND_DETAIL if event_name == "socket.bind" else None,
+              guarded_file_identity_after=guard_snapshot(),
+              stack=[{"file": row.filename, "line": row.lineno, "function": row.name}
+                                   for row in traceback.extract_stack(limit=7)])
+        faulthandler.disable()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(3)  # Own carrier only; no library fallback or finalizer after a denied operation.
+
+
+def main():
+    global STOP, PHASE, GUARDED_FILES, HELPER_POLICY, PRIVATE_TMP, IPV6_POLICY
+    payload = json.load(sys.stdin)
+    assert payload["role"] == "DATASET_CONSTRUCTOR_AND_CACHE_COVERAGE_ONLY"
+    pair = payload["capture_fds"]
+    assert len(pair) == 2 and len(set(pair)) == 2 and all(type(fd) is int and fd > 2 for fd in pair)
+    for kind, descriptor in zip(("stdout", "stderr"), pair):
+        info = os.fstat(descriptor)
+        assert stat.S_ISREG(info.st_mode) and info.st_nlink == 0
+        assert os.readlink("/proc/self/fd/" + str(descriptor)).startswith("/memfd:constructor_v1_" + kind)
+    out, err = (os.dup(descriptor) for descriptor in pair)
+    os.dup2(out, 1)
+    os.dup2(err, 2)
+    os.close(out)
+    os.close(err)
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    faulthandler.enable(file=sys.stderr, all_threads=True)
+    STOP = min(payload["stop_monotonic"], time.monotonic() + 60)
+    GUARDED_FILES = payload["guarded_files"]
+    HELPER_POLICY = payload["helper_policy"]
+    IPV6_POLICY = payload["ipv6_policy"]
+    PRIVATE_TMP = payload["private_tmp"]
+    assert private_tmp_valid() and os.environ.get("TMPDIR") == PRIVATE_TMP["path"]
+    event("carrier_boot", start_ticks=identity(), user_site_enabled=site.ENABLE_USER_SITE,
+          faulthandler_enabled=True, capture_method="system_memfd_pass_fds_project_os_dup", owned_private_tmp=PRIVATE_TMP)
+    code = 2
+    try:
+        check()
+        assert site.ENABLE_USER_SITE is True and Path.cwd() == ROOT
+        for record in payload["guarded_files"]:
+            same_file(record)
+        assert not any(name in sys.modules for name in (
+            "torch", "numpy", "gorilla", "framework", "dgl", "transformers")), "TARGET_IMPORTED_BEFORE_AUDIT"
+        verified_uname()
+        subprocess.Popen = ObservedReadonlyPopen
+        for name in ("listen", "connect", "connect_ex", "send", "sendall", "sendto", "sendmsg"):
+            if hasattr(socket.socket, name):
+                setattr(socket.socket, name, forbidden("socket." + name))
+        sys.addaudithook(audit)  # Active before YAML, Torch or project/library imports.
+        event("audit_guard_installed", persistent_writes_network_arbitrary_subprocess_and_unpickle_class_lookup_denied=True,
+              exact_platform_uname_p_exception=True)
+        sys.path.insert(0, str(ROOT))
+        sys.path.insert(0, str(ROOT / "framework/lib"))
+        PHASE = "torch_import"
+        event("phase_enter", phase=PHASE)
+        import torch
+        assert torch.__file__ == "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/__init__.py"
+        assert not torch.cuda.is_initialized()
+        torch.load = forbidden("torch.load")
+        torch.multiprocessing.set_sharing_strategy("file_system")
+        event("original_sharing_strategy_set", sharing_strategy=torch.multiprocessing.get_sharing_strategy(),
+              cuda_initialized=False)
+        PHASE = "gorilla_config_import"
+        event("phase_enter", phase=PHASE)
+        import gorilla
+        cfg = gorilla.Config.fromfile(payload["config_path"])
+        assert cfg.train.seed == 1999
+        train = cfg.data.train
+        assert train.type == "scannetv2_sample_graph_edge" and train.dataset == "scanrefer"
+        assert train.data_root.rstrip("/") == str(DATA) and train.prefix == "train"
+        assert train.training is True and train.aug is True and train.with_elastic is True and train.mode == 4
+        assert cfg.dataloader.train.batch_size == 2 and cfg.dataloader.train.num_workers == 4
+        assert cfg.dataloader.train.persistent_workers is True
+        check()
+        PHASE = "dataset_import"
+        event("phase_enter", phase=PHASE)
+        from framework.dataset import build_dataset, ScanNetDataset_sample_graph_edge
+        for name in ("load", "_torch_load_compat", "__getitem__", "collate_fn", "transform_train",
+                     "transform_test", "data_aug", "elastic", "get_sp_label", "get_ref_mask",
+                     "_get_token_positive_map_by_parse"):
+            setattr(ScanNetDataset_sample_graph_edge, name, forbidden("dataset." + name))
+        import numpy as np
+        ipv6_module = sys.modules.get("urllib3.util.connection")
+        event("ipv6_capability_module_result", allowed_bind_count=IPV6_BIND_COUNT,
+              HAS_IPV6=getattr(ipv6_module, "HAS_IPV6", None), no_extra_probe=True)
+        random.seed(1999)
+        np.random.seed(1999)
+        torch.default_generator.manual_seed(1999)  # CPU generator only.
+        assert not torch.cuda.is_initialized()
+        logger = logging.getLogger("constructor_readonly")
+        logger.handlers[:] = [logging.StreamHandler(sys.stderr)]
+        logger.setLevel(logging.INFO)
+        logger.propagate = False
+        PHASE = "original_dataset_constructor"
+        event("phase_enter", phase=PHASE)
+        dataset = build_dataset(train, logger)
+        assert not torch.cuda.is_initialized()
+        check()
+        assert dataset.training is True and dataset.aug is True and dataset.with_elastic is True
+        assert isinstance(dataset.scanrefer, list) and 0 < len(dataset.scanrefer) <= 200000
+        assert isinstance(dataset.scene_graphs, dict)
+        PHASE = "full_annotation_cache_key_and_light_schema_coverage"
+        event("phase_enter", phase=PHASE, annotation_count=len(dataset.scanrefer))
+        missing, malformed, keys = [], [], set()
+        missing_count = malformed_count = 0
+        for index, annotation in enumerate(dataset.scanrefer):
+            if index % 1024 == 0:
+                check()
+            scene = str(annotation["scene_id"])
+            ann = str(int(annotation["ann_id"]))  # Exact normalization used by original __getitem__.
+            keys.add((scene, ann))
+            graph = dataset.scene_graphs.get(scene, {}).get(ann)
+            if graph is None:
+                missing_count += 1
+                if len(missing) < 12:
+                    missing.append({"scene": scene, "ann": ann})
+                continue
+            nodes = graph.get("graph_node") if isinstance(graph, dict) else None
+            valid = (isinstance(graph, dict) and isinstance(graph.get("utterance"), str)
+                     and "graph_edge" in graph and isinstance(nodes, list) and len(nodes) > 0
+                     and isinstance(nodes[0], dict) and nodes[0].get("node_id") == 0
+                     and all(isinstance(nodes[0].get(name), list) for name in (
+                         "target_char_span", "mod_char_span", "pron_char_span", "rel_char_span")))
+            if not valid:
+                malformed_count += 1
+                if len(malformed) < 12:
+                    malformed.append({"scene": scene, "ann": ann})
+        for record in payload["guarded_files"]:
+            same_file(record)
+        assert not torch.cuda.is_initialized()
+        assert "tools.train" not in sys.modules and not any(name.startswith("framework.model") for name in sys.modules)
+        origins = {name: getattr(sys.modules.get(name), "__file__", None) for name in (
+            "torch", "gorilla", "numpy", "framework.dataset.scannetv2", "pointgroup_ops",
+            "pointgroup_ops.pointgroup_ops_ext", "torch_scatter", "scipy", "dgl", "transformers", "sng_parser")}
+        assert origins["framework.dataset.scannetv2"] == str(ROOT / "framework/dataset/scannetv2.py")
+        assert origins["pointgroup_ops.pointgroup_ops_ext"] == str(
+            ROOT / "framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so")
+        event("constructor_result", status="CONSTRUCTOR_AND_CACHE_COVERAGE_PASS" if not missing_count and not malformed_count
+              else "CACHE_COVERAGE_OR_LIGHT_SCHEMA_BLOCKED",
+              annotation_count=len(dataset.scanrefer), distinct_scene_annotation_keys=len(keys),
+              scene_groups=len(dataset.scene_inputs), cache_scenes=len(dataset.scene_graphs),
+              missing_key_count=missing_count, missing_first12=missing,
+              malformed_light_schema_count=malformed_count, malformed_first12=malformed,
+              tokenizer_class=type(dataset.tokenizer).__module__ + "." + type(dataset.tokenizer).__name__,
+              tokenizer_is_fast=dataset.tokenizer.is_fast, module_origins=origins, readonly_helpers=HELPER_RECORDS, owned_temporary_operation_count=TEMP_OP_COUNT, ipv6_loopback_capability_binds=IPV6_BIND_COUNT,
+              guarded_file_identity_after=guard_snapshot(),
+              cuda_initialized=False, samples_fetched=0, workers_started=0, pointgroup_scatter_calls=0,
+              rss_max_KiB=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+              scope="Original constructor + JSON key/light schema coverage only; no token encoding, span semantics, item, augmentation or historical worker fault reproduction.")
+        code = 0 if not missing_count and not malformed_count else 2
+    except BaseException as error:
+        event("constructor_blocked", status="BLOCKED_NO_WORKAROUND", phase=PHASE,
+              error_type=type(error).__name__, error=str(error)[:800],
+              guarded_file_identity_after=guard_snapshot())
+        traceback.print_exc(limit=10)
+    finally:
+        faulthandler.disable()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(code)  # Own process; no worker/child exists and no library finalizer is needed.
+
+
+if __name__ == "__main__":
+    main()

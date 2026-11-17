@@ -1,0 +1,87 @@
+{
+  "source": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_d6b400e3\\prepare_isolated_psnc_version.py",
+  "source_sha256": "b8e1f4414286aea959c5e1dd0e9a2bbb0df8614bc3d1ed46b95beea746c4a173",
+  "destination_sha256": "2356e31440864615d29f671b92c4e50566f050533dd7d3fc17b95c35292a5680",
+  "changes": [
+    {
+      "old": "Save frozen PSNC source",
+      "new": "Save frozen BTC source",
+      "count": 1
+    },
+    {
+      "old": "DEST=ROOT/'pipeline/isolated_versions/psnc_d6b400e3'",
+      "new": "DEST=ROOT/'pipeline/isolated_versions/btc_2c25f38f'",
+      "count": 1
+    },
+    {
+      "old": "OLD=ROOT/'pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare'",
+      "new": "OLD=ROOT/'pipeline/diagnostic_bundles/tick_2c25f38f/new_candidate_prepare'",
+      "count": 1
+    },
+    {
+      "old": "BASE='74fcd21df0af9a971792038ffe251af1ffea2604'",
+      "new": "BASE='43dce016c1a1713c2a5dab7061810dc2efde8954'\nPRIMARY='74fcd21df0af9a971792038ffe251af1ffea2604'",
+      "count": 1
+    },
+    {
+      "old": "TOKEN='d6b400e39d1445bfbf165ca916876e5c'",
+      "new": "TOKEN='2c25f38f32af4c69b3def8130cc5399c'",
+      "count": 1
+    },
+    {
+      "old": "    feasibility=read(HERE/'isolated_version_feasibility.json')\n    assert sha(HERE/'isolated_version_feasibility.json')=='0cdc11eb2daa84877f8ef8fd7d75a5fd0d99596dc81daba74b282386e487e8d1'\n    assert feasibility['status']=='ISOLATED_DETACHED_LOCAL_VERSION_STORAGE_FEASIBLE_WITH_EXPLICIT_BYTE_AND_PRIMARY_STATE_GUARDS'",
+      "new": "    # Refuse executable Git hooks or configured content filters before checkout.\n    cfg=subprocess.run(['git','-C',str(REPO),'config','--get-regexp',r'^(core\\.hooksPath|filter\\..*)$'],capture_output=True,timeout=20)\n    assert cfg.returncode==1 and not cfg.stdout, 'Git hooksPath/filter needs explicit review'\n    hooks=Path(git(REPO,'rev-parse','--git-path','hooks').decode().strip())\n    if not hooks.is_absolute():hooks=REPO/hooks\n    assert not hooks.exists() or not any(p.is_file() and not p.name.endswith('.sample') for p in hooks.iterdir()), 'Active Git hooks need review'",
+      "count": 1
+    },
+    {
+      "old": "302432f1e2ba136576c4eb8a814a7ab3fb9596272304924b2a9db356074b49de",
+      "new": "c36b4d095ee3d48510a1064f699b2fe41be33569aaefb917d873a45c484d0814",
+      "count": 1
+    },
+    {
+      "old": "frozen=read(OLD/'preparation.json')['source_files'];assert len(frozen)==9",
+      "new": "frozen={name.removeprefix('staged_repository/'):value for name,value in read(OLD/'preparation.json')['prepared_file_hashes'].items() if name.startswith('staged_repository/')};assert len(frozen)==9",
+      "count": 1
+    },
+    {
+      "old": "before['HEAD']==BASE",
+      "new": "before['HEAD']==PRIMARY",
+      "count": 1
+    },
+    {
+      "old": "        git(DEST,'add','--',*sorted(frozen))",
+      "new": "        assert not git(DEST,'check-attr','-a','--',*sorted(frozen)).strip(), 'Source attributes require review'\n        git(DEST,'add','--',*sorted(frozen))",
+      "count": 1
+    },
+    {
+      "old": "Add PSNC parent spectral token coupling (native pending)",
+      "new": "Add BTC parent tree complement composition (native pending)",
+      "count": 1
+    },
+    {
+      "old": "hierarchy-parent-spectral-nonlinear-token-coupling",
+      "new": "hierarchy-parent-binary-tree-complement-composition",
+      "count": 1
+    },
+    {
+      "old": "'experiment_id':'M210-PSNC'",
+      "new": "'experiment_id':'M211-BTC'",
+      "count": 1
+    },
+    {
+      "old": "'primary_Cluster_HEAD':BASE",
+      "new": "'primary_Cluster_HEAD':PRIMARY",
+      "count": 1
+    },
+    {
+      "old": "Keep primary HEAD74f for PSBR freshdispatch. Advance only after PSBR verified launch or safe reconciliation; never sync active remote checkout. Real new-commit native/YAML/resources still required.",
+      "new": "Source commit extends PSNC43 linearly; both isolated worktrees retain their exact versions. Keep primary and active remote PSBR HEAD74f unchanged. Real new-commit native/YAML/resources still required.",
+      "count": 1
+    },
+    {
+      "old": "after['HEAD']==BASE",
+      "new": "after['HEAD']==PRIMARY",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+--- draft_before/lock_core.py
++++ draft_after/lock_core.py
+@@ -251,7 +251,7 @@
+             os.close(descriptor)
+         # FD numbers are opened after canonical Popen(close_fds=True). They
+         # survive this execve because each was made inheritable above.
+-        os.execve(BINDING["python"], [BINDING["python"], *args], os.environ.copy())
++        os.execve(BINDING["python"], [BINDING["python"], "-B", *args], os.environ.copy())
+     finally:
+         # Only reached on refusal/error, never after successful exec.
+         for descriptor in reversed(descriptors):
+@@ -261,7 +261,7 @@
+     args = sys.argv[1:]
+     if not is_training(script_target(args)):
+         # No mutable PATH search, shell function, env executable or proof switch.
+-        os.execve(BINDING["python"], [BINDING["python"], *args], os.environ.copy())
++        os.execve(BINDING["python"], [BINDING["python"], "-B", *args], os.environ.copy())
+     validate_training(args)
+     require_project_cap1()
+     locked_exec(args)

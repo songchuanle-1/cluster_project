@@ -1,0 +1,58 @@
+{
+  "observed_at": "2026-10-19T08:15:58.579545+00:00",
+  "ordinary_state_count": 1163,
+  "native_saved_state_count": 1165,
+  "native_restored_state_count": 1165,
+  "ordinary_omitted_buffers": {
+    "text_encoder.embeddings.position_ids": {
+      "registered_buffer": true,
+      "nonpersistent": true,
+      "is_parameter": false,
+      "matches_saved_value_before_load": true,
+      "shape": [
+        1,
+        514
+      ],
+      "dtype": "torch.int64"
+    },
+    "text_encoder.embeddings.token_type_ids": {
+      "registered_buffer": true,
+      "nonpersistent": true,
+      "is_parameter": false,
+      "matches_saved_value_before_load": true,
+      "shape": [
+        1,
+        514
+      ],
+      "dtype": "torch.int64"
+    }
+  },
+  "missing_saved_keys": [],
+  "native_key_sets_equal": true,
+  "native_tensor_mismatches": [],
+  "all_native_saved_tensors_equal": true,
+  "optimizer_state_entries": 642,
+  "optimizer_tensor_mismatches": [],
+  "scheduler_equal": true,
+  "restored_metadata": {
+    "epoch": 5,
+    "best_miou": 0.43399661779403687,
+    "epochs_no_improve": 0
+  },
+  "native_serializer_source_sha256": "05a25338d6436b755937ada88807173d3f11446e6432b20f26a2e66649a0a53d",
+  "serializer_functions": [
+    {
+      "name": "_save_to_state_dict",
+      "source": "def _save_to_state_dict(module: nn.Module, destination: Dict, prefix: str,\n                        keep_vars: bool):\n    r\"\"\"Saves module state to `destination` dictionary.\n    This method is modified from :meth:`torch.nn.Module._save_to_state_dict`.\n    Args:\n        module (nn.Module): The module to generate state_dict.\n        destination (dict): A dict where state will be stored.\n        prefix (str): The prefix for parameters and buffers used in this\n            module.\n    \"\"\"\n    for name, param in module._parameters.items():\n        if param is not None:\n            destination[prefix + name] = param if keep_vars else param.detach()\n    for name, buf in module._buffers.items():\n        # remove check of _non_persistent_buffers_set to allow nn.BatchNorm2d\n        if buf is not None:\n            destination[prefix + name] = buf if keep_vars else buf.detach()"
+    },
+    {
+      "name": "get_state_dict",
+      "source": "def get_state_dict(module, destination=None, prefix=\"\", keep_vars=False):\n    r\"\"\"Returns a dictionary containing a whole state of the module.\n    Both parameters and persistent buffers (e.g. running averages) are\n    included. Keys are corresponding parameter and buffer names.\n    This method is modified from :meth:`torch.nn.Module.state_dict` to\n    recursively check parallel module in case that the model has a complicated\n    structure, e.g., nn.Module(nn.Module(DDP)).\n    Args:\n        module (nn.Module): The module to generate state_dict.\n        destination (OrderedDict): Returned dict for the state of the\n            module.\n        prefix (str): Prefix of the key.\n        keep_vars (bool): Whether to keep the variable property of the\n            parameters. Default: False.\n    Returns:\n        dict: A dictionary containing a whole state of the module.\n    \"\"\"\n    # recursively check parallel module in case that the model has a\n    # complicated structure, e.g., nn.Module(nn.Module(DDP))\n    if is_module_wrapper(module):\n        module = module.module\n\n    # below is the same as torch.nn.Module.state_dict()\n    if destination is None:\n        destination = OrderedDict()\n        destination._metadata = OrderedDict()\n    destination._metadata[prefix[:-1]] = local_metadata = dict(\n        version=module._version)\n    _save_to_state_dict(module, destination, prefix, keep_vars)\n    for name, child in module._modules.items():\n        if child is not None:\n            get_state_dict(child,\n                           destination,\n                           prefix + name + \".\",\n                           keep_vars=keep_vars)\n    for hook in module._state_dict_hooks.values():\n        hook_result = hook(module, destination, prefix, local_metadata)\n        if hook_result is not None:\n            destination = hook_result\n    return destination"
+    }
+  ],
+  "cuda_initialized": false,
+  "native_optimizer_steps": 0,
+  "training_launches": 0,
+  "model_or_config_changed": false,
+  "diagnosis": "Operational observer compared Module.state_dict with the different native save serializer;exact two omitted nonpersistent nonlearned buffers also match saved values. Full native serialized model/optimizer/scheduler CPU equality passes. No model incompatibility or scientific gate conclusion."
+}

@@ -1,0 +1,101 @@
+{
+  "owner": {
+    "token": "20c15273b622479495bada469c5f3c99",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T12:22:03.958138+00:00",
+    "deadline_at": "2026-11-06T13:22:03.958138+00:00",
+    "context_sha256": "c380048424bbfb55c1440ecbd5cb65c34ff59cd08df6cd9967ec5ad92386c534",
+    "pending_sha256": "828553b40ed4f920492366459d82381051ed5f10e4d12823792b1c3a65748fa5"
+  },
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport os,json,socket,subprocess,re,time\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\npid=2829477\nroot='\"'\"'/data/songcl/Project/Cluster_project/Cluster_hvd_20261106'\"'\"'\nsource='\"'\"'d20eb221eff6584b67d4e9b5673559d0e1cb735b'\"'\"'\nlog=root+'\"'\"'/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log'\"'\"'\nargv=['\"'\"'python'\"'\"','\"'\"'tools/train.py'\"'\"','\"'\"'configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml'\"'\"','\"'\"'--gpu_ids'\"'\"','\"'\"'0'\"'\"','\"'\"'--num_gpus'\"'\"','\"'\"'1'\"'\"']\nproc=Path('\"'\"'/proc'\"'\"')/str(pid)\ndef identity():\n text=(proc/'\"'\"'stat'\"'\"').read_text();fields=text[text.rfind('\"'\"')'\"'\"')+2:].split()\n assert fields[19]=='\"'\"'158248846'\"'\"' and fields[0] not in ('\"'\"'Z'\"'\"','\"'\"'X'\"'\"')\n assert proc.stat().st_uid==os.getuid()==1001\n assert os.readlink(proc/'\"'\"'cwd'\"'\"')==root and os.readlink(proc/'\"'\"'fd/1'\"'\"')==log\n assert [v.decode() for v in (proc/'\"'\"'cmdline'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if v]==argv\nidentity()\nactual_source=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'-C'\"'\"',root,'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip()\nassert actual_source==source\ndef log_sample():\n p=Path(log)\n with p.open('\"'\"'rb'\"'\"') as f:\n  f.seek(max(0,p.stat().st_size-24576));raw=f.read(24576)\n text=raw.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"')\n clean=re.sub(r'\"'\"'\\x1b\\[[0-9;]*[a-zA-Z]'\"'\"','\"'\"''\"'\"',text)\n train=re.findall(r'\"'\"'(?:Epoch|epoch)\\s*[:\\[]?\\s*(\\d+)[^\\r\\n]{0,180}?(\\d+)/4686'\"'\"',clean)\n if not train:\n  steps=re.findall(r'\"'\"'(\\d+)/4686'\"'\"',clean)\n  epochs=re.findall(r'\"'\"'(?:Epoch|epoch)\\D{0,5}(\\d+)'\"'\"',clean)\n  train=[(epochs[-1] if epochs else None,steps[-1])] if steps else []\n return {'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'log_size'\"'\"':p.stat().st_size,\n  '\"'\"'bytes_read'\"'\"':len(raw),'\"'\"'last_native_train'\"'\"':train[-1] if train else None,\n  '\"'\"'fatal_error_markers'\"'\"':[x for x in ('\"'\"'Traceback (most recent call last)'\"'\"','\"'\"'CUDA out of memory'\"'\"','\"'\"'RuntimeError:'\"'\"','\"'\"'FloatingPointError'\"'\"') if x in clean]}\nfirst=log_sample();time.sleep(1.5);second=log_sample();identity()\ntable=Path('\"'\"'/proc/locks'\"'\"').read_text().splitlines();locks=[]\nfor kind in ('\"'\"'training'\"'\"','\"'\"'diagnostic'\"'\"','\"'\"'exclusive'\"'\"'):\n path=Path('\"'\"'/tmp/cluster_project_gpu0_'\"'\"'+kind+'\"'\"'.lock'\"'\"');st=path.stat()\n key='\"'\"'%02x:%02x:%d'\"'\"'%(os.major(st.st_dev),os.minor(st.st_dev),st.st_ino)\n rows=[row for row in table if len(row.split())>5 and row.split()[5]==key]\n locks.append({'\"'\"'kind'\"'\"':kind,'\"'\"'path'\"'\"':str(path),'\"'\"'inode'\"'\"':st.st_ino,'\"'\"'device_major'\"'\"':os.major(st.st_dev),\n  '\"'\"'device_minor'\"'\"':os.minor(st.st_dev),'\"'\"'kernel_entries'\"'\"':rows})\nstages={}\nfor name in ('\"'\"'m230_12e364dc'\"'\"','\"'\"'m230_20c15273'\"'\"'):\n stage=Path('\"'\"'/data/songcl/Project/Cluster_project/pipeline/cooperative_guards'\"'\"')/name\n stages[name]={'\"'\"'exists'\"'\"':stage.exists()}\n if stage.exists():\n  for filename in ('\"'\"'spawn.json'\"'\"','\"'\"'state.json'\"'\"'):\n   if (stage/filename).exists():\n    stages[name][filename]=json.loads((stage/filename).read_text())\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),\n '\"'\"'pid'\"'\"':pid,'\"'\"'starttime'\"'\"':'\"'\"'158248846'\"'\"','\"'\"'uid'\"'\"':1001,'\"'\"'runtime_root'\"'\"':root,'\"'\"'source_commit'\"'\"':actual_source,\n '\"'\"'argv'\"'\"':argv,'\"'\"'log'\"'\"':log,'\"'\"'samples'\"'\"':[first,second],'\"'\"'locks'\"'\"':locks,'\"'\"'stages'\"'\"':stages,\n '\"'\"'read_only'\"'\"':True,'\"'\"'signals_sent'\"'\"':False,'\"'\"'training_launches'\"'\"':0}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-06T12:27:24.885427+00:00",
+    "hostname": "dl04-MS-7E06",
+    "pid": 2829477,
+    "starttime": "158248846",
+    "uid": 1001,
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106",
+    "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "argv": [
+      "python",
+      "tools/train.py",
+      "configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml",
+      "--gpu_ids",
+      "0",
+      "--num_gpus",
+      "1"
+    ],
+    "log": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log",
+    "samples": [
+      {
+        "observed_at": "2026-11-06T12:27:23.358709+00:00",
+        "log_size": 1700591,
+        "bytes_read": 24576,
+        "last_native_train": [
+          null,
+          "1334"
+        ],
+        "fatal_error_markers": []
+      },
+      {
+        "observed_at": "2026-11-06T12:27:24.859623+00:00",
+        "log_size": 1701881,
+        "bytes_read": 24576,
+        "last_native_train": [
+          null,
+          "1339"
+        ],
+        "fatal_error_markers": []
+      }
+    ],
+    "locks": [
+      {
+        "kind": "training",
+        "path": "/tmp/cluster_project_gpu0_training.lock",
+        "inode": 92537152,
+        "device_major": 259,
+        "device_minor": 4,
+        "kernel_entries": []
+      },
+      {
+        "kind": "diagnostic",
+        "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+        "inode": 92537153,
+        "device_major": 259,
+        "device_minor": 4,
+        "kernel_entries": []
+      },
+      {
+        "kind": "exclusive",
+        "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+        "inode": 92537154,
+        "device_major": 259,
+        "device_minor": 4,
+        "kernel_entries": []
+      }
+    ],
+    "stages": {
+      "m230_12e364dc": {
+        "exists": false
+      },
+      "m230_20c15273": {
+        "exists": false
+      }
+    },
+    "read_only": true,
+    "signals_sent": false,
+    "training_launches": 0
+  }
+}

@@ -1,0 +1,3419 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only frozen outcome-independent registry for referent target rank; no model forward, native score, GPU execution, admission, or efficacy claim",
+  "producer_sha256": "09d55e09882785a8f285efeac18c75a804b0c5d17a03108fb52b975a9d5685fb",
+  "sources": {
+    "config": {
+      "path": "/data3/songcl/Project/Cluster_project/Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    "train_annotations": {
+      "path": "/data3/songcl/data/scanrefer/ScanRefer_train_new.json",
+      "sha256": "018754b90bcc27d5746bb50d6c35d6e7a35fd39519ac669e3fbe3fa6f425922d"
+    },
+    "train_graphs": {
+      "path": "/data3/songcl/data/scanrefer/scene_graphs_new_train.json",
+      "sha256": "e058fdd5bee5acd4fce7e78516d88b07581131e9fe83afd226cb835e80942e08"
+    }
+  },
+  "cohort_contract": {
+    "sample": "first 16 deterministic TRAIN batches",
+    "seed": 1999,
+    "selection_uses_model_outcome": false,
+    "selection_uses_native_score_or_rank": false,
+    "post_hoc_expression_exclusion": false,
+    "registry_frozen_before_native_capture": true,
+    "same_class_pool_definition": "all non-target scene object instances whose normalized object name equals the target object name"
+  },
+  "primary_evaluation_contract": {
+    "eligible_rows": "primary_rank_eligible=true",
+    "rank": "ascending native target score rank among the target plus every predeclared same-class candidate; rank 1 is best",
+    "scene_balance": "apply scene_weight, then aggregate expressions within scene and report a scene-level uncertainty interval",
+    "missing_data": "native candidate coverage, masks, transformed-input hashes, and hierarchical-partition hashes are required; never impute",
+    "controls": [
+      "objectness-only candidate score",
+      "within-scene candidate permutation",
+      "observed-failure pairs remain failure-local only"
+    ]
+  },
+  "summary": {
+    "expressions": 123,
+    "scenes": 32,
+    "outcome_independent_expressions": 123,
+    "primary_rank_eligible_expressions": 73,
+    "no_same_class_candidate_expressions": 50,
+    "same_class_candidate_count": 312,
+    "pool_size": {
+      "min": 1,
+      "median": 3,
+      "max": 19
+    },
+    "scene_expression_distribution": {
+      "1": 1,
+      "2": 1,
+      "4": 30
+    },
+    "scene_weight_total": 32.0
+  },
+  "registry_sha256": "d021105000439d82d936c12ac0045f4e76b021588e91b87ac28ed4370a6dd966",
+  "rows": [
+    {
+      "registry_key": "scene0332_00:0:28",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 0
+      },
+      "scene": "scene0332_00",
+      "ann_id": "28",
+      "description_sha256": "cdc18889f69a86f5f16d0399db261ed631cfbf7bfaad0b418b8369089211a76a",
+      "target_object_id": "12",
+      "target_object_name": "recycling_bin",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0332_00:1:29",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 1
+      },
+      "scene": "scene0332_00",
+      "ann_id": "29",
+      "description_sha256": "6b87a6667e795334a98a0115dd569efc05673c3e2019c12581be57e6f9dd2934",
+      "target_object_id": "1",
+      "target_object_name": "trash_bin",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0332_00:2:30",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 2
+      },
+      "scene": "scene0332_00",
+      "ann_id": "30",
+      "description_sha256": "2a5c3e46986113dfd935d3616f862bf6cb838f9656c10cd3aafeda251c2fbd26",
+      "target_object_id": "19",
+      "target_object_name": "dresser",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0332_00:3:31",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 3
+      },
+      "scene": "scene0332_00",
+      "ann_id": "31",
+      "description_sha256": "018e7d84954eb5937c4f283c50e08f2aa4c182ca98f94e6ccd8c532e01881816",
+      "target_object_id": "0",
+      "target_object_name": "bed",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0170_00:0:20",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 0
+      },
+      "scene": "scene0170_00",
+      "ann_id": "20",
+      "description_sha256": "88d9e4da98800b889875ce51ff5e9ec8290bdac1283745078105ce3803ce954d",
+      "target_object_id": "4",
+      "target_object_name": "bathroom_cabinet",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0170_00:1:21",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 1
+      },
+      "scene": "scene0170_00",
+      "ann_id": "21",
+      "description_sha256": "d374c411b3e33507bf358131466654393c715d24f2c4cd4645460ca433db454d",
+      "target_object_id": "2",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0170_00:2:22",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 2
+      },
+      "scene": "scene0170_00",
+      "ann_id": "22",
+      "description_sha256": "7c5f3dfc84ac3ea8dd043a1f81b31b5e7a2bb9d6c58f13b4a04c42ac49fabb24",
+      "target_object_id": "15",
+      "target_object_name": "toilet",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0170_00:3:23",
+      "dataset_order": {
+        "step": 0,
+        "expression_slot": 3
+      },
+      "scene": "scene0170_00",
+      "ann_id": "23",
+      "description_sha256": "f0cd80be8f91e7186450c079b4ec088b34cb32b0cc967fb731873edb7e998488",
+      "target_object_id": "0",
+      "target_object_name": "bathtub",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0493_00:0:8",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 0
+      },
+      "scene": "scene0493_00",
+      "ann_id": "8",
+      "description_sha256": "6006552cb7a2808f89ed92dde6d8381b8c0c30489dcf219ec9b4ad6cbba92838",
+      "target_object_id": "2",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "15",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "15": "chair",
+        "3": "chair",
+        "4": "chair",
+        "5": "chair",
+        "6": "chair"
+      },
+      "same_class_candidate_count": 5,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0493_00:1:9",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 1
+      },
+      "scene": "scene0493_00",
+      "ann_id": "9",
+      "description_sha256": "f7cbf55c551d5d8e4a7ff8806148ae4b7ef217adf61a91f55e8b62065b675690",
+      "target_object_id": "4",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "15",
+        "2",
+        "3",
+        "5",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "15": "chair",
+        "2": "chair",
+        "3": "chair",
+        "5": "chair",
+        "6": "chair"
+      },
+      "same_class_candidate_count": 5,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0493_00:2:10",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 2
+      },
+      "scene": "scene0493_00",
+      "ann_id": "10",
+      "description_sha256": "dfcbdc0e9663e22bac7649ac7bd567d4dfa79c6170b216effd65975c68e2dffe",
+      "target_object_id": "8",
+      "target_object_name": "table",
+      "same_class_candidate_ids": [
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "9": "table"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0493_00:3:11",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 3
+      },
+      "scene": "scene0493_00",
+      "ann_id": "11",
+      "description_sha256": "59f6021a2fcf1632b1fa505d7e2ed58b8e34eb232b014e01c658fe23350bd6c9",
+      "target_object_id": "3",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "15",
+        "2",
+        "4",
+        "5",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "15": "chair",
+        "2": "chair",
+        "4": "chair",
+        "5": "chair",
+        "6": "chair"
+      },
+      "same_class_candidate_count": 5,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0642_00:0:44",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 0
+      },
+      "scene": "scene0642_00",
+      "ann_id": "44",
+      "description_sha256": "056044ff820911a930b876d80f9ddcc17628722ce8be8c3e301aae73d07c9787",
+      "target_object_id": "54",
+      "target_object_name": "shower_curtain",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0642_00:1:45",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 1
+      },
+      "scene": "scene0642_00",
+      "ann_id": "45",
+      "description_sha256": "cd6f8d69ed5a4781627768ac5487da5636aeb16351047aea661e84a06b621bc4",
+      "target_object_id": "29",
+      "target_object_name": "lamp",
+      "same_class_candidate_ids": [
+        "17"
+      ],
+      "same_class_candidate_names": {
+        "17": "lamp"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0642_00:2:46",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 2
+      },
+      "scene": "scene0642_00",
+      "ann_id": "46",
+      "description_sha256": "5b62ca7f40da56576e3622b67f9bc55575e26c4d002386d5fd7484ea894f62a8",
+      "target_object_id": "3",
+      "target_object_name": "curtain",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0642_00:3:47",
+      "dataset_order": {
+        "step": 1,
+        "expression_slot": 3
+      },
+      "scene": "scene0642_00",
+      "ann_id": "47",
+      "description_sha256": "e8b1561858f37a8115fa02bdb44a48176245abed5f10e49993b1691f9bd693aa",
+      "target_object_id": "29",
+      "target_object_name": "lamp",
+      "same_class_candidate_ids": [
+        "17"
+      ],
+      "same_class_candidate_names": {
+        "17": "lamp"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0564_00:0:52",
+      "dataset_order": {
+        "step": 2,
+        "expression_slot": 0
+      },
+      "scene": "scene0564_00",
+      "ann_id": "52",
+      "description_sha256": "73e68b34f4351c4cb42621c5450e5a0e911d293c5aadd91b0f96662582664022",
+      "target_object_id": "2",
+      "target_object_name": "bathroom_stall_door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 1,
+      "scene_weight": 1.0
+    },
+    {
+      "registry_key": "scene0481_00:0:80",
+      "dataset_order": {
+        "step": 2,
+        "expression_slot": 0
+      },
+      "scene": "scene0481_00",
+      "ann_id": "80",
+      "description_sha256": "c5fb765715e2615695cfc947071e4862cb8c682200f23e5d4c7fbe6e71c06bb6",
+      "target_object_id": "6",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "2",
+        "3",
+        "4",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "5",
+        "50",
+        "51",
+        "52",
+        "7",
+        "8"
+      ],
+      "same_class_candidate_names": {
+        "2": "chair",
+        "3": "chair",
+        "4": "chair",
+        "45": "chair",
+        "46": "chair",
+        "47": "chair",
+        "48": "chair",
+        "49": "chair",
+        "5": "chair",
+        "50": "chair",
+        "51": "chair",
+        "52": "chair",
+        "7": "chair",
+        "8": "chair"
+      },
+      "same_class_candidate_count": 14,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0481_00:1:81",
+      "dataset_order": {
+        "step": 2,
+        "expression_slot": 1
+      },
+      "scene": "scene0481_00",
+      "ann_id": "81",
+      "description_sha256": "d2d0684538cc93a162742f700052a9cc23bb98000f4356596aeedba08096828c",
+      "target_object_id": "52",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "2",
+        "3",
+        "4",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "5",
+        "50",
+        "51",
+        "6",
+        "7",
+        "8"
+      ],
+      "same_class_candidate_names": {
+        "2": "chair",
+        "3": "chair",
+        "4": "chair",
+        "45": "chair",
+        "46": "chair",
+        "47": "chair",
+        "48": "chair",
+        "49": "chair",
+        "5": "chair",
+        "50": "chair",
+        "51": "chair",
+        "6": "chair",
+        "7": "chair",
+        "8": "chair"
+      },
+      "same_class_candidate_count": 14,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0481_00:2:82",
+      "dataset_order": {
+        "step": 2,
+        "expression_slot": 2
+      },
+      "scene": "scene0481_00",
+      "ann_id": "82",
+      "description_sha256": "4bfca491c1a6d7fbe72b9198322b6db1915715a5b572039829e65186f0bc7be8",
+      "target_object_id": "0",
+      "target_object_name": "bookshelf",
+      "same_class_candidate_ids": [
+        "14"
+      ],
+      "same_class_candidate_names": {
+        "14": "bookshelf"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0481_00:3:83",
+      "dataset_order": {
+        "step": 2,
+        "expression_slot": 3
+      },
+      "scene": "scene0481_00",
+      "ann_id": "83",
+      "description_sha256": "f9585536c6bdfd78bf5571e6ade221b8423a1b92ec6ff4c19b37ab08ba3c2840",
+      "target_object_id": "4",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "2",
+        "3",
+        "45",
+        "46",
+        "47",
+        "48",
+        "49",
+        "5",
+        "50",
+        "51",
+        "52",
+        "6",
+        "7",
+        "8"
+      ],
+      "same_class_candidate_names": {
+        "2": "chair",
+        "3": "chair",
+        "45": "chair",
+        "46": "chair",
+        "47": "chair",
+        "48": "chair",
+        "49": "chair",
+        "5": "chair",
+        "50": "chair",
+        "51": "chair",
+        "52": "chair",
+        "6": "chair",
+        "7": "chair",
+        "8": "chair"
+      },
+      "same_class_candidate_count": 14,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0340_00:0:36",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 0
+      },
+      "scene": "scene0340_00",
+      "ann_id": "36",
+      "description_sha256": "0ceab935048d9689601a4655f0d0f9050cfd0978678df6db9f5383de0f64c8cd",
+      "target_object_id": "4",
+      "target_object_name": "cabinet",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0340_00:1:37",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 1
+      },
+      "scene": "scene0340_00",
+      "ann_id": "37",
+      "description_sha256": "4bbaa0be0b9d4e03bf05fcfe0d2ad4949b90434f777f569484d45c224e08d28b",
+      "target_object_id": "12",
+      "target_object_name": "bed",
+      "same_class_candidate_ids": [
+        "13"
+      ],
+      "same_class_candidate_names": {
+        "13": "bed"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0340_00:2:38",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 2
+      },
+      "scene": "scene0340_00",
+      "ann_id": "38",
+      "description_sha256": "fc784387ebf987bcec21c97d4b3aa86f1970c12b39d9d260ec72d1a2eff08312",
+      "target_object_id": "0",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0340_00:3:39",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 3
+      },
+      "scene": "scene0340_00",
+      "ann_id": "39",
+      "description_sha256": "165dff351683234328f9051ff469202787af01c44591448b782be5de2eb0ecbd",
+      "target_object_id": "26",
+      "target_object_name": "nightstand",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0515_00:0:52",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 0
+      },
+      "scene": "scene0515_00",
+      "ann_id": "52",
+      "description_sha256": "a2d0e859a75a9dced8e3a1007adfd2ad975912350e2b10674541b6a363119199",
+      "target_object_id": "28",
+      "target_object_name": "nightstand",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0515_00:1:53",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 1
+      },
+      "scene": "scene0515_00",
+      "ann_id": "53",
+      "description_sha256": "5dc576df8576de9b9f13fe9b16aa06f0cdae3e0c2a7c976b77907fd10ff11fa5",
+      "target_object_id": "34",
+      "target_object_name": "stool",
+      "same_class_candidate_ids": [
+        "37"
+      ],
+      "same_class_candidate_names": {
+        "37": "stool"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0515_00:2:54",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 2
+      },
+      "scene": "scene0515_00",
+      "ann_id": "54",
+      "description_sha256": "a32a29d40a1eae79ddf22e0075e3a56628756ff6059dc04539b89cab2172350a",
+      "target_object_id": "53",
+      "target_object_name": "microwave",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0515_00:3:55",
+      "dataset_order": {
+        "step": 3,
+        "expression_slot": 3
+      },
+      "scene": "scene0515_00",
+      "ann_id": "55",
+      "description_sha256": "f16105db46051d0e0f773f925dcef33fbffcef5026d8899c8a700b52bcabe9e4",
+      "target_object_id": "20",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0240_00:0:32",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 0
+      },
+      "scene": "scene0240_00",
+      "ann_id": "32",
+      "description_sha256": "76cdb258ffdddfdfcccd1bd10ba7fa0ebdaf1f708e49df4040566330a22e61f8",
+      "target_object_id": "4",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0240_00:1:33",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 1
+      },
+      "scene": "scene0240_00",
+      "ann_id": "33",
+      "description_sha256": "2505a8710eff321eb0727542f9403fe660a1bb9255b812e4249690bbe5be33a5",
+      "target_object_id": "8",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [
+        "7"
+      ],
+      "same_class_candidate_names": {
+        "7": "trash_can"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0240_00:2:34",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 2
+      },
+      "scene": "scene0240_00",
+      "ann_id": "34",
+      "description_sha256": "6a6fd876286773264f8b86825694a86abe6d3e4832725f36177df2cad240d626",
+      "target_object_id": "13",
+      "target_object_name": "calendar",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0240_00:3:35",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 3
+      },
+      "scene": "scene0240_00",
+      "ann_id": "35",
+      "description_sha256": "ead3936f9095537bf23f0e2050475f55a58a00a4548b8fab63f8b23287794a67",
+      "target_object_id": "5",
+      "target_object_name": "box",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0440_00:0:72",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 0
+      },
+      "scene": "scene0440_00",
+      "ann_id": "72",
+      "description_sha256": "058d1faa24163212433b449ea8d046b6216d13dd973df5d076aec94d85b83e00",
+      "target_object_id": "9",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0440_00:1:73",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 1
+      },
+      "scene": "scene0440_00",
+      "ann_id": "73",
+      "description_sha256": "b45c369ce8c40d0fc5985bf16e4d92d16ef0d8589da012d2e6a05991fe947866",
+      "target_object_id": "17",
+      "target_object_name": "dresser",
+      "same_class_candidate_ids": [
+        "16"
+      ],
+      "same_class_candidate_names": {
+        "16": "dresser"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0440_00:2:74",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 2
+      },
+      "scene": "scene0440_00",
+      "ann_id": "74",
+      "description_sha256": "54600ee6bd3a2c5521f6de2eb6917443a127d9e026a25056778d8f3e04a69c2e",
+      "target_object_id": "3",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "4"
+      ],
+      "same_class_candidate_names": {
+        "4": "office_chair"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0440_00:3:75",
+      "dataset_order": {
+        "step": 4,
+        "expression_slot": 3
+      },
+      "scene": "scene0440_00",
+      "ann_id": "75",
+      "description_sha256": "2269ffc01d75593da9c82fa7dc1d1751cce085e1e27b9773444c7337a7d8fd3a",
+      "target_object_id": "13",
+      "target_object_name": "shelf",
+      "same_class_candidate_ids": [
+        "12"
+      ],
+      "same_class_candidate_names": {
+        "12": "shelf"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0288_00:0:28",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 0
+      },
+      "scene": "scene0288_00",
+      "ann_id": "28",
+      "description_sha256": "3218f214e6c2ddb43d3332dc3ece1007ca0cc79bd25f6920f4f05a09b990f4d1",
+      "target_object_id": "39",
+      "target_object_name": "stool",
+      "same_class_candidate_ids": [
+        "38"
+      ],
+      "same_class_candidate_names": {
+        "38": "stool"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0288_00:1:29",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 1
+      },
+      "scene": "scene0288_00",
+      "ann_id": "29",
+      "description_sha256": "710393c22d1fd3e034a0cc4322c17696c3aa4cdf5b917a7dc573e32bc12dae52",
+      "target_object_id": "38",
+      "target_object_name": "stool",
+      "same_class_candidate_ids": [
+        "39"
+      ],
+      "same_class_candidate_names": {
+        "39": "stool"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0288_00:2:30",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 2
+      },
+      "scene": "scene0288_00",
+      "ann_id": "30",
+      "description_sha256": "4d64b6bc71ebd47245a0598b7a914a1b60457ce84c87c832d17355b504a20f69",
+      "target_object_id": "18",
+      "target_object_name": "recycling_bin",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0288_00:3:31",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 3
+      },
+      "scene": "scene0288_00",
+      "ann_id": "31",
+      "description_sha256": "4beaec3f1bc51673a1dd358debc8bb9d845125078050c0f6388fbf6334e8ce35",
+      "target_object_id": "25",
+      "target_object_name": "kitchen_cabinet",
+      "same_class_candidate_ids": [
+        "24"
+      ],
+      "same_class_candidate_names": {
+        "24": "kitchen_cabinet"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0327_00:0:56",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 0
+      },
+      "scene": "scene0327_00",
+      "ann_id": "56",
+      "description_sha256": "fbc61342ae9da990a77a4028dbec733f7841042fe175ae53d1ae7d0d48567c75",
+      "target_object_id": "46",
+      "target_object_name": "refrigerator",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0327_00:1:57",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 1
+      },
+      "scene": "scene0327_00",
+      "ann_id": "57",
+      "description_sha256": "af758fb49e0e77b28a113648e995b3851eb91c2702f6249c42767b0899a8ef36",
+      "target_object_id": "0",
+      "target_object_name": "kitchen_cabinet",
+      "same_class_candidate_ids": [
+        "15",
+        "47",
+        "48"
+      ],
+      "same_class_candidate_names": {
+        "15": "kitchen_cabinet",
+        "47": "kitchen_cabinet",
+        "48": "kitchen_cabinet"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0327_00:2:58",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 2
+      },
+      "scene": "scene0327_00",
+      "ann_id": "58",
+      "description_sha256": "acedac82bfd69b751290ef64ef2dd766e9dd517ccddfd9d38cf176533210c3d9",
+      "target_object_id": "20",
+      "target_object_name": "sink",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0327_00:3:59",
+      "dataset_order": {
+        "step": 5,
+        "expression_slot": 3
+      },
+      "scene": "scene0327_00",
+      "ann_id": "59",
+      "description_sha256": "99c7ce06f06ed1a80c618267180e1893e4e7cd78e7993d1aab30a685a17ba217",
+      "target_object_id": "48",
+      "target_object_name": "kitchen_cabinet",
+      "same_class_candidate_ids": [
+        "0",
+        "15",
+        "47"
+      ],
+      "same_class_candidate_names": {
+        "0": "kitchen_cabinet",
+        "15": "kitchen_cabinet",
+        "47": "kitchen_cabinet"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0289_00:0:64",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 0
+      },
+      "scene": "scene0289_00",
+      "ann_id": "64",
+      "description_sha256": "46968e777c53ebc0d60a7c16829664d57821e76d1a8dc6ef09b824474e34da9a",
+      "target_object_id": "10",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "29",
+        "30",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "11": "office_chair",
+        "12": "office_chair",
+        "13": "office_chair",
+        "14": "office_chair",
+        "16": "office_chair",
+        "17": "office_chair",
+        "18": "office_chair",
+        "19": "office_chair",
+        "20": "office_chair",
+        "29": "office_chair",
+        "30": "office_chair",
+        "9": "office_chair"
+      },
+      "same_class_candidate_count": 12,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0289_00:1:65",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 1
+      },
+      "scene": "scene0289_00",
+      "ann_id": "65",
+      "description_sha256": "b086f9ea4e58eb2880fa35db5e87fc754c9ab64243c94569b318acbc23d08dbf",
+      "target_object_id": "19",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "16",
+        "17",
+        "18",
+        "20",
+        "29",
+        "30",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "office_chair",
+        "11": "office_chair",
+        "12": "office_chair",
+        "13": "office_chair",
+        "14": "office_chair",
+        "16": "office_chair",
+        "17": "office_chair",
+        "18": "office_chair",
+        "20": "office_chair",
+        "29": "office_chair",
+        "30": "office_chair",
+        "9": "office_chair"
+      },
+      "same_class_candidate_count": 12,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0289_00:2:66",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 2
+      },
+      "scene": "scene0289_00",
+      "ann_id": "66",
+      "description_sha256": "e62dfb4d25af9b4cacc36e0fc8e33fdcb9f26b2467e2a3e8d75cb1c5ea15a46d",
+      "target_object_id": "20",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "16",
+        "17",
+        "18",
+        "19",
+        "29",
+        "30",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "office_chair",
+        "11": "office_chair",
+        "12": "office_chair",
+        "13": "office_chair",
+        "14": "office_chair",
+        "16": "office_chair",
+        "17": "office_chair",
+        "18": "office_chair",
+        "19": "office_chair",
+        "29": "office_chair",
+        "30": "office_chair",
+        "9": "office_chair"
+      },
+      "same_class_candidate_count": 12,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0289_00:3:67",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 3
+      },
+      "scene": "scene0289_00",
+      "ann_id": "67",
+      "description_sha256": "c18d7a745d8ca1151e0ab0ef3127e9c4cbceba60b258fd66132d72ffb5c664b7",
+      "target_object_id": "13",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "12",
+        "14",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "29",
+        "30",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "office_chair",
+        "11": "office_chair",
+        "12": "office_chair",
+        "14": "office_chair",
+        "16": "office_chair",
+        "17": "office_chair",
+        "18": "office_chair",
+        "19": "office_chair",
+        "20": "office_chair",
+        "29": "office_chair",
+        "30": "office_chair",
+        "9": "office_chair"
+      },
+      "same_class_candidate_count": 12,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0138_00:0:116",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 0
+      },
+      "scene": "scene0138_00",
+      "ann_id": "116",
+      "description_sha256": "213b17c046e873080365c55e084174e3d8de614d0889934928f75a6796f5abb7",
+      "target_object_id": "22",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "21",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27"
+      ],
+      "same_class_candidate_names": {
+        "21": "chair",
+        "23": "chair",
+        "24": "chair",
+        "25": "chair",
+        "26": "chair",
+        "27": "chair"
+      },
+      "same_class_candidate_count": 6,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0138_00:1:117",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 1
+      },
+      "scene": "scene0138_00",
+      "ann_id": "117",
+      "description_sha256": "8040e7d5d32179804f2e0e8bf0b38df10d4c4dd1a7f88b687b650e0bd8fe9fdf",
+      "target_object_id": "25",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "21",
+        "22",
+        "23",
+        "24",
+        "26",
+        "27"
+      ],
+      "same_class_candidate_names": {
+        "21": "chair",
+        "22": "chair",
+        "23": "chair",
+        "24": "chair",
+        "26": "chair",
+        "27": "chair"
+      },
+      "same_class_candidate_count": 6,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0138_00:2:118",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 2
+      },
+      "scene": "scene0138_00",
+      "ann_id": "118",
+      "description_sha256": "4586d3cd34c9554352f27f484bdd877f7bb30871ac15e07fc0d834602c9fcb85",
+      "target_object_id": "19",
+      "target_object_name": "desk",
+      "same_class_candidate_ids": [
+        "18",
+        "35"
+      ],
+      "same_class_candidate_names": {
+        "18": "desk",
+        "35": "desk"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0138_00:3:119",
+      "dataset_order": {
+        "step": 6,
+        "expression_slot": 3
+      },
+      "scene": "scene0138_00",
+      "ann_id": "119",
+      "description_sha256": "9638145dce8a7aa6efe648785da6e77163d84c54f965c5145309008cd07ed682",
+      "target_object_id": "20",
+      "target_object_name": "table",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0220_00:0:20",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 0
+      },
+      "scene": "scene0220_00",
+      "ann_id": "20",
+      "description_sha256": "36dee4d2c07f4b8fcf55e9aeb19967d3dfdc500ad4bd4a7e1eaf0fcbcadf7ec2",
+      "target_object_id": "12",
+      "target_object_name": "kitchen_cabinets",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0220_00:1:21",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 1
+      },
+      "scene": "scene0220_00",
+      "ann_id": "21",
+      "description_sha256": "0f5fff355aed01254f1e51110c2f932318633bfb8775bfd986c4ad338de295f1",
+      "target_object_id": "42",
+      "target_object_name": "curtain",
+      "same_class_candidate_ids": [
+        "4"
+      ],
+      "same_class_candidate_names": {
+        "4": "curtain"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0220_00:2:22",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 2
+      },
+      "scene": "scene0220_00",
+      "ann_id": "22",
+      "description_sha256": "7af0be0443fbcdfea99682b1f9e70bb1102e5efa9251afb026338e3c23f43f5e",
+      "target_object_id": "15",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0220_00:3:23",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 3
+      },
+      "scene": "scene0220_00",
+      "ann_id": "23",
+      "description_sha256": "05f4e037b6602e16b68efec7f222a46fac2ba3f79b4fbad02787c17befb4d9d6",
+      "target_object_id": "33",
+      "target_object_name": "kitchen_cabinet",
+      "same_class_candidate_ids": [
+        "23",
+        "24",
+        "31",
+        "35"
+      ],
+      "same_class_candidate_names": {
+        "23": "kitchen_cabinet",
+        "24": "kitchen_cabinet",
+        "31": "kitchen_cabinet",
+        "35": "kitchen_cabinet"
+      },
+      "same_class_candidate_count": 4,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0076_00:0:76",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 0
+      },
+      "scene": "scene0076_00",
+      "ann_id": "76",
+      "description_sha256": "9674df9c3fc5b550dbe902d697de198743f51dd8de33e8fbba446ad2690b73a8",
+      "target_object_id": "7",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "13",
+        "14",
+        "6",
+        "8",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "chair",
+        "11": "chair",
+        "13": "chair",
+        "14": "chair",
+        "6": "chair",
+        "8": "chair",
+        "9": "chair"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 2,
+      "scene_weight": 0.5
+    },
+    {
+      "registry_key": "scene0076_00:1:77",
+      "dataset_order": {
+        "step": 7,
+        "expression_slot": 1
+      },
+      "scene": "scene0076_00",
+      "ann_id": "77",
+      "description_sha256": "51345571b26b80966671ada2b311886a958c7681b9b7e4fb0a782516e42b5de9",
+      "target_object_id": "8",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "13",
+        "14",
+        "6",
+        "7",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "chair",
+        "11": "chair",
+        "13": "chair",
+        "14": "chair",
+        "6": "chair",
+        "7": "chair",
+        "9": "chair"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 2,
+      "scene_weight": 0.5
+    },
+    {
+      "registry_key": "scene0421_00:0:72",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 0
+      },
+      "scene": "scene0421_00",
+      "ann_id": "72",
+      "description_sha256": "848303f54c0a2b9e995b4133362f171a7828fa83b114421fa6129d103987f371",
+      "target_object_id": "10",
+      "target_object_name": "basket",
+      "same_class_candidate_ids": [
+        "11",
+        "12",
+        "14",
+        "60",
+        "61",
+        "8",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "11": "basket",
+        "12": "basket",
+        "14": "basket",
+        "60": "basket",
+        "61": "basket",
+        "8": "basket",
+        "9": "basket"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0421_00:1:73",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 1
+      },
+      "scene": "scene0421_00",
+      "ann_id": "73",
+      "description_sha256": "7f3305d1e8590e7e2f264eafa391118f0094efc9e714c916d391695a3a23e05b",
+      "target_object_id": "8",
+      "target_object_name": "basket",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "12",
+        "14",
+        "60",
+        "61",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "basket",
+        "11": "basket",
+        "12": "basket",
+        "14": "basket",
+        "60": "basket",
+        "61": "basket",
+        "9": "basket"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0421_00:2:74",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 2
+      },
+      "scene": "scene0421_00",
+      "ann_id": "74",
+      "description_sha256": "be0fa8e7a77e9fbb4cb032986c532bfabbb9831f98d75fdd8f561de2f09362f6",
+      "target_object_id": "14",
+      "target_object_name": "basket",
+      "same_class_candidate_ids": [
+        "10",
+        "11",
+        "12",
+        "60",
+        "61",
+        "8",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "basket",
+        "11": "basket",
+        "12": "basket",
+        "60": "basket",
+        "61": "basket",
+        "8": "basket",
+        "9": "basket"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0421_00:3:75",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 3
+      },
+      "scene": "scene0421_00",
+      "ann_id": "75",
+      "description_sha256": "7594d0d8d4230859715df564667c63f27de7cd68d6bc62d5fee4a0bc10e0f7c9",
+      "target_object_id": "25",
+      "target_object_name": "shelf",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0223_00:0:24",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 0
+      },
+      "scene": "scene0223_00",
+      "ann_id": "24",
+      "description_sha256": "66a76e14aacb34dee6453ee4d915d6312be5b19cff1a71bf45d1e2021a178392",
+      "target_object_id": "20",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [
+        "19"
+      ],
+      "same_class_candidate_names": {
+        "19": "trash_can"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0223_00:1:25",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 1
+      },
+      "scene": "scene0223_00",
+      "ann_id": "25",
+      "description_sha256": "fe0d047526fcfc04d173ba3a9149ba02fa1e447698c6c810feb80b96b854736e",
+      "target_object_id": "17",
+      "target_object_name": "recycling_bin",
+      "same_class_candidate_ids": [
+        "18"
+      ],
+      "same_class_candidate_names": {
+        "18": "recycling_bin"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0223_00:2:26",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 2
+      },
+      "scene": "scene0223_00",
+      "ann_id": "26",
+      "description_sha256": "38bc7443b5b4cc3ac0477d94d0d58c8146752ae764b230fade644adbfe68cad2",
+      "target_object_id": "0",
+      "target_object_name": "desk",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0223_00:3:27",
+      "dataset_order": {
+        "step": 8,
+        "expression_slot": 3
+      },
+      "scene": "scene0223_00",
+      "ann_id": "27",
+      "description_sha256": "c51dda7ea4cfbb66c08594599ee3ef9fa823ee5b6a2a43e5c6f5b3ae3ea3b448",
+      "target_object_id": "16",
+      "target_object_name": "radiator",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0319_00:0:32",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 0
+      },
+      "scene": "scene0319_00",
+      "ann_id": "32",
+      "description_sha256": "7e68023704f34e38ca28521826cf85ffa1e3dd071457c15e7fec37694791937a",
+      "target_object_id": "8",
+      "target_object_name": "pillow",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0319_00:1:33",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 1
+      },
+      "scene": "scene0319_00",
+      "ann_id": "33",
+      "description_sha256": "390d120e5d422c5992b9c74c59d1674fd1fb5bd4fcf3266e6855257c47c39ee4",
+      "target_object_id": "2",
+      "target_object_name": "couch",
+      "same_class_candidate_ids": [
+        "3"
+      ],
+      "same_class_candidate_names": {
+        "3": "couch"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": false,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0319_00:2:34",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 2
+      },
+      "scene": "scene0319_00",
+      "ann_id": "34",
+      "description_sha256": "daf78543674074c33ae15bef9517fc1121d7f0e24628c9ecc948c74ece3d590d",
+      "target_object_id": "4",
+      "target_object_name": "sofa_chair",
+      "same_class_candidate_ids": [
+        "19",
+        "20",
+        "5"
+      ],
+      "same_class_candidate_names": {
+        "19": "sofa_chair",
+        "20": "sofa_chair",
+        "5": "sofa_chair"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0319_00:3:35",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 3
+      },
+      "scene": "scene0319_00",
+      "ann_id": "35",
+      "description_sha256": "bca15891d94df09d13b894cd3c00e583b7307e9f70a83d0b3e7a78e9a04f6f11",
+      "target_object_id": "20",
+      "target_object_name": "sofa_chair",
+      "same_class_candidate_ids": [
+        "19",
+        "4",
+        "5"
+      ],
+      "same_class_candidate_names": {
+        "19": "sofa_chair",
+        "4": "sofa_chair",
+        "5": "sofa_chair"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0472_00:0:56",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 0
+      },
+      "scene": "scene0472_00",
+      "ann_id": "56",
+      "description_sha256": "74cd5a655746e3a0acfcbd5c9ed4819ae403727a080c88c57f416bc76667ec02",
+      "target_object_id": "9",
+      "target_object_name": "kitchen_counter",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0472_00:1:57",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 1
+      },
+      "scene": "scene0472_00",
+      "ann_id": "57",
+      "description_sha256": "df5790b3b1c46ce47fab8c8dad1774b52b32928f362d4b40ebbe68a12a04e76e",
+      "target_object_id": "6",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [
+        "23"
+      ],
+      "same_class_candidate_names": {
+        "23": "door"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0472_00:2:58",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 2
+      },
+      "scene": "scene0472_00",
+      "ann_id": "58",
+      "description_sha256": "382841646f5800c69bbf15719af5a1a450ebcdf5edd596fe259fb39464b1a35e",
+      "target_object_id": "20",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "21",
+        "22"
+      ],
+      "same_class_candidate_names": {
+        "21": "chair",
+        "22": "chair"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0472_00:3:59",
+      "dataset_order": {
+        "step": 9,
+        "expression_slot": 3
+      },
+      "scene": "scene0472_00",
+      "ann_id": "59",
+      "description_sha256": "773c7e2e494616d907ad05ad7801f3e5ebd4c215b460a1c1b0d16f955fb10064",
+      "target_object_id": "6",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [
+        "23"
+      ],
+      "same_class_candidate_names": {
+        "23": "door"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0192_00:0:4",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 0
+      },
+      "scene": "scene0192_00",
+      "ann_id": "4",
+      "description_sha256": "58c3087c0c4579a89a053f25298a7bafa4d4d1a7f620c881fb1a9da796c52e9a",
+      "target_object_id": "4",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "2",
+        "3",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "2": "chair",
+        "3": "chair",
+        "6": "chair"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0192_00:1:5",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 1
+      },
+      "scene": "scene0192_00",
+      "ann_id": "5",
+      "description_sha256": "9e881d2f151cc2a8b4d8ff2af8ef5c0a2353329d57fe73d4d8e74a97291ec944",
+      "target_object_id": "5",
+      "target_object_name": "coffee_table",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0192_00:2:6",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 2
+      },
+      "scene": "scene0192_00",
+      "ann_id": "6",
+      "description_sha256": "d19d1392ad9b2d92bec425d9441e4a5a4efaef9a4024a52c2986b291d8a86668",
+      "target_object_id": "2",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "3",
+        "4",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "3": "chair",
+        "4": "chair",
+        "6": "chair"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0192_00:3:7",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 3
+      },
+      "scene": "scene0192_00",
+      "ann_id": "7",
+      "description_sha256": "20070dc04a04c9d6588574936135f47d7838ce322524c5e05240ed39c859fc35",
+      "target_object_id": "5",
+      "target_object_name": "coffee_table",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0039_00:0:16",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 0
+      },
+      "scene": "scene0039_00",
+      "ann_id": "16",
+      "description_sha256": "093b79324c427cf02e46e0446e13f4a2d6cf7af4a8d500cb4be68e581d84faa1",
+      "target_object_id": "15",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0039_00:1:17",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 1
+      },
+      "scene": "scene0039_00",
+      "ann_id": "17",
+      "description_sha256": "e7ce52e3547d53936d6bfdbe112457b15acf6bc9bc449bf62076d2e131791dde",
+      "target_object_id": "11",
+      "target_object_name": "nightstand",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0039_00:2:18",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 2
+      },
+      "scene": "scene0039_00",
+      "ann_id": "18",
+      "description_sha256": "9939af5450d48743dabc91a92535cc579a1807bbb96c2c92a8c492843765b4a6",
+      "target_object_id": "15",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0039_00:3:19",
+      "dataset_order": {
+        "step": 10,
+        "expression_slot": 3
+      },
+      "scene": "scene0039_00",
+      "ann_id": "19",
+      "description_sha256": "80c237b0f868ae7dd67042f2e5fd2e64af8641de37882261b200cbf0fb839914",
+      "target_object_id": "6",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0110_00:0:4",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 0
+      },
+      "scene": "scene0110_00",
+      "ann_id": "4",
+      "description_sha256": "e4ef2e245698ac2cf4c30815913241bb62cf9e6b3c376792e5917c389bb03a9a",
+      "target_object_id": "16",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [
+        "18"
+      ],
+      "same_class_candidate_names": {
+        "18": "trash_can"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0110_00:1:5",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 1
+      },
+      "scene": "scene0110_00",
+      "ann_id": "5",
+      "description_sha256": "1536cf5f7629148873397bdb15366c624b49843c957ca8374dbe7e915a76eefd",
+      "target_object_id": "17",
+      "target_object_name": "radiator",
+      "same_class_candidate_ids": [
+        "19"
+      ],
+      "same_class_candidate_names": {
+        "19": "radiator"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0110_00:2:6",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 2
+      },
+      "scene": "scene0110_00",
+      "ann_id": "6",
+      "description_sha256": "131b014b57980a36d8cc7ca5596dcc2793f6ea0b6f75b26cda8d048fa7901b4f",
+      "target_object_id": "10",
+      "target_object_name": "desk",
+      "same_class_candidate_ids": [
+        "14"
+      ],
+      "same_class_candidate_names": {
+        "14": "desk"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0110_00:3:7",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 3
+      },
+      "scene": "scene0110_00",
+      "ann_id": "7",
+      "description_sha256": "316fcdc175a13da15c567b81c051a033e6facfdb02aa115565afa9f8f3f7d3ea",
+      "target_object_id": "9",
+      "target_object_name": "recycling_bin",
+      "same_class_candidate_ids": [
+        "8"
+      ],
+      "same_class_candidate_names": {
+        "8": "recycling_bin"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0524_00:0:0",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 0
+      },
+      "scene": "scene0524_00",
+      "ann_id": "0",
+      "description_sha256": "c104aa02b5c94ae51085c506c7e5c8a1989f06677092e9ecec227261185aa776",
+      "target_object_id": "3",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0524_00:1:1",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 1
+      },
+      "scene": "scene0524_00",
+      "ann_id": "1",
+      "description_sha256": "7bcd2c345f22b451ffb253baaac3f9bd68f5ddcf2f077b1282c7b5ddb96a4b34",
+      "target_object_id": "3",
+      "target_object_name": "trash_can",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0524_00:2:2",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 2
+      },
+      "scene": "scene0524_00",
+      "ann_id": "2",
+      "description_sha256": "597bf66911cd067eb8887ec2382b9fcd9210d896a5681f195f49ba3f7709647e",
+      "target_object_id": "4",
+      "target_object_name": "workbench",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0524_00:3:3",
+      "dataset_order": {
+        "step": 11,
+        "expression_slot": 3
+      },
+      "scene": "scene0524_00",
+      "ann_id": "3",
+      "description_sha256": "2756de528bf07ca5a71c74ac99168bf0596a2a0e456f9d8480bb1e423af94b42",
+      "target_object_id": "5",
+      "target_object_name": "door",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0632_00:0:16",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 0
+      },
+      "scene": "scene0632_00",
+      "ann_id": "16",
+      "description_sha256": "f09150fd7fd874a916f5097a9bf46f87dc9bd7c49cf4cff4e247a640b7afd1e9",
+      "target_object_id": "2",
+      "target_object_name": "bookshelf",
+      "same_class_candidate_ids": [
+        "0",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "0": "bookshelf",
+        "6": "bookshelf"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0632_00:1:17",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 1
+      },
+      "scene": "scene0632_00",
+      "ann_id": "17",
+      "description_sha256": "53e7d0aec12896b8c49356458633175fbc56175a1e5a85ea26a8308b9912318d",
+      "target_object_id": "0",
+      "target_object_name": "bookshelf",
+      "same_class_candidate_ids": [
+        "2",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "2": "bookshelf",
+        "6": "bookshelf"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0632_00:2:18",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 2
+      },
+      "scene": "scene0632_00",
+      "ann_id": "18",
+      "description_sha256": "a1b488bfc0d9220b7f05d93c0b8df54c04b16ef89910d4998d08b96e1ac7021e",
+      "target_object_id": "5",
+      "target_object_name": "cabinet",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0632_00:3:19",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 3
+      },
+      "scene": "scene0632_00",
+      "ann_id": "19",
+      "description_sha256": "e39bddc845cd7578c9b6b574ebd207ecf16b586eb9a784dc5134c690f0ba5c05",
+      "target_object_id": "6",
+      "target_object_name": "bookshelf",
+      "same_class_candidate_ids": [
+        "0",
+        "2"
+      ],
+      "same_class_candidate_names": {
+        "0": "bookshelf",
+        "2": "bookshelf"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0420_00:0:96",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 0
+      },
+      "scene": "scene0420_00",
+      "ann_id": "96",
+      "description_sha256": "857b0b9d44b4214017f1680c8124d668c4f0a90444cfdc7476d880e07c3e0ec4",
+      "target_object_id": "5",
+      "target_object_name": "table",
+      "same_class_candidate_ids": [
+        "22",
+        "25",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "22": "table",
+        "25": "table",
+        "6": "table"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0420_00:1:97",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 1
+      },
+      "scene": "scene0420_00",
+      "ann_id": "97",
+      "description_sha256": "2381f2eb960b93b6e50d932570d824eb63925868f892410cab4df19f701a50dd",
+      "target_object_id": "41",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "3",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "42"
+      ],
+      "same_class_candidate_names": {
+        "23": "chair",
+        "24": "chair",
+        "26": "chair",
+        "27": "chair",
+        "28": "chair",
+        "29": "chair",
+        "3": "chair",
+        "30": "chair",
+        "31": "chair",
+        "32": "chair",
+        "33": "chair",
+        "34": "chair",
+        "35": "chair",
+        "36": "chair",
+        "37": "chair",
+        "38": "chair",
+        "39": "chair",
+        "40": "chair",
+        "42": "chair"
+      },
+      "same_class_candidate_count": 19,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0420_00:2:98",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 2
+      },
+      "scene": "scene0420_00",
+      "ann_id": "98",
+      "description_sha256": "16f5a0f67b8632c0d5df392e9b9d8a2c9a092771c715a8225a5464ed19625cdc",
+      "target_object_id": "25",
+      "target_object_name": "table",
+      "same_class_candidate_ids": [
+        "22",
+        "5",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "22": "table",
+        "5": "table",
+        "6": "table"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0420_00:3:99",
+      "dataset_order": {
+        "step": 12,
+        "expression_slot": 3
+      },
+      "scene": "scene0420_00",
+      "ann_id": "99",
+      "description_sha256": "1c5ec2fc4ec81a138b73986a6f2963e2f2064b35635f4d5591da062a64151c3d",
+      "target_object_id": "33",
+      "target_object_name": "chair",
+      "same_class_candidate_ids": [
+        "23",
+        "24",
+        "26",
+        "27",
+        "28",
+        "29",
+        "3",
+        "30",
+        "31",
+        "32",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42"
+      ],
+      "same_class_candidate_names": {
+        "23": "chair",
+        "24": "chair",
+        "26": "chair",
+        "27": "chair",
+        "28": "chair",
+        "29": "chair",
+        "3": "chair",
+        "30": "chair",
+        "31": "chair",
+        "32": "chair",
+        "34": "chair",
+        "35": "chair",
+        "36": "chair",
+        "37": "chair",
+        "38": "chair",
+        "39": "chair",
+        "40": "chair",
+        "41": "chair",
+        "42": "chair"
+      },
+      "same_class_candidate_count": 19,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0416_00:0:72",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 0
+      },
+      "scene": "scene0416_00",
+      "ann_id": "72",
+      "description_sha256": "b1c954ea752fad9b79cfd57da7b39cf6c4f7494fe22f7dde70faab107339b9d5",
+      "target_object_id": "27",
+      "target_object_name": "towel",
+      "same_class_candidate_ids": [
+        "26"
+      ],
+      "same_class_candidate_names": {
+        "26": "towel"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0416_00:1:73",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 1
+      },
+      "scene": "scene0416_00",
+      "ann_id": "73",
+      "description_sha256": "b8d417465a725d89d615e1c72bf3b96660067a9e2ef16626bc5bf191f23dcd8b",
+      "target_object_id": "2",
+      "target_object_name": "desk",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0416_00:2:74",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 2
+      },
+      "scene": "scene0416_00",
+      "ann_id": "74",
+      "description_sha256": "1a6dec5d8495f882aea8d10fd7f6a89c1d9e9602fd4b2419e61a8747084c6f60",
+      "target_object_id": "43",
+      "target_object_name": "pillow",
+      "same_class_candidate_ids": [
+        "28",
+        "29",
+        "30",
+        "31",
+        "40",
+        "41",
+        "42"
+      ],
+      "same_class_candidate_names": {
+        "28": "pillow",
+        "29": "pillow",
+        "30": "pillow",
+        "31": "pillow",
+        "40": "pillow",
+        "41": "pillow",
+        "42": "pillow"
+      },
+      "same_class_candidate_count": 7,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0416_00:3:75",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 3
+      },
+      "scene": "scene0416_00",
+      "ann_id": "75",
+      "description_sha256": "3cf60f3e3109ae0ace36c2d6c6a0171a3c5bc3b5b368848c69afc36011c0a687",
+      "target_object_id": "4",
+      "target_object_name": "computer_tower",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0320_00:0:16",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 0
+      },
+      "scene": "scene0320_00",
+      "ann_id": "16",
+      "description_sha256": "f8d7860f452c8cc4ab935d16121691e497988fbf605a480c00fc81846ed4ac3f",
+      "target_object_id": "10",
+      "target_object_name": "stool",
+      "same_class_candidate_ids": [
+        "46",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "46": "stool",
+        "9": "stool"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0320_00:1:17",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 1
+      },
+      "scene": "scene0320_00",
+      "ann_id": "17",
+      "description_sha256": "f5c6a71792971c11875b299b48a7b234706df16106bd9ad0b325ab9a9ce96933",
+      "target_object_id": "15",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "16",
+        "28",
+        "31"
+      ],
+      "same_class_candidate_names": {
+        "16": "office_chair",
+        "28": "office_chair",
+        "31": "office_chair"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0320_00:2:18",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 2
+      },
+      "scene": "scene0320_00",
+      "ann_id": "18",
+      "description_sha256": "5b64a4daa47715eac77de31ff5402be6506ad62d9878e30fe99acea6f6e14795",
+      "target_object_id": "46",
+      "target_object_name": "stool",
+      "same_class_candidate_ids": [
+        "10",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "10": "stool",
+        "9": "stool"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0320_00:3:19",
+      "dataset_order": {
+        "step": 13,
+        "expression_slot": 3
+      },
+      "scene": "scene0320_00",
+      "ann_id": "19",
+      "description_sha256": "01ec88536985553f9a966fb8e8392d03b90eeea57245118de1288f660ec7bfa3",
+      "target_object_id": "34",
+      "target_object_name": "monitor",
+      "same_class_candidate_ids": [
+        "18",
+        "30"
+      ],
+      "same_class_candidate_names": {
+        "18": "monitor",
+        "30": "monitor"
+      },
+      "same_class_candidate_count": 2,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": true,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0679_00:0:8",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 0
+      },
+      "scene": "scene0679_00",
+      "ann_id": "8",
+      "description_sha256": "1a006878f90c138484933e8bb2bdf4f8d7cfc12d1a7e203bc5d1846a697fbc79",
+      "target_object_id": "6",
+      "target_object_name": "lamp",
+      "same_class_candidate_ids": [
+        "18",
+        "19",
+        "38"
+      ],
+      "same_class_candidate_names": {
+        "18": "lamp",
+        "19": "lamp",
+        "38": "lamp"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0679_00:1:9",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 1
+      },
+      "scene": "scene0679_00",
+      "ann_id": "9",
+      "description_sha256": "c49713f84a8eee5f177fba3782319b6ef1cf1ab11444ade599397cbdd82072d2",
+      "target_object_id": "38",
+      "target_object_name": "lamp",
+      "same_class_candidate_ids": [
+        "18",
+        "19",
+        "6"
+      ],
+      "same_class_candidate_names": {
+        "18": "lamp",
+        "19": "lamp",
+        "6": "lamp"
+      },
+      "same_class_candidate_count": 3,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0679_00:2:10",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 2
+      },
+      "scene": "scene0679_00",
+      "ann_id": "10",
+      "description_sha256": "5e1f8afd59c9a8a157a407b8d885a23bbdecf012772471e9c914ef4993ea23bf",
+      "target_object_id": "37",
+      "target_object_name": "ottoman",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0679_00:3:11",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 3
+      },
+      "scene": "scene0679_00",
+      "ann_id": "11",
+      "description_sha256": "703f61455c6e7b7fd1012691e3dcd0673cb3b55b54a11d2e6a9867997ac6cdb8",
+      "target_object_id": "9",
+      "target_object_name": "table",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0452_00:0:56",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 0
+      },
+      "scene": "scene0452_00",
+      "ann_id": "56",
+      "description_sha256": "6fd28bbb1f44fb7ab92192a0a52e128b92cf645481c7cec578a42ea40eefbfb8",
+      "target_object_id": "21",
+      "target_object_name": "picture",
+      "same_class_candidate_ids": [
+        "19",
+        "20",
+        "22",
+        "23"
+      ],
+      "same_class_candidate_names": {
+        "19": "picture",
+        "20": "picture",
+        "22": "picture",
+        "23": "picture"
+      },
+      "same_class_candidate_count": 4,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0452_00:1:57",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 1
+      },
+      "scene": "scene0452_00",
+      "ann_id": "57",
+      "description_sha256": "9240b61bd8ed93f0a927c800ffed66c4c50ac7571230e8d76261777e08ea543f",
+      "target_object_id": "23",
+      "target_object_name": "picture",
+      "same_class_candidate_ids": [
+        "19",
+        "20",
+        "21",
+        "22"
+      ],
+      "same_class_candidate_names": {
+        "19": "picture",
+        "20": "picture",
+        "21": "picture",
+        "22": "picture"
+      },
+      "same_class_candidate_count": 4,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0452_00:2:58",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 2
+      },
+      "scene": "scene0452_00",
+      "ann_id": "58",
+      "description_sha256": "439f27c6a366dfc83a6491d0fbddd678871115ae15629a002238b418356bca4e",
+      "target_object_id": "2",
+      "target_object_name": "office_chair",
+      "same_class_candidate_ids": [
+        "1",
+        "10",
+        "29",
+        "3",
+        "31",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "same_class_candidate_names": {
+        "1": "office_chair",
+        "10": "office_chair",
+        "29": "office_chair",
+        "3": "office_chair",
+        "31": "office_chair",
+        "4": "office_chair",
+        "5": "office_chair",
+        "6": "office_chair",
+        "7": "office_chair",
+        "8": "office_chair",
+        "9": "office_chair"
+      },
+      "same_class_candidate_count": 11,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0452_00:3:59",
+      "dataset_order": {
+        "step": 14,
+        "expression_slot": 3
+      },
+      "scene": "scene0452_00",
+      "ann_id": "59",
+      "description_sha256": "198f84e8b632c149a1c2782a8071f31cdbc1301f973716b286161b183ae420f3",
+      "target_object_id": "19",
+      "target_object_name": "picture",
+      "same_class_candidate_ids": [
+        "20",
+        "21",
+        "22",
+        "23"
+      ],
+      "same_class_candidate_names": {
+        "20": "picture",
+        "21": "picture",
+        "22": "picture",
+        "23": "picture"
+      },
+      "same_class_candidate_count": 4,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0588_00:0:88",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 0
+      },
+      "scene": "scene0588_00",
+      "ann_id": "88",
+      "description_sha256": "47b80d4c4d0a366f209ddc2eba8056f66879b80abcba299d6b6b09afd04642ed",
+      "target_object_id": "18",
+      "target_object_name": "end_table",
+      "same_class_candidate_ids": [
+        "15",
+        "16",
+        "17",
+        "19",
+        "20",
+        "22"
+      ],
+      "same_class_candidate_names": {
+        "15": "end_table",
+        "16": "end_table",
+        "17": "end_table",
+        "19": "end_table",
+        "20": "end_table",
+        "22": "end_table"
+      },
+      "same_class_candidate_count": 6,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0588_00:1:89",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 1
+      },
+      "scene": "scene0588_00",
+      "ann_id": "89",
+      "description_sha256": "793772371b5be4309e5de73607cc420a667af6b841eba440e349ab8ec35bfe7e",
+      "target_object_id": "44",
+      "target_object_name": "cabinet",
+      "same_class_candidate_ids": [
+        "30"
+      ],
+      "same_class_candidate_names": {
+        "30": "cabinet"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0588_00:2:90",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 2
+      },
+      "scene": "scene0588_00",
+      "ann_id": "90",
+      "description_sha256": "1c27cd55879eb190c290d0ef1599ac6a5239f4ff25972410a96f1a36d787e935",
+      "target_object_id": "0",
+      "target_object_name": "coffee_table",
+      "same_class_candidate_ids": [
+        "1"
+      ],
+      "same_class_candidate_names": {
+        "1": "coffee_table"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": false,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0588_00:3:91",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 3
+      },
+      "scene": "scene0588_00",
+      "ann_id": "91",
+      "description_sha256": "6d0af27fc4e4b1bce7ab92a8997fc257bf73cbe497c51be16e7873739051f8e6",
+      "target_object_id": "19",
+      "target_object_name": "end_table",
+      "same_class_candidate_ids": [
+        "15",
+        "16",
+        "17",
+        "18",
+        "20",
+        "22"
+      ],
+      "same_class_candidate_names": {
+        "15": "end_table",
+        "16": "end_table",
+        "17": "end_table",
+        "18": "end_table",
+        "20": "end_table",
+        "22": "end_table"
+      },
+      "same_class_candidate_count": 6,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0209_00:0:12",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 0
+      },
+      "scene": "scene0209_00",
+      "ann_id": "12",
+      "description_sha256": "d030d965e230a3435332ff385120ada95fd82bcecb2eb76bbf3bcac6f5c4d4e5",
+      "target_object_id": "13",
+      "target_object_name": "nightstand",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0209_00:1:13",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 1
+      },
+      "scene": "scene0209_00",
+      "ann_id": "13",
+      "description_sha256": "455670cc4cf8dc77e85efbcb5a30bfed3e0ed54423bad6f832be8989f53b6153",
+      "target_object_id": "7",
+      "target_object_name": "tv",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0209_00:2:14",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 2
+      },
+      "scene": "scene0209_00",
+      "ann_id": "14",
+      "description_sha256": "9190353f5e871a4055f03ab67e0972abd8eb0c2682d6ef9eef04acb6f1d2e6b9",
+      "target_object_id": "2",
+      "target_object_name": "sofa_chair",
+      "same_class_candidate_ids": [],
+      "same_class_candidate_names": {},
+      "same_class_candidate_count": 0,
+      "primary_rank_eligible": false,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    },
+    {
+      "registry_key": "scene0209_00:3:15",
+      "dataset_order": {
+        "step": 15,
+        "expression_slot": 3
+      },
+      "scene": "scene0209_00",
+      "ann_id": "15",
+      "description_sha256": "bb52eddf615d85104c318b15dad8306d07c12551dfc24312fb86972a92a315cd",
+      "target_object_id": "1",
+      "target_object_name": "bed",
+      "same_class_candidate_ids": [
+        "0"
+      ],
+      "same_class_candidate_names": {
+        "0": "bed"
+      },
+      "same_class_candidate_count": 1,
+      "primary_rank_eligible": true,
+      "same_target_repeated": true,
+      "target_has_relation_edge": true,
+      "connected_same_class_peer": false,
+      "scene_expression_count": 4,
+      "scene_weight": 0.25
+    }
+  ],
+  "limitations": [
+    "Metadata class equality does not establish native candidate-query coverage or geometric confusability.",
+    "The fixed TRAIN sample is diagnostic and not a held-out population sample.",
+    "This registry makes no novelty, causal-effect, or model-quality claim."
+  ]
+}

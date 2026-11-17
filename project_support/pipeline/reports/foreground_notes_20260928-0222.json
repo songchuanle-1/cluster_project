@@ -1,0 +1,12 @@
+{
+  "actions": [
+    "本轮 design 快照 2026-09-28 02:08:48+08:00。续做稳定候选 m95-sample-context-support：静态审计证实旧 M95 原生生产器仅接受 256 条 m95_preregistered_identity_controls_v1，且需要 stratum、target_class、peer 等字段；冻结两场景 31 条新清单不能直接复用，已记录反证并未伪造元数据。",
+    "按预注册实现独立只读 31 表达原生捕获适配器，绑定原始 TRAIN 数据集/标注/图谱及 M95 checkpoint SHA256，验证场景、ann、原文、物理目标，保留原始模型、loss 与 seed1999。六项 CPU 身份契约测试及 AST 检查通过；这是实现准备，不是 GPU 原生验证或科学准入。",
+    "02:19 实时 server-6 GPU7：13199 MiB、外部 PID 709354 占用 13184 MiB；瞬时利用率 0% 不等于空卡。未部署、未启动原生捕获、未干扰外部进程；无入队或训练启动。",
+    "02:22 finish 返回 CLOSURE_INCOMPLETE: Capacity gap remains with executable research: m95-sample-context-support；截止 03:08:48 尚远，且工具不接受将双槽卡上的单一外部 GPU 进程标作独占槽位封锁。不存在合法提前完成条件；本轮 abort、保留证据，执行状态 INCOMPLETE。"
+  ],
+  "decisions": [
+    "m95-sample-context-support 保持 diagnosis。新适配器仅供冻结原生结果采集，尚缺 GPU 运行、同输入因果 placebo、独立结构机制和六项准入验证；不能把 CPU 测试写成 native_backward PASS。",
+    "只有实时 GPU7 空闲、获得独占诊断租约且远端源码/数据/checkpoint 哈希核实后才执行采集。若容量缺口与活动诊断导致提前 postflight 拒绝，保留实证并如实 abort，不人为声称截止、资源封锁或实验通过。"
+  ]
+}

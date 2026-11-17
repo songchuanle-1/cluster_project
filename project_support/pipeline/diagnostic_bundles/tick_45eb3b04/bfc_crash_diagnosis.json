@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T05:03:07.431391+00:00",
+  "status": "BFC_SHARED_DATALOADER_CRASH_LOCAL_SOURCE_DIAGNOSIS_CAUSE_UNRESOLVED_NO_REPAIR_OR_RESUME",
+  "experiment_id": "M213-BFC",
+  "admitted_scientific_source": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+  "anchors": {
+    "root_actual_phase_reconciliation": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/original_phase_reconciliation.json",
+      "sha256": "e6355b9b3e90bf377a869e73dd7b9e21f4e688f4dcea00d59a3ae52d1b965d44"
+    },
+    "local_dataset_source": {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"
+    },
+    "local_native_train_source": {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    },
+    "local_dataloader_source": {
+      "path": "Cluster/framework/dataset/__init__.py",
+      "sha256": "eb3f092f427ec70c62adfa5c7e4586335fbc925ea76d175ef33387f9fa4da33c"
+    },
+    "original_BFC_config": {
+      "path": "Cluster/configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    "canonical_resume_source": {
+      "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/cluster_resume.py",
+      "sha256": "4740e50abad1c6a1db9b3fdfa540ea006047dffd6196305f081e1a55eaa1415f"
+    }
+  },
+  "observed_facts_from_root_proof": {
+    "observed_at": "2026-10-26T04:54:43.248051+00:00",
+    "original_BFC_PID": 219369,
+    "original_BFC_process_present": false,
+    "last_train_progress": [
+      20,
+      50,
+      3832,
+      4686
+    ],
+    "log_bytes": 26759161,
+    "log_age_seconds": 736.2567899227142,
+    "trace_path": [
+      "DataLoader worker process0",
+      "scannetv2.__getitem__:376",
+      "get_sp_label:341",
+      "torch_scatter.scatter_mean:41",
+      "scatter_sum:23",
+      "out.scatter_add_(dim,index,src)"
+    ],
+    "exception": "unsupported operation: some elements of the input tensor and the written-to tensor refer to a single memory location. Please clone() the tensor before performing the operation.",
+    "BFC_GPU0_inventory": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 41, 0",
+    "BFC_GPU0_contexts": "",
+    "BCR_original_process_present": false,
+    "BCR_natural_earlystop_is_separate_from_BFC_crash": true,
+    "reviewer_new_remote_observation": false
+  },
+  "code_evidence": [
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "line": 219,
+      "finding": "Training preprocessing reindexes selected superpoint IDs using np.unique(...,return_inverse=True); same sampling indexes instance labels at221."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "line": 373,
+      "finding": "superpoint is torch.from_numpy; instance labels are from_numpy(...).long at375; get_sp_label called376 before returning a batch."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "line": 339,
+      "finding": "For every unique instance, ref_lbl=(instance_label==instance) then scatter_mean(ref_lbl.float(),superpoint,dim=-1) without an out argument; threshold remains >0.5 at342."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "line": 330,
+      "finding": "get_ref_mask contains the same scatter_mean pattern, so any approved low-level repair should consider both call sites with identical semantics; do not silently patch only one or skip labels."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "line": 453,
+      "finding": "sp_ins_label is returned and collated into sp_ins_labels at478/558; it is not safe to assume preprocessing result is unused."
+    },
+    {
+      "path": "Cluster/framework/dataset/__init__.py",
+      "line": 22,
+      "finding": "Native TRAIN loader uses shuffle=True, drop_last=True, pin_memory=True and persistent_workers; BFC YAML specifies batch2/4workers/persistent_workersTrue."
+    },
+    {
+      "path": "Cluster/tools/train.py",
+      "line": 103,
+      "finding": "Batch is fetched by for i,batch in enumerate(dataloader) before model(batch,mode=loss); loader exception is not a completed BFC forward/loss failure."
+    }
+  ],
+  "root_cause_assessment": {
+    "established_failure_layer": "CPU dataset-label reduction in a DataLoader worker, preceding delivery of the failing batch to the model. This is a training/runtime implementation crash, not evidence of BFC scientific rejection.",
+    "direct_repository_alias_found": false,
+    "why_not_yet_diagnosed": "Repository code supplies no output tensor, comparison produces a new boolean result and .float() is a conversion. No explicit source/output shared-storage relationship is visible at this call site. The exact installed torch_scatter implementation/version and original failing tensor/storage metadata were not captured. Error text alone does not establish which operand aliases or prove clone is sufficient.",
+    "hypotheses_to_discriminate": [
+      {
+        "hypothesis": "Actual failing src/index layout or alias boundary interacts with the installed scatter implementation.",
+        "status": "UNCONFIRMED",
+        "needed": "Original failing scene/index/instance and post-transform CPU tensors, sizes/strides/storage offsets/contiguity/pointers and exact installed scatter source."
+      },
+      {
+        "hypothesis": "A runtime-library implementation/version-specific allocation/overlap path differs from the presumed no-out fresh-output path.",
+        "status": "UNCONFIRMED",
+        "needed": "Read exact same-environment torch/torch_scatter versions and scatter.py lines used by traceback, then reproduce on the captured inputs without importing a model."
+      }
+    ],
+    "unsupported_attributions": [
+      "No evidence that BFC feature topology or its four weight quadrants caused this loader error.",
+      "No evidence connecting the earlier foreign GPU context to this CPU overlap exception.",
+      "No evidence that labels are semantically wrong, threshold should change, sample should be skipped or a seed/worker change is a repair."
+    ]
+  },
+  "minimum_future_diagnostic_no_automatic_source_change": {
+    "current_executed": "NOT_RUN",
+    "capture": [
+      "Record original scan/annotation/dataset index and worker index, instance value, post-transform superpoint/instance arrays, ref_lbl source sizes/strides/storage_offset/contiguity/device/dtype and same-environment torch/torch_scatter package versions/source hashes.",
+      "Do not infer the failing dataset index from Train20 step3832: DataLoader shuffle/persistent workers/prefetch may fail on a future queued sample. No captured failing sample is present in the current proof."
+    ],
+    "matched_CPU_checks": [
+      "On the exact captured inputs, run the original scatter_mean unchanged as the reproduction baseline.",
+      "Compare one change at a time: independent contiguous clones of src/index, then a separately allocated explicit output of identical dtype/device/size. Inspect source/index/output storage relationships before the failing scatter_add. These are diagnostic controls, not preapproved production fixes.",
+      "Compare exact returned gt_spmask and full get_sp_label outputs to unchanged valid samples, preserving >0.5, original superpoint membership, instance iteration/order, dtype and data. Check the same pattern in get_ref_mask."
+    ],
+    "promotion_boundary": "Only an actually reproduced/control-passing minimal storage/allocation repair warrants an isolated version and required source/native/data-label checks. Do not edit the active shared dataset or BFC receipt/source, replace scatter formulas, rerun unchanged training as a claimed fix, or alter seed/data/precision/threshold. Shared dataset changes affect CTS/BEC source/data hashes and must not be slipped into their already frozen packages."
+  },
+  "native_recovery_contract": {
+    "train_entry": {
+      "path": "Cluster/tools/train.py",
+      "line": 434,
+      "behavior": "--resume passes fixed path to gorilla.resume(model,optimizer,scheduler,strict=False,map_location=cpu); start_epoch=meta.epoch+1, restore best_miou and epochs_no_improve. Pretrain branch is mutually exclusive."
+    },
+    "checkpoint_save": {
+      "path": "Cluster/tools/train.py",
+      "line": 489,
+      "behavior": "Full optimizer/scheduler/meta saved after a completed train/validation epoch; meta={epoch,best_miou,epochs_no_improve}. last.pth at502-503; mid-epoch save block180-184 is commented out. BFC YAML save_epoch100 exceeds epochs50, so numbered per-epoch snapshots are not guaranteed by native50-epoch run."
+    },
+    "partial_epoch_scope": "The Train20 step3832 model state is not guaranteed recoverable. If complete last.pth later proves meta.epoch19, native restart is epoch20, not step3833; exact path/existence/hash/meta are currently UNKNOWN. No checkpoint body was read/stat/existence-checked by this reviewer.",
+    "RNG_and_sampler_scope": "Visible train resume branch does not restore Python/NumPy/worker/sampler/generator states or dataloader iterator position. The installed gorilla internals were not read; no claim of exact stochastic or batchwise replay is justified. Native seed is reset before model/dataloader construction.",
+    "required_future_fullstate_evidence": [
+      "Fixed complete checkpoint file SHA/path tied to the original M213 run directory, original config/log/PID lineage and admitted source48fc, not just compatible parameter shapes.",
+      "CPU-only load proof with model/optimizer/scheduler nonempty and valid finite meta(epoch,best_miou,epochs_no_improve); preserve original scalar types while normalizing JSON floats if needed. Do not substitute a pretrained backbone or weights-only model for full resume.",
+      "Exact BFC-specific human authorization and matching hashed resume_checkpoint_evidence documents required by canonical cluster_resume.validate; existing HAP/M206/resource grants do not substitute.",
+      "Original admission/resource/duplicate-process/allowlist/occupancy checks still apply. Resume verifies actual remote HEAD/source against task.code_commit without sync; if CTS/main moves beyond48fc, a changed compatible source cannot be relabeled as original48fc resume. Resolve exact checkout/root/source compatibility explicitly before any launch.",
+      "Immediately before launch the fixed checkpoint is rehashed; no cold fallback or latest/best auto-selection. Preserve crash archive and prior launch/source/receipt lineage, do not mark done_earlystop from BFC traceback."
+    ],
+    "canonical_resume_lines": {
+      "intent_fail_closed": [
+        9,
+        13
+      ],
+      "GPU_and_native_launcher": [
+        21,
+        27
+      ],
+      "exact_path_identity_hash_and_human": [
+        28,
+        61
+      ],
+      "CPU_fullstate_and_meta": [
+        62,
+        78
+      ],
+      "exact_admitted_source_no_sync": [
+        81,
+        94
+      ],
+      "checkpoint_rehash": [
+        97,
+        108
+      ]
+    }
+  },
+  "remaining_unknowns": [
+    "Offending scene/annotation/dataset index, original failed instance value and actual tensor/storage metadata.",
+    "Exact remote torch/torch_scatter versions and implementation bytes; local repository dataset lines match traceback but remote dataset bytes were not independently rehashed here.",
+    "Whether original failing scatter can be reproduced, and which minimal storage intervention fixes it.",
+    "Actual checkpoint file availability/hash/full state/meta and amount of recoverable epoch20 partial work.",
+    "BFC final efficacy and any causal relation between its structure and crash are UNKNOWN."
+  ],
+  "material_concerns": [
+    {
+      "code": "BFC_NATIVE_DATALOADER_IMPLEMENTATION_CRASH",
+      "scientific_rejection": false,
+      "repair_validated": false,
+      "automatic_resume_authorized": false
+    }
+  ],
+  "bookkeeping_recommendation": "Archive exact original BFC PID/log as crashed after canonical verification, preserve prior evidence/checkpoint lineage, and keep recovery explicitly pending diagnosis/full-state proof/human resume contract. This does not block CTS or another already-authorized independent candidate from using a genuinely fresh idle slot.",
+  "actions_by_reviewer": {
+    "local_source_read_and_hash": true,
+    "private_report_only": true,
+    "model_or_dataset_modified": false,
+    "native_or_Torch_test": false,
+    "checkpoint_body_or_metadata_file_access": false,
+    "SSH_GPU_Git": false,
+    "shared_ledger_or_scheduler_change": false,
+    "resume_or_relaunch": false,
+    "old9_reviewed": false
+  }
+}

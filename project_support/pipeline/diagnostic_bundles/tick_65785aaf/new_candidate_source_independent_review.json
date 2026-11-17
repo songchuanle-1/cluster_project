@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "status": "STATIC_CRE_SOURCE_TOPOLOGY_AND_INTEGRATION_REVIEWED_NOT_NATIVE_PASS",
+  "recorded_at": "2026-10-26T22:23:01.023685+00:00",
+  "candidate_id": "hierarchy-cross-root-directed-edge-broadcast",
+  "experiment_id": "M217-CRE",
+  "code_commit": null,
+  "source_parent_commit": null,
+  "base_reference_commit": "026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563",
+  "material_concerns": [],
+  "anchors": {
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/preparation.json",
+      "sha256": "c760d9fd353d2b3e208837b9489ba511918e73821c278d97b5067c14701a41fe"
+    },
+    "source_manifest": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/source_manifest.json",
+      "sha256": "cf6014e4a957da56349abf9ab2b0558b7a668f0db2f227cf12b06dc0fba2711c"
+    },
+    "native_protocol": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/native_protocol.md",
+      "sha256": "69450726b7e908be6375acddda30aa9f8c97654fca9f554b397133e17e272271"
+    },
+    "hypothesis": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/hypothesis.json",
+      "sha256": "366af0c24ccf51ff3a642f65528b989012af27c88d622a88c7a957ae380f8a2f"
+    },
+    "implementation": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/implementation.md",
+      "sha256": "7cf431190bff129d58cb88ed15fd51d23c572e0a7ea7b3669450eb44e0d47432"
+    },
+    "author_final_software_validation": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/static_validation_final.json",
+      "sha256": "dc54670a29eb6bb5110769ac9d52cf3f13963d13fb9b3bacfe132a8c62e3d562"
+    },
+    "metadata_int_clarification": {
+      "path": "pipeline/diagnostic_bundles/tick_65785aaf/new_candidate_prepare/design_clarification.json",
+      "sha256": "c66c8e03b2b51cbcf6c863853988f5a59271285f1d16d376831505b8c3fe2815"
+    }
+  },
+  "source_files_exact9": {
+    "configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/hier_postprocess.py": "6cd338ba1bb16ae9778273bff96ae0973854767d7075b97f65715a2fbc632dc7",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/root_exchange.py": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+  },
+  "bounded_route_and_constraint_review": {
+    "metadata_scope": "Only current research candidate id/experiment/stage/short hypothesis/mechanism/config projection for coarse/global/CPA/agg/CCP neighbors, plus experiments.csv matching short legacy IDs/configs. No655 evidence bodies, grant/checkpoint bodies, old native tests, general literature or exhaustive historical novelty audit.",
+    "actual_near_neighbor_sources": [
+      {
+        "route": "M71-CCP",
+        "actual_source": {
+          "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ccp/hier_postprocess.py",
+          "sha256": "b44a78ed6cab50d9ec818cb6cac940a48f54e25320f0073e05b08f366c031c69"
+        },
+        "bounded_function_read": "refine_cluster_feats_hierarchical"
+      },
+      {
+        "route": "M204-CPA-R1",
+        "actual_source": {
+          "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/coarse_cross_attention.py",
+          "sha256": "c75b79e8c5fdddba1d3f86125e711fe5e9d305788b70e0bde44c3d6b8e5ad514"
+        },
+        "bounded_function_read": "coarse_readback"
+      },
+      {
+        "route": "M206-CGCA",
+        "actual_source": {
+          "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca/coarse_channel.py",
+          "sha256": "d27ded2de014f62bf29de9fc9ce4cd51f968ac4ffab5c048d4d7a249d3a4dd92"
+        },
+        "bounded_function_read": "CoarseConditionedChannelAttention.forward"
+      },
+      {
+        "route": "legacy-lite_agg",
+        "actual_source": {
+          "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_agg/hier_postprocess.py",
+          "sha256": "3edec55f847787b87118795edd04def261204d0b8dca872241620176e6c47d62"
+        },
+        "bounded_function_read": "SharedClusterBank.build_cluster_feats"
+      },
+      {
+        "route": "M215-BEC-R1",
+        "actual_source": {
+          "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bec/bipartite_edges.py",
+          "sha256": "9863f14db172c27a39152bdd55f22722e5203ede7c53386fac57fa73a2ef44c1"
+        },
+        "bounded_function_read": "CrossLevelBipartiteEdgeComposition.forward"
+      }
+    ],
+    "findings": [
+      {
+        "route": "Original M95",
+        "difference": "M95 refines each bank independently with a pointwise FFN before original HCG. CRE first conditions full-channel vector messages on pairs of true-supported coarse receiver/sender roots, fixed-means each receiver and directly synthesizes fine/middle descendants using their original coarse ancestor. Existing HCG point-global-mean communication remains; no claim original entire decoder lacked global interaction."
+      },
+      {
+        "route": "M71-CCP / legacy CCP variants",
+        "difference": "Read original M71 function adds original gathered parent features along the membership tree, with no learned root-root receiver/sender message or direct two-decoder raw-message synthesis. M73/M74 labels/config metadata were bounded matches, not an exhaustive old-variant source audit."
+      },
+      {
+        "route": "M204-CPA-R1",
+        "difference": "Actual CPA r1 is projection-free per-point queries dotted against coarse keys, softmax-weighted coarse value readback. CRE coarse-root receiver-conditioned joint nonlinear vector messages are uniformly reduced, then descendants decode fixed original-ancestor context; no point-to-allcoarse attention or learned weights. Difference is the whole receiver/message graph, not removal of QKV projections."
+      },
+      {
+        "route": "M206-CGCA",
+        "difference": "Actual coarse Gram grouped channel affinity mixes each fine token own values. CRE carries full root sender vectors through explicit root-root edges and ancestor synthesis. Paused M206 remains held; no resume or repair granted."
+      },
+      {
+        "route": "legacy-lite_agg",
+        "difference": "Actual banned agg code learns scalar MLP/softmax weights while constructing the raw fine bank. CRE leaves raw aggregation byte/AST unchanged; its private fixed equal mean reduces already transformed vector root messages. No learned pooling score/selector is introduced."
+      },
+      {
+        "route": "M215-BEC-R1",
+        "difference": "Actual BEC forward sends retained/upward split messages over original child-parent membership edges, mean-pools upward, applies original coarse FFN, then descends. CRE has no refined-child/upward branch: different coarse roots exchange first, then D0/D1 read m directly. It does not borrow BEC prior native results."
+      },
+      {
+        "route": "recent middle graph candidates",
+        "difference": "Ledger short mechanisms identify PSBR/BCR recurrence, BTC complement tree, PSNC spectral conjugation, BFC pair-state, CTS cyclic triad and AEF antisymmetric MST middle flux. CRE cross-root wholegraph is not an activation/kernel/width change or same-ID retry of those mechanisms; this bounded metadata/source review does not establish global novelty."
+      }
+    ],
+    "constraint_result": "No exact identical old graph or prohibited route restart identified in this bounded scope. Original three rawcf skips and LNs, raw banks/FPS/membership/childmaps, CSORT, HCG and one inst_feats-to-ILA/mask path remain. No new gate, residual, QKV, point-N-squared attention, language routing, learned pooling/selector, numeric/config/seed/schedule/precision sweep or repeated injection.",
+    "author_document_precision": "Frozen hypothesis calls CPA QKV attention as shorthand; actual reviewed CPA r1 has no learned QKV projection. This external review uses the precise projection-free point-query/softmax distinction above. No frozen document rewritten.",
+    "claim_scope": "Whole-graph alternative with changed FFN capacity and empty-slot bias behavior; not a single-factor causal test, a proven training deficit, new-coverage claim, general novelty result or accuracy benefit."
+  },
+  "production_topology_and_forward_independent_execution": {
+    "status": "ACTUAL_PRODUCTION_AST_STDLIB_TOPOLOGY_AND_SYMBOLIC_FORWARD_CHECKS_PASSED_NOT_NATIVE",
+    "recorded_at": "2026-10-26T22:17:43.028754+00:00",
+    "source_sha256": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232",
+    "check_count": 26,
+    "checks": [
+      {
+        "name": "Noncontiguous true roots exclude unsupported prefix IDs",
+        "passed": true
+      },
+      {
+        "name": "Actual directed receiver-sender topology has exactly six ordered nonself rows",
+        "passed": true
+      },
+      {
+        "name": "Fine and middle rows use exact composed original coarse ancestors",
+        "passed": true
+      },
+      {
+        "name": "Singleton uses one private None sender, not duplicated real root",
+        "passed": true
+      },
+      {
+        "name": "Point metadata reorder/multiplicity does not alter fixed-support plan",
+        "passed": true
+      },
+      {
+        "name": "Native maximum8 roots has56 ordered nonself edges and7 donors each",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 0",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 1",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 2",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 3",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 4",
+        "passed": true
+      },
+      {
+        "name": "Actual plan rejects invalid metadata case 5",
+        "passed": true
+      },
+      {
+        "name": "Actual equal-mean helper uses arithmetic mean of supplied messages",
+        "passed": true
+      },
+      {
+        "name": "Empty means preserve zero-row shape",
+        "passed": true
+      },
+      {
+        "name": "Active empty message group rejected rather than fabricated mean",
+        "passed": true
+      },
+      {
+        "name": "Actual forward batches all real oriented rows once and singleton privatezero last",
+        "passed": true
+      },
+      {
+        "name": "Actual fine synthesis receives ownnormalized payload plus raw rootmessage only",
+        "passed": true
+      },
+      {
+        "name": "Actual middle synthesis receives ownnormalized payload plus correct composed rootmessage",
+        "passed": true
+      },
+      {
+        "name": "Actual forward preserves full original shapes and input carrier cells",
+        "passed": true
+      },
+      {
+        "name": "Unsupported and padded delta cells stay zero at level 0",
+        "passed": true
+      },
+      {
+        "name": "Unsupported and padded delta cells stay zero at level 1",
+        "passed": true
+      },
+      {
+        "name": "Unsupported and padded delta cells stay zero at level 2",
+        "passed": true
+      },
+      {
+        "name": "Coarse deltas are exactly actual message means at original IDs",
+        "passed": true
+      },
+      {
+        "name": "Actual operator shares GELU in exactly three payload phases",
+        "passed": true
+      },
+      {
+        "name": "All-empty actual forward returns zero deltas with no new map or activation call",
+        "passed": true
+      },
+      {
+        "name": "Actual unchanged native coarse-cap guard rejects width9 before payload",
+        "passed": true
+      }
+    ],
+    "executed_actual_AST": [
+      "build_root_exchange_plan",
+      "equal_root_message_means",
+      "CoarseRootDirectedExchange.forward"
+    ],
+    "carrier_scope": "Opaque scalar expression trees and stdlib Fraction for private mean; no Torch numerical kernels, parameter initialization, FP32, gradients, optimizer, GPU or native performance evidence. Actual __init__ not executed; registration/init reviewed statically.",
+    "files_written": 0
+  },
+  "frozen_integration_independent_checks": {
+    "status": "FROZEN_CRE_SOURCE_INTEGRATION_AST_HASH_CHECKS_PASSED_NOT_NATIVE",
+    "recorded_at": "2026-10-26T22:20:31.862561+00:00",
+    "check_count": 19,
+    "checks": [
+      {
+        "name": "Exact frozen c76019-file payload map",
+        "passed": true
+      },
+      {
+        "name": "Exact nine source/YAML bytes with source commit/parent still null",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy __init__.py",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy backbone.py",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy dec.py",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy loss.py",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy network.py",
+        "passed": true
+      },
+      {
+        "name": "Unchanged original M95 bytecopy sample_model.py",
+        "passed": true
+      },
+      {
+        "name": "Original YAML exact a18f bytes",
+        "passed": true
+      },
+      {
+        "name": "Original seed1999 epochs50/max70/drop0/singlelayer",
+        "passed": true
+      },
+      {
+        "name": "Original FFN/LN and common constructor order exact prefix",
+        "passed": true
+      },
+      {
+        "name": "Other entire hierarchy AST exact: rawbank/FPS/IDs/HCG/CSORT/loss",
+        "passed": true
+      },
+      {
+        "name": "New maps only inside CPU RNG fork, all three original FFNs removed",
+        "passed": true
+      },
+      {
+        "name": "Three original preLN, one rawskip perlevel and one HCG/message delivery",
+        "passed": true
+      },
+      {
+        "name": "Exactly3 registered Linear2CtoC and sharedGELU, no new gate/parameter/buffer",
+        "passed": true
+      },
+      {
+        "name": "Only metadata detached; shape scalar canonicalized; payload functional",
+        "passed": true
+      },
+      {
+        "name": "Future native protocol exact hash and legal six-block/coverage/zero scopes",
+        "passed": true
+      },
+      {
+        "name": "All eight model sources compile without module/Torch import",
+        "passed": true
+      },
+      {
+        "name": "Author final46 proof tied exactly to frozen helper/hierarchy and software-only",
+        "passed": true
+      }
+    ],
+    "source_files_exact9": {
+      "configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/hier_postprocess.py": "6cd338ba1bb16ae9778273bff96ae0973854767d7075b97f65715a2fbc632dc7",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/root_exchange.py": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+    },
+    "preparation_sha256": "c760d9fd353d2b3e208837b9489ba511918e73821c278d97b5067c14701a41fe",
+    "helper_sha256": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232",
+    "hierarchy_sha256": "6cd338ba1bb16ae9778273bff96ae0973854767d7075b97f65715a2fbc632dc7",
+    "resources_native_Torch": "NOT_RUN",
+    "review_harness_note": "Initial private integration probe reached final author-proof field check then KeyError from assumed helper_sha256. Corrected to actual source_helper_sha256; no model/source/protocol edit or native action."
+  },
+  "source_graph_contract": {
+    "formula": "z_l=originalLN_l(X_l); e_pq=GELU(U[z2_p,z2_q]), q!=p among true-supported roots; m_p=equal mean other-root messages; delta2=m; delta0_i=GELU(D0[z0_i,m_composed_coarse_ancestor(i)]); delta1_j=GELU(D1[z1_j,m_coarse_parent(j)]); refined_l=X_l+delta_l.",
+    "true_support": "sorted unique ids0; middle from ids1[truefine]; coarse from ids2[truemiddle], excluding unsupported original prefixes and padded rows. Original IDs are retained and receiver/sender pairs are simultaneous from original normalized states.",
+    "degeneracies": "One true root uses same U[z,privatezero] with no fake original sender. No true roots returns zero deltas with no map calls. Unsupported/padded deltas are zero; removed empty-slot FFN bias updates explicitly differ from M95. Optional boundaries remain future native NOT_EXERCISED if absent.",
+    "gradient_path_source_inference": "Normalized feature payloads are never detached; only ID metadata is detached to CPU lists. Functional index_copy and mean preserve intended differentiable path under normal PyTorch semantics. Actual autograd/module initialization/optimizer behavior was not run locally.",
+    "common_initialization": "Original FFNs/LNs/common constructor body is an exact prefix before new modules. New U/D0/D1 only in CPU fork_rng(devices=[]), original FFNs de-registered as three Identity modules. Intent preserves common RNG progression but actual pairing/correlation/loader behavior is unmeasured."
+  },
+  "future_native_gate_scope": {
+    "native_TRAIN2": "NOT_RUN",
+    "resources": "NOT_RUN",
+    "formal_training": "NOT_RUN",
+    "compatible_real_source_version_required": true,
+    "original_protocol": "Actual original M95 control, two fixed TRAIN forwards, seed1999/epochs50/max_iters70/YAML/data/pretrain/criterion/optimizer/scheduler unchanged; no sample replacement, auxiliary backward, precision or threshold change. Compare actual original TRAIN fingerprints and common initialization excluding old all3FFNs/newroot_exchange only, retaining all3LNs; no fixed839/843/full-buffer gate.",
+    "core_coverage": "Each original TRAIN forward must include at least one actual scene with >=2 true supported coarse roots; singleton scenes remain legal. Otherwise INCONCLUSIVE before zero-output grad watch, no resample.",
+    "original_loss_weight_blocks": "Six aggregate C-column blocks: U receiver/sender, D0 own/context, D1 own/context. Require future finite/nonzero original-loss gradients and actual slice updates per native optimizer step; per-edge/call/row gradients and zero/unchanged bias are legal.",
+    "resource_protocol": "Original full counted<=10G/three fvcore handler hashes/full unsupported dictionary/same real input/bs1/lang1/warm20/repeat100/median-P90/allocated-reserved and original +15% condition; no new one-sided counter or latency threshold.",
+    "observer_limits": "Future captured actual original outputs only, no map/GELU replay or auxiliary autograd. Smoke peak includes observers, pure TRAIN peak unknown. No new conservation/offdiagonal/tolerance hard gate."
+  },
+  "source_only_cost_inference": {
+    "C": 256,
+    "original_three_FFN_parameters": 1576704,
+    "new_three_Linear_parameters": 393984,
+    "parameter_delta": -1182720,
+    "max_native_roots": 8,
+    "max_real_directed_edges_per_scene": 56,
+    "linear_MAC_bound_at_full_native_supported_widths": 49283072,
+    "original_three_FFN_linear_MAC_at_full_padded_widths": 171966464,
+    "cost_scope": "Arithmetic for token linear maps only, excludes LayerNorm/GELU/means/index/cpu metadata and all other model work; not measured full-model FLOPs/latency/memory or a10G PASS.",
+    "metadata_complexity": "O(P + FlogF + MlogM + RlogR + R^2 + F + M) for membership traversal/sets/sorts/pair and recipient generation; linearity not claimed for entire helper."
+  },
+  "limitations": {
+    "Torch_native_FP32_GELU_gradients": "NOT_RUN",
+    "actual_common_initialization_and_TRAIN_pairing": "NOT_RUN",
+    "actual_parameters_full_model_resources": "NOT_RUN",
+    "point_query_mask_quality_target0_51_robustness_novelty": "UNKNOWN",
+    "actual_Git_source_version": "NOT_CREATED_OR_AUDITED_BY_THIS_REPORT. Current packet code/source/parent remain null;026c is only reference. Root may separately save exact9 source bytes; any actual commit/native binding needs separate proof. AEF56b2 is a sibling if saved from026c; no future fast-forward or old-result relabel assumed."
+  },
+  "review_execution_notes": [
+    "Actual selected production AST functions, not a mirrored CRE forward, were executed with opaque expression carriers and stdlib Fraction only. 26 independent topology/forward checks plus19 hash/AST/integration checks are software/source assertions, not45 experiments.",
+    "Author final46 source/list checks were inspected and hash-bound, not rerun. Earlier author pre-int pass/helper snapshot retained; explicit int(shape) metadata refinement before freeze is not Torch tracing evidence or scientific revision.",
+    "Initial private integration probe used assumed author proof helper_sha256 field and stopped with KeyError after source checks; corrected to actual source_helper_sha256. No candidate/native state changed.",
+    "CSV metadata read used corrected utf-8-sig encoding after local unknown-encoding error; no model/test/shared mutation."
+  ],
+  "actions": {
+    "Torch_imported": false,
+    "GPU_native_or_SSH": false,
+    "Git_command_or_mutation": false,
+    "root_owner_helper_entry": false,
+    "old655_evidence_or_grant_checkpoint_body": false,
+    "old_holds_reopened": false,
+    "source_or_shared_queue_owner_ledger_written": false,
+    "new_model_implemented_by_reviewer": false,
+    "only_new_private_review_written": true,
+    "native_PASS_admission_receipt_or_queue_created": false
+  }
+}

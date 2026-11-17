@@ -1,0 +1,171 @@
+{
+  "admission": false,
+  "allocation": {
+    "foreign_process_memory_mib": 41996,
+    "foreign_process_pid": 3694608,
+    "foreign_process_untouched": true,
+    "gpu": 7,
+    "gpu_memory_total_mib": 81559,
+    "gpu_memory_used_mib": 42023,
+    "max_tasks_per_gpu": 2,
+    "server": "server-6"
+  },
+  "checkpoint_transfer": false,
+  "completed_work": [
+    "Materialized the dependency collection plan in the server-6 target interpreter.",
+    "Collected and validated server-6 dependency provenance without model-package imports.",
+    "Fixed the ELF section-header parser and tightened its exact-size fixture.",
+    "Verified pointgroup_ops import and a tiny CUDA forward/backward operator path.",
+    "Inspected M197 best/last checkpoints, optimizer state, scheduler state and epochs.",
+    "Preserved the foreign GPU7 process and avoided queue, launch or checkpoint mutation."
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/headless/.tick_context.json",
+      "sha256": "c9924915817f9d525d44c84dd87e5aab89bc6520441103069d0271843109a932"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b"
+    },
+    {
+      "path": "SERVERS.yaml",
+      "sha256": "4da92203f8e9600ef1264b85d6509a524c7be9f373c44d3d40747615f651eedc"
+    },
+    {
+      "path": "scripts/dependency_observation_collector_20260921.py",
+      "sha256": "933144b5da9338f5f37c92cc6f0c4bd569bbe4a2b78f74fdd5c64e9d41cb19ea"
+    },
+    {
+      "path": "scripts/test_dependency_observation_collector_20260921.py",
+      "sha256": "42846eb49a09c50025edf5c53c816571016c4fb31cdaaf4211c73350186a80ee"
+    },
+    {
+      "path": "scripts/dependency_collection_plan_20260921.py",
+      "sha256": "af3523458cd6d605b87e51742a796c67ec03b0f4c5e50eca6550930a52a9b737"
+    },
+    {
+      "path": "scripts/test_dependency_collection_plan_20260921.py",
+      "sha256": "2f0c6cfc40114f62cfe45eb9cb0d9cf94c170d8329faa9fc907df796580236da"
+    },
+    {
+      "path": "scripts/dependency_provenance_audit_20260921.py",
+      "sha256": "4cdc6e33c9bd580633b6d795ac0e52ccdd7358cd3835e47e0be092e0c063eebb"
+    },
+    {
+      "path": "scripts/test_dependency_provenance_audit_20260921.py",
+      "sha256": "7289329e87c471d89d5efa3a83809bd31048da23d75db51083cf00283afb2056"
+    },
+    {
+      "path": "scripts/pointgroup_runtime_smoke_20260921.py",
+      "sha256": "f72f676a44cffc62726a90b832382840f758045f0924e05cf525eb0fd00d07fc"
+    },
+    {
+      "path": "scripts/inspect_m197_checkpoint_20260921.py",
+      "sha256": "60ccc6ee383308479322879c1fd56a824ac75c203edf2ef45a5faef624ed374d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/dependency_collection_seed_server6_20260921.json",
+      "sha256": "07bcd98537c190bf225c2c510b59b07288a6120156e9312c420d9e8e048f9911"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/dependency_plan_server6_20260921_v3.json",
+      "sha256": "2564df3c298985817dea5bfcc6c14f3f79697c085fac28e386a6d8859cae3358"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/dependency_observation_server6_20260921_v5.json",
+      "sha256": "7d20c290e2fec1f6f7c91f5dc6440ff6181c662f67cc81d4093cf99d43eeba37"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/dependency_provenance_receipt_server6_20260921.json",
+      "sha256": "1bb51eab37cf35778d94251700b2f0143e59dc53882307db104ccf2af3f1c810"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/pointgroup_runtime_smoke_server6_20260921.json",
+      "sha256": "83c0edf5ae16415c89276b2c65b87dcca10fa46ccd9922bbd65c32531777a4f8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/m197_checkpoint_inspection_server6_20260921.json",
+      "sha256": "6234da27bb4c8e7e1e37c3b68f93613bdc7d2ea6a07863e3169b25a9785dca9d"
+    }
+  ],
+  "generated_at": "2026-09-21T21:27:43.614003+08:00",
+  "limitations": [
+    "The dependency receipt records observed files and ELF declarations, not loaded bytes.",
+    "The operator smoke covers one tiny path and is not model-level validation.",
+    "M197 remains stopped_unknown and restart is not authorized.",
+    "The three artifact and six data hashes remain to be verified.",
+    "The foreign GPU7 process reduces available memory; no eviction was attempted."
+  ],
+  "m197_checkpoint": {
+    "best_epoch": 23,
+    "best_miou_observed": 0.49241167306900024,
+    "last_epoch": 26,
+    "last_logged_epoch": 27,
+    "last_logged_step": 3240,
+    "last_logged_total_steps": 4686,
+    "optimizer_state_present": true,
+    "restart_authorized": false,
+    "scheduler_state_present": true,
+    "terminal_state": "stopped_unknown"
+  },
+  "model_native_backward_verified": false,
+  "native_execution_completed": true,
+  "native_operator_smoke": {
+    "backward_succeeded": true,
+    "coordinates_device": "cpu",
+    "extension_imported": true,
+    "feature_device": "cuda",
+    "finding": "voxelization_idx requires CPU coordinate storage; passing CUDA coordinates segfaults before returning, consistent with host dereference of a device pointer.",
+    "forward_succeeded": true,
+    "full_model_native_backward_verified": false,
+    "grad_abs_sum": 10.333333969116211,
+    "grad_finite": true,
+    "max_allocated_mb": 0.004
+  },
+  "next_action": "Continue the existing saved-only diagnostic; do not repeat completed dependency collection or fixture cross-checks. Verify the exact three artifact and six data hashes, then exercise the model-loader/import boundary without loading the full model or starting training. Preserve M197 as stopped_unknown and require the full safe-resume admission chain before any restart. Do not regenerate recovered groups or treat the tiny operator smoke as full-model efficacy evidence.",
+  "operator_native_backward_verified": true,
+  "queue_changed": false,
+  "queue_sha256": "1fb0bf22702581457204f05b95b1bf30c9e682534d605c34aaeb8ae7ff5a8746",
+  "resources_verified": false,
+  "resumed_due_ids": [
+    "input-modality-distinguishability",
+    "instance-identity-representation",
+    "modality-identity-preservation",
+    "referent-causality-audit",
+    "referent-discrimination",
+    "referent-query-selection",
+    "referent-supervision-axis",
+    "same-target-description-grounding"
+  ],
+  "runtime_observation": {
+    "abi_compatibility_checked": false,
+    "bootstrap_count": 2,
+    "cuda": "12.8",
+    "declared_library_count": 8,
+    "direct_package_count": 9,
+    "provenance_receipt_validated": true,
+    "python": "3.10.20",
+    "runtime_loader_resolution_verified": false,
+    "soabi": "cpython-310-x86_64-linux-gnu",
+    "torch": "2.8.0+cu128",
+    "visible_devices": [
+      "7"
+    ]
+  },
+  "schema_version": 1,
+  "scientific_validation_complete": false,
+  "snapshot_generated_at": "2026-09-21T13:09:33.541267+00:00",
+  "training_launch": false,
+  "validation": {
+    "modules": [
+      "test_dependency_observation_collector_20260921",
+      "test_dependency_collection_plan_20260921",
+      "test_dependency_provenance_audit_20260921"
+    ],
+    "output": "......................\n----------------------------------------------------------------------\nRan 22 tests in 0.482s\n\nOK\n",
+    "tests_passed": 22,
+    "tests_run": 22,
+    "tests_skipped": 0
+  }
+}

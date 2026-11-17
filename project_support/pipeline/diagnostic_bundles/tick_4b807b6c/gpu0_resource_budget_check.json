@@ -1,0 +1,49 @@
+{
+  "owner": {
+    "token": "4b807b6cd96d4318b04bec6cf5dade9f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-05T17:09:32.637608+00:00",
+    "deadline_at": "2026-11-05T18:09:32.637608+00:00",
+    "context_sha256": "dc5f974d3147a0ce34542c6c5d51194c915d29fc95d9ba16ce53ff0c3ac0b110",
+    "pending_sha256": "01180f2cc07fd7662fa6dc3fc4c88d504c2319a2b77d89b81c158306cb8b9a1a"
+  },
+  "recorded_at": "2026-11-05T17:12:25.782076+00:00",
+  "observed_at": "2026-11-05T17:11:01.048835+00:00",
+  "candidate_id": "hierarchy-ancestry-mobius-interaction-composition",
+  "experiment_id": "M229-MIC",
+  "result": "blocked",
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c 'import socket,subprocess,json\nfrom datetime import datetime,timezone\nassert socket.gethostname()==\"dl04-MS-7E06\"\ninv=subprocess.check_output([\"nvidia-smi\",\"-i\",\"0\",\"--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total\",\"--format=csv,noheader,nounits\"],text=True).strip()\napps=subprocess.check_output([\"nvidia-smi\",\"-i\",\"0\",\"--query-compute-apps=pid,used_memory\",\"--format=csv,noheader,nounits\"],text=True).strip()\nrow=[x.strip() for x in inv.split(\",\")]\nassert row[0]==\"0\" and row[1]==\"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\"\nprint(json.dumps({\"observed_at\":datetime.now(timezone.utc).isoformat(),\"hostname\":socket.gethostname(),\"physical_gpu\":0,\"gpu_uuid\":row[1],\"utilization_percent\":int(row[2]),\"memory_used_mib\":int(row[3]),\"memory_total_mib\":int(row[4]),\"memory_free_mib\":int(row[4])-int(row[3]),\"compute_contexts_raw\":apps,\"external_overlay_authorized\":True,\"required_free_mib\":20000}))\n'"
+  ],
+  "observation": {
+    "observed_at": "2026-11-05T17:11:01.048835+00:00",
+    "hostname": "dl04-MS-7E06",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "utilization_percent": 68,
+    "memory_used_mib": 27337,
+    "memory_total_mib": 32607,
+    "memory_free_mib": 5270,
+    "compute_contexts_raw": "2227164, 27288",
+    "external_overlay_authorized": true,
+    "required_free_mib": 20000
+  },
+  "source_observation": {
+    "path": "pipeline/diagnostic_bundles/tick_4b807b6c/gpu0_current_observation.json",
+    "sha256": "940d25ddd186d9f8b4af379fc30a85f5c9acdc42f6061168323542fef5b6b7ea"
+  },
+  "canonical_begin_already_attempted_dispatch": true,
+  "launch_requested": false,
+  "training_Popen": false,
+  "new_dispatch_hold": false,
+  "signals_or_eviction": false,
+  "interpretation": "External sharing remains authorized. Actual5270MiB free does not meet unchanged20000MiB budget; leave MIC waiting. No empty-card/low-utilization requirement or user permission gap."
+}

@@ -1,229 +1,72 @@
-# BQNet: Boosting Query Points Network for 3D Referring Expression Segmentation
+# cluster_project：源码、实验记录与迁移交接
 
-Framework:
+这是 2026-11-17 的私有交接仓库。训练代码以 **M236-CSO 集成提交
+`5413102c57b526035f3920b5e7a81f3b58ad764d`** 为基准，补充项目外层支持代码、实验统计与迁移资料。
+本次仅做归档和上传，没有迁移服务器、恢复暂停实验或启动训练。
 
-<img src="docs\framework.png"/>
+- **[迁移与接班文档](docs/migration/HANDOVER.md)**：环境、数据、checkpoint、原生协议、已知故障和下一步。
+- **[实验统计](experiments/EXPERIMENT_SUMMARY.md)**、[逐项 CSV](experiments/experiments_inventory.csv)：完整 ID 去重、局部结果及来源冲突。
+- **[数据和权重清单](docs/migration/migration_assets.json)**：原路径、历史哈希、大小和证据时间；文件需另行传输。
+- **[导出来源清单](provenance/export_manifest.prepare.json)**、[文件 SHA-256](provenance/files.sha256.json)：支持代码、归档分支和排除项。
 
-## Introduction
-3D Referring Expression Segmentation (3D-RES) localizes and segments objects within 3D point clouds based on natural language descriptions. A critical challenge lies in the quality of query point features, as they directly interact with scene features to generate segmentation masks. Despite recent progress, existing methods suffer from three key limitations: inadequate progressive fusion of multimodal features, insufficient modeling of explicit spatial relations, and uneven learning difficulties among query points due to varying scene complexities. To overcome these limitations, we introduce Boosting Query points Network (BQNet). BQNet iteratively optimizes query point features using three core modules: the Progressive Multimodal Knowledge Learning (PMKL) module, which progressively fuses multimodal knowledge; the Dual Factor Attention Block (DFB) for explicitly modeling feature relationships and spatial context; and the Foreground-Background Hard Query point Learning (FBHQL) module, which optimizes challenging query points through adaptive difficulty perception mechanism. Comprehensive experiments demonstrate BQNet's superiority over state-of-the-art by 1.3 and 3.0 points in Acc@0.5 metrics on the 3D-RES and 3D-GRES tasks, respectively.
+## 目录与源码版本
 
-## Installation
+| 位置 | 内容 |
+|---|---|
+| 仓库根的 `framework/`、`configs/`、`tools/`、`scripts/` 等 | 原 `cluster_project/Cluster/`，以 M236 集成5413为基准 |
+| `project_support/` | 原项目根外的 `scripts/`、`framework/`、`configs/`、`pipeline/`、服务器登记和历史实验 YAML |
+| `experiments/` | 本次统计、冲突说明、输入哈希及可复算 producer |
+| `docs/migration/` | 交接文档、资产清单、源机四份 YAML 的实际差异与原字节 |
+| `tooling/` | canonical pipeline/remote-train skill 快照及本次导出工具，仅归档 |
+| `provenance/` | 完整性、来源、安全审计和导出范围 |
+| `docs/upstream/README.md` | 原训练仓库 README，部分命令和路径已过时 |
 
-Requirements
+`main` 适合检查当前待运行的 M236 代码；原实验提交和未提交代码分别保存：
 
-- Python 3.7 or higher
-- Pytorch 1.12
-- CUDA 11.3 or higher
+- `archive/isolated/<原worktree名>`：26 个原始独立版本，引用原提交，无重命名或重写历史。
+- `archive/local-main-committed-20261117`：原本地主树提交 `0747f6acec1c61018ec99acf2efa5329c9b3523c`。
+- `archive/local-working-20261117`：该主树的 9 项 modified 与 28 项 untracked 文件快照。
 
-The following installation suppose `python=3.8` `pytorch=1.12.1` and `cuda=11.3`.
-- Create a conda virtual environment
+本地 working 的 RVEC 等内容可能与新版不同，必须在其归档分支查看，不能直接覆盖 M236。
+原 `framework/DEST3D` 仅记录 gitlink 且缺少 `.gitmodules`；当前 main 另将现场已有源码及 LICENSE 展开为普通文件，
+见 [嵌套源码清单](provenance/nested_sources.json)。现存文件与原 gitlink 提交的对应关系未知，归档分支保留原指针。
+当前 main 移除了历史构建产物和论文二进制；原 Git 历史仍保留原来已跟踪的文件。
+没有上传训练权重、数据、原始训练日志、凭据或缓存。大于 2 MiB 的支持层历史记录一般单独列入排除清单；
+`research_work.json` 明确保留。原生证据中所有权租约、启动意图和一次性入口均是历史材料，不能重放。
 
-  ```
-  conda create -n BQNet python=3.8
-  conda activate BQNet
-  ```
+## 实验概况
 
-- Clone this repository
+| 去重账本状态 | 数量 |
+|---|---:|
+| `done_complete` | 41 |
+| `done_earlystop` | 157 |
+| `stopped_unknown` | 45 |
+| `crashed` | 13 |
+| 人工暂停 | 2 |
+| 等待正式训练 | 1 |
+| 撤回 | 7 |
+| **合计** | **266** |
 
-- If you have not cmake
-  ```
-  #cmake
-  wget https://github.com/Kitware/CMake/releases/download/v3.29.1/cmake-3.29.1.tar.gz
-  tar -xzvf cmake-3.29.1.tar.gz
-  cd cmake-3.29.1
+198 个 ID 被账本标为结束，其中 M174/M195/M196 存在已知完成性问题，其余也未逐项重审全部原生日志。
+这个数字不能等同于严格确认完成的训练次数。候选工作流另有 162 条，也不能并入训练完成数。
 
-  ./bootstrap --prefix=$HOME/local --parallel=8
+历史 champion 为 **M95-CSORT，账本 mIoU 0.5020**；frozen 参考值 **0.5024607181549072**
+与历史 champion 权重的身份对应仍未核实，目标为 **0.5100**。
+**M236-CSO 已通过原生两步及资源技术准入，但完整训练尚未开始，效力和新颖性仍未知。**
+M206、M227 保持人工暂停；M235 的长程 Adam 故障根因未知。
 
-  make -j8
+## 在新机器接手
 
-  make install
-
-  vim ~/.bashrc
-
-  export LOCAL_PATH="$HOME/local/bin"
-  export PATH="$LOCAL_PATH:$PATH"
-
-  source ~/.bashrc
-
-  cmake --version
-  ```
-
-- Install the dependencies
-
-  Install [Pytorch 1.12.1](https://pytorch.org/)
-
-  ```
-  pip install spconv-cu113
-  pip install https://data.pyg.org/whl/torch-1.12.0%2Bcu113/torch_scatter-2.0.9-cp38-cp38-linux_x86_64.whl # please check the versions in the website
-  pip install -r requirements.txt
-  ```
-
-  Install segmentator from this [repo](https://github.com/Karbo123/segmentator) (download this repo).
-  ```
-  cd csrc && mkdir build && cd build
-
-  cmake .. \
-  -DCMAKE_PREFIX_PATH=`python -c 'import torch;print(torch.utils.cmake_prefix_path)'` \
-  -DPYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
-  -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") \
-  -DCAFFE2_USE_CUDNN=0 \
-  -DCMAKE_INSTALL_PREFIX=`python -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())
-  '` 
-  
-
-  make && make install # after install, please do not delete this folder (as we only create a symbolic link)
-  ```
-
-- Setup, Install framework and pointgroup_ops.
-
-  ```
-  <!-- conda install -c conda-forge gxx_linux-64=8.4.0  #gcc版本 -->
-  conda install -c conda-forge sparsehash   conda环境安装libsparsehash-dev
-  <!-- ###setup.py 31行  include_dirs=[os.path.join(os.environ['CONDA_PREFIX'], 'include')], -->
-
-  <!-- sudo apt-get install libsparsehash-dev -->
-  python setup.py develop
-  cd framework/lib/
-  python setup.py develop
-  cd ../../
-  ```
-
-- Compile pointnet++
-  ```
-  cd pointnet2
-  python setup.py install --user
-  cd ..
-  ```
-- Install Pytorch3D. You can try 'pip install pytorch3d'. If it doesn't work, you can install it from source:
-  ```
-  git clone git@github.com:facebookresearch/pytorch3d.git
-  cd pytorch3d && pip install -e .
-  ```
-
-- Install Spcay
-  ```
-  pip install spacy==3.7.5
-  pip install pydantic==2.10.6
-  ```
-- Install [en_core_web_sm-3.7.1.tar.gz]()
-  ```
-  download it
-
-  pip intall en_core_web_sm-3.7.1.tar.gz
-  ```
-
-## Data Preparation
-
-## [ALL Data](https://pan.baidu.com/s/17QjG11xik8WsTS-u20202w?pwd=yayh)
-
-### ScanNet v2 dataset
-
-Download the [ScanNet](http://www.scan-net.org/) v2 dataset.
-
-Put the downloaded `scans` folder as follows. You need to download the ['.aggregation.json', '.sens', '.txt', '_vh_clean_2.0.010000.segs.json', '_vh_clean_2.ply', '_vh_clean_2.labels.ply', '_vh_clean.aggregation.json'] files. (Please note ! ! ! This will take up nearly 1TB of storage space ! ! ! If you do not have enough hard drive capacity, you can skip downloading the '.sens' files and the 2D feature extraction step, and directly download the processed 2D features.)
-
-```
-IPDN
-├── data
-│   ├── scannetv2
-│   │   ├── scans
+```bash
+git clone -c core.autocrlf=false https://github.com/songchuanle-1/cluster_project.git
+cd cluster_project
+python -B tooling/export/verify_export.py
 ```
 
-Split and preprocess point cloud data (Note! If you have not downloaded the '.sens' files, please comment out the corresponding sections in the script before running it.)
+先阅读交接文档，再选择目标机器并迁移数据与权重、重建环境、重编译 CUDA 扩展及验证协议。
+源机器的服务器登记、旧 owner、旧 shim 和 GPU 授权不能直接继承为新机器的启动许可。
+独立 `tools/test.py` 还存在模型导入入口问题，详见交接文档。
+不要直接执行旧 README 或历史 `SERVERS.yaml` 中的命令。
 
-```
-cd data/scannetv2
-bash prepare_data.sh
-```
-
-The script data into train/val folder and preprocess the data. After running the script the scannet dataset structure should look like below.
-
-```
-MDIN
-├── data
-│   ├── scannetv2
-│   │   ├── scans
-│   │   ├── train
-│   │   ├── val
-│   │   ├── processed (if you process '.sen' file)
-```
-
-Obtain image features using CLIP and project them to point. (Please modify the output of the original CLIP's visual encoder to obtain 'tokens'. See line 79 in image2point_clip.py for more imformation.)
-
-If you haven't processed the '.sen' files or find this step too time-consuming, you can download our preprocessed features and unzip them into the 'clip-feat' folder. Click [here](https://pan.baidu.com/s/11eeMZEeS0t7LZIeBDD_k1g?pwd=c8ct) to download.
-```
-cd ..
-python image2point_clip.py
-```
-
-### ScanRefer dataset
-Download [scanrefer](https://pan.baidu.com/s/1dayGht2PFqz8kx--Q2cZhA?pwd=n9s4) annotations following the instructions.
-
-Put the downloaded `scanrefer` folder as follows.
-```
-IPDN
-├── data
-│   ├── scanrefer
-│   │   ├── ScanRefer_train_new.json
-│   │   ├── ScanRefer_val_new.json
-```
-
-### multi3drefer dataset
-Downloading the [multi3drefer](https://pan.baidu.com/s/19nwg8175aSODXiqT7VAxrg?pwd=caf5) annotations. 
-Put the downloaded `multi3drefer` folder as follows.
-```
-MDIN
-├── data
-│   ├── multi3drefer
-│   │   ├── multi3drefer_train.json
-│   │   ├── multi3drefer_val.json
-```
-
-## Pretrained Backbone
-
-Download [SPFormer](https://pan.baidu.com/s/1it4h_M-9eIMXAsC2rSn7Dw?pwd=yy3x) pretrained model and move it to backbones.
-
-```
-mkdir backbones
-mv ${Download_PATH}/sp_unet_backbone.pth backbones/
-```
-
-## Training
-For 3D-GRES:
-```
-python tools/train.py configs/BQNet_gres.yaml --gpu_id 0
-```
-For 3D-RES:
-```
-python tools/train.py configs/BQNet_res.yaml --gpu_id 0
-```
-
-## Inference
-For 3D-GRES:
-```
-python tools/train.py configs/BQNet_gres.yaml --checkpoint best_gres.pth --gpu_id 0
-```
-For 3D-RES:
-```
-python tools/train.py configs/BQNet_res.yaml --checkpoint best_res.pth --gpu_id 0
-```
-
-<!-- ## Citation
-
-If you find this work useful in your research, please cite:
-
-```
-
-``` -->
-
-## Models
-Download pretrain models and move it to checkpoints.
-|Benchmark | Task  | mIoU | Acc@0.25 | Acc@0.5 | Model |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| Multi3DRes | 3D-GRES | 53.2 | 71.6 | 53.0 | [Model](https://pan.baidu.com/s/1u2sUramI2KyUvI-Io6FcKQ?pwd=tqc2) |
-| ScanRefer   | 3D-RES | 50.9 | 61.4 | 56.2 | [Model](https://pan.baidu.com/s/1kRfm6s_aEmHU7cycf1uCTw?pwd=6hkb) |
-
-## Ancknowledgement
-
-Sincerely thanks for [MDIN](https://github.com/sosppxo/MDIN), [MaskClustering](https://github.com/PKU-EPIC/MaskClustering), [ReLA](https://github.com/henghuiding/ReLA), [M3DRef-CLIP](https://github.com/3dlg-hcvc/M3DRef-CLIP), [EDA](https://github.com/yanmin-wu/EDA), [SceneGraphParser](https://github.com/vacancy/SceneGraphParser), [SoftGroup](https://github.com/thangvubk/SoftGroup), [SSTNet](https://github.com/Gorilla-Lab-SCUT/SSTNet), [SPFormer](https://github.com/sunjiahao1999/SPFormer) and  [IPDN](https://github.com/80chen86/IPDN) repos. This repo is build upon them.
-
+训练代码可以直接以克隆目录为根使用。若需重建原 `Cluster/` 与外层支持目录的布局，
+可用 `tooling/export/materialize_project.py` 在一个**全新目录**生成副本；它不会安装依赖或执行训练。

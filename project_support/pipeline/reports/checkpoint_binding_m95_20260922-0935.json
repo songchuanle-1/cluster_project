@@ -1,0 +1,79 @@
+{
+  "contract": "exact-checkpoint-binding-receipt-v1",
+  "generated_at": "2026-09-22T09:35:00+08:00",
+  "host": "server-6",
+  "host_address": "100.64.3.28",
+  "allowed_gpu": 7,
+  "read_only": true,
+  "gpu_work_performed": false,
+  "cuda_initialized": false,
+  "model_instantiated": false,
+  "training": false,
+  "checkpoint_transfer": false,
+  "finding": "The exact M95-CTF-HCG-CSORT champion checkpoint is present in allowed server-6 storage under a path the prior ticks never probed. The four native capture routes were blocked solely on exact checkpoint binding; that prerequisite is now satisfied by a byte-exact identity match.",
+  "checkpoint": {
+    "remote_path": "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/best.pth",
+    "bytes": 936269892,
+    "sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "container": "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/",
+    "file_mtime": "2026-09-14 02:49"
+  },
+  "expected_identity": {
+    "source": "pipeline/reports/saved_replay_migration_20260920-1015.json",
+    "field": "original_binding.checkpoint_sha256",
+    "sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "match": "exact"
+  },
+  "payload_inspection": {
+    "method": "torch.load(map_location='cpu', weights_only=False); no CUDA device touched",
+    "top_level_keys": ["meta", "model", "optimizer", "scheduler"],
+    "meta": {
+      "epoch": 16,
+      "best_miou": 0.5024607,
+      "epochs_no_improve": 0,
+      "time": "Sat Aug 15 22:47:13 2026"
+    },
+    "state_dict_tensors": 1165,
+    "state_dict_params_including_buffers": 168554565,
+    "contains_text_encoder": true,
+    "contains_dec": true,
+    "sample_keys": [
+      "input_conv.0.weight",
+      "unet.blocks.block0.conv_branch.0.weight",
+      "unet.blocks.block0.conv_branch.0.bias"
+    ]
+  },
+  "champion_identity_corroboration": {
+    "ledger_miou": 0.502,
+    "historical_exact_max": 0.5024607181549072,
+    "checkpoint_meta_best_miou": 0.5024607,
+    "consistent": true
+  },
+  "why_prior_ticks_missed_it": {
+    "probed_paths": [
+      "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/<champion-stem>/",
+      "allowed server-6 script roots"
+    ],
+    "unprobed_path": "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/",
+    "note": "The checkpoint is a parent-model copy staged for the 2026-09-14 SCM admission comparison, named best.pth inside a variant directory, so a directory-name search for the champion stem could not find it."
+  },
+  "unlocks": [
+    "referent-causality-audit",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "modality-identity-preservation"
+  ],
+  "not_evidence_of": [
+    "admission",
+    "efficacy",
+    "independence",
+    "novelty",
+    "target-independent objectness",
+    "full-model native backward for any candidate"
+  ],
+  "caveats": [
+    "A matching checkpoint hash binds weights, not the surrounding capture code or config; the config digest must still be verified per run.",
+    "The containing directory also holds SCM variant artifacts; only best.pth is the parent-model payload and only its hash was bound.",
+    "Finding the checkpoint does not by itself authorize enqueue or training."
+  ]
+}

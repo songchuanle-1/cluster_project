@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "preregistered_at": "2026-11-08T14:00:33.658630+00:00",
+  "producer_agent": "/root/actual_chain_fast",
+  "owner_provenance_only": {
+    "token": "ec4597142e314aa7a0478bac13e26402",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T13:10:13.081564+00:00",
+    "deadline_at": "2026-11-08T14:10:13.081564+00:00",
+    "context_sha256": "ca7d223211d13359f25e920276d637ff4ba3b31a5e55c67981f2f626c48e653f",
+    "pending_sha256": "92367a4ba1deb25a852d7a9719a34156543ed92dd223562473812002928482aa"
+  },
+  "candidate_id": "hierarchy-native-distribution-embedding-composition",
+  "experiment_id": "M233-NDE",
+  "implementation_revision": 1,
+  "source_commit": "0747f6acec1c61018ec99acf2efa5329c9b3523c",
+  "runtime_code_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+  "kind": "STANDALONE_EQ_HARNESS_OPTIMIZER_MODEL_INTERFACE_REPAIR_ONLY_NOT_MODEL_REVISION2",
+  "failure": {
+    "request_id": "3a18320c71b14d51b81b976db57f4aa5",
+    "pid": 2840900,
+    "certainty": "terminal",
+    "returncode": 1,
+    "error_type": "AttributeError",
+    "error": "'HierarchicalDistributionEmbedding' object has no attribute 'text_encoder'",
+    "execution_completed": false,
+    "location": "compare_revision1 line192 original_optimizer=optimizer_factory(original), main lambda302, native gorilla/solver/build.py39 getattr(model,key).parameters()",
+    "partial_scope": "First fixture forward/gradient/comparison calculations may have occurred before optimizer construction. No completed fixture cases or positive equivalence results were serialized; no PASS is established."
+  },
+  "cause": "The standalone core lacks full-model named submodules required by unchanged YAML paramwise_cfg. Native installed build_single_optimizer exclusively selects getattr(model,key).parameters() for each configured ordered group.",
+  "change": "Create a parameterless torch.nn.Module carrier with empty text_encoder/input_conv/unet/output_layer submodules and dec pointing to the SAME constructed core. Pass carrier to unchanged native gorilla.build_optimizer with the same deepcopy(cfg.optimizer). No tensor/module is recreated or initialized inside carrier; no forward call or model-source change.",
+  "prediction": "The exact native builder receives the same five ordered YAML groups, four empty and dec containing each requires_grad core parameter once in its existing order. Core identity/names/state/gradients/RNG and original/revision optimizer-group equality remain unchanged; native downstream AdamW construction retains all YAML options. This fixes missing-submodule construction only; actual numerical EQ remains unknown.",
+  "frozen": {
+    "compare_revision1_entire_source_unchanged": true,
+    "fixed_two_fixtures_unchanged": true,
+    "torch_assert_close_dtype_defaults_unchanged": true,
+    "initialization_RNG_restore_and_wrong_parent_control_unchanged": true,
+    "native_data_training_or_model_source_changes": false,
+    "no_resampling_or_tolerance_relaxation": true
+  },
+  "local_validation_plan": "Compile only; AST exactness of all existing functions except the sole main factory argument; stdlib mock executes exact extracted installed build_optimizer/build_single_optimizer using fake modules/parameters to prove full-model restricted-core group identity/order/config equality, constructor failure reproduction, and configuration preservation. No Torch, gorilla import, GPU or training execution.",
+  "future_execution_contract": {
+    "this_owner_prepare_only": true,
+    "old_EQ_max1_capability_consumed": true,
+    "never_replay_or_modify_old_request_lease_stage_or_entry": true,
+    "fresh_future_owner_capability_stage_manifest_lease_and_independent_review_required_for_new_entry_sha": true,
+    "normalizer_and_production_remain_unexecuted_until_fixed_EQ_actual_pass_and_review": true,
+    "model_revision1_remains_pending_not_revision2": true
+  },
+  "references": {
+    "original_entry": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/nde_resource_native_active/equivalence_diagnostic.py",
+      "sha256": "82b3db05625a5a2246e97ef69d0077c36d40a7fd5d054b179fa61632b3677613"
+    },
+    "failed_execution": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/nde_equivalence_execution/equivalence_execution.json",
+      "sha256": "60a75fabed0c97610159de72de322004fb212db7c1e03dfaa44ee487e27c491a"
+    },
+    "failed_raw_result": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/equivalence_evidence/equivalence_result.json",
+      "sha256": "bf885badada02a9acafb631af2f0b02c601f70d537ff26f1836a0c0b1e59b98f"
+    },
+    "failed_stderr": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/equivalence_evidence/equivalence_stderr.log",
+      "sha256": "48b6cbb112587860123358f5b06897fcdf87f21e33e10c26e23ed7005cc2a542"
+    },
+    "installed_native_solver": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/eq_harness_failure_evidence/installed_gorilla_solver_build.py",
+      "sha256": "b0ceec0bb89c1cdcb1efa3a44507d57ac495f7d6e63e1ae5332334b70fbaf654"
+    },
+    "installed_solver_collection": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/eq_harness_failure_evidence/collection.json",
+      "sha256": "250afff34f3d3a9747033e64b9313d93e2e9f16252dbe4fa49b3616efd7bb6c1"
+    },
+    "native_yaml": {
+      "path": "pipeline/diagnostic_bundles/tick_ec459714/nde_resource_native_active/candidate.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    "original_model_revision_preregistration": {
+      "path": "pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision1_preregistration.json",
+      "sha256": "d199e73a16601beb254644a655d5aaa545ac3c968abbaf5aa13412f3bca1f4f9"
+    }
+  },
+  "actual_fixed_EQ": "NOT_RUN",
+  "execution_authorized": false
+}

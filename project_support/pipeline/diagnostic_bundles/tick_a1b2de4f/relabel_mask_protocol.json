@@ -1,0 +1,115 @@
+{
+  "preregistered_at": "2026-10-19T20:23:05.881534+00:00",
+  "candidate_id": "hierarchy-native-superpoint-relabeling-audit",
+  "token": "a1b2de4f938b490c9f4cf17decc7a8f6",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "basis": {
+    "path": "pipeline/diagnostic_bundles/tick_a1b2de4f/relabel_result.json",
+    "sha256": "7ffce47bab0882e9ba39f14d82bc42c53db856e84345ddcceb9b1b7769bae7a4"
+  },
+  "cohort": [
+    {
+      "scene_id": "scene0000_00",
+      "group_index": 0,
+      "exact_train_support_count": 667,
+      "expression_ids": [
+        {
+          "object_id": "39",
+          "ann_id": "0"
+        },
+        {
+          "object_id": "15",
+          "ann_id": "1"
+        },
+        {
+          "object_id": "7",
+          "ann_id": "2"
+        },
+        {
+          "object_id": "36",
+          "ann_id": "3"
+        }
+      ]
+    },
+    {
+      "scene_id": "scene0001_00",
+      "group_index": 44,
+      "exact_train_support_count": 710,
+      "expression_ids": [
+        {
+          "object_id": "13",
+          "ann_id": "0"
+        },
+        {
+          "object_id": "3",
+          "ann_id": "1"
+        },
+        {
+          "object_id": "3",
+          "ann_id": "2"
+        },
+        {
+          "object_id": "0",
+          "ann_id": "3"
+        }
+      ]
+    },
+    {
+      "scene_id": "scene0002_00",
+      "group_index": 60,
+      "exact_train_support_count": 2329,
+      "expression_ids": [
+        {
+          "object_id": "17",
+          "ann_id": "0"
+        },
+        {
+          "object_id": "11",
+          "ann_id": "1"
+        },
+        {
+          "object_id": "42",
+          "ann_id": "2"
+        },
+        {
+          "object_id": "30",
+          "ann_id": "3"
+        }
+      ]
+    },
+    {
+      "scene_id": "scene0003_00",
+      "group_index": 101,
+      "exact_train_support_count": 406,
+      "expression_ids": [
+        {
+          "object_id": "2",
+          "ann_id": "0"
+        },
+        {
+          "object_id": "15",
+          "ann_id": "1"
+        },
+        {
+          "object_id": "9",
+          "ann_id": "2"
+        },
+        {
+          "object_id": "14",
+          "ann_id": "3"
+        }
+      ]
+    }
+  ],
+  "pairs": 2,
+  "expression_count": 16,
+  "question": "Do native physical hierarchy changes under lossless row relabeling reach inst_feats and fixed-query masks,with original targets/prefix held?",
+  "intervention": "Reverse only native coordinates before original FPS/partitioner;inverse-remap fine membership to original physical feature rows;reuse coherent deeper memberships/childmaps and original native aggregation/refinement/ILA/head. No model/config/feature/query/target changes.",
+  "controls": "Original point/features/mask/scores/identity/tokenreaggregation all<=original1e-6;exact inverse coordinate permutation,unchanged prefix/query hashes. No threshold deletion/waiver. Raw readouts may be saved on failed float control but task interpretation MUST remain inconclusive and scientificadmissionFALSE.",
+  "readout": "All native primary-target matched queries;mean sigmoid absolute probability error perquery,then expression,then fixedscene. Correlatedrows;no populationCI/validationselection/efficacy or trainable repair.",
+  "prior_failure_preserved": {
+    "path": "pipeline/diagnostic_bundles/tick_a1b2de4f/resolution_pair_0_result.json",
+    "sha256": "fbe87a63fa8eae67a4ba554ec9ac7d82ba56b71fd169885af4280feb1c117a17"
+  },
+  "limits": "Geometryconfirmed4fixedscenes,not maskharm or novelty. This stage is same stable diagnosticID,not mechanism revision/new model. No optimizer/backward/training,canonicalseedrepair or re-opening historical routes."
+}

@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "owner": {
+    "token": "fd2aae2a3cd648c3a18c0119362783fe",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-05T19:07:33.049964+00:00",
+    "deadline_at": "2026-11-05T20:07:33.049964+00:00",
+    "context_sha256": "8cf13764996d9234be9463ef0d8333580691e2a28dd2b20ec13e09d38cd66ea1",
+    "pending_sha256": "e21ef7aaab6f154859f1394d87e53fb5f585fe21e5209c826685c01e7aba989a"
+  },
+  "reviewed_at": "2026-11-05T19:46:34.432107+00:00",
+  "reviewer": "/root/tick_audit",
+  "reviewer_actual_child_thread": "01a1a5a9-7056-7c92-bc3b-ca205451add4",
+  "passed": true,
+  "status": "ACTUAL_EXISTING_MIC_PROGRESS_AND_POSTLAUNCH_GUARDIAN_THREE_LOCKS_INDEPENDENT_REVIEW_PASS",
+  "scope": "Independent local reads/hash/identity/kernel-entry comparison of actual root observations; reviewer performed no SSH/GPU/process action/shared-state mutation. Only this review is written.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fd2aae2a/mic_guardian_start_result.json",
+      "sha256": "72e0ec9aae27dbb43ff00737af5b4141f66891f43393fab2cce0c7d881424987"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fd2aae2a/mic_post_guardian_live_observation.json",
+      "sha256": "64a084bf261843a94e5cfc4545cfc59f423aebe83bf3529542f3a1c813cced61"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fd2aae2a/mic_live_observation_2.json",
+      "sha256": "56152b273501c7341282071bd5142b40a7efc986cbb09d741bf179a84845019c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fd2aae2a/guardian_software_independent_review.json",
+      "sha256": "643f49d582386ca9fd52ed506bf93911a4c41ab67803ced354e77e74f497c5c6"
+    }
+  ],
+  "trainer": {
+    "pid": 2881795,
+    "starttime": "152216088",
+    "source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+    "log": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+    "same_argv_cwd_stdout_lineage": true,
+    "prior_observed_at": "2026-11-05T19:22:09.063197+00:00",
+    "prior_native_progress": [
+      1,
+      2556,
+      4686
+    ],
+    "current_observed_at": "2026-11-05T19:43:55.406872+00:00",
+    "current_native_progress": [
+      2,
+      1262,
+      4686
+    ],
+    "native_tail_progress_samples": [
+      [
+        2,
+        1258,
+        4686
+      ],
+      [
+        2,
+        1259,
+        4686
+      ],
+      [
+        2,
+        1260,
+        4686
+      ],
+      [
+        2,
+        1261,
+        4686
+      ],
+      [
+        2,
+        1262,
+        4686
+      ]
+    ],
+    "GPU0_context_belongs_to_same_PID": true,
+    "fatal_error_markers": [],
+    "training_restarted": false
+  },
+  "guardian": {
+    "pid": 3033165,
+    "starttime": "152434416",
+    "status": "HOLDING",
+    "fresh_alive_start_verified": true,
+    "actual_three_current_kernel_FLOCK_WRITE_entries": [
+      "31: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF",
+      "30: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF",
+      "29: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+    ],
+    "exact_inodes_and_guardian_owner_verified": true,
+    "trainer_itself_has_lock_FDs": false,
+    "CPU_only_guardian_launch_count": 1,
+    "postlaunch_correction": true,
+    "prelaunch_lock_check_proven": false,
+    "binding_content_hash_recomputed": "08a1f752669db19b33f6f47cc16885e37ee0e58571eb1883b944ab232ac3bac2"
+  },
+  "material_concerns": [],
+  "limitations": [
+    "This proves actual postlaunch cooperative protection; it cannot retroactively prove the trainer launch had three locks.",
+    "No raw numeric prelaunch memory observation is established or invented by this review. Current training occupation/free memory is not substituted for prelaunch data.",
+    "Natural-exit release is supported by reviewed software, but no trainer-exit/guardian-release event has yet been observed.",
+    "Technical running/progress is not trained efficacy or novelty."
+  ]
+}

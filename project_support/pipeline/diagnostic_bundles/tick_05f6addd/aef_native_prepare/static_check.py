@@ -1,0 +1,107 @@
+"""Minimal stdlib preparation/observer-contract checks, never Torch/native/Git/SSH."""
+from pathlib import Path
+from datetime import datetime, timezone
+import ast
+import copy
+import hashlib
+import json
+import re
+
+HERE = Path(__file__).resolve().parent
+ROOT = Path('D:/project/cluster_project')
+REFERENCE = ROOT / 'pipeline/diagnostic_bundles/tick_6bdbcf77/cts_operational_prepare/native'
+
+
+def main():
+    checks = []
+    def need(name, value):
+        assert value, name
+        checks.append({'name': name, 'passed': True})
+    sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
+    worker = ast.parse((HERE / 'worker.py').read_bytes())
+    runtime = ast.parse((HERE / 'native_runtime.py').read_bytes())
+    reference_worker = ast.parse((REFERENCE / 'worker.py').read_bytes())
+    reference_runtime = ast.parse((REFERENCE / 'native_runtime.py').read_bytes())
+    for p in [HERE / 'worker.py', HERE / 'native_runtime.py', *sorted((HERE / 'candidate_model').glob('*.py'))]:
+        compile(p.read_bytes(), str(p), 'exec')
+        need('actual source AST+compile ' + p.name, True)
+    function = lambda tree, name: next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == name)
+    dump = lambda n: ast.dump(n, include_attributes=False)
+    need('original complete resources AST identical', dump(function(worker, 'resources')) == dump(function(reference_worker, 'resources')))
+    generic = ['sha', 'verify_source_version', 'verify', 'observe', 'acquire', 'release', 'fingerprint', 'save']
+    for name in generic:
+        need('unchanged runtime function AST ' + name, dump(function(runtime, name)) == dump(function(reference_runtime, name)))
+    message_normalized = ast.parse((HERE / 'native_runtime.py').read_text('utf8').replace('AEF', 'CTS'))
+    need('require-promoted guard same except candidate diagnostic label', dump(function(message_normalized, 'require_promoted_version')) == dump(function(reference_runtime, 'require_promoted_version')))
+    manifest = json.loads((HERE / 'manifest_template.json').read_text('utf8'))
+    active = ['current_token', 'stage', 'tick_generated_at', 'deadline_at', 'physical_gpu', 'gpu_uuid', 'allowed_gpus', 'context_sha256', 'pending_sha256', 'runtime_code_commit']
+    need('all ten execution fields null', all(manifest[k] is None for k in active))
+    need('new version-bound capability not old null disabled draft', manifest['draft_execution_disabled'] is False and manifest['code_commit'] == '56b2a96dc48cc8a88f0f7105527ef448113b1060' and manifest['runtime_expected_commit'] == '026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563')
+    need('twelve actual diagnostic payload hashes', len(manifest['diagnostic_files']) == 12 and all(sha(HERE / n) == h for n, h in manifest['diagnostic_files'].items()))
+    need('no active manifest/lease/binding files', not any((HERE / n).exists() for n in ['native_manifest.json', 'execution_lease.json', 'execution_binding.json']))
+    source = json.loads((ROOT / 'pipeline/diagnostic_bundles/tick_150c2902/new_candidate_prepare/source_manifest.json').read_text('utf8'))
+    binding = json.loads((HERE / 'source_version_binding.json').read_text('utf8'))
+    need('exact original nine source+YAML bytes and original YAML hash', binding['source_files'] == source['source_files'] and sha(HERE / 'candidate.yaml') == source['native_YAML_sha256'] and all(sha(HERE / 'candidate_model' / n) == h for n, h in binding['candidate_source_hashes'].items()))
+    need('actual source proof and Git independent review refs match', all(sha(ROOT / binding[k]['path']) == binding[k]['sha256'] for k in ['isolated_source_version', 'isolated_source_version_independent_review']))
+    # Exercise the actual pure observer metadata functions, not the old model suites.
+    ns = {'copy': copy}
+    exec(compile(ast.Module(body=[function(worker, n) for n in ['mst_plan_observation', 'flux_coverage_preflight']], type_ignores=[]), 'actual_observer_metadata', 'exec'), ns)
+    for groups in [[], [{'parent_id': 0, 'node_ids': [1], 'edges': []}], [{'parent_id': 2, 'node_ids': [1, 3, 5], 'edges': [(1, 3), (3, 5)]}]]:
+        edges = [edge for g in groups for edge in g['edges']]
+        result = ns['mst_plan_observation']({'groups': groups, 'edges': edges})
+        need('actual observer plan structure case ' + str(len(edges)), result[1] == edges)
+    for members, expected in [([], False), ([([0], [True])], False), ([([0, 0], [True, True])], True), ([([0, 1, 0], [True, False, True])], True)]:
+        need('actual preflight real edge=' + str(expected) + '/case' + str(len(checks)), ns['flux_coverage_preflight'](members)['real_mst_edge_possible'] is expected)
+    # Test only the actual narrow index_add wrapper with opaque stdlib values.
+    # No numerical Tensor operation, model forward, gradient or native claim.
+    class Bool:
+        def __init__(self, value): self.value = value
+        def all(self): return self.value
+    class Value:
+        def __init__(self, tag, shape=(3, 2)): self.tag, self.shape = tag, shape
+        def __neg__(self): return Value('-' + self.tag, self.shape)
+        def __eq__(self, other): return Bool(self.tag == 'zero' and other == 0)
+    record = {'scatter_calls': []}
+    context = {'activation_calls': 1, 'scatter_count': 0, 'left_index': [0, 1], 'right_index': [1, 2], 'expected_flux': Value('q', (2, 2)), 'features': Value('features', (1, 3, 2)), 'record': record}
+    state = {'forward_index': 1, 'flux_context': context}
+    returns = [Value('first'), Value('second'), Value('inactive')]
+    original_calls = []
+    def original(tensor, dim, index, source, *args, **kwargs):
+        original_calls.append((tensor, dim, index, source))
+        return returns[len(original_calls) - 1]
+    fake_torch = type('FakeTorch', (), {'equal': staticmethod(lambda a, b: a == b)})
+    ns = {'state': state, 'torch': fake_torch, 'original_index_add': original,
+          'summary': lambda value: {'finite': True}, 'fingerprint': lambda torch, value: value.tag if isinstance(value, Value) else repr(value), 'watch': lambda *args: None}
+    wrapper = next(n for n in ast.walk(worker) if isinstance(n, ast.FunctionDef) and n.name == 'observed_index_add')
+    exec(compile(ast.Module(body=[wrapper], type_ignores=[]), 'actual_index_add_wrapper', 'exec'), ns)
+    first = ns['observed_index_add'](Value('zero'), 0, [0, 1], Value('q', (2, 2)))
+    need('first tracked call invokes original exactly once and returns same object', len(original_calls) == 1 and first is returns[0])
+    second = ns['observed_index_add'](first, 0, [1, 2], Value('-q', (2, 2)))
+    need('second tracked call reads actual first object and returns actual second', len(original_calls) == 2 and second is returns[1] and context['scatter_count'] == 2)
+    state.pop('flux_context')
+    inactive = ns['observed_index_add'](Value('other'), 1, [], Value('unused'))
+    need('outside active AEF context transparent one original call', len(original_calls) == 3 and inactive is returns[2] and len(record['scatter_calls']) == 2)
+    # Unbound actual manifest must fail a real top-level assertion before GPU code.
+    namespace = {'MANIFEST': manifest, 'CANDIDATE_COMMIT': binding['code_commit'], 'RUNTIME_EXPECTED_COMMIT': binding['runtime_expected_commit']}
+    top_asserts = [n for n in runtime.body if isinstance(n, ast.Assert)]
+    first = top_asserts[:5]
+    try:
+        exec(compile(ast.Module(body=first, type_ignores=[]), 'actual_unbound_manifest_asserts', 'exec'), namespace)
+    except AssertionError:
+        need('unbound runtime_code_commit refused by actual top assertions', True)
+    else:
+        raise AssertionError('Unbound manifest unexpectedly accepted')
+    text = (HERE / 'worker.py').read_text('utf8')
+    need('no auxiliary autograd probe', 'torch.autograd.grad(' not in text and 'torch.autograd.backward(' not in text)
+    need('no old triadic mechanism fields', all(n not in text for n in ['triadic', 'actual_three_distinct', 'actual_multiround', 'actual_dilated']))
+    need('two required input blocks only; per-call finite-only', "'left_input':(weight,0,c,0,c),'right_input':(weight,0,c,c,2*c)" in text and "all(g['finite'] for g in record[key])" in text)
+    need('global method and hooks finally restored', "global_replacements.append((torch.Tensor,'index_add',original_index_add))" in text and 'for owner,name,original in reversed(global_replacements):setattr(owner,name,original)' in text and 'for hook in hooks:hook.remove()' in text)
+    result = {'status': 'STDLIB_SOFTWARE_PREPARATION_CHECKS_PASSED_NOT_NATIVE_PASS', 'recorded_at': datetime.now(timezone.utc).isoformat(), 'checks': checks, 'check_count': len(checks), 'worker_sha256': sha(HERE / 'worker.py'), 'runtime_sha256': sha(HERE / 'native_runtime.py'), 'manifest_template_sha256': sha(HERE / 'manifest_template.json'), 'resources_function_AST_sha256': hashlib.sha256(dump(function(worker, 'resources')).encode()).hexdigest(), 'Torch_native_GPU_SSH_Git_shared_actions': False, 'old_136_46_suites_rerun': False, 'observer_standin_scope': 'Opaque stdlib values verify original-call count/return-object/control flow only; no Tensor numerical result/FP32/gradient/native proof.'}
+    with (HERE / 'static_validation.json').open('x', encoding='utf8') as stream:
+        json.dump(result, stream, ensure_ascii=False, indent=2)
+        stream.write('\n')
+    print(json.dumps({'check_count': len(checks), 'worker_sha256': result['worker_sha256'], 'validation_sha256': sha(HERE / 'static_validation.json')}))
+
+
+if __name__ == '__main__':
+    main()

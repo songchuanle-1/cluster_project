@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T02:20:07.658921+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "8fafa3d4ebcb48e7ba3436e084f6ee9f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T03:12:05.347438+00:00"
+  },
+  "proposal": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/variant_proposal.json",
+    "sha256": "7a82845976c83accb74f730fef4500046c6f7e004c5dff84b2ea02c2f0c79650"
+  },
+  "proposed_stable_id": "hierarchy-parent-segmented-bidirectional-token-state",
+  "status": "BOUNDED_REVIEW_IMPLEMENTABLE_SUBJECT_TO_ROOT_SELECTION_NOT_ADMISSION",
+  "blocking_findings": [],
+  "decision": "No explicit same-computation-graph historical reopening or banned-mechanism conflict found in the bounded sources. The proposal is technically implementable for root selection. This does not establish efficacy, task-deficit evidence, literature novelty, or training admission; no model implementation was authorized or performed by this review.",
+  "read_scope": {
+    "goal": {
+      "path": "pipeline/goal.json",
+      "sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+    },
+    "candidate_ledger": "Current research_work candidates id/experiment_id/stage/hypothesis/name/mechanism only; regex-targeted recurrence/state/sibling/sort/directional terms. No evidence/history expansion.",
+    "historical_indexes": "Targeted recurrence/RNN/GRU/LSTM/sequence/tanh/attnpool/agg terms in the named indexes only; no global history clearance.",
+    "source_references": {
+      "M95": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/hier_postprocess.py",
+        "sha256": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f"
+      },
+      "M39_C2C": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_c2c/hier_postprocess.py",
+        "sha256": "1bb58e7d058639c52f0b4effa447dd5938c5be6a6f752015f738ca11674b6350"
+      },
+      "M205_MDC": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mdc/middle_conv.py",
+        "sha256": "c3ee77ae92c424e6cc132460af235e9d07673af7940ab79a10165660cdf49f0a"
+      },
+      "variant_index": {
+        "path": "Cluster/framework/model/Quard_model/variants_base1.md",
+        "sha256": "3ded71ea32a6581eb41aef79f0123c181e1515621175fa79bdc1c2bb6674e8fd"
+      },
+      "legacy_result_index": {
+        "path": "Cluster/docs/variants_results_20260716.md",
+        "sha256": "286a915eb189a281dcdbf1504ae150dab536a5b777b8ea592d6ae115196f9e3d"
+      },
+      "experiment_index": {
+        "path": "pipeline/experiments.csv",
+        "sha256": "dfa7339d3144fdc2f0a7f2d9bc6e461fb3b13be635eb53dbbef7f66e1770862f"
+      }
+    },
+    "literature_search_performed": false
+  },
+  "history_boundaries": [
+    {
+      "comparison": "M39-C2C",
+      "evidence": "C2C hier_postprocess.py:488-529",
+      "difference": "Per-scale dense Q/K/V/out softmax self-attention with residual+LN versus parent-segmented shared nonlinear recurrent state, without QKV/softmax/new residual. Shared broad intra-scale interaction intent alone is insufficient to call the graphs equal."
+    },
+    {
+      "comparison": "M205-MDC",
+      "evidence": "middle_conv.py:7-49",
+      "difference": "Self+six nearest directional depthwise terms, one pointwise GELU; explicitly permits cross-coarse-parent edges. Proposed variable-length bidirectional state paths remain inside actual coarse-parent groups. It is not a kernel-size/neighbor-count alteration of MDC."
+    },
+    {
+      "comparison": "historical banned attnpool/lite_agg",
+      "evidence": "variants_base1.md:801,814-816,866,879-883",
+      "difference": "Those replace point-to-cluster pooling with content attention or learned point weights. Proposed raw cluster mean banks and pooling remain unchanged; replacement occurs on middle token refinement."
+    },
+    {
+      "comparison": "HRC/HAP/CGCA/RSTR/PCE/FLE/HDS/CPA",
+      "difference": "No refined-child-to-parent pooling chain, affine prolongation, coarse-feature channel Gram, reversible transport, point contact graph, same-leaf point attention, extra point update, or point-coarse attention is proposed. Existing held/rejected IDs are not reopened. This comparison uses current named mechanism descriptions and previously bounded source context, not a new exhaustive source audit."
+    }
+  ],
+  "ban_review": {
+    "pure_scaling_or_activation_tweak": "No: Wh creates off-diagonal token dependence. tanh is part of the new recurrence, while native YAML activation_fn remains unchanged. This is not an activation-only config experiment.",
+    "gate_or_language_routing": "No new learned gating or language/query-dependent donor choice is in the formula. Original HCG gate is retained.",
+    "large_QKV": "No Q/K/V attention projections or attention matrix. Wx/Wh/Wo are state transforms, not renamed attention projections.",
+    "residual": "Entire middle residual FFN is replaced, without a new residual skip/branch. Existing native point update and fine/coarse residual FFNs remain baseline behavior.",
+    "attnpool_agg_multi": "No changed raw aggregation, multiple point injections, or repeated decoder-layer injection. The broad word aggregation does not establish equivalence to the verified banned point-weighted-pooling graph.",
+    "resource_or_Phase1_relaxation": "None. Fewer analytic dense MACs/parameters are not a measured resource pass; original fixed seed/schedule/data and standard limits remain."
+  },
+  "required_implementation_boundaries": [
+    "Keep PointCloudPartitioner/FPS, original ids0/ids1/ids2, child_cluster_maps, raw feature aggregation and CSORT byte/semantically unchanged. Add detached current-batch geometry cache only; do not replace the partitioner or canonicalize point rows.",
+    "Use original ids2[b] for middle-to-coarse parent assignment. Do not use the CSORT child_cluster_maps inverse direction as this assignment.",
+    "Distinguish valid per-batch middle prefix (ids2[b].numel()), true point-supported middle slots from composed ids1[ids0], and batch padding. Use geometry/membership-derived boolean masks; never feature magnitude or coordinate zero as validity.",
+    "Define/freeze the centroid formula and detached cache lifetime before code: preferably the already-reviewed cascade of original-ID geometric means, not a silent switch to point-mass reweighting or new FPS centers. Empty-centroid placeholders must never enter supported-token sort/state transport.",
+    "Lexicographic xyz ordering with exact original-token-ID tie break must yield a permutation of supported native middle IDs. Scatter recurrent outputs back to the original middle positions; never reorder output bank/ids/maps or ground-truth rows.",
+    "Reset both directional states to zero for each batch and each actual coarse parent; precompute Wx once, share Wx/Wh across directions, Wh without bias as specified; do not detach recurrent feature states.",
+    "Delete the replaced middle FFN parameters rather than leaving dead trainable parameters. Preserve original middle LayerNorm, fine/coarse FFNs, raw CSORT, HCG, single final point injection and all YAML numeric values.",
+    "Set unsupported/padded middle outputs to zero as explicitly declared. M95 HCG gathers middle rows only via composed ids1[ids0] (hier_postprocess.py:601-620), and its global_mean is point_feats.mean (line624), so unsupported zero rows are not directly read back; excluding them from recurrence prevents phantom state bridges. Raw CSORT must still consume raw banks."
+  ],
+  "mechanism_falsification_and_limits": [
+    "Probe off-diagonal h1-to-mu1 derivatives only on the direct captured middle-refinement path: same-parent generic nonzero, cross-parent exactly zero. Shared model parameters across tokens do not by themselves constitute a same-forward cross-parent dependency.",
+    "A real nonsingleton parent must exercise Wh in native two-batch loss/backward; all observed gradients finite and an actual optimizer update of the intended module are required to demonstrate the path was used. Unexercised singleton-only data are missing coverage, not efficacy evidence.",
+    "Use the declared state-reset-at-each-token intervention with identical Wx/Wo/inputs/order/masks/readout to cut history edges. It diagnoses transport sensitivity; it does not establish improved localization or isolate every difference from original M95.",
+    "Stable sorting means deterministic association only for the frozen FPS/centroid inputs. Tied centroids use token IDs; bidirectionality with arbitrary Wo concatenation weights does not imply reversal, rotation, or token-relabeling invariance. Near-tie sorting can be sensitive to centroid reduction rounding.",
+    "Serial GEMMs/sorting and tanh saturation or recurrent gradient products remain performance/numerical risks. Two finite native steps would not prove long-training stability or benefit.",
+    "No verified task-error deficit for this exact recurrence is supplied. The current proposal remains a falsifiable structural hypothesis, with efficacy and external novelty UNKNOWN."
+  ],
+  "independent_analytic_check": {
+    "C": 256,
+    "new_middle_parameters": 262656,
+    "old_middle_ffn_parameters": 525568,
+    "delta": -262912,
+    "nominal_dense_MACs_at_64_tokens": 20971520,
+    "status": "Integer arithmetic only, not measured FLOPs/latency/memory"
+  },
+  "native_smoke": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "efficacy": "UNKNOWN",
+  "novelty": "UNVERIFIED",
+  "model_modified": false,
+  "candidate_registered": false,
+  "tests_reexecuted": false,
+  "torch_imported": false,
+  "ssh_executed": false,
+  "gpu_executed": false,
+  "write_scope": "Only this new variant_boundary_review.json; no model/ledger/old artifact or Git modifications."
+}

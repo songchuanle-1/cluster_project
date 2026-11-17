@@ -1,0 +1,10 @@
+{
+  "status": "LOCAL_STATIC_CHECK_HARNESS_LOOKUP_FAILED_BEFORE_PRODUCTION_PLAN_TESTS",
+  "command": "python -B -X utf8 D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_ab7e46d4\\new_candidate_prepare\\static_check.py",
+  "exit_code": 1,
+  "error": "StopIteration in node(): static checker requested nonexistent PointCloudPartitioner.get_cluster_center; actual original method name is cluster_layer.",
+  "initial_check_source_sha256": "b78c56352479e40461ea287187de9fe79ea192ceffb8e4a51ff23a8e3eb1b72f",
+  "production_sources_changed": false,
+  "scientific_candidate_revision": false,
+  "fix": "Only static checker uses actual original cluster_layer method for unchanged-AST check; preserve first checker and failure."
+}

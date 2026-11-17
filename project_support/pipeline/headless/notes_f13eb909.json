@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "22:13:00快照：Phase1目标0.5100，M95冠军0.5020，队列running/claiming/waiting均0，容量2；仅server-6 GPU7获授权。现有候选m95-sample-context-support处于diagnosis。",
+    "修复上轮预注册证据SHA256截断8位，并核对稳定候选此前355条证据引用与文件完全匹配；不追认上轮INCOMPLETE为成功。",
+    "预注册并在server-6 CPU执行64场景CLIP零特征几何配对：893个零行和893个同场景最近点数的非零对照，零行纯度更低的场景仅1/64、未知语义占比更高31/64；这是观测关联，不是缓存损坏或收益证明。",
+    "预注册并在server-6 CPU核实原生TRAIN点序：64场景最大537406点，均未达到2500000采样阈值，原始首点与多数语义0/1981的结论适用于本队列这些场景的首个保留点。",
+    "只读查阅另一项目IPDN baseline的CLIP生产源码：未投影点可在除零后的NaN替换中成为零并作超点均值；本项目缓存究竟由其生成还是下载仍未知，不能把源码行为当作缓存来源证明。",
+    "22:18实时server-6 GPU7为外部PID 709354占用约13.2GB；未触碰外部作业，无GPU验证、模型准入、代码部署、入队或启动训练。两项测试与源审查的哈希证据写入稳定候选。",
+    "22:40 finish真实返回CLOSURE_INCOMPLETE: Capacity gap remains with executable research: m95-sample-context-support，租约仍保留。候选仍属diagnosis；没有证据把它伪装成资源阻塞或两个独立假设已穷尽。保留证据并abort，不宣称本轮完成。"
+  ],
+  "decisions": [
+    "22:31:30 route_change：零行大小匹配对照与首点训练顺序未形成失败特异性新机制；维持diagnosis，不放宽六项准入门槛。见pipeline/decisions/20260927-223130_route_change.md。",
+    "继续条件：独立确定物理CLIP缓存来源和观测计数，并先发现预测盲、任务相关的独立因果缺口，预注册原生匹配干预；不可改名复活已否路线。"
+  ]
+}

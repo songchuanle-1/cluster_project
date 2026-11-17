@@ -1,0 +1,28 @@
+{
+  "checked_at": "2026-09-15T23:08:00+08:00",
+  "candidate_id": "boundary-component-conditioning",
+  "server": "server-4",
+  "scope": "Read-only occupancy precheck; no native diagnostic or training launched.",
+  "gpu_query_succeeded": true,
+  "gpus": [
+    {"index": 0, "used_mib": 19791, "total_mib": 32607, "utilization_percent": 15,
+     "processes": [{"pid": 3237667, "command": "python", "used_mib": 19738}],
+     "disposition": "Existing M196; do not interrupt or colocate."},
+    {"index": 1, "used_mib": 20511, "total_mib": 32607, "utilization_percent": 31,
+     "processes": [
+       {"pid": 1264346, "command": "/home/liwj/.conda/envs/mhla_py310/bin/python", "used_mib": 14408},
+       {"pid": 2439065, "command": "/home/lyb/.conda/envs/gdn2/bin/python", "used_mib": 6074}],
+     "disposition": "Foreign jobs; no eviction or diagnostic launch."}
+  ],
+  "attempted_alternatives": [
+    "Checked both allowed GPUs: GPU0 has M196; GPU1 has two foreign jobs.",
+    "Other servers and local native compute excluded by goal restriction.",
+    "Remote diagnostic source and component-capture helper exist in /tmp."
+  ],
+  "environment_note": "Guessed /home/dl04/anaconda3/envs/project_cluster/bin/python absent. Resolve interpreter from registered conda source before eventual run; environment availability itself unproven.",
+  "command_exit_code": 1,
+  "exit_code_reason": "Final ls checked nonexistent guessed interpreter; nvidia-smi queries and source-file checks succeeded.",
+  "retry_after": "2026-09-16T00:08:00+08:00",
+  "unblock_condition": "Allowed server-4 GPU free of existing compute and configured native environment resolved.",
+  "admission": false
+}

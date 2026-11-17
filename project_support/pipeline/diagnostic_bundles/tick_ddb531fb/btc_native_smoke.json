@@ -1,0 +1,180 @@
+{
+  "id": "M211-BTC",
+  "candidate_id": "hierarchy-parent-binary-tree-complement-composition",
+  "config": "configs/Quard/ctf_hcg_csort_btc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_btc.yaml",
+  "code_commit": "00e2b18c6b8d568a64edb496e6979d766440883c",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.507390975952148,
+    13.910472869873047
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/btc_ddb531fb/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_btc.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "common_initialized_parameter_observations": {
+    "names_equal": true,
+    "tensor_count": 843,
+    "parameter_count": 156958522,
+    "fingerprints_equal": true,
+    "sha256": "04231c23641ec4d1fd7b9a31292b1b117ee84c5c22385379f641ddba2063b07a",
+    "scope": "Original common named parameters after native backbone pretrain, before TRAIN loader; exclude exact replaced-middle and new-tree prefixes on both targets; retain middle LayerNorm",
+    "excluded_name_prefixes": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.middle_tree."
+    ],
+    "full_buffer_values": "NOT_RECORDED"
+  },
+  "actual_n_ge3_supported_parent_group_counts": [
+    64,
+    64
+  ],
+  "actual_tree_map_call_counts": [
+    {
+      "inside": 384,
+      "outside": 896,
+      "leaf": 512
+    },
+    {
+      "inside": 384,
+      "outside": 896,
+      "leaf": 512
+    }
+  ],
+  "root_inside_actual_calls": [
+    0,
+    0
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/smoke_champion_execution.json",
+      "sha256": "6cdb54619dc2f484cf5bb64deb92ecd1b8d69a90cd4bbb74db363ff86f8ba03c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/smoke_candidate_execution.json",
+      "sha256": "584b262efb4328ff809a825f578530363044e0fa6083bd8d11b7aeca0a1b4570"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/resources_champion_execution.json",
+      "sha256": "0f38d47924c32fa6981209cec38aa60634a0f52b9d8379fa21adacc1a891a91d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/resources_candidate_execution.json",
+      "sha256": "7ad02416ad9755e5ce0be83dcca19fc2683dd2c8e3062155a0ece136e8482a7c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/execution_binding.json",
+      "sha256": "e6e1c096ee68f39e873a7d57078dfe0e510784ba59fc16ec92e542de83fce2fb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/native_manifest.json",
+      "sha256": "c2bac7c3cdd06e2dd03a31f517d63d1e26ccc6034fdb1a2a2f1e4dcd2d42e29a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution/execution_lease.json",
+      "sha256": "858d326618d7d449456a95df0939619bb8cc8951b12fee1e923c2f823476bdc7"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution_review_preparation/actual_four_result_review.json",
+      "sha256": "15e19fbfd01268b8142ea50073d5e3046066e178d072a38c0abb19a2ba68d9a6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_native_resource_independent_review.json",
+      "sha256": "dc03f6cd308f598baab970e06483ad333d963b1f1efbfc4944e1f7cef8204bbd"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_execution_review_preparation/admit_btc_draft.py",
+      "sha256": "340617a1281ee337868eb048f267bd2b7a4a9582c4d9ba41ea8b655de37fde4b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_status_after_four.json",
+      "sha256": "58d3841dc4fb093fc1dcd883519368b3ee272bd3f619decb54fe6264316d2b1e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_ddb531fb/btc_native_operation_history.json",
+      "sha256": "03bbca16930166f6f3319afbd71c60a605dc344e71fd16ce06e35d237dc222d3"
+    }
+  ],
+  "recorded_at": "2026-10-24T16:19:58.497069+00:00",
+  "limitations": {
+    "training_efficacy": "UNKNOWN",
+    "full_buffer_values": "NOT_RECORDED",
+    "offdiagonal_probe": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "empty_padding_singleton_coverage": {
+      "actual_unsupported_internal_rows": [
+        0,
+        0
+      ],
+      "actual_padding_rows": [
+        0,
+        0
+      ],
+      "actual_supported_singleton_groups": [
+        0,
+        0
+      ]
+    },
+    "raw_cross_target_digest_scope": "Cross-target exact intermediate output equality is not a preregistered gate; no magnitude/cause inferred from digest differences.",
+    "pure_TRAIN_memory": "UNKNOWN; no separate no-observer native TRAIN process pair"
+  }
+}

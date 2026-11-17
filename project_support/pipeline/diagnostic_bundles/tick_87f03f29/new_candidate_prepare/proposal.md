@@ -1,0 +1,11 @@
+# M225-ELC: undirected edge-state line-graph composition
+
+Use exactly the point-supported original fine--middle--coarse forest. Each undirected child--parent edge owns one persistent C-vector, initialized by shared `GELU(U[normalized_child,normalized_parent])`. At each component's line-graph round, every edge reads its OLD own state and the equal mean of all OTHER edges sharing either endpoint, then shared `GELU(R[own,mean])` replaces all active edge states synchronously. U and R are distinct default 2C-to-C Linear maps. Each true component runs its exact line-graph diameter, equal to original-tree diameter minus one (1 or 3 for this three-level support forest). Finished components receive no fake updates. A node's final delta is the equal mean of its incident final edge states. Empty/unsupported/padded rows have zero delta.
+
+This E-state carrier differs from SFC/PES node states and DCE directed recipient-specific cavities. It belongs to ordinary line-graph/message-passing families; novelty, task deficit and efficacy are UNKNOWN. Endpoint initialization has fixed child/parent roles; persistent states are shared by both endpoints. Original ancestor raw features already include descendants. Neither message exclusion nor edge storage removes physical self-information.
+
+The final incident readout couples endpoint outputs: on the three-node path, middle delta is the real-arithmetic mean of the endpoint deltas. More generally the bipartite signed-degree sum vanishes in real arithmetic. These are expressivity limitations/descriptions, not FP32 or RSTR admission tests. Capacity loss, smoothing, backtracking, degree bias, CPU synchronization and actual resource/optimization costs remain unknown.
+
+At C=256, U+R have 262656 parameters versus original three FFNs' 1576704. With original native K=[256,64,8], E<=320 and at most three recurrence rounds, linear MAC upper estimate is 167772160 versus original 171966464. These are source arithmetic only. Prefix/suffix/reduction work and whole-call resources are unmeasured.
+
+Preserve original three LN calls, raw means/membership/FPS/IDs/CSORT, three raw skips, HCG and single inst_feats delivery, native YAML values, seed/data/pretrain/criterion/optimizer/precision/schedule. Original FFNs are constructed in original order before replacement by Identity; new maps are created in a CPU RNG fork.

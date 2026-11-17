@@ -1,0 +1,259 @@
+    if candidate:
+        core=att.spatial_dirichlet;graph=importlib.import_module(qualified+'.spatial_dirichlet')
+        original_plan=graph.build_support_plan;original_chain=graph.build_chain_plan
+        original_energy=graph.chain_energy;original_mean=graph._group_mean
+        original_getitem=torch.Tensor.__getitem__;original_invert=torch.Tensor.__invert__
+        original_select=torch.Tensor.index_select;original_sub=torch.Tensor.__sub__
+        original_square=torch.Tensor.square;original_cat=torch.cat
+        original_zeros_like=torch.zeros_like;original_copy=torch.Tensor.index_copy
+        def queue_replace(owner,name,replacement,original):
+            installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):
+                assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):
+            hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),
+                att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):
+                    record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            points,positions,point_mask,normalized,ids=values
+            assert owner is core and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert points is state['nsd_encoder_features_ref'] and positions is state['nsd_encoder_positions_ref']
+            assert positions is state['nsd_padded_positions_ref'] and point_mask is state['nsd_encoder_mask_ref']
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            record={'forward':state['forward_index'],'point_input':summary(points),'native_positions':summary(positions),
+                'native_positions_sha256':fingerprint(torch,positions),
+                'exact_original_decoder_padded_positions_reference':True,
+                'exact_original_encoder_feature_and_mask_references':True,
+                'normalized_inputs':[summary(x) for x in normalized],
+                'scene_observations':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Original support/coordinate-only adjacent-chain/tie means/squared contrasts; three actual shared analysis calls and three actual shared synthesis calls; original restoration/HCG/rawskip/single-inst path. Wrappers return unchanged original objects.',
+                'per_parameter_nonzero_FP32_minimum_effect_gate_added':False}
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(points.shape[0]))]
+            state['nsd_context']={'record':record,'points':points,'positions':positions,'mask':point_mask,
+                'normalized':normalized,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'rows':[],'selectors':[],'selected':{},'scenes':[],'scene':None}
+            state['nsd_input_points_ref']=points;state['nsd_point_mask_ref']=point_mask
+            for level,value in enumerate(normalized):watch(value,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_getitem(tensor,key):
+            output=original_getitem(tensor,key);c=state.get('nsd_context')
+            if c is None:return output
+            role=next((name for name,ref in [('points',c['points']),('positions',c['positions']),('mask',c['mask'])] if tensor is ref),None)
+            if role is None:role=next(('normalized'+str(i) for i,ref in enumerate(c['normalized']) if tensor is ref),None)
+            if role is not None and type(key) is int:c['rows'].append((output,role,key))
+            else:
+                row=next(((role,batch) for ref,role,batch in c['rows'] if tensor is ref),None)
+                selector=next((batch for ref,batch in c['selectors'] if key is ref),None)
+                if row is not None and row[0] in ('points','positions') and selector is not None:
+                    role,batch=row;assert batch==selector
+                    selected=c['selected'].setdefault(batch,{})
+                    assert role not in selected;selected[role]=output;selected[role+'_mask_ref']=key
+            return output
+        def observed_invert(tensor):
+            output=original_invert(tensor);c=state.get('nsd_context')
+            if c is not None:
+                row=next(((role,batch) for ref,role,batch in c['rows'] if tensor is ref),None)
+                if row is not None and row[0]=='mask':c['selectors'].append((output,row[1]))
+            return output
+        def observed_plan(ids0,ids1,ids2,valid_count,widths):
+            c=state['nsd_context'];batch=len(c['scenes'])
+            assert (ids0,ids1,ids2)==c['members'][batch] and widths==c['widths']
+            plan=original_plan(ids0,ids1,ids2,valid_count,widths)
+            info=nsd_plan_observation(plan,(ids0,ids1,ids2),valid_count,widths)
+            info.update(batch=batch,actual_original_support_builder_calls=1,actual_group_mean_calls=0,
+                actual_chain_energy_calls=0,actual_chain_builder_calls=0,actual_square_calls=0,
+                actual_analysis_calls=0,actual_synthesis_calls=0,actual_final_index_copy_calls=0,
+                mean_observations=[],energy_observations=[],analysis_observations=[],synthesis_observations=[],
+                restoration_observations=[])
+            selected=c['selected'][batch]
+            assert selected['points_mask_ref'].tolist()==selected['positions_mask_ref'].tolist()
+            scene={'record':info,'plan':plan,'counts':[len(x) for x in plan['nodes']],
+                'points':selected['points'],'positions':selected['positions'],'means':[],'energy':None,
+                'energies':[],'selected_normalized':{},'analysis':[],'synthesis':{},'restored':[]}
+            info['actual_original_valid_coordinate_and_feature_mask_reference']=True
+            c['scenes'].append(scene);c['scene']=scene;c['record']['scene_observations'].append(info)
+            return plan
+        def observed_mean(values,labels,count):
+            output=original_mean(values,labels,count);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is None:return output
+            info={'input':summary(values),'output':summary(output),'groups':int(count),
+                'original_calls':1,'returned_original_object_unchanged':True}
+            assert info['input']['finite'] and info['output']['finite']
+            scene['record']['actual_group_mean_calls']+=1
+            energy=scene['energy']
+            if energy is not None:
+                plan=energy['plan'];ordinal=len(energy['means'])
+                if ordinal==0:
+                    assert values is energy['values'] and labels.tolist()==plan['point_to_coordinate'] and count==len(plan['groups'])
+                else:
+                    assert ordinal==1 and values is energy['square'] and labels.tolist()==plan['edge_parent'] and count==energy['count']
+                energy['means'].append(output);info['scope']='actual_chain_coordinate_mean' if ordinal==0 else 'actual_chain_squared_contrast_mean'
+            else:
+                ordinal=len(scene['means']);p=scene['plan']
+                expected=[scene['points'],scene['positions'],
+                    scene['means'][0] if ordinal>=2 else None,scene['means'][1] if ordinal>=3 else None,
+                    scene['analysis'][0] if ordinal>=4 else None,scene['analysis'][1] if ordinal>=5 else None][ordinal]
+                level=0 if ordinal<2 else 1 if ordinal in (2,3,4) else 2
+                mapping=('point_to_fine' if ordinal<2 else 'fine_to_middle' if ordinal in (2,3,4) else 'middle_to_coarse')
+                assert values is expected and labels.tolist()==p[mapping] and count==scene['counts'][level]
+                scene['means'].append(output);info['scope']='actual_feature_or_coordinate_center' if ordinal<4 else 'actual_child_analysis_state_mean'
+            scene['record']['mean_observations'].append(info);lite_watch(output,c['record']);return output
+        def observed_chain(coordinates,labels,count):
+            c=state['nsd_context'];scene=c['scene'];energy=scene['energy']
+            assert energy is not None and coordinates==energy['coordinates'].detach().cpu().tolist()
+            assert labels==energy['labels'].tolist() and count==energy['count']
+            plan=original_chain(coordinates,labels,count);energy['plan']=plan
+            scene['record']['actual_chain_builder_calls']+=1
+            energy['record']['actual_chain_plan']=plan
+            energy['record'].update(nsd_chain_plan_observation(plan,count))
+            return plan
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            output=original_select(tensor,dim,index,*args,**kwargs);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is None:return output
+            energy=scene['energy']
+            if energy is not None:
+                assert energy['means'] and tensor is energy['means'][0] and dim==0
+                ordinal=len(energy['selects']);assert ordinal in (0,1)
+                assert index.tolist()==energy['plan']['left' if ordinal==0 else 'right']
+                energy['selects'].append(output)
+            else:
+                row=next(((role,batch) for ref,role,batch in c['rows'] if tensor is ref and role.startswith('normalized')),None)
+                if row is not None:
+                    level=int(row[0][-1]);assert dim==0 and index.tolist()==scene['plan']['nodes'][level]
+                    scene['selected_normalized'][level]=output
+                elif scene['synthesis']:
+                    level=1 if len(scene['synthesis'])==1 else 0
+                    assert tensor is scene['synthesis'][level+1] and dim==0
+                    assert index.tolist()==scene['plan']['middle_to_coarse' if level==1 else 'fine_to_middle']
+                    scene['downward_ref']=output
+            return output
+        def observed_sub(tensor,other):
+            output=original_sub(tensor,other);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is not None and scene['energy'] is not None:
+                energy=scene['energy'];assert len(energy['selects'])==2
+                assert tensor is energy['selects'][0] and other is energy['selects'][1]
+                energy['contrast']=output
+            return output
+        def observed_square(tensor,*args,**kwargs):
+            output=original_square(tensor,*args,**kwargs);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is not None and scene['energy'] is not None:
+                energy=scene['energy'];assert tensor is energy['contrast']
+                assert output.dtype==tensor.dtype
+                info={'input':summary(tensor),'output':summary(output),'original_calls':1,
+                    'input_dtype_equals_output_dtype':True,'extra_FP32_cast_added':False}
+                assert info['input']['finite'] and info['output']['finite']
+                energy['square']=output;energy['record']['actual_squared_pair_contrast']=info
+                scene['record']['actual_square_calls']+=1;lite_watch(output,c['record'])
+            return output
+        def observed_energy(values,coordinates,labels,count):
+            c=state['nsd_context'];scene=c['scene'];level=len(scene['energies']);p=scene['plan']
+            expected=[(scene['points'],scene['positions'],'point_to_fine'),
+                (scene['means'][0],scene['means'][1],'fine_to_middle'),
+                (scene['means'][2],scene['means'][3],'middle_to_coarse')][level]
+            assert values is expected[0] and coordinates is expected[1] and labels.tolist()==p[expected[2]] and count==scene['counts'][level]
+            info={'level':level,'input':summary(values),'native_coordinates':summary(coordinates),
+                'original_calls':1,'returned_original_object_unchanged':True,'energy_arithmetic_replayed':False}
+            energy={'values':values,'coordinates':coordinates,'labels':labels,'count':count,
+                'means':[],'selects':[],'record':info}
+            scene['energy']=energy
+            try:output=original_energy(values,coordinates,labels,count)
+            finally:scene['energy']=None
+            has_edges=bool(energy['plan']['left'])
+            assert len(energy['means'])==(2 if has_edges else 0) and len(energy['selects'])==(2 if has_edges else 0)
+            assert ('square' in energy)==has_edges
+            info.update(output=summary(output),output_sha256=fingerprint(torch,output),
+                actual_coordinate_mean_and_contrast_mean_calls=len(energy['means']),
+                original_empty_chain_zero_branch=not has_edges)
+            assert info['input']['finite'] and info['native_coordinates']['finite'] and info['output']['finite']
+            assert list(output.shape)==[count,core.channels]
+            scene['energies'].append(output);scene['record']['energy_observations'].append(info)
+            scene['record']['actual_chain_energy_calls']+=1;lite_watch(output,c['record']);return output
+        def observed_zeros_like(tensor,*args,**kwargs):
+            output=original_zeros_like(tensor,*args,**kwargs);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is not None and scene['energy'] is None:
+                if scene['selected_normalized'].get(0) is tensor:scene['fine_zero']=output
+                elif len(scene['analysis'])==3 and tensor is scene['analysis'][2]:scene['coarse_zero']=output
+            return output
+        def observed_cat(values,*args,**kwargs):
+            output=original_cat(values,*args,**kwargs);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is None:return output
+            dim=kwargs.get('dim',args[0] if args else 0)
+            if len(scene['energies'])==3 and len(scene['analysis'])<3:
+                level=len(scene['analysis']);context=scene['fine_zero'] if level==0 else scene['means'][3+level]
+                expected=(scene['selected_normalized'][level],scene['energies'][level],context)
+                assert dim==-1 and len(values)==3 and all(x is y for x,y in zip(values,expected))
+                assert list(output.shape)==[scene['counts'][level],3*core.channels]
+                scene['analysis_input']=output
+            elif len(scene['analysis'])==3 and len(scene['synthesis'])<3:
+                level=2-len(scene['synthesis']);context=scene['coarse_zero'] if level==2 else scene['downward_ref']
+                expected=(scene['analysis'][level],context)
+                assert dim==-1 and len(values)==2 and all(x is y for x,y in zip(values,expected))
+                assert list(output.shape)==[scene['counts'][level],2*core.channels]
+                scene['synthesis_input']=output
+            return output
+        def stage_pre(kind):
+            def call(owner,values):
+                scene=state['nsd_context']['scene'];assert owner is getattr(core,kind)
+                assert values[0] is scene[kind+'_input']
+            return call
+        def stage_post(kind):
+            def call(owner,values,output):
+                c=state['nsd_context'];scene=c['scene']
+                level=len(scene['analysis']) if kind=='analysis' else 2-len(scene['synthesis'])
+                info={'level':level,'input':summary(values[0]),'output':summary(output),'original_calls':1,
+                    'actual_original_shared_module':True,'no_replay_or_replacement':True}
+                assert info['input']['finite'] and info['output']['finite']
+                if kind=='analysis':scene['analysis'].append(output)
+                else:scene['synthesis'][level]=output
+                scene['record'][kind+'_observations'].append(info)
+                scene['record']['actual_'+kind+'_calls']+=1;lite_watch(output,c['record'])
+            return call
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            output=original_copy(tensor,dim,index,source,*args,**kwargs);c=state.get('nsd_context');scene=c.get('scene') if c else None
+            if scene is not None and len(scene['synthesis'])==3:
+                level=len(scene['restored']);assert level<3 and dim==0
+                assert source is scene['synthesis'][level] and index.tolist()==scene['plan']['nodes'][level]
+                assert list(tensor.shape)==[c['widths'][level],core.channels] and bool((tensor==0).all())
+                info={'level':level,'original_node_ids':scene['plan']['nodes'][level],
+                    'output':summary(output),'actual_synthesis_delta_ref':True,'original_calls':1,
+                    'zero_initialized_destination':True,'returned_original_object_unchanged':True}
+                assert info['output']['finite'];scene['record']['restoration_observations'].append(info)
+                scene['restored'].append(output);scene['record']['actual_final_index_copy_calls']+=1
+            return output
+        for name,replacement,original in [('build_support_plan',observed_plan,original_plan),
+            ('build_chain_plan',observed_chain,original_chain),('chain_energy',observed_energy,original_energy),
+            ('_group_mean',observed_mean,original_mean)]:queue_replace(graph,name,replacement,original)
+        for owner,name,replacement,original in [(torch.Tensor,'__getitem__',observed_getitem,original_getitem),
+            (torch.Tensor,'__invert__',observed_invert,original_invert),(torch.Tensor,'index_select',observed_select,original_select),
+            (torch.Tensor,'__sub__',observed_sub,original_sub),(torch.Tensor,'square',observed_square,original_square),
+            (torch,'cat',observed_cat,original_cat),(torch,'zeros_like',observed_zeros_like,original_zeros_like),
+            (torch.Tensor,'index_copy',observed_copy,original_copy)]:queue_replace(owner,name,replacement,original)
+        for kind in ('analysis','synthesis'):
+            hooks.extend([getattr(core,kind).register_forward_pre_hook(stage_pre(kind)),
+                getattr(core,kind).register_forward_hook(stage_post(kind))])
+        def exchange_post(owner,values,output):
+            c=state.pop('nsd_context');active=[scene for scene in c['scenes'] if scene['counts'][0]]
+            for scene in active:
+                item=scene['record'];assert item['actual_chain_energy_calls']==item['actual_chain_builder_calls']==3
+                assert item['actual_analysis_calls']==item['actual_synthesis_calls']==item['actual_final_index_copy_calls']==3
+                assert len(scene['means'])==6
+            record=c['record'];count=len(active)
+            for level,value in enumerate(output):
+                assert list(value.shape)==list(c['normalized'][level].shape)
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(value) for value in output],
+                actual_true_fine_paths=sum(scene['counts'][0] for scene in active),actual_supported_scene_count=count,
+                actual_chain_energy_calls=3*count,actual_chain_builder_calls=3*count,
+                actual_analysis_calls=3*count,actual_synthesis_calls=3*count,actual_final_index_copy_calls=3*count,
+                actual_three_LN_calls=list(state['norm_counts']),actual_production_NSDirichlet_path_observed=True,
+                no_feature_energy_or_model_replay=True)
+            state['nsd_delta_snapshots']=[value.detach().clone() for value in output];exchange_calls.append(record)
+        hooks.extend([core.register_forward_pre_hook(exchange_pre),core.register_forward_hook(exchange_post)])

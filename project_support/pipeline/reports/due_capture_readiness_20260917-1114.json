@@ -1,0 +1,88 @@
+{
+  "scope": "Event-mode overdue capacity retry and static terminal-contract hardening; no native capture or efficacy claim",
+  "timestamp": "2026-09-17T11:14:00+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding",
+    "same-forward-coverage-diagnosis"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62481,
+    "total_mib": 81559,
+    "free_mib": 18599,
+    "processes": [
+      {
+        "pid": 1134192,
+        "name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "native_progress": {
+      "epoch": 12,
+      "step": 820,
+      "total_steps": 4686,
+      "best_miou": 0.4708,
+      "crash_markers": false
+    },
+    "capture_launched": false
+  },
+  "static_advance": {
+    "finding": "The terminal evaluator did not previously require config identity, top-level checkpoint identity, native-input identity, or hierarchical partition validity during capture validation.",
+    "implementation": [
+      "Require config_path, config_sha256, and top-level checkpoint_sha256 in captures.",
+      "Bind each row checkpoint_sha256 to the capture manifest.",
+      "Require valid native_input_sha256 on every row and equality across paired rows.",
+      "Revalidate hierarchical partition fields and require equality of hierarchical_partition_sha256 across paired rows.",
+      "Accept canonical integer or JSON-round-tripped decimal-string child-map keys without changing the canonical hash."
+    ],
+    "tests": {
+      "terminal_contract": 12,
+      "hierarchical_partition": 11,
+      "passed": true
+    },
+    "report": {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1118.json",
+      "sha256": "eefb10a301eb9ec6799b87c9a1060d0dcfa9f636d272d4f1a08107d4df18368b"
+    }
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-17T12:10:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Rechecked live GPU capacity and M197 native progress, then advanced the frozen paired-capture contract with additional fail-closed identity and hierarchy validation."
+  },
+  "evidence": [
+    {
+      "path": "scripts/pirs_preregistered_contract_20260917.py",
+      "sha256": "b85855c52abfad8de1282cbf313e7b78aa6e1e3ee2bcfaa549569fd6363e81c9"
+    },
+    {
+      "path": "scripts/hierarchical_partition_contract_20260916.py",
+      "sha256": "1633e31d46109c7055c93b761dc43bdebcae131bdef8b04b611464981cb1537e"
+    },
+    {
+      "path": "scripts/test_hierarchical_partition_contract_20260916.py",
+      "sha256": "749a60929c55adb649934c47d93d2379f2d32c176c4b5e90a185e89795cd061b"
+    }
+  ],
+  "limitations": [
+    "The capture identities are validated structurally; they are not authenticated against an external signed manifest.",
+    "No paired native capture ran, so no P1/P2/P3 or efficacy result is claimed.",
+    "M197-PIRS remains prior-art engineering evidence and does not authorize a successor mechanism."
+  ]
+}

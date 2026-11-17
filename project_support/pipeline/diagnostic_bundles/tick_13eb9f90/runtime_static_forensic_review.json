@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-07T21:28:40.867025+00:00",
+  "reviewer_agent": "/root/runtime_trace_audit",
+  "owner_provenance_only": {
+    "token": "13eb9f90892a472b8102218b83e99ea8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T21:06:15.452582+00:00",
+    "deadline_at": "2026-11-07T22:06:15.452582+00:00",
+    "context_sha256": "1f30bbf6b19d15e61582a00e3f349e4de62ad805ea709d14bf75609fcf40a5f1",
+    "pending_sha256": "2472b72d89ed09556611b3b4a703fa6de1fc11a9247e427e6d8c113b4d1c3a1e"
+  },
+  "scope": "LOCAL_STATIC_SOURCE_AND_RETAINED_TRACE_COMPARISON_WITH_ROOT_ACTUAL_CPU_PROVENANCE; no SSH, import Torch, model/data execution, GPU, test suite, checkpoint or source mutation",
+  "diagnostic_status": "INCONCLUSIVE",
+  "root_cause": "UNKNOWN",
+  "failure_scope": "runtime_implementation_inconclusive",
+  "scientific_hypothesis_falsified": false,
+  "checked_facts": [
+    {
+      "fact": "NSD actual call stack enters Network.loss decorator then framework/utils/utils.py11 x.cuda(), installed Module.cuda/_apply and _python_dispatch.is_traceable_wrapper_subclass401 before loss body executes for that batch.",
+      "evidence": {
+        "path": "pipeline/diagnostic_bundles/tick_13eb9f90/nsd_exact_log_evidence.json",
+        "sha256": "989920536c93dcb849fa88b5b286096f1f0ef10b257435eacf99ec7e832a2c12"
+      }
+    },
+    {
+      "fact": "Static AST confirms NSD loss is a bound method whose first argument is self and @cuda_cast iterates every positional argument. Because model self has cuda, the wrapper attempts self.cuda() on each loss call. This explains the recursive Module._apply path, not why any binding became the wrong type.",
+      "source_lines": {
+        "framework/utils/utils.py_x_cuda": 11,
+        "NSD/network.py_loss_definition": 115,
+        "NSD/network.py_cuda_cast_decorator": 114
+      }
+    },
+    {
+      "fact": "HVD full original traceback confirms train.py129 gradient clipping calls model.parameters after backward; installed named_modules2855 fails at self not in memo with MultiheadAttention reported as the non-iterable container. The old fresh CPU128 traversal did not reproduce the crashed object.",
+      "evidence": {
+        "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/archived_traceback.txt",
+        "sha256": "78f2dba25fb7b44bd75a865603c6dbe6640a084b9734f6a6df93973092fdc859"
+      }
+    },
+    {
+      "fact": "PSC failure originated in DataLoader worker0, at get_sp_label/Tensor.unique/_return_output, with NoneType not callable. This worker-side site is distinct from model self.cuda traversal and cannot be explained solely by observing that traversal in NSD.",
+      "evidence": {
+        "path": "pipeline/diagnostic_bundles/tick_c706ca80/psc_terminal_state_observation.json",
+        "sha256": "669d51cecf5941acadfca2e7e51649147841902ae1bd30231935e7f9e96bb1a0"
+      }
+    },
+    {
+      "fact": "Root actual current CPU fresh import has torch references of type module in _python_dispatch, module and functional, all identical to imported torch; six selected Python files match installed RECORD and interpreter hash matches deployment. This does not reconstruct historical namespaces, certify binary ABI/hardware, prove official wheel authenticity, or establish repair.",
+      "evidence": {
+        "path": "pipeline/diagnostic_bundles/tick_13eb9f90/runtime_provenance_observation.json",
+        "sha256": "e0ab81261837ebcddeb464f938378f4a311f7205161910382dfd17d033c04def"
+      }
+    }
+  ],
+  "specific_testable_hypothesis": {
+    "statement": "An in-process call-binding or namespace/reference integrity change after training history may be responsible for at least one failure. NSD message is compatible with an unexpected object being resolved where torch.Tensor is accessed; HVD is compatible with a wrong runtime memo argument/binding; PSC is compatible with a wrong callable reference in the worker. A common cause across all three remains unproved.",
+    "status": "HYPOTHESIS_ONLY_NOT_REPRODUCED",
+    "what_would_distinguish_it": "Capture actual failing frame locals/globals and bound-method identity in the original failure, rather than checking a fresh object after the process has exited.",
+    "alternatives_not_excluded": [
+      "Distinct independent implementation/library defects at the three sites.",
+      "Training-history-specific Python object mutation, extension interaction or process-specific state not present in fresh imports.",
+      "Runtime binary/ABI or hardware faults; file hashes alone cannot adjudicate these."
+    ],
+    "not_supported": "No source/log evidence presently establishes that cuda_cast self.cuda causes global Torch corruption, that a particular native extension is guilty, or that the NSD mechanism is mathematically or numerically invalid."
+  },
+  "next_information_gain_observation_not_executed": {
+    "scope": "On a separately authorized future diagnostic execution, use bounded exception-frame metadata capture before re-raising; no automatic replay/restart of NSD/HVD/PSC and no change to loss/precision/data/seed/schedule.",
+    "NSD_fields": [
+      "type/qualified-name and identity of frame.f_globals[torch] at is_traceable_wrapper_subclass, compared with sys.modules[torch]",
+      "type(t), type(param_applied), and callable/function qualified name at the actual _apply/is_traceable frames; avoid tensor contents"
+    ],
+    "HVD_fields": [
+      "actual failing frame type(memo), type(self), and bound named_modules __self__/__func__ identity; do not substitute a newly constructed module tree"
+    ],
+    "PSC_fields": [
+      "inside worker0 actual _return_output and wrapper frames, type/qualified-name of the invoked callable and torch binding, PID/worker identity and source hashes; parent-process metadata is insufficient"
+    ],
+    "why_not_repeat_old_check": "A new healthy import or another128 parameter traversal still cannot distinguish historical call-binding state or worker globals at the actual failing operation."
+  },
+  "no_root_cause_PASS_or_fix_claim": true,
+  "no_execution_or_restart_authorization_created": true,
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_13eb9f90/nsd_exact_log_evidence.json",
+      "sha256": "989920536c93dcb849fa88b5b286096f1f0ef10b257435eacf99ec7e832a2c12"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_13eb9f90/runtime_provenance_observation.json",
+      "sha256": "e0ab81261837ebcddeb464f938378f4a311f7205161910382dfd17d033c04def"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/archived_traceback.txt",
+      "sha256": "78f2dba25fb7b44bd75a865603c6dbe6640a084b9734f6a6df93973092fdc859"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/diagnosis.json",
+      "sha256": "d12697a06c26acd34c36ca2091edcaa40be3d6f8912f46bcc4e651433e318e91"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_c706ca80/psc_terminal_state_observation.json",
+      "sha256": "669d51cecf5941acadfca2e7e51649147841902ae1bd30231935e7f9e96bb1a0"
+    },
+    {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    },
+    {
+      "path": "Cluster/framework/utils/utils.py",
+      "sha256": "8a7d6e15708742e5a1fc252f5d9fb9c8ba8d4241291ebb45ddfc0236cc04e758"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd/network.py",
+      "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d"
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"
+    }
+  ]
+}

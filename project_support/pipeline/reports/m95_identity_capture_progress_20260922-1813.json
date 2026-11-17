@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "contract": "m95_identity_capture_progress_v1",
+  "generated_at": "2026-09-22T18:14:02+08:00",
+  "scope": "Progress receipt for the detached, manifest-bound M95 identity-control capture. The job is running; this is not a completed capture, analysis, admission, efficacy, or novelty result.",
+  "gpu_gate": {
+    "host": "server-6",
+    "gpu": 7,
+    "utilization_percent": 0,
+    "memory_used_mib": 42023,
+    "memory_total_mib": 81559,
+    "foreign_pid": 3694608,
+    "foreign_process": "/home/jiaoh/conda_envs/das_env/bin/python",
+    "foreign_memory_used_mib": 41996,
+    "safe_project_slot": true,
+    "decision_basis": "The producer is hard-capped to 15% of device memory and the observed free memory exceeds that cap with the foreign process left untouched."
+  },
+  "launch": {
+    "pid": 1578754,
+    "started_at": "2026-09-22T18:13:00+08:00",
+    "output_dir": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813",
+    "log_path": "/data3/songcl/Project/Cluster_project/pipeline/logs/m95_identity_capture_20260922-1813.log",
+    "cuda_visible_devices": "7",
+    "checkpoint": "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/best.pth",
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "manifest": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/manifest_capture_20260922/manifest.json",
+    "manifest_sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023",
+    "producer": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/manifest_capture_20260922/native_manifest_capture_20260922.py",
+    "producer_sha256": "f71305e0aaaf796774a9d408161390dc60e0d292d42d3324ed7ae84073ef6b8f"
+  },
+  "progress_samples": [
+    {
+      "step": 0,
+      "expressions": 0,
+      "matching_expressions": 0,
+      "loss": 0.4485701024532318
+    },
+    {
+      "step": 11,
+      "expressions": 1,
+      "matching_expressions": 0,
+      "loss": 1.2136098146438599
+    },
+    {
+      "step": 31,
+      "expressions": 2,
+      "matching_expressions": 0,
+      "loss": 0.5111551880836487
+    }
+  ],
+  "persisted_artifacts": [
+    {
+      "name": "manifest_selected_009.pt",
+      "bytes": 4707078
+    },
+    {
+      "name": "manifest_selected_022.pt",
+      "bytes": 2690246
+    }
+  ],
+  "state": "pending_progress",
+  "native_capture_completed": false,
+  "scientific_validation_complete": false,
+  "next_action": "Monitor the unique log until capture.json exists, verify the capture remains hash-bound and complete for all 256 manifest rows, then run analyze_m95_manifest_identity_controls_20260922.py with the exact checkpoint and manifest hashes.",
+  "not_evidence_of": [
+    "completed native capture",
+    "identity-specific causal support",
+    "admission",
+    "deployable efficacy",
+    "population effect",
+    "novelty"
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "owner": {
+    "token": "91c85c4270bd407ba432eca5dbf7d3a8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T15:11:36.784479+00:00",
+    "deadline_at": "2026-11-10T16:11:36.784479+00:00",
+    "context_sha256": "d1a82f07e45547ddd21ae1b683c512ebdc507d2918a2e3d29f3042d06c4cfb29",
+    "pending_sha256": "f72d8f0311730464227da959d659ce43712b147d50bfba10cdbd70ceaa256985"
+  },
+  "recorded_at": "2026-11-10T15:22:15.044193+00:00",
+  "kind": "READ_ONLY_STATIC_OPTIMIZER_SOURCE_BYTECODE_AND_LOG_COLLECTION_DIAGNOSIS",
+  "actual_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_91c85c42/m235_optimizer_source_diagnosis/static_probe.actual.json",
+    "sha256": "15c4e448dfede455c30102f7ab6b2698b05aeebf544040d1f01a109f16ddf05f"
+  },
+  "fatal_frames_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_91c85c42/m235_fatal_frames.actual.json",
+    "sha256": "e033a1f0ada38279274bd81c4b078bf83afd6a8955b46b9bda4fc5ea73607929"
+  },
+  "adam_source_identity": {
+    "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/optim/adam.py",
+    "sha256": "46296644b82ae5f2ecae17ee30ce4691f4cc2078a0e478ec2beef10ffbe8018e",
+    "size": 39250,
+    "mtime_ns": 1782094216515795192,
+    "ctime_ns": 1784019270297721689,
+    "device": 66308,
+    "inode": 56269921,
+    "uid": 1001,
+    "read_stable": true
+  },
+  "adam_pyc_identity": {
+    "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/optim/__pycache__/adam.cpython-310.pyc",
+    "sha256": "5ba459a960780f7f744e0d31f84d123ee7e250f74e41564051cf526a0040d253",
+    "size": 19040,
+    "mtime_ns": 1782094219087886529,
+    "ctime_ns": 1784019262716633226,
+    "device": 66308,
+    "inode": 56258210,
+    "uid": 1001,
+    "read_stable": true
+  },
+  "current_source_pyc_timestamp_header_match": true,
+  "current_source_pyc_init_group_bytecode_match": true,
+  "current_source_pyc_init_group_line_map_match": true,
+  "source_grad_access_lines": [
+    150,
+    153,
+    157
+  ],
+  "pyc_grad_LOAD_ATTR_lines": [
+    150,
+    153,
+    157
+  ],
+  "traceback_reported_line191_text": "exp_avg_sqs.append(state[\"exp_avg_sq\"])",
+  "line191_has_direct_grad_attribute_load": false,
+  "line191_bytecode": [
+    {
+      "offset": 262,
+      "opname": "LOAD_FAST",
+      "argrepr": "exp_avg_sqs",
+      "starts_line": 191,
+      "effective_line": 191
+    },
+    {
+      "offset": 264,
+      "opname": "LOAD_METHOD",
+      "argrepr": "append",
+      "starts_line": null,
+      "effective_line": 191
+    },
+    {
+      "offset": 266,
+      "opname": "LOAD_FAST",
+      "argrepr": "state",
+      "starts_line": null,
+      "effective_line": 191
+    },
+    {
+      "offset": 268,
+      "opname": "LOAD_CONST",
+      "argrepr": "'exp_avg_sq'",
+      "starts_line": null,
+      "effective_line": 191
+    },
+    {
+      "offset": 270,
+      "opname": "BINARY_SUBSCR",
+      "argrepr": "",
+      "starts_line": null,
+      "effective_line": 191
+    },
+    {
+      "offset": 272,
+      "opname": "CALL_METHOD",
+      "argrepr": "",
+      "starts_line": null,
+      "effective_line": 191
+    },
+    {
+      "offset": 274,
+      "opname": "POP_TOP",
+      "argrepr": "",
+      "starts_line": null,
+      "effective_line": 191
+    }
+  ],
+  "current_source_cache_mismatch_observed": false,
+  "conclusion": "The currently installed source/cache are consistent. The saved traceback line191 does not directly access .grad. Static disk evidence does not establish the exit-time executing code object, instruction offset or local objects; cause remains UNKNOWN.",
+  "missing_exit_time_evidence": [
+    "frame f_code/f_lasti and in-memory line table",
+    "optimizer param_groups/state and local p/grads/exp_avg_sqs objects",
+    "exception object and any native corruption evidence"
+  ],
+  "integration_source_hashes": [
+    {
+      "path": "tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+      "frozen_or_prior_train_hash_match": true,
+      "direct_optimizer_pattern_hit_count": 17
+    },
+    {
+      "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/loss.py",
+      "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "frozen_or_prior_train_hash_match": true,
+      "direct_optimizer_pattern_hit_count": 0
+    },
+    {
+      "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/network.py",
+      "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "frozen_or_prior_train_hash_match": true,
+      "direct_optimizer_pattern_hit_count": 0
+    }
+  ],
+  "train130": "optimizer.step()",
+  "train421": "optimizer = gorilla.build_optimizer(model, cfg.optimizer)",
+  "candidate_loss_network_direct_optimizer_patterns": "No optimizer/param_groups/add_param_group/torch.optim/.grad assignment text matches; this limited static scan does not prove runtime object integrity.",
+  "python_binary_matches_prior_capture": true,
+  "python_sha256": "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5",
+  "prior_python_capture": {
+    "path": "pipeline/diagnostic_bundles/tick_6b23467a/m235_setup_execution/collect_result.json",
+    "sha256": "cc850f99465645c99fa89d9becf63834eb1c04cc0e4aab5a4863e42804930e3e"
+  },
+  "prior_adam_manifest_references": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_692e522c/nec_runtime_preparation.json",
+      "sha256": "40225e21c8c0dcde4fc56487cce73df1f83e1e4435e7d877d1d75d26145704d0",
+      "matches": [
+        {
+          "json_path": [
+            "observation",
+            "protected_old_roots_before",
+            "/data/songcl/Project/Cluster_project/Cluster_resume_wfc_20261104",
+            "source_hashes",
+            "framework/torch/optim/adam.py"
+          ],
+          "value": {
+            "sha256": "a7ce0c677b2cced361179d3cd5409fea7efc64821ce32b83821c0b29b0770f84",
+            "symlink": null
+          }
+        },
+        {
+          "json_path": [
+            "observation",
+            "protected_old_roots_before",
+            "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+            "source_hashes",
+            "framework/torch/optim/adam.py"
+          ],
+          "value": {
+            "sha256": "a7ce0c677b2cced361179d3cd5409fea7efc64821ce32b83821c0b29b0770f84",
+            "symlink": null
+          }
+        },
+        {
+          "json_path": [
+            "observation",
+            "protected_old_roots_after",
+            "/data/songcl/Project/Cluster_project/Cluster_resume_wfc_20261104",
+            "source_hashes",
+            "framework/torch/optim/adam.py"
+          ],
+          "value": {
+            "sha256": "a7ce0c677b2cced361179d3cd5409fea7efc64821ce32b83821c0b29b0770f84",
+            "symlink": null
+          }
+        },
+        {
+          "json_path": [
+            "observation",
+            "protected_old_roots_after",
+            "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+            "source_hashes",
+            "framework/torch/optim/adam.py"
+          ],
+          "value": {
+            "sha256": "a7ce0c677b2cced361179d3cd5409fea7efc64821ce32b83821c0b29b0770f84",
+            "symlink": null
+          }
+        }
+      ]
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_abb177b5/nec_terminal_correction_intent.json",
+      "sha256": "46f6889f5700cba9e5838959e38dc5858b9e99d078b6bf12adf629d2841b7ad5",
+      "matches": [
+        {
+          "json_path": [
+            "protected_before",
+            "source",
+            "framework/torch/optim/adam.py"
+          ],
+          "value": "a7ce0c677b2cced361179d3cd5409fea7efc64821ce32b83821c0b29b0770f84"
+        }
+      ]
+    }
+  ],
+  "prior_adam_comparison_limit": "Retained matches are framework/torch vendored source in older protected roots (SHAa7ce0c...), not the current installed site-packages path. They are not evidence of mutation at the installed path; no prior same-path installed Adam baseline was used.",
+  "log_collection": {
+    "archive_id": "b75c9152d7fd4ecea9af538101d777d4",
+    "experiment_reference": {
+      "path": "pipeline/experiments/M235-SINC.json",
+      "sha256": "8f8bc6c3791823ec4166a3097e6e9a5617820b9a2d97ce4809171f7d127c9c62"
+    },
+    "log_local": "",
+    "helper_reference": {
+      "path": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\pipeline_monitor.py",
+      "sha256": "8f981df7b03f5b3d7283c92fcddc880f40a2b7af1aed22774d38376a8a5e6cc1",
+      "lines": [
+        548,
+        583
+      ]
+    },
+    "script_reference": {
+      "path": "scripts/remote_pull.sh",
+      "sha256": "fa3ed5958ed762dcff0b680c4f4e36377b0e0568573562c8e9cbcc013a26429d",
+      "lines": [
+        13,
+        65
+      ]
+    },
+    "existing_scripts_directory": "D:\\project\\cluster_project\\scripts",
+    "computed_PROJECT_DIR": "D:/project",
+    "computed_SERVERS_YAML": "D:/SERVERS.yaml",
+    "computed_SERVERS_YAML_exists": false,
+    "computed_shell_destination": "D:/Checkpoints/server_4",
+    "monitor_search_directory": "D:/project/cluster_project/Checkpoints/server_4",
+    "diagnosis": "Current helper passes dirname(dirname(project/scripts)) as PROJECT_DIR. remote_pull.sh derives its inventory and destination from that wrong parent. Its set -euo pipefail and HOST=$(get_yaml_value ...) can stop at the failed missing-inventory read, whose stderr is hidden. The later empty-HOST guard also exits1 if reached. Monitor ignores returncode/stderr and returns empty when its separate search finds no log.",
+    "actual_pull_stderr_or_returncode_retained": false,
+    "conclusion_scope": "Deterministic current-code path defect and matching empty-log outcome; the historical pull subprocess error itself was not captured. No pull, retry, rearchive or fix performed."
+  },
+  "Torch_imported": false,
+  "code_objects_executed": false,
+  "GPU_compute": false,
+  "signals_sent": false,
+  "source_or_package_cache_mutations": false,
+  "queue_registry_or_native_output_edits": false,
+  "root_cause": "UNKNOWN",
+  "training_repair": "NOT_PERFORMED",
+  "CPU_or_native_retest": "NOT_RUN"
+}

@@ -1,0 +1,64 @@
+{
+  "contract": "m95_entry_fps_provenance_tick_v1",
+  "observed_at": "2026-09-25T21:47:00+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "scope": "Matched diagnostic manifest subsets and fixed-item native operator control; strict historical full-scan replay pending.",
+  "authorized_host": "server-6",
+  "authorized_gpu": 7,
+  "frozen_identity": {
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "manifest_sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023",
+    "loaded_pointnet2_extension_sha256": "8711c249d9bd3aa5c4b6f902dba2dc37b9ecb623ed4111c6a468f8763ded4d07"
+  },
+  "matched_subset_pair": {
+    "path": "pipeline/reports/m95_entry_fps_pair_20260925-2135.json",
+    "sha256": "78fd10fa6b419921a0ab47aa3c5f64494229758634696ae512908841e520d58d",
+    "rows": 5,
+    "coordinate_bytes_differ": [83, 95, 174, 178, 193],
+    "fps_changed_indices": {"83": 0, "95": 2, "174": 0, "178": 0, "193": 192},
+    "coordinate_max_abs_delta_range": [5.960464477539062e-07, 5.7220458984375e-06]
+  },
+  "fixed_coordinate_replay": {
+    "path": "pipeline/reports/m95_entry_fps_replay_20260925-2144.json",
+    "sha256": "a85a54c766ab8df4e1b46f13af18755fd2a2b7ae88cf289a260889360b2e2c2b",
+    "repeats_per_input": 5,
+    "all_native_outputs_reproduced": true,
+    "all_repeats_identical": true
+  },
+  "fixed_item_scatter_control": {
+    "path": "pipeline/reports/m95_scatter_fps_same_input_20260925-2141.json",
+    "sha256": "6db634d1fe4efa3022cbb9359c18f1f1521f811d19749e2ee56f3cd546acf29c",
+    "rows": [95, 193],
+    "repeats_per_item": 32,
+    "scatter_unique_hashes_per_item": [32, 32],
+    "fps_unique_outputs_per_item": [1, 1],
+    "limitation": "One transformed native item per scene; does not establish which reduction execution produces historical full-forward changes."
+  },
+  "first_fps_divergence": {
+    "path": "pipeline/reports/m95_entry_fps_first_divergence_20260925-2142.json",
+    "sha256": "bb11f47cb0edaf22641bf990bdd80c97497d9fb4fd5f4ec72fa936f6eaa54a85",
+    "row95_first_changed_position": 250,
+    "row193_first_changed_position": 20,
+    "limitation": "CPU distance reconstruction approximates the native reduction order; native replay establishes output identity."
+  },
+  "invalid_full_scan_attempt": {
+    "pid": 2311570,
+    "output": "pipeline/diagnostic_runs/m95_frozen_fullscan_20260925_2112",
+    "last_step": 727,
+    "stopped_after_exact_pid_command_verification": true,
+    "reason": "Unchanged entrypoint c76eae89 was staged with a different composite producer hash bef2f029; frozen exact postprocessor requires 206c594d."
+  },
+  "strict_full_scan": {
+    "pid": 2621503,
+    "output": "pipeline/diagnostic_runs/m95_frozen_contract_fullscan_20260925_2147",
+    "log": "pipeline/diagnostic_runs/m95_frozen_contract_fullscan_20260925_2147.log",
+    "producer_composite_sha256": "206c594d8c5219c6e249d89f7cb91815467bd443a030bc8bbd76d457de0b485a",
+    "state": "running_progress_verified",
+    "last_verified_step": 30,
+    "strict_comparator": "pending_completion",
+    "historical_gate": "fail_28_of_65"
+  },
+  "interpretation": "Matched pre-forward item fingerprints do not bind scatter_mean output bytes. Captured coordinates map reproducibly to FPS indices under the same loaded extension. The 192-index cascade at row193 begins at FPS choice 20. This does not establish strict historical full-scan identity or model efficacy.",
+  "admission": false,
+  "training_launched": false
+}

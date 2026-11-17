@@ -1,0 +1,8 @@
+# Independent TRAIN Replication: Next24 Outcome-Blind Scenes
+
+- Same stable diagnostic and frozen trained HDS, not a new model/mechanism/seed or tuning sweep. First8scene results remain immutable: native-minus-magnitude-matched permutation +0.00348936, scene95%interval[-0.00152766,+0.00915295]; evidence is inconclusive, not an admission criterion.
+- Freeze exactly the next24scenes in the original SHA256 scene ordering, excluding the prior4scenes and first8pilot scenes. Each first native TRAIN group contributes all4expressions. No scene or expression is selected by IoU, labels, task outcomes or previous condition preference. Freeze identities before native prediction.
+- Repeat exactly the same four conditions, original normal query/selection, unchanged projection/norm/ILA/decoder, cyclic permutation and recipient norm matching. No new parameter/tolerance/precision/deterministic flag, no changed model or checkpoint.
+- Planned24full native captures+96suffix replays. CPU fixture controls are cached4families, not rerun or recounted. Report the first8and new24separately; any combined32scene summary is descriptive and cannot erase the pilot or be called a fresh untouched confirmatory trial.
+- Fixed new24scene sample size, no optional stopping at a preferred sign or interval. Native matching1e-6 and relative norm1e-6 unchanged. Scene bootstrap5000/seed1999 preregistered; interval crossing0 is uncertainty, not global falsification or a pre-training efficacy gate.
+- Preserve all failures. Zero native training/optimizer/VAL/backward steps. Verify pinned authorized GPU0/live occupation/3flocks before running and all released afterward, then continue only evidence-backed distinct research within the real deadline.

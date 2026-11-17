@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T02:25:07.383245+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "8fafa3d4ebcb48e7ba3436e084f6ee9f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T03:12:05.347438+00:00"
+  },
+  "experiment_id": "M209-PSBR",
+  "candidate_id": "hierarchy-parent-segmented-bidirectional-token-state",
+  "status": "FINAL_SOURCE_CONSTRAINTS_REVIEWED_STATIC_ONLY_NOT_NATIVE_ADMISSION",
+  "proposal": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/variant_proposal.json",
+    "sha256": "7a82845976c83accb74f730fef4500046c6f7e004c5dff84b2ea02c2f0c79650"
+  },
+  "design_clarification": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_prepare/design_clarification.json",
+    "sha256": "56ba2619eddbff71431a5a1c54f4875c0c0be60e6db3cf8555b3733437026d81"
+  },
+  "source_inventory_snapshot": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_prepare/source_inventory.json",
+    "sha256": "a4ef2d51c3445879f6ca064a993d2abd84bee041a108bd0e2a34e9ec25158f85"
+  },
+  "prior_bounded_history_review": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/variant_boundary_review.json",
+    "sha256": "b0a82386701867bc268535960dc84a4ac787a238dd33d68a3217bd1add173c2d"
+  },
+  "source_hashes": {
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/dec.py": "3a3bd73cf868982476bc58b68a286923e2b194059df00ed5017e510c8d6d0973",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/hier_postprocess.py": "f5086a19c1057b6efe2702547814dbf74b1753300a9022c4bca21e341d326518",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/middle_recurrence.py": "301213d9d72d0121f5d3970571b4169b80a11f0a5f5962d4f7e4cc0d7fcff032",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+    "configs/Quard/ctf_hcg_csort_psbr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+  },
+  "blocking_findings": [],
+  "source_scope": {
+    "new_files": 9,
+    "python_sources": 8,
+    "native_yaml": 1,
+    "unchanged_copied_sources": [
+      "__init__.py",
+      "backbone.py",
+      "loss.py",
+      "network.py",
+      "sample_model.py"
+    ],
+    "baseline_source_and_YAML_hashes_match": true,
+    "protected_28_existing_file_bytes_match": true,
+    "old_boundary_review_unchanged": true
+  },
+  "static_constraints": {
+    "whole_middle_FFN_replaced": true,
+    "old_middle_FFN_registration_replaced_by_Identity": true,
+    "original_middle_LayerNorm_retained": true,
+    "shared_Wx_Wh_bidirectional_state_and_Wo_concat": true,
+    "Wh_bias": false,
+    "new_residual_gate_or_QKV_attention": false,
+    "pure_activation_or_scale_change": false,
+    "raw_mean_pool_FPS_partition_and_ID_logic_preserved": true,
+    "rawbank_CSORT_unchanged": true,
+    "original_HCG_gather_gate_message_norm_and_point_injection_retained": true,
+    "baseline_loss_network_backbone_and_native_YAML_byte_unchanged": true,
+    "seed_data_schedule_numeric_config_changed": false,
+    "new_CPU_RNG_fork_only_in_module_construction": true
+  },
+  "AST_evidence": {
+    "unchanged_hier_methods_count": 25,
+    "changed_hier_methods": [
+      "C2F_ClusterAttn_CTF.__init__",
+      "C2F_ClusterAttn_CTF.forward",
+      "PointCloudPartitioner.__init__",
+      "PointCloudPartitioner.forward",
+      "SharedClusterBank.get_cluster"
+    ],
+    "unchanged_dec_methods_count": 23,
+    "changed_dec_methods": [
+      "Encoder_layer.forward"
+    ],
+    "explicit_invariant_methods": [
+      "aggregate_cluster",
+      "PointCloudPartitioner.partition_points",
+      "PointCloudPartitioner.cluster_layer",
+      "SharedClusterBank.build_cluster_feats",
+      "C2F_ClusterAttn_CTF_HCG._cluster_to_points",
+      "C2F_ClusterAttn_CTF_HCG_CSORT._cross_scale_orth_loss",
+      "C2F_ClusterAttn_CTF_HCG_CSORT.forward"
+    ],
+    "boundary": "Method AST equality establishes unchanged local expressions/control flow for listed operations. New geometry side caches add checks/storage to partition forward and original IDs are returned; no dynamic equality or behavior was executed."
+  },
+  "implemented_proposal_alignment": [
+    "Geometry comes directly from detached original per_layer_coords[2], the existing fine-mean to middle-mean path; no replacement FPS, new centroid estimator or point-row canonicalization.",
+    "True middle support is bincount(ids1[ids0])>0, with Kmid consistent with original ids2 length. Unsupported internal slots and batch tails do not enter state transport; coordinate zero is not a padding sentinel.",
+    "Parents are original ids2. Supported middle token IDs are sorted by detached (x,y,z,original ID), grouped separately per batch/coarse parent, with zero forward/backward boundary states.",
+    "One Wx input projection is reused by both directional traversals, Wh is biasless and shared, tanh states remain differentiable, and Wo concatenated-state output is index_copy-ed to original native IDs.",
+    "Only the middle residual-FFN output expression is replaced. Fine/coarse residual FFN expressions remain original, raw banks feed original CSORT and the original HCG/point readback path executes once."
+  ],
+  "RNG_clarification": {
+    "approved_scope": "After constructing the original three FFNs and original LayerNorms, replace middle FFN registration and construct only ParentSegmentedBidirectionalRecurrence inside torch.random.fork_rng(devices=[]).",
+    "no_manual_seed_or_custom_initializer_or_initialization_search_found": true,
+    "static_intent": "Restore downstream CPU RNG position after additional default Linear initialization, while keeping the original CPU initialization consumption of common modules.",
+    "risk": "The new module consumes a CPU RNG subsequence that is restored, so subsequent common-module initialization can reuse that sequence and correlate weights. This is a declared pairing control, not independent new-module initialization or benefit evidence.",
+    "runtime_assumption": "Native model construction must actually occur on CPU. devices=[] does not demonstrate arbitrary externally changed default-device behavior or any actual CUDA/loader RNG pairing.",
+    "common_weights_actual_comparison": "NOT_RUN",
+    "native_loader_batch_fingerprint_pairing": "NOT_RUN",
+    "RNG_state_actual_before_after_check": "NOT_RUN"
+  },
+  "claim_limits": [
+    "The cross-token Wh/tanh graph is structural, not an activation_fn/GELU-to-tanh config tweak or pure distribution scaling. No new language/query routing, sigmoid gate, attention QKV/softmax or residual branch is present.",
+    "Bounded historical comparison remains limited to the frozen prior review. No exhaustive historical or external novelty clearance is claimed.",
+    "No actual tensor geometry invariants, native parameter .grad/update, within-parent/cross-parent Jacobians, finite loss/backward or two-batch equivalence were tested here.",
+    "Sorting and recurrence can have axis/order/tie sensitivity, CPU synchronization/serial GEMM overhead and saturation/recurrent-gradient risks. Parameter/MAC estimates are not measured resource results.",
+    "Unchanged local YAML and loss/network sources demonstrate unchanged configured paths/numbers; remote dataset bytes, checkpoint assets, actual initialization and data batches are not reverified by this local source review.",
+    "Root selected implementation and registered candidate status do not establish native or scientific admission. Future worker/resource/receipt bindings must use these exact final source hashes, not relabel frozen HRC evidence."
+  ],
+  "native_data_backward": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "actual_common_weights": "NOT_RUN",
+  "actual_loader_pairing": "NOT_RUN",
+  "efficacy": "UNKNOWN",
+  "novelty": "UNVERIFIED",
+  "model_imported_or_executed": false,
+  "torch_imported": false,
+  "native_tests_or_synthetic_behavior_executed": false,
+  "ssh_executed": false,
+  "gpu_executed": false,
+  "write_scope": "Only this new psbr_prepare/constraints_review.json; implementation/ledger/old artifacts/Git were not modified."
+}

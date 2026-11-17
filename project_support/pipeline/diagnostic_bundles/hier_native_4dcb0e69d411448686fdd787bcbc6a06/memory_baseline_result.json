@@ -1,0 +1,81 @@
+{
+  "token": "4dcb0e69d411448686fdd787bcbc6a06",
+  "attempt_sha256": "41602ddefb6985574d556650b855c429223174d90ad1e73fade95640bd85d9ec",
+  "observed_at": "2026-10-16T01:26:37.891521+00:00",
+  "outcome": {
+    "condition": "baseline",
+    "full_forward_completed": false,
+    "full_backward_completed": false,
+    "error_type": "RuntimeError",
+    "error": "CUDA out of memory. Tried to allocate 34.00 MiB (GPU 0; 23.70 GiB total capacity; 5.71 GiB already allocated; 16.64 GiB free; 5.92 GiB allowed; 5.92 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF",
+    "budget_passed_all_observations": false,
+    "passed_this_diagnostic": false
+  },
+  "observations": [
+    {
+      "stage": "before",
+      "observed_at": "2026-10-16T01:26:10.928645+00:00",
+      "gpu": "1, GPU-340de111-e7e4-ed2d-15c9-8ab6a253e4a0, 24268, 1, 24267, 0",
+      "contexts": [],
+      "own_mib": 0,
+      "post_budget_limit_mib": 7091,
+      "post_budget_passed": true
+    },
+    {
+      "stage": "before_cuda_allocation",
+      "observed_at": "2026-10-16T01:26:33.185146+00:00",
+      "gpu": "1, GPU-340de111-e7e4-ed2d-15c9-8ab6a253e4a0, 24268, 3, 24265, 0",
+      "contexts": [],
+      "own_mib": 0,
+      "post_budget_limit_mib": 7091,
+      "post_budget_passed": true
+    },
+    {
+      "stage": "model_loaded",
+      "observed_at": "2026-10-16T01:26:35.599519+00:00",
+      "gpu": "1, GPU-340de111-e7e4-ed2d-15c9-8ab6a253e4a0, 24268, 1454, 22814, 19",
+      "contexts": [
+        {
+          "pid": 95645,
+          "memory_mib": 1451
+        }
+      ],
+      "own_mib": 1451,
+      "post_budget_limit_mib": 7091,
+      "post_budget_passed": true,
+      "torch_allocated_bytes": 631719424,
+      "torch_reserved_bytes": 677380096,
+      "torch_peak_allocated_bytes": 631719424,
+      "torch_peak_reserved_bytes": 677380096
+    },
+    {
+      "stage": "after_exception",
+      "observed_at": "2026-10-16T01:26:37.886535+00:00",
+      "gpu": "1, GPU-340de111-e7e4-ed2d-15c9-8ab6a253e4a0, 24268, 7230, 17038, 52",
+      "contexts": [
+        {
+          "pid": 95645,
+          "memory_mib": 7227
+        }
+      ],
+      "own_mib": 7227,
+      "post_budget_limit_mib": 7091,
+      "post_budget_passed": false,
+      "torch_allocated_bytes": 6131063296,
+      "torch_reserved_bytes": 6356467712,
+      "torch_peak_allocated_bytes": 6131063296,
+      "torch_peak_reserved_bytes": 6356467712
+    }
+  ],
+  "train_groups": [
+    0,
+    60
+  ],
+  "scenes": 2,
+  "expressions": 8,
+  "allocator_fraction": 0.25,
+  "optimizer_steps": 0,
+  "new_training": false,
+  "source_independent_model": false,
+  "scope": "Matched fresh-process first-pair memory/gradient diagnosis only; not full-cohort admission, physical24GB insufficiency or trained efficacy."
+}

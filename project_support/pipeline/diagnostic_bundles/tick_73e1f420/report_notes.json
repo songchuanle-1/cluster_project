@@ -1,0 +1,12 @@
+{
+  "actions": [
+    "上海2026-10-21 08:09 begin完成监控/目标/已有合格队列派发检查；无终态和运维问题、waiting0。M205-MDC Best mIoU=.4370、第5/50轮；M206-CGCA Best=.4208、第5/50轮，均no_improve0/10。属于持续中的早期训练，最终收益未知。",
+    "08:10:22核验pinned server4 hostname、授权两卡UUID、memory/util/context及必要锁；GPU0 PID3842306约18639MiB、GPU1 PID3873690约19751MiB仍有CUDA contexts。GPU0 util0仍非空闲，未使用卡。",
+    "仅更新HAP真实resource_check/blocked及对应证据/重试条件。完整HAP包和启动前守卫前轮已核验，本轮没有重复staging、guard执行、torch/模型/数据/GPU行为，没有新候选或原生结果。"
+  ],
+  "decisions": [
+    "两项既有训练保持原协议继续；不因低利用率共享运行卡，不按早期mIoU作最终有效性结论。",
+    "HAP等待真实授权空卡；下个owned tick按既有协议fresh token/lease/stage，精确f51823bb源与原YAML不变，实测原TRAIN两步/配对资源PASS才准入/同步/派发。旧stage lease不跨tick重放。",
+    "本轮没有新准入/队列/启动、未改目标/资源边界/禁用项/调度或旧held；无新增用户决定事项，不为凑配额增加变体。状态仍为训练中和等待资源，按通知约定静默。"
+  ]
+}

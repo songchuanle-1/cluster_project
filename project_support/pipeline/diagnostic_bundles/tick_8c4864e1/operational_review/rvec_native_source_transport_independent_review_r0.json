@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T23:47:33.605587+00:00",
+  "owner": {
+    "token": "8c4864e1a36e4f3883b3d301cfc39069",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T23:07:37.192344+00:00",
+    "deadline_at": "2026-11-09T00:07:37.192344+00:00",
+    "context_sha256": "1355b39f8a8e1e3014fc9a88c859829961fe5440fb90d5c44bead5b2ff6b0643",
+    "pending_sha256": "899db4c29a4d1a8412badfd2344695d0e357c1adfd050a2e78f3850c48a30ed2"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "passed": false,
+  "FROZEN_sha256": "c70c123ca0779942b0c5cf54d320343797e0b662dcf5926269b189063105290d",
+  "source_version_sha256": "03dbea770f05d106c844664ce96324845892a0477edfe9622c955c0c765e49e5",
+  "worker_sha256": "960136252fb1bff33c6c885f9decef37f856b13d23fd2ccb932321db008e044a",
+  "runtime_sha256": "47bb858499659de5a997d049ace59adaae4bdf2e4013290fd34564e287b2895f",
+  "transport_sha256": "0661f9234ceb26ce7bde8bee63b7a168f25904a7bb009e953b3db1500a37384d",
+  "source_and_native_protocol_review_passed": false,
+  "material_concerns": [
+    {
+      "file": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare/worker.py",
+      "line": 516,
+      "issue": "exception_frame_metadata calls os.getpid() but worker has no import os and no other os binding.",
+      "effect": "Every failure metadata capture reaches NameError at the final return, loses the promised bounded frame/type/source-hash evidence, and reports CAPTURE_FAILED_ORIGINAL_EXCEPTION_PRESERVED. The original failure remains preserved in traceback/error fields.",
+      "required_correction": "Add the stdlib import os at module scope, regenerate all dependent worker/diagnostic/manifest/contract/FROZEN hashes, and request a bounded delta review. No model, gate, protocol, RNG or data change is needed."
+    }
+  ],
+  "completed_checks_without_other_material_concern": {
+    "exact_candidate_nine_source_bytes_match_frozen_source_and_retained_commit_proof": true,
+    "all_packet_and_anchor_hashes_match": true,
+    "live_owner_context_pending_and_deadline_current": true,
+    "common_initialization_uses_actual_unchanged_M95_and_candidate_named_parameter_values": true,
+    "excludes_only_fine_FFN0_norm0_and_new_fine_exchange_on_both_arms": true,
+    "middle_and_coarse_FFNs_and_norms_retained": true,
+    "actual_names_shapes_dtypes_values_and_canonical_hash_equality_required_before_TRAIN_loader": true,
+    "reference_entry_RNG_restored_no_weight_copy_no_post_reference_RNG_substitution": true,
+    "derived841_not_used_as_pass": true,
+    "native_first_two_natural_TRAIN_batches_original_seed1999_batch2_workers4_persistent_drop_last": true,
+    "actual_original_train_criterion_backward_optimizer_scheduler_protocol_preserved": true,
+    "exact_five_parameter_set_wr_wd_w2_b1_b2_and25088_elements": true,
+    "all_five_have_nonNone_finite_gradients_and_actual_individual_updates_each_step": true,
+    "whole_core_nonzero_criterion_weight_gradient_and_natural_offdiagonal_support_required": true,
+    "transparent_existing_forward_observers_no_auxiliary_loss_backward_or_donor_cut_native_forward": true,
+    "graph_same_leaf_raw_bank_maps_CSORT_and_single_inst_feats_to_HCG_ILA_masks_observed": true,
+    "full_resources_function_AST_exact_authenticated_NDE_worker": true,
+    "resources_bs1_lang1_warmup20_repeat100_fvcore_handler_hashes_and_raw_timings_preserved": true,
+    "free20000MiB_gpu0_UUID_three_original_lock_paths_projectmax1_overlay_no_idle_predicate": true,
+    "fresh_stage_owner_lease_300second_guard_worker_alarm_and_actual_source_asset_hash_checks": true,
+    "strict_hostkey_key_only_SSH_pinned_hostname_uid_and_runtime_HEAD_before_staging": true,
+    "root_only_explicit_execute_genuine_peer_review_bound_to_exact_packet": true,
+    "exclusive_request_intent_result_and_remote_arm_markers_prevent_replay": true,
+    "timeout_is_uncertain_no_explicit_signal_delete_or_automatic_replay": true,
+    "no_old_NDE_grant_receipt_intent_or_lease_reused": true
+  },
+  "execution_by_reviewer": false,
+  "Torch_SSH_GPU_execution_by_reviewer": false,
+  "source_index_queue_ledger_or_shared_mutations_by_reviewer": false,
+  "native_execution_authorized_to_author": false,
+  "scientific_admission": false,
+  "scope": "STATIC_SOURCE_NATIVE_PROTOCOL_TRANSPORT_STAGE_CONTRACT_ONLY; native and resource outcomes remain unmeasured"
+}

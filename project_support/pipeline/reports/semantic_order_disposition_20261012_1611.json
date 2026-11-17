@@ -1,0 +1,13 @@
+{
+  "stage": "rejected",
+  "hypothesis_id": "mixed-instance-semantics-make-context-supervision-order-dependent",
+  "test": "All native TRAIN annotated physical targets, native taxonomy and AST-extracted first-point context loop controls.",
+  "result": "36665 expressions/562 scenes/7875 physical targets: zero missing geometry, zero mixed semantic targets, zero mixed class targets, zero reversal-changed targets. Synthetic mixed same-instance reversal changes both points; uniform reversal is identical.",
+  "rejection_reason": "Actual annotated instances are semantically homogeneous, disconfirming the heterogeneous semantic first-point order premise. Not a certification of all labels, synonym/category coverage or full-model behavior.",
+  "matched_control": "Original native context loop, homogeneous identity and reversal, mixed mentioned/unmentioned native categories.",
+  "next_action": "Do not repeat homogeneous raw-data audit; reopen only for new evidence of actual native heterogeneous annotated instances.",
+  "evidence": [
+    {"path": "pipeline/reports/semantic_order_audit_20261012_1611.json", "sha256": "35a3842efdcfbd57a9a1a3335011fd92e8ea517eaab197b3db8d0c42ba777eed"},
+    {"path": "scripts/semantic_order_audit_20261012_1611.py"}
+  ]
+}

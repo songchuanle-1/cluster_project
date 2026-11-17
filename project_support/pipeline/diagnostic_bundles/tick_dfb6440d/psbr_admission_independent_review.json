@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T14:30:20.596243+00:00",
+  "reviewer": "/root/pce_audit",
+  "status": "PSBR_FORMAL_ADMISSION_WAITING_RECORDS_CONSISTENT",
+  "receipt": {
+    "path": "pipeline/admissions/M209-PSBR.json",
+    "sha256": "c85ae4fe82f83720330ca5b1bca176492bcc8fa82f9c2ddad98d49712c6416a2"
+  },
+  "standard_artifacts": {
+    "smoke": {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_native_smoke.json",
+      "sha256": "72d5107a656caeb63091858c487f4ba25a61fa4f0f9e9625c9d85d5d0389936e"
+    },
+    "resources": {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_resource_comparison.json",
+      "sha256": "f36b64f1f71a023318af5655203c6d1d048dfe6920f5c5c92446c9e31ef6ef61"
+    },
+    "constraints": {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_constraints_independence.json",
+      "sha256": "eb86ab81722a41a2b6142c56c8445b4a84a096bd460a0cbfe9a510ca65b4ab7f"
+    }
+  },
+  "script": {
+    "path": "pipeline/diagnostic_bundles/tick_dfb6440d/admit_psbr.py",
+    "sha256": "72d8210fa2da89b722a2b52c421c5e9ab5eb2a09d307a85a15b06c95600d9cbe"
+  },
+  "root_admission_result": {
+    "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_admission_queue_result.json",
+    "sha256": "9b5a346c68e60375ad66a4f7596a5b4661edc2f202718ef1ed5a732c1ca72774"
+  },
+  "checks": {
+    "current_owner": true,
+    "receipt_exact_hash": true,
+    "PSBR_waiting_not_training": true,
+    "PSBR_GPU0_only": true,
+    "queue_exp_id": true,
+    "queue_exp_config": true,
+    "queue_exp_code_commit": true,
+    "queue_exp_candidate_id": true,
+    "queue_exp_admission_receipt": true,
+    "smoke_receipt_id": true,
+    "smoke_receipt_config": true,
+    "smoke_receipt_code_commit": true,
+    "smoke_receipt_goal_sha256": true,
+    "actual_integer_steps_losses": true,
+    "actual_train_native_flags_source": true,
+    "actual_two_TRAIN_batch_pair": true,
+    "common_named_parameters_actually_fingerprinted_and_equal": true,
+    "common_fingerprint_summary_exact_raw": true,
+    "no_HRC_mean_or_probe_fields": true,
+    "resource_summary_matches_review": true,
+    "resource_costs_exact_actual": true,
+    "latency_increases_honestly_recorded": true,
+    "unsupported_ops_preserved": true,
+    "scientific_unknown_limits_preserved": true,
+    "PSBR_source_YAML_fields": true,
+    "structural_identity_not_HRC": true,
+    "artifact:pipeline/authorizations/experiment_first_20261021.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_native_smoke.json": true,
+    "artifact:pipeline/decisions/20261022-222828_queue_push.md": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_native_resource_independent_review.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_resource_comparison.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_constraints_independence.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/smoke_champion_execution.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/smoke_candidate_execution.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/resources_champion_execution.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/resources_candidate_execution.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/execution_binding.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/native_manifest.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/execution_lease.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_dfb6440d/psbr_result_review/actual_four_result_review.json": true,
+    "artifact:pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/preparation.json": true,
+    "artifact:pipeline/admissions/M209-PSBR.json": true,
+    "M206_manual_before_exact_equal": true,
+    "script_mapping_real_PSBR_observations": true,
+    "canonical_closure_admission_readonly": true
+  },
+  "blocking_findings": [],
+  "canonical_admission_error": null,
+  "observed_state": {
+    "PSBR_queue_status": "waiting",
+    "PSBR_experiment_status": "waiting",
+    "PSBR_candidate_stage": "deployment",
+    "PSBR_training_status": "waiting",
+    "PSBR_pid": null,
+    "PSBR_launch_verified": null,
+    "HRC_queue_status_during_snapshot": "waiting",
+    "HRC_pid_during_snapshot": null,
+    "HRC_snapshot_not_a_fresh_remote_health_check": true
+  },
+  "resource_observations": {
+    "counted_flops": 9749949516.0,
+    "parameter_count": 157221178,
+    "median_change_pct": 4.6277024609120865,
+    "P90_change_pct": 11.582146206727506,
+    "memory_15pct_condition": false
+  },
+  "nonblocking_precision_notes": [
+    "Standard PSBR common named-parameter fingerprint is actually measured/equal (843 tensors,156958522 parameters), excluding replaced/new modules; full buffers/full-state remain unrecorded.",
+    "No HRC mean/dependency-probe fields survive. The pure_TRAIN limitations string still says diagnostic/probe overhead, while PSBR uses observer/reference controls without the HRC autograd probe. This is imprecise inherited prose, not a numerical or gate failure; future reporting should say observer/reference overhead.",
+    "Resource limitations retain the generic phrase equal counted FLOPs; actual PSBR numbers explicitly show lower counted FLOPs but increased observed median/P90. No actual total-cost or speed gain is inferred."
+  ],
+  "M206_task_unchanged": true,
+  "execution": {
+    "canonical_admission_readonly": true,
+    "SSH": false,
+    "GPU": false,
+    "dispatch": false,
+    "shared_state_write": false,
+    "torch_import": false
+  },
+  "write_scope": "Only this new independent report."
+}

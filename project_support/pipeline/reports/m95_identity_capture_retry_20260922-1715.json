@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "contract": "m95_identity_capture_retry_v1",
+  "generated_at": "2026-09-22T17:15:20+08:00",
+  "scope": "Retry-boundary safety check for the deployed frozen M95 identity-control capture. No model forward, GPU allocation, admission, queue mutation, or training occurred.",
+  "retry_gate": {
+    "previous_retry_after": "2026-09-22T17:15:00+08:00",
+    "retry_boundary_reached": true,
+    "safe_project_slot": false
+  },
+  "gpu_preflight": {
+    "host": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "memory_used_mib": 42023,
+    "memory_total_mib": 81559,
+    "foreign_pid": 3694608,
+    "foreign_process": "/home/jiaoh/conda_envs/das_env/bin/python",
+    "action": "do not evict or interfere with foreign work",
+    "native_capture_started": false
+  },
+  "capture_and_analysis_contract": {
+    "manifest": {
+      "path": "pipeline/diagnostic_runs/m95_identity_controls_20260922/manifest.json",
+      "sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023",
+      "rows": 256
+    },
+    "producer": {
+      "path": "scripts/native_manifest_capture_20260922.py",
+      "sha256": "f71305e0aaaf796774a9d408161390dc60e0d292d42d3324ed7ae84073ef6b8f",
+      "test_sha256": "6706dc733d9a8937f41c3105d79659b111808719087c35e038780df18c8427d5"
+    },
+    "analyzer": {
+      "path": "scripts/analyze_m95_manifest_identity_controls_20260922.py",
+      "sha256": "bd9615e401d4862d55e20c7bbc9b165f59ca9998ea94d5917d3481f7b181c6f6",
+      "test_sha256": "dff8781d16821563cbb06d36ce4726310ac5bdccee7903b80133c7cf08e796d4"
+    },
+    "local_validation": {
+      "command": "python -m unittest test_native_manifest_capture_20260922 test_analyze_m95_manifest_identity_controls_20260922",
+      "tests_passed": 13,
+      "tests_failed": 0,
+      "timestamp": "2026-09-22T17:11:00+08:00"
+    }
+  },
+  "candidate_handoff": {
+    "referent-supervision-axis": "primary_estimand",
+    "referent-causality-audit": "primary_estimand",
+    "modality-identity-preservation": "stage_identity_margins",
+    "referent-discrimination": "class_matched_selector",
+    "instance-identity-representation": "class_matched_non_target_and_stage_identity"
+  },
+  "next_action": "When server-6 GPU7 has a safe project slot, run the deployed producer with the exact checkpoint and manifest hashes, then run the deployed analyzer and evaluate the frozen candidate handoff endpoints.",
+  "not_evidence_of": [
+    "admission",
+    "deployable efficacy",
+    "population effect",
+    "referent-specific causality",
+    "novelty"
+  ]
+}

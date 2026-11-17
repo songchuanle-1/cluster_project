@@ -1,0 +1,46 @@
+{
+  "scope": "Design-mode primary-source audit for the remaining selector-style referent candidate; no native execution or efficacy claim",
+  "timestamp": "2026-09-17T18:15:00+08:00",
+  "candidate": {
+    "id": "language-guided-query-selection",
+    "hypothesis": "Selecting object candidates from aligned positional and semantic text-point features will raise the selected referent query above same-class distractors.",
+    "proposed_surface": "Replace or alter candidate selection using text-conditioned positional and semantic alignment.",
+    "admission_status": "rejected_before_design"
+  },
+  "primary_source": {
+    "title": "Unified Representation Space for 3D Visual Grounding",
+    "arxiv_id": "2506.14238v1",
+    "url": "https://arxiv.org/html/2506.14238v1",
+    "local_copy": "pipeline/reports/language_guided_query_selection_source_20260917.html",
+    "sha256": "DA53E0D9CB42772FC037848131B2E4824796E6386AE033B20B269C59F611C9DC",
+    "findings": [
+      "Section III-C defines language-guided query selection (LGQS) using positional and semantic information from both modalities to identify object candidate points aligned with the text.",
+      "The module outputs Nq indices and initializes object candidate points from the selected indices.",
+      "The method reports at least 2.24% improvement on ScanRefer and Nr3D/Sr3D over its baseline.",
+      "The paper states that LGQS is inspired by Grounding DINO, so the candidate also inherits an established 2D vision-language query-selection mechanism."
+    ]
+  },
+  "project_gate": {
+    "goal_sha256": "9CA0CEAB49311ECA448DD5E9EFDD02A62F72DE7B93AC214728E4DC0027218700",
+    "violated_constraint": "The goal explicitly says not to make changes to pooling, selector, write-back location, or variant count the research main line.",
+    "novelty_result": "Prior art on ScanRefer plus established Grounding DINO-style query selection.",
+    "causal_result": "The candidate changes selector inputs and candidate initialization, not a new causal supervision unit for the confirmed referent-selection failure."
+  },
+  "resource_consequence": {
+    "assessment": "Would require a new aligned text-point representation and candidate-selection path; no efficiency evidence exists for this project.",
+    "measured_delta_flops": null,
+    "measured_delta_latency": null,
+    "measured_delta_memory": null,
+    "note": "Rejected before resource implementation because it fails the explicit selector constraint and novelty gate."
+  },
+  "decision": {
+    "outcome": "Do not admit, implement, enqueue, or rename language-guided query selection.",
+    "rejected_remainder": "Candidate budget 1 remains unfilled; an empty slot is preferable to a banned and already-published selector variant.",
+    "next_action": "Continue only with a genuinely new structural information path or causal supervision unit outside selector, quality-target, ranking, consistency, matching, and counterfactual families."
+  },
+  "limitations": [
+    "This is a primary-source and goal-constraint audit, not a reproduction of UniSpace-3D.",
+    "No claim is made that LGQS is ineffective; it is rejected for this project because it is prior art and violates the current selector constraint.",
+    "No code, model, config, admission receipt, queue entry, sync, or training run was created."
+  ]
+}

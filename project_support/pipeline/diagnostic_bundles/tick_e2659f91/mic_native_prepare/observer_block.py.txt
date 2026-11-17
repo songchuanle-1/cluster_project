@@ -1,0 +1,119 @@
+    if candidate:
+        core=att.mobius_interaction;graph=importlib.import_module(qualified+'.ancestry_mobius')
+        original_plan=graph.build_mobius_path_plan;original_prepare=graph.prepare_mobius_path_plans;original_mean=graph.mean_mobius_paths
+        original_select=torch.Tensor.index_select;original_copy=torch.Tensor.index_copy;original_cat=torch.cat
+        original_plus=torch.Tensor.__add__;original_minus=torch.Tensor.__sub__;original_getitem=torch.Tensor.__getitem__
+        def queue_replace(owner,name,replacement,original):installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for l in range(3):hooks.extend([att.cluster_ffn_norm[l].register_forward_pre_hook(norm_pre(l)),att.cluster_ffn_norm[l].register_forward_hook(norm_post(l))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            normalized,ids=values
+            assert owner is core and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[l] is state['norm_outputs'][l] for l in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            if not mic_coverage_preflight(members)['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_PATH';raise RuntimeError('INCONCLUSIVE MIC before watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],'normalized_bank_sha256':fingerprint(torch,normalized),
+                'plans':[],'cell_calls':[],'slice_calls':[],'subset_arithmetic_calls':[],'contrast_arithmetic_calls':[],'mean_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Eight actual Boolean-lattice input blocks in one8F sharedLinear/GELU invocation, eight actual slices and original seven signed operations, two transparent direct-finepath means. No learned/mean/feature arithmetic/scatter/model/criterion/backward replay.',
+                'FP32_cancellation_Jacobian_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'mic_context' not in state
+            state['mic_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'phase':'prepare','builder_calls':0,'prepare_calls':0,'gather_count':0,'gathered':[],'subset_refs':{},'cell_calls':0,'GELU_calls':0,'slices':[],'contrast_ops':0,'mean_count':0,'mean_outputs':[],'final_level':0,'final_outputs':[]}
+            for l,x in enumerate(normalized):
+                if not x.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE MIC input before watches')
+                watch(x,record,'native_normalized_level'+str(l)+'_gradients')
+        def observed_plan(points,fm,mc,widths):
+            c=state['mic_context'];b=c['builder_calls'];assert (points,fm,mc)==c['members'][b] and widths==c['widths']
+            output=original_plan(points,fm,mc,widths);c['builder_calls']+=1;p=mic_plan_observation(output,(points,fm,mc));p['batch']=b;c['record']['plans'].append(p);return output
+        def observed_prepare(levels,ids):
+            c=state['mic_context'];assert c['phase']=='prepare' and ids is c['ids_ref'] and all(levels[l] is c['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);assert c['builder_calls']==len(output)==int(levels[0].shape[0]);c['prepare_calls']+=1
+            dest=[[],[],[]];gathers=[[],[],[]];mp=[];cp=[];mc=[];cc=[];mo=co=0
+            for b,p in enumerate(output):
+                for l,key in enumerate(('fine_ids','middle_ids','coarse_ids')):dest[l].extend(b*c['widths'][l]+i for i in p[key])
+                for l,key in enumerate(('fine_ids','middle_for_paths','coarse_for_paths')):gathers[l].extend(b*c['widths'][l]+i for i in p[key])
+                mp.extend(mo+j for j in p['middle_parent_positions']);cp.extend(co+k for k in p['coarse_parent_positions']);mc.extend(p['middle_path_counts']);cc.extend(p['coarse_path_counts']);mo+=len(p['middle_ids']);co+=len(p['coarse_ids'])
+            assert gathers[0] and all(mc) and all(cc);c.update(destinations=dest,gather_indices=gathers,mp=mp,cp=cp,mc=mc,cc=cc,n=len(gathers[0]),phase='gather');return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            c=state.get('mic_context')
+            if c is None:return original_select(tensor,dim,index,*args,**kwargs)
+            assert c['phase']=='gather' and dim==0;level=c['gather_count'];assert index.detach().cpu().tolist()==c['gather_indices'][level]
+            assert fingerprint(torch,tensor.detach().reshape(-1))==fingerprint(torch,c['normalized'][level].detach().reshape(-1))
+            output=original_select(tensor,dim,index,*args,**kwargs);c['gathered'].append(output);c['gather_count']+=1
+            if c['gather_count']==3:c['phase']='subset0_ab'
+            c['record']['primitive_calls'].append({'kind':'original_path_bank_gather','level':level,'original_calls':1,'returned_original_object_unchanged':True});return output
+        def arithmetic(tensor,other,kind,original,*args,**kwargs):
+            c=state.get('mic_context')
+            if c is None:return original(tensor,other,*args,**kwargs)
+            if c['phase'].startswith('subset'):
+                a,b,coarse=c['gathered'];r=c['subset_refs'];specs={'subset0_ab':(a,b,'ab0','subset0_c'),'subset0_c':(r.get('ab0'),coarse,'abc','subset1_ab'),'subset1_ab':(a,b,'ab','subset2_ac'),'subset2_ac':(a,coarse,'ac','subset3_bc'),'subset3_bc':(b,coarse,'bc','cat')}
+                phase=c['phase'];assert phase in specs and kind=='add';left,right,key,nxt=specs[phase];assert tensor is left and other is right
+                output=original(tensor,other,*args,**kwargs);r[key]=output;c['phase']=nxt;c['record']['subset_arithmetic_calls'].append({'phase':phase,'kind':kind,'output':summary(output),'output_sha256':fingerprint(torch,output),'original_calls':1,'returned_original_object_unchanged':True});lite_watch(output,c['record']);return output
+            assert c['phase']=='contrast';i=c['contrast_ops'];signs=('sub','sub','sub','add','add','add','sub');assert i<7 and kind==signs[i] and len(c['slices'])==i+2
+            assert tensor is (c['slices'][0] if i==0 else c['contrast_ref']) and other is c['slices'][i+1]
+            output=original(tensor,other,*args,**kwargs);c['contrast_ref']=output;c['contrast_ops']+=1
+            c['record']['contrast_arithmetic_calls'].append({'operation':i,'kind':kind,'right_subset_index':i+1,'output':summary(output),'output_sha256':fingerprint(torch,output),'original_calls':1,'returned_original_object_unchanged':True})
+            if c['contrast_ops']==7:c.update(q_ref=output,phase='middle_mean')
+            lite_watch(output,c['record']);return output
+        def observed_plus(tensor,other,*args,**kwargs):return arithmetic(tensor,other,'add',original_plus,*args,**kwargs)
+        def observed_minus(tensor,other,*args,**kwargs):return arithmetic(tensor,other,'sub',original_minus,*args,**kwargs)
+        def observed_cat(values,*args,**kwargs):
+            c=state.get('mic_context')
+            if c is None:return original_cat(values,*args,**kwargs)
+            assert c['phase']=='cat' and len(values)==8 and kwargs.get('dim',args[0] if args else 0)==0
+            a,b,coarse=c['gathered'];r=c['subset_refs'];expected=(r['abc'],r['ab'],r['ac'],r['bc'],a,b,coarse)
+            assert all(v is x for v,x in zip(values[:7],expected));assert list(values[7].shape)==[c['n'],core.channels] and bool((values[7]==0).all())
+            output=original_cat(values,*args,**kwargs);c.update(cell_input_ref=output,phase='cell');c['record']['subset_input_order']=['ABC','AB','AC','BC','A','B','C','ZERO'];c['record']['actual_zero_vertex_input']=True;return output
+        def cell_pre(owner,values):
+            c=state['mic_context'];assert owner is core.cell and c['phase']=='cell' and values[0] is c['cell_input_ref'] and list(values[0].shape)==[8*c['n'],core.channels]
+            info={'input':summary(values[0]),'input_sha256':fingerprint(torch,values[0]),'actual_rows':8*c['n'],'shared_original_cell':True,'original_linear_calls':1};assert info['input']['finite'];c['record']['cell_calls'].append(info);lite_watch(values[0],c['record'])
+        def cell_post(owner,values,output):
+            c=state['mic_context'];assert c['cell_calls']==0;c.update(linear_ref=output,phase='GELU');c['cell_calls']=1;c['record']['cell_calls'][-1].update(linear_output=summary(output),linear_output_sha256=fingerprint(torch,output));lite_watch(output,c['record'])
+        def activation_post(owner,values,output):
+            c=state['mic_context'];assert owner is core.activation and c['phase']=='GELU' and values[0] is c['linear_ref'] and c['GELU_calls']==0
+            c.update(activation_ref=output,phase='contrast');c['GELU_calls']=1;c['record']['cell_calls'][-1].update(actual_GELU_output=summary(output),actual_GELU_sha256=fingerprint(torch,output),original_GELU_calls=1);assert c['record']['cell_calls'][-1]['actual_GELU_output']['finite'];lite_watch(output,c['record'])
+        def observed_getitem(tensor,key):
+            c=state.get('mic_context')
+            if c is None or tensor is not c.get('activation_ref'):return original_getitem(tensor,key)
+            i=len(c['slices']);n=c['n'];assert c['phase']=='contrast' and i<8 and isinstance(key,slice) and key.step is None and (key.start or 0)==i*n and key.stop==(i+1)*n
+            output=original_getitem(tensor,key);c['slices'].append(output);c['record']['slice_calls'].append({'subset_index':i,'coefficient':(1,-1,-1,-1,1,1,1,-1)[i],'output':summary(output),'output_sha256':fingerprint(torch,output),'original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_mean(messages,positions,counts):
+            c=state['mic_context'];i=c['mean_count'];assert i in (0,1) and c['phase']==('middle_mean' if i==0 else 'coarse_mean') and messages is c['q_ref']
+            assert positions==c['mp' if i==0 else 'cp'] and counts==c['mc' if i==0 else 'cc']
+            c['mean_active']=True
+            try:output=original_mean(messages,positions,counts)
+            finally:c['mean_active']=False
+            c['record']['mean_calls'].append({'level':i+1,'input_sha256':fingerprint(torch,messages),'output':summary(output),'output_sha256':fingerprint(torch,output),'parent_positions':list(positions),'fine_path_counts':list(counts),'same_actual_q_object':True,'coarse_direct_fine_path_not_middle_mean':i==1,'original_mean_calls':1,'returned_original_object_unchanged':True,'mean_replayed':False})
+            assert c['record']['mean_calls'][-1]['output']['finite'];c['mean_outputs'].append(output);c['mean_count']+=1;c['phase']='coarse_mean' if i==0 else 'final_scatter';lite_watch(output,c['record']);return output
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            c=state.get('mic_context')
+            if c is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            l=c['final_level'];assert c['phase']=='final_scatter' and dim==0 and l<3 and index.detach().cpu().tolist()==c['destinations'][l] and bool((tensor==0).all()) and source is ([c['q_ref']]+c['mean_outputs'])[l]
+            output=original_copy(tensor,dim,index,source,*args,**kwargs);c['final_outputs'].append(output);c['final_level']+=1
+            if c['final_level']==3:c['phase']='complete'
+            c['record']['primitive_calls'].append({'kind':'final_original_ID_scatter','level':l,'original_calls':1,'returned_original_object_unchanged':True});return output
+        for name,replacement,original in [('build_mobius_path_plan',observed_plan,original_plan),('prepare_mobius_path_plans',observed_prepare,original_prepare),('mean_mobius_paths',observed_mean,original_mean)]:queue_replace(graph,name,replacement,original)
+        for owner,name,replacement,original in [(torch,'cat',observed_cat,original_cat),(torch.Tensor,'index_select',observed_select,original_select),(torch.Tensor,'index_copy',observed_copy,original_copy),(torch.Tensor,'__add__',observed_plus,original_plus),(torch.Tensor,'__sub__',observed_minus,original_minus),(torch.Tensor,'__getitem__',observed_getitem,original_getitem)]:queue_replace(owner,name,replacement,original)
+        hooks.extend([core.cell.register_forward_pre_hook(cell_pre),core.cell.register_forward_hook(cell_post),core.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            c=state.pop('mic_context');record=c['record'];assert c['phase']=='complete' and c['prepare_calls']==1 and c['gather_count']==3 and c['cell_calls']==c['GELU_calls']==1 and len(c['slices'])==8 and c['contrast_ops']==7 and c['mean_count']==2 and c['final_level']==3
+            for l,value in enumerate(output):
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,c['final_outputs'][l].detach().reshape(-1))
+                if not value.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE MIC output before watches')
+                watch(value,record,'native_output_level'+str(l)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],actual_true_fine_paths=sum(p['path_count'] for p in record['plans']),actual_original_builder_calls=c['builder_calls'],actual_prepare_calls=1,actual_cell_calls=1,actual_GELU_calls=1,actual_subset_rows=8*c['n'],actual_subset_slices=8,actual_contrast_operations=7,actual_private_mean_calls=2,actual_final_index_copy_calls=3,actual_three_LN_calls=list(state['norm_counts']),
+                exact_subset_coefficients=[1,-1,-1,-1,1,1,1,-1],actual_original_subset_and_contrast_operations_once=True,contrast_from_actual_eight_GELU_slices_exact=True,upper_means_from_same_actual_q_exact=True,final_deltas_from_actual_captures_exact=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'paths':p['path_count'],'empty_scene':not p['fine_ids'],'singleton_path':p['path_count']==1,'middle_path_counts':p['middle_path_counts'],'coarse_path_counts':p['coarse_path_counts'],'unsupported_or_padding':[c['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['mic_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([core.register_forward_pre_hook(exchange_pre),core.register_forward_hook(exchange_post)])
+

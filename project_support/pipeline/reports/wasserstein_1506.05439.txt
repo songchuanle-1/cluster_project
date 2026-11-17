@@ -1,0 +1,1068 @@
+                                                              Learning with a Wasserstein Loss
+
+
+                                                Charlie Frogner∗ Chiyuan Zhang∗                                Hossein Mobahi
+                                                Center for Brains, Minds and Machines                                CSAIL
+                                                Massachusetts Institute of Technology                 Massachusetts Institute of Technology
+                                             frogner@mit.edu, chiyuan@mit.edu                           hmobahi@csail.mit.edu
+arXiv:1506.05439v3 [cs.LG] 30 Dec 2015
+
+
+
+
+                                                         Mauricio Araya-Polo                                 Tomaso Poggio
+                                                      Shell International E & P, Inc.            Center for Brains, Minds and Machines
+                                                    Mauricio.Araya@shell.com                     Massachusetts Institute of Technology
+                                                                                                           tp@ai.mit.edu
+
+
+
+                                                                                        Abstract
+                                                     Learning to predict multi-label outputs is challenging, but in many problems there
+                                                     is a natural metric on the outputs that can be used to improve predictions. In this
+                                                     paper we develop a loss function for multi-label learning, based on the Wasserstein
+                                                     distance. The Wasserstein distance provides a natural notion of dissimilarity for
+                                                     probability measures. Although optimizing with respect to the exact Wasserstein
+                                                     distance is costly, recent work has described a regularized approximation that is
+                                                     efficiently computed. We describe an efficient learning algorithm based on this
+                                                     regularization, as well as a novel extension of the Wasserstein distance from prob-
+                                                     ability measures to unnormalized measures. We also describe a statistical learning
+                                                     bound for the loss. The Wasserstein loss can encourage smoothness of the predic-
+                                                     tions with respect to a chosen metric on the output space. We demonstrate this
+                                                     property on a real-data tag prediction problem, using the Yahoo Flickr Creative
+                                                     Commons dataset, outperforming a baseline that doesn’t use the metric.
+
+
+                                         1       Introduction
+                                         We consider the problem of learning to predict a non-negative measure over a finite set. This prob-
+                                         lem includes many common machine learning scenarios. In multiclass classification, for example,
+                                         one often predicts a vector of scores or probabilities for the classes. And in semantic segmenta-
+                                         tion [1], one can model the segmentation as being the support of a measure defined over the pixel
+                                         locations. Many problems in which the output of the learning machine is both non-negative and
+                                         multi-dimensional might be cast as predicting a measure.
+                                         We specifically focus on problems in which the output space has a natural metric or similarity struc-
+                                         ture, which is known (or estimated) a priori. In practice, many learning problems have such struc-
+                                         ture. In the ImageNet Large Scale Visual Recognition Challenge [ILSVRC] [2], for example, the
+                                         output dimensions correspond to 1000 object categories that have inherent semantic relationships,
+                                         some of which are captured in the WordNet hierarchy that accompanies the categories. Similarly, in
+                                         the keyword spotting task from the IARPA Babel speech recognition project, the outputs correspond
+                                         to keywords that likewise have semantic relationships. In what follows, we will call the similarity
+                                         structure on the label space the ground metric or semantic similarity.
+                                         Using the ground metric, we can measure prediction performance in a way that is sensitive to re-
+                                         lationships between the different output dimensions. For example, confusing dogs with cats might
+                                             ∗
+                                                 Authors contributed equally.
+                                             1
+                                                 Code and data are available at http://cbcl.mit.edu/wasserstein.
+
+
+                                                                                             1
+                                                                               0.4
+               0.3
+
+
+    Distance
+                         Divergence       Wasserstein
+
+
+
+
+                                                                    Distance
+                                                                                            Divergence           Wasserstein
+                                                                               0.3
+               0.2
+                                                                               0.2
+               0.1
+                                                                               0.1
+               0.0
+                     3        4           5             6   7                        0.1   0.2    0.3    0.4    0.5    0.6     0.7   0.8    0.9
+                                      Grid Size                                                                Noise
+
+Figure 2: The Wasserstein loss encourages predictions that are similar to ground truth, robustly
+to incorrect labeling of similar classes (see Appendix E.1). Shown is Euclidean distance between
+prediction and ground truth vs. (left) number of classes, averaged over different noise levels and
+(right) noise level, averaged over number of classes. Baseline is the multiclass logistic loss.
+
+be more severe an error than confusing breeds of dogs. A loss function that incorporates this metric
+might encourage the learning algorithm to favor predictions that are, if not completely accurate, at
+least semantically similar to the ground truth.
+In this paper, we develop a loss function for multi-label learn-
+ing that measures the Wasserstein distance between a prediction
+and the target label, with respect to a chosen metric on the out-
+put space. The Wasserstein distance is defined as the cost of
+the optimal transport plan for moving the mass in the predicted                                     Siberian husky             Eskimo dog
+measure to match that in the target, and has been applied to a
+wide range of problems, including barycenter estimation [3], la-                                 Figure 1: Semantically near-
+bel propagation [4], and clustering [5]. To our knowledge, this                                  equivalent classes in ILSVRC
+paper represents the first use of the Wasserstein distance as a
+loss for supervised learning.
+We briefly describe a case in which the Wasserstein loss improves learning performance. The setting
+is a multiclass classification problem in which label noise arises from confusion of semantically
+near-equivalent categories. Figure 1 shows such a case from the ILSVRC, in which the categories
+Siberian husky and Eskimo dog are nearly indistinguishable. We synthesize a toy version of this
+problem by identifying categories with points in the Euclidean plane and randomly switching the
+training labels to nearby classes. The Wasserstein loss yields predictions that are closer to the ground
+truth, robustly across all noise levels, as shown in Figure 2. The standard multiclass logistic loss is
+the baseline for comparison. Section E.1 in the Appendix describes the experiment in more detail.
+The main contributions of this paper are as follows. We formulate the problem of learning with prior
+knowledge of the ground metric, and propose the Wasserstein loss as an alternative to traditional
+information divergence-based loss functions. Specifically, we focus on empirical risk minimization
+(ERM) with the Wasserstein loss, and describe an efficient learning algorithm based on entropic
+regularization of the optimal transport problem. We also describe a novel extension to unnormalized
+measures that is similarly efficient to compute. We then justify ERM with the Wasserstein loss
+by showing a statistical learning bound. Finally, we evaluate the proposed loss on both synthetic
+examples and a real-world image annotation problem, demonstrating benefits for incorporating an
+output metric into the loss.
+
+
+2              Related work
+
+Decomposable loss functions like KL Divergence and `p distances are very popular for probabilis-
+tic [1] or vector-valued [6] predictions, as each component can be evaluated independently, often
+leading to simple and efficient algorithms. The idea of exploiting smoothness in the label space
+according to a prior metric has been explored in many different forms, including regularization [7]
+and post-processing with graphical models [8]. Optimal transport provides a natural distance for
+probability distributions over metric spaces. In [3, 9], the optimal transport is used to formulate
+the Wasserstein barycenter as a probability distribution with minimum total Wasserstein distance
+to a set of given points on the probability simplex. [4] propagates histogram values on a graph by
+minimizing a Dirichlet energy induced by optimal transport. The Wasserstein distance is also used
+to formulate a metric for comparing clusters in [5], and is applied to image retrieval [10], contour
+
+
+                                                                2
+matching [11], and many other problems [12, 13]. However, to our knowledge, this is the first time
+it is used as a loss function in a discriminative learning framework. The closest work to this pa-
+per is a theoretical study [14] of an estimator that minimizes the optimal transport cost between the
+empirical distribution and the estimated distribution in the setting of statistical parameter estimation.
+
+3     Learning with a Wasserstein loss
+
+3.1   Problem setup and notation
+
+We consider the problem of learning a map from X ⊂ RD into the space Y = RK    + of measures over
+a finite set K of size |K| = K. Assume K possesses a metric dK (·, ·), which is called the ground
+metric. dK measures semantic similarity between dimensions of the output, which correspond to
+the elements of K. We perform learning over a hypothesis space H of predictors hθ : X → Y,
+parameterized by θ ∈ Θ. These might be linear logistic regression models, for example.
+In the standard statistical learning setting, we get an i.i.d. sequence of training examples S =
+((x1 , y1 ), . . . , (xN , yN )), sampled from an unknown joint distribution PX ×Y . Given a measure of
+performance (a.k.a. risk) E(·, ·), the goal is to find the predictor hθ ∈ H that minimizes the expected
+risk E[E(hθ (x), y)]. Typically E(·, ·) is difficult to optimize directly and the joint distribution PX ×Y
+is unknown, so learning is performed via empirical risk minimization. Specifically, we solve
+                                       (                     N
+                                                                                 )
+                                                          1 X
+                                  min ÊS [`(hθ (x), y) =       `(hθ (xi ), yi )                        (1)
+                                 hθ ∈H                    N i=1
+
+with a loss function `(·, ·) acting as a surrogate of E(·, ·).
+
+3.2   Optimal transport and the exact Wasserstein loss
+
+Information divergence-based loss functions are widely used in learning with probability-valued out-
+puts. Along with other popular measures like Hellinger distance and χ2 distance, these divergences
+treat the output dimensions independently, ignoring any metric structure on K.
+Given a cost function c : K × K → R, the optimal transport distance [15] measures the cheapest
+way to transport the mass in probability measure µ1 to match that in µ2 :
+                                                Z
+                      Wc (µ1 , µ2 ) =     inf          c(κ1 , κ2 )γ(dκ1 , dκ2 )            (2)
+                                         γ∈Π(µ1 ,µ2 )   K×K
+
+where Π(µ1 , µ2 ) is the set of joint probability measures on K×K having µ1 and µ2 as marginals. An
+important case is that in which the cost is given by a metric dK (·, ·) or its p-th power dpK (·, ·) with p ≥
+1. In this case, (2) is called a Wasserstein distance [16], also known as the earth mover’s distance
+[10]. In this paper, we only work with discrete measures. In the case of probability measures, these
+are histograms in the simplex ∆K . When the ground truth y and the output of h both lie in the
+simplex ∆K , we can define a Wasserstein loss.
+Definition 3.1 (Exact Wasserstein Loss). For any hθ ∈ H, hθ : X → ∆K , let hθ (κ|x) = hθ (x)κ be
+the predicted value at element κ ∈ K, given input x ∈ X . Let y(κ) be the ground truth value for κ
+given by the corresponding label y. Then we define the exact Wasserstein loss as
+                                 Wpp (h(·|x), y(·)) =           inf        hT, M i                       (3)
+                                                            T ∈Π(h(x),y)
+
+where M ∈ RK×K
+           +   is the distance matrix Mκ,κ0 = dpK (κ, κ0 ), and the set of valid transport plans is
+
+                         Π(h(x), y) = {T ∈ RK×K
+                                            +   : T 1 = h(x), T > 1 = y}                                 (4)
+where 1 is the all-one vector.
+
+Wpp is the cost of the optimal plan for transporting the predicted mass distribution h(x) to match
+the target distribution y. The penalty increases as more mass is transported over longer distances,
+according to the ground metric M .
+
+
+                                                        3
+Algorithm 1 Gradient of the Wasserstein loss
+    Given h(x), y, λ, K. (γa , γb if h(x), y unnormalized.)
+    u←1
+    while u has
+              not converged do
+                          K y K> u
+                                        
+              h(x)
+                                                                          if h(x), y normalized
+                                                                λ
+                                                          γ γaλ+1
+       u←
+                               
+                      γa λ
+                                            >
+                                                     bλ
+                                                 γ γλ+1    a
+             
+               h(x) γa λ+1      K   y   K    u    b                     if h(x), y unnormalized
+    end while
+                                     γb λ      γb λ
+    If h(x), y unnormalized: v ← y γb λ+1 K> u γb λ+1
+                               log u> 1
+                    
+                       log u
+        p
+    ∂Wp /∂h(x) ←         λ −     λK 1                 if h(x), y normalized
+                       γa (1 − (diag(u)Kv) h(x)) if h(x), y unnormalized
+
+
+4           Efficient optimization via entropic regularization
+To do learning, we optimize the empirical risk minimization functional (1) by gradient descent.
+Doing so requires evaluating a descent direction for the loss, with respect to the predictions h(x).
+Unfortunately, computing a subgradient of the exact Wasserstein loss (3), is quite costly, as follows.
+The exact Wasserstein loss (3) is a linear program and a subgradient of its solution can be computed
+using Lagrange duality. The dual LP of (3) is
+    d
+        Wpp (h(x), y) =    sup α> h(x) + β > y,           CM = {(α, β) ∈ RK×K : ακ + βκ0 ≤ Mκ,κ0 }. (5)
+                          α,β∈CM
+
+As (3) is a linear program, at an optimum the values of the dual and the primal are equal (see, e.g.
+[17]), hence the dual optimal α is a subgradient of the loss with respect to its first argument.
+Computing α is costly, as it entails solving a linear program with O(K 2 ) contraints, with K being
+the dimension of the output space. This cost can be prohibitive when optimizing by gradient descent.
+
+4.1         Entropic regularization of optimal transport
+
+Cuturi [18] proposes a smoothed transport objective that enables efficient approximation of both the
+transport matrix in (3) and the subgradient of the loss. [18] introduces an entropic regularization
+term that results in a strictly convex problem:
+       λ                                              1                    X
+         Wpp (h(·|x), y(·)) =       inf      hT, M i − H(T ), H(T ) = −         Tκ,κ0 log Tκ,κ0 . (6)
+                                T ∈Π(h(x),y)          λ                       0      κ,κ
+
+Importantly, the transport matrix that solves (6) is a diagonal scaling of a matrix K = e−λM −1 :
+                                                 T ∗ = diag(u)Kdiag(v)                                 (7)
+               λα               λβ
+for u = e           and v = e        , where α and β are the Lagrange dual variables for (6).
+Identifying such a matrix subject to equality constraints on the row and column sums is exactly a
+matrix balancing problem, which is well-studied in numerical linear algebra and for which efficient
+iterative algorithms exist [19]. [18] and [3] use the well-known Sinkhorn-Knopp algorithm.
+
+4.2         Extending smoothed transport to the learning setting
+
+When the output vectors h(x) and y lie in the simplex, (6) can be used directly in place of (3), as
+(6) can approximate the exact Wasserstein distance closely for large enough λ [18]. In this case, the
+                                                                                                  u> 1
+gradient α of the objective can be obtained from the optimal scaling vector u as α = logλ u − logλK    1.
+1
+  A Sinkhorn iteration for the gradient is given in Algorithm 1.
+        1
+     Note that α is only defined up to a constant shift: any upscaling of the vector u can be paired with a
+corresponding downscaling of the vector v (and vice versa) without altering the matrix T ∗ . The choice α =
+log u       u> 1
+  λ
+      − logλK    1 ensures that α is tangent to the simplex.
+
+
+                                                            4
+(a) Convergence to smoothed trans- (b) Approximation        of    exact (c) Convergence of alternating pro-
+port.                              Wasserstein.                         jections (λ = 50).
+
+                 Figure 3: The relaxed transport problem (8) for unnormalized measures.
+
+For many learning problems, however, a normalized output assumption is unnatural. In image seg-
+mentation, for example, the target shape is not naturally represented as a histogram. And even when
+the prediction and the ground truth are constrained to the simplex, the observed label can be subject
+to noise that violates the constraint.
+There is more than one way to generalize optimal transport to unnormalized measures, and this is a
+subject of active study [20]. We will develop here a novel objective that deals effectively with the
+difference in total mass between h(x) and y while still being efficient to optimize.
+
+4.3   Relaxed transport
+
+We propose a novel relaxation that extends smoothed transport to unnormalized measures. By re-
+placing the equality constraints on the transport marginals in (6) with soft penalties with respect to
+KL divergence, we get an unconstrained approximate transport problem. The resulting objective is:
+ λ,γa ,γb                                          1                             f T > 1ky (8)
+                                                                                          
+            WKL (h(·|x), y(·)) =      min hT, M i − H(T ) + γa KL
+                                                               f (T 1kh(x)) + γb KL
+                                       K×K
+                                   T ∈R+           λ
+
+       f (wkz) = w> log(w z) − 1> w + 1> z is the generalized KL divergence between
+where KL
+w, z ∈ RK+ . Here   represents element-wise division. As with the previous formulation, the optimal
+transport matrix with respect to (8) is a diagonal scaling of the matrix K.
+Proposition 4.1. The transport matrix T ∗ optimizing (8) satisfies T ∗ = diag(u)Kdiag(v), where
+                   γ λ                      γ λ
+u = (h(x) T ∗ 1) a , v = y (T ∗ )> 1 b , and K = e−λM −1 .
+
+And the optimal transport matrix is a fixed point for a Sinkhorn-like iteration. 2
+                                                                                     γa λ
+                                                                                                   − γaγa λ
+Proposition 4.2. T ∗ = diag(u)Kdiag(v) optimizing (8) satisfies: i) u = h(x) γa λ+1 (Kv)                λ+1
+                                                                                                              ,
+               γb λ        − γ b λ
+and ii) v = y γb λ+1  K> u γb λ+1 , where represents element-wise multiplication.
+
+Unlike the previous formulation, (8) is unconstrained with respect to h(x). The gradient is given by
+∇h(x) WKL (h(·|x), y(·)) = γa (1 − T ∗ 1 h(x)). The iteration is given in Algorithm 1.
+When restricted to normalized measures, the relaxed problem (8) approximates smoothed transport
+(6). Figure 3a shows, for normalized h(x) and y, the relative distance between the values of (8) and
+(6) 3 . For λ large enough, (8) converges to (6) as γa and γb increase.
+(8) also retains two properties of smoothed transport (6). Figure 3b shows that, for normalized
+outputs, the relaxed loss converges to the unregularized Wasserstein distance as λ, γa and γb increase
+4
+  . And Figure 3c shows that convergence of the iterations in (4.2) is nearly independent of the
+dimension K of the output space.
+   2
+     Note that, although the iteration suggested by Proposition 4.2 is observed empirically to converge (see
+Figure 3c, for example), we have not proven a guarantee that it will do so.
+   3
+     In figures 3a-c, h(x), y and M are generated as described in [18] section 5. In 3a-b, h(x) and y have
+dimension 256. In 3c, convergence is defined as in [18]. Shaded regions are 95% intervals.
+   4
+     The unregularized Wasserstein distance was computed using FastEMD [21].
+
+
+                                                     5
+    Posterior Probability
+
+
+
+
+                                                                                       Posterior Probability
+                            0.20                                                                               0.20
+                            0.18                                     0         2                               0.18                                     2         5
+                            0.16                                     1         3                               0.16                                     3         6
+                            0.14                                                                               0.14                                     4
+                            0.12                                                                               0.12
+                            0.10                                                                               0.10
+                            0.08                                                                               0.08
+                                   0        1       2            3       4                                            0        1       2            3       4
+                                                     p-th norm                                                                          p-th norm
+
+                            (a) Posterior predictions for images of digit 0.                                   (b) Posterior predictions for images of digit 4.
+
+Figure 4: MNIST example. Each curve shows the predicted probability for one digit, for models
+trained with different p values for the ground metric.
+
+
+5                           Statistical Properties of the Wasserstein loss
+
+Let S = ((x1 , y1 ), . . . , (xN , yN )) be i.i.d. samples and hθ̂ be the empirical risk minimizer
+                                   (                                N
+                                                                                           )
+                                          p                  1 X p
+               hθ̂ = argmin ÊS Wp (hθ (·|x), y) =                     W (hx θ(·|xi ), yi ) .
+                          hθ ∈H                                N i=1 p
+
+Further assume H = s ◦ Ho is the composition of a softmax s and a base hypothesis space Ho of
+functions mapping into RK . The softmax layer outputs a prediction that lies in the simplex ∆K .
+Theorem 5.1. For p = 1, and any δ > 0, with probability at least 1 − δ, it holds that
+                                                                                r
+     1                        1                                  o             log(1/δ)
+  E W1 (hθ̂ (·|x), y) ≤ inf E W1 (hθ (·|x), y) + 32KCM RN (H ) + 2CM                                                                                              (9)
+                        hθ ∈H                                                         2N
+with the constant CM = maxκ,κ0 Mκ,κ0 . RN (Ho ) is the Rademacher complexity [22] measuring
+the complexity of the hypothesis space Ho .
+
+The Rademacher complexity RN (Ho ) for commonly used models like neural networks and kernel
+machines [22] decays with the training set size. This theorem guarantees that the expected Wasser-
+stein loss of the empirical risk minimizer approaches the best achievable loss for H.
+As an important special case, minimizing the empirical risk with Wasserstein loss is also good for
+multiclass classification. Let y = eκ be the “one-hot” encoded label vector for the groundtruth class.
+Proposition 5.2. In the multiclass classification setting, for p = 1 and any δ > 0, with probability
+at least 1 − δ, it holds that
+                                                                                  r
+                                    1                     2          o             log(1/δ)
+ Ex,κ dK (κθ̂ (x), κ) ≤ inf KE[W1 (hθ (x), y)] + 32K CM RN (H ) + 2CM K                        (10)
+                           hθ ∈H                                                        2N
+where the predictor is κθ̂ (x) = argmaxκ hθ̂ (κ|x), with hθ̂ being the empirical risk minimizer.
+
+Note that instead of the classification error Ex,κ [1{κθ̂ (x) 6= κ}], we actually get a bound on the
+expected semantic distance between the prediction and the groundtruth.
+
+6                           Empirical study
+
+6.1                           Impact of the ground metric
+
+In this section, we show that the Wasserstein loss encourages smoothness with respect to an artificial
+metric on the MNIST handwritten digit dataset. This is a multi-class classification problem with
+output dimensions corresponding to the 10 digits, and we apply a ground metric dp (κ, κ0 ) = |κ −
+κ0 |p , where κ, κ0 ∈ {0, . . . , 9} and p ∈ [0, ∞). This metric encourages the recognized digit to be
+numerically close to the true one. We train a model independently for each value of p and plot the
+average predicted probabilities of the different digits on the test set in Figure 4.
+
+
+                                                                                   6
+              1.00                                                                       1.00
+
+              0.95                                                                       0.95
+ top-K Cost   0.90                                                                       0.90
+
+
+
+
+                                                                            top-K Cost
+              0.85                            Loss Function                              0.85                           Loss Function
+                                             Divergence                                                                Divergence
+              0.80                                                                       0.80
+                                             Wasserstein (α=0.5)                                                       Wasserstein (α=0.5)
+              0.75                           Wasserstein (α=0.3)                         0.75                          Wasserstein (α=0.3)
+              0.70                           Wasserstein (α=0.1)                         0.70                          Wasserstein (α=0.1)
+
+
+                            5           10           15            20                                 5           10           15            20
+                                K (# of proposed tags)                                                    K (# of proposed tags)
+
+                     (a) Original Flickr tags dataset.                                   (b) Reduced-redundancy Flickr tags dataset.
+
+Figure 5: Top-K cost comparison of the proposed loss (Wasserstein) and the baseline (Divergence).
+Note that as p → 0, the metric approaches the 0 − 1 metric d0 (κ, κ0 ) = 1κ6=κ0 , which treats all
+incorrect digits as being equally unfavorable. In this case, as can be seen in the figure, the predicted
+probability of the true digit goes to 1 while the probability for all other digits goes to 0. As p
+increases, the predictions become more evenly distributed over the neighboring digits, converging
+to a uniform distribution as p → ∞ 5 .
+
+6.2            Flickr tag prediction
+
+We apply the Wasserstein loss to a real world multi-label learning problem, using the recently re-
+leased Yahoo/Flickr Creative Commons 100M dataset [23]. 6 Our goal is tag prediction: we select
+1000 descriptive tags along with two random sets of 10,000 images each, associated with these tags,
+for training and testing. We derive a distance metric between tags by using word2vec [24] to
+embed the tags as unit vectors, then taking their Euclidean distances. To extract image features we
+use MatConvNet [25]. Note that the set of tags is highly redundant and often many semantically
+equivalent or similar tags can apply to an image. The images are also partially tagged, as different
+users may prefer different tags. We therefore measure the prediction performance by the top-K cost,
+                        PK
+defined as CK = 1/K k=1 minj dK (κ̂k , κj ), where {κj } is the set of groundtruth tags, and {κ̂k }
+are the tags with highest predicted probability. The standard AUC measure is also reported.
+We find that a linear combination of the Wasserstein loss Wpp and the standard multiclass logistic loss
+KL yields the best prediction results. Specifically, we train a linear model by minimizing Wpp + αKL
+on the training set, where α controls the relative weight of KL. Note that KL taken alone is our
+baseline in these experiments. Figure 5a shows the top-K cost on the test set for the combined loss
+and the baseline KL loss. We additionally create a second dataset by removing redundant labels
+from the original dataset: this simulates the potentially more difficult case in which a single user
+tags each image, by selecting one tag to apply from amongst each cluster of applicable, semantically
+similar tags. Figure 3b shows that performance for both algorithms decreases on the harder dataset,
+while the combined Wasserstein loss continues to outperform the baseline.
+In Figure 6, we show the effect on performance of varying the weight α on the KL loss. We observe
+that the optimum of the top-K cost is achieved when the Wasserstein loss is weighted more heavily
+than at the optimum of the AUC. This is consistent with a semantic smoothing effect of Wasserstein,
+which during training will favor mispredictions that are semantically similar to the ground truth,
+sometimes at the cost of lower AUC 7 . We finally show two selected images from the test set in
+Figure 7. These illustrate cases in which both algorithms make predictions that are semantically
+relevant, despite overlapping very little with the ground truth. The image on the left shows errors
+made by both algorithms. More examples can be found in the appendix.
+         5
+      To avoid numerical issues, we scale down the ground metric such that all of the distance values are in the
+interval [0, 1).
+    6
+      The dataset used here is available at http://cbcl.mit.edu/wasserstein.
+    7
+      The Wasserstein loss can achieve a similar trade-off by choosing the metric parameter p, as discussed in
+Section 6.1. However, the relationship between p and the smoothing behavior is complex and it can be simpler
+to implement the trade-off by combining with the KL loss.
+
+
+                                                                        7
+                 0.95                                                                          0.95
+                              K=1         K=2         K=3         K=4                                       K=1         K=2         K=3         K=4
+                 0.90                                                                          0.90
+
+    Top-K cost
+
+
+
+
+                                                                                  Top-K cost
+                 0.85                                                                          0.85
+                 0.80                                                                          0.80
+                 0.75                                                                          0.75
+                 0.70                                                                          0.70
+                 0.65                                                                          0.65
+                 0.64 0.0           0.5         1.0         1.5         2.0                    0.64 0.0           0.5         1.0         1.5         2.0
+                 0.62                                                                          0.62
+      AUC
+
+
+
+
+                                                                                    AUC
+                 0.60                                                                          0.60
+                 0.58                     Wasserstein AUC                                      0.58                     Wasserstein AUC
+                 0.56                     Divergence AUC                                       0.56                     Divergence AUC
+                 0.54                                                                          0.54
+                        0.0         0.5         1.0         1.5         2.0                           0.0         0.5         1.0         1.5         2.0
+                                                α                                                                             α
+                         (a) Original Flickr tags dataset.                                     (b) Reduced-redundancy Flickr tags dataset.
+
+                          Figure 6: Trade-off between semantic smoothness and maximum likelihood.
+
+
+
+
+(a) Flickr user tags: street, parade, dragon; our                                              (b) Flickr user tags: water, boat, reflection, sun-
+proposals: people, protest, parade; baseline pro-                                              shine; our proposals: water, river, lake, summer;
+posals: music, car, band.                                                                      baseline proposals: river, water, club, nature.
+
+Figure 7: Examples of images in the Flickr dataset. We show the groundtruth tags and as well as
+tags proposed by our algorithm and the baseline.
+
+
+7                Conclusions and future work
+In this paper we have described a loss function for learning to predict a non-negative measure over a
+finite set, based on the Wasserstein distance. Although optimizing with respect to the exact Wasser-
+stein loss is computationally costly, an approximation based on entropic regularization is efficiently
+computed. We described a learning algorithm based on this regularization and we proposed a novel
+extension of the regularized loss to unnormalized measures that preserves its efficiency. We also
+described a statistical learning bound for the loss. The Wasserstein loss can encourage smoothness
+of the predictions with respect to a chosen metric on the output space, and we demonstrated this
+property on a real-data tag prediction problem, showing improved performance over a baseline that
+doesn’t incorporate the metric.
+An interesting direction for future work may be to explore the connection between the Wasserstein
+loss and Markov random fields, as the latter are often used to encourage smoothness of predictions,
+via inference at prediction time.
+
+
+
+
+                                                                              8
+References
+ [1] Jonathan Long, Evan Shelhamer, and Trevor Darrell. Fully convolutional networks for semantic segmen-
+     tation. CVPR (to appear), 2015.
+ [2] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng Huang,
+     Andrej Karpathy, Aditya Khosla, Michael Bernstein, Alexander C. Berg, and Li Fei-Fei. ImageNet Large
+     Scale Visual Recognition Challenge. International Journal of Computer Vision (IJCV), 2015.
+ [3] Marco Cuturi and Arnaud Doucet. Fast Computation of Wasserstein Barycenters. ICML, 2014.
+ [4] Justin Solomon, Raif M Rustamov, Leonidas J Guibas, and Adrian Butscher. Wasserstein Propagation for
+     Semi-Supervised Learning. In ICML, pages 306–314, 2014.
+ [5] Michael H Coen, M Hidayath Ansari, and Nathanael Fillmore. Comparing Clusterings in Space. ICML,
+     pages 231–238, 2010.
+ [6] Lorenzo Rosasco Mauricio A. Alvarez and Neil D. Lawrence. Kernels for vector-valued functions: A
+     review. Foundations and Trends in Machine Learning, 4(3):195–266, 2011.
+ [7] Leonid I Rudin, Stanley Osher, and Emad Fatemi. Nonlinear total variation based noise removal algo-
+     rithms. Physica D: Nonlinear Phenomena, 60(1):259–268, 1992.
+ [8] Liang-Chieh Chen, George Papandreou, Iasonas Kokkinos, Kevin Murphy, and Alan L Yuille. Semantic
+     image segmentation with deep convolutional nets and fully connected crfs. In ICLR, 2015.
+ [9] Marco Cuturi, Gabriel Peyré, and Antoine Rolet. A Smoothed Dual Approach for Variational Wasserstein
+     Problems. arXiv.org, March 2015.
+[10] Yossi Rubner, Carlo Tomasi, and Leonidas J Guibas. The earth mover’s distance as a metric for image
+     retrieval. IJCV, 40(2):99–121, 2000.
+[11] Kristen Grauman and Trevor Darrell. Fast contour matching using approximate earth mover’s distance.
+     In CVPR, 2004.
+[12] S Shirdhonkar and D W Jacobs. Approximate earth mover’s distance in linear time. In CVPR, 2008.
+[13] Herbert Edelsbrunner and Dmitriy Morozov. Persistent homology: Theory and practice. In Proceedings
+     of the European Congress of Mathematics, 2012.
+[14] Federico Bassetti, Antonella Bodini, and Eugenio Regazzini. On minimum kantorovich distance estima-
+     tors. Stat. Probab. Lett., 76(12):1298–1302, 1 July 2006.
+[15] Cédric Villani. Optimal Transport: Old and New. Springer Berlin Heidelberg, 2008.
+[16] Vladimir I Bogachev and Aleksandr V Kolesnikov. The Monge-Kantorovich problem: achievements,
+     connections, and perspectives. Russian Math. Surveys, 67(5):785, 10 2012.
+[17] Dimitris Bertsimas, John N. Tsitsiklis, and John Tsitsiklis. Introduction to Linear Optimization. Athena
+     Scientific, Boston, third printing edition, 1997.
+[18] Marco Cuturi. Sinkhorn Distances: Lightspeed Computation of Optimal Transport. NIPS, 2013.
+[19] Philip A Knight and Daniel Ruiz. A fast algorithm for matrix balancing. IMA Journal of Numerical
+     Analysis, 33(3):drs019–1047, October 2012.
+[20] Lenaic Chizat, Gabriel Peyré, Bernhard Schmitzer, and François-Xavier Vialard. Unbalanced Optimal
+     Transport: Geometry and Kantorovich Formulation. arXiv.org, August 2015.
+[21] Ofir Pele and Michael Werman. Fast and robust Earth Mover’s Distances. ICCV, pages 460–467, 2009.
+[22] Peter L Bartlett and Shahar Mendelson. Rademacher and gaussian complexities: Risk bounds and struc-
+     tural results. JMLR, 3:463–482, March 2003.
+[23] Bart Thomee, David A. Shamma, Gerald Friedland, Benjamin Elizalde, Karl Ni, Douglas Poland,
+     Damian Borth, and Li-Jia Li. The new data and new challenges in multimedia research. arXiv preprint
+     arXiv:1503.01817, 2015.
+[24] Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. Distributed representations of
+     words and phrases and their compositionality. In NIPS, 2013.
+[25] A. Vedaldi and K. Lenc.      MatConvNet – Convolutional Neural Networks for MATLAB.              CoRR,
+     abs/1412.4564, 2014.
+[26] M. Ledoux and M. Talagrand. Probability in Banach Spaces: Isoperimetry and Processes. Classics in
+     Mathematics. Springer Berlin Heidelberg, 2011.
+[27] Clark R. Givens and Rae Michael Shortt. A class of wasserstein metrics for probability distributions.
+     Michigan Math. J., 31(2):231–240, 1984.
+
+
+
+
+                                                     9
+A    Relaxed transport
+Equation (8) gives the relaxed transport objective as
+ λ,γa ,γb                                          1                      f T > 1ky
+                                                                                    
+          WKL (h(·|x), y(·)) = min hT, M i − H(T ) + γa KL
+                                                        f (T 1kh(x)) + γb KL
+                               T ∈RK×K
+                                   +
+                                                   λ
+     f (wkz) = w> log(w
+with KL                           z) − 1> w + 1> z.
+
+Proof of Proposition 4.1. The first order condition for T ∗ optimizing (8) is
+                    1
+                       log Tij∗ + 1 + γa (log T ∗ 1 h(x))i + γb log(T ∗ )> 1 y j = 0.
+                                                                             
+            Mij +
+                    λ
+         ⇒ log Tij∗ + γa λ log (T ∗ 1 h(xi ))i + γb λ log (T ∗ )> 1 yj j = −λMij − 1
+                                                                         
+
+                                γ λ              γb λ
+         ⇒Tij∗ (T ∗ 1 h(x))i a (T ∗ )> 1 y j = exp (−λMij − 1)
+                                   γ λ               γb λ
+         ⇒Tij∗ = (h(x) T ∗ 1)i a y (T ∗ )> 1 j exp (−λMij − 1)
+
+
+Hence T ∗ (if it exists) is a diagonal scaling of K = exp (−λM − 1).
+
+
+                                                           γ λ                                  γb λ
+Proof of Proposition 4.2. Let u = (h(x) T ∗ 1) a                 and v =       y   (T ∗ )> 1            , so T ∗ =
+diag(u)Kdiag(v). We have
+                                 T ∗ 1 = diag(u)Kv
+                                              γ λ+1
+                                    ⇒ (T ∗ 1) a       = h(x)γa λ          Kv
+
+where we substituted the expression for u. Re-writing T ∗ 1,
+                                                γ λ+1
+                                 (diag(u)Kv) a          = diag(h(x)γa λ )Kv
+                                                                  −γa λ
+                              ⇒uγa λ+1 = h(x)γa λ          (Kv)
+                                             γa λ                γa λ
+                              ⇒u = h(x) γa λ+1        (Kv)− γa λ+1 .
+
+                                              γb λ                  γ λ
+                                                                     b
+                                                                 − γ λ+1
+A symmetric argument shows that v = y γb λ+1          (K> u)        b      .
+
+B    Statistical Learning Bounds
+We establish the proof of Theorem 5.1 in this section. For simpler notation, for a sequence S =
+((x1 , y1 ), . . . , (xN , yN )) of i.i.d. training samples, we denote the empirical risk R̂S and risk R as
+                    R̂S (hθ ) = ÊS Wpp (hθ (·|x), y(·)) , R(hθ ) = E Wpp (hθ (·|x), y(·))
+                                                                                           
+                                                                                                         (11)
+Lemma B.1. Let hθ̂ , hθ∗ ∈ H be the minimizer of the empirical risk R̂S and expected risk R,
+respectively. Then
+                         R(hθ̂ ) ≤ R(hθ∗ ) + 2 sup |R(h) − R̂S (h)|
+                                                        h∈H
+
+
+
+Proof. By the optimality of hθ̂ for R̂S ,
+                     R(hθ̂ ) − R(hθ∗ ) = R(hθ̂ ) − R̂S (hθ̂ ) + R̂S (hθ̂ ) − R(hθ∗ )
+                                         ≤ R(hθ̂ ) − R̂S (hθ̂ ) + R̂S (hθ∗ ) − R(hθ∗ )
+                                         ≤ 2 sup |R(h) − R̂S (h)|
+                                             h∈H
+
+
+
+
+                                                      10
+Therefore, to bound the risk for hθ̂ , we need to establish uniform concentration bounds for the
+Wasserstein loss. Towards that goal, we define a space of loss functions induced by the hypothesis
+space H as
+                             L = `θ : (x, y) 7→ Wpp (hθ (·|x), y(·)) : hθ ∈ H
+                                  
+                                                                                               (12)
+The uniform concentration will depends on the “complexity” of L, which is measured by the empir-
+ical Rademacher complexity defined below.
+Definition B.2 (Rademacher Complexity [22]). Let G be a family of mapping from Z to R, and
+S = (z1 , . . . , zN ) a fixed sample from Z. The empirical Rademacher complexity of G with respect
+to S is defined as                              "                       #
+                                                            n
+                                                       1 X
+                                    R̂S (G) = Eσ sup           σi g(zi )                       (13)
+                                                  g∈G N i=1
+
+where σ = (σ1 , . . . , σN ), with σi ’s independent uniform random variables taking values in
+{+1, −1}. σi ’s are called the Rademacher random variables. The Rademacher complexity is de-
+fined by taking expectation with respect to the samples S,
+                                                     h     i
+                                      RN (G) = ES R̂S (G)                                 (14)
+
+Theorem B.3. For any δ > 0, with probability at least 1 − δ, the following holds for all `θ ∈ L,
+                                                       r
+                                                         CM2 log(1/δ)
+                        E[`θ ] − ÊS [`θ ] ≤ 2RN (L) +                                         (15)
+                                                               2N
+with the constant CM = maxκ,κ0 Mκ,κ0 .
+
+By the definition of L, E[`θ ] = R(hθ ) and ÊS [`θ ] = R̂S [hθ ]. Therefore, this theorem provides a
+uniform control for the deviation of the empirical risk from the risk.
+Theorem B.4 (McDiarmid’s Inequality). Let S = {X1 , . . . , XN } ⊂ X be N i.i.d. random vari-
+ables. Assume there exists C > 0 such that f : X N → R satisfies the following stability condition
+
+                          |f (x1 , . . . , xi , . . . , xN ) − f (x1 , . . . , x0i , . . . , xN )| ≤ C   (16)
+for all i = 1, . . . , N and any x1 , . . . , xN , xi ∈ X . Then for any ε > 0, denoting f (X1 , . . . , XN )
+                                                          0
+
+by f (S), it holds that
+                                                                                         2ε2
+                                                                                              
+                                P (f (S) − E[f (S)] ≥ ε) ≤ exp −                                         (17)
+                                                                                        N C2
+
+Lemma B.5. Let the constant CM = maxκ,κ0 Mκ,κ0 , then 0 ≤ Wpp (·, ·) ≤ CM .
+
+Proof. For any h(·|x) and y(·), let T ∗ ∈ Π(h(x), y) be the optimal transport plan that solves (3),
+then                                                     X
+                        Wpp (h(x), y) = hT ∗ , M i ≤ CM     Tκ,κ0 = CM
+                                                               κ,κ0
+
+
+
+
+Proof of Theorem B.3. For any `θ ∈ L, note the empirical expectation is the empirical risk of the
+corresponding hθ :
+                                 N                     N
+                              1 X                   1 X p
+                ÊS [`θ ] =         `θ (xi , yi ) =      W (hθ (·|xi ), yi (·)) = R̂S (hθ )
+                              N i=1                 N i=1 p
+
+Similarly, E[`θ ] = R(hθ ). Let
+                                         Φ(S) = sup E[`] − ÊS [`]                                         (18)
+                                               `∈L
+Let S 0 be S with the i-th sample replaced by (x0i , yi0 ), by Lemma B.5, it holds that
+                                                        Wpp (hθ (x0i ), yi0 ) − Wpp (hθ (xi ), yi )   CM
+     Φ(S) − Φ(S 0 ) ≤ sup ÊS 0 [`] − ÊS [`] = sup                                                 ≤
+                         `∈L                      hθ ∈H                       N                       N
+
+                                                     11
+Similarly, we can show Φ(S 0 ) − Φ(S) ≤ CM /N , thus |Φ(S 0 ) − Φ(S)| ≤ CM /N . By Theorem B.4,
+for any δ > 0, with probability at least 1 − δ, it holds that
+                                                      r
+                                                           2 log(1/δ)
+                                                          CM
+                                Φ(S) ≤ E[Φ(S)] +                                            (19)
+                                                              2N
+To bound E[Φ(S)], by Jensen’s inequality,
+                                                     h             i                           
+ES [Φ(S)] = ES sup E[`] − ÊS [`] = ES sup ES 0 ÊS 0 [`] − ÊS [`] ≤ ES,S 0 sup ÊS 0 [`] − ÊS [`]
+                  `∈L                         `∈L                                    `∈L
+
+Here S 0 is another sequence of i.i.d. samples, usually called ghost samples, that is only used for
+analysis. Now we introduce the Rademacher variables σi , since the role of S and S 0 are completely
+symmetric, it follows
+                                "         N
+                                                                            #
+                                      1 X             0    0
+          ES [Φ(S)] ≤ ES,S 0 ,σ sup          σi (`(xi , yi ) − `(xi , yi ))
+                                  `∈L N i=1
+                              "         N
+                                                         #         "           N
+                                                                                                 #
+                                     1 X          0    0                     1 X
+                     ≤ ES 0 ,σ sup         σi `(xi , yi ) + ES,σ sup             −σi `(xi , yi )
+                                `∈L N i=1                             `∈L N i=1
+                           h        i       h            i
+                     = ES R̂S (L) + ES 0 R̂S 0 (L)
+                     = 2RN (L)
+The conclusion follows by combing (18) and (19).
+
+To finish the proof of Theorem 5.1, we combine Lemma B.1 and Theorem B.3, and relate RN (L)
+to RN (H) via the following generalized Talagrand’s lemma [26].
+Lemma B.6. Let F be a class of real functions, and H ⊂ F = F1 × . . . × FK be a K-valued
+function class. If m : RK → R is a Lm -Lipschitz function and m(0) = 0, then R̂S (m ◦ H) ≤
+     PK
+2Lm k=1 R̂S (Fk ).
+Theorem B.7 (Theorem 6.15 of [15]). Let µ and ν be two probability measures on a Polish space
+(K, dK ). Let p ∈ [1, ∞) and κ0 ∈ K. Then
+                                    Z                         1/p
+                                  0                                   1   1
+                 Wp (µ, ν) ≤ 21/p       dK (κ0 , κ)d|µ − ν|(κ)      ,   + 0 =1           (20)
+                                      K                               p  p
+Corollary B.8. The Wasserstein loss is Lipschitz continuous in the sense that for any hθ ∈ H, and
+any (x, y) ∈ X × Y,
+                                                    X
+                      Wpp (hθ (·|x), y) ≤ 2p−1 CM       |hθ (κ|x) − y(κ)|                    (21)
+                                                         κ∈K
+
+In particular, when p = 1, we have
+                                                     X
+                            W11 (hθ (·|x), y) ≤ CM         |hθ (κ|x) − y(κ)|                      (22)
+                                                     κ∈K
+
+
+We cannot apply Lemma B.6 directly to the Wasserstein loss class, because the Wasserstein loss is
+only defined on probability distributions, so 0 is not a valid input. To get around this problem, we
+assume the hypothesis space H used in learning is of the form
+                                      H = {s ◦ ho : ho ∈ Ho }                                     (23)
+         o                                      K
+where H is a function class that maps into R , and s is the softmax function defined as s(o) =
+(s1 (o), . . . , sK (o)), with
+                                         eok
+                               sk (o) = P oj , k = 1, . . . , K                            (24)
+                                          je
+The softmax layer produce a valid probability distribution from arbitrary input, and this is consistent
+with commonly used models such as Logistic Regression and Neural Networks. By working with
+the log of the groundtruth labels, we can also add a softmax layer to the labels.
+
+
+                                                    12
+Lemma B.9 (Proposition 2 of [27]). The Wasserstein distances Wp (·, ·) are metrics on the space of
+probability distributions of K, for all 1 ≤ p ≤ ∞.
+Proposition B.10. The map ι : RK × RK → R defined by ι(y, y 0 ) = W11 (s(y), s(y 0 )) satisfies
+                                  |ι(y, y 0 ) − ι(ȳ, ȳ 0 )| ≤ 4CM k(y, y 0 ) − (ȳ, ȳ 0 )k2                               (25)
+for any (y, y 0 ), (ȳ, ȳ 0 ) ∈ RK × RK . And ι(0, 0) = 0.
+
+Proof. For any (y, y 0 ), (ȳ, ȳ 0 ) ∈ RK × RK , by Lemma B.9, we can use triangle inequality on the
+Wasserstein loss,
+         |ι(y, y 0 ) − ι(ȳ, ȳ 0 )| = |ι(y, y 0 ) − ι(ȳ, y 0 ) + ι(ȳ, y 0 ) − ι(ȳ, ȳ 0 )| ≤ ι(y, ȳ) + ι(y 0 , ȳ 0 )
+Following Corollary B.8, it continues as
+                     |ι(y, y 0 ) − ι(ȳ, ȳ 0 )| ≤ CM (ks(y) − s(ȳ)k1 + ks(y 0 ) − s(ȳ 0 )k1 )                             (26)
+Note for each k = 1, . . . , K, the gradient ∇y sk satisfies
+                                                                                   v
+                                 K                                               u K
+                            ∂sk                                       K
+                                                                                   u X
+      k∇y sk k2 =                           = (δkj sk − sk sj )j=1               = ts2k s2j + s2k (1 − 2sk )                 (27)
+                            ∂yj    j=1 2                                     2
+                                                                                          j=1
+
+By mean value theorem, ∃α ∈ [0, 1], such that for yθ = αy + (1 − α)ȳ, it holds that
+                            K
+                            X                                        K
+                                                                     X
+   ks(y) − s(ȳ)k1 =               h∇y sk |y=yαk , y − ȳi ≤               k∇y sk |y=yαk k2 ky − ȳk2 ≤ 2ky − ȳk2
+                            k=1                                      k=1
+                                   qP                       √        √   √
+                                        2
+                                             P
+because by (27), and the fact that   j sj ≤    j sj = 1 and   a + b ≤ a + b for a, b ≥ 0, it
+holds
+            XK                  X                 X
+                k∇y sk k2 =         k∇y sk k2 +         k∇y sk k2
+              k=1                     k:sk ≤1/2                  k:sk >1/2
+                                                                                                    K
+                                        X                √                          X              X
+                                  ≤               sk + sk 1 − 2sk +                          sk ≤         2sk = 2
+                                      k:sk ≤1/2                                  k:sk >1/2          k=1
+
+Similarly, we have ks(y 0 ) − s(ȳ 0 )k1 ≤ 2ky 0 − ȳ 0 k2 , so from (26), we know
+                                                                     √                                 1/2
+  |ι(y, y 0 ) − ι(ȳ, ȳ 0 )| ≤ 2CM (ky − ȳk2 + ky 0 − ȳ 0 k2 ) ≤ 2 2CM ky − ȳk22 + ky 0 − ȳ 0 k22
+then (25) follows immediately. The second conclusion follows trivially as s maps the zero vector to
+a uniform distribution.
+
+Proof of Theorem 5.1. Consider the loss function space preceded with a softmax layer
+                             L = {ιθ : (x, y) 7→ W11 (s(hoθ (x)), s(y)) : hoθ ∈ Ho }
+We apply Lemma B.6 to the 4CM -Lipschitz continuous function ι in Proposition B.10 and the
+function space
+                            Ho × . . . × Ho × I × . . . × I
+                            |      {z     } |     {z      }
+                                                  K copies                K copies
+with I a singleton function space with only the identity map. It holds
+                                                           
+                   R̂S (L) ≤ 8CM K R̂S (Ho ) + K R̂S (I) = 8KCM R̂S (Ho )                                                    (28)
+
+because for the identity map, and a sample S = (y1 , . . . , yN ), we can calculate
+                                "         N
+                                                       #         "     N
+                                                                               #
+                                       1 X                          1 X
+                   R̂S (I) = Eσ sup          σi f (yi ) = Eσ              σi yi = 0
+                                  f ∈I N i=1                       N i=1
+The conclusion of the theorem follows by combining (28) with Theorem B.3 and Lemma B.1.
+
+
+                                                               13
+C     Connection with multiclass classification
+Proof of Proposition 5.2. Given that the label is a “one-hot” vector y = eκ , the set of transport plans
+(4) degenerates. Specifically, the constraint T > 1 = eκ means that only the κ-th column of T can
+be non-zero. Furthermore, the constraint T 1 = hθ̂ (·|x) ensures that the κ-th column of T actually
+equals hθ̂ (·|x). In other words, the set Π(hθ̂(·|x) , eκ ) contains only one feasible transport plan, so
+(3) can be computed directly as
+
+                  Wpp (hθ̂ (·|x), eκ ) =
+                                         X                       X p
+                                           Mκ0 ,κ hθ̂ (κ0 |x) =       dK (κ0 , κ)hθ̂ (κ0 |x)
+                                      κ0 ∈K                        κ0 ∈K
+
+Now let κ̂ = argmaxκ hθ̂ (κ|x) be the prediction, we have
+                              X                  X
+             hθ̂ (κ̂|x) = 1 −   hθ̂ (κ|x) ≥ 1 −      hθ̂ (κ̂|x) = 1 − (K − 1)hθ̂ (κ̂|x)
+                              κ6=κ̂                  κ6=κ̂
+
+Therefore, hθ̂ (κ̂|x) ≥ 1/K, so
+                        Wpp (hθ̂ (·|x), eκ ) ≥ dpK (κ̂, κ)hθ̂ (κ̂|x) ≥ dpK (κ̂, κ)/K
+The conclusion follows by applying Theorem 5.1 with p = 1.
+
+D     Algorithmic Details of Learning with a Wasserstein Loss
+In Section 5, we describe the statistical generalization properties of learning with a Wasserstein loss
+function via empirical risk minimization on a general space of classifiers H. In all the empirical
+studies presented in the paper, we use the space of linear logistic regression classifiers, defined by
+                                                     !K                              
+                                       exp(θk> x)                                    
+               H = hθ (x) = PK                              : θk ∈ RD , k = 1, ..., K
+                     
+                                       j=1 exp(θj> x)        k=1
+                                                                                      
+
+We use stochastic gradient descent with a mini-batch size of 100 samples to optimize the empirical
+                                          PK
+risk, with a standard regularizer 0.0005 k=1 kθk k22 on the weights. The algorithm is described
+in Algorithm 2, where WASSERSTEIN is a sub-routine that computes the Wasserstein loss and its
+subgradient via the dual solution as described in Algorithm 1. We always run the gradient descent
+for a fixed number of 100,000 iterations for training.
+
+Algorithm 2 SGD Learning of Linear Logistic Model with Wasserstein Loss
+    Init θ1 randomly.
+    for t = 1, . . . , T do
+        Sample mini-batch Dt = (x1 , y1 ), . . . , (xn , yn ) from the training set.
+        Compute Wasserstein subgradient ∂Wpp /∂hθ |θt ← WASSERSTEIN(Dt , hθt (·)).
+        Compute parameter subgradient ∂Wpp /∂θ|θt = (∂hθ /∂θ)(∂Wpp /∂hθ )|θt
+        Update parameter θt+1 ← θt − ηt ∂Wpp /∂θ|θt
+    end for
+
+Note that the same training algorithm can easily be extended from training a linear logistic regres-
+sion model to a multi-layer neural network model, by cascading the chain-rule in the subgradient
+computation.
+
+E     Empirical study
+E.1    Noisy label example
+
+We simulate the phenomenon of label noise arising from confusion of semantically similar classes
+as follows. Consider a multiclass classification problem, in which the labels correspond to the
+vertices on a D × D lattice on the 2D plane. The Euclidean distance in R2 is used to measure the
+
+
+                                                    14
+                 (a) Noise level 0.1                                     (b) Noise level 0.5
+
+        Figure 8: Illustration of training samples on a 3x3 lattice with different noise levels.
+
+
+semantic similarity between labels. The observations for each category are samples from an isotropic
+Gaussian distribution centered at the corresponding vertex. Given a noise level t, we choose with
+probability t to flip the label for each training sample to one of the neighboring categories8 , chosen
+uniformly at random. Figure 8 shows the training set for a 3 × 3 lattice with noise levels t = 0.1 and
+t = 0.5, respectively.
+Figure 2 is generated as follows. We repeat 10 times for noise levels t = 0.1, 0.2, . . . , 0.9 and
+D = 3, 4, . . . , 7. We train a multiclass linear logistic regression classifier (as described in section D
+of the Appendix) using either the standard KL-divergence loss9 or the proposed Wasserstein loss10 .
+The performance is measured by the mean Euclidean distance in the plane between the predicted
+class and the true class, on the test set. Figure 2 compares the performance of the two loss functions.
+
+E.2    Full figure for the MNIST example
+
+The full version of Figure 4 from Section 6.1 is shown in Figure 9.
+
+E.3    Details of the Flickr tag prediction experiment
+
+From the tags in the Yahoo Flickr Creative Commons dataset, we filtered out those not occurring
+in the WordNet11 database, as well those whose dominant lexical category was ”noun.location” or
+”noun.time.” We also filtered out by hand nouns referring to geographical location or nationality,
+proper nouns, numbers, photography-specific vocabulary, and several words not generally descrip-
+tive of visual content (such as ”annual” and ”demo”). From the remainder, the 1000 most frequently
+occurring tags were used.
+We list some of the 1000 selected tags here. The 50 most frequently occurring tags: travel, square,
+wedding, art, flower, music, nature, party, beach, family, people, food, tree, summer, water, concert,
+winter, sky, snow, street, portrait, architecture, car, live, trip, friend, cat, sign, garden, mountain,
+bird, sport, light, museum, animal, rock, show, spring, dog, film, blue, green, road, girl, event, red,
+   8
+      Connected vertices on the lattice are considered neighbors, and the Euclidean distance between neighbors
+is set to 1.
+    9
+      This corresponds to maximum likelihood estimation of the logistic regression model.
+   10
+      In this special case, this corresponds to weighted maximum likelihood estimation, c.f. Section C.
+   11
+      http://wordnet.princeton.edu
+
+
+                                                     15
+                          0.40                                                                               0.40
+                                                                  0         5                                                                        0         5
+                                                                  1         6                                                                        1         6
+                          0.35                                    2         7                                0.35                                    2         7
+                                                                  3         8                                                                        3         8
+                          0.30                                    4         9                                0.30                                    4         9
+  Posterior Probability
+
+
+
+
+                                                                                     Posterior Probability
+                          0.25                                                                               0.25
+
+                          0.20                                                                               0.20
+
+                          0.15                                                                               0.15
+
+                          0.10                                                                               0.10
+
+                          0.05                                                                               0.05
+
+                          0.00                                                                               0.00
+                                 0       1        2           3       4                                             0       1        2           3       4
+                                                  p-th norm                                                                          p-th norm
+
+
+                          (a) Posterior prediction for images of digit 0.                                    (b) Posterior prediction for images of digit 4.
+
+Figure 9: Each curve is the predicted probability for a target digit from models trained with different
+p values for the ground metric.
+
+
+fun, building, new, cloud. . . . and the 50 least frequent tags: arboretum, chick, sightseeing, vineyard,
+animalia, burlesque, key, flat, whale, swiss, giraffe, floor, peak, contemporary, scooter, society, actor,
+tomb, fabric, gala, coral, sleeping, lizard, performer, album, body, crew, bathroom, bed, cricket,
+piano, base, poetry, master, renovation, step, ghost, freight, champion, cartoon, jumping, crochet,
+gaming, shooting, animation, carving, rocket, infant, drift, hope.
+The complete features and labels can also be downloaded from the project website12 . We train a
+multiclass linear logistic regression model with a linear combination of the Wasserstein loss and
+the KL divergence-based loss. The Wasserstein loss between the prediction and the normalized
+groundtruth is computed as described in Algorithm 1, using 10 iterations of the Sinkhorn-Knopp
+algorithm. Based on inspection of the ground metric matrix, we use p-norm with p = 13, and set
+λ = 50. This ensures that the matrix K is reasonably sparse, enforcing semantic smoothness only in
+each local neighborhood. Stochastic gradient descent with a mini-batch size of 100, and momentum
+0.7 is run for 100,000 iterations to optimize the objective function on the training set. The baseline
+is trained under the same setting, using only the KL loss function.
+To create the dataset with reduced redundancy, for each image in the training set, we compute the
+pairwise semantic distance for the groundtruth tags, and cluster them into “equivalent” tag-sets with
+a threshold of semantic distance 1.3. Within each tag-set, one random tag is selected.
+Figure 10 shows more test images and predictions randomly picked from the test set.
+
+
+
+
+         12
+                          http://cbcl.mit.edu/wasserstein/
+
+
+                                                                                16
+(a) Flickr user tags: zoo, run,      (b) Flickr user tags: travel, ar-     (c) Flickr user tags: spring, race,
+mark; our proposals: running,        chitecture, tourism; our proposals:   training; our proposals: road, bike,
+summer, fun; baseline proposals:     sky, roof, building; baseline pro-    trail; baseline proposals: dog,
+running, country, lake.              posals: art, sky, beach.              surf, bike.
+
+
+
+
+(d) Flickr user tags: family, trip, house; our propos- (e) Flickr user tags: education, weather, cow, agricul-
+als: family, girl, green; baseline proposals: woman, ture; our proposals: girl, people, animal, play; base-
+tree, family.                                          line proposals: concert, statue, pretty, girl.
+
+
+
+
+(f) Flickr user tags: garden, table, gardening; our (g) Flickr user tags: nature, bird, rescue; our propos-
+proposals: garden, spring, plant; baseline proposals: als: bird, nature, wildlife; baseline proposals: ature,
+garden, decoration, plant.                            bird, baby.
+
+Figure 10: Examples of images in the Flickr dataset. We show the groundtruth tags and as well as
+tags proposed by our algorithm and baseline.
+
+
+
+                                                     17
+

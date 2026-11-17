@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T03:48:39.267464+00:00",
+  "status": "BOUNDED_CHECKER_AND_ADMISSION_DRAFT_STATIC_REVIEW_ONLY",
+  "candidate_id": "hierarchy-parent-bidirectional-complement-recurrence",
+  "experiment_id": "M212-BCR",
+  "code_commit": "11a811618179ab1ddc0cee299194667413b7fdb9",
+  "delegated_role": "Read-only child audit; owning root performs actual native/results/admission/dispatch separately.",
+  "owner_provenance": {
+    "token": "7526f819f16e4f688566119d347cd198",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-25T03:33:04.642225+00:00",
+    "deadline_at": "2026-10-25T04:33:04.642225+00:00",
+    "context_sha256": "a524f30594b751e3145c0547e877e5db876833e11ae9db67932d282c5e099541",
+    "pending_sha256": "782f1e48bd24c9f04706ac3efbeda1a0b3ad824c269fe9e72eea3cc76b6964f0"
+  },
+  "reviewed_files": [
+    {
+      "path": "pipeline/diagnostic_bundles/manual_gpu1_20261025/bcr_execution_review_prepare/review_bcr.py",
+      "sha256": "e2a59d1636e46e13b852ef0ff7c37a60fcb3e9a691de2e68c42ade753267c230"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/manual_gpu1_20261025/bcr_execution_review_prepare/admit_bcr_draft.py",
+      "sha256": "d58018bd81f3816eff2be4e41bd857dcb86a9f543a64dc0226d4dd2f706cfa89"
+    }
+  ],
+  "supporting_worker": {
+    "path": "pipeline/diagnostic_bundles/manual_gpu1_20261025/bcr_gpu1_operational_prepare/native/worker.py",
+    "sha256": "a3b10169a9edee14b7943626934abbe46662e366268dcd4919320c86aefd6538"
+  },
+  "static_checks": [
+    {
+      "file": "review_bcr.py",
+      "check": "stdlib_AST_parse_and_compile_without_execution",
+      "observed": true
+    },
+    {
+      "file": "admit_bcr_draft.py",
+      "check": "stdlib_AST_parse_and_compile_without_execution",
+      "observed": true
+    },
+    {
+      "check": "four_request_terminal_direct_wait_result_manifest_and_package_hash_chain_static",
+      "observed": true,
+      "lines": "review 109-203"
+    },
+    {
+      "check": "true_native_TRAIN2_losses_original_backward_optimizer_count_and_updates_static",
+      "observed": true,
+      "lines": "review 269-320"
+    },
+    {
+      "check": "BCR_scan_token_state_and_readout_own_left_right_five_weight_blocks_nonzero_finite_grad_and_independent_before_after_update",
+      "observed": true,
+      "lines": "review 259-266; worker 400-433"
+    },
+    {
+      "check": "n_ge3_consumed_depth2_nonzero_original_prior_state_native_loss_path_static",
+      "observed": true,
+      "lines": "review 217-255; worker 465-473"
+    },
+    {
+      "check": "production_plan_rederived_true_support_parent_order_exclusive_source_and_original_ID_inverse_static",
+      "observed": true,
+      "lines": "review 206-255"
+    },
+    {
+      "check": "rawbank_ids_maps_CSORT_HCG_original_middle_skip_single_inst_path_static",
+      "observed": true,
+      "lines": "review 303-318"
+    },
+    {
+      "check": "paired_original_TRAIN_batches_pretrain_seed1999_loader_common_named_parameters_excluding_only_middle_replacement_static",
+      "observed": true,
+      "lines": "review 333-338"
+    },
+    {
+      "check": "resource_bs1_lang1_warm20_repeat100_121predict_original_handlers_100timings_medianP90_unsupported10G_static",
+      "observed": true,
+      "lines": "review 87-107,339-345"
+    },
+    {
+      "check": "memory_15pct_observed_condition_separate_decision_no_new_latency_or_pureTRAIN_threshold",
+      "observed": true,
+      "lines": "review 344-345; admit 131"
+    },
+    {
+      "check": "physicalGPU1_UUID_and_namespace_plus_exact_grant_and_live_server_eligibility_static",
+      "observed": true,
+      "lines": "review 114-125,152-168,325; admit 112,138-140"
+    },
+    {
+      "check": "default_admission_main_is_readonly_until_explicit_execute_root_and_bound_actual_reviews",
+      "observed": true,
+      "lines": "admit 109-158"
+    },
+    {
+      "check": "actual_primary_HEAD11a_eight_model_and_original_YAML_Git_blob28protected_status_bytes_emptyindex_static",
+      "observed": true,
+      "lines": "admit 88-106"
+    },
+    {
+      "check": "canonical_lock_admission_dispatch_budget_waiting_GPU1_without_launch_or_sync",
+      "observed": true,
+      "lines": "admit 159-282"
+    },
+    {
+      "check": "protected_BTC0_exact_running_row_PID_receipt_experiment_hash_and_M206_unchanged",
+      "observed": true,
+      "lines": "admit 170-174,273-278"
+    }
+  ],
+  "material_concerns": [],
+  "required_pre_execution_corrections": [
+    {
+      "file": "review_bcr.py",
+      "line": 202,
+      "issue": "Explanatory standard_smoke_fields_mapping.identity contains stale00e while real identity fields correctly bind11a.",
+      "required_fix": "Only root materialized sibling copy: update explanation00e to11a; preserve original frozen source and record exact old/new SHA."
+    },
+    {
+      "file": "admit_bcr_draft.py",
+      "line": 133,
+      "issue": "Current owner comparison iterates binding owner keys rather than independently requiring exact six-key schema; original Adapter and root ff helper already enforce six keys.",
+      "required_fix": "Only root materialized sibling copy: require exact keys token/thread_id/generated_at/deadline_at/context_sha256/pending_sha256 before the existing current-owner comparison. Preserve originals and record exact diff/newSHA."
+    }
+  ],
+  "root_resolution": "Root explicitly keeps original files frozen and will apply only the two scoped corrections in a separately recorded execution sibling after actual four-result and independent reviews.",
+  "limitations": [
+    "No actual raw files or result semantics were reviewed or inferred by this report. Actual four native/resource arms and independent review remain prerequisites.",
+    "No execution of either reviewed module/main/reviewer/adapter; only AST parse and compile occurred.",
+    "No new threshold, seed, schedule, precision, model byte, YAML, resource protocol or grant change recommended.",
+    "Common initialized named parameters are recorded; complete buffers/full common state are not measured. Empty/padding/singleton scope must use actual coverage, including zero counts.",
+    "Individual scan/readout rows may have zero gradients; required aggregate five blocks and consumed nonzero prior-state native path remain the frozen check.",
+    "Pure TRAIN memory, offdiagonal probe, efficacy, launch progress and remote BTC0 continuity are unmeasured here.",
+    "Admission protection covers queue/existing experiment/receipt bytes. Actual safe_sync/dispatch must separately preserve BTC0 exact loaded source8, deterministic mapped YAML hash, PID/start ticks and log growth; shared runtimeHEAD must not relabel BTC tested00e receipt."
+  ],
+  "native_results_reviewed": false,
+  "native_execution": "NOT_RUN_BY_THIS_AUDIT",
+  "resources_execution": "NOT_RUN_BY_THIS_AUDIT",
+  "transport": "NOT_RUN",
+  "torch_imported": false,
+  "standard_PASS_receipt_queue_written": false,
+  "admission_authorized": false,
+  "training_launched": false,
+  "next_action": "After actual four-result and mdc independent semantic review, root materializes only scoped corrections and supplies real report/checker SHA; obtain read-only final diff/admission/launch proof audit."
+}

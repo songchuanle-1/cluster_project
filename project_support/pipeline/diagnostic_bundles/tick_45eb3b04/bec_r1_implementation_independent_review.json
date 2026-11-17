@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T05:32:27.487397+00:00",
+  "status": "BEC_R1_SINGLE_SCALAR_IMPLEMENTATION_AND_CPU_COMPATIBILITY_EVIDENCE_REVIEWED_NOT_NATIVE_PASS",
+  "candidate_id": "hierarchy-cross-level-bipartite-edge-composition",
+  "experiment_id": "M215-BEC",
+  "revision": 1,
+  "original_code_commit": "9b6782f44ca7f2c8ac35baea01dfd070314b5701",
+  "code_commit": null,
+  "material_concerns": [],
+  "anchors": {
+    "preregistration": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_revision1_preregistration.json",
+      "sha256": "3fa782b8970de909a219cc090e2188983e1afeab1ac99cac43df07b4f1e5b527"
+    },
+    "CPU_evidence": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_r1_cpu_trace_evidence.json",
+      "sha256": "390ac50aef6ac17c121427a49956aebef4526b6e3b6ac8e3dd0eb4e21d16ac5f"
+    },
+    "revised_source_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_r1_prepare/preparation.json",
+      "sha256": "2ef488c483bf1fb5234dc9615069f7ec2a9232370d186ec4f92cb2bfb3212731"
+    },
+    "original_failed_resource": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_execution/resources_candidate_execution.json",
+      "sha256": "f8fac959a9b040838710d9a7199ea5a9e552bc364904e6d0b182feb77811c4f5"
+    },
+    "original_source_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_6bdbcf77/new_candidate_prepare/preparation.json",
+      "sha256": "2d0606030583fd29719a39a114e11c1c31f44b63ca0fa2cff849baf40e7ca14d"
+    },
+    "original_disabled_native_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_f86d1cfa/bec_native_prepare/preparation.json",
+      "sha256": "322c8ce812ffccda6cfa3d6d2d6e1dd8f73859ab5d3a9835d0c1110328c3e3ff"
+    }
+  },
+  "check_count": 20,
+  "checks_passed": [
+    "new_private_R1_review",
+    "preregistered3fa782_before_CPU_and_source_prepare",
+    "exact_one_registered_implementation_revision_no_source_early_change",
+    "original_BEC_resource_failure_retained_exact_f8fac_rc1",
+    "same_runtime_CPU_JIT_and_original_profiler_handlers",
+    "three_CPU_cases_exact_bool_dtype_shape_eager_mask_equality",
+    "all_three_original_bool_fail_same_error_and_int1_traces_succeed",
+    "CPU_test_not_model_GPU_or_optimizer_training",
+    "CPU_collector_hides_CUDA_before_torch_and_uses_same_conda_python",
+    "no_custom_profiler_operator_handlers_or_ignored_op_reset",
+    "entire_R1_twelve_filemap_exact",
+    "original_source2d06_still_frozen",
+    "same_nine_paths_only_bipartite_helper_changed_other7_and_YAML_equal",
+    "original_nine_frozen_bytes_and_new_nine_declared_bytes_match",
+    "only_one_declared_call_literal_text_delta",
+    "exact_one_AST_index_fill_third_bool_literal_target",
+    "whole_module_AST_equal_after_only_boolTrue_to_int1_constant",
+    "revised_source_compiles_without_model_import",
+    "old_disabled322c_and_worker7e5_unchanged",
+    "R1_prepare_has_no_fabricated_version_or_native_pass"
+  ],
+  "confirmed_change": {
+    "file": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bec/bipartite_edges.py",
+    "old_line": "mask[b] = mask[b].index_fill(0, ids, True)",
+    "new_line": "mask[b] = mask[b].index_fill(0, ids, 1)",
+    "only_AST_delta": "One index_fill Call third argument Constant(boolTrue)->Constant(int1). Same bool target mask, all routing/modules/weights/norm/skip/source structure unchanged.",
+    "other_seven_models_and_YAML_byte_equal": true,
+    "old_frozen_original_nine_unchanged": true
+  },
+  "CPU_evidence_scope": {
+    "cases": [
+      "empty",
+      "nonempty",
+      "repeated"
+    ],
+    "eager_mask_dtype": "torch.bool",
+    "three_cases_eager_equal": true,
+    "original_bool_JIT_and_fvcore_fail": true,
+    "int1_JIT_and_original_fvcore_success": true,
+    "profiler_handlers_original_three_SHA": {
+      "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+      "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+      "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+    },
+    "whole_model_native_GPU_or_resources": "NOT_RUN_BY_THIS_CPU_TEST",
+    "no_backward_or_optimizer": true
+  },
+  "original_failure_retained": "Original BEC9b678 resource candidate remains terminal rc1/false execution_completed and frozen original two-smoke results remain historical. This source compatibility finding is not a revised-model TRAIN/resource/admission PASS and does not retrospectively bless original trace failure.",
+  "source_version_boundary": "No new isolated R1 source-version proof was present at this review. Do not infer a commit/parent or clean worktree from this null-version preparation. A separately saved compatible actual source version must be bound to new native/runtime/checker metadata and tested against that exact version; never relabel old9b678 raw.",
+  "current_human_resource_boundary": "User explicitly withdrew GPU1 during this turn. No future GPU1 compute is permitted. Existing historical GPU1 diagnostics are retained with original device/time. This R1 review is CPU/private-source only and supplies no fresh GPU use authority; any later real gates must use currently authorized GPU0 with a fresh valid owner/resources/assets/version/locks/lease.",
+  "deadline_boundary": "Do not extend the45eb original05:52:30.746713UTC deadline. If a frozen native entry requires >1020s remaining and that margin is absent, leave the revised native/resource checks for a future freshly owned tick. Do not override the entry/time guard.",
+  "limitations": [
+    "Reviewer read saved same-environment CPU evidence and AST/source/filehashes only; no Torch/tensor/software suite/model/SSH/GPU/Git/helper/shared mutation executed.",
+    "Mask-line standalone trace demonstrates the preregistered compatibility prediction for3 cases, not complete model tracing/performance, exact gradient equality or efficacy. Original native2TRAIN/common/data/12block/resource/10G/15% controls must still run anew on the revised exact version.",
+    "Read only original source/preparation/worker hashes and current failure, not old held routes, authorizations, huge checkpoints or other projects."
+  ]
+}

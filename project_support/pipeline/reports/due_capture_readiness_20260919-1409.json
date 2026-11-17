@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "scope": "Capacity-only retry plus a CPU-side correction to the permutation family-wise endpoint; no model forward, native capture, training, queue mutation, or efficacy claim",
+  "generated_at": "2026-09-19T14:09:00+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T14:08:00+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "memory_total_mib": 81559,
+    "memory_used_mib": 62483,
+    "memory_free_mib": 18597,
+    "process_count_on_gpu": 2,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_memory_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_memory_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_snapshot_progress": {
+    "observed_at": "2026-09-19T14:07:10+08:00",
+    "source": ".tick_context preflight",
+    "epoch": 22,
+    "total_epochs": 50,
+    "best_miou": 0.491,
+    "no_improve": 1,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T14:08:00+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. Native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T15:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "attempted_alternatives": [
+    "Queried the live GPU7 process table and memory without touching any process.",
+    "Audited the existing permutation-calibration family-wise summary instead of repeating an earlier capacity-only check.",
+    "Corrected the Holm family-wise endpoint from all endpoints rejecting (max) to any endpoint rejecting (min).",
+    "Added a regression test and reran the 300-simulation by 999-draw calibration.",
+    "Kept native capture unlaunched because the frozen producer gate still requires an open GPU slot."
+  ],
+  "native_capture_launched": false,
+  "static_research_progress": {
+    "status": "corrected_and_retested_this_tick",
+    "finding": "The previous family-wise endpoint required all six adjusted p-values to reject, which measured joint rejection rather than family-wise any rejection. The corrected min rule gives an honest null estimate of 10/300 and unchanged planted signal detection of 300/300.",
+    "permutation_calibration": {
+      "report": "pipeline/reports/referent_permutation_calibration_20260919-1409.json",
+      "report_sha256": "a6648ebc4412349296c475316ea4ab4b183d94e74fc1b8092e4ea7999d8726a2",
+      "source": {
+        "path": "scripts/referent_permutation_calibration_20260919.py",
+        "sha256": "c6785f55341d82e70160a5c7b5eeeb758107714b1a4f83aa4b4e43ad6814960b"
+      },
+      "test": {
+        "path": "scripts/test_referent_permutation_calibration_20260919.py",
+        "sha256": "e460bf3354969a90fef42dfffcdddfe60c7c1bc9340c071359d581433533fb72",
+        "tests_passed": 4,
+        "tests_failed": 0
+      },
+      "null_familywise_any": {
+        "rejections": 10,
+        "simulations": 300,
+        "rejection_rate": 0.03333333333333333,
+        "rejection_rate_ci95": {
+          "low": 0.01820494733885481,
+          "high": 0.06026182580405482
+        }
+      },
+      "planted_signal_familywise_any": {
+        "rejections": 300,
+        "simulations": 300,
+        "rejection_rate": 1.0,
+        "rejection_rate_ci95": {
+          "low": 0.9873570287754538,
+          "high": 0.9999999999999998
+        }
+      },
+      "decision": {
+        "status": "passed",
+        "referent_power_passed": true,
+        "objectness_false_positive_passed": true,
+        "familywise_null_upper_ci95": 0.06026182580405482,
+        "consequence": "Permutation p-values may be reported as calibrated diagnostics on native rank-eligible rows."
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-09-17T03:10:51+08:00",
+  "scope": "Targeted server-6 GPU7 and PIRS run-log check for the due frozen-capture gate.",
+  "queue_task": "M197-PIRS",
+  "pid": 1134192,
+  "pid_alive": true,
+  "training_progress": {
+    "epoch": 10,
+    "total_epochs": 50,
+    "step": 1693,
+    "total_steps": 4686,
+    "best_miou": 0.463
+  },
+  "gpu7_processes": [
+    {
+      "pid": 1134192,
+      "owner": "cluster_project",
+      "used_memory_mib": 19948
+    },
+    {
+      "pid": 3827570,
+      "owner": "foreign",
+      "used_memory_mib": 42488
+    }
+  ],
+  "process_count": 2,
+  "capacity_gate_open": false,
+  "native_execution_completed": false,
+  "static_progress": {
+    "artifact": "pipeline/reports/pirs_preregistered_contract_20260917.json",
+    "artifact_sha256": "8cf0115393b353d87d9f8f9638212dbe9ebe5880983ffb37f83dab6c5eb5625d"
+  },
+  "blocker": "GPU7 still has the running PIRS process and one foreign process.",
+  "retry_after": "2026-09-17T04:07:00+08:00",
+  "unblock_condition": "Fewer than two GPU7 processes and sufficient measured free memory.",
+  "limitations": [
+    "Process count is not model efficacy evidence.",
+    "The existing sixteen-row legacy capture is not a strict terminal paired capture.",
+    "No native capture, training launch, sync, admission, or queue mutation occurred."
+  ]
+}

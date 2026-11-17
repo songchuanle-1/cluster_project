@@ -1,0 +1,125 @@
+{
+  "owner": {
+    "token": "51fe22452ecf43a390b8cfa6fddbc733",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T23:11:05.069988+00:00",
+    "deadline_at": "2026-11-10T00:11:05.069988+00:00",
+    "context_sha256": "482c41f2754c8b9c3b32d723704c68b51226b580d9df3580089980943a2a9b8b",
+    "pending_sha256": "f5c034a4857e02d924d8af70181e8cbc3a7326853317a733843068a2f96993d4"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "recorded_at": "2026-11-10T00:05:40.504090+00:00",
+  "passed": true,
+  "material_concerns": [],
+  "scope": "ACTUAL_V4_DATASET_IMPORT_CAPABILITY_BIND_AUDIT_BLOCK_ONLY",
+  "actual_sha256": "166eed0ed603c04591db6c2776e95149a7603f33f1fac216360fb291c4e717ea",
+  "frozen_sha256": "c13d17d52c13c94efc8180affca0a4d94223a00981fccb3d4a59e0db637e3004",
+  "source_review_sha256": "1a61d0906d451a25021ca9233da461d4a136a97bca226b79a7aa6ccfd5521d24",
+  "classification": "DIAGNOSTIC_IMPORT_AUDIT_OVERRESTRICTION_NO_DATASET_CONSTRUCTOR_OR_NATIVE_WORKER_OUTCOME",
+  "outer_terminal_rc": 0,
+  "carrier": {
+    "pid": 3334242,
+    "start_ticks": "188557643",
+    "certainty": "terminal",
+    "returncode": 3
+  },
+  "block": {
+    "stage": "audit_blocked",
+    "pid": 3334242,
+    "status": "BLOCKED_AUDIT_EVENT",
+    "phase": "dataset_import",
+    "audit_event": "socket.bind",
+    "target": "<socket.socket fd=19, family=AddressFamily.AF_INET6, type=SocketKind.SOCK_STREAM, proto=0, laddr=('::', 0, 0, 0)>",
+    "guarded_file_identity_after": {
+      "checked": 23,
+      "unchanged": true,
+      "changed_first6": []
+    },
+    "stack": [
+      {
+        "file": "<frozen importlib._bootstrap>",
+        "line": 1006,
+        "function": "_find_and_load_unlocked"
+      },
+      {
+        "file": "<frozen importlib._bootstrap>",
+        "line": 688,
+        "function": "_load_unlocked"
+      },
+      {
+        "file": "<frozen importlib._bootstrap_external>",
+        "line": 883,
+        "function": "exec_module"
+      },
+      {
+        "file": "<frozen importlib._bootstrap>",
+        "line": 241,
+        "function": "_call_with_frames_removed"
+      },
+      {
+        "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/urllib3/util/connection.py",
+        "line": 137,
+        "function": "<module>"
+      },
+      {
+        "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/urllib3/util/connection.py",
+        "line": 127,
+        "function": "_has_ipv6"
+      },
+      {
+        "file": "<string>",
+        "line": 208,
+        "function": "audit"
+      }
+    ]
+  },
+  "readonly_helper": {
+    "pid": 3334362,
+    "start_ticks": "188557710",
+    "argv": [
+      "uname",
+      "-p"
+    ],
+    "returncode": 0
+  },
+  "all23guarded_file_identities_unchanged": true,
+  "private_tmp_after": {
+    "policy": {
+      "path": "/tmp/m234_constructor_51fe2245_okyoadnw",
+      "identity": [
+        66308,
+        92555596
+      ],
+      "uid": 1001,
+      "mode": "0700"
+    },
+    "entries_first16": [
+      {
+        "name": "tmpkinvxxgb",
+        "directory": true,
+        "symlink": false,
+        "bytes": 4096
+      }
+    ],
+    "entries_count_lower_bound": 1,
+    "listing_complete": true,
+    "recursive_cleanup": false,
+    "removed_empty": false,
+    "own_residue_preserved": true
+  },
+  "constructor_complete": false,
+  "interpretation": [
+    "Exactcurrentowner/intent/review/frozen/actualhashchain andallfrozenfilebytes match. Onev4execution isterminal; authenticatedreadonlyhelperstarted andterminalPIDmatch,returncode0; nouncertainhelperrecord inferred.",
+    "Torch/Gorilla import+originalConfig.fromfile andYAML checks progressed sufficiently toenterdataset_import. Auditthendeniedsocket.bind aturllib3/util/connection.py _has_ipv6 importcapabilityprobe. Itisdagnosticharnessnetworkrestriction, notdatasetcache/nativeworkerfault.",
+    "Bindaddressisnotrecorded: audit target isonlystr(arguments[0]) forsocket.bind, so donotassertobservedloopbackaddress,port,remoteendpointorsuccessfulnetworkbind. Anyfutureexemptionwouldneedexactauthenticsource/arguments; no suchnewlaunchthislease.",
+    "No original_dataset_constructor/constructor_result/cachekeycoverage, sample/PTH/DataLoaderworker/model/loss/training orhistoricalfault reproduction. Constructorcachecoverage remainsUNKNOWN.",
+    "OwnTMPoperation/residue iswithinverifiedprivateUID1001/mode0700/devino scope; boundedlistingdeclaredretainedresidue. Rootwasnotempty andnotrecursivelydeleted. All23source/cache/asset/platform/uname identities unchanged. Noexisting/foreign/protectedtask cleanup orsignals occurred."
+  ],
+  "limitations": [
+    "Guardedidentitymatching isnotfreshcontentrehash andPython-audit coverageisnotabsoluteallnative-sideeffectproof. NoGPUorworker-budget/nativeclearance isprovided.",
+    "NoV5/traceexecution shouldstartinthislease perrootclosureinstruction. Preserveallv1-v4harnessfailuresandprivateownresidue withtheiroriginalartifacts; historicalrootcause remainsUNKNOWN."
+  ],
+  "historical_worker_fault": "UNKNOWN",
+  "reviewer_actions": "LOCAL_JSON_HASH_FROZEN_SOURCE_ONLY_NO_SSH_TORCH_NATIVE_GPU_DATAEXECUTION_OR_SHAREDLEDGER_MUTATION"
+}

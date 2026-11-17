@@ -1,0 +1,82 @@
+{
+  "owner": {
+    "token": "abb177b593654188aa78ca4196688dc5",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-05T11:05:11.386845+00:00",
+    "deadline_at": "2026-11-05T12:05:11.386845+00:00",
+    "context_sha256": "2f8cbe9b50330d57dbaaddb2698777f393d51171fd9c496c9834402cec876768",
+    "pending_sha256": "b56a0651b5b633a042808e3a029e71a5e54d094ebb4cd6c28aedb65fb56cc47a"
+  },
+  "recorded_at": "2026-11-05T11:24:24.415935+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=12",
+    "songcl@192.168.1.115",
+    "bash -lc 'source /data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh && conda activate project_cluster && CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 python -B -'"
+  ],
+  "returncode": 0,
+  "observation": {
+    "observed_at": "2026-11-05T11:24:24.751949+00:00",
+    "hostname": "dl04-MS-7E06",
+    "pid7603_exists": false,
+    "rows": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nec/20261104_230851/best.pth",
+        "size": 888939156,
+        "sha256": "d524587d4abc371af2332b60e49eae94ca6bc9386f1040fcad2d8ae5a09d8071",
+        "mtime_ns": 1793854920190051342,
+        "checkpoint_top_keys": [
+          "meta",
+          "model",
+          "optimizer",
+          "scheduler"
+        ],
+        "native_meta": {
+          "epoch": 13,
+          "best_miou": 0.49454113841056824,
+          "epochs_no_improve": 0
+        }
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nec/20261104_230851/last.pth",
+        "size": 888939156,
+        "sha256": "ad8ef9945ee58e67cdfa588da05ad1f7ef93febda78297c4d94383f3ab452215",
+        "mtime_ns": 1793873377225902972,
+        "checkpoint_top_keys": [
+          "meta",
+          "model",
+          "optimizer",
+          "scheduler"
+        ],
+        "native_meta": {
+          "epoch": 22,
+          "best_miou": 0.49454113841056824,
+          "epochs_no_improve": 9
+        }
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nec/20261104_230851/events.out.tfevents.1793804931.dl04-MS-7E06",
+        "size": 23522190,
+        "sha256": "1096165eda6dac157ba00699e4570d31366167e70614a5948d0cde613e855000",
+        "mtime_ns": 1793875424031844149
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nec/20261104_230851/20261104_230851.log",
+        "size": 11136409,
+        "sha256": "0df16c650a82e3a1fb90ab224ea8b5df718734188262e70afb24108cd25f7119",
+        "mtime_ns": 1793875423673837956
+      }
+    ],
+    "torch_cuda_initialized": false,
+    "GPU_computation": false,
+    "signals_sent": false,
+    "mutations": false,
+    "checkpoint_note": "Native early-stop break is before save, so last checkpoint is not epoch23."
+  },
+  "stderr_summary": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n"
+}

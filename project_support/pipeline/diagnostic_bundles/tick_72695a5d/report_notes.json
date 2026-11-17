@@ -1,0 +1,18 @@
+{
+  "actions": [
+    "本轮快照北京时间2026-10-19 09:17:16，design，原始表格的运行0/队列0仅指该preflight时点；以下记录随后发生的授权和启动。",
+    "用户在所属会话明确回复授权：仅CPA-R1一次固定配置探索性训练。授权绑定八个已测模型文件及一个配置、server4物理GPU0、seed1999/batch2/workers4/epochs50/max_iters70；不是科学PASS或通用门槛放宽。",
+    "限定提交c31f45994f8d68b78dfe8bb4fef3f9aaefabe86e，九个Git blob与已测字节哈希逐项一致；远端采用安全快进，不reset/clean/stash，不带入PDC/BCCA脏文件。只适配候选自身部署路径。",
+    "M204-CPA于北京时间09:29:58单次启动，09:30:53已验证原生Train[1/50]从0增长至107，进程存活、目标UUID正确、无Traceback或不稳定损失跳步；最新状态见final_training_state.json。没有重跑上轮诊断和资源测试。",
+    "训练使用原始backbone而非M95头部，原生AdamW/PolyLR和训练循环不变；外层运行时在任何CUDA初始化前核对主机/GPU空闲，并全程持有training/diagnostic/exclusive三锁，禁止共享、驱逐、reset及重复启动。",
+    "训练已登记queue/running/experiments并标注人工探索授权、launch_verified=true、scientific_admission=false。旧diagnosis/semantic controls未通过及revision1 inconclusive全部保留。当前没有新验证集mIoU结果，提升未知。",
+    "其余四个候选到期只核对授权作用域：此次授权未恢复旧监督主线，维持原有人工作用域冻结并按四小时窗口复查；不是显卡阻塞，不为填槽复活旧路线或生成替代变体。收尾枚举external_resource_blocked在本轮具体指人工授权冻结，明细已留档。",
+    "收据用量为begin至收据写入的本地可见窗口，排除前置读取和最终回复；当前统计未知，以收据为准，不把缓存重复相加或用量当账单。实际产出为一份限定授权、一项九文件提交、一次安全同步和一次已核实训练启动，不是新增科学结论。",
+    "报告生成时尚未声称本轮收尾完成。finish及租约释放另行核验；远端训练获准跨tick继续，不在编排收尾时终止。"
+  ],
+  "decisions": [
+    "仅执行已获授权的M204-CPA；所有其他候选的准入、禁止路线、资源卡号、调度和全局目标不变，不改共享checker。",
+    "按原生ScanReferVAL观察首次验证和后续收敛，再按既有baseline/champion、场景相关性和相对资源条件评价；在足够证据前不声称新颖性或收益。",
+    "正常收尾只表示操作记录完整，不表示科学验证通过；若真实校验失败，保存证据并abort，不停止已授权远端训练。"
+  ]
+}

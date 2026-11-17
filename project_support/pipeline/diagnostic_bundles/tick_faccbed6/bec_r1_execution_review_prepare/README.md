@@ -1,0 +1,21 @@
+# BEC R1 read-only actual-result checker preparation
+
+This private checker prepares review of future actual BEC implementation-revision1 results. It does not execute a model, SSH, a GPU operation, training, profiler, admission, or dispatch. At preparation there are no actual R1 native or resource results. No standard PASS, receipt, queue entry, execution binding, manifest, or lease is created here.
+
+Scientific source026c is separately proven as a single child of tested CTS4e8 by immutable Git operation proof617203. Source preparation2ef remains an immutable unversioned declaration. The prior source9b, original source preparation2d, disabled native322c, old failed resource raw and successful original smoke remain historical. Review972c has implementation/CPU scope and is not a post-Git independent review of026c.
+
+`review_bec_r1.py` derives from frozen old BEC checker1aace. Exactly15 named functions retain identical AST: need, finite, digest, read, hash_string, tensor, gradients, common, named_hashes, resources, plan_metadata, bec_record, required_weight_blocks, smoke, and review_payloads. The original 6555 protocol, five module gradients/updates, twelve aggregate partition gradients/updates, paired original two TRAIN batches, common-parameter scope, full unsupported operators, original resource protocol, 10G budget and existing15% memory condition are unchanged. Original per-call zero gradients remain legal where already legal; no new amplitude, equality, sampling, performance or dependency gate is added. An inherited invalid-identity diagnostic string in review_payloads retains its old labels solely as part of the unchanged AST; comparisons use the R1 globals.
+
+Metadata wrappers change to source026c / parent and expected runtime4e8, original package `_bec`, exact R1 source preparation2ef and source proof617203, local execution directory `bec_r1_execution`, remote stage `bec_r1_<original-token8>_gpu0`, and physicalGPU0 only. Directory review retains exact original six owner fields, fixed original deadline, binding/manifest/lease reconstruction, exact requests, terminal results, original direct Popen wait/result hashes, actual source identity and strict resolver checks. It never renews a lease. Empty early argv remains an unobserved sample, not independent identity proof for future signals.
+
+The added revision_lineage function hashes immutable preregistration3fa782, CPU compatibility390ac5, source preparation2ef and source proof617203. It compares only immutable preregistration fields. Mutable current revision result/evidence never determine whether raw evidence is true: the read-only checker remains usable after a real result changes pending to passed or failed. Execution-before-pending checks belong to the operational adapter. Old9b raw cannot be relabelled026c. CPU trace compatibility is not a native/resource PASS.
+
+The external_packet_contract is an exact catalog of the newly frozen operational package. Its static_release field names the future production release and the expected bytes from release_template; the file and current candidate external anchors must actually exist and match before a directory review can succeed. The catalog does not authorize execution or claim that release exists. Source026c/native4e8 and currentGPU0-only resource grant94075 are independent from any original owner. No prepared token becomes an active lease.
+
+Software checks are limited to new binding regressions and named AST comparisons. Populated old-identity raw/manifest/candidate modifications are synthetic in-memory software fixtures, not native observations. No synthetic actual request/result/binding/manifest/lease files are saved. No original98-case suite is rerun. Actual missing four results are rejected. Scientific efficacy, R1 native gradients/updates, original resource measurement and all deployment outcomes remain NOT_RUN/UNKNOWN until a later authorized fresh execution.
+
+Future local review usage (owning root only supplies actual completed evidence):
+
+    python -B review_bec_r1.py --project D:/project/cluster_project --execution-dir <actual-tick>/bec_r1_execution --output <new-private-review.json>
+
+The only successful semantic review status is RAW_SEMANTICS_VALIDATED_NOT_ADMISSION. Standard artifacts, receipt and formal launch remain separate owning-root operations.

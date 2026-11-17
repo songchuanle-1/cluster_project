@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-22T05:21:18+08:00",
+  "scope": "Event-mode bounded evidence consolidation; no model forward, training launch, admission, queue mutation, or efficacy claim.",
+  "source_evidence": [
+    {
+      "path": "pipeline/headless/.tick_context.json",
+      "sha256": "f6e1bf22d6229c05ef0bff7d3aaf6e118e8c3e072d3e1702e8535d5f50582b72"
+    },
+    {
+      "path": "pipeline/reports/same_target_description_consistency_source_audit_20260917-1207.json",
+      "sha256": "6b38e54cb76e3dd56a5828d737e41d7a46027d585690a40aaafc1ec74f71d350"
+    },
+    {
+      "path": "pipeline/reports/modality_language_alignment_20260916.json",
+      "sha256": "09d20bfbef97d32ac70add2e9355dad4f0486fc9e0b0cbf45ec0ddbc61a5977c"
+    },
+    {
+      "path": "pipeline/reports/modality_mean_summary_20260916.json",
+      "sha256": "241f21dd38c8e2e6c3d3c4ef546ed5be54459b23e0c81ba181ccbffd6cb7d921"
+    },
+    {
+      "path": "pipeline/reports/modality_identity_claim_audit_20260916.json",
+      "sha256": "a8e8c72e6e958c27e11a092123d091e33d9ec87dd0d6492aa0184214d5e11d96"
+    },
+    {
+      "path": "pipeline/reports/referent_control_coverage_20260918-1618.json",
+      "sha256": "5e81df958d29f6dacd042ef2e521655c0abbd464121879a742ae3c0e8148afe0"
+    },
+    {
+      "path": "pipeline/reports/design_admissibility_audit_20260919-0510.json",
+      "sha256": "d299278449a61be664d3203586f5767e4f4d7b8e7b5b3a8e3ef8f956d385069d"
+    }
+  ],
+  "resolutions": [
+    {
+      "id": "same-target-description-grounding",
+      "stage": "rejected",
+      "disposition": "rejected_before_design",
+      "reason": "The same-target alternate-description set is already the explicit positive-supervision unit in TrackRef3D, and ViewRefer already constructs geometry-consistent alternate descriptions. The fixed sample has only 8 observable success disagreements, so the diagnostic does not create a distinct causal unit.",
+      "next_action": "Do not reopen under same-target grounding, agreement, invariance, variance, multi-positive, or consistency naming.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/same_target_description_consistency_source_audit_20260917-1207.json",
+          "sha256": "6b38e54cb76e3dd56a5828d737e41d7a46027d585690a40aaafc1ec74f71d350"
+        },
+        {
+          "path": "pipeline/reports/same_target_summary_20260916_metadata_corrected.json",
+          "sha256": "656a6a8058b989ea241a359535da4ef38fd59eb9ea05da20343e04da00f6b76e"
+        }
+      ]
+    },
+    {
+      "id": "referent-query-selection",
+      "stage": "rejected",
+      "disposition": "diagnosis_complete_not_admissible",
+      "reason": "Positive-only restriction confirms query selection is the actionable bottleneck, but selector and candidate-initialization changes are explicitly outside the research main line. Keep the diagnostic finding without treating another selector as a mechanism.",
+      "next_action": "Retain selection as diagnostic context only. Do not create LGQS, selector, candidate-initialization, or renamed query-selection variants.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/design_admissibility_audit_20260919-0510.json",
+          "sha256": "d299278449a61be664d3203586f5767e4f4d7b8e7b5b3a8e3ef8f956d385069d"
+        },
+        {
+          "path": "pipeline/reports/referent_control_coverage_20260918-1618.json",
+          "sha256": "5e81df958d29f6dacd042ef2e521655c0abbd464121879a742ae3c0e8148afe0"
+        }
+      ]
+    },
+    {
+      "id": "input-modality-distinguishability",
+      "stage": "rejected",
+      "disposition": "diagnosis_complete_not_admissible",
+      "reason": "The fixed native sample shows weak 2D language-instance alignment and no physical correspondence supplied by textual distinctions; broad modality perturbations harm more expressions than they rescue. Fusion and relation-conditioned identity transport are already closed or prior art, so separating inputs is not itself a mechanism.",
+      "next_action": "Keep the measurements as diagnostic evidence. Do not reopen under modality preservation, cancelation, fusion, gating, or identity transport.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/modality_language_alignment_20260916.json",
+          "sha256": "09d20bfbef97d32ac70add2e9355dad4f0486fc9e0b0cbf45ec0ddbc61a5977c"
+        },
+        {
+          "path": "pipeline/reports/modality_mean_summary_20260916.json",
+          "sha256": "241f21dd38c8e2e6c3d3c4ef546ed5be54459b23e0c81ba181ccbffd6cb7d921"
+        },
+        {
+          "path": "pipeline/reports/modality_identity_claim_audit_20260916.json",
+          "sha256": "a8e8c72e6e958c27e11a092123d091e33d9ec87dd0d6492aa0184214d5e11d96"
+        }
+      ]
+    },
+    {
+      "id": "referent-supervision-axis",
+      "stage": "open_no_candidate",
+      "disposition": "open_axis",
+      "reason": "The supervision axis remains open under USER-SCOPE-B, but no candidate currently passes the causal-unit, novelty, control, and constraint gates.",
+      "next_action": "Use the normal design-mode admission chain before admitting any successor. Do not fill capacity with a PIRS rename or tuning-only variant.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/design_admissibility_audit_20260919-0510.json",
+          "sha256": "d299278449a61be664d3203586f5767e4f4d7b8e7b5b3a8e3ef8f956d385069d"
+        }
+      ]
+    },
+    {
+      "id": "referent-causality-audit",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "reason": "The fail-closed target-rank evaluator and native projection are implemented, but the complete 123-expression native candidate-rank capture has not run. The current preflight reports server-6 unreachable.",
+      "next_action": "When server-6 is reachable, verify code/data identity and GPU7 capacity, run the frozen native capture, project all rank-eligible expressions, and evaluate without imputation.",
+      "blocker": "server-6 was unreachable in the 05:07 monitor preflight.",
+      "retry_after": "2026-09-22T06:20:00+08:00",
+      "unblock_condition": "Server-6 SSH succeeds and the allowed GPU7 has measured capacity without evicting foreign work.",
+      "alternatives_attempted": "The read-only monitor preflight attempted reachability. The local projection/evaluator is already complete, and no unauthorized host fallback exists.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/referent_target_rank_evaluator_20260919.json",
+          "sha256": "aa763041446ffd64bdef3b60e5a437d1d468d50f7e5837d18f78e005b937d652"
+        },
+        {
+          "path": "pipeline/reports/referent_native_expression_producer_20260919.json",
+          "sha256": "cd96462574a2b302d73b98c94803f2814a24ebc0b6ee0809f5b171a986c9b874"
+        }
+      ]
+    },
+    {
+      "id": "referent-discrimination",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "reason": "Exact same-class controls exist, but model-confusability and target rank require the frozen native candidate-rank capture. The current fixed support capture covers only 16 expressions and lacks the required target-independent objectness axis.",
+      "next_action": "After the native capture unblocks, report target and same-class candidate ranks on the complete predeclared cohort with ties and missing coverage handled by the frozen fail-closed contract.",
+      "blocker": "server-6 was unreachable in the 05:07 monitor preflight.",
+      "retry_after": "2026-09-22T06:20:00+08:00",
+      "unblock_condition": "Server-6 reachable, allowed GPU7 capacity measured, and complete same-forward candidate-rank evidence available.",
+      "alternatives_attempted": "Reviewed the existing fixed-support evidence locally; it covers only 16 expressions and lacks the required target-independent objectness axis.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/referent_control_coverage_20260918-1618.json",
+          "sha256": "5e81df958d29f6dacd042ef2e521655c0abbd464121879a742ae3c0e8148afe0"
+        },
+        {
+          "path": "pipeline/reports/referent_target_rank_evaluator_20260919.json",
+          "sha256": "aa763041446ffd64bdef3b60e5a437d1d468d50f7e5837d18f78e005b937d652"
+        }
+      ]
+    },
+    {
+      "id": "instance-identity-representation",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "reason": "The archived identity-loss proof was rejected, not the underlying hypothesis. A valid test needs paired raw/projected/fused/final features on identical physical support, including explicit controls.",
+      "next_action": "Run the predeclared same-forward feature and candidate-rank capture before proposing any representation or identity-loss structure.",
+      "blocker": "server-6 was unreachable in the 05:07 monitor preflight.",
+      "retry_after": "2026-09-22T06:20:00+08:00",
+      "unblock_condition": "Server-6 reachable and complete same-forward identity evidence captured against one frozen code/config/checkpoint identity.",
+      "alternatives_attempted": "The archived identity-loss proof was independently rejected; the remaining hypothesis cannot be tested on the incomplete archived rows.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/modality_identity_claim_audit_20260916.json",
+          "sha256": "a8e8c72e6e958c27e11a092123d091e33d9ec87dd0d6492aa0184214d5e11d96"
+        },
+        {
+          "path": "pipeline/reports/modality_identity_separability_20260916.json",
+          "sha256": "61660620a3f00116fb02c0ed4f8199db4ae624c291d0aca4e5b3005abd63ba6a"
+        }
+      ]
+    },
+    {
+      "id": "modality-identity-preservation",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "reason": "Archived modality interventions prove that both paths affect grounding, but they are GT perturbations rather than a same-forward identity-preservation control. The current identity-loss proof is rejected.",
+      "next_action": "Capture paired modality endpoints on exact physical support and test preservation with same-class controls before design.",
+      "blocker": "server-6 was unreachable in the 05:07 monitor preflight.",
+      "retry_after": "2026-09-22T06:20:00+08:00",
+      "unblock_condition": "Server-6 reachable and the same-forward modality/identity control chain completes with hashed inputs and native backward evidence.",
+      "alternatives_attempted": "Reviewed the completed GT-based modality interventions locally; they are not a same-forward identity-preservation control.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/modality_mean_summary_20260916.json",
+          "sha256": "241f21dd38c8e2e6c3d3c4ef546ed5be54459b23e0c81ba181ccbffd6cb7d921"
+        },
+        {
+          "path": "pipeline/reports/modality_identity_claim_audit_20260916.json",
+          "sha256": "a8e8c72e6e958c27e11a092123d091e33d9ec87dd0d6492aa0184214d5e11d96"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "due_items_reviewed": 8,
+    "rejected": 3,
+    "blocked": 4,
+    "open_no_candidate": 1,
+    "queue_mutated": false,
+    "training_launched": false
+  },
+  "next_action": "No due item remains actionable in event mode. External blockers record the required server-6 unblock condition; a later design-mode tick may review the open supervision axis without filling capacity with an inadmissible variant."
+}

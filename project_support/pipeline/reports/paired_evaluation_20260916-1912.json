@@ -1,0 +1,190 @@
+{
+  "scope": "Executed CPU tooling and control audit; not native validation",
+  "tests_passed": 8,
+  "archive_self_comparison": {
+    "expressions": 16,
+    "scenes": 4,
+    "scene_rates": {
+      "scene0031_00": {
+        "expressions": 4,
+        "baseline": 0.75,
+        "candidate": 0.75
+      },
+      "scene0315_00": {
+        "expressions": 4,
+        "baseline": 0.25,
+        "candidate": 0.25
+      },
+      "scene0505_00": {
+        "expressions": 4,
+        "baseline": 0.25,
+        "candidate": 0.25
+      },
+      "scene0673_00": {
+        "expressions": 4,
+        "baseline": 0.75,
+        "candidate": 0.75
+      }
+    },
+    "scene_balanced_delta": 0.0,
+    "scene_bootstrap_percentile_95": [
+      0.0,
+      0.0
+    ],
+    "fixed": 0,
+    "broken": 0,
+    "limitations": [
+      "Superpoint success at IoU > .5 is not goal mIoU.",
+      "Scene bootstrap is descriptive and unstable with few scenes.",
+      "Matching integer support alone does not certify identical transforms.",
+      "Caller must freeze sample, augmentation and model checkpoint identities.",
+      "Self-comparison validates tooling only; not treatment efficacy."
+    ]
+  },
+  "control_expression_manifest": [
+    {
+      "scene": "scene0110_00",
+      "ann_id": 5,
+      "node_ids": [
+        3
+      ]
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 7,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0416_00",
+      "ann_id": 74,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0420_00",
+      "ann_id": 98,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0421_00",
+      "ann_id": 75,
+      "node_ids": [
+        2
+      ]
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_ids": [
+        2,
+        3
+      ]
+    }
+  ],
+  "control_nodes": 7,
+  "unique_control_expressions": 6,
+  "missing_control_expressions": [
+    {
+      "scene": "scene0110_00",
+      "ann_id": 5,
+      "node_ids": [
+        3
+      ]
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 7,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0416_00",
+      "ann_id": 74,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0420_00",
+      "ann_id": 98,
+      "node_ids": [
+        1
+      ]
+    },
+    {
+      "scene": "scene0421_00",
+      "ann_id": 75,
+      "node_ids": [
+        2
+      ]
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_ids": [
+        2,
+        3
+      ]
+    }
+  ],
+  "remote_observation": {
+    "timestamp": "2026-09-16T19:10:00+08:00",
+    "ssh_recovered": true,
+    "gpu": 7,
+    "free_mib": 18607,
+    "used_mib": 62473,
+    "utilization_percent": 100,
+    "pirs_pid": 1134192,
+    "foreign_pid": 3827570,
+    "foreign_command": "das_foundation/scripts/train_das_mae.py",
+    "native_epoch": 8,
+    "native_steps": [
+      4059,
+      4070
+    ],
+    "capture_launched": false
+  },
+  "native_blocker": {
+    "blocker": "GPU7 occupied by PIRS and foreign training; no third process authorized.",
+    "retry_after": "2026-09-16T20:07:00+08:00",
+    "unblock_condition": "GPU7 below two processes and sufficient measured free memory.",
+    "alternatives_attempted": "Executed CPU evaluator, eight tests, self-check and control audit."
+  },
+  "evidence": [
+    {
+      "path": "pipeline/reports/native_support_capture_20260916-1517.json",
+      "sha256": "41d27702be33f6d8db27ff195359a52863149efd7649408a3b62a40cbd776de8"
+    },
+    {
+      "path": "pipeline/reports/evaluation_contract_20260916-1310.json",
+      "sha256": "399f71466892c8b57a7762fe28a001b993aa62a6d6242ff0c787d8c350ac940d"
+    },
+    {
+      "path": "scripts/paired_capture_evaluation_20260916.py",
+      "sha256": "bc5d99bc3ab4c656c84b898624246890ed3d9fa74a5727746e98b3c8b0cb74d6"
+    },
+    {
+      "path": "scripts/test_paired_capture_evaluation_20260916.py",
+      "sha256": "785e0d0ce1c3199c4719625a1988339ce0bb5c8d91070690555ee5adc4905c3e"
+    },
+    {
+      "path": "scripts/persist_paired_evaluation_20260916.py",
+      "sha256": "0ebab337e2d8d1bec7bc9937dbafde404c1dbd61170147fecccb664e18b5227d"
+    },
+    {
+      "path": "pipeline/decisions/20260916-191100_other.md",
+      "sha256": "5d1452f0fbe07b486d7d5c6f4a0bfe9e9d0672dcc7bd8e2e7be2a8e09d13bc37"
+    }
+  ],
+  "limitations": [
+    "No expanded sample, native semantic validation or PIRS efficacy.",
+    "Seven nodes correspond to six expressions, not seven independent controls.",
+    "Support indices cannot certify identical coordinate transformations."
+  ]
+}

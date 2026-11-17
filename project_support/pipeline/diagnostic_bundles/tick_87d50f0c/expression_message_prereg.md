@@ -1,0 +1,13 @@
+# Expression-specific point-message diagnosis
+
+- StableID: m95-expression-specific-point-message. Existing trainedM95 only;no newmodel or training variant.
+- Information gap: Does the hierarchical POINT-side message carry target-expression-specific task information beyond generic same-scene context,while the original finalquery is fixed?
+- Falsifiable prediction: on original matched main-target queries,substituting the same-scene message from a different-target expression increases native mask-probability absolute error relative to the expression's own message. Positive scene-balanced paired difference is the predicted direction,not a tuned cutoff.
+- This differs from scale deletion/mixed-cell responsibility: allfine/middle/coarse remain together,no boundary grouping,no new scale gate. It is not a renamed proposal for language routing/gating/residual/supervision,rank/pooledmomentblindness,or CPA key/attention tuning.
+- Use the existing frozenM95epoch16 TRAINcohort and source/config/checkpoint/data hashes. FirstCPUtest uses saved2scene/8expression prefix only. No task effect or populationclaim from message distances/cotangents.
+- Donor selection is fixed before task outcomes: within each original scene,cyclic expression order,choose the first subsequent expression with a different original object_id. Missingdifferenttarget => unknown. Do not choose donor by loss/features/results.
+- Ownidentity,donorthenundodonor,bitwiseoriginalquery,superpointvalidity/pointorder and native target-index controls must pass unchanged1e-6 before interpreting any task effect. Same-scene identity alone does not prove physicalpointordering;must check originalscene/coordinates/assignments.
+- Hold recipient original inst_feats,query,language suffix,targets,matched queryselection,allweights and positions. Swap only the captured posthierarchy message before the unchanged native encoder gate/ILA/prediction_head. No donorquery/no targetrelabel/no refit.
+- Freeze finalquery and exactnative prediction_head,not proxy einsum. Primaryabs(sigmoid(native_mask_logit)-originalnativebinarytarget). Meanmatchedquerieswithinexpression,expressionswithinscene,sceneequally;reportsamplecounts andmissinggroups.
+- A null/inverted effect is not permission to inject arbitrary language guidance or reopen bannedroutes. It answers this conditionalinformation question only;an effective deployment mechanism andbenefit remainunproved.
+- CPU/source feasibility may passwithouttaskdiagnosis;all6scientificadmissiongatesfalseuntilrealrequired evidence. Newtraining/admission0. GPUuseonlyafterfreshauthorizedidleness/exclusivelease;preserveM204andforeignjobs.

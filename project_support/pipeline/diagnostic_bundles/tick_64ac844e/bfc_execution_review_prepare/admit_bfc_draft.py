@@ -1,0 +1,328 @@
+"""Owning-root BFC admission draft, derived from dfb6440d/admit_psbr.py.
+
+Default is read-only checks. Only --execute-root permits the original
+standard-artifact/decision/receipt/canonical-waiting writes after actual gates.
+This script never syncs source, dispatches, connects remotely, or runs a model.
+"""
+import argparse
+import copy
+from datetime import datetime, timezone
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path('D:/project/cluster_project')
+HERE = Path(__file__).resolve().parent
+TICK = ROOT/'pipeline/diagnostic_bundles/tick_64ac844e'
+EXECUTION = TICK/'bfc_execution'
+SKILL = Path('C:/Users/chuanle song/.codex/skills/songcl_research_pipeline')
+TOKEN = None  # Set from the actual current root owner after all evidence is supplied.
+THREAD = '01a159c5-29ab-7a22-ba7f-e79174757253'
+CID = 'hierarchy-parent-butterfly-token-composition'
+EXP = 'M213-BFC'
+COMMIT = '48fc302c3c02ffef0b241be3593c386b6b65a72e'
+GOAL = '0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85'
+CONFIG = 'configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml'
+REVIEW = None  # Must be supplied as a real actual-report path; no outcome is prepared.
+REVIEW_SHA = None  # Supplied only after an actual local four-result report exists.
+REVIEWER_SHA = None  # Owning root must pass the exact independently reviewed checker SHA.
+EXPECTED_INDEPENDENT_STATUS = 'FOUR_ACTUAL_BFC_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED'
+EXPECTED_AUTHORIZATION = {'path': 'pipeline/authorizations/experiment_first_20261021.json', 'sha256': '2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8'}
+GPU1_GRANT = {'path': 'pipeline/authorizations/server4_gpu1_20261025.json', 'sha256': '90f8820a60ef4d4e277904815b025658f7b8b457b0711a4d0ef5f7395fdd23f8'}
+PAIRS = [('smoke', 'champion'), ('smoke', 'candidate'), ('resources', 'champion'), ('resources', 'candidate')]
+
+
+def require(value, reason):
+    if not value:
+        raise ValueError(reason)
+
+
+def read(path):
+    def reject(value):
+        raise ValueError('Nonstandard JSON number: '+value)
+    return json.loads(Path(path).read_text(encoding='utf-8'),parse_constant=reject)
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def ref(path):
+    path = Path(path).resolve()
+    require(path.is_relative_to(ROOT), 'Evidence outside project')
+    return {'path': path.relative_to(ROOT).as_posix(), 'sha256': sha(path)}
+
+
+def save(path, value, exclusive=False):
+    path = Path(path)
+    if exclusive:
+        with path.open('x', encoding='utf-8') as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+            stream.write('\n')
+    else:
+        temporary = path.with_name(path.name+'.'+TOKEN+'.tmp')
+        with temporary.open('x', encoding='utf-8') as stream:
+            json.dump(value, stream, ensure_ascii=False, indent=2, allow_nan=False)
+            stream.write('\n'); stream.flush(); os.fsync(stream.fileno())
+        os.replace(temporary, path)
+
+
+def git(*args):
+    return subprocess.check_output(['git', '-C', str(ROOT/'Cluster'), *args], text=True, encoding='utf-8').strip()
+
+
+def current_owner():
+    owner = read(ROOT/'pipeline/headless/.foreground.lockdir/owner.json')
+    mode = read(ROOT/'pipeline/execution_mode.json')
+    require(mode['mode'] == 'foreground', 'Actual foreground execution mode required; background provenance cannot authorize admission')
+    require(owner['thread_id'] == mode['target_thread_id'] == os.environ.get('CODEX_THREAD_ID') == THREAD,
+            'Actual current root owner/environment/target mismatch; never override the thread')
+    require(datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at']), 'Original deadline expired')
+    require(sha(ROOT/'pipeline/headless/.tick_context.json') == owner['context_sha256'] and
+            sha(ROOT/'pipeline/headless/.tick_context_state.next.json') == owner['pending_sha256'], 'Current context/pending changed')
+    require(sha(ROOT/'pipeline/goal.json') == GOAL, 'Goal changed')
+    return owner
+
+
+def source_checks(manifest):
+    require(git('rev-parse', 'HEAD') == COMMIT, 'Main HEAD must actually equal tested48fc before formal admission')
+    require(not git('diff', '--cached', '--name-only'), 'Index is not empty')
+    protected = read(ROOT/'pipeline/diagnostic_bundles/tick_16b87793/protected_worktree_before.json')['protected_existing_worktree']
+    status = subprocess.check_output(['git', '-C', str(ROOT/'Cluster'), 'status', '--porcelain', '--untracked-files=all'], text=True, encoding='utf-8')
+    require({(line[:2], line[3:]) for line in status.splitlines() if line} == {(x['status'], x['path']) for x in protected}, 'Protected28 status changed')
+    require(all(sha(ROOT/'Cluster'/x['path']) == x['sha256'] for x in protected), 'Protected28 bytes changed')
+    source = ROOT/'Cluster/framework/model/Quard_model'/manifest['candidate_name']
+    require(len(manifest['candidate_source_hashes']) == 8, 'Wrong source inventory')
+    for name, expected in manifest['candidate_source_hashes'].items():
+        path = source/name
+        require(sha(path) == expected, 'Actual source differs from tested manifest: '+name)
+        blob = subprocess.check_output(['git', '-C', str(ROOT/'Cluster'), 'show', COMMIT+':'+path.relative_to(ROOT/'Cluster').as_posix()])
+        require(hashlib.sha256(blob).hexdigest() == expected, 'Admitted Git blob differs: '+name)
+    require(manifest['config'] == CONFIG and sha(ROOT/'Cluster'/CONFIG) == manifest['candidate_config_sha256'], 'Native config hash changed')
+    config_blob = subprocess.check_output(['git', '-C', str(ROOT/'Cluster'), 'show', COMMIT+':'+CONFIG])
+    require(hashlib.sha256(config_blob).hexdigest() == manifest['candidate_config_sha256'], 'Native YAML Git48fc blob differs')
+    old_config = ROOT/'Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml'
+    require((ROOT/'Cluster'/CONFIG).read_bytes() == old_config.read_bytes(), 'Original native YAML bytes changed')
+
+
+def operation_history_checks():
+    history_path=TICK/'bfc_native_operation_history.json';status_path=TICK/'bfc_status_after_four.json'
+    history=read(history_path);status=read(status_path);binding=read(EXECUTION/'execution_binding.json')
+    gpu=binding['physical_gpu'];require(type(gpu) is int and gpu in UUIDS and binding['gpu_uuid']==UUIDS[gpu],'Selected original GPU/UUID invalid')
+    require(history['candidate_id']==CID and history['code_commit']==COMMIT and history['physical_gpu']==gpu and history['gpu_uuid']==UUIDS[gpu],'Actual operation history identity/GPU mismatch')
+    require(history['token']==binding['owner']['token'] and history['workers_after']==[] and history['selected_gpu_contexts_after']==[],'Actual operation history is not terminal/empty')
+    require(history['status_evidence']==ref(status_path) and status['binding']==binding,'Actual status source/hash/binding mismatch')
+    spec=importlib.util.spec_from_file_location('actual_bfc_operation_history',HERE/'bfc_operation_history.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    console,bound,records,reconcile_refs=module.validate(TICK,EXECUTION)
+    require(bound==binding and history['same_original_requests_reconciled_read_only']==records and history['original_status_console']==ref(console) and history['reconcile_console_evidence']==reconcile_refs,'Actual full original status/reconcile objects no longer match history')
+    require(status_path.read_bytes()==Path(console).read_bytes(),'Saved status differs byte-for-byte from actual root console')
+    return [ref(status_path),ref(history_path),ref(console),*reconcile_refs,ref(HERE/'bfc_operation_history.py')]
+
+
+UUIDS={0:'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c',1:'GPU-7f82edb9-f620-8045-caea-a75232265cd1'}
+
+def protected_snapshot(queue):
+    result={'running_sha256':sha(ROOT/'pipeline/running.json')}
+    expected={'M211-BTC':('00e2b18c6b8d568a64edb496e6979d766440883c','93756329046cf30357c258848d6b3287c25b4b0c96ef69b0ffd5f3b8710f2a36'),
+              'M212-BCR':('11a811618179ab1ddc0cee299194667413b7fdb9','b8532405ba05101355898016aeeb45e1776217bc95a64a2ae449c1ff02ef60ac')}
+    for eid,(commit,receipt_sha) in expected.items():
+        rows=[t for tasks in queue['gpu_queues'].values() for t in tasks if t['id']==eid]
+        require(len(rows)<=1,'Protected task duplicate before BFC admission')
+        experiment_path=ROOT/'pipeline/experiments'/str(eid+'.json');experiment=read(experiment_path)
+        require(experiment['id']==eid and experiment['code_commit']==commit,'Protected experiment identity differs')
+        receipt_path=ROOT/'pipeline/admissions'/str(eid+'.json');require(sha(receipt_path)==receipt_sha,'Protected receipt changed')
+        result[eid]={'queue_rows':copy.deepcopy(rows),'experiment_sha256':sha(experiment_path),'receipt_sha256':receipt_sha}
+    rows=[t for tasks in queue['gpu_queues'].values() for t in tasks if t['id']=='M206-CGCA']
+    require(len(rows)==1 and rows[0].get('dispatch_hold') and rows[0].get('resume_authorized') is False,'M206 user pause must remain exact; resource grant is not resume permission')
+    result['M206-CGCA']={'queue_rows':copy.deepcopy(rows),'experiment_sha256':sha(ROOT/'pipeline/experiments/M206-CGCA.json')}
+    return result
+
+
+def actual_checks(independent_path, independent_sha):
+    global TOKEN
+    owner=current_owner();TOKEN=owner['token']
+    require(isinstance(REVIEW_SHA,str) and len(REVIEW_SHA)==64 and isinstance(REVIEWER_SHA,str) and len(REVIEWER_SHA)==64 and REVIEW is not None,'Actual local report/checker SHA/path must be explicitly bound; draft cannot assume results')
+    require(sha(ROOT/GPU1_GRANT['path'])==GPU1_GRANT['sha256'],'Exact explicit resource grant missing/changed')
+    require(sha(REVIEW)==REVIEW_SHA and sha(HERE/'review_bfc.py')==REVIEWER_SHA,'Actual semantic review/checker changed')
+    independent_path=Path(independent_path).resolve()
+    require(independent_path.is_relative_to(ROOT) and sha(independent_path)==independent_sha,'Independent review path/SHA mismatch')
+    independent=read(independent_path)
+    require(independent['status']==EXPECTED_INDEPENDENT_STATUS and independent['material_concerns']==[],'Independent semantics/resource review did not pass')
+    require((independent['candidate_id'],independent['code_commit'],independent['goal_sha256'])==(CID,COMMIT,GOAL),'Independent review identity mismatch')
+    for mode,target in PAIRS:
+        matches=[x for x in independent['raw_results'] if x['mode']==mode and x['target']==target];require(len(matches)==1,'Independent raw arm missing/ambiguous')
+        item=matches[0];expected=EXECUTION/(mode+'_'+target+'_execution.json')
+        require((ROOT/item['execution_path']).resolve()==expected.resolve() and sha(expected)==item['execution_sha256'],'Independent raw artifact drift')
+        envelope=read(expected)
+        require(item['result_sha256']==envelope['result_sha256'] and item['request_id']==envelope['identity']['request_id'],'Independent original request/result mismatch')
+    spec=importlib.util.spec_from_file_location('actual_bfc_semantics',HERE/'review_bfc.py')
+    reviewer=importlib.util.module_from_spec(spec);spec.loader.exec_module(reviewer)
+    fresh=reviewer.review_directory(ROOT,EXECUTION);reviewed=read(REVIEW)
+    require(fresh['review_status']==reviewed['review_status']=='RAW_SEMANTICS_VALIDATED_NOT_ADMISSION' and fresh['observations']==reviewed['observations'],'Current actual semantics differ from hash-bound report')
+    require(reviewed['standard_PASS_receipt_queue_written'] is False and reviewed['candidate_id']==CID and reviewed['code_commit']==COMMIT,'Local report identity or no-write boundary differs')
+    require(fresh['observations']['existing_memory_condition_needs_separate_retention_decision'] is False,'Original memory-retention condition needs a separate real decision')
+    binding=read(EXECUTION/'execution_binding.json');manifest=read(EXECUTION/'native_manifest.json')
+    keys={'token','thread_id','generated_at','deadline_at','context_sha256','pending_sha256'}
+    require(set(binding['owner'])==keys and binding['owner']=={k:owner[k] for k in keys},'Original six-field binding is not actual current owner; no historical lease replay')
+    gpu=binding['physical_gpu'];require(type(gpu) is int and gpu in UUIDS and binding['gpu_uuid']==UUIDS[gpu],'Wrong selected original GPU')
+    source_checks(manifest)
+    policy=read(ROOT/'pipeline/closure_policy.json');auth=policy['experiment_first']['authorization']
+    require(policy['enabled'] is True and policy['experiment_first']['enabled'] is True and auth==EXPECTED_AUTHORIZATION and sha(ROOT/auth['path'])==auth['sha256'],'Current experiment-first authorization changed')
+    import yaml
+    server=yaml.safe_load((ROOT/'SERVERS.yaml').read_text(encoding='utf-8'))['servers']['server-4']
+    require(gpu in server['allowed_gpus'] and server['max_tasks_per_gpu']==1 and server['dispatch_enabled'] is True and server['host']=='192.168.1.115' and server['expected_hostname']=='dl04-MS-7E06','Current selected-card eligibility changed')
+    require(str(server['expected_gpu_uuids'].get(gpu,server['expected_gpu_uuids'].get(str(gpu))))==UUIDS[gpu],'Selected-card UUID changed')
+    operation_history_checks()
+    return owner,fresh,manifest,auth
+
+
+def main():
+    global REVIEW_SHA, REVIEWER_SHA, REVIEW, EXECUTION, TICK
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--execution-dir',default=str(EXECUTION))
+    parser.add_argument('--local-review',required=True)
+    parser.add_argument('--local-review-sha',required=True)
+    parser.add_argument('--reviewer-sha',required=True)
+    parser.add_argument('--independent-review', required=True)
+    parser.add_argument('--independent-sha', required=True)
+    parser.add_argument('--execute-root', action='store_true', help='Root-reviewed explicit standard/receipt/waiting writes; never launches')
+    args = parser.parse_args()
+    REVIEW_SHA,REVIEWER_SHA=args.local_review_sha,args.reviewer_sha
+    EXECUTION=Path(args.execution_dir).resolve();TICK=EXECUTION.parent;REVIEW=Path(args.local_review).resolve()
+    require(EXECUTION.name=='bfc_execution' and TICK.is_relative_to(ROOT/'pipeline/diagnostic_bundles') and REVIEW.is_relative_to(ROOT/'pipeline/diagnostic_bundles'),'Unexpected execution/report location')
+    owner, review, manifest, auth = actual_checks(args.independent_review, args.independent_sha)
+    if not args.execute_root:
+        print(json.dumps({'status': 'ACTUAL_CHECKS_ONLY_NO_STANDARD_OR_SHARED_WRITES', 'id': EXP, 'code_commit': COMMIT,
+                          'standard_PASS_receipt_queue_written': False, 'training_launched': False}))
+        return
+    sys.path.insert(0, str(SKILL))
+    import closure
+    import pipeline_monitor as monitor
+    lock = monitor.acquire_lock(str(ROOT)); require(lock is not None, 'Canonical pipeline lock busy')
+    try:
+        owner, review, manifest, auth = actual_checks(args.independent_review, args.independent_sha)
+        queue = monitor.load_queue(str(ROOT)); work = read(ROOT/'pipeline/research_work.json')
+        require(not any(t.get('id') == EXP for ts in queue['gpu_queues'].values() for t in ts) and monitor.load_experiment(str(ROOT), EXP) is None, 'Existing experiment cannot be admitted twice')
+        candidate = next(c for c in work['candidates'] if c['id'] == CID)
+        require(candidate['stage'] == 'validation' and candidate['code_commit'] == COMMIT and candidate['authorization'] == auth, 'Candidate is not current validation48fc')
+        require(not candidate.get('revision_history') and not any(candidate.get(k) for k in ['human_hold', 'scope_hold', 'numerical_hold', 'dispatch_hold', 'hold']), 'Candidate hold/revision cannot be bypassed')
+        protected_before=protected_snapshot(queue)
+        selected_gpu=read(EXECUTION/'execution_binding.json')['physical_gpu']
+        raws = {mode+'_'+target: read(EXECUTION/(mode+'_'+target+'_execution.json'))['result'] for mode, target in PAIRS}
+        smoke = raws['smoke_candidate']; observation = review['observations']; now = datetime.now(timezone.utc).isoformat()
+        evidence = [ref(EXECUTION/(mode+'_'+target+'_execution.json')) for mode, target in PAIRS]
+        evidence += [ref(EXECUTION/n) for n in ['execution_binding.json', 'native_manifest.json', 'execution_lease.json']]
+        evidence += [ref(REVIEW), ref(Path(args.independent_review)), ref(Path(__file__))]
+        evidence.append(GPU1_GRANT)
+        evidence.extend(operation_history_checks())
+        identity = {'id': EXP, 'candidate_id': CID, 'config': CONFIG, 'code_commit': COMMIT, 'goal_sha256': GOAL}
+        standard_smoke = {**identity, 'steps': smoke['optimizer_steps'], 'losses': smoke['losses'],
+            'native_data_loaded': smoke['native_data_loaded'], 'backward_finite': smoke['backward_finite'],
+            'intended_path_observed': smoke['intended_path_observed'], 'split': 'train', 'command': smoke['actual_train_command'],
+            'data_source': smoke['data_source']['train'], 'native_train_cli_reference': smoke['native_train_cli_reference'],
+            'paired_TRAIN_batches': smoke['batches'], 'common_initialized_parameter_observations': observation['common_initialized_parameter_observations'],
+            'actual_n_ge3_supported_parent_group_counts': observation['actual_n_ge3_supported_parent_group_counts'],
+            'actual_map_call_counts': observation['actual_map_call_counts'],
+            'actual_nonpower2_supported_parent_group_counts': observation['actual_nonpower2_supported_parent_group_counts'],
+            'actual_multistage_supported_parent_group_counts': observation['actual_multistage_supported_parent_group_counts'],
+            'actual_required_weight_blocks': observation['actual_required_weight_blocks'],
+            'evidence': evidence, 'recorded_at': now, 'limitations': {'training_efficacy': 'UNKNOWN', 'full_buffer_values': 'NOT_RECORDED',
+            'offdiagonal_probe': 'NOT_IMPLEMENTED_NOT_MEASURED',
+            'empty_padding_singleton_coverage': {k: observation[k] for k in ['actual_unsupported_internal_rows', 'actual_padding_rows', 'actual_supported_singleton_groups']},
+            'raw_cross_target_digest_scope': observation['raw_bank_digest_scope'], 'pure_TRAIN_memory': smoke['pure_training_peak_memory']}}
+        resources = {**identity, 'passed_existing_resource_requirements': True, 'recorded_at': now,
+            'protocol': {'batch_size': 1, 'lang_num_max': 1, 'warmup': 20, 'repeat': 100, 'counted_flops_limit': 10e9},
+            'observations': observation['resource_observations'], 'evidence': evidence,
+            'limitations': 'Original handlers and full unsupported dictionaries retained. Counted FLOPs do not include all actual CPU/Python work. Smoke memory includes observer/topology/source-recording overhead; pure TRAIN memory and efficacy UNKNOWN.'}
+        constraints = {**identity, 'passed': True, 'recorded_at': now, 'checks': {
+            'current_main_HEAD_equals_actual_tested48fc': True, 'eight_sources_and_YAML_equal_manifest_and_Git48fc': True,
+            'all28_protected_status_and_bytes_unchanged_index_empty': True, 'original_YAML_seed_schedule_data_optimizer': True,
+            'actual_two_TRAIN_batches_and_common_named_initialization_paired': True, 'original_FPS_rawbanks_CSORT_HCG_single_injection': True,
+            'only_replaced_middle_FFN_with_original_skip_shared_pair_composition_no_new_gate_language_route_QKV_or_residual_path': True},
+            'structural_change': 'Replace only original middle FFN delta with original-parent geometry-ordered simultaneous butterfly pair composition. One shared2C-to2C Linear+GELU has262656 parameters replacing525568, actual delta-262912. Keep original cf skip/LayerNorm, fine/coarse FFNs, raw CSORT/FPS/IDs/HCG and single inst update. Actual same-old-state inputs, original two-output activation/scatter, n3/nonpower2/multistage and four aggregate weight-quadrant loss gradients/updates were reviewed; individual call/half zeros are legal. Own state is included, without a self-exclusive or conservation claim.',
+            'source_hashes': manifest['candidate_source_hashes'], 'config_sha256': manifest['candidate_config_sha256'],
+            'frozen_native_preparation': ref(ROOT/candidate['worker_preparation']['preparation']['path']),
+            'evidence': evidence, 'research_scope': 'Experiment-first technical admission only. No efficacy/whole-mechanism novelty claim; earlier PSBR/HRC/HAP realizations do not reject BFC or all hierarchy.',
+            'resources': 'Only actual selected server4 binding GPU0or1/max1 under current allowed resources; no auto-switch or availability claim. Both existing BTC0 and BCR1 task/experiment/receipt states are protected byte-for-byte; paused M206 is preserved. This creates waiting work, not launch, sync or a new resource grant.'}
+        paths = {'smoke': TICK/'bfc_native_smoke.json', 'resources': TICK/'bfc_resource_comparison.json', 'constraints': TICK/'bfc_constraints_independence.json'}
+        receipt_path = ROOT/'pipeline/admissions'/f'{EXP}.json'
+        require(not receipt_path.exists() and not any(p.exists() for p in paths.values()), 'Refuse overwriting existing standard artifacts/receipt')
+        for kind, value in [('smoke', standard_smoke), ('resources', resources), ('constraints', constraints)]:
+            save(paths[kind], value, exclusive=True)
+        decision_args = ['C:/Program Files (x86)/Git/bin/bash.exe', str(SKILL/'log_decision.sh'), 'cluster_project', 'queue_push',
+            'Admit BFC48fc after actual paired native and resource review', 'Queue exact tested M213-BFC on its actual selected authorized binding GPU',
+            'Actual original TRAIN2/FFN0/2 and coupled pair-stage mix/GELU/scatter, four aggregate W quadrant original-loss gradients and updates, original-middle-skip-HCG-inst path and matched resource pair independently reviewed. Preserve all numeric readouts and unsupported ops; unexercised zero/padding/singleton boundaries and offdiagonal probe, pure TRAIN memory and efficacy remain unknown. No new threshold/revision/seed/data/schedule/GPU grant.',
+            '; '.join(x['path']+' SHA'+x['sha256'] for x in [ref(p) for p in paths.values()]+[ref(Path(args.independent_review))])]
+        decision_run = subprocess.run(decision_args, capture_output=True, text=True, encoding='utf-8', timeout=30, env=os.environ.copy())
+        require(decision_run.returncode == 0, 'Decision logger failed: '+decision_run.stderr)
+        decision = Path(decision_run.stdout.strip().split('-> ', 1)[1].strip())
+        receipt = {**identity, 'profile': 'experiment_first', 'authorization': auth, 'native_smoke': ref(paths['smoke']),
+            'decision': ref(decision), 'created_at': now, 'independent_review': ref(Path(args.independent_review)),
+            'gates': {name: {'passed': True, 'evidence': [ref(paths[kind]), ref(Path(args.independent_review))]}
+                      for name, kind in [('native_backward', 'smoke'), ('resources', 'resources'), ('independence', 'constraints'), ('constraints', 'constraints')]},
+            'efficacy': 'UNKNOWN until actual original formal training; admission is not accuracy gain.'}
+        task = {'id': EXP, 'label': 'BFC simultaneous two-output butterfly token composition', 'config': CONFIG, 'code_commit': COMMIT,
+            'admission_receipt': receipt_path.relative_to(ROOT).as_posix(), 'status': 'waiting', 'gpu': str(selected_gpu), 'server': 'server-4',
+            'profile': 'experiment_first', 'requires_exclusive_ownership': True, 'added_at': now,
+            'note': 'Original byte-identical native YAML/seed1999/epochs50/maxiters70; actual paired diagnostic TRAIN2 and resources reviewed. Actual selected binding GPU only; BTC0, BCR1 and M206 pause protected. Diagnostic admission is not efficacy.'}
+        current_owner()
+        save(receipt_path, receipt, exclusive=True)
+        closure.admission(ROOT, task)
+        prospective = copy.deepcopy(queue); prospective['gpu_queues']['server-4'].append(task)
+        closure.validate_foreground_dispatch_budget(ROOT, prospective, task)
+        candidate.setdefault('execution_preparation_history', []).append({
+            'recorded_at': now, 'reason': 'Preserve original externally anchored unexecuted preparation state before actual four-arm admission.',
+            'current_status_fields': {k: copy.deepcopy(candidate.get(k)) for k in [
+                'config_status', 'source_status', 'native_status', 'resource_status', 'native_worker_adapter',
+                'implementation_status', 'native_execution_code_commit', 'native_smoke_status', 'resource_profile_status', 'admission_status']},
+            'worker_preparation': copy.deepcopy(candidate['worker_preparation']),
+            'execution_adapter': copy.deepcopy(candidate['execution_adapter'])})
+        candidate.update(stage='deployment', training_status='waiting', native_status='actual_TRAIN2_backward_coupled_butterfly_four_W_quadrants_observed',
+            resource_status='actual_original_protocol_pair_passed', experiment_first_admission=True, admission_receipt=ref(receipt_path),
+            native_execution=ref(REVIEW), native_execution_code_commit=COMMIT,
+             native_smoke_status='ACTUAL_TRAIN2_PASSED', resource_profile_status='ACTUAL_PAIRED_RESOURCES_PASSED', admission_status='ADMITTED_WAITING',
+            config_status='Exact original YAML is now verified in main Git48fc and actual native smoke/resources.',
+            source_status='TESTED48FC_PRESENT_MAIN_ACTUAL_NATIVE_PAIR_VERIFIED',
+            native_worker_adapter='ACTUAL_FRESH_BINDING_FOUR_ARMS_TERMINAL_REVIEWED',
+            implementation_status='ACTUAL_NATIVE_TRAIN2_AND_RESOURCE_PAIR_VERIFIED',
+            next_action='Exact tested BFC48fc admitted waiting on only its actual selected binding GPU. Canonical fresh dispatch must recheck source/runtime/assets/idle/exclusive ownership and actual progress. Do not touch protected BTC0/BCR1, resume M206 or alter original seed/YAML/schedule.')
+        for key in ['blocker_kind', 'blocker', 'blocked_at', 'retry_after', 'unblock_condition']:
+            candidate.pop(key, None)
+        candidate['worker_preparation'].update(status='ACTUAL_NATIVE_TRAIN2_AND_RESOURCES_COMPLETED_PASSED',
+            native_backward_passed=True, resources_passed=True, native_backward_executed=True,
+            resource_profile_executed=True, active_native_manifest_or_execution_lease_created=True)
+        candidate['execution_adapter'].update(status='ACTUAL_FRESH_BINDING_FOUR_ARMS_TERMINAL_REVIEWED',
+            native_execution_tested=True, native_execution_code_commit=COMMIT,
+            remote_adapter_execution_tested=True, active_binding_manifest_lease_created=True, standard_summaries_created=True,
+            standard_result_formatter_implemented=True, standard_result_formatter=ref(Path(__file__)),
+            active_binding=ref(EXECUTION/'execution_binding.json'), native_manifest=ref(EXECUTION/'native_manifest.json'),
+            execution_lease=ref(EXECUTION/'execution_lease.json'), actual_four_result_review=ref(REVIEW),
+            execution_results={mode+'_'+target: ref(EXECUTION/(mode+'_'+target+'_execution.json')) for mode, target in PAIRS},
+            provenance='Root used the existing reviewed static catalog with a fresh exact owner/assets/idle-selected-GPU/three-lock binding. Four original M95/BFC selected-GPU smoke/resource requests completed terminal with independent semantic review. Original immutable request/terminal/result identities are retained; no unrecorded retry or idleness proof is inferred. The frozen preparation/release remain unchanged historical/static anchors; actual execution is separately bound here. This is diagnostic admission, not formal training or efficacy.')
+        for path in [*paths.values(), receipt_path, decision, REVIEW, Path(args.independent_review), Path(__file__)]:
+            item = ref(path)
+            if item not in candidate['evidence']:
+                candidate['evidence'].append(item)
+        work['updated_at'] = now; save(ROOT/'pipeline/research_work.json', work)
+        monitor.save_queue(str(ROOT), prospective)
+        experiment = copy.deepcopy(task)
+        experiment['history'] = [{'ts': now, 'status': 'waiting', 'action': 'actual_experiment_first_admission_queued', 'receipt': ref(receipt_path)}]
+        monitor.save_experiment(str(ROOT), experiment)
+        require(protected_snapshot(monitor.load_queue(str(ROOT)))==protected_before,'Protected BTC0/BCR1/M206/running registry changed')
+        result = {'recorded_at': datetime.now(timezone.utc).isoformat(), 'token': TOKEN, 'task': task, 'receipt': ref(receipt_path),
+            'decision': ref(decision), 'standard_artifacts': {k: ref(v) for k, v in paths.items()},
+            'canonical_admission_validated': True, 'canonical_tick_budget_validated': True, 'm206_queue_unchanged': True,
+            'training_launched': False, 'source_synced': False, 'BTC0_BCR1_M206_and_running_registry_unchanged':True, 'GPU1_resource_grant':GPU1_GRANT}
+        save(TICK/'bfc_admission_queue_result.json', result, exclusive=True)
+        print(json.dumps({'id': EXP, 'status': 'waiting', 'receipt': ref(receipt_path), 'training_launched': False, 'source_synced': False, 'BTC0_BCR1_M206_and_running_registry_unchanged':True, 'GPU1_resource_grant':GPU1_GRANT}, ensure_ascii=False))
+    finally:
+        lock.close()
+
+
+if __name__ == '__main__':
+    main()

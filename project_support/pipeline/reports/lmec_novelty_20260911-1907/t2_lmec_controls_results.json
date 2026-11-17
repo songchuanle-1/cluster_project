@@ -1,0 +1,254 @@
+{
+  "probe": "t2_lmec_controls",
+  "setup": {
+    "n_trials_per_area": 200,
+    "n_points": 128,
+    "dim": 8,
+    "k_candidates": 8,
+    "target_areas": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "distractor_areas_shuffled_per_trial": [
+      3,
+      6,
+      12,
+      20,
+      40,
+      56,
+      80
+    ],
+    "distractor_areas_disjoint_from_target_areas": true,
+    "tie_breaking": "uniform over argmax ties",
+    "planted_signal": 1.5,
+    "shuffle_control": "unit direction with the planted language component projected out"
+  },
+  "accuracy_by_area": {
+    "lmec_v2": [
+      {
+        "target_area": 1,
+        "accuracy": 0.755
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.845
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.98
+      },
+      {
+        "target_area": 8,
+        "accuracy": 0.995
+      },
+      {
+        "target_area": 16,
+        "accuracy": 1.0
+      },
+      {
+        "target_area": 32,
+        "accuracy": 1.0
+      }
+    ],
+    "support_only_lambda0": [
+      {
+        "target_area": 1,
+        "accuracy": 0.875
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.92
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.98
+      },
+      {
+        "target_area": 8,
+        "accuracy": 1.0
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.99
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.99
+      }
+    ],
+    "original_unstandardized": [
+      {
+        "target_area": 1,
+        "accuracy": 0.87
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.92
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.98
+      },
+      {
+        "target_area": 8,
+        "accuracy": 1.0
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.99
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.995
+      }
+    ],
+    "area_large_only": [
+      {
+        "target_area": 1,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 8,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.0
+      }
+    ],
+    "area_small_only": [
+      {
+        "target_area": 1,
+        "accuracy": 1.0
+      },
+      {
+        "target_area": 2,
+        "accuracy": 1.0
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 8,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.0
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.0
+      }
+    ],
+    "random": [
+      {
+        "target_area": 1,
+        "accuracy": 0.12
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.11
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.085
+      },
+      {
+        "target_area": 8,
+        "accuracy": 0.1
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.125
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.13
+      }
+    ],
+    "shuffled_language": [
+      {
+        "target_area": 1,
+        "accuracy": 0.215
+      },
+      {
+        "target_area": 2,
+        "accuracy": 0.195
+      },
+      {
+        "target_area": 4,
+        "accuracy": 0.19
+      },
+      {
+        "target_area": 8,
+        "accuracy": 0.13
+      },
+      {
+        "target_area": 16,
+        "accuracy": 0.165
+      },
+      {
+        "target_area": 32,
+        "accuracy": 0.18
+      }
+    ]
+  },
+  "mean_accuracy": {
+    "lmec_v2": 0.9292,
+    "support_only_lambda0": 0.9592,
+    "original_unstandardized": 0.9592,
+    "area_large_only": 0.0,
+    "area_small_only": 0.3333,
+    "random": 0.1117,
+    "shuffled_language": 0.1792
+  },
+  "gaps": {
+    "lmec_v2_minus_area_large": 0.9292,
+    "lmec_v2_minus_area_small": 0.5959,
+    "lmec_v2_minus_random": 0.8175,
+    "lmec_v2_minus_shuffled": 0.75,
+    "lmec_v2_minus_support_only": -0.03,
+    "lmec_v2_minus_original": -0.03
+  },
+  "gates": {
+    "C1_uses_language_not_geometry": true,
+    "C2_requires_true_language_alignment": true,
+    "C3_complement_term_adds_over_support_only": false,
+    "C4_standardization_helps_over_original": false
+  },
+  "observations": {
+    "O5_area_prior_is_directional": "neither |S| nor -|S| recovers the target: the target area sweeps 1..32 and the distractor areas are disjoint from it, so a fixed geometry prior picks the same 80-point or 3-point distractor on every trial and scores exactly zero",
+    "tiny_mask": {
+      "lmec_v2": 0.755,
+      "support_only_lambda0": 0.875,
+      "original_unstandardized": 0.87,
+      "area_large_only": 0.0,
+      "area_small_only": 1.0,
+      "random": 0.12,
+      "shuffled_language": 0.215
+    }
+  },
+  "verdict": {
+    "controls_pass": false,
+    "admits_training": false,
+    "reason": "Offline controls only; N1-v2 novelty re-check and a matched trained control are still outstanding, and the synthetic model assumes independent point features."
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "owner": {
+    "token": "f77b26d64ead4c52bd429009cc78827b",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-04T12:10:09.687225+00:00",
+    "deadline_at": "2026-11-04T13:10:09.687225+00:00",
+    "context_sha256": "8a38ad0f3b3aab162ddd646f8c33471cd3b5dbc71bb7e740c984ef3e4a70bc81",
+    "pending_sha256": "d6468cd803156354fcb87253c1cdeeb381f1147a243d38a67108259c58c7a9e9"
+  },
+  "recorded_at": "2026-11-04T12:23:37.038408+00:00",
+  "command": "Pinned SSH/hostname; read only exact WFC run stdout/native logger/source/checkpoint hashes and GPU0 NVML",
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-04T12:23:37.165805+00:00",
+    "hostname": "dl04-MS-7E06",
+    "owner": {
+      "token": "f77b26d64ead4c52bd429009cc78827b",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-04T12:10:09.687225+00:00",
+      "deadline_at": "2026-11-04T13:10:09.687225+00:00",
+      "context_sha256": "8a38ad0f3b3aab162ddd646f8c33471cd3b5dbc71bb7e740c984ef3e4a70bc81",
+      "pending_sha256": "d6468cd803156354fcb87253c1cdeeb381f1147a243d38a67108259c58c7a9e9"
+    },
+    "original_pid_absent": true,
+    "source_commit": "94c4fe61b38f46f321a7ee84236fea70ade04d9b",
+    "source_hashes_verified": true,
+    "train_source_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+    "train_source_tail": ".work_dir,args.resume+'.pth')\n        resume_path = args.resume\n        if gorilla.is_main_process(): logger.info(f'Resume from {resume_path}')\n        meta = gorilla.resume(model=model,\n                              filename=resume_path,\n                              optimizer=optimizer,\n                              scheduler=lr_scheduler,\n                              strict=False,\n                              map_location='cpu')\n        start_epoch = meta.get(\"epoch\", 0) + 1\n        best_miou = meta.get(\"best_miou\", 0)\n        epochs_no_improve = meta.get(\"epochs_no_improve\", 0)\n        logger.info(f'resume start_epoch:{start_epoch},best_miou:{best_miou},epochs_no_improve:{epochs_no_improve}!')\n        print(f'resume start_epoch:{start_epoch},best_miou:{best_miou},epochs_no_improve:{epochs_no_improve}!')\n        # print(start_epoch)\n    elif cfg.train.pretrain:\n        if gorilla.is_main_process(): logger.info(f'Load pretrain from {cfg.train.pretrain}')\n        gorilla.load_checkpoint(model, cfg.train.pretrain, strict=False, map_location='cpu')\n\n    cfg.dataloader.train.batch_size /= args.num_gpus\n    cfg.dataloader.train.batch_size = int(cfg.dataloader.train.batch_size)\n    if gorilla.is_main_process():\n        logger.info(f'Train batch size per gpu: {cfg.dataloader.train.batch_size}')\n    # train and val dataset\n    if not args.skip_training:\n        train_dataset = build_dataset(cfg.data.train, logger)\n        train_loader = build_dataloader(train_dataset, dist=args.dist, **cfg.dataloader.train)\n    if not args.skip_validate and gorilla.is_main_process():\n        val_dataset = build_dataset(cfg.data.val, logger)\n        val_loader = build_dataloader(val_dataset, **cfg.dataloader.val)\n\n    # ─ 训练前自动 profiling: 参数量 + FLOPs + 推理时间 ─\n    if not args.skip_training:\n        model_profile(model, cfg, logger)\n\n    # train and val\n    if gorilla.is_main_process():\n        logger.info('Training')\n\n    for epoch in range(start_epoch, cfg.train.epochs + 1):\n        if not args.skip_training:\n            train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)\n        if not args.skip_validate and (epoch % cfg.train.interval == 0) and gorilla.is_main_process():\n            miou = eval(epoch, best_miou, model, val_loader, cfg, logger, writer, not args.skip_training)\n            if gorilla.is_main_process():\n                if miou > best_miou:\n                    best_miou = miou\n                    epochs_no_improve = 0\n                else:\n                    epochs_no_improve += 1\n                    if args.patience > 0 and epochs_no_improve >= args.patience:\n                        logger.info(f'Early stopping at epoch {epoch}: no improvement for {args.patience} epochs (best={best_miou:.4f})')\n                        print(f'Early stopping at epoch {epoch}: no improvement for {args.patience} epochs (best={best_miou:.4f})')\n                        break\n        if gorilla.is_main_process() and args.save_ckpt: \n            # meta = dict(epoch=epoch,best_miou=miou)\n            meta = dict(epoch=epoch,best_miou=best_miou,epochs_no_improve=epochs_no_improve)\n            if miou >= best_miou:\n                save_file = osp.join(cfg.work_dir, f'best.pth')\n                gorilla.save_checkpoint(model, save_file,optimizer, lr_scheduler,meta)\n                logger.info(f'save best pth to {save_file}')\n                print(f'save best pth to {save_file}')\n            if epoch > cfg.train.save_epoch:\n                save_file = osp.join(cfg.work_dir, f'epoch_{epoch:04d}.pth')\n                gorilla.save_checkpoint(model, save_file, optimizer, lr_scheduler, meta)\n                logger.info(f'save epoch pth to {save_file}') \n                print(f'save epoch pth to {save_file}') \n            save_file = osp.join(cfg.work_dir, f'last.pth')\n            gorilla.save_checkpoint(model, save_file,optimizer, lr_scheduler,meta)\n            logger.info(f'save last pth to {save_file}')    \n            print(f'save last pth to {save_file}')    \n        writer.flush()\n        if args.skip_training:\n            break\n\nif __name__ == '__main__':\n    args = get_args()\n    if args.num_gpus > 1:\n        args.dist = True\n    gorilla.set_cuda_visible_devices(gpu_ids=args.gpu_ids, num_gpu=args.num_gpus)\n    gorilla.launch(\n        main,\n        args.num_gpus,\n        num_machines=args.num_machines,\n        machine_rank=args.machine_rank,\n        dist_url=args.dist_url,\n        args=(args,) # use tuple to wrap\n    )\n    \n",
+    "logs": {
+      "stdout": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_resume_wfc_20261104/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_wfc_20261104_114716.log",
+        "bytes": 6912256,
+        "sha256": "ac3477d400bf01b14bc85032f5af5289f0c1b8811771f656bed2dd891eb5a61e",
+        "mtime_ns": 1793792381166000808,
+        "tail": "27,  2.67it/s]\rVal[30/50]:  80%|███████████████▉    | 290/363 [01:43<00:27,  2.69it/s]\rVal[30/50]:  80%|████████████████    | 291/363 [01:43<00:27,  2.61it/s]\rVal[30/50]:  80%|████████████████    | 292/363 [01:43<00:25,  2.78it/s]\rVal[30/50]:  81%|████████████████▏   | 293/363 [01:44<00:26,  2.65it/s]\rVal[30/50]:  81%|████████████████▏   | 294/363 [01:44<00:26,  2.63it/s]\rVal[30/50]:  81%|████████████████▎   | 295/363 [01:45<00:27,  2.46it/s]\rVal[30/50]:  82%|████████████████▎   | 296/363 [01:45<00:27,  2.42it/s]\rVal[30/50]:  82%|████████████████▎   | 297/363 [01:45<00:27,  2.41it/s]\rVal[30/50]:  82%|████████████████▍   | 298/363 [01:46<00:26,  2.41it/s]\rVal[30/50]:  82%|████████████████▍   | 299/363 [01:47<00:34,  1.84it/s]\rVal[30/50]:  83%|████████████████▌   | 300/363 [01:47<00:31,  2.02it/s]\rVal[30/50]:  83%|████████████████▌   | 301/363 [01:47<00:28,  2.18it/s]\rVal[30/50]:  83%|████████████████▋   | 303/363 [01:48<00:20,  2.87it/s]\rVal[30/50]:  84%|████████████████▋   | 304/363 [01:48<00:20,  2.83it/s]\rVal[30/50]:  84%|████████████████▊   | 306/363 [01:49<00:17,  3.28it/s]\rVal[30/50]:  85%|████████████████▉   | 307/363 [01:49<00:17,  3.12it/s]\rVal[30/50]:  85%|████████████████▉   | 308/363 [01:50<00:19,  2.76it/s]\rVal[30/50]:  85%|█████████████████   | 309/363 [01:50<00:20,  2.63it/s]\rVal[30/50]:  85%|█████████████████   | 310/363 [01:50<00:17,  3.07it/s]\rVal[30/50]:  86%|█████████████████▏  | 311/363 [01:51<00:18,  2.77it/s]\rVal[30/50]:  86%|█████████████████▏  | 312/363 [01:51<00:18,  2.69it/s]\rVal[30/50]:  86%|█████████████████▏  | 313/363 [01:51<00:18,  2.66it/s]\rVal[30/50]:  87%|█████████████████▎  | 314/363 [01:52<00:18,  2.59it/s]\rVal[30/50]:  87%|█████████████████▎  | 315/363 [01:52<00:19,  2.45it/s]\rVal[30/50]:  87%|█████████████████▍  | 316/363 [01:53<00:20,  2.32it/s]\rVal[30/50]:  88%|█████████████████▌  | 318/363 [01:53<00:13,  3.41it/s]\rVal[30/50]:  88%|█████████████████▌  | 319/363 [01:53<00:13,  3.31it/s]\rVal[30/50]:  88%|█████████████████▋  | 320/363 [01:54<00:13,  3.14it/s]\rVal[30/50]:  88%|█████████████████▋  | 321/363 [01:54<00:11,  3.51it/s]\rVal[30/50]:  89%|█████████████████▋  | 322/363 [01:54<00:10,  3.91it/s]\rVal[30/50]:  89%|█████████████████▊  | 323/363 [01:54<00:11,  3.41it/s]\rVal[30/50]:  89%|█████████████████▊  | 324/363 [01:55<00:12,  3.14it/s]\rVal[30/50]:  90%|█████████████████▉  | 325/363 [01:55<00:13,  2.90it/s]\rVal[30/50]:  90%|██████████████████  | 327/363 [01:56<00:10,  3.44it/s]\rVal[30/50]:  90%|██████████████████  | 328/363 [01:56<00:10,  3.22it/s]\rVal[30/50]:  91%|██████████████████▏ | 330/363 [01:57<00:11,  2.83it/s]\rVal[30/50]:  91%|██████████████████▏ | 331/363 [01:57<00:10,  3.06it/s]\rVal[30/50]:  91%|██████████████████▎ | 332/363 [01:57<00:08,  3.60it/s]\rVal[30/50]:  92%|██████████████████▎ | 333/363 [01:58<00:08,  3.57it/s]\rVal[30/50]:  92%|██████████████████▍ | 334/363 [01:58<00:09,  3.09it/s]\rVal[30/50]:  92%|██████████████████▍ | 335/363 [01:58<00:09,  2.96it/s]\rVal[30/50]:  93%|██████████████████▌ | 336/363 [01:59<00:09,  2.84it/s]\rVal[30/50]:  93%|██████████████████▌ | 337/363 [01:59<00:09,  2.72it/s]\rVal[30/50]:  93%|██████████████████▌ | 338/363 [01:59<00:08,  2.83it/s]\rVal[30/50]:  93%|██████████████████▋ | 339/363 [02:00<00:08,  2.92it/s]\rVal[30/50]:  94%|██████████████████▊ | 341/363 [02:00<00:06,  3.41it/s]\rVal[30/50]:  94%|██████████████████▊ | 342/363 [02:00<00:05,  4.01it/s]\rVal[30/50]:  94%|██████████████████▉ | 343/363 [02:01<00:04,  4.32it/s]\rVal[30/50]:  95%|██████████████████▉ | 344/363 [02:01<00:05,  3.79it/s]\rVal[30/50]:  95%|███████████████████ | 345/363 [02:01<00:05,  3.37it/s]\rVal[30/50]:  95%|███████████████████ | 346/363 [02:02<00:05,  3.18it/s]\rVal[30/50]:  96%|███████████████████ | 347/363 [02:02<00:05,  3.00it/s]\rVal[30/50]:  96%|███████████████████▏| 348/363 [02:02<00:04,  3.56it/s]\rVal[30/50]:  96%|███████████████████▏| 349/363 [02:03<00:04,  3.25it/s]\rVal[30/50]:  97%|███████████████████▎| 351/363 [02:03<00:03,  3.50it/s]\rVal[30/50]:  97%|███████████████████▍| 352/363 [02:03<00:03,  3.27it/s]\rVal[30/50]:  97%|███████████████████▍| 353/363 [02:04<00:03,  3.04it/s]\rVal[30/50]:  98%|███████████████████▌| 354/363 [02:04<00:03,  2.90it/s]\rVal[30/50]:  98%|███████████████████▌| 355/363 [02:04<00:02,  3.19it/s]\rVal[30/50]:  98%|███████████████████▌| 356/363 [02:05<00:02,  2.95it/s]\rVal[30/50]:  98%|███████████████████▋| 357/363 [02:05<00:02,  2.50it/s]\rVal[30/50]:  99%|███████████████████▋| 358/363 [02:06<00:02,  2.44it/s]\rVal[30/50]:  99%|███████████████████▊| 359/363 [02:06<00:01,  2.48it/s]\rVal[30/50]:  99%|███████████████████▊| 360/363 [02:06<00:01,  2.92it/s]\rVal[30/50]:  99%|███████████████████▉| 361/363 [02:07<00:00,  2.19it/s]\rVal[30/50]: 100%|███████████████████▉| 362/363 [02:07<00:00,  2.55it/s]\rVal[30/50]: 100%|████████████████████| 363/363 [02:07<00:00,  2.84it/s]\nmIOU: 0.484. Acc_50: 0.538. Acc_25: 0.590\nspmIOU: 0.444. spAcc_50: 0.495. spAcc_25: 0.580\nEarly stopping at epoch 30: no improvement for 10 epochs (best=0.4971)\n",
+        "metrics": [],
+        "early_stopping": [
+          [
+            "30",
+            "10",
+            "0.4971"
+          ]
+        ],
+        "errors": [],
+        "local_evidence": {
+          "path": "pipeline/diagnostic_bundles/tick_f77b26d6/stdout_terminal_full.log",
+          "sha256": "ac3477d400bf01b14bc85032f5af5289f0c1b8811771f656bed2dd891eb5a61e"
+        }
+      },
+      "native_logger": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_wfc/20261104_114727/20261104_114727.log",
+        "bytes": 2426715,
+        "sha256": "a5dffadd0d63a66aee295449ee984f3ef615000bd14ffba822d9dd7dc198e5d6",
+        "mtime_ns": 1793792380757995951,
+        "tail": ", layer_2_mask_dice_loss: 0.0132, layer_2_sem_loss: -0.5926, layer_2_indi_loss: 0.0933, layer_3_score_loss: 0.0012, layer_3_mask_bce_loss: 0.0043, layer_3_mask_dice_loss: 0.0119, layer_3_sem_loss: -0.6006, layer_3_indi_loss: 0.0913, layer_4_score_loss: 0.0003, layer_4_mask_bce_loss: 0.0041, layer_4_mask_dice_loss: 0.0123, layer_4_sem_loss: -0.6034, layer_4_indi_loss: 0.0900, orth_reg_loss: 0.0099, loss: 0.6074, grad_total_norm: 1.8721\n2026-11-04 19:37:19,253 - INFO - Epoch [30/50][4650/4686]  lr: 1.2e-05, eta: 10:56:22, data_time: 0.00, iter_time: 0.42, score_loss: 0.0009, mask_bce_loss: 0.0014, mask_dice_loss: 0.0088, sem_loss: -0.7349, indi_loss: 0.0456, sample_loss: 0.1417, layer_0_score_loss: 0.0008, layer_0_mask_bce_loss: 0.0020, layer_0_mask_dice_loss: 0.0177, layer_0_sem_loss: -0.5458, layer_0_indi_loss: 0.1039, layer_1_score_loss: 0.0007, layer_1_mask_bce_loss: 0.0019, layer_1_mask_dice_loss: 0.0121, layer_1_sem_loss: -0.6578, layer_1_indi_loss: 0.0758, layer_2_score_loss: 0.0007, layer_2_mask_bce_loss: 0.0017, layer_2_mask_dice_loss: 0.0148, layer_2_sem_loss: -0.7001, layer_2_indi_loss: 0.0603, layer_3_score_loss: 0.0003, layer_3_mask_bce_loss: 0.0015, layer_3_mask_dice_loss: 0.0131, layer_3_sem_loss: -0.7371, layer_3_indi_loss: 0.0480, layer_4_score_loss: 0.0004, layer_4_mask_bce_loss: 0.0016, layer_4_mask_dice_loss: 0.0133, layer_4_sem_loss: -0.7380, layer_4_indi_loss: 0.0455, orth_reg_loss: 0.0099, loss: 0.5365, grad_total_norm: 2.5300\n2026-11-04 19:37:23,458 - INFO - Epoch [30/50][4660/4686]  lr: 1.2e-05, eta: 10:56:18, data_time: 0.00, iter_time: 0.42, score_loss: 0.0008, mask_bce_loss: 0.0018, mask_dice_loss: 0.0087, sem_loss: 1.2693, indi_loss: 0.0781, sample_loss: 0.1396, layer_0_score_loss: 0.0030, layer_0_mask_bce_loss: 0.0034, layer_0_mask_dice_loss: 0.0153, layer_0_sem_loss: 1.3071, layer_0_indi_loss: 0.1151, layer_1_score_loss: 0.0031, layer_1_mask_bce_loss: 0.0052, layer_1_mask_dice_loss: 0.0154, layer_1_sem_loss: 1.2893, layer_1_indi_loss: 0.1218, layer_2_score_loss: 0.0017, layer_2_mask_bce_loss: 0.0028, layer_2_mask_dice_loss: 0.0104, layer_2_sem_loss: 1.2787, layer_2_indi_loss: 0.0893, layer_3_score_loss: 0.0009, layer_3_mask_bce_loss: 0.0023, layer_3_mask_dice_loss: 0.0094, layer_3_sem_loss: 1.2775, layer_3_indi_loss: 0.0842, layer_4_score_loss: 0.0007, layer_4_mask_bce_loss: 0.0022, layer_4_mask_dice_loss: 0.0090, layer_4_sem_loss: 1.2744, layer_4_indi_loss: 0.0806, orth_reg_loss: 0.0099, loss: 1.2317, grad_total_norm: 1.6766\n2026-11-04 19:37:27,082 - INFO - Epoch [30/50][4670/4686]  lr: 1.2e-05, eta: 10:56:02, data_time: 0.00, iter_time: 0.42, score_loss: 0.0007, mask_bce_loss: 0.0020, mask_dice_loss: 0.0069, sem_loss: -1.5038, indi_loss: 0.1808, sample_loss: 0.1406, layer_0_score_loss: 0.0009, layer_0_mask_bce_loss: 0.0041, layer_0_mask_dice_loss: 0.0162, layer_0_sem_loss: -1.4791, layer_0_indi_loss: 0.1827, layer_1_score_loss: 0.0009, layer_1_mask_bce_loss: 0.0031, layer_1_mask_dice_loss: 0.0111, layer_1_sem_loss: -1.4947, layer_1_indi_loss: 0.1939, layer_2_score_loss: 0.0009, layer_2_mask_bce_loss: 0.0028, layer_2_mask_dice_loss: 0.0096, layer_2_sem_loss: -1.4902, layer_2_indi_loss: 0.2019, layer_3_score_loss: 0.0003, layer_3_mask_bce_loss: 0.0022, layer_3_mask_dice_loss: 0.0071, layer_3_sem_loss: -1.5141, layer_3_indi_loss: 0.1735, layer_4_score_loss: 0.0006, layer_4_mask_bce_loss: 0.0022, layer_4_mask_dice_loss: 0.0072, layer_4_sem_loss: -1.5022, layer_4_indi_loss: 0.1802, orth_reg_loss: 0.0099, loss: 0.2901, grad_total_norm: 4.1470\n2026-11-04 19:37:31,048 - INFO - Epoch [30/50][4680/4686]  lr: 1.2e-05, eta: 10:55:53, data_time: 0.00, iter_time: 0.42, score_loss: 0.0002, mask_bce_loss: 0.0006, mask_dice_loss: 0.0053, sem_loss: -0.6692, indi_loss: 0.0762, sample_loss: 0.1436, layer_0_score_loss: 0.0016, layer_0_mask_bce_loss: 0.0012, layer_0_mask_dice_loss: 0.0143, layer_0_sem_loss: -0.5018, layer_0_indi_loss: 0.1309, layer_1_score_loss: 0.0013, layer_1_mask_bce_loss: 0.0008, layer_1_mask_dice_loss: 0.0088, layer_1_sem_loss: -0.6313, layer_1_indi_loss: 0.0943, layer_2_score_loss: 0.0008, layer_2_mask_bce_loss: 0.0008, layer_2_mask_dice_loss: 0.0086, layer_2_sem_loss: -0.6602, layer_2_indi_loss: 0.0825, layer_3_score_loss: 0.0003, layer_3_mask_bce_loss: 0.0006, layer_3_mask_dice_loss: 0.0057, layer_3_sem_loss: -0.6691, layer_3_indi_loss: 0.0796, layer_4_score_loss: 0.0003, layer_4_mask_bce_loss: 0.0007, layer_4_mask_dice_loss: 0.0056, layer_4_sem_loss: -0.6709, layer_4_indi_loss: 0.0762, orth_reg_loss: 0.0099, loss: 0.5535, grad_total_norm: 2.6566\n2026-11-04 19:37:32,816 - INFO - Validation\n2026-11-04 19:39:40,743 - INFO - Evaluate referring segmentation: 9508\n2026-11-04 19:39:40,757 - INFO - mIoU : 0.48382365703582764\n2026-11-04 19:39:40,758 - INFO - mIOU: 0.484. Acc_50: 0.538. Acc_25: 0.590\n2026-11-04 19:39:40,758 - INFO - spmIOU: 0.444. spAcc_50: 0.495. spAcc_25: 0.580\n2026-11-04 19:39:40,758 - INFO - Early stopping at epoch 30: no improvement for 10 epochs (best=0.4971)\n",
+        "metrics": [
+          0.48364129662513733,
+          0.48184701800346375,
+          0.48421984910964966,
+          0.4811730682849884,
+          0.48382365703582764
+        ],
+        "early_stopping": [
+          [
+            "30",
+            "10",
+            "0.4971"
+          ]
+        ],
+        "errors": [],
+        "local_evidence": {
+          "path": "pipeline/diagnostic_bundles/tick_f77b26d6/native_logger_terminal_full.log",
+          "sha256": "a5dffadd0d63a66aee295449ee984f3ef615000bd14ffba822d9dd7dc198e5d6"
+        }
+      }
+    },
+    "checkpoints": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_wfc/20261104_114727/last.pth",
+        "bytes": 884204776,
+        "mtime_ns": 1793790281395253266,
+        "sha256": "8cbad3409397b63b6d61b13ccde021eac962efa84a297bb1855b481f2e3f3fe1"
+      }
+    ],
+    "queries": {
+      "gpu": {
+        "command": [
+          "nvidia-smi",
+          "-i",
+          "0",
+          "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+          "--format=csv,noheader,nounits"
+        ],
+        "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 0, 46, 32607\n",
+        "stderr": "",
+        "returncode": 0
+      },
+      "compute": {
+        "command": [
+          "nvidia-smi",
+          "-i",
+          "0",
+          "--query-compute-apps=gpu_uuid,pid,process_name",
+          "--format=csv,noheader,nounits"
+        ],
+        "stdout": "",
+        "stderr": "",
+        "returncode": 0
+      }
+    },
+    "GPU1": "NOT_QUERIED_NOT_AUTHORIZED",
+    "signals_sent": false,
+    "new_model_or_backward_executed": false
+  }
+}

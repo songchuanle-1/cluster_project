@@ -1,0 +1,100 @@
+{
+  "owner": {
+    "token": "a6e82f44da954be096beeaef0a3755bc",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-30T08:07:36.868186+00:00",
+    "deadline_at": "2026-10-30T09:07:36.868186+00:00",
+    "context_sha256": "92328cba570e995a45b3f9f1f2afea593c76b3bd397f39fb70fb143a8400d723",
+    "pending_sha256": "d09ab844ae1689008acf65b670499c2a2fe7ea0a4799e269df48b19739312ac2"
+  },
+  "observed_at": "2026-10-30T08:35:17.346667+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import socket,os,json,subprocess,hashlib,time,re\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=json.loads('\"'\"'{\"pid\": 3696093, \"start_ticks\": \"96568246\", \"root\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1\", \"commit\": \"c9be548699cd66bf68badff9ae6198a03eafa142\", \"log\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc_20261030_163221.log\", \"config\": \"configs/Quard/ctf_hcg_csort_sfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc.yaml\", \"name\": \"model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc\", \"hashes\": {\"configs/Quard/ctf_hcg_csort_sfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc.yaml\": \"a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/__init__.py\": \"327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/backbone.py\": \"1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/dec.py\": \"6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/hier_postprocess.py\": \"8a921e4a908497d0716d656c48b617c1624af425ee0086fee4c95640029c74e8\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/loss.py\": \"c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/network.py\": \"5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/sample_model.py\": \"b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/synchronous_forest.py\": \"1a77779eecad16ae4ab948ba501a429d31139115c48890781a43ddb070c9e1da\"}}'\"'\"');pid=p['\"'\"'pid'\"'\"'];proc=Path('\"'\"'/proc'\"'\"')/str(pid)\nassert proc.exists() and proc.stat().st_uid==os.getuid()\ndef identity():\n cmd=(proc/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode();env=dict(v.split(b'\"'\"'='\"'\"',1) for v in (proc/'\"'\"'environ'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if b'\"'\"'='\"'\"' in v)\n assert '\"'\"'tools/train.py'\"'\"' in cmd and p['\"'\"'config'\"'\"'] in cmd and str((proc/'\"'\"'cwd'\"'\"').resolve())==p['\"'\"'root'\"'\"']\n initial_env=env.get(b'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"');assert initial_env in (None,b'\"'\"'1'\"'\"')\n return {'\"'\"'pid'\"'\"':pid,'\"'\"'argv'\"'\"':cmd,'\"'\"'cwd'\"'\"':str((proc/'\"'\"'cwd'\"'\"').resolve()),'\"'\"'start_ticks'\"'\"':(proc/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19],'\"'\"'initial_cuda_environment'\"'\"':initial_env.decode() if initial_env is not None else '\"'\"'NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT'\"'\"'}\nbefore=identity();assert before['\"'\"'start_ticks'\"'\"']==p['\"'\"'start_ticks'\"'\"'] and str((proc/'\"'\"'fd'\"'\"'/'\"'\"'1'\"'\"').resolve())==p['\"'\"'log'\"'\"'];head=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',p['\"'\"'root'\"'\"'],'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip();assert head==p['\"'\"'commit'\"'\"']\ngpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'1'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nrow=[x.strip() for x in gpu.split('\"'\"','\"'\"')];assert row[0]=='\"'\"'1'\"'\"' and row[1]=='\"'\"'GPU-7f82edb9-f620-8045-caea-a75232265cd1'\"'\"'\ncontexts=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'1'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nassert str(pid) in [line.split('\"'\"','\"'\"')[0].strip() for line in contexts.splitlines()]\nhashes={}\nfor rel,want in p['\"'\"'hashes'\"'\"'].items():\n actual=hashlib.sha256((Path(p['\"'\"'root'\"'\"'])/rel).read_bytes()).hexdigest();hashes[rel]=actual\n assert actual==(want if rel.endswith('\"'\"'.py'\"'\"') else '\"'\"'77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea'\"'\"')\ndef sample():\n path=Path(p['\"'\"'log'\"'\"']);size=path.stat().st_size\n with path.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,size-1200000));data=f.read()\n txt=data.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"');steps=[(int(a),int(b)) for a,b in re.findall(r'\"'\"'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',txt)]\n assert not any(e in txt for e in ['\"'\"'Traceback'\"'\"','\"'\"'CUDA out of memory'\"'\"','\"'\"'RuntimeError'\"'\"'])\n return {'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'log_size'\"'\"':size,'\"'\"'tail_sha256'\"'\"':hashlib.sha256(data).hexdigest(),'\"'\"'last_native_step'\"'\"':steps[-1] if steps else None,'\"'\"'max_native_step'\"'\"':max(steps) if steps else None,'\"'\"'tail_exception_seen'\"'\"':False}\na=sample();time.sleep(3);b=sample();after=identity();assert before==after\nassert b['\"'\"'log_size'\"'\"']>a['\"'\"'log_size'\"'\"'] and a['\"'\"'max_native_step'\"'\"'] is not None and b['\"'\"'max_native_step'\"'\"'] is not None and tuple(b['\"'\"'max_native_step'\"'\"'])>tuple(a['\"'\"'max_native_step'\"'\"']), '\"'\"'Original native TRAIN step did not strictly grow in the two actual samples'\"'\"'\nfd=[]\nfor f in (proc/'\"'\"'fd'\"'\"').iterdir():\n try:\n  target=str(f.resolve())\n  if target.endswith('\"'\"'.log'\"'\"') and target.startswith('\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/'\"'\"'+p['\"'\"'name'\"'\"']+'\"'\"'/'\"'\"'):fd.append(target)\n except (FileNotFoundError,PermissionError):pass\nfd=sorted(set(fd));metric_lines=[]\nif len(fd)==1:\n with open(fd[0],errors='\"'\"'replace'\"'\"') as f:\n  for line in f:\n   if '\"'\"'mIoU :'\"'\"' in line or '\"'\"'resume start_epoch:'\"'\"' in line:metric_lines.append(line.strip())\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'identity_before'\"'\"':before,'\"'\"'identity_after'\"'\"':after,'\"'\"'runtime_commit'\"'\"':head,'\"'\"'source_hashes'\"'\"':hashes,'\"'\"'samples'\"'\"':[a,b],'\"'\"'native_logger_paths'\"'\"':fd,'\"'\"'metric_lines'\"'\"':metric_lines,'\"'\"'checkpoint_body_read'\"'\"':False,'\"'\"'GPU_queries'\"'\"':'\"'\"'Read-only GPU1 UUID/compute-PID queries only'\"'\"','\"'\"'GPU1'\"'\"':gpu,'\"'\"'GPU1_contexts'\"'\"':contexts,'\"'\"'signals_sent'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stdout_sha256": "efcea2bd96245be4ef3d92cc58fce753565d9fd59feed01d2a736943ffdd57cd",
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-10-30T08:35:18.286775+00:00",
+    "hostname": "dl04-MS-7E06",
+    "identity_before": {
+      "pid": 3696093,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_sfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc.yaml --gpu_ids 1 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "96568246",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "identity_after": {
+      "pid": 3696093,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_sfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc.yaml --gpu_ids 1 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "96568246",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "runtime_commit": "c9be548699cd66bf68badff9ae6198a03eafa142",
+    "source_hashes": {
+      "configs/Quard/ctf_hcg_csort_sfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc.yaml": "77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/hier_postprocess.py": "8a921e4a908497d0716d656c48b617c1624af425ee0086fee4c95640029c74e8",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/synchronous_forest.py": "1a77779eecad16ae4ab948ba501a429d31139115c48890781a43ddb070c9e1da"
+    },
+    "samples": [
+      {
+        "observed_at": "2026-10-30T08:35:15.283250+00:00",
+        "log_size": 147045,
+        "tail_sha256": "8871de0400c7921ab4e60d6c7ad8062e95806842cf3dcfdb59717322ec64225d",
+        "last_native_step": [
+          1,
+          359
+        ],
+        "max_native_step": [
+          1,
+          359
+        ],
+        "tail_exception_seen": false
+      },
+      {
+        "observed_at": "2026-10-30T08:35:18.284753+00:00",
+        "log_size": 148795,
+        "tail_sha256": "4c359cf7c4400145a3f73a29ec767785274cf04142440c30d2816cf0a2aee117",
+        "last_native_step": [
+          1,
+          366
+        ],
+        "max_native_step": [
+          1,
+          366
+        ],
+        "tail_exception_seen": false
+      }
+    ],
+    "native_logger_paths": [
+      "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/20261030_163228.log"
+    ],
+    "metric_lines": [],
+    "checkpoint_body_read": false,
+    "GPU_queries": "Read-only GPU1 UUID/compute-PID queries only",
+    "GPU1": "1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 13679, 53",
+    "GPU1_contexts": "3696093, 13654",
+    "signals_sent": false
+  },
+  "precise_native_validation": {
+    "values": null,
+    "best": null,
+    "no_improve": null,
+    "scope": "Exact live original logger mIoU lines only; no checkpoint read, current training incomplete."
+  }
+}

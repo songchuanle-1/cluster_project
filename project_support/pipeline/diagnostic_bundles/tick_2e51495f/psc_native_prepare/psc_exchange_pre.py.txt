@@ -1,0 +1,23 @@
+        def exchange_pre(owner,values):
+            points,positions,point_mask,normalized,ids=values
+            assert owner is core and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert points is state['psc_encoder_features_ref'] and positions is state['psc_encoder_positions_ref']
+            assert positions is state['psc_padded_positions_ref'] and point_mask is state['psc_encoder_mask_ref']
+            assert positions.shape[:2]==points.shape[:2] and positions.shape[-1]==3
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[batch].detach().cpu().tolist() for level in ids) for batch in range(int(points.shape[0]))]
+            record={'forward':state['forward_index'],'point_input':summary(points),'point_padding':summary(point_mask),
+                'native_positions':summary(positions),'native_positions_sha256':fingerprint(torch,positions),
+                'exact_original_decoder_padded_positions_reference':True,
+                'exact_original_encoder_feature_and_mask_references':True,
+                'normalized_inputs':[summary(value) for value in normalized],'normalized_bank_sha256':fingerprint(torch,normalized),
+                'scene_observations':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual original padded native coordinates, original valid point/coordinate masking and native dtype cast, true support plan, eleven original group means, three original signed centered3xC cross products, actual within+between total, five returned moments, exact10C pack and original shared factor/split/restoration. Wrappers call originals once and return original objects; no coordinate/statistic/feature/model/loss replay.',
+                'extra_FP32_Jacobian_minimum_effect_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'psc_context' not in state
+            state['psc_context']={'record':record,'members':members,'normalized':normalized,'ids_ref':ids,
+                'points_ref':points,'positions_ref':positions,'mask_ref':point_mask,
+                'row_refs':[],'selector_refs':[],'selected':{},
+                'widths':[int(value.shape[1]) for value in normalized],'scene_contexts':[],'current_scene':None}
+            state['psc_input_points_ref']=points;state['psc_point_mask_ref']=point_mask
+            for level,value in enumerate(normalized):watch(value,record,'native_normalized_level'+str(level)+'_gradients')

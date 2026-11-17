@@ -1,0 +1,121 @@
+{
+  "id": "M206-CGCA",
+  "config": "configs/Quard/ctf_hcg_csort_cgca/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca.yaml",
+  "server": "server-4",
+  "gpu": "1",
+  "status": "waiting",
+  "history": [
+    {
+      "ts": "2026-10-21T05:15:56.221447",
+      "action": "launched",
+      "gpu": "1"
+    },
+    {
+      "ts": "2026-10-21T03:24:57.819641+00:00",
+      "action": "user_paused_and_queued_full_resume",
+      "from_gpu": "1",
+      "to_gpu": "0",
+      "checkpoint": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261021_gpu0_resume_031718_r2/20261021_051530/last.pth",
+      "checkpoint_sha256": "2e11ea38ba81b657301a34efc11483455fb1f9eeb83a5f4d52fbc40ffb4669d7",
+      "meta": {
+        "epoch": 8,
+        "best_miou": 0.4751223027706146,
+        "epochs_no_improve": 0
+      },
+      "stop_confirmation": {
+        "path": "pipeline/manual_ops/20261021_gpu0_resume_031718_r2/stop_confirmation_reconciled.json",
+        "sha256": "5a20e4432db2bb6cfc4d3efe4637041f26f4635b430dad6c972dca0818043490"
+      }
+    },
+    {
+      "ts": "2026-10-21T15:25:10.463864+00:00",
+      "action": "human_reenabled_gpu1_resume_retargeted",
+      "from_gpu": "0",
+      "to_gpu": "1",
+      "resource_authorization": {
+        "path": "pipeline/authorizations/server4_gpu1_reenabled_20261021_gpu1_reenable_152505.json",
+        "sha256": "30f17c5bcb66782a255d7eed4bb00277e807bfea4e64a48a499ab749fadd2fa7"
+      },
+      "same_checkpoint_sha256": "2e11ea38ba81b657301a34efc11483455fb1f9eeb83a5f4d52fbc40ffb4669d7",
+      "native_resume_start_epoch": 9
+    },
+    {
+      "ts": "2026-10-21T23:28:11.184894",
+      "action": "launched",
+      "gpu": "1"
+    },
+    {
+      "ts": "2026-10-21T15:30:06.247167+00:00",
+      "action": "native_full_resume_confirmed",
+      "epoch": 9,
+      "restored_best": 0.4751223027706146,
+      "restored_patience_counter": 0,
+      "gpu": "1",
+      "pid": 732137,
+      "native_launch_proof": {
+        "path": "pipeline/diagnostic_bundles/tick_8bec58e9/native_resume_launch_proof.json",
+        "sha256": "7bd06fd5989e05f401a8ab460c8ece5b7baca587d856a8c5c3987b8a3b01ab74"
+      }
+    },
+    {
+      "ts": "2026-10-22T02:57:54.299235+00:00",
+      "action": "user_paused_GPU1_release_to_others",
+      "checkpoint_meta": {
+        "epoch": 24,
+        "best_miou": 0.4952535927295685,
+        "epochs_no_improve": 7
+      },
+      "checkpoint": {
+        "path": "pipeline/manual_ops/20261022_gpu1_pause_105409/checkpoint_evidence.json",
+        "sha256": "8df6674ca8487a97c81363ddef22f215fee94eab4a1d89b5e077db53f39849b6"
+      },
+      "stop_confirmation": {
+        "path": "pipeline/manual_ops/20261022_gpu1_pause_105409/stop_confirmation.json",
+        "sha256": "e04990fd0dca48aa6b7026f09e617478337fcc78ad0307876e9bbaf4844873e0"
+      },
+      "no_auto_resume": true
+    }
+  ],
+  "launch_verified": false,
+  "launch_verification": "user_paused",
+  "paused_run": {
+    "pid": 732137,
+    "gpu": "1",
+    "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca_20261021_232722.log",
+    "launched": "2026-10-21T23:28:10",
+    "launch_verified": true,
+    "launch_verification": "training_progress",
+    "claimed_gpu": "1",
+    "resume_from": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261021_gpu0_resume_031718_r2/20261021_051530/last.pth",
+    "resume_authorization": {
+      "path": "pipeline/authorizations/m206_resume_gpu1_20261021_gpu1_reenable_152505.json",
+      "sha256": "2340cf75fc5ca0a0d219b938309849609577f6ea7008ea12851887f17885dd56"
+    },
+    "resume_checkpoint_evidence": {
+      "path": "pipeline/manual_ops/20261021_gpu1_reenable_152505/checkpoint_evidence_gpu1.json",
+      "sha256": "a3875e2d1de9ce2a3160f2ae54741fe900f32201a542988f19b2013244028615"
+    },
+    "paused_at": "2026-10-22T02:57:54.113883+00:00",
+    "reason": "GPU1可以先暂停训练了  给别人腾出来一张卡",
+    "starttime": "21298582",
+    "checkpoint": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_gpu1_pause_105409/20261021_232736/last.pth",
+    "checkpoint_sha256": "e9b42b2632762dae5ca49d80b3272889809b1ffe3ec30dd377690af8cb2e8e9d",
+    "meta": {
+      "epoch": 24,
+      "best_miou": 0.4952535927295685,
+      "epochs_no_improve": 7
+    },
+    "stop_confirmation": {
+      "path": "pipeline/manual_ops/20261022_gpu1_pause_105409/stop_confirmation.json",
+      "sha256": "e04990fd0dca48aa6b7026f09e617478337fcc78ad0307876e9bbaf4844873e0"
+    }
+  },
+  "resume_from": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_gpu1_pause_105409/20261021_232736/last.pth",
+  "resume_checkpoint_evidence": {
+    "path": "pipeline/manual_ops/20261022_gpu1_pause_105409/checkpoint_evidence.json",
+    "sha256": "8df6674ca8487a97c81363ddef22f215fee94eab4a1d89b5e077db53f39849b6"
+  },
+  "training_status": "paused_by_user",
+  "dispatch_hold": "User paused M206 to release GPU1 to others. No automatic resume or GPU0 migration; wait for explicit resume instruction and full source/checkpoint/resource validation.",
+  "resume_authorized": false
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "status": "PROPOSED_M223_FINE_COARSE_COMPLETE_BIPARTITE_DAG_BOUNDED_BOUNDARY_REVIEW_NOT_IMPLEMENTATION_OR_NATIVE_PASS",
+  "recorded_at": "2026-10-29T10:22:19.341641+00:00",
+  "candidate_id": null,
+  "experiment_id": "M223_PROPOSED_UNNAMED",
+  "code_commit": null,
+  "material_concerns": [],
+  "implementation_reviewed": false,
+  "anchors": {
+    "current148_route_metadata_index": {
+      "path": "pipeline/diagnostic_bundles/tick_f8d84d12/candidate_route_index.json",
+      "sha256": "b6755b4675736c116a429d423393858e90a4808aa58ef0c0bfd5f7fb7d15fa17"
+    },
+    "bounded_CPA_source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/coarse_cross_attention.py",
+      "sha256": "c75b79e8c5fdddba1d3f86125e711fe5e9d305788b70e0bde44c3d6b8e5ad514"
+    },
+    "bounded_CRE_source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/root_exchange.py",
+      "sha256": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232"
+    },
+    "bounded_BEC_source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bec/bipartite_edges.py",
+      "sha256": "9863f14db172c27a39152bdd55f22722e5203ede7c53386fac57fa73a2ef44c1"
+    }
+  },
+  "proposed_DAG": "For true fineF and true coarseR in each original scene: q_fr=GELU(Wpair[zfine_f,zcoarse_r]); fine_delta_f=mean_r q_fr; coarse_delta_r=mean_f q_fr; middle_delta_j=GELU(Wmid[zmiddle_j,mean_{truefine originalparent=j} fine_delta_f]). Original3LN/raw3skips/rawbank/membership/CSORT/HCG/singleinst remain.",
+  "bounded_route_comparison": {
+    "CPA": "Actual projection-free point-to-coarse per-head dot-product/softmax readback; only point message changes, not coarse bank. Distinct from dense learned channel-vector messages between fine-bank and all coarse-bank nodes with both endpoint reductions.",
+    "CRE": "Actual shared coarse-root pairMLP means excluding ownroot plus fine/middle decode from only their original rootcontext; no direct fine-to-every-root edge or coarse collection of every fine vector.",
+    "BEC": "Actual original-membership up/down edge compositions with split retained/up branches and original coarse FFN; no complete nonancestor fine-coarse bipartite graph.",
+    "APF_AOC_known_recent_graphs": "Ancestry-only private triplets or two ancestor-order diamonds; no all-root Cartesian product. Same broad hierarchy/message-passing family is acknowledged, not a novelty claim.",
+    "metadata_scope": "Current148 IDs and short hypotheses only, bounded pair/coarse/global/bipartite/agg keywords; no exact same graph identified. This is not an exhaustive historical or literature uniqueness proof."
+  },
+  "ban_boundary": {
+    "no_rawpool_strategy_or_multi_config_sweep": true,
+    "private_fixed_edge_means_do_not_by_themselves_hit_raw_aggregation_config_ban": true,
+    "no_QKV_attention_weights_softmax_selector_or_pointN_squared": true,
+    "no_new_gate_extra_residual_or_repeated_instance_injection": true,
+    "true_cluster_product_native_cap_F256_R8_rows2048_not_point_attention": true,
+    "old_held_or_rejected_failures_not_repaired_reopened_or_relabelled": true
+  },
+  "known_limits_and_required_source_precision": [
+    "The fine/coarse outputs are two marginals of the sameq tensor. Real-arithmetic globalmean(fine_delta)=globalmean(coarse_delta) is descriptive coupling, not an FP32 conservation admission gate.",
+    "Global averaging/washout, redundant root contexts and unequal layer roles are plausible limitations; effect and novelty remain unknown.",
+    "Original raw ancestors/features may already carry global/descendant information; new edges are an explicit computational graph fork, not proof of new information or a diagnosed task deficit.",
+    "Only true supported original IDs participate. Padding/unsupported rows have zero private delta, never fake pairing. Middle mean must use truefine original membership and count each fine once, not pointmultiplicity or a mean of coarse groups.",
+    "AtC256 original capacities256/64/8:2maps parameters262656 and dense linearMAC276824064 vs original3FFNs171966464, difference104857600. These source estimates are not actual whole-model FLOPs/latency/memoryPASS.",
+    "Any actual prototype/source review must wait for real frozen files and hashes. No implementation/native/resources/initialization/autograd/result is signed here."
+  ],
+  "outcome": "No definite sameDAG or explicit ban blocker found in bounded evidence; root may choose exactly this one structural prototype. General novelty/efficacy unknown does not create a new paper/measurement gate. If actual source differs or reveals exact old-route equivalence, flag then rather than changing protocol or proposing a second candidate.",
+  "reviewer_actions": {
+    "only_bounded_current_short_metadata_and3_source_reads": true,
+    "Git_SSH_GPU_Torch_or_root_entry": false,
+    "old655_grant_checkpoint_or_log_bodies_or_old_suites": false,
+    "model_implementation_shared_write_or_native": false
+  }
+}

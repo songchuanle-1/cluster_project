@@ -1,0 +1,26 @@
+{
+  "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+  "scope": "Independent agent read-only source/AST review, not native behavior",
+  "findings": [
+    "PackageAST and local relative imports valid; native YAML unchanged.",
+    "FPS partitioner, original feature aggregation and CSORT unchanged.",
+    "Real pointoccupiedmask propagated; emptyID/padding excluded from geometry/RHS.",
+    "Original child RHS remains in autograd; detached geometry batched3x3 pinv.",
+    "Updatedparent intercept coarse→mid→fine correct; fine/mid return twoTensor, coarse remains outside, enables isolated newparent inputgradient capture."
+  ],
+  "limits": [
+    "FP32 normal equations square conditioning; default native pinv cutoff frozen, no ridge/precision tuning.",
+    "Native tensor execution, finite backward, latency/FLOPs/memory and mIoU allunrun.",
+    "Singlechild detail0; up to4 independentchildren mayreduce togroupmean replacement; zero fine/mid biasgradient expected."
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_34cf158b/version.json",
+      "sha256": "2b60738011578bcdfc26c37fc03f79a2b4d6b548b748c7b28a70a87e94a8b9e7"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_34cf158b/static_validation.json",
+      "sha256": "67dbec31ac8f1cb2bc9bd6021fd552f8044a5f6d4761ea453a4bb3fccde4fcc4"
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+--- tick9573/dispatch_m235_once.py
++++ tickc1fe/dispatch_cso_once.py
+@@ -14,10 +14,10 @@
+ HERE = Path(__file__).resolve().parent
+ TICK = HERE.parent
+ DRAFT_EXECUTION_DISABLED = False
+-EXPECTED_OWNER = {'token': '9573f1fc8cad435fb47660949b563298', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-10T11:34:11.138562+00:00', 'deadline_at': '2026-11-10T12:34:11.138562+00:00', 'context_sha256': '963ebc596263bcce708d1b19a7a4eac472136dbe68ac348d242d38ddc5e2151e', 'pending_sha256': '3809a1ef5963b17c4df04c3870d57c65b50cd273631eb1f2ab25b8f6b8284857'}
+-TOKEN = '9573f1fc8cad435fb47660949b563298'
++EXPECTED_OWNER = {'token': 'c1fe217800894083b65baac45f79aa83', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-14T01:52:47.538159+00:00', 'deadline_at': '2026-11-14T02:52:47.538159+00:00', 'context_sha256': 'e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4', 'pending_sha256': '3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6'}
++TOKEN = 'c1fe217800894083b65baac45f79aa83'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+-SOURCE = 'b1e639b3ceb14bb5c65d9f81a084d41c834b951c'
++SOURCE = '5413102c57b526035f3920b5e7a81f3b58ad764d'
+ RUNTIME = "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+ GPU_UUID = "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+ SKILL = "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline"
+@@ -45,7 +45,7 @@
+ 
+ from packet_runtime import guard as packet_guard, arguments, require_arguments, actual_production
+ from source_resolver import scoped, verify
+-EXEC = TICK / "m235_dispatch_execution"
++EXEC = TICK / "cso_dispatch_execution"
+ CALLS = []
+ 
+ 
+@@ -77,8 +77,8 @@
+         capture_output=True, text=True, encoding="utf8", errors="replace", timeout=timeout,
+     )
+     number = len(CALLS)
+-    stdout = EXEC / f"m235_dispatch_ssh_{number:02d}.stdout"
+-    stderr = EXEC / f"m235_dispatch_ssh_{number:02d}.stderr"
++    stdout = EXEC / f"cso_dispatch_ssh_{number:02d}.stdout"
++    stderr = EXEC / f"cso_dispatch_ssh_{number:02d}.stderr"
+     with stdout.open("x", encoding="utf8") as stream:
+         stream.write(result.stdout)
+     with stderr.open("x", encoding="utf8") as stream:
+@@ -107,7 +107,7 @@
+     ACTIVE_ARGS = args
+     owner = guard()
+     EXEC.mkdir(exist_ok=True)
+-    assert not (EXEC / "m235_dispatch_intent.json").exists(), "Existing intent: reconcile, never replay"
++    assert not (EXEC / "cso_dispatch_intent.json").exists(), "Existing intent: reconcile, never replay"
+     review = Path(args.production_review)
+     production_path = Path(args.production_result)
+     production = actual_production(production_path, review, args.production_review_sha256)
+@@ -115,7 +115,7 @@
+     raw = yaml.safe_load((ROOT / "SERVERS.yaml").read_text(encoding="utf8"))["servers"]["server-4"]
+     assert raw["remote_code_root"] == RUNTIME
+     assert sha(ROOT / "SERVERS.yaml") == read(HERE / "baseline.json")["SERVERS_sha256"]
+-    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/sinc_path_prod_9573f1fc/conda_source.sh"
++    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178/conda_source.sh"
+     assert raw["allowed_gpus"] == [0] and raw["max_tasks_per_gpu"] == 1
+     assert raw["allow_external_overlay"] is True and raw["task_memory_mb"] == 20000
+     assert raw["expected_hostname"] == "dl04-MS-7E06"
+@@ -130,7 +130,7 @@
+         queue = monitor.load_queue(str(ROOT))
+         eligible = [t for ts in queue["gpu_queues"].values() for t in ts
+                     if t.get("status") == "waiting" and not t.get("dispatch_hold")]
+-        assert len(eligible) == 1 and eligible[0]["id"] == "M235-SINC"
++        assert len(eligible) == 1 and eligible[0]["id"] == "M236-CSO"
+         assert not [t for ts in queue["gpu_queues"].values() for t in ts if t.get("status") in ("running", "claiming")]
+         task = eligible[0]
+         assert task["code_commit"] == SOURCE and not task.get("resume_authorized") and not task.get("resume_from")
+@@ -151,10 +151,13 @@
+  assert hashlib.sha256((Path(P["stage"])/relative).read_bytes()).hexdigest()==expected
+ assert not Path(P["marker"]).exists()
+ assert hashlib.sha256((root/P["config"]).read_bytes()).hexdigest() in (P["source_config_sha256"],P["config_sha256"])
+-row=subprocess.check_output(["nvidia-smi","-i","0","--query-gpu=index,uuid,memory.used,memory.total,utilization.gpu","--format=csv,noheader,nounits"],text=True).strip()
+-v=[s.strip() for s in row.split(",")]
+-assert v[:2]==["0",P["uuid"]]
+-assert int(v[3])-int(v[2])>=20000
++from types import ModuleType
++helper_source=P["direct_free_source"]
++assert hashlib.sha256(helper_source).hexdigest()==P["direct_free_sha256"]
++helper=ModuleType("cso_prelaunch_direct_free")
++exec(compile(helper_source,"reviewed_direct_memory_free_guard.py","exec"),helper.__dict__)
++direct=helper.require_direct_free_memory()
++row=", ".join(map(str,(direct["index"],direct["uuid"],direct["memory_free_mib"],direct["memory_used_mib"],direct["memory_total_mib"],direct["utilization_percent"])))
+ contexts=subprocess.check_output(["nvidia-smi","-i","0","--query-compute-apps=pid,used_memory","--format=csv,noheader,nounits"],text=True).strip()
+ trainers=[]
+ for proc in Path("/proc").iterdir():
+@@ -177,7 +180,7 @@
+   c=os.lstat(path);assert (c.st_dev,c.st_ino)==(item["dev"],item["ino"])
+  finally:os.close(fd)
+ print(json.dumps({"observed_at":datetime.now(timezone.utc).isoformat(),"gpu_row":row,
+- "free_memory_mib":int(v[3])-int(v[2]),"contexts":contexts,"project_trainers":trainers,
++ "free_memory_mib":direct["memory_free_mib"],"memory_free_queried_directly":True,"contexts":contexts,"project_trainers":trainers,
+  "three_original_inodes_available":True,"all_production_bytes_verified":True,
+  "overlay_authorized":True,"exclusive_performance_claimed":False,"signals_sent":False}))
+ '''
+@@ -186,15 +189,17 @@
+                       "marker": production["binding"]["one_shot_marker"],
+                       "config": task["config"],
+                       "config_sha256": production["binding"]["runtime_config_sha256"],
+-                      "source_config_sha256": "d479b53c7874d2515f91af32acdf908a884c91ebb24bcec42d53d12c39c74369",
+-                      "locks": production["binding"]["lock_files"]}
++                      "source_config_sha256": '908bc08a4d78dcc2723588abb7a6e3adeb169a79e788ce74ee5afbd78c991081',
++                      "locks": production["binding"]["lock_files"],
++                      "direct_free_source": (HERE / "direct_memory_free_guard.py").read_bytes(),
++                      "direct_free_sha256": sha(HERE / "direct_memory_free_guard.py")}
+             observation = json.loads(ssh(server["host"], server["user"],
+                 "/usr/bin/python3 -B -c " + shlex.quote("P=" + repr(params) + "\n" + program)))
+-            save(EXEC / "m235_prelaunch_actual_resources.json", observation)
++            save(EXEC / "cso_prelaunch_actual_resources.json", observation)
+             # Canonical monitor/closure retain admission, source, live memory,
+             # concurrency and progress gates. The exact existence probe above
+             # is read-only; no process signal is sent.
+-            save(EXEC / "m235_dispatch_intent.json", {
++            save(EXEC / "cso_dispatch_intent.json", {
+                 "recorded_at": datetime.now(timezone.utc).isoformat(),
+                 "owner": {k: owner[k] for k in ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")},
+                 "source": SOURCE, "runtime_root": RUNTIME, "task": task,
+@@ -212,8 +217,8 @@
+         finally:
+             monitor.ssh = original_ssh
+         current = read(ROOT / "pipeline/queue.json")
+-        actual = next(t for t in current["gpu_queues"]["server-4"] if t["id"] == "M235-SINC")
+-        save(EXEC / "m235_dispatch_result.json", {
++        actual = next(t for t in current["gpu_queues"]["server-4"] if t["id"] == "M236-CSO")
++        save(EXEC / "cso_dispatch_result.json", {
+             "recorded_at": datetime.now(timezone.utc).isoformat(), "owner_token": TOKEN,
+             "task": actual, "canonical_events": events, "ssh_calls": CALLS,
+             "signals_sent": False, "launch_verified": actual.get("launch_verified") is True,

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "stable_id": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "experiment_id": "M210-PSNC",
+  "status": "PREPARED_STATIC_ONLY_UNEXECUTED",
+  "code_commit": null,
+  "formula": "Y=X+Q^T(f(QX)-b)+b; b=f(0); f=original FFN1(original LN1(.))",
+  "original_skip": "retained, no new residual path",
+  "Q": "real orthonormal DCT-II fixed sign convention",
+  "sort": "exact current detached per_layer_coords[2], lex xyz then original middle ID",
+  "support": "bincount(ids1[ids0],minlength=ids2.numel())>0",
+  "parent": "original ids2 values",
+  "n1": "no Q or -b+b, original per-row f in the common working call",
+  "n0": "no group",
+  "all_groups_size_le1": "original [B,K,C] f call, no sentinel",
+  "mixed_groups": "one [B,K+1,C] original norm/FFN call, private sentinel per batch, differentiate b",
+  "empty_and_pad": "not mixed, original per-row FFN/bias semantics",
+  "dropout": "existing native0 only, refuse nonzero; no mask protocol change",
+  "parameters_buffers_added": 0,
+  "DCT_cache": "none",
+  "state_dict_cache": "no registration",
+  "actual_fp32_native_data_resources": "NOT_RUN",
+  "hypothesis": "Fixed signed-mode nonlinear processing can couple occupied middle sibling evidence before unchanged HCG readback; efficacy unknown",
+  "native_minimum_future_tests": [
+    "exact staged resolver/source/YAML and no fallback",
+    "original native train.train TwoNativeBatches with finite losses/backwards/optimizer steps",
+    "middle FFN native finite gradients and actual weights updates; one call per forward",
+    "actual supported nonsingleton groups, DCT mode/sign/order/inverse/sentinel graph and HCG input records",
+    "same-forward rawbank/IDs/maps/CSORT and single inst path preservation",
+    "M95 original paired TRAIN fingerprints,seed,pretrain,loader/common observations",
+    "old handler fvcore bs1/lang1/warm20/repeat100 full unsupported report and <=10G",
+    "relative original latency/memory and existing15% retention condition"
+  ],
+  "optional_diagnostics": [
+    "Q=I same-layout control plus original-layout M95 kept distinct",
+    "zero/affine/singleton FP32 numerical readouts with frozen tolerance, no posthoc precision/tolerance adjustment",
+    "column-association permutation with paired inverse; row-mode permutation is invalid negative control",
+    "offdiagonal loss-path autograd probe only with full grad/optimizer/RNG isolation if later implemented"
+  ],
+  "limitations": [
+    "nonzero constants not preserved",
+    "GEMM layout differs in mixed batches",
+    "DCT fixed geometry order not rotation invariant",
+    "double stdlib algebra is not torch/native proof",
+    "future package unversioned and not installed; PSBR74f FIFO must be protected"
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T12:10:09.095225+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "37695e94da4a485c8979d474d3f33b39",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T13:08:33.052148+00:00"
+  },
+  "baseline": {
+    "path": "pipeline/diagnostic_bundles/tick_9079d9a4/continuation_boundary_check.json",
+    "sha256": "64885baead5922e9a3f9dfe9ee7e989f86663ba050614614fbc42f3e26ff884b"
+  },
+  "status": "NO_NEW_ACTIONABLE_BOUNDARY_CHANGE",
+  "four_candidate_snapshot": {
+    "M206-CGCA": {
+      "id": "hierarchy-coarse-conditioned-fine-channel-attention",
+      "stage": "blocked",
+      "resume_stage": "training",
+      "blocker_kind": "human_authorization",
+      "training_status": "paused_by_user",
+      "resume_authorized": false,
+      "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335"
+    },
+    "M207-HAP": {
+      "id": "hierarchy-affine-coarse-to-fine-prolongation",
+      "stage": "training",
+      "resume_stage": "training",
+      "blocker_kind": null,
+      "training_status": "running",
+      "resume_authorized": true,
+      "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0"
+    },
+    "M208-HRC": {
+      "id": "hierarchy-bottom-up-refined-token-composition",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "exclusive_gpu_slot",
+      "training_status": null,
+      "resume_authorized": null,
+      "code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a"
+    },
+    "M209-PSBR": {
+      "id": "hierarchy-parent-segmented-bidirectional-token-state",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "exclusive_gpu_slot",
+      "training_status": null,
+      "resume_authorized": null,
+      "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604"
+    }
+  },
+  "M206_due_review": {
+    "manual_before_task_exact_equal": true,
+    "dispatch_hold": "User paused M206 to release GPU1 to others. No automatic resume or GPU0 migration; wait for explicit resume instruction and full source/checkpoint/resource validation.",
+    "resume_authorized": false,
+    "new_explicit_resume_grants": [],
+    "authorization_directory_json_count": 13,
+    "selected_authorization_artifacts": [
+      {
+        "path": "pipeline/authorizations/m206_resume_gpu1_20261021_gpu1_reenable_152505.json",
+        "modified_since_previous_audit": false,
+        "M206_identity": true,
+        "explicit_M206_resume_grant": true
+      }
+    ],
+    "selection_boundary": "New/modified JSON since previous audit plus filenames containing M206/CGCA. Historical unrelated grants not read; timer never grants resume.",
+    "actionable": false
+  },
+  "HAP": {
+    "status": "running",
+    "pid": 1063355,
+    "gpu": "0",
+    "launch_verified": true,
+    "authorization": {
+      "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+      "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+    },
+    "checkpoint": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/checkpoint_evidence.json",
+      "sha256": "b89c4bd17158e5455fb12834e497e146b0659b75f7a5c8445070a95487b2ec1d"
+    },
+    "historical_restart_proof": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+      "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+    },
+    "root_begin_report": {
+      "epoch": "28/50",
+      "best_miou": 0.5002,
+      "epochs_no_improve": 6
+    },
+    "fresh_root_observation": {
+      "path": "pipeline/diagnostic_bundles/tick_37695e94/hap_progress_observation.json",
+      "sha256": "46fbedfdc2d0c6fe2bf09fa286ff4597af0bc65bd238d65063545cc62ec0742e"
+    },
+    "reviewer_remote_check": "NOT_QUERIED",
+    "new_launch": false
+  },
+  "frozen_reuse": {
+    "M208-HRC": {
+      "source_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+      "external_reference_signature": "0ec94fa74591a576307e80a14eea5e382a2b7b7f4598151c8aa7a6cd5bad6f8e",
+      "source_and_artifact_metadata_checked": 23,
+      "later_artifacts": [],
+      "full_byte_checks": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "native_resources": "NOT_RUN",
+      "pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN"
+    },
+    "M209-PSBR": {
+      "source_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+      "external_reference_signature": "4acc1b00b60aebd8d87a519605fa24e5a0a0a6a05affbf961d0cd6e54cf49a3b",
+      "source_and_artifact_metadata_checked": 22,
+      "later_artifacts": [],
+      "full_byte_checks": "REUSED_FROM_TICK_2f0a4e82_NOT_REHASHED",
+      "native_resources": "NOT_RUN",
+      "pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN"
+    }
+  },
+  "worktree": {
+    "HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "index_empty": true,
+    "28statuses_and_mtimes_unchanged": true,
+    "28bytes": "Prior exact byte audit reused; no new content hashes."
+  },
+  "running_snapshot": {
+    "server-6": {},
+    "server-4": {
+      "0": "M207-HAP"
+    }
+  },
+  "checks": {
+    "owner_and_deadline": true,
+    "M206_manual_before_task_exact_equal": true,
+    "M206_humanhold_resume_false": true,
+    "HAP_three_record_running": true,
+    "HAP_resume_authorization_ref_unchanged": true,
+    "HAP_resume_checkpoint_evidence_ref_unchanged": true,
+    "HAP_native_resume_progress_ref_unchanged": true,
+    "HAP_grant21799_sha": true,
+    "HAP_grant_not_borrowed": true,
+    "HAP_source_and_receipt_refs_unchanged": true,
+    "HAP_prior_crash_ref_kept": true,
+    "no_new_explicit_M206_resume_authorization": true,
+    "M208-HRC_external_signature_unchanged": true,
+    "M208-HRC_commit_unchanged": true,
+    "M208-HRC_metadata_no_change": true,
+    "M208-HRC_unexecuted_capacity_hold": true,
+    "M209-PSBR_external_signature_unchanged": true,
+    "M209-PSBR_commit_unchanged": true,
+    "M209-PSBR_metadata_no_change": true,
+    "M209-PSBR_unexecuted_capacity_hold": true,
+    "same_28_statuses": true,
+    "28_protected_mtimes_unchanged": true,
+    "HEAD74f_index_empty": true,
+    "GPU0_only_grant_unchanged": true
+  },
+  "blocking_findings": [],
+  "real_reuse_boundary": [
+    "Current local queue/experiment/work/running agreement, existing HAP-only grant and bounded grant-directory changes checked; no new M206 resume authorization inferred.",
+    "Frozen source/native/adapter identity and metadata checks reuse earlier complete byte reviews. Metadata is a drift screen, not a new proof against timestamp-preserving mutation.",
+    "HRC/PSBR native/resources/pairing remain NOT_RUN; efficacy UNKNOWN.",
+    "Current HAP health is reported by root begin/linked current observation; this reviewer did not contact the server.",
+    "No old8/655 hold scan, no SSH/torch/GPU/tests/shared-state writes."
+  ],
+  "execution": {
+    "SSH": false,
+    "torch_import": false,
+    "GPU": false,
+    "tests": false,
+    "shared_state_write": false,
+    "unrelated_hold_scan": false
+  },
+  "write_scope": "This new report only."
+}

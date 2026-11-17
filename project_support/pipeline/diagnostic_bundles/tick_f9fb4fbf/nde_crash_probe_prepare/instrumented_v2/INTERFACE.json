@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "status": "PREPARED_DEFAULT_DISABLED_NOT_EXECUTED",
+  "mother_bootstrap": {
+    "path": "pipeline/diagnostic_bundles/tick_f9fb4fbf/nde_crash_probe_prepare/FROZEN.json",
+    "sha256": "9c6a9d9192a302363f9eea1355e4fc10d29ebca04d3b467856a20bd518c04d65"
+  },
+  "actual_disabled_bootstrap": {
+    "path": "pipeline/diagnostic_bundles/tick_f9fb4fbf/nde_crash_probe_prepare/instrumented_v2/crash_probe_bootstrap.py",
+    "sha256": "8ec117e8002593bbb5da0bddea54c24e77f5978d44ee0378256ad8e37392cbfe"
+  },
+  "sole_flag_active_projection_sha256": "4d3d8230d09ebf3dbc834a9cb879eb3f5f2df5db9a090dfe85e31f3067494146",
+  "sole_active_projection": "replace first and only DRAFT_DIAGNOSTIC_DISABLED = True with False; preserve all other exact UTF8 bytes/newlines",
+  "protocol": {
+    "path": "pipeline/diagnostic_bundles/tick_f9fb4fbf/crash_probe_protocol.json",
+    "sha256": "8b2dd93ee7b62c729609a306a89c782185720c1eb721652a5378f09cbb285513"
+  },
+  "diagnostic_stage_projection": {
+    "original14_native_file_bytes": "PRESERVE_EXACT",
+    "original_model_worker_runtime_source_root": "PRESERVE_EXACT",
+    "new_payload": {
+      "crash_probe_bootstrap.py": "4d3d8230d09ebf3dbc834a9cb879eb3f5f2df5db9a090dfe85e31f3067494146",
+      "independent_probe_review.json": "ACTUAL_REVIEW_FILE_SHA256_PENDING"
+    },
+    "manifest_mutation_scope": "Fresh manifest only; add2 diagnostic_files entries for actual active bootstrap/review, preserve original14 entries and existing fields; recompute manifest hash then fresh lease/binding/request. Never append after frozen binding or modify old manifest. Request is not in self-bound manifest.",
+    "review_fields_required": [
+      "passed=true",
+      "bootstrap_sha256=4d3d8230d09ebf3dbc834a9cb879eb3f5f2df5db9a090dfe85e31f3067494146",
+      "owner=actual fresh six owner fields",
+      "fault_localization_only=true"
+    ],
+    "request_fields_required": [
+      "operation=candidate_resources_fault_localization",
+      "fault_localization_only=true",
+      "admission_evidence=false",
+      "comparable_resource_or_latency_evidence=false",
+      "owner",
+      "native_manifest_sha256",
+      "execution_lease_sha256",
+      "bootstrap_sha256",
+      "worker_sha256",
+      "runtime_sha256",
+      "independent_review_file",
+      "independent_review_sha256",
+      "original_worker_argv"
+    ]
+  },
+  "instrumented_marker": {
+    "instrumented": true,
+    "fault_localization_only": true,
+    "original_worker_resources_function_unchanged": true,
+    "comparable_resources_or_latency_evidence": false,
+    "technical_admission_evidence": false
+  },
+  "single_probe_only": true,
+  "successful_exit_interpretation": "FAULT_NOT_REPRODUCED_UNDER_INSTRUMENTATION_ONLY",
+  "admission_granted": false
+}

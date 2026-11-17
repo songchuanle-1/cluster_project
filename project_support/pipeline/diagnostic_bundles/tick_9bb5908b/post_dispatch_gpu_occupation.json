@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "kind": "exclusive_gpu_occupation",
+  "complete": true,
+  "read_only": true,
+  "project": "cluster_project",
+  "token": "9bb5908b9875410eba1ffbb87a62e3d5",
+  "snapshot_generated_at": "2026-10-31T10:08:14.388754+00:00",
+  "snapshot_sha256": "d81e5f0d9611b2f25f786473d2e579af3bd32751f362c76078c986e73578019b",
+  "servers_sha256": "19b3753d13a8253263c6525f19a739795b816be141e21a9f9b3aaccddf4f8265",
+  "observed_at": "2026-10-31T10:38:52.780619+00:00",
+  "candidate_ids": [
+    "hierarchy-nonlinear-lifting-analysis-synthesis"
+  ],
+  "scope": {
+    "server": "server-4",
+    "host": "192.168.1.115",
+    "user": "songcl",
+    "allowed_gpus": [
+      0,
+      1
+    ],
+    "max_tasks_per_gpu": 1
+  },
+  "queries": {
+    "hostname": {
+      "rc": 0,
+      "stdout": "dl04-MS-7E06\n",
+      "stderr": "",
+      "command": [
+        "hostname"
+      ]
+    },
+    "gpu": {
+      "rc": 0,
+      "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 25, 13689, 32607\n1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 0, 3533, 32607\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+        "--format=csv,noheader,nounits"
+      ]
+    },
+    "compute": {
+      "rc": 0,
+      "stdout": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 2085005\nGPU-7f82edb9-f620-8045-caea-a75232265cd1, 1656613\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid",
+        "--format=csv,noheader,nounits"
+      ]
+    }
+  },
+  "raw_log": {
+    "path": "pipeline/diagnostic_bundles/tick_9bb5908b/post_dispatch_gpu_raw.json",
+    "sha256": "e15033037abc555d34483549f0a37c1b21b332184a3ce6afe77d0b97c4331032"
+  },
+  "command": "Read-only postdispatch original WFC identity/source/TRAIN and both physical GPU inventory query recorded in wfc_original_post_dispatch_observation.json",
+  "scope_note": "Physical0 holds actual original new WFC PID2085005; physical1 context identity/ownership UNKNOWN. Not sole/exclusive permission and no new dispatch."
+}

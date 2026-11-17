@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "kind": "exclusive_gpu_occupation",
+  "complete": true,
+  "read_only": true,
+  "project": "cluster_project",
+  "token": "692b4575ac644ad6a0b0b25c3736b596",
+  "snapshot_generated_at": "2026-10-30T02:10:57.565975+00:00",
+  "snapshot_sha256": "c104bc138a48ea9c04ae935c90379777103b49fc924d82e462809a41c4cd06c1",
+  "servers_sha256": "2583ddf1a21511368e98bfaed99d1a2c5e6bd7f223e577d565279a3628352fc1",
+  "observed_at": "2026-10-30T02:30:22.646140+00:00",
+  "candidate_ids": [
+    "hierarchy-fine-coarse-complete-bipartite-composition"
+  ],
+  "scope": {
+    "server": "server-4",
+    "host": "192.168.1.115",
+    "user": "songcl",
+    "allowed_gpus": [
+      0
+    ],
+    "max_tasks_per_gpu": 1
+  },
+  "queries": {
+    "hostname": {
+      "rc": 0,
+      "stdout": "dl04-MS-7E06\n",
+      "stderr": "",
+      "command": [
+        "hostname"
+      ]
+    },
+    "gpu": {
+      "rc": 0,
+      "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 19, 19731, 32607\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "-i",
+        "0",
+        "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+        "--format=csv,noheader,nounits"
+      ]
+    },
+    "compute": {
+      "rc": 0,
+      "stdout": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 3437349\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "-i",
+        "0",
+        "--query-compute-apps=gpu_uuid,pid",
+        "--format=csv,noheader,nounits"
+      ]
+    }
+  },
+  "command": "python -B 'C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\gpu_occupation.py' cluster_project --token 692b4575ac644ad6a0b0b25c3736b596 --server server-4 --label closure",
+  "raw_log": {
+    "path": "pipeline/checks/gpu_occupation_server-4_closure_692b4575ac644ad6a0b0b25c3736b596.log",
+    "sha256": "e76b1fec884ee79c8a87d5cf54bc7bd865642bb023dd11c6a87dcae9a6877931"
+  }
+}

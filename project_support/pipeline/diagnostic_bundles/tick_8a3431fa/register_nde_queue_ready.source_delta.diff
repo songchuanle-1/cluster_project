@@ -1,0 +1,28 @@
+--- register_nde_queue.py
++++ register_nde_queue_ready.py
+@@ -55,10 +55,14 @@
+         assert a["passed"] is True and a["production_result_sha256"] == ref(production)["sha256"]
+         assert hashlib.sha256((ROOT / "SERVERS.yaml").read_bytes()).hexdigest() == p["SERVERS_sha256"]
+         proof_paths += [pointer, production, review, TICK / "nde_runtime_deployment.json",
+-                        TICK / "nde_deployment_execute/ff_result.json"]
++                        ROOT / "pipeline/diagnostic_bundles/tick_2218a502/nde_deployment_execute/ff_result.json"]
+     lock = monitor.acquire_lock(str(ROOT))
+     assert lock is not None
+     try:
++        proof_refs = []
++        for path in proof_paths:
++            assert path.is_file(), "Missing registration evidence; no queue mutation: " + str(path)
++            proof_refs.append(ref(path))
+         before = monitor.load_queue(str(ROOT))
+         assert not any(t["id"] == "M233-NDE" for ts in before["gpu_queues"].values() for t in ts)
+         after = copy.deepcopy(before)
+@@ -77,8 +81,7 @@
+             candidate.update(stage="deployment", deployed=True, source_only=False,
+                              runtime_root=read(TICK / "nde_runtime_deployment.json")["runtime_root"])
+             candidate["next_action"] = "Use the canonical gated dispatcher on server4 physicalGPU0; verify increasing native training steps. Keep all resource safeguards and manual pauses."
+-        for p in proof_paths:
+-            entry = ref(p)
++        for entry in proof_refs:
+             if entry not in candidate["evidence"]:
+                 candidate["evidence"].append(entry)
+         work["updated_at"] = now

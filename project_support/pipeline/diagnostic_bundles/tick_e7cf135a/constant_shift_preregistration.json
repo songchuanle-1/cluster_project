@@ -1,0 +1,43 @@
+{
+  "preregistered_at": "2026-10-20T15:08:25.316887+00:00",
+  "candidate_id": "hierarchy-scale-output-constant-shift-explanation",
+  "token": "e7cf135a487f4ec4b53c386489ba38f1",
+  "hypothesis_id": "scale-intervention-mask-change-is-only-a-spatially-constant-logit-offset",
+  "hypothesis": "The observed foreground/non-target tradeoff from existing M95 scale interventions can be fully explained by a spatially constant selected-query logit shift, rather than a change in spatial discrimination.",
+  "motivation_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_e7cf135a/scale_analysis.json",
+    "sha256": "3aab7365b896d3d313f45cda49812c75b43803ce94cb92e4110e2992d4c3a2b7"
+  },
+  "diagnostic_only": true,
+  "frozen_cohort": {
+    "path": "pipeline/diagnostic_bundles/tick_e7cf135a/cohort.json",
+    "sha256": "76ce49a13c0d5288d279a386084aea96042123360d4be98a6fa80dcfe8ec7ba2"
+  },
+  "assets": {
+    "path": "pipeline/diagnostic_bundles/tick_e7cf135a/native_manifest.json",
+    "sha256": "004df91acc007c6d3dd230cbf67b5d69c379d10dd88e461e0ea5c28cc191e647"
+  },
+  "arms": [
+    "omit_middle",
+    "omit_coarse",
+    "cycle_middle_messages",
+    "cycle_coarse_messages"
+  ],
+  "decomposition": "For each expression and original native selected query, delta=z_arm-z_native over valid supports; constant=mean(delta), residual=delta-constant. No labels, fit parameters or alternate threshold. Read z_native+constant, z_native+residual, z_native+constant+residual.",
+  "controls": [
+    "Original native readback/head/frozen-bank identities<=1e-6",
+    "delta reconstruction and full-arm logits reconstruction<=1e-6",
+    "Valid-support residual mean, unchanged query/native indi and input hash",
+    "Labels read only after interventions/decomposition; no production source or training changes"
+  ],
+  "falsifier": "Bias-only explanation fails on this fixed cohort if any correctly reconstructed intervention has max_abs_residual>original1e-6. Report residual RMS/energy and all scene directions rather than claiming that a small nonzero spatial residual is a task benefit.",
+  "readouts": [
+    "Per-expression constant,delta/residual maximum and RMS, constant/residual energy fractions",
+    "All/foreground/non-target probability-MAE changes for full/constant-only/residual-only/reconstructed arms",
+    "Probability-MAE interaction because sigmoid is nonlinear; never call this scale complementarity or add the effects as if linear"
+  ],
+  "limits": "This is an explanatory output diagnostic only. A constant cannot change point ranking. This does not authorize bias correction, centering/scaling, parameter tuning or any new model. Same8TRAINscenes/32expressions are not a new population or trained evaluation.",
+  "tolerance": 1e-06,
+  "new_training": 0,
+  "optimizer_steps": 0
+}

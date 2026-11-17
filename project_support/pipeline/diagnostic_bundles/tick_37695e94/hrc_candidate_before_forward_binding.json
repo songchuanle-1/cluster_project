@@ -1,0 +1,380 @@
+{
+  "id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "stage": "blocked",
+  "resume_stage": "validation",
+  "profile": "experiment_first",
+  "created_at": "2026-10-21T18:12:25.250567+00:00",
+  "hypothesis": "Passing refined fine tokens through the original fixed-child mean before the original middle FFN, and refined middle tokens before the original coarse FFN, may compose nonlinear local evidence across hierarchy levels before the unchanged single HCG/inst_feats readback. This changes information dependence, not pooling weights or hyperparameters; task efficacy is unknown.",
+  "matched_control": "Original M95 independent per-scale FFNs, identical native ScanRefer TRAIN/validation YAML, seed1999, epochs50/maxiters70, original pretrain/optimizer and original standard resource protocol. No training-efficacy inference from static checks.",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "authorization": {
+    "path": "pipeline/authorizations/experiment_first_20261021.json",
+    "sha256": "2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8"
+  },
+  "code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+  "config": "configs/Quard/ctf_hcg_csort_hrc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc.yaml",
+  "native_status": "NOT_RUN_waiting_authorized_idle_gpu",
+  "resource_status": "NOT_RUN_waiting_authorized_idle_gpu",
+  "scientific_admission": false,
+  "diagnostic_only": false,
+  "blocker_kind": "exclusive_gpu_slot",
+  "required_server": "server-4",
+  "blocker": "Fresh exact authorized HAP PID1063355/start27048767 continues native epoch28 on only projectGPU0, context19800MiB. No exclusive native slot for HRC/PSBR. GPU1 remains released to others and M206 manually paused.",
+  "blocked_at": "2026-10-22T12:10:12.859756+00:00",
+  "retry_after": "2026-10-22T13:10:12.859756+00:00",
+  "unblock_condition": "HAP natural completion or other human-authorized change, then fresh actual physicalGPU0 idle/UUID/exclusive lease and frozen worker/adapter checks. GPU1 availability is not authorization.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/preparation.json",
+      "sha256": "b26bc05a40d0c9c30993645c7a5c1dfae8ab71488e7b6cf843e58bed41bb6c9f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/implementation.md",
+      "sha256": "5a6ed14f6c14f5a2b4a1a20bade9a3bf4fbde37f4a729ad8fe91618e980e33d6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/hier_postprocess.diff",
+      "sha256": "ab117d9a0b1f2dbb1ba5f94af0dd276601ed2970e6fb82f43f9882ac4b728026"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/validate_static.py",
+      "sha256": "90b77a9ba7c9dea9b54b6ef8d26e342ac9a63505ae3cc505a7f90644d3c5fe0c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/validate_preparation.py",
+      "sha256": "ae6125b9984870eb4cb0c177ea55780e406ad568d26e3dc410d8a4504095651d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/static_validation.json",
+      "sha256": "4faa9dfbfb49c300e6d9ecc7045c289fa604e2439e325a9d38f8731ce06c9a42"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/independent_review.json",
+      "sha256": "bc76bfa5227e5c631e686ecae36f742e883d01607426329677f3f297429df68e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/version.json",
+      "sha256": "eb602fe1b113a0d0ed673ec66edaf18c5281f126c1751eab45062ba195d94143"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/live_running_resource_check.json",
+      "sha256": "95a5a236f4e45cb58f3f4bdf1f2b0cf89194a1410300be12dc2fa7929d1a647b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/observe_running.py",
+      "sha256": "d0c360c18994ea2cab1248830d247e0765cfe63eb7e681aa681352d18a7b0136"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_native_resource_check.json",
+      "sha256": "8db2c5ccfbd83ba8f44bc38deea31a4abeae976aec8f61bda11799bf84a31605"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_prepare/native_resource_block.json",
+      "sha256": "5918916bad8f18c7cbc2d25e87c86d2205b321925a018bf8be0d4be3f92756c9"
+    },
+    {
+      "path": "pipeline/decisions/20261022-021649_next_batch.md",
+      "sha256": "2d100ffb3f1b493d804c525bd995264e660907476c35616dd30641a509515dd4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/observe_resources.py",
+      "sha256": "70b93fe7f146e059936ae60406fd3af013904561231d5d160d12c579d2543444"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/native_resource_check.json",
+      "sha256": "6c541c44af351e76afd51612732b5daeaa05629d764f9d846395dd9fdce29d87"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_resource_block.json",
+      "sha256": "0abc199610632e298f0b3deb705b91e693bf5994cadfab4442ee85499929b783"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/source_version_verification.json",
+      "sha256": "dacac05924ec26d566e5e3195c0b6a04639213611eecac8a7e9a79c7ecff4399"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/held_route_boundary_check.json",
+      "sha256": "7d7317c7056c8cb8d0ebc6b85cc61ba47809357ae0fcb97bfae4af2bea28dd21"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_static_validation.json",
+      "sha256": "0bb36dff74003c4b5e330365297e1345ee76fdd9048c821607e70338d4662276"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_independent_review.json",
+      "sha256": "4a1b906dc3b89673f84c04df2b4264e7e4ff822b425983232386fe65b6655189"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/preparation.json",
+      "sha256": "4754db1a1c550c869596e0ca57cee99834239e8ed78e87ec65f68142f48c812a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/README.md",
+      "sha256": "21969aa890cd52374d44092c99c46f90bafc8a31035642f0e037f52c800b4035"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json",
+      "sha256": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py",
+      "sha256": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+      "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/validate_static.py",
+      "sha256": "ba9c7e46ef41a85cc9a474822696cd9627907d6f7d0a6f0417c9d4794062704a"
+    },
+    {
+      "path": "pipeline/decisions/20261022-042252_next_batch.md",
+      "sha256": "4871f67e0781a978950040c97d01d8fb53b707d0d2a83522354253a16ff722cb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_4059b69c/observe_resources.py",
+      "sha256": "7ed3afcd5ec9985d22ed39aaa04e6697f906b3df30a0dacb494a6ae72568768d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_4059b69c/native_resource_check.json",
+      "sha256": "f5cfa58d1e28f32e87a7b4f0dc83df7e26409ff265ac5d3719fca34922b86fa2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_4059b69c/hrc_resource_block.json",
+      "sha256": "6b5a13914fee2a1d78a959f3c452a87ffa249f551f1b7e932cafd0457014b129"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_4059b69c/source_evidence_reuse_check.json",
+      "sha256": "6f32937a659075b916b387a0970784a1cca7d1eee59a0d0ce169741445535bc0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_4059b69c/future_execution_chain_review.json",
+      "sha256": "51fe9daaf33fad5aa2b768f53a04483f5122c0f7d2393a40b51a437db25edac0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/observe_resources.py",
+      "sha256": "8a1974cf2503b436839a62176b8d062a1ad700ce17453b0b39a3ee17925924d4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/native_resource_check.json",
+      "sha256": "01ddc10407cd157752c6043b6ea7b8d5a21477f2b81044324e4a669373d7262a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_resource_block.json",
+      "sha256": "1822591513ac921519d533cfb489016b7542bc8c7177bf0fdaa18a4151133a9f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/source_evidence_reuse_check.json",
+      "sha256": "e49c414bf65f6151b8e1615664ee8122c38c7fd5c1213c18ece569c43ea799f4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_actual_guard_integration.json",
+      "sha256": "dcd6137ba9d56108d9940e1a1883b1d0b32c68604884637e2aacecbd0d6cce98"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_independent_review.json",
+      "sha256": "5f5084265439ca6433328e34d4a6d4e9685bf3e7b8aa49376f4fb43dd82d413d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/preparation.json",
+      "sha256": "1ab29434e5a1e4f0144fd38e22d83f1ae561813973ed0468e64f65aac6c9a568"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter_release.json",
+      "sha256": "f2b3cdfe7a63cacf65e0d38837c4df1211715a31320f4d808d569c855a9e6d83"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter.py",
+      "sha256": "0f0663ec37e8b58ea72e3be39a193bf5b2860bf7fdb2ed51bd611c123a6b63a9"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/remote_ops.py",
+      "sha256": "3b9147010d2580423930110807862391cf5814ab846b1770b934d784503416e8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/README.md",
+      "sha256": "6be4563f0aa19940f97aff61a9d63930f5ae9d3f8b52bf1163fd37e6f31dfd9e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/static_validation_r2.json",
+      "sha256": "664dffd14f31e475c60160c71427ee93516e479e29c79b1bee3e36e566ef0b14"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/independent_review/final_validation_r2.json",
+      "sha256": "14fb3aa82bdb0c5c0ed3f395c1289f933498b104523a2437a1e250b6bbe88413"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/final_result_boundary_review_r2.json",
+      "sha256": "fb12762ffdf2c9264c088c9544beb8ce8d2388df42b93ca1e179a35df3bb020c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/independent_review/initial_snapshot_failure_reproduction.json",
+      "sha256": "100659a1da2842202f5dc0b56bad023dda9bff373a465e4133297872e7a5d7d4"
+    },
+    {
+      "path": "pipeline/decisions/20261022-082706_next_batch.md",
+      "sha256": "13825ebbd7b5aa47fbdbfc0d7c31f81345f7eac66a9ce4340cf0e556bb1d2ac3"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/observe_resources.py",
+      "sha256": "c272e55b8dfc9967db8d2f0577f2336ec6145282aaa3a4f29a464ea69b5dac45"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/native_resource_check.json",
+      "sha256": "17cdf7c1537a2a6c8c86d0ba310291a0c5f49334d2a0e048ad564864ccac6cf0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/hrc_resource_block.json",
+      "sha256": "42623ec3db0f25a323b63c74843acddd60682792dbbf24eae3e15a5dd15222e6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_resource_check.json",
+      "sha256": "adaf90b23a87608cb52d1d7610e690c10c9de4ec38802b173ece6510d36725a6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/source_evidence_reuse_check.json",
+      "sha256": "75cfcb0afac6e3908e0cb6e4b57954d4c73753f58871649fd518b1feeb432146"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/final_source_integrity.json",
+      "sha256": "26e5c4a12039649a804adc886b46b4423f4f2cf58e773dc90828e6bfb64f3628"
+    },
+    {
+      "path": "pipeline/authorizations/server4_gpu0_only_20261022_gpu1_pause_105409.json",
+      "sha256": "1871f8c9777c548acfda87b9e91b72c2d5fc94ac78920430c52bdceea1cbd51e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/gpu0_observation.json",
+      "sha256": "c833199c4a213e9ed7bbbb9c8717b37c63c0fd2fd002b407ebb7abbc0b8aaf38"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_crash_remote_inspection.json",
+      "sha256": "5815809ed7a2aa29e28ba696590e17de775fcbe3216d8d5ca08e71d94d47d22d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/source_and_pause_reuse_check.json",
+      "sha256": "2bcf71bb75b27cba98ccd63ed28eadb94199402fcf713f14ce368cad3f37142e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/gpu0_slot_final.json",
+      "sha256": "79f141f3ad706d84bdb7bc27db01bc3a55888b71cf1148ebfa3be37dc8385c00"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_1ee09b79/gpu0_slot_final.json",
+      "sha256": "3ece5057fab7f0d0a4533c7208bc4d7183ffa1215119524f352dd72443b8bd70"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_1ee09b79/continuation_integrity_check.json",
+      "sha256": "1ce9d8e6ad80539f429476382d994e21ebf16b485b01ab1386167286ee9d3d51"
+    },
+    {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+      "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2f0a4e82/hap_progress_observation.json",
+      "sha256": "bc5227357daa5716ecb8f2c5895d2311424ab6f22d64652726cd0685aeac57ac"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2f0a4e82/additional_gpu0_context_identity.json",
+      "sha256": "328d99b5000952f33acd1799803a59c2e3b07f5bc631e3af2ffd2c7cad58c68e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2f0a4e82/continuation_integrity_check.json",
+      "sha256": "394df9bef2d1bd6a12129f312a3ca79e6cbdd790aef90e8f7f70e8d2eb48bd19"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9079d9a4/hap_progress_observation.json",
+      "sha256": "40e2cb854907a48613cef0a9acb0c7209d3451e561b71cd9c0502f9e7a0c6a73"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_9079d9a4/continuation_boundary_check.json",
+      "sha256": "64885baead5922e9a3f9dfe9ee7e989f86663ba050614614fbc42f3e26ff884b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_37695e94/hap_progress_observation.json",
+      "sha256": "46fbedfdc2d0c6fe2bf09fa286ff4597af0bc65bd238d65063545cc62ec0742e"
+    }
+  ],
+  "next_action": "GPU0 only: HAP crash is archived; preserve all foreign work and wait for a real GPU0 opening, then verify exact prepared worker/adapter external anchors and fresh current binding for actual native/resource checks. Do not use GPU1 or auto-resume M206. Preserve original runs. After an actual current authorized server4GPU0 opening, first externally verify candidate.execution_adapter exact preparation/release/source hashes, frozen worker hashes and current policy/owner/context/deadline. Use fresh execution_binding/manifest/lease/isolated stage and live idle/UUID/3flocks checks for four real runs: M95/HRC native TRAIN2 smokes and original-resource pair. Budget all four within original deadline; reconcile exact original request/stage/PID/startticks/argv/result after uncertainty, no blind replay or deadline renewal. Raw completion is not admission: audit real losses/gradients/path/mean control, both batch fingerprints, original resource input/handlers/bs1/warm20/repeat100/unsupported/memory scopes; then build standard native_smoke/resource summaries and satisfy closure.admission before original-YAML queue/canonical gated dispatch. Efficacy UNKNOWN.",
+  "risks": [
+    "Internal empty child slots can carry original FFN bias into parent means; only batch padding is removed, no occupancy weighting.",
+    "Repeated pooling may discard detail or repeat scale evidence.",
+    "Expected parameter delta0 follows identical constructors; native tensor behavior, dependency gradients, FLOPs, latency, memory and training efficacy remain unmeasured."
+  ],
+  "static_implementation_result": "passed_static_only; nine hashes/native YAML/source isolation and original constructors/raw bank/HCG/CSORT verified",
+  "worker_preparation": {
+    "status": "PREPARED_UNEXECUTED",
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/preparation.json",
+      "sha256": "4754db1a1c550c869596e0ca57cee99834239e8ed78e87ec65f68142f48c812a"
+    },
+    "worker": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+      "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+    },
+    "runtime": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py",
+      "sha256": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4"
+    },
+    "manifest_template": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json",
+      "sha256": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509"
+    },
+    "root_static_validation": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_static_validation.json",
+      "sha256": "0bb36dff74003c4b5e330365297e1345ee76fdd9048c821607e70338d4662276"
+    },
+    "independent_review": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_independent_review.json",
+      "sha256": "4a1b906dc3b89673f84c04df2b4264e7e4ff822b425983232386fe65b6655189"
+    },
+    "active_native_manifest_or_execution_lease_created": false,
+    "native_backward_executed": false,
+    "resource_profile_executed": false
+  },
+  "execution_adapter": {
+    "status": "PREPARED_UNEXECUTED",
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/preparation.json",
+      "sha256": "1ab29434e5a1e4f0144fd38e22d83f1ae561813973ed0468e64f65aac6c9a568"
+    },
+    "release": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter_release.json",
+      "sha256": "f2b3cdfe7a63cacf65e0d38837c4df1211715a31320f4d808d569c855a9e6d83"
+    },
+    "adapter": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter.py",
+      "sha256": "0f0663ec37e8b58ea72e3be39a193bf5b2860bf7fdb2ed51bd611c123a6b63a9"
+    },
+    "remote_ops": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/remote_ops.py",
+      "sha256": "3b9147010d2580423930110807862391cf5814ab846b1770b934d784503416e8"
+    },
+    "README": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/README.md",
+      "sha256": "6be4563f0aa19940f97aff61a9d63930f5ae9d3f8b52bf1163fd37e6f31dfd9e"
+    },
+    "independent_tests": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/independent_review/final_validation_r2.json",
+      "sha256": "14fb3aa82bdb0c5c0ed3f395c1289f933498b104523a2437a1e250b6bbe88413"
+    },
+    "root_review": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_independent_review.json",
+      "sha256": "5f5084265439ca6433328e34d4a6d4e9685bf3e7b8aa49376f4fb43dd82d413d"
+    },
+    "actual_local_guard_integration": {
+      "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_actual_guard_integration.json",
+      "sha256": "dcd6137ba9d56108d9940e1a1883b1d0b32c68604884637e2aacecbd0d6cce98"
+    },
+    "external_anchor_required": true,
+    "standard_result_formatter_implemented": false,
+    "native_execution_tested": false,
+    "remote_adapter_execution_tested": false,
+    "active_binding_manifest_lease_created": false,
+    "provenance": "Exact saved preparation/release/source hashes are external review anchors. Old preparation timestamps are historical; create current execution_binding instead of altering old provenance."
+  },
+  "required_gpu": "0"
+}

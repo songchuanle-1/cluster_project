@@ -1,0 +1,124 @@
+{
+  "observed_at": "2026-10-17T08:33:08.654979+00:00",
+  "native_result_observed_at": "2026-10-17T08:31:08.001345+00:00",
+  "scope": "TRAIN only,4fixed scenes16expressions,off-distribution omissions,descriptive exact Shapley; no mechanism tuning or population proof",
+  "summary": {
+    "expressions": 16,
+    "full_scale_fixed_q_iou": 0.7017901409417391,
+    "empty_scale_bias_retained_fixed_q_iou": 0.7051412204746157,
+    "true_zero_message_fixed_q_iou": 0.6778678400442004,
+    "full_minus_empty": -0.0033510795328766108,
+    "full_minus_true_zero": 0.023922300897538662,
+    "empty_bias_retained_minus_true_zero": 0.027273380430415273,
+    "point_iou_shapley_fine_middle_coarse": [
+      0.0075679175400485575,
+      -0.0045276148399959,
+      -0.006391382232929269
+    ],
+    "joint_fixed_selection_full_minus_empty": -0.005146848212461919,
+    "joint_own_selection_full_minus_empty": -0.005146848212461919
+  },
+  "scenes": {
+    "scene0000_00": {
+      "expressions": 4,
+      "full_scale_fixed_q_iou": 0.9037271440029144,
+      "empty_scale_bias_retained_fixed_q_iou": 0.8897809684276581,
+      "true_zero_message_fixed_q_iou": 0.8997186869382858,
+      "full_minus_empty": 0.013946175575256348,
+      "full_minus_true_zero": 0.004008457064628601,
+      "empty_bias_retained_minus_true_zero": -0.009937718510627747,
+      "point_iou_shapley_fine_middle_coarse": [
+        -0.013960026204586029,
+        -0.0026233717799186707,
+        0.030529573559761047
+      ],
+      "joint_fixed_selection_full_minus_empty": -0.032528847455978394,
+      "joint_own_selection_full_minus_empty": -0.032528847455978394
+    },
+    "scene0002_00": {
+      "expressions": 4,
+      "full_scale_fixed_q_iou": 0.733373798429966,
+      "empty_scale_bias_retained_fixed_q_iou": 0.7925020530819893,
+      "true_zero_message_fixed_q_iou": 0.6064238473773003,
+      "full_minus_empty": -0.059128254652023315,
+      "full_minus_true_zero": 0.1269499510526657,
+      "empty_bias_retained_minus_true_zero": 0.18607820570468903,
+      "point_iou_shapley_fine_middle_coarse": [
+        0.01063977430264155,
+        -0.015047607322533924,
+        -0.054720421632130936
+      ],
+      "joint_fixed_selection_full_minus_empty": 0.001780577003955841,
+      "joint_own_selection_full_minus_empty": 0.001780577003955841
+    },
+    "scene0003_00": {
+      "expressions": 4,
+      "full_scale_fixed_q_iou": 0.9097733795642853,
+      "empty_scale_bias_retained_fixed_q_iou": 0.9097733795642853,
+      "true_zero_message_fixed_q_iou": 0.8734754323959351,
+      "full_minus_empty": 0.0,
+      "full_minus_true_zero": 0.03629794716835022,
+      "empty_bias_retained_minus_true_zero": 0.03629794716835022,
+      "point_iou_shapley_fine_middle_coarse": [
+        0.005706451833248138,
+        0.0008521154522895813,
+        -0.00655856728553772
+      ],
+      "joint_fixed_selection_full_minus_empty": 0.0,
+      "joint_own_selection_full_minus_empty": 0.0
+    },
+    "scene0004_00": {
+      "expressions": 4,
+      "full_scale_fixed_q_iou": 0.26028624176979065,
+      "empty_scale_bias_retained_fixed_q_iou": 0.22850848082453012,
+      "true_zero_message_fixed_q_iou": 0.33185339346528053,
+      "full_minus_empty": 0.031777760945260525,
+      "full_minus_true_zero": -0.07156715169548988,
+      "empty_bias_retained_minus_true_zero": -0.10334491264075041,
+      "point_iou_shapley_fine_middle_coarse": [
+        0.02788547022889057,
+        -0.0012915957098205877,
+        0.005183886426190535
+      ],
+      "joint_fixed_selection_full_minus_empty": 0.010160877602174878,
+      "joint_own_selection_full_minus_empty": 0.010160877602174878
+    }
+  },
+  "maximum_native_matching_error": 0.0,
+  "maximum_scalar_efficiency_residual": 5.551115123125783e-17,
+  "canonical_calls_by_scene": [
+    4,
+    4,
+    4,
+    4
+  ],
+  "empty_subset_message_norm_by_scene": [
+    836.5422973632812,
+    1563.1826171875,
+    652.6614990234375,
+    1229.58056640625
+  ],
+  "local_all_scales_nonnegative": false,
+  "actual_work": {
+    "cpu_control_families": 4,
+    "full_native_forwards": 5,
+    "successful_full_native_forwards": 4,
+    "native_suffix_replays": 36,
+    "first_failed_full_native_forwards": 1,
+    "backwards": 0,
+    "optimizer_steps": 0,
+    "val_forwards": 0,
+    "training_launches": 0,
+    "model_revisions": 0
+  },
+  "unknowns": [
+    "independent full-network reproducibility",
+    "population scale harms",
+    "cause of VAL deficit",
+    "retrained omission ablations",
+    "subgroup labels",
+    "generalization",
+    "whole-training peak memory"
+  ],
+  "interpretation": "All-scale-beneficial local premise refuted. Empty subset retains learned bias and differs from true zero; Shapley signs depend on that preregistered reference. Never conclude coarse/middle globally harmful or select a new model from this cohort."
+}

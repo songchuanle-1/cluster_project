@@ -1,0 +1,9 @@
+# BEC native version-bound private copy
+
+This copy binds the existing actual isolated BEC9b67 single child of48fc. Original2d06 source preparation and322c disabled/unversioned native preparation remain immutable. The original BEC worker7e5, all eight model files and native YAML are copied byte for byte. No native model, TRAIN, resource profile, Git, SSH or GPU was run by this assembly.
+
+Only this runtime copy is capability-enabled, binds candidate9b67/source-parent48fc and requires the live runtime checkout to remain48fc. Its original seven guard/function bodies remain unchanged. Before torch/model/data/CUDA import, the future worker still requires exact current-owner manifest/lease, original deadline, selected physical0or1/UUID, live whitelist, two idle observations, all three selected-card flock handles and exact assets/source hashes. Visible physical selection maps to logicalcuda0; worker.cuda() and logical index0 are unchanged.
+
+The manifest template has ten execution fields null. No native_manifest.json, execution_lease.json, execution_binding.json, adapter_release.json or transport is created here. Static version/source evidence is historical provenance, not a lease, idle proof or GPU grant. Future original two TRAIN batches must actually establish common initialization/input pairing, true three-distinct source IDs and multi-round/dilation coverage, and all three aggregate W input-column original-loss gradients/updates. Individual call/row zeros are legal. Missing required coverage is INCONCLUSIVE; no resampling or threshold/dtype change.
+
+The original resource function/handlers/bs1/lang1/warmup20/repeat100 are unchanged. Unsupported operators must be disclosed from actual runs. Smoke peaks include observers/reference snapshots and are not pure TRAIN memory; pure TRAIN and efficacy remain UNKNOWN. This package creates no admission, receipt, queue entry, source promotion, scheduler action or scientific PASS.

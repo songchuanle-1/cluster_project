@@ -1,0 +1,46 @@
+\section{Discussion and Limitations}
+
+\begin{comment}
+\noindent \textbf{Social Impact.}
+The paramount consideration of social impact has significantly shaped the development of our proposed CoT 3D visual grounding architecture. 
+As, it holds profound implications across diverse domains and applications, spanning from the integration of indoor navigation systems within robots, empowering them to execute a wide spectrum of tasks, to the facilitation of assistive systems catering to the needs of elderly individuals and those with disabilities—such as the visually impaired. 
+For instance, in the context of visually impaired individuals, the technology's ability to ground objects within their 3D environment from language descriptions is pivotal in tasks like retrieving their glasses or a glass of water.
+Aligned with this imperative, the inherent data-efficient nature of our approach positions it as an ideal candidate for federated learning schemes. 
+This becomes particularly relevant when a robot is introduced into a novel indoor environment and necessitates rapid learning from minimal interactions with its new user.
+\end{comment}
+\noindent \textbf{Comparison with PhraseRefer \citep{yuan2022toward} and ScanEnts \citep{abdelreheem2022scanents3d}.}
+We acknowledge the great work proposed by PhraseRefer \citep{yuan2022toward} and ScanEnts \citep{abdelreheem2022scanents3d}, which paved the way for the importance of paying attention not just to the target object but also to the anchors.
+Thus, underlying approaches have some similarities in terms of demonstrating the importance of including anchors in the pipeline.
+However, there are a lot of significant differences:
+1) Design a CoT framework for 3D visual grounding that explicitly models causal reasoning while interpreting the instruction inspired by the human perception system.
+2) Show that we can design an efficient framework that achieves state-of-the-art results on three challenging benchmarks, i.e., Nr3D, Sr3D \citep{achlioptas2020referit3d}, and ScanRefer \citep{chen2020scanrefer}, without requiring human labels. Proper design of such an approach is pivotal in attaining a good performance  while circumventing the need for intensive human annotations.
+A pertinent example can be drawn from the labeling procedure employed in PhraseRefer \citep{yuan2022toward}, which demanded a cumulative workforce commitment of 3664 hours, roughly equivalent to an extensive five-month timespan.
+%Thus, as shown in Table 4, we integrated our CoT architecture into four different baselines, i.e., LAR, SAT, MVT, and ViL.
+%Our framework shows a consistent gain across different baselines.
+%Most importantly, we report the results for two framework variants for each baseline, one using our pseudo-noisy labels (human-free) and the second using the anchors GT annotations from PhraseRefer \cite{yuan2022toward}.
+%Significance performance gain can be shown for the MVT case in the Table below, where using our pseudo labels, we outperform PhraseRefer \cite{yuan2022toward} and ScanEnts \cite{abdelreheem2022scanents3d}, which utilize GT anchors annotations.
+%Furthermore, when we use their manual annotations instead of our pseudo labels, we achieve SOTA results and outperform them significantly.
+%This emphasizes the importance of our proposed CoT framework.
+
+
+\noindent \textbf{Pseudo labels accuracy.} 
+The accuracy of the pseudo-labels plays a vital role in the overall performance.
+To evaluate its performance, we manually collect ground-truth labels for 1) the predicted orderings of the anchors in the utterance and 2) the final localization of the anchors as predicted by the geometry module, based on 10\% of the Nr3D.
+To evaluate orderings predicted by in-context learning, we use the normalized Levenshtein edit distance between two sequences, where a length of 1 means that every object in the sequence is incorrect. We achieve an average distance of $0.18$ between predicted and ground-truth orderings.
+We consider anchor-wise localization accuracy to evaluate the geometry module's accuracy, where the anchors considered for each sequence are those mentioned in the input utterance. 
+We achieve a $77$ \% accuracy for this task compared to human annotators.
+Overall, a significant accuracy gap is measured between automatically collected pseudo-labels and ground-truth data, contributing to the performance loss observed on the Nr3D dataset.
+
+
+\noindent \textbf{Pseudo module limitations.}
+Despite designing a data efficient framework that could be integrated into any existing 3D visual grounding architecture, and achieve SOTA results without requiring any manual annotation efforts, our pseudo label module hinders achieving more gain on Nr3D.
+Accordingly, we encourage the future efforts to try to enhance the pseudo module performance.
+In addition, the anchor localization block in our pseudo module is tailored on ScanNet dataset \citep{dai2017scannet}, and will thus need some adaptations to be usable on other 3D scene datasets.
+
+
+\noindent \textbf{Pathway module limitations.}
+Our Pathway module is responsible of generating a chain of logical order for the extracted objects from the input utterance.
+However, it does not handle the multi-path scenario, where multiple paths are valid.
+For instance, given this utterance ``It is the chair besides the desk, which has a book and a lamp above it'', we have two possible starting points, i.e., locating the lamp first or the book. 
+Thus, for simplicity, we start by the last mentioned object in the utterance, in the multiple paths scenario.
+Nevertheless, one possible solution to handle this limitation implicitly through building a graph that reasons the different possibilities \citep{salzmann2020trajectron++}. 

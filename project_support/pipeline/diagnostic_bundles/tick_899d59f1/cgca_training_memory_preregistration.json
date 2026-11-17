@@ -1,0 +1,21 @@
+{
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "reason": "Candidate native training smoke used different actual batches from prior MDC; absolute7.42GB vs4.36GB is not a matched delta. Run original M95 same native initialization/data/seed/batch/optimizer steps to check actual batch fingerprint equality and peak memory rather than infer from architecture.",
+  "gate": "If native training peak ratio>1.15, retain original goal requirement for trained+.003mIoU; no untrained benefit claim/automatic waiver. If batches differ, record unmatched and no comparison rather than force equality by replacing data.",
+  "candidate_source_unchanged": true,
+  "candidate_smoke_preserved": {
+    "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/smoke_candidate_result.json",
+    "sha256": "d2fe096bf2e353006f71b46e4fa595dfc743a45ac764750bd2ea9d4e106df6c2"
+  },
+  "baseline_diagnostic_change": "Permit missing CGCA module when reporting baseline zero-parameter count only; native M95 model/trainer unchanged.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_baseline_native/worker.py",
+      "sha256": "088bd0750cf2a514982b4b99df966ce6cc33bc55bf8ea4785735e7505907ce11"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_baseline_native/control.py",
+      "sha256": "b54582164b1e378382191deb9b2c820f0666c017b529e34f4b9bafb68ddf537f"
+    }
+  ]
+}

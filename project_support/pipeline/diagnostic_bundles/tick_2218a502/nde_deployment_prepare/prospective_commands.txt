@@ -1,0 +1,14 @@
+All commands below are PROSPECTIVE only, for separately reviewed activation copies; these preparation packets stay disabled.
+
+python -B <reviewed-deployment-active>/prepare_nde_baseline.py --execute-root
+
+python -B <reviewed-deployment-active>/deploy_nde.py --execute-root --phase ff --receipt <canonical-M233.json> --review <actual-independent-normalization-review.json> --review-sha256 <actualSHA> --native-manifest D:/project/cluster_project/pipeline/diagnostic_bundles/tick_801d029a/nde_execution/native_manifest.json --native-result <actual-normalized-native_smoke.json> --resource-result <actual-normalized-resources.json> --protected-baseline D:/project/cluster_project/pipeline/diagnostic_bundles/tick_2218a502/nde_deployment_baseline.json --baseline-sha256 <actualSHA>
+
+Existing-runtime sync is a canonical API call after genuine admission and local FF:
+closure.safe_sync(ROOT, ROOT / 'Cluster', authorized_server4, monitor.ssh)
+It verifies existing source before pushing admitted0747 and remote merge --ff-only. Do not execute inherited deploy_nde.py --phase runtime or --phase switch: runtime source assumes an absent/new worktree, and pointer switch has its own reviewed route.
+
+After production/pointer completion and M233 queue registration only:
+python -B <reviewed-dispatch-active>/dispatch_nde_once.py --execute-root --production-result <actual2218production.json> --production-review <actual2218productionreview.json> --production-review-sha256 <actualSHA>
+
+Original dispatch guard requires deadline remaining>100 seconds; original FF guard requires>150 before intent and>120 immediately before Git. No margin is reduced. No old request is replayed.

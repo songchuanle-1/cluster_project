@@ -1,0 +1,118 @@
+{
+  "contract": "m95_native_routes_repeat_summary_v1",
+  "admission": false,
+  "source_sha256": {
+    "jacobian": "9fc76f39259e0024e69a4df2d1c20a51171a3f58d72482f8e10d034b24331553",
+    "ownership": "85e028f2e1a0ed94a6434b3b4b727a976a555badd42143db05b552bdddab4115"
+  },
+  "jacobian": {
+    "repeat": {
+      "units_per_repeat": 83,
+      "max_absolute_metric_drift": 3.4203340620320155e-06,
+      "status": "FAIL",
+      "frozen_tolerance": 1e-06
+    },
+    "parameters_repeat": {
+      "units_per_repeat": 21,
+      "max_absolute_metric_drift": 5.300305927491422e-07,
+      "status": "PASS",
+      "frozen_tolerance": 1e-06
+    },
+    "frozen_expressions": 31,
+    "scenes": 2,
+    "query_pairs": {
+      "mask/referent": {
+        "defined": 31,
+        "native_mean_cosine": -0.002406173367311293,
+        "rotated_mean_cosine": -0.0010162041606782998,
+        "negative_native": 20
+      },
+      "mask/semantic": {
+        "defined": 31,
+        "native_mean_cosine": 0.002506403604396183,
+        "rotated_mean_cosine": -0.0005271377767038294,
+        "negative_native": 15
+      },
+      "referent/semantic": {
+        "defined": 31,
+        "native_mean_cosine": 0.5979678584260391,
+        "rotated_mean_cosine": 0.02197751470039818,
+        "negative_native": 0
+      }
+    },
+    "native_summed_update": {
+      "mask": {
+        "nonzero": 31,
+        "adversely_directed": 1
+      },
+      "referent": {
+        "nonzero": 31,
+        "adversely_directed": 0
+      },
+      "semantic": {
+        "nonzero": 31,
+        "adversely_directed": 0
+      },
+      "quality": {
+        "nonzero": 29,
+        "adversely_directed": 8
+      }
+    },
+    "final_ffn_parameter_pairs": {
+      "mask/referent": {
+        "defined_batches": 21,
+        "mean_cosine": -0.03435101821916638,
+        "negative_batches": 16
+      },
+      "mask/semantic": {
+        "defined_batches": 21,
+        "mean_cosine": -0.023143545575551244,
+        "negative_batches": 17
+      },
+      "referent/semantic": {
+        "defined_batches": 21,
+        "mean_cosine": 0.6320570058610809,
+        "negative_batches": 0
+      }
+    },
+    "max_native_gradient_sum_error": 9.313225746154785e-10,
+    "interpretation": "Native referent and semantic objectives align, mask/referent are near orthogonal. No general adverse referent update; do not implement generic task-gradient surgery from this cohort. One adverse mask expression remains a diagnostic flag, not an efficacy veto."
+  },
+  "ownership": {
+    "repeat": {
+      "units_per_repeat": 121,
+      "max_absolute_metric_drift": 6.145908042154424e-06,
+      "status": "FAIL",
+      "frozen_tolerance": 1e-06
+    },
+    "outcomes_repeat": {
+      "units_per_repeat": 83,
+      "max_absolute_metric_drift": 0.0,
+      "status": "PASS",
+      "frozen_tolerance": 1e-06
+    },
+    "distinct_target_pairs": 121,
+    "scenes": 2,
+    "pairs_with_failure": 25,
+    "selected_target_overlap_pairs": 2,
+    "native_matched_target_overlap_pairs": 1,
+    "same_target_exclusions": 2,
+    "gradient_mean_cosine_joint_vs_independent": 0.9973816993622628,
+    "arms": {
+      "joint": {
+        "both_margin_directions_corrective": 121,
+        "mean_corrective_cosine": 0.06826670633314481
+      },
+      "independent": {
+        "both_margin_directions_corrective": 121,
+        "mean_corrective_cosine": 0.0686481064833138
+      },
+      "shifted_joint": {
+        "both_margin_directions_corrective": 0,
+        "mean_corrective_cosine": -0.256206834016889
+      }
+    },
+    "interpretation": "Physical correspondence matters, but categorical ownership supplies the same correction as existing independent BCE on every eligible pair. Do not admit the generic categorical realization as a new mechanism. No assertion that future joint structures cannot learn."
+  },
+  "limitations": "31 frozen expressions/2 scenes plus native companions. Prediction-blind selection within an existing narrow cohort; no population effect, trained benefit or new-candidate backward. No optimizer, new model/config, admission, queue or training."
+}

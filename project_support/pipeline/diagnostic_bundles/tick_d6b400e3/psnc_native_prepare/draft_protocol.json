@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "candidate_id": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "experiment_id": "M210-PSNC",
+  "status": "DRAFT_EXECUTION_DISABLED",
+  "code_commit": null,
+  "base_reference_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "worker_modes": [
+    "smoke",
+    "resources"
+  ],
+  "targets": [
+    "champion",
+    "candidate"
+  ],
+  "native_train_entry": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "PSNC_observation_fields": [
+    "PSNC_spectral_observations.batches/groups/DCT_calls",
+    "same_call_f0_output/native_f0_output_gradients",
+    "analysis_work_max_abs_error/synthesis_inverse_max_abs_error observations without threshold",
+    "actual_nonsingleton_supported_groups",
+    "unmixed_original_f_rows_exact plus actual empty/pad/singleton counts",
+    "original_middle_norm_calls/original_middle_ffn_calls=1",
+    "PSNC_middle_exact_HCG_input",
+    "native tracked3FFN parameter gradients and actual updates"
+  ],
+  "unchanged_standard_resources": "bs1/lang1/warm20/repeat100 with original handlers, full unsupported dictionary and same-input pairing",
+  "not_implemented": [
+    "real version/promotion binding",
+    "operational transport adapter/stage/reconcile",
+    "current manifest/lease/binding/release",
+    "four actual raw results / pairing / formatter / receipt / queue",
+    "auxiliary offdiagonal/identity-Q/FP32 operator stress probes",
+    "pure TRAIN memory pair"
+  ],
+  "new_numerical_thresholds": [],
+  "dropout_precision_tolerance_changes": false,
+  "source_f0_no_detach": "Frozen verified parent_spectral.py; native full FFN last-row gradient readout is not isolated parameter contribution",
+  "actual_native_resource_transport": "NOT_RUN"
+}

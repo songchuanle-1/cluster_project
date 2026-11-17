@@ -1,0 +1,223 @@
+--- frozen_NDE46_worker0d3bac
++++ revision1_worker0747
+@@ -212,6 +212,7 @@
+         original_plan=graph.build_support_plan;original_mean=graph._group_mean
+         original_getitem=torch.Tensor.__getitem__;original_invert=torch.Tensor.__invert__
+         original_select=torch.Tensor.index_select;original_cat=torch.cat
++        original_linear=graph.F.linear;original_add=torch.Tensor.__add__
+         original_zeros_like=torch.zeros_like;original_copy=torch.Tensor.index_copy
+         def queue_replace(owner,name,replacement,original):
+             installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+@@ -239,7 +240,7 @@
+                 'exact_original_encoder_feature_and_mask_references':True,
+                 'normalized_inputs':[summary(x) for x in normalized],
+                 'scene_observations':[],'_internal_gradient_flags':[],
+-                'native_observer_scope':'Original support/private native point selection; shared analysis acts before each of the three private means, followed by three actual shared synthesis stages and original restoration/HCG/rawskip/single-inst path. Wrappers return original objects unchanged.',
++                'native_observer_scope':'Revision1 actual original-weight affine factoring: child half plus unique supported parent half before gather/add; original per-child GELU and second Linear before each of three private means. Original support/synthesis/restoration/HCG/rawskip/single-inst. Wrappers return original objects unchanged.',
+                 'per_parameter_nonzero_FP32_minimum_effect_gate_added':False}
+             members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(points.shape[0]))]
+             state['nde_context']={'record':record,'points':points,'mask':point_mask,
+@@ -250,6 +251,15 @@
+         def observed_getitem(tensor,key):
+             output=original_getitem(tensor,key);c=state.get('nde_context')
+             if c is None:return output
++            scene=c.get('scene');active=scene.get('active_analysis') if scene else None
++            if active is not None and tensor is core.analysis[0].weight:
++                assert isinstance(key,tuple) and len(key)==2 and key[0]==slice(None)
++                col=key[1];assert isinstance(col,slice) and col.step is None
++                role='child' if col.start is None and col.stop==core.channels else 'parent'
++                if role=='parent':assert col.start==core.channels and col.stop is None
++                assert role not in active['weight_views']
++                active['weight_views'][role]=output
++                assert list(output.shape)==[core.channels,core.channels]
+             role=next((name for name,ref in [('points',c['points']),('mask',c['mask'])] if tensor is ref),None)
+             if role is None:role=next(('normalized'+str(i) for i,ref in enumerate(c['normalized']) if tensor is ref),None)
+             if role is not None and type(key) is int:c['rows'].append((output,role,key))
+@@ -281,7 +291,7 @@
+             assert len(selected['points'])==valid_count
+             scene={'record':info,'plan':plan,'counts':[len(x) for x in plan['nodes']],
+                 'points':selected['points'],'means':[],'selected_normalized':{},
+-                'context_broadcasts':{},'analysis':[],'synthesis':{},'restored':[]}
++                'context_broadcasts':{},'analysis':[],'synthesis':{},'restored':[],'active_analysis':None}
+             info['actual_original_valid_feature_mask_reference']=True
+             c['scenes'].append(scene);c['scene']=scene;c['record']['scene_observations'].append(info)
+             return plan
+@@ -302,25 +312,65 @@
+             output=original_select(tensor,dim,index,*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
+             if scene is None:return output
+             row=next(((role,batch) for ref,role,batch in c['rows'] if tensor is ref and role.startswith('normalized')),None)
++            active=scene.get('active_analysis')
+             if row is not None:
+                 level=int(row[0][-1]);assert dim==0 and index.tolist()==scene['plan']['nodes'][level]
+                 scene['selected_normalized'][level]=output
++            elif active is not None and len(active['linear_outputs'])>=2 and tensor is active['linear_outputs'][1]:
++                level=active['level'];mapping=('point_to_fine','fine_to_middle','middle_to_coarse')[level]
++                assert dim==0 and index is active['labels'] and index.tolist()==scene['plan'][mapping]
++                assert level not in scene['context_broadcasts'] and active['linear_inputs'][1] is active['parent']
++                scene['context_broadcasts'][level]=output;active['parent_broadcast']=output
++                scene['record']['actual_parent_context_broadcast_calls']+=1
++                scene['record']['parent_context_observations'].append({'level':level,'mapping':mapping,
++                    'actual_original_normalized_parent_token_ref':True,'actual_original_ancestry_mapping':True,
++                    'projected_unique_parent_before_gather':True,'unique_parent_rows':int(active['parent'].shape[0]),
++                    'child_rows':int(active['source'].shape[0]),'original_calls':1,'output':summary(output)})
++            elif scene['synthesis']:
++                level=1 if len(scene['synthesis'])==1 else 0
++                assert tensor is scene['synthesis'][level+1] and dim==0
++                assert index.tolist()==scene['plan']['middle_to_coarse' if level==1 else 'fine_to_middle']
++                scene['downward_ref']=output
++            return output
++        def observed_linear(*args,**kwargs):
++            output=original_linear(*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
++            active=scene.get('active_analysis') if scene else None
++            if active is None:return output
++            values=args[0] if args else kwargs['input']
++            weight=args[1] if len(args)>1 else kwargs['weight']
++            bias=args[2] if len(args)>2 else kwargs.get('bias')
++            ordinal=len(active['linear_outputs']);assert ordinal<3
++            if ordinal==0:
++                assert values is active['source'] and weight is active['weight_views']['child'] and bias is core.analysis[0].bias
++                role='actual_child_first_affine_half';bias_once=True
++            elif ordinal==1:
++                assert values is active['parent'] and weight is active['weight_views']['parent'] and bias is None
++                assert values.shape[0]==scene['counts'][active['level']]
++                role='actual_unique_parent_first_affine_half';bias_once=False
+             else:
+-                level=next((level for level,ref in scene['selected_normalized'].items() if tensor is ref),None)
+-                if level is not None:
+-                    mapping=('point_to_fine','fine_to_middle','middle_to_coarse')[level]
+-                    assert dim==0 and index.tolist()==scene['plan'][mapping]
+-                    assert level==len(scene['analysis']) and level not in scene['context_broadcasts']
+-                    scene['context_broadcasts'][level]=output;scene['record']['actual_parent_context_broadcast_calls']+=1
+-                    scene['record']['parent_context_observations'].append({'level':level,
+-                        'mapping':mapping,'actual_original_normalized_parent_token_ref':True,
+-                        'actual_original_ancestry_mapping':True,'original_calls':1,'output':summary(output)})
+-                elif scene['synthesis']:
+-                    level=1 if len(scene['synthesis'])==1 else 0
+-                    assert tensor is scene['synthesis'][level+1] and dim==0
+-                    assert index.tolist()==scene['plan']['middle_to_coarse' if level==1 else 'fine_to_middle']
+-                    scene['downward_ref']=output
++                assert values is active['activation_output'] and weight is core.analysis[2].weight and bias is core.analysis[2].bias
++                role='actual_original_second_linear';bias_once=None
++            info={'role':role,'original_calls':1,'input':summary(values),'weight':summary(weight),
++                'output':summary(output),'first_affine_original_bias_applied_here':bias_once,
++                'actual_original_parameter_or_slice_reference':True,'returned_original_object_unchanged':True,
++                'input_dtype_equals_output_dtype':values.dtype==output.dtype,'FP32_cast_added':False}
++            assert info['input']['finite'] and info['weight']['finite'] and info['output']['finite']
++            active['linear_inputs'].append(values);active['linear_outputs'].append(output);active['linear_observations'].append(info)
++            lite_watch(output,c['record']);return output
++        def observed_add(tensor,other,*args,**kwargs):
++            output=original_add(tensor,other,*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
++            active=scene.get('active_analysis') if scene else None
++            if active is not None and active['linear_outputs'] and tensor is active['linear_outputs'][0]:
++                assert other is active['parent_broadcast'] and len(active['linear_outputs'])==2
++                assert 'affine_sum' not in active;active['affine_sum']=output
+             return output
++        def activation_pre(owner,values):
++            active=state['nde_context']['scene']['active_analysis']
++            assert owner is core.analysis[1] and values[0] is active['affine_sum']
++        def activation_post(owner,values,output):
++            c=state['nde_context'];active=c['scene']['active_analysis']
++            assert owner is core.analysis[1] and values[0] is active['affine_sum']
++            active['activation_output']=output;lite_watch(output,c['record'])
+         def observed_zeros_like(tensor,*args,**kwargs):
+             output=original_zeros_like(tensor,*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
+             if scene is not None and len(scene['means'])==3 and tensor is scene['means'][2]:scene['coarse_zero']=output
+@@ -329,13 +379,8 @@
+             output=original_cat(values,*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
+             if scene is None:return output
+             dim=kwargs.get('dim',args[0] if args else 0)
+-            if len(scene['analysis'])<3:
+-                level=len(scene['analysis']);source=scene['points'] if level==0 else scene['means'][level-1]
+-                expected=(source,scene['context_broadcasts'][level])
+-                assert len(scene['means'])==level and dim==-1 and len(values)==2 and all(x is y for x,y in zip(values,expected))
+-                assert list(output.shape)==[source.shape[0],2*core.channels]
+-                scene['analysis_input']=output
+-            elif len(scene['means'])==3 and len(scene['synthesis'])<3:
++            assert len(scene['analysis'])==len(scene['means'])==3 and scene['active_analysis'] is None
++            if len(scene['synthesis'])<3:
+                 level=2-len(scene['synthesis']);context=scene['coarse_zero'] if level==2 else scene['downward_ref']
+                 expected=(scene['means'][level],context)
+                 assert dim==-1 and len(values)==2 and all(x is y for x,y in zip(values,expected))
+@@ -345,22 +390,41 @@
+         def stage_pre(kind):
+             def call(owner,values):
+                 scene=state['nde_context']['scene'];assert owner is getattr(core,kind)
+-                assert values[0] is scene[kind+'_input']
++                if kind=='analysis':
++                    assert len(values)==3;source,parent,labels=values;level=len(scene['analysis'])
++                    assert len(scene['means'])==level and scene['active_analysis'] is None
++                    expected_source=scene['points'] if level==0 else scene['means'][level-1]
++                    mapping=('point_to_fine','fine_to_middle','middle_to_coarse')[level]
++                    assert source is expected_source and parent is scene['selected_normalized'][level]
++                    assert labels.tolist()==scene['plan'][mapping] and parent.shape[0]==scene['counts'][level]
++                    scene['active_analysis']={'level':level,'source':source,'parent':parent,'labels':labels,
++                        'weight_views':{},'linear_inputs':[],'linear_outputs':[],'linear_observations':[]}
++                else:assert values[0] is scene['synthesis_input']
+             return call
+         def stage_post(kind):
+             def call(owner,values,output):
+-                c=state['nde_context'];scene=c['scene']
+-                level=len(scene['analysis']) if kind=='analysis' else 2-len(scene['synthesis'])
++                c=state['nde_context'];scene=c['scene'];level=len(scene['analysis']) if kind=='analysis' else 2-len(scene['synthesis'])
+                 info={'level':level,'input':summary(values[0]),'output':summary(output),'original_calls':1,
+                     'actual_original_shared_module':True,'no_replay_or_replacement':True}
+                 assert info['input']['finite'] and info['output']['finite']
+                 if kind=='analysis':
+-                    assert len(scene['means'])==level
+-                    scene['analysis'].append(output);info['before_private_mean']=True
+-                    info['analysis_source']='actual_native_points' if level==0 else 'actual_child_state'
++                    active=scene['active_analysis'];assert active['level']==level and len(scene['means'])==level
++                    assert len(active['linear_outputs'])==3 and output is active['linear_outputs'][2]
++                    assert set(active['weight_views'])=={'child','parent'}
++                    assert scene['context_broadcasts'][level] is active['parent_broadcast']
++                    info.update(before_private_mean=True,analysis_source='actual_native_points' if level==0 else 'actual_child_state',
++                        parent_input=summary(values[1]),actual_three_argument_analysis=True,
++                        affine_factorization_observations=active['linear_observations'],
++                        actual_child_and_unique_parent_first_affine_halves=True,
++                        actual_original_first_affine_bias_applied_once=True,
++                        actual_parent_projection_before_gather=True,
++                        original_per_child_GELU_and_second_Linear=True,
++                        analysis_first_affine_source_rows=int(active['source'].shape[0]),
++                        analysis_first_affine_unique_parent_rows=int(active['parent'].shape[0]),
++                        original_parameter_topology_and_precision=True)
++                    scene['analysis'].append(output);scene['active_analysis']=None
+                 else:scene['synthesis'][level]=output
+-                scene['record'][kind+'_observations'].append(info)
+-                scene['record']['actual_'+kind+'_calls']+=1;lite_watch(output,c['record'])
++                scene['record'][kind+'_observations'].append(info);scene['record']['actual_'+kind+'_calls']+=1;lite_watch(output,c['record'])
+             return call
+         def observed_copy(tensor,dim,index,source,*args,**kwargs):
+             output=original_copy(tensor,dim,index,source,*args,**kwargs);c=state.get('nde_context');scene=c.get('scene') if c else None
+@@ -378,11 +442,13 @@
+             ('_group_mean',observed_mean,original_mean)]:queue_replace(graph,name,replacement,original)
+         for owner,name,replacement,original in [(torch.Tensor,'__getitem__',observed_getitem,original_getitem),
+             (torch.Tensor,'__invert__',observed_invert,original_invert),(torch.Tensor,'index_select',observed_select,original_select),
++            (graph.F,'linear',observed_linear,original_linear),(torch.Tensor,'__add__',observed_add,original_add),
+             (torch,'cat',observed_cat,original_cat),(torch,'zeros_like',observed_zeros_like,original_zeros_like),
+             (torch.Tensor,'index_copy',observed_copy,original_copy)]:queue_replace(owner,name,replacement,original)
+         for kind in ('analysis','synthesis'):
+             hooks.extend([getattr(core,kind).register_forward_pre_hook(stage_pre(kind)),
+                 getattr(core,kind).register_forward_hook(stage_post(kind))])
++        hooks.extend([core.analysis[1].register_forward_pre_hook(activation_pre),core.analysis[1].register_forward_hook(activation_post)])
+         def exchange_post(owner,values,output):
+             c=state.pop('nde_context');active=[scene for scene in c['scenes'] if scene['counts'][0]]
+             for scene in active:
+@@ -399,7 +465,8 @@
+                 actual_group_mean_calls=3*count,actual_parent_context_broadcast_calls=3*count,
+                 actual_analysis_calls=3*count,actual_synthesis_calls=3*count,actual_final_index_copy_calls=3*count,
+                 actual_three_LN_calls=list(state['norm_counts']),actual_production_NDEmbedding_path_observed=True,
+-                native_point_analysis_precedes_first_private_mean=True,no_feature_or_model_replay=True)
++                native_point_analysis_precedes_first_private_mean=True,no_feature_or_model_replay=True,
++                actual_revision1_affine_factoring_observed=True,implementation_revision=1)
+             state['nde_delta_snapshots']=[value.detach().clone() for value in output];exchange_calls.append(record)
+         hooks.extend([core.register_forward_pre_hook(exchange_pre),core.register_forward_hook(exchange_post)])
+ 
+@@ -728,7 +795,7 @@
+         'native_criterion_backwards':0,'native_predict_calls':0,'new_training':0,
+         'exception_frame_capture_status':'NOT_EXERCISED',
+         'native_model_and_yaml_unchanged':False,'source_scope':'Exact native NDE or original M95, original backbone pretrain and native train loop'}
+-    result.update(experiment_id=MANIFEST['experiment_id'],config=MANIFEST['config'],
++    result.update(experiment_id=MANIFEST['experiment_id'],config=MANIFEST['config'],implementation_revision=MANIFEST.get('implementation_revision'),
+         native_manifest_sha256=sha(STAGE/'native_manifest.json'),
+         diagnostic_worker_sha256=sha(Path(__file__)),runtime_sha256=sha(STAGE/'native_runtime.py'),
+         source_preparation_sha256=MANIFEST['source_preparation_sha256'],

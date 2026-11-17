@@ -1,0 +1,7 @@
+# LFT guarded operational preparation
+
+Source94c4 is an exact9 child18e. Native activation is separately frozen in sibling lft_native_activation_prepare; original a87d draft is untouched. The original worker/science/protocol/resources remain byte/AST unchanged. PhysicalGPU0 only, live authorized[0,1]; a legal running/reserved GPU1 does not invalidate GPU0, but selectedGPU0 must have no registered or pending/uncertain claim and must be physically idle with its exact UUID and all three locks available. Never evict, reset or use fallback GPU1.
+
+No production adapter_release.json, manifest, lease, remote stage, request or result exists in this preparation. Root must externally review/register native and this exact package, then copy release_template.json exactly to adapter_release.json. The default root launcher is NOP. Future use still needs the actual current owner/context/pending/deadline, intended runtime18e and genuine parent ELC technical receipt. A changed runtime requires separately binding a truly compatible tested version, not a blind ff.
+
+Explicit root commands use python -B run_lft_operation.py --execute-root --operation prepare, then stage, then one run --mode smoke/resources --target champion/candidate per original four-arm request. Each run requires >1020 seconds remaining. Local/remote uncertainty preserves original IDs and requires status/reconcile; never replay a mutation. No admission/queue or formal training is generated here. Both current original jobs must remain untouched.

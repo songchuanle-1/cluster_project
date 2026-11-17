@@ -1,0 +1,17 @@
+{
+  "actions": [
+    "上海2026-10-21 07:10 begin已完成进展/目标检查及已有合格队列派发检查，waiting0，无终态/运维问题；M205-MDC Best=.4023、第4/50轮，M206-CGCA Best=.3808、第3/50轮，均no_improve0/10。与前轮相比继续增长，但最终收益仍待训练。",
+    "07:12:04严格已知主机/hostname/两卡UUID/contexts核验，server4 GPU0 PID3842306、GPU1 PID3873690仍占用；没有共享或改动运行中的任务。",
+    "继续已有M207-HAP：核对本地8源+1YAML逐字节等于f51823bb提交；原YAML和M95字节相同。只读校验实际基线源码/训练入口/数据集源码/annotation/backbone pretrain及frozen M95 checksum，未加载checkpoint为模型或创建tensor。",
+    "在新私有目录hap_5c5688ff组装13文件完整检查包，包括fresh runtime/manifest/当前租约/原worker/8源/YAML。远端AST/compile和所有payload hash核验完成；既有训练代码根没有修改。",
+    "独立只读复核确认GPU0/UUID0/query/lock/env和token/thread/deadline/manifestSHA一致，acquire在torch之前；修正了旧CGCA元数据GPU0与实际runtimeGPU1不一致的复制风险。旧文件原字节保留。",
+    "实际执行同一native_runtime.acquire的受限probe：因GPU0占用在torch/gorilla/worker/setup前拒绝，before/after CUDA contexts一致，无自身CUDA context，0forward/0optimizer、持有锁0。即使意外空卡probe也只释放自身锁停止；没有执行原生smoke。",
+    "新resource_check/blocked、完整检查包与guard证据绑定当前HAP/tick_attempt；0新候选、0模型源代码提交、0原生数据/backward/资源计算、0准入/入队/启动。"
+  ],
+  "decisions": [
+    "保留两项现有正式训练和原验证/早停协议，不按当前早期mIoU判断最终收益，不驱逐任务或以低util/旧flock可用推断空闲。",
+    "HAP保持validation/native_status=pending_resource。真实空闲server4卡出现后，用新foreground token、原deadline、同一精确版本/原YAML/资产重建私有stage并重验UUID/contexts/locks，再执行TRAIN两步和配对资源，实测PASS才准入/安全同步/派发。旧stage和lease不可跨tick直接重放。",
+    "本轮guard成功拒绝只是资源前置检查结果，不是HAP数值/梯度/FLOPs/延迟/显存或准确率PASS。pinv observer的既有诊断局限继续保留并分开归因。",
+    "复用已有项目操作授权；无新增用户决定事项，不更改目标/资源边界/禁用项/调度/历史冻结结果，不凑新增候选配额。"
+  ]
+}

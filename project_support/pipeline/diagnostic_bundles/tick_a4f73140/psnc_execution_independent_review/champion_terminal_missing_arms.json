@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-23T22:17:09.445327+00:00",
+  "token": "a4f7314098ed4dbd8351aa005661583d",
+  "review_scope": "Local request/execution/binding metadata and frozen adapter/remote control-flow only; no remote query.",
+  "material_concerns": [],
+  "champion": {
+    "request_id": "ad14828cebb34d00b3ac4b03d313840e",
+    "certainty": "terminal",
+    "returncode": 0,
+    "pid": 2451704,
+    "start_ticks": "41012199",
+    "worker_execution_completed": true,
+    "native_smoke_checks_passed": true,
+    "optimizer_steps": 2,
+    "losses": [
+      9.529125213623047,
+      13.909586906433105
+    ],
+    "worker_result_observed_at": "2026-10-23T22:13:29.513673+00:00",
+    "terminal_evidence_scope": "remote_ops.run_operation waits for the exact Popen process at line182 before constructing terminal at188. Original stateR is startup identity, not current liveness.",
+    "raw_after_scope": "Worker-local after snapshot occurs before worker process exits, so its self CUDA context2451704/9632MiB is not a current occupancy/liveness/foreign-owner proof."
+  },
+  "current_remote_liveness": "NOT_OBSERVED_BY_THIS_REVIEW",
+  "GPU0_current_idle": "NOT_OBSERVED_BY_THIS_REVIEW",
+  "arm_file_presence": {
+    "smoke_champion": {
+      "request": true,
+      "execution": true
+    },
+    "smoke_candidate": {
+      "request": true,
+      "execution": false
+    },
+    "resources_champion": {
+      "request": false,
+      "execution": false
+    },
+    "resources_candidate": {
+      "request": false,
+      "execution": false
+    }
+  },
+  "uncertain_file_names": [],
+  "binding": {
+    "stage": "/data/songcl/Project/Cluster_project/pipeline/psnc_a4f73140",
+    "physical_gpu": 0,
+    "candidate_code_commit": "43dce016c1a1713c2a5dab7061810dc2efde8954",
+    "runtime_code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "owner_deadline": "2026-10-23T23:09:39.758328+00:00"
+  },
+  "missing_arm_sequence_after_actual_idle": [
+    "run --mode smoke --target candidate",
+    "run --mode resources --target champion",
+    "run --mode resources --target candidate"
+  ],
+  "resume_scope": "Only an arm with no original request can be run after root read-only reconciliation and actual fresh idle confirmation; exact same current owner/binding and >1020seconds remaining per run. Existing request is never replayed. run_pair would revisit champion and be refused. No GPU busy bypass or lease extension.",
+  "root_reported_pair_refusal": "Authorized GPU is busy before candidate request. Occupancy cause not inferred from these local records.",
+  "admission": "NOT_EVALUATED; champion completion alone is not candidate/four-arm/resource/standard PASS.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/execution_binding.json",
+      "sha256": "a8f6337816b1172e475f9731b15a90a1e468c24d849288f1d3bc7ee10dc18011"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/smoke_champion_request.json",
+      "sha256": "4c446ee8bcd085bc143f75b4977acdd97762aefcb42e59d85a31b04c036f1655"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/smoke_champion_execution.json",
+      "sha256": "135522a57c40b4a5176431054321b7e3c45b8e8cf5e3def2a7ec92c0e5df7f2e"
+    }
+  ],
+  "executed": {
+    "adapter_called": false,
+    "SSH": false,
+    "GPU": false,
+    "torch": false,
+    "native": false,
+    "shared_state_write": false
+  },
+  "write_scope": "Only this new independent diagnostic report"
+}

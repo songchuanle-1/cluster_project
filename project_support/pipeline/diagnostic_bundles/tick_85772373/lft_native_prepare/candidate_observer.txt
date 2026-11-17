@@ -1,0 +1,187 @@
+    if candidate:
+        lifting_module=importlib.import_module(qualified+'.nonlinear_lifting')
+        original_plan=lifting_module.build_lifting_plan;original_prepare=lifting_module.prepare_lifting_plans
+        original_mean=lifting_module.mean_by_parent
+        original_select=torch.Tensor.index_select;original_add=torch.Tensor.index_add;original_copy=torch.Tensor.index_copy
+        original_plus=torch.Tensor.__add__;original_minus=torch.Tensor.__sub__
+        def queue_replace(owner,name,replacement,original):
+            installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            normalized,ids,ffns=values
+            assert owner is att.nonlinear_lifting and ids is bank.cluster_ids_list and ffns is att.cluster_ffn and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=lft_coverage_preflight(members)
+            if not coverage['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FOREST';raise RuntimeError('INCONCLUSIVE_COVERAGE before LFT watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'map_calls':[],'mean_calls':[],'original_FFN_calls':[],'arithmetic_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual original plan/prepare;8 shared P/U Linear/GELU calls;4 mean returns;3 packed original FFNs;scoped actual add/sub/select/add/copy. Each original called once and its original object returned. No learned/mean/model/criterion/backward or arithmetic replay.',
+                'FP32_inverse_Jacobian_optional_coverage_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'lft_context' not in state
+            state['lft_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,
+                'widths':[int(x.shape[1]) for x in normalized],'phase':'prepare','builder_calls':0,'prepare_calls':0,
+                'pack_calls':0,'map_calls':0,'GELU_calls':0,'mean_calls':0,'mean_add_calls':0,'mean_outputs':[],
+                'activation_outputs':[],'arithmetic_count':0,'ffn_counts':[0,0,0],'final_level':0,'final_outputs':[]}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE original LFT input before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(points,fm,mc,widths):
+            context=state['lft_context'];b=context['builder_calls'];context['builder_calls']+=1
+            assert (points,fm,mc)==context['members'][b] and widths==context['widths']
+            output=original_plan(points,fm,mc,widths);record=lft_plan_observation(output,(points,fm,mc));record['batch']=b
+            context['record']['plans'].append(record);return output
+        def observed_prepare(levels,ids):
+            context=state['lft_context'];assert context['phase']=='prepare' and ids is context['ids_ref'] and not context['prepare_calls']
+            assert all(levels[l] is context['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);context['prepare_calls']=1;context['plans_ref']=output
+            assert context['builder_calls']==len(output)==int(levels[0].shape[0])
+            destinations=[[],[],[]];fine_parents=[];middle_parents=[];fine_counts=[];middle_counts=[];mo=co=0
+            for b,plan in enumerate(output):
+                for level,key in enumerate(('fine_ids','middle_ids','coarse_ids')):destinations[level].extend(b*context['widths'][level]+i for i in plan[key])
+                fine_parents.extend(mo+p for p in plan['fine_parent_positions']);middle_parents.extend(co+p for p in plan['middle_parent_positions'])
+                fine_counts.extend(plan['middle_fine_counts']);middle_counts.extend(plan['coarse_middle_counts'])
+                mo+=len(plan['middle_ids']);co+=len(plan['coarse_ids'])
+            assert destinations[0] and all(fine_counts) and all(middle_counts)
+            context.update(destinations=destinations,fine_parents=fine_parents,middle_parents=middle_parents,
+                fine_counts=fine_counts,middle_counts=middle_counts,phase='pack')
+            return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            context=state.get('lft_context')
+            if context is None:return original_select(tensor,dim,index,*args,**kwargs)
+            assert dim==0;phase=context['phase']
+            if phase=='pack':
+                level=context['pack_calls'];assert index.detach().cpu().tolist()==context['destinations'][level]
+                assert fingerprint(torch,tensor.detach().reshape(-1))==fingerprint(torch,context['normalized'][level].detach().reshape(-1))
+                output=original_select(tensor,dim,index,*args,**kwargs);context[('fine','middle','coarse')[level]]=output;context['pack_calls']+=1
+                if context['pack_calls']==3:context['phase']='map_pf_a'
+                kind='original_supported_bank_pack'
+            else:
+                specs={'gather_pf_a':(0,'fine_parents','parent_pf_a','sub_f_a'),
+                    'gather_pm_a':(2,'middle_parents','parent_pm_a','sub_m_a'),
+                    'gather_pm_s':(5,'middle_parents','parent_pm_s','add_m_s'),
+                    'gather_pf_s':(7,'fine_parents','parent_pf_s','add_f_s')}
+                assert phase in specs,phase
+                output_index,parent_key,out_key,next_phase=specs[phase]
+                assert tensor is context['activation_outputs'][output_index] and index.detach().cpu().tolist()==context[parent_key]
+                output=original_select(tensor,dim,index,*args,**kwargs);context[out_key]=output;context['phase']=next_phase;kind='actual_original_parent_prediction_gather'
+            context['record']['primitive_calls'].append({'kind':kind,'phase':phase,'original_calls':1,'returned_original_object_unchanged':True});return output
+        def arithmetic(tensor,other,kind,original,*args,**kwargs):
+            context=state.get('lft_context')
+            if context is None:return original(tensor,other,*args,**kwargs)
+            phase=context['phase'];a=context['activation_outputs']
+            specs={'sub_f_a':('sub',context.get('fine'),context.get('parent_pf_a'),'detail_fine','mean_fine_analysis'),
+                'add_m_a':('add',context.get('middle'),a[1] if len(a)>1 else None,'lifted_middle','map_pm_a'),
+                'sub_m_a':('sub',context.get('lifted_middle'),context.get('parent_pm_a'),'detail_middle','mean_middle_analysis'),
+                'add_c_a':('add',context.get('coarse'),a[3] if len(a)>3 else None,'lifted_coarse','ffn_0'),
+                'sub_c_s':('sub',context.get('coarse_core'),a[4] if len(a)>4 else None,'coarse_out','map_pm_s'),
+                'add_m_s':('add',context.get('middle_core'),context.get('parent_pm_s'),'lifted_middle_out','mean_fine_synthesis'),
+                'sub_m_s':('sub',context.get('lifted_middle_out'),a[6] if len(a)>6 else None,'middle_out','map_pf_s'),
+                'add_f_s':('add',context.get('fine_core'),context.get('parent_pf_s'),'fine_out','final_scatter')}
+            assert phase in specs,phase
+            expected,left,right,key,next_phase=specs[phase];assert kind==expected and tensor is left and other is right
+            output=original(tensor,other,*args,**kwargs);context[key]=output;context['arithmetic_count']+=1;context['phase']=next_phase
+            context['record']['arithmetic_calls'].append({'phase':phase,'kind':kind,'output':summary(output),'output_sha256':fingerprint(torch,output),'original_calls':1,'returned_original_object_unchanged':True,'arithmetic_replayed':False})
+            lite_watch(output,context['record']);return output
+        def observed_plus(tensor,other,*args,**kwargs):return arithmetic(tensor,other,'add',original_plus,*args,**kwargs)
+        def observed_minus(tensor,other,*args,**kwargs):return arithmetic(tensor,other,'sub',original_minus,*args,**kwargs)
+        map_roles=('pf_a','um_a','pm_a','uc_a','uc_s','pm_s','um_s','pf_s')
+        map_names=('predict_fine','update_middle','predict_middle','update_coarse','update_coarse','predict_middle','update_middle','predict_fine')
+        def expected_map_input(context,index):
+            key=('middle','mean0','coarse','mean1','mean2','coarse_out','mean3','middle_out')[index]
+            return context['mean_outputs'][int(key[-1])] if key.startswith('mean') else context[key]
+        def map_pre(name):
+            def call(owner,values):
+                context=state['lft_context'];index=context['map_calls'];role=map_roles[index]
+                assert name==map_names[index] and owner is getattr(att.nonlinear_lifting,name) and context['phase']=='map_'+role and values[0] is expected_map_input(context,index)
+                context['record']['map_calls'].append({'role':role,'map':name,'input':summary(values[0]),'input_sha256':fingerprint(torch,values[0])})
+            return call
+        def map_post(name):
+            def call(owner,values,output):
+                context=state['lft_context'];assert name==map_names[context['map_calls']]
+                context['map_ref']=output;context['map_calls']+=1;context['phase']='activation';lite_watch(output,context['record'])
+            return call
+        def activation_post(owner,values,output):
+            context=state['lft_context'];index=context['GELU_calls']
+            assert owner is att.nonlinear_lifting.activation and context['phase']=='activation' and values[0] is context['map_ref'] and context['map_calls']==index+1
+            context['activation_outputs'].append(output);context['GELU_calls']+=1
+            context['phase']=('gather_pf_a','add_m_a','gather_pm_a','add_c_a','sub_c_s','gather_pm_s','sub_m_s','gather_pf_s')[index]
+            context['record']['map_calls'][-1].update(actual_GELU_output=summary(output),actual_GELU_sha256=fingerprint(torch,output));lite_watch(output,context['record'])
+        mean_specs=(('mean_fine_analysis','detail_fine','fine_parents','fine_counts','map_um_a'),
+            ('mean_middle_analysis','detail_middle','middle_parents','middle_counts','map_uc_a'),
+            ('mean_middle_synthesis','middle_core','middle_parents','middle_counts','map_uc_s'),
+            ('mean_fine_synthesis','fine_core','fine_parents','fine_counts','map_um_s'))
+        def observed_mean(messages,parents,counts):
+            context=state['lft_context'];index=context['mean_calls'];phase,key,pk,ck,next_phase=mean_specs[index]
+            assert context['phase']==phase and messages is context[key] and parents==context[pk] and counts==context[ck]
+            context.update(phase='mean_active',mean_input_ref=messages,mean_parents=list(parents),mean_counts=list(counts),current_mean_adds=0)
+            output=original_mean(messages,parents,counts)
+            assert context['current_mean_adds']==1 and list(output.shape)==[len(counts),att.nonlinear_lifting.channels]
+            context['mean_calls']+=1;context['mean_outputs'].append(output);context['phase']=next_phase
+            context['record']['mean_calls'].append({'role':phase,'input_sha256':fingerprint(torch,messages),'output':summary(output),'output_sha256':fingerprint(torch,output),
+                'actual_parent_positions':list(parents),'actual_positive_child_counts':list(counts),'original_mean_calls':1,'returned_original_object_unchanged':True,'mean_replayed':False,
+                'normalization_scope':'Original frozen mean_by_parent index_add/divide-count body; no observer floating mean/inverse residual gate.'})
+            assert context['record']['mean_calls'][-1]['output']['finite'];lite_watch(output,context['record']);return output
+        def observed_add(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('lft_context')
+            if context is None:return original_add(tensor,dim,index,source,*args,**kwargs)
+            assert context['phase']=='mean_active' and dim==0 and source is context['mean_input_ref'] and index.detach().cpu().tolist()==context['mean_parents']
+            assert not context['current_mean_adds'] and bool((tensor==0).all())
+            output=original_add(tensor,dim,index,source,*args,**kwargs);context['current_mean_adds']=1;context['mean_add_calls']+=1
+            context['record']['primitive_calls'].append({'kind':'original_parent_mean_index_add','original_calls':1,'returned_original_object_unchanged':True});return output
+        def packed_ffn_pre(level):
+            def call(owner,values):
+                context=state['lft_context'];key=('detail_fine','detail_middle','lifted_coarse')[level]
+                assert context['phase']=='ffn_'+str(level) and owner is att.cluster_ffn[level] and values[0] is context[key] and not context['ffn_counts'][level]
+            return call
+        def packed_ffn_post(level):
+            def call(owner,values,output):
+                context=state['lft_context'];context[('fine_core','middle_core','coarse_core')[level]]=output;context['ffn_counts'][level]+=1
+                context['phase']='ffn_'+str(level+1) if level<2 else 'mean_middle_synthesis'
+                context['record']['original_FFN_calls'].append({'level':level,'packed_input':summary(values[0]),'output':summary(output),'original_module_identity':True,'original_calls':1});lite_watch(output,context['record'])
+            return call
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('lft_context')
+            if context is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            level=context['final_level'];assert context['phase']=='final_scatter' and dim==0 and level<3
+            assert index.detach().cpu().tolist()==context['destinations'][level] and source is context[('fine_out','middle_out','coarse_out')[level]] and bool((tensor==0).all())
+            output=original_copy(tensor,dim,index,source,*args,**kwargs);context['final_outputs'].append(output);context['final_level']+=1
+            if context['final_level']==3:context['phase']='complete'
+            context['record']['primitive_calls'].append({'kind':'final_original_ID_scatter','original_calls':1,'returned_original_object_unchanged':True});return output
+        for name,replacement,original in [('build_lifting_plan',observed_plan,original_plan),('prepare_lifting_plans',observed_prepare,original_prepare),('mean_by_parent',observed_mean,original_mean)]:queue_replace(lifting_module,name,replacement,original)
+        for owner,name,replacement,original in [(torch.Tensor,'index_select',observed_select,original_select),(torch.Tensor,'index_add',observed_add,original_add),(torch.Tensor,'index_copy',observed_copy,original_copy),(torch.Tensor,'__add__',observed_plus,original_plus),(torch.Tensor,'__sub__',observed_minus,original_minus)]:queue_replace(owner,name,replacement,original)
+        for name in ('predict_fine','update_middle','predict_middle','update_coarse'):
+            module=getattr(att.nonlinear_lifting,name);hooks.extend([module.register_forward_pre_hook(map_pre(name)),module.register_forward_hook(map_post(name))])
+        hooks.append(att.nonlinear_lifting.activation.register_forward_hook(activation_post))
+        for level in range(3):hooks.extend([att.cluster_ffn[level].register_forward_pre_hook(packed_ffn_pre(level)),att.cluster_ffn[level].register_forward_hook(packed_ffn_post(level))])
+        def exchange_post(owner,values,output):
+            context=state.pop('lft_context');record=context['record']
+            assert context['phase']=='complete' and len(output)==3 and context['prepare_calls']==1 and context['pack_calls']==3 and context['map_calls']==context['GELU_calls']==8
+            assert context['mean_calls']==context['mean_add_calls']==4 and context['arithmetic_count']==8 and context['ffn_counts']==[1,1,1] and context['final_level']==3
+            for level,value in enumerate(output):
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,context['final_outputs'][level].detach().reshape(-1))
+                if not value.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE LFT output before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),
+                actual_original_builder_calls=context['builder_calls'],actual_prepare_calls=1,actual_map_calls=context['map_calls'],actual_GELU_calls=context['GELU_calls'],
+                actual_private_mean_calls=context['mean_calls'],actual_arithmetic_calls=context['arithmetic_count'],actual_original_FFN_calls=list(context['ffn_counts']),
+                actual_final_index_copy_calls=context['final_level'],actual_three_LN_calls=list(state['norm_counts']),actual_original_FFN_modules_passed_without_reregistration=True,
+                actual_analysis_then_FFN_then_inverse_order=True,final_deltas_from_actual_synthesis_captures=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'true_fine':len(p['fine_ids']),'true_middle':len(p['middle_ids']),'true_coarse':len(p['coarse_ids']),
+                    'empty_scene':not p['fine_ids'],'single_true_path':len(p['fine_ids'])==1,'middle_fine_counts':p['middle_fine_counts'],'coarse_middle_counts':p['coarse_middle_counts'],
+                    'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['lft_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.nonlinear_lifting.register_forward_pre_hook(exchange_pre),att.nonlinear_lifting.register_forward_hook(exchange_post)])

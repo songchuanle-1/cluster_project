@@ -1,0 +1,30 @@
+{
+  "created": "2026-09-11T17:18:24.735982",
+  "purpose": "CPU-only head ownership and synthetic parameter-coupling audit",
+  "baseline_audit": "reports/d0_checkpoint_identity_20260911-0413/d0_baseline_identity_20260911.json",
+  "m95_audit": "reports/d0_checkpoint_identity_20260911-0413/d0_m95_identity_20260911.json",
+  "baseline_audit_sha256": "23a17f68e66816d36763b0a87943354935579d50a5cebf3a8ebe6b7919358fc6",
+  "m95_audit_sha256": "b6b473c57acab79e6e86574c7d3aaa1c6de0c9f9d61d6f3f149768a929f9a3a3",
+  "source_files": {
+    "d1_head_ownership_20260911.py": "c4b4f09cc3acd6e97777361cb213edb67fef8fa53a32e325363ef833cafb009b",
+    "prepare_d1_head_20260911.py": "3ca58c2d1eac7c4824cab6bf144d980bacabe6e847a170c84aa48028c05e0355"
+  },
+  "finite_difference_epsilon": 1e-05,
+  "synthetic_seed": 1999,
+  "no_cuda": true,
+  "no_checkpoint_write": true,
+  "no_training": true,
+  "no_real_data_forward": true,
+  "goal_sha256": "f16c1db985fbeeb97e284b0e8c24140a5a39e56cb64cd099168be03639c65901",
+  "protocol_initial_sha256": "cf7c884848fdd11f46101d80f0db239a8a05d6cc9f0997231c936b0bae76c8d5",
+  "source_files_current": {
+    "d1_head_ownership_20260911.py": "0b60fc7611f549c13f8e8f5998cb0a37a969e2799e10016b37a6c40f7ce945e7",
+    "run_d1_head_20260911.py": "e9fa204a06e9061fc84f313325fbb2ae1ad9dd062f3725f3fef07e77f4faae57"
+  },
+  "repair_history": [
+    "attempt0 failed before model load: margin output was not scalar",
+    "attempt1 failed before model load: importing baseline and M95 in one process collided on gorilla criterion registration",
+    "attempt2 completed but the finite-difference control exposed a sign mismatch in the synthetic comparison",
+    "attempt3 passed all ownership, coupling, finite-difference, and CUDA-hidden checks"
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T05:51:06.249204+00:00",
+  "status": "CTS_ADMITTED_WAITING_GPU0_BUSY_ZERO_NATIVE_LAUNCH_POSTRESULT_RECORDING_COLLISION_REVIEWED",
+  "candidate_id": "hierarchy-parent-cyclic-triadic-state-composition",
+  "experiment_id": "M214-CTS",
+  "code_commit": "4e80006047d5cb3dcdfb9c1102e02c33f354a07d",
+  "material_concerns": [],
+  "anchors": {
+    "actual_ff": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/cts_primary_ff_result.json",
+      "sha256": "b32ffc71bdd17fe6d00d3b1fbaf344600e5ec6049c46f10d3ad4bc2188b4ef56"
+    },
+    "actual_admission": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/cts_admission_queue_result.json",
+      "sha256": "8abdbc8607c1f48e4639771f41768146ab4df59992d08caa2ea3ecefbb84de88"
+    },
+    "receipt": {
+      "path": "pipeline/admissions/M214-CTS.json",
+      "sha256": "5416d5e2e3b1170f0c741ca5f7c17af48ff33f9e0f559c5aac979b5714f4d9e0"
+    },
+    "actual_dispatch_result": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/cts_dispatch_result.json",
+      "sha256": "199e1803beff2d9cc157b90ae414906e5e68d6eb070b3240b7c158526bf98772"
+    },
+    "actual_transport_calls": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/cts_dispatch_transport_calls.json",
+      "sha256": "21966e41b9c034b6d0038ab8a3a34e7bb7acbafc6c2d59630ccfcc0cd0fa7a1c"
+    },
+    "actual_GPU0_wait": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/gpu0_wait_observation.json",
+      "sha256": "b6f6f2363d79426fc2d19fffb19dd88d0d6c286cdfcfececa02f2a60147dc40f"
+    },
+    "dispatch_intent": {
+      "path": "pipeline/diagnostic_bundles/tick_e245536a/cts_dispatch_intent.json",
+      "sha256": "16c100d44f661682db9bcc7e2e951160710911fa15ddaaa65058bf8c6b607775"
+    }
+  },
+  "check_count": 19,
+  "checks_passed": [
+    "new_private_outcome_review",
+    "actual_ff_admit_dispatch_transport_wait_anchors",
+    "source_actual4e8_exact9_and_protected28_index_root_verified",
+    "ff_no_remote_sync_launch_or_new_commit",
+    "actual_receipt5416_immutable_and_canonical_admission_budget_validated",
+    "receipt_actual_CTS_source_goal_and_native_current_owner_separate",
+    "three_real_standard_refs_preserve_two_steps_resource_and_constraints",
+    "canonical_dispatch_once_but_no_verified_native_progress",
+    "one_successful_strict_selected_GPU0_inventory_call_zero_Popen_sync",
+    "inventory_busy10743_prevented_launch",
+    "independent_selected_GPU0_wait_probe_exact_UUID_context_memory_no_identity_or_GPU1_query",
+    "current_queue_waiting_gpu0_no_PID_claim_or_launch",
+    "current_no_registered_training_running_map",
+    "CTS_experiment_waiting_no_training_PID",
+    "research_CTS_deployment_waiting_not_training",
+    "archived_BFCcrash_BCRearlystop_and_receipts_unchanged",
+    "M206_original_pause_and_all_nontarget_queue_rows_unchanged",
+    "postresult_recording_collision_identified_without_native_uncertainty",
+    "current0only_authority_and_original_overallstop_retained"
+  ],
+  "actual_state": {
+    "source_main_tested4e8_present": true,
+    "technical_admission_and_FIFO_queue_waiting": true,
+    "canonical_dispatch_calls": 1,
+    "actual_transport_calls": 1,
+    "native_Popen_requests": 0,
+    "training_PID": null,
+    "training_started": false,
+    "verified_native_progress": false,
+    "remote_source_sync_by_this_attempt": false,
+    "selected_GPU": 0,
+    "GPU1_queried_or_used_by_deployment": false
+  },
+  "resource_context_observation": {
+    "GPU0_total_used_MiB": 10743,
+    "PID": 3381194,
+    "PID_memory_MiB": 10694,
+    "owner_and_purpose": "UNKNOWN_NOT_QUERIED",
+    "current_project_task_PID": false,
+    "idle": false,
+    "next_compute_permission": "GPU0 only; retain current external occupancy and wait for a genuinely idle future observation."
+  },
+  "post_result_recording_error": {
+    "type": "FileExistsError",
+    "cause": "Actual dispatch driver first saved cts_dispatch_result.json, then generic phase_result(dispatch) tried exclusive creation of that same filename.",
+    "launch_uncertainty": false,
+    "actual_result_is_preserved": true,
+    "recovery": "Retain actual result/transport/request/phase intent and this bounded read-only interpretation. If desired write an exclusive supplementary recording-reconciliation artifact; never overwrite result/delete intent/replay this one-shot helper. Future canonical normal dispatch after fresh idle may act on waiting task under a new owned tick; this is not a retry of an unknown existing native process.",
+    "scientific_model_or_resource_test_failure": false
+  },
+  "new_action": false,
+  "user_decision": false,
+  "waiting_close_supported": true,
+  "limits": [
+    "Root performed all actual ff/admission/SSH/probe operations. Reviewer only read their saved evidence/current selected bytes/queue/experiment/source; no helper/Git/SSH/GPU/Torch/tests/transport/shared mutation.",
+    "No training/accuracy/novelty success is inferred from technical admission. BEC resource failure and BFC crash remain distinct; BCR native earlystop and M206pause preserved.",
+    "Do not rerun dispatch to cure its post-result file collision, do not evict3381194, do not use GPU1, and do not extend overall05:52:30 stop. No fresh remote checkoutHEAD assertion is made because this dispatch performed no source sync/verification."
+  ]
+}

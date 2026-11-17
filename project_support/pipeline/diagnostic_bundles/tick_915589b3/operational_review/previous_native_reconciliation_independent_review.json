@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-09T01:18:22.651474+00:00",
+  "owner": {
+    "token": "915589b3154c4c3c99b1db658f610a1f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T01:12:12.491733+00:00",
+    "deadline_at": "2026-11-09T02:12:12.491733+00:00",
+    "context_sha256": "dada34d7594e909fafb5912692a196a80a7f11a55681e45cb7b1736039e08e5e",
+    "pending_sha256": "d5e94794b90053aff865886bb78f0d94483538397354b954968aa5e13566ffd7"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "passed": true,
+  "material_concerns": [],
+  "scope": "FRESH_OWNER_READ_ONLY_PREVIOUS_STAGE_RECONCILIATION_WRAPPER_AND_ACTUAL_EVIDENCE_INTEGRITY",
+  "wrapper": {
+    "path": "pipeline/diagnostic_bundles/tick_915589b3/reconcile_previous_once.py",
+    "sha256": "367f7bf8f57d45815869ab6cb72e3d371c11b7c1ba5c7a4bb2c7633819e8f7b5"
+  },
+  "actual": {
+    "path": "pipeline/diagnostic_bundles/tick_915589b3/previous_native_reconciliation_actual.json",
+    "sha256": "a343a3654dea4c60be57a28514a638b3718c6fd1fa142d8e50df81e529929624"
+  },
+  "historical_wrapper": {
+    "path": "pipeline/diagnostic_bundles/tick_8c4864e1/observe_native_release_once.py",
+    "sha256": "23eeda146801611a3e48fcd05f3a198321b6fefc0a4e33923d09730f6f34de2e",
+    "not_executed_by_fresh_wrapper": true
+  },
+  "remote_program_sha256": "d2bca7cd5f988bd10c56ae18da2926076d466ddbf97f8e72d7472a7bb458c683",
+  "wrapper_checks": {
+    "current_root_thread_owner_token_context_pending_and_deadline_bound": true,
+    "historical_remote_PROGRAM_read_as_AST_literal_only": true,
+    "strict_existing_host_key_and_key_only_SSH": true,
+    "remote_hostname_uid_GPU_UUID_and_runtime_HEAD_checked": true,
+    "remote_actions_only_process_file_gpu_queries_and_transient_nonblocking_lock_probes": true,
+    "no_model_Torch_or_GPU_compute_import_or_execution": true,
+    "no_signals_remote_file_source_queue_ledger_writes_or_source_activation": true,
+    "new_actual_output_exclusive_creation_prevents_replay": true,
+    "reviewer_did_not_execute_wrapper_or_remote_program": true
+  },
+  "actual_findings": {
+    "observed_at": "2026-11-09T01:15:08.241585+00:00",
+    "certainty": "terminal",
+    "returncode": 0,
+    "matching_historical_stage_or_native_trainers": 0,
+    "additional_matching_project_stage_processes": 0,
+    "original_locks": [
+      {
+        "kind": "training",
+        "path": "/tmp/cluster_project_gpu0_training.lock",
+        "device": 66308,
+        "inode": 92537152,
+        "expected_device": 66308,
+        "expected_inode": 92537152,
+        "original_inode_matches": true,
+        "nonblocking_available": true
+      },
+      {
+        "kind": "diagnostic",
+        "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+        "device": 66308,
+        "inode": 92537153,
+        "expected_device": 66308,
+        "expected_inode": 92537153,
+        "original_inode_matches": true,
+        "nonblocking_available": true
+      },
+      {
+        "kind": "exclusive",
+        "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+        "device": 66308,
+        "inode": 92537154,
+        "expected_device": 66308,
+        "expected_inode": 92537154,
+        "original_inode_matches": true,
+        "nonblocking_available": true
+      }
+    ],
+    "all_three_reported_original_device_inodes_match_and_nonblocking_available": true,
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+    "runtime_HEAD": "0747f6acec1c61018ec99acf2efa5329c9b3523c",
+    "gpu0": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 24010, 8100, 49",
+    "gpu0_free_mib": 24010,
+    "gpu0_free20000MiB_met_at_observation": true,
+    "external_usage_preserved_by_no_signals_or_remote_mutations": true,
+    "foreign_PID_identity_not_enumerated_in_this_observation": true,
+    "historical_terminal_result_hash_matches_original_actual_record": true,
+    "historical_result": {
+      "name": "smoke_candidate_result.json",
+      "bytes": 15415,
+      "sha256": "d2a48608d88378cb8d388c12df8c8f16024574365f9dcb85b46c4b63d685cf0a",
+      "execution_completed": false,
+      "optimizer_steps": 0,
+      "error_type": "ImportError",
+      "error": "Could not import _ext module.\nPlease see the setup instructions in the README: https://github.com/erikwijmans/Pointnet2_PyTorch/blob/master/README.rst",
+      "common_init_passed": null
+    }
+  },
+  "temporal_limits": "Locks/processes are snapshot observations at 2026-11-09T01:15:08.241585+00:00. They do not establish the old worker exact release time, fill the prior expired-owner postflight gap retroactively, or reserve current resources. Any new execution must acquire fresh current-owner locks and recheck resources.",
+  "historical_native_outcome_preserved": {
+    "ImportError": true,
+    "execution_completed": false,
+    "optimizer_steps": 0,
+    "common_init": "UNMEASURED",
+    "native_TRAIN2": "NOT_RUN",
+    "resources": "NOT_RUN"
+  },
+  "new_native_execution_or_environment_repair_approval": false,
+  "scientific_admission": false,
+  "Torch_SSH_GPU_execution_by_reviewer": false,
+  "shared_state_source_index_queue_ledger_mutations_by_reviewer": false
+}

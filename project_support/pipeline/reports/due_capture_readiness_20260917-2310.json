@@ -1,0 +1,56 @@
+{
+  "scope": "Event-mode overdue capacity retry for blocked native capture stages; no native capture or efficacy claim",
+  "timestamp": "2026-09-17T23:10:46+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 19076,
+    "processes": [
+      {
+        "pid": 1134192,
+        "used_mib": 19956,
+        "elapsed_seconds": 125097,
+        "role": "M197-PIRS",
+        "command": "python tools/train.py configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml --gpu_ids 7 --num_gpus 1"
+      },
+      {
+        "pid": 3827570,
+        "used_mib": 42488,
+        "elapsed_seconds": 103727,
+        "role": "foreign",
+        "command": "/home/jiaoh/conda_envs/das_env/bin/python -u /data3/jiaoh/das_foundation/scripts/train_das_mae.py --config /data3/jiaoh/das_foundation/runs/daguang_das_pretrain_2_scratch_vit_b_gpu0_2_3_5_7_b112_e300_20260916_181939/config_launch.yaml --output-dir /data3/jiaoh/das_foundation/runs/daguang_das_pretrain_2_scratch_vit_b_gpu0_2_3_5_7_b112_e300_20260916_181939 --epochs 300 --batch-size 112 --grad-accum-steps 1 --num-workers 4 --prefetch-factor 2 --max-val-samples 4096 --precision bf16 --preview-interval 5"
+      }
+    ],
+    "capture_launched": false
+  },
+  "preexisting_evidence": {
+    "finding": "The latest frozen contract run passed 18 fail-closed tests and retained bound baseline/PIRS config and model-source identities.",
+    "report": {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1910.json",
+      "sha256": "827fdc016cfc3e71f1002880303857beced8995cb61150f9c9af54b61e39c419"
+    }
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied at the two-process cap by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-18T00:10:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Ran one bounded live GPU/process query after the 22:10 retry deadline and made no launch attempt. Existing static contract evidence remains hash-addressed and was not repeated."
+  },
+  "limitations": [
+    "No paired native capture ran, so no P1/P2/P3 or efficacy result is claimed.",
+    "M197-PIRS remains prior-art engineering evidence and does not authorize a successor mechanism.",
+    "The foreign DAS workload was observed only and was not touched."
+  ]
+}

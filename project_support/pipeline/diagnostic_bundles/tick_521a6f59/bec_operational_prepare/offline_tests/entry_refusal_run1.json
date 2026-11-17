@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-10-26T00:16:28.975118+00:00",
+  "scope": "ACTUAL_LOCAL_CLI_REFUSAL_ONLY_NO_EXTERNAL_RELEASE_OR_ACTIVE_MATERIAL",
+  "source_sha256": "8fd4112d7a31614d527d4d48d9d5847c48bcf42deeef79a85dd8e9656cb132b0",
+  "cases": [
+    {
+      "argv": [],
+      "refused": true,
+      "exception": {
+        "class": "SystemExit",
+        "message": "2"
+      },
+      "stderr_tail": "usage: adapter.py [-h] [--gpu {0,1}] [--mode {smoke,resources}]\n                  [--target {champion,candidate}]\n                  [--execution-dir EXECUTION_DIR] [--request-id REQUEST_ID]\n                  [--local-only]\n                  {probe,prepare,stage,run,pair,run_pair,status,reconcile}\nadapter.py: error: the following arguments are required: operation\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "prepare",
+        "--gpu",
+        "2"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "SystemExit",
+        "message": "2"
+      },
+      "stderr_tail": "usage: adapter.py [-h] [--gpu {0,1}] [--mode {smoke,resources}]\n                  [--target {champion,candidate}]\n                  [--execution-dir EXECUTION_DIR] [--request-id REQUEST_ID]\n                  [--local-only]\n                  {probe,prepare,stage,run,pair,run_pair,status,reconcile}\nadapter.py: error: argument --gpu: invalid choice: '2' (choose from 0, 1)\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "probe",
+        "--gpu",
+        "-1"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "SystemExit",
+        "message": "2"
+      },
+      "stderr_tail": "usage: adapter.py [-h] [--gpu {0,1}] [--mode {smoke,resources}]\n                  [--target {champion,candidate}]\n                  [--execution-dir EXECUTION_DIR] [--request-id REQUEST_ID]\n                  [--local-only]\n                  {probe,prepare,stage,run,pair,run_pair,status,reconcile}\nadapter.py: error: argument --gpu: invalid choice: '-1' (choose from 0, 1)\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "probe"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "Refused",
+        "message": "Explicit physical --gpu is required"
+      },
+      "stderr_tail": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "run",
+        "--mode",
+        "invalid",
+        "--target",
+        "candidate"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "SystemExit",
+        "message": "2"
+      },
+      "stderr_tail": "usage: adapter.py [-h] [--gpu {0,1}] [--mode {smoke,resources}]\n                  [--target {champion,candidate}]\n                  [--execution-dir EXECUTION_DIR] [--request-id REQUEST_ID]\n                  [--local-only]\n                  {probe,prepare,stage,run,pair,run_pair,status,reconcile}\nadapter.py: error: argument --mode: invalid choice: 'invalid' (choose from smoke, resources)\n",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "prepare",
+        "--gpu",
+        "0"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "Refused",
+        "message": "Actual owner/environment/execution-mode identity mismatch"
+      },
+      "stderr_tail": "",
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "prepare",
+        "--gpu",
+        "1"
+      ],
+      "refused": true,
+      "exception": {
+        "class": "Refused",
+        "message": "Actual owner/environment/execution-mode identity mismatch"
+      },
+      "stderr_tail": "",
+      "stdout": ""
+    }
+  ],
+  "case_count": 7,
+  "process_network_torch_events": [],
+  "native_resources_transport": "NOT_RUN",
+  "no_execution_directory_created_by_check": true,
+  "limits": "Current real candidate still refers to its prior disabled preparation, and this package has no external static release anchor. Prepare refusals are not a fresh registered-busy integration proof and not a hardware observation."
+}

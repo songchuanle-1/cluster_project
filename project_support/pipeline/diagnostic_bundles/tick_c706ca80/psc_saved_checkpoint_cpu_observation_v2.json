@@ -1,0 +1,60 @@
+{
+  "owner_provenance_only": {
+    "token": "c706ca805df642f3b7d41f51206ed921",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T19:05:17.840971+00:00",
+    "deadline_at": "2026-11-06T20:05:17.840971+00:00",
+    "context_sha256": "6758593bed23ab56d15374fd311174f538ccc72ce981bb0a39e073c77e91a94b",
+    "pending_sha256": "d974423c258040c800d637da85433c8057023aa529b496c90edb5f71361745cf"
+  },
+  "original_json_serialization_failure_preserved": "psc_saved_checkpoint_cpu_observation.json",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 /home/songcl/.conda/envs/project_cluster/bin/python -I -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport socket,os,json,hashlib,gc\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"' and os.getuid()==1001 and os.environ['\"'\"'CUDA_VISIBLE_DEVICES'\"'\"']=='\"'\"''\"'\"'\nassert not Path('\"'\"'/proc/141056'\"'\"').exists()\nimport torch\nbase=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc/20261107_020336'\"'\"');rows=[]\nfor n in ('\"'\"'best.pth'\"'\"','\"'\"'last.pth'\"'\"'):\n p=base/n;h=hashlib.sha256()\n with p.open('\"'\"'rb'\"'\"') as f:\n  for b in iter(lambda:f.read(1048576),b'\"'\"''\"'\"'):h.update(b)\n value=torch.load(p,map_location='\"'\"'cpu'\"'\"',weights_only=False);m=value.get('\"'\"'meta'\"'\"',{})\n rows.append({'\"'\"'path'\"'\"':str(p),'\"'\"'sha256'\"'\"':h.hexdigest(),'\"'\"'bytes'\"'\"':p.stat().st_size,'\"'\"'metadata'\"'\"':{k:float(v) if isinstance(v,torch.Tensor) else v for k,v in m.items()},'\"'\"'optimizer_present'\"'\"':bool(value.get('\"'\"'optimizer'\"'\"')),'\"'\"'lr_scheduler_present'\"'\"':'\"'\"'lr_scheduler'\"'\"' in value or '\"'\"'scheduler'\"'\"' in value})\n del value;gc.collect()\nprint(json.dumps({'\"'\"'recorded_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'torch_version'\"'\"':torch.__version__,'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"':os.environ['\"'\"'CUDA_VISIBLE_DEVICES'\"'\"'],'\"'\"'map_location'\"'\"':'\"'\"'cpu'\"'\"','\"'\"'checkpoints'\"'\"':rows,'\"'\"'model_forward_backward_or_GPU_execution'\"'\"':False,'\"'\"'trainer_remains_absent'\"'\"':not Path('\"'\"'/proc/141056'\"'\"').exists()},default=lambda x:x.item()))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "observation": {
+    "recorded_at": "2026-11-06T19:21:09.412241+00:00",
+    "torch_version": "2.8.0+cu128",
+    "CUDA_VISIBLE_DEVICES": "",
+    "map_location": "cpu",
+    "checkpoints": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc/20261107_020336/best.pth",
+        "sha256": "d904edc080d6e9d698606c07dac1174b42958be9a1faf29de873a4f553bd797a",
+        "bytes": 905454356,
+        "metadata": {
+          "epoch": 1,
+          "best_miou": 0.3035579323768616,
+          "epochs_no_improve": 0,
+          "time": "Sat Nov  7 02:39:11 2026"
+        },
+        "optimizer_present": true,
+        "lr_scheduler_present": true
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc/20261107_020336/last.pth",
+        "sha256": "5f2c3095b06eb02ad5ba634862ff04551292d80be2d69421e556d29057b6a85a",
+        "bytes": 905454356,
+        "metadata": {
+          "epoch": 1,
+          "best_miou": 0.3035579323768616,
+          "epochs_no_improve": 0,
+          "time": "Sat Nov  7 02:39:12 2026"
+        },
+        "optimizer_present": true,
+        "lr_scheduler_present": true
+      }
+    ],
+    "model_forward_backward_or_GPU_execution": false,
+    "trainer_remains_absent": true
+  }
+}

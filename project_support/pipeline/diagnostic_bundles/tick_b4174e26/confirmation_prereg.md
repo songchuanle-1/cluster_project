@@ -1,0 +1,7 @@
+# Counterexample confirmation and bounded TRAIN CPU preparation
+
+- Confirm the saved lattice/rotation counterexample without selecting new transforms or probe scales. Use exact integer squared-distance ties on the unrotated lattice as an independent mathematical reference;compare admitted graph behavior with independent NumPy softmax/mean evaluation on the same frozen arrays.
+- A diagnostic-only graph copy with the mathematically known integer tie mask may test whether the observed fallback flip explains the output change. This is an oracle on a synthetic lattice,not deployable code,not a tolerance fix and not a model revision. Production files stay unchanged.
+- On the frozen eight TRAIN scenes,execute original CPU data preprocessing now and preserve raw augmented coordinates/superpoint IDs plus CPU superpoint means for later exact GPU-FPS membership collection.
+- Extra CPU stress check:hold all superpoints of each scene in ONE explicitly artificial leaf and test the same disclosed transforms with fixed C256 float32 probes. This is not native fine membership and does not replace the original native-FPS test. It checks whether the lattice issue appears in this different real-coordinate stress sample;zero findings do not establish model robustness.
+- No outcome/VAL-based scene choice,source change,epsilon adjustment,checkpoint choice,newseed training or GPU use. Preserve every result and distinguish source behavior,numerical sensitivity,unknown native membership and unknown trained-mask harm.

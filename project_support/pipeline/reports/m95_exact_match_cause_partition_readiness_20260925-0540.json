@@ -1,0 +1,50 @@
+{
+  "admission": false,
+  "artifacts": {
+    "analyzer": {
+      "path": "scripts/m95_exact_match_cause_partition_20260925.py",
+      "sha256": "6f329451624a65d2805b3f108f8b78a3cfe8a29209918535ae6702318e0b23b7"
+    },
+    "tests": {
+      "path": "scripts/test_m95_exact_match_cause_partition_20260925.py",
+      "sha256": "d1f29c0b7b4e76c3878fe222de2b3016ce6837cf69d93412c8dd4b75a865aca0"
+    }
+  },
+  "capture": {
+    "capture_json_present": false,
+    "duplicate_launched": false,
+    "expected_steps": 4663,
+    "expressions": 234,
+    "host": "server-6",
+    "last_observed_step": 4288,
+    "pid": 3140840,
+    "status": "running"
+  },
+  "contract": "m95_exact_match_cause_partition_readiness_v1",
+  "limitations": [
+    "The checker is verified only on synthetic fixtures; no exact native result exists until capture.json is complete.",
+    "Oracle selectors are diagnostic upper bounds and are not deployable selectors.",
+    "No training intervention, native backward, resource measurement, admission or efficacy claim is made."
+  ],
+  "next_executable_action": "When the full capture reaches the expected endpoint and capture.json exists, run the fail-closed postprocess runner, then run the exact match-cause partition analyzer on the validated capture.",
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable selector",
+    "deployable efficacy",
+    "novelty",
+    "whole-mechanism benefit"
+  ],
+  "schema_version": 1,
+  "scope": "CPU-only implementation readiness for exact native nearest-GT versus instance-member cause partitioning.",
+  "status": "implementation_complete_native_validation_pending",
+  "timestamp": "2026-09-25T05:40:00+08:00",
+  "validation": {
+    "local_py_compile_passed": true,
+    "local_tests_passed": 8,
+    "remote_bundle": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/manifest_capture_match_20260924",
+    "remote_py_compile_passed": true,
+    "remote_tests_passed": 8
+  }
+}

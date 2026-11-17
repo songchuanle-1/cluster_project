@@ -1,0 +1,29 @@
+{
+  "contract": "m95_saved_nearest_provenance_v1",
+  "observed_at": "2026-09-23T12:11:00+08:00",
+  "host": "server-6",
+  "scope": "Read-only schema inspection of completed frozen TRAIN capture and one saved feature shard; no forward, backward, GPU execution, or new capture.",
+  "source_capture": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813/capture.json",
+  "source_capture_sha256": "f90286842d9d82d835652a29048100a10b6286ee5630e0d7c296363e95880025",
+  "source_criterion": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/loss.py",
+  "source_criterion_sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+  "source_provenance_report": "pipeline/reports/m95_discordance_provenance_20260923-1107.json",
+  "source_provenance_sha256": "6ed69abe4d26a2bd20283bb59119c2ebf30d4c0e73e2252903c210925292e372",
+  "discordant_class_ids_with_positive_outside_target_seed": [0, 11, 23, 65, 79, 253],
+  "acceptable_class_ids": [0, 23, 65],
+  "saved_schema": {
+    "capture_row_has": ["fps_superpoints", "sampled_seed_indices", "native_positive", "physical_instance_labels", "target_instances"],
+    "artifact_has": ["axis", "features", "native_positive", "physical_instance_labels", "query_mask_logits", "query_masks", "target_union"],
+    "feature_keys": ["final", "fused", "projected_2d", "projected_3d", "raw_2d", "raw_3d"],
+    "missing": ["sp_coords_float", "sampled_pos", "obj_pos", "per_query_match_cause"]
+  },
+  "criterion_requirement": "match_sampled_ins chooses the nearest sampled query for each GT by torch.cdist(sampled_pos, obj_pos), then adds sampled-instance members. The forward computes obj_pos from native superpoint coordinates and object masks.",
+  "result": "Exact nearest-GT replay is not possible from the saved capture. The six positives outside target-seed membership remain cause-unattributed; neither erroneous labels nor a specific nearest-GT cause is established.",
+  "limitations": [
+    "A writer/schema check and one saved-shard schema observation are not a per-row geometric replay.",
+    "The cohort is 40 outcome-selected TRAIN failures; no population or efficacy inference.",
+    "No candidate passes native backward, resource, independent-mechanism, or matched-control gates."
+  ],
+  "admission": false,
+  "queue_mutation": false
+}

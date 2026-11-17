@@ -1,0 +1,191 @@
+"""One stdlib read-only GPU0/GPU1 resource observation, no allocation or dispatch."""
+from datetime import datetime, timezone
+from pathlib import Path
+import fcntl
+import hashlib
+import json
+import os
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {
+    "token": "4ecb5020c4c54abeb26dc874ed90080e",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T01:06:58.009358+00:00",
+    "deadline_at": "2026-11-10T02:06:58.009358+00:00",
+    "context_sha256": "a143a825802aa28c5db3b61c93314f0b2d764e02ed0cb7008d88c8e6bc280f4d",
+    "pending_sha256": "71bc1ed72a827fe476a5e8492671d879e0d24bec5b16a3bd674f3022994ea08d",
+}
+ROOT = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+UUIDS = {0: "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+         1: "GPU-7f82edb9-f620-8045-caea-a75232265cd1"}
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+
+def identity(pid):
+    try:
+        return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return None
+
+
+def observe(argv, seconds, stop, label):
+    pin()
+    assert time.monotonic() < stop
+    out = os.memfd_create("dual_gpu_resource_stdout", os.MFD_CLOEXEC)
+    err = os.memfd_create("dual_gpu_resource_stderr", os.MFD_CLOEXEC)
+    env = dict(os.environ)
+    env.update(GIT_OPTIONAL_LOCKS="0", GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null",
+               GIT_CONFIG_SYSTEM="/dev/null", PYTHONDONTWRITEBYTECODE="1")
+    process = subprocess.Popen(argv, cwd=str(ROOT), env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err)
+    PROCESSES.append(process)
+    started = identity(process.pid)
+    until = min(stop, time.monotonic() + seconds)
+    while process.poll() is None and time.monotonic() < until:
+        time.sleep(0.02)
+    code = process.poll()
+    def tail(fd):
+        size = os.fstat(fd).st_size
+        return os.pread(fd, min(size, 8192), max(0, size - 8192)).decode("utf-8", "replace")
+    record = {"label": label, "argv": argv, "pid": process.pid, "start_ticks": started,
+              "certainty": "terminal" if code is not None else "uncertain", "returncode": code,
+              "stdout_bytes": os.fstat(out).st_size, "stdout": tail(out), "stderr_tail": tail(err)[-1024:],
+              "signals_sent": False, "automatic_retry": False}
+    if code is None:
+        record.update(reason="SOFT_TIMEOUT_PRESERVE_PID_NO_SIGNAL_OR_RETRY",
+                      output_descriptors=[f"/proc/{process.pid}/fd/1", f"/proc/{process.pid}/fd/2"])
+    else:
+        os.close(out)
+        os.close(err)
+    return record
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NO_HELPERS_OR_LOCKS"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    assert (datetime.fromisoformat(OWNER["deadline_at"]) - datetime.now(timezone.utc)).total_seconds() > 40
+    result = {"owner": OWNER, "kind": "CURRENT_TWO_GPU_READONLY_RESOURCE_PROOF",
+              "pid": os.getpid(), "start_ticks": identity(os.getpid()),
+              "recorded_at": datetime.now(timezone.utc).isoformat(), "maximum_soft_seconds": 12,
+              "GPU_allocation_context_or_job_control": False, "config_or_budget_changed": False,
+              "snapshot_allowed_gpus_retained": [0], "snapshot_max_tasks_per_gpu_retained": 1,
+              "GPU1_dispatch_or_resource_admission": False, "signals_sent": False, "automatic_retry": False}
+    print(json.dumps({"stage": "resource_boot", "pid": os.getpid(), "start_ticks": result["start_ticks"]}),
+          file=sys.stderr, flush=True)
+    opened, acquired = [], []
+    try:
+        assert ROOT.resolve() == ROOT
+        stop = time.monotonic() + 12
+        git = observe(["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+                       "-C", str(ROOT), "rev-parse", "HEAD"], 2, stop, "runtime_HEAD")
+        result["git"] = git
+        if git["certainty"] != "terminal" or git["returncode"] != 0:
+            result["status"] = "RUNTIME_IDENTITY_UNCERTAIN_NO_GPU_QUERY"
+            return
+        assert git["stdout"].strip() == "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e"
+        producer = Path("/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/bin/python")
+        info = os.lstat(producer)
+        assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001 and info.st_size <= 8192
+        producer_fd = os.open(producer, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        try:
+            pinned = os.fstat(producer_fd)
+            assert (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) == (
+                pinned.st_dev, pinned.st_ino, pinned.st_size, pinned.st_mtime_ns)
+            assert hashlib.sha256(os.pread(producer_fd, 8193, 0)).hexdigest() == "62ae097cd67499ab86941c79c4eb8526173f4a694ffb6e41406f42355b37a64e"
+            after = os.lstat(producer)
+            assert (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns) == (
+                pinned.st_dev, pinned.st_ino, pinned.st_size, pinned.st_mtime_ns)
+        finally:
+            os.close(producer_fd)
+        result["historical_producer_read_only_not_executed"] = str(producer)
+        result["original_GPU0_locks"] = []
+        for kind, inode in (("training", 92537152), ("diagnostic", 92537153), ("exclusive", 92537154)):
+            path = Path("/tmp/cluster_project_gpu0_" + kind + ".lock")
+            before = os.lstat(path)
+            assert stat.S_ISREG(before.st_mode) and before.st_uid == 1001
+            assert (before.st_dev, before.st_ino) == (66308, inode)
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+            opened.append(fd)
+            info, after = os.fstat(fd), os.lstat(path)
+            assert (info.st_dev, info.st_ino) == (after.st_dev, after.st_ino) == (66308, inode)
+            available = False
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                acquired.append(fd)
+                available = True
+            except BlockingIOError:
+                pass
+            result["original_GPU0_locks"].append({"kind": kind, "dev": info.st_dev, "ino": info.st_ino,
+                                                 "nonblocking_acquired": available, "created_or_replaced": False})
+        result["all_three_GPU0_locks_held_during_query"] = len(acquired) == 3
+        if len(acquired) != 3:
+            for fd in acquired:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            acquired.clear()
+        cards = observe(["/usr/bin/nvidia-smi", "-i", "0,1",
+                         "--query-gpu=index,uuid,memory.free,memory.total", "--format=csv,noheader,nounits"],
+                        3, stop, "GPU0_GPU1_IDENTITY_FREE_TOTAL")
+        result["gpu_query"] = cards
+        if cards["certainty"] != "terminal" or cards["returncode"] != 0:
+            result["status"] = "GPU_QUERY_UNCERTAIN_OR_FAILED"
+            return
+        assert cards["stdout_bytes"] <= 1024
+        values = []
+        for line in cards["stdout"].splitlines():
+            fields = [field.strip() for field in line.split(",")]
+            assert len(fields) == 4
+            index, free, total = int(fields[0]), int(fields[2]), int(fields[3])
+            assert index in UUIDS and fields[1] == UUIDS[index] and 0 <= free <= total <= 1024 * 1024
+            values.append({"index": index, "uuid": fields[1], "free_MiB": free, "total_MiB": total,
+                           "meets_original_20000_MiB_snapshot": free >= 20000})
+        assert sorted(row["index"] for row in values) == [0, 1]
+        result["GPUs"] = sorted(values, key=lambda row: row["index"])
+        apps = observe(["/usr/bin/nvidia-smi", "-i", "0,1",
+                        "--query-compute-apps=gpu_uuid,pid,used_gpu_memory", "--format=csv,noheader,nounits"],
+                       3, stop, "GPU0_GPU1_COMPUTE_PID_ONLY")
+        result["compute_query"] = apps
+        if apps["certainty"] != "terminal" or apps["returncode"] != 0:
+            result["status"] = "COMPUTE_QUERY_UNCERTAIN_OR_FAILED"
+            return
+        assert apps["stdout_bytes"] <= 8192
+        processes = []
+        for line in apps["stdout"].splitlines():
+            if not line.strip():
+                continue
+            fields = [field.strip() for field in line.split(",")]
+            assert len(fields) == 3 and fields[0] in UUIDS.values()
+            pid = int(fields[1])
+            assert pid > 0
+            processes.append({"gpu_uuid": fields[0], "pid": pid, "used_gpu_memory_MiB_reported": fields[2]})
+        assert len(processes) <= 64
+        result["compute_processes"] = processes
+        result["status"] = "RESOURCE_OBSERVATION_COMPLETE_NO_DISPATCH_OR_JOB_CHANGE"
+        result["both_empty_compute_lists_observed"] = not processes
+    except BaseException as error:
+        result.update(status="RESOURCE_OBSERVATION_BLOCKED", error_type=type(error).__name__, error=str(error)[:700])
+    finally:
+        for fd in acquired:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        for fd in opened:
+            os.close(fd)
+        result.update(only_own_locks_released=True, finished_at=datetime.now(timezone.utc).isoformat(),
+                      scope="Momentary resource proof for experiment design; no GPU1 authorization/budget/config mutation or external-task intervention.")
+        encoded = json.dumps(result, ensure_ascii=True)
+        assert len(encoded.encode()) <= 32768
+        print(encoded)
+
+
+if __name__ == "__main__":
+    main()

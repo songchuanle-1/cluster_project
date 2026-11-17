@@ -1,0 +1,42 @@
+{
+  "candidate_id": "hierarchy-ancestry-path-factor-composition",
+  "experiment_id": "M219-APF",
+  "status": "STRUCTURAL_HYPOTHESIS_NOT_EFFICACY_OR_NOVELTY",
+  "motivation": "Original M95 has independent per-token FFNs on original pooled three-level banks. APF tests a direct joint original-ancestry factor with distinct output roles. Original raw aggregation and downstream HCG already provide context; no task deficit or zero-context claim is inferred.",
+  "formula": {
+    "z_l": "Original LayerNorm_l(raw_l)",
+    "F_i": "GELU(W concat(z0_i,z1_p(i),z2_q(p(i)))) in R^(3C), one shared default Linear3C->3C, one original GELU",
+    "split": "F_i=(u_i,v_i,w_i), three C-wide views",
+    "fine_delta": "u_i at each true fine original ID",
+    "middle_delta": "equal mean of v_i over true fine children of that original middle ID",
+    "coarse_delta": "equal mean of w_i over all true fine descendant paths of that original coarse ID, directly, not mean of middle means",
+    "refined_l": "original raw_l + delta_l, one existing outer skip each; original HCG and single native inst_feats writeback retained"
+  },
+  "graph_hypothesis": "One simultaneous ternary raw-ancestry factor, direct fine output and two private upper message reductions may be a useful alternative factorization of hierarchy context. It changes capacity and degree weighting too; no single-factor causal or efficacy conclusion.",
+  "boundaries": [
+    "One path per point-supported fine token, deduplicating point IDs; original ids1/ids2 membership and original IDs remain unchanged.",
+    "No true path => zero deltas, no map/GELU invocation. Singleton path uses all three real original-level vectors, no fake/sentinel parent.",
+    "Unsupported/pad deltas are zero and retain raw skip. Unlike original full-bank FFNs this does not preserve their unsupported-row bias response; no phantom factor is created.",
+    "Coarse private mean is fine-token-path weighted, not equal-middle and not physical-point-mass weighted. Raw mean/FPS/CSORT banks stay unchanged."
+  ],
+  "closest_routes": {
+    "BEC": "Two-input edge maps, upward private means, original coarse FFN then two downward nonlinear maps. APF has one raw3input nonlinear factor and simultaneous3output roles; fine does not read newly aggregated upper messages.",
+    "CCP": "Old parent/ancestor additive context is not a joint ternary nonlinear factor and no3split private aggregation.",
+    "lite_agg": "Old point+mean learned scalar/softmax alters raw pooling; APF keeps raw pools, has no learned pooling score and only private fixed means of new vector messages.",
+    "CRE": "Cross-root receiver/sender edge vectors and ancestor decoders, unlike within-original-path triplets.",
+    "HPC": "Whole-forest linear resolvent before/after original3FFNs, unlike direct per-path joint factor replacing3FFNs.",
+    "CTS_BFC_AEF": "Same-parent state propagation/flux, not a simultaneous original3level path factor."
+  },
+  "family": "Neural hyperedge/factor aggregation family acknowledged. Literature novelty NOT_VERIFIED; finite historical scope is not exhaustive.",
+  "matched_control": "Original M95 exact native YAML/data/pretrain/seed1999/precision/optimizer/50epochs/max_iters70 and same original first2TRAIN batches/resource handlers.",
+  "parameter_source_inference": {
+    "C": 256,
+    "original_three_FFN": "3*(8C^2+5C)=1576704",
+    "new_joint_factor": "9C^2+3C=590592",
+    "delta": -986112,
+    "actual_native_inventory": "NOT_RUN"
+  },
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "efficacy": "UNKNOWN"
+}

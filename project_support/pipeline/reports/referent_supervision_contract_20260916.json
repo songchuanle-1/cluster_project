@@ -1,0 +1,236 @@
+{
+  "scope": "Static source checks and finite counterexamples only; no native data execution.",
+  "source_checks": {
+    "seed_match_has_no_mask_argument": true,
+    "indi_positive_set_is_indices": true,
+    "mask_and_indi_share_indices": true,
+    "score_regresses_matched_iou_only": true,
+    "mask_depends_on_same_query": true,
+    "query_receives_scene_and_language": true
+  },
+  "label_support_cases": [
+    {
+      "seed_positive": false,
+      "target_iou": 0.0,
+      "existing_score_supervised": false,
+      "proposed_positive": false
+    },
+    {
+      "seed_positive": false,
+      "target_iou": 0.25,
+      "existing_score_supervised": false,
+      "proposed_positive": false
+    },
+    {
+      "seed_positive": false,
+      "target_iou": 0.75,
+      "existing_score_supervised": false,
+      "proposed_positive": true
+    },
+    {
+      "seed_positive": false,
+      "target_iou": 1.0,
+      "existing_score_supervised": false,
+      "proposed_positive": true
+    },
+    {
+      "seed_positive": true,
+      "target_iou": 0.0,
+      "existing_score_supervised": false,
+      "proposed_positive": false
+    },
+    {
+      "seed_positive": true,
+      "target_iou": 0.25,
+      "existing_score_supervised": false,
+      "proposed_positive": false
+    },
+    {
+      "seed_positive": true,
+      "target_iou": 0.75,
+      "existing_score_supervised": true,
+      "proposed_positive": true
+    },
+    {
+      "seed_positive": true,
+      "target_iou": 1.0,
+      "existing_score_supervised": true,
+      "proposed_positive": true
+    }
+  ],
+  "positive_support_mismatches": 2,
+  "query_extent_counterexample": [
+    [
+      true,
+      false
+    ],
+    [
+      false,
+      true
+    ]
+  ],
+  "connected_case_provenance": [
+    {
+      "scene": "scene0421_00",
+      "ann_id": 75,
+      "node_id": 2,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 5,
+      "node_id": 3,
+      "distance_to_target": 2,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 7,
+      "node_id": 1,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0420_00",
+      "ann_id": 98,
+      "node_id": 1,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0416_00",
+      "ann_id": 74,
+      "node_id": 1,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_id": 2,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_id": 3,
+      "distance_to_target": 1,
+      "available_axis": [
+        "scene",
+        "ann_id",
+        "node_id"
+      ],
+      "missing_from_this_archive": [
+        "native_batch_occurrence",
+        "sample_inverse",
+        "original_superpoint_ids",
+        "paired_2d_3d_row_vectors",
+        "cache_producer_identity"
+      ]
+    }
+  ],
+  "ownership_control_counterexample": {
+    "owned": [
+      5,
+      4
+    ],
+    "endpoint_relocated": [
+      3,
+      5
+    ],
+    "predicate_disabled": [
+      3,
+      3
+    ]
+  },
+  "conclusions": [
+    "Absence of explicit mask pooling does not establish absence of extent information.",
+    "Seed matching is verified, but supervision as the root cause is not identified.",
+    "Mask-label supervision overlaps score quality learning, but is not identical: support differs.",
+    "Changing referent positives changes the referent assignment even if the mask matcher is untouched.",
+    "23 unsuccessful fixed readouts cannot prove representation-wide absence of information.",
+    "A relation mentioned in text need not identify a unique physically observable referent.",
+    "Seven connected text cases lack physical axes in the inspected ownership archive.",
+    "Endpoint-sensitive factor inference is a control, not a newly established contribution."
+  ],
+  "limitations": [
+    "No neural learning, native imitation test, FLOPs, latency, memory or generalization measurement.",
+    "No claim that missing fields in this archive are absent from native data.",
+    "No new prior-art conclusion; literature search returned no usable result this tick."
+  ],
+  "sources": {
+    "scripts/referent_supervision_contract_20260916.py": "d56df383da7f6d5641e5aac3ff5ef99ae2220210842fd54ec94751721a775c71",
+    "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "pipeline/reports/ownership_path_contract_20260916.json": "208412404e95cb0f7b9a8495eb007d07ef7e7444b7971b5bed6bc633f8861445",
+    "pipeline/reports/modality_index_contract_20260916.json": "19d4f42e9469da19586602426322f9602d496de28efe2dd34ccae10012640db9"
+  }
+}

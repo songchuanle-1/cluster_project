@@ -1,0 +1,652 @@
+      Structured Output Learning with High Order Loss Functions
+
+
+
+                       Daniel Tarlow                                     Richard S. Zemel
+                Department of Computer Science                      Department of Computer Science
+                     University of Toronto                               University of Toronto
+
+
+                      Abstract                                 domain, a natural learning objective is simply to min-
+                                                               imize the number of errors made on the training data.
+    Often when modeling structured domains, it                 Consider formulating a learning objective for an im-
+    is desirable to leverage information that is               age labeling task, where the goal is to label each pixel
+    not naturally expressed as simply a label. Ex-             in an image according to semantic class (e.g., airplane,
+    amples include knowledge about the evalua-                 dog, cow). Given ground truth labels for all pixels in a
+    tion measure that will be used at test time,               set of images, it is straightforward to define a learning
+    and partial (weak) label information. When                 objective that uses no other knowledge of the domain.
+    the additional information has structure that              In this case, the objective might correspond to penal-
+    factorizes according to small subsets of vari-             izing each pixel-wise error, and doing so equally across
+    ables (i.e., is low order, or decomposable), sev-          the training set.
+    eral approaches can be used to incorporate it              However, there is typically information available that
+    into a learning procedure. Our focus in this               is not naturally expressed as simply a label. In the
+    work is the more challenging case, where the               above example, we may have access to weakly labeled
+    additional information does not factorize ac-              images (e.g., labeled with bounding boxes), or we may
+    cording to low order graphical model struc-                have an evaluation measure that is more suited to the
+    ture; we call this the high order case. We                 learning task. It is desirable to incorporate this addi-
+    propose to formalize various forms of this ad-             tional information into a learning objective, but doing
+    ditional information as high order loss func-              so often leads to loss functions that do not easily de-
+    tions, which may have complex interactions                 compose according to the model structure; in other
+    over large subsets of variables. We then ad-               words, the resulting loss functions are high order.
+    dress the computational challenges inherent
+    in learning according to such loss functions,              High order loss functions arise in many domains. In
+    particularly focusing on the loss-augmented                search engine rankings, for example, it is well known
+    inference problem that arises in large mar-                that the accuracy on the top most relevant results is
+    gin learning; we show that learning with high              far more important than accuracy on lower ranked re-
+    order loss functions is often practical, giv-              sults; standard evaluation objectives take this into ac-
+    ing strong empirical results, with one popular             count, and are high-order. Domain-specific evaluation
+    and several novel high-order loss functions, in            measures with non-decomposable structure also arise
+    several settings.                                          in many other domains, including machine transla-
+                                                               tion, where the BLEU score assesses the precision of n-
+                                                               grams in candidate machine translations against refer-
+1    Introduction                                              ence human translations [1], and image labeling prob-
+                                                               lems, where the PASCAL VOC Segmentation Chal-
+When formulating a learning objective, there is a range        lenge scoring function is based on a ratio of counts: #
+of information available to the modeler. Most com-             true positives/(# true positives + # false positives +
+monly, in supervised learning, there are ground truth          # false negatives) [2]. While incorporating knowledge
+labels provided by measurement devices or domain ex-           of the test-time procedure in a learning objective is
+perts. In the absence of any other knowledge about a           intuitively appealing, it does not always improve per-
+                                                               formance; in certain domains such as ranking it has
+Appearing in Proceedings of the 15th International Con-        been observed that optimizing the test objective can
+ference on Artificial Intelligence and Statistics (AISTATS)    actually hurt performance [3]. In this work, we will
+2012, La Palma, Canary Islands. Volume 22 of JMLR:             show that it is beneficial to include knowledge of test-
+W&CP 22. Copyright 2012 by the authors.                        time evaluation in an image labeling setting.
+
+                                                        1212
+                         Structured Output Learning with High Order Loss Functions
+
+
+The common motivation in each of these examples is              used generically in a factor graph formulation, mean-
+that we would like to improve performance of our mod-           ing they can be combined to form a range of loss
+els using knowledge that is (a) not easily expressed as         functions and also be combined with any factor graph
+a simple label, and (b) is non-decomposable. Method-            model, with no need for new formulations, derivations,
+ologically, the commonality is that we will express             or code. Second, by putting complexity in the loss
+knowledge as non-decomposable or high order loss                function and not the energy, we push complexity to
+functions (HOLs), then we will use a common learn-              the training procedure and obtain models that can be
+ing procedure to incorporate the loss function into the         very efficient at test-time.
+learning objective. The framework we choose to work
+with is the margin-scaled structural SVM, which aims
+                                                                2    Related Work
+to maximize a margin between the energy a model as-
+signs to the ground truth and the energy the model              Methods for improving learning in structured output
+assigns to all other assignments. In the margin-scaled          spaces by incorporating the loss function were origi-
+SVM, the margin is dependent on the loss — assign-              nally developed for SVMs [7, 8], where the MAP in-
+ments with high loss need to have higher energy. The            ference problem required for margin maximization was
+computational crux that comes up when learning using            augmented to include the loss function. Recent pro-
+the margin-scaled SVM is finding the most violating             posals have also demonstrated improved learning in
+constraint, which is a function of the assignment that          conditional random field approaches to structured pre-
+maximizes a sum of negative energy and loss. When a             diction by incorporating loss [9]. An application that
+decomposable loss function is paired with an otherwise          drives progress in this area is image segmentation; [10]
+tractable model, finding this most violating constraint         noted that pairwise segmentation models paired with
+is tractable, as the loss can be folded directly into stan-     (decomposable) per-pixel loss functions can be opti-
+dard inference computations. With high order losses,            mized very efficiently by using graph cuts to solve the
+the problem becomes more difficult. Our approach will           loss-augmented MAP problem. Our work here can be
+work within a high order message passing framework,             viewed as an extension that explores high order loss
+as described in e.g., [4].                                      functions, similarly relying on recent advances in MAP
+Interestingly, there are certain classes of high order          inference to achieve efficiency on difficult subproblems.
+interaction where efficient optimization can be per-            With the exception of [6] and [11], relatively little work
+formed either exactly or approximately. Such cases              exists on large margin learning with high-order losses;
+have been the focus of much recent work on maximum              further, the algorithm of [6] is limited to the case of
+a posteriori (MAP) inference in high order models (see          unary-only models, where all variables are assumed to
+e.g., [5]), but little work has applied the computational       be independent in the model. The recent work of [11]
+insights at the heart of this work to learning problems;        is closely related to one of our applications: the fo-
+we extend the fundamental insights that are leveraged           cus is optimizing a labeling model for performance on
+in the MAP inference community, and apply them to               the aforementioned intersection-over-union loss. [11]
+derive efficient learning algorithms for HOLs.                  utilizes a piecewise approximation to the loss function
+                                                                and solves a separate linear program for each piece.
+Contributions:
+                                                                We discuss this method further in Section 4, drawing
+                                                                comparisons once we have given more details of our
+  • New algorithms that enable several types of high            approach. We note that other works have expressed
+    order loss functions to be incorporated.                    similar motivations, aiming to optimize specific test-
+  • Several new classes of loss function, along with the        time evaluation procedures, such as the BLEU score
+    observation that efficient algorithms from MAP              [12]. Our approach differs in that we work within a
+    inference, which have not previously been consid-           standard well-studied learning framework.
+    ered in the context of learning objectives, can be          We also note that concurrent with this work, [13] ad-
+    used to optimize them.                                      dresses the problem of learning with high order loss
+  • An empirical demonstration in image segmenta-               functions for a special case where exact loss-augmented
+    tion that optimizing the test objective (based on           inference can be done via reduction to graph cuts. Our
+    the PASCAL score) gives an improvement over                 message passing approach is more general, but for the
+    optimizing other surrogate training objectives.             problem addressed, our loss-augmented inference is ap-
+                                                                proximate. An empirical comparison between the two
+                                                                approaches is provided in [13].
+There are two secondary emphases of our work. The
+first concerns its modularity and generality. The com-          There is a rapidly growing literature on incorporating
+plex loss functions are expressed as factors that can be        high-order potentials into the model likelihood. No-
+                                                         1213
+                                          Daniel Tarlow, Richard S. Zemel
+
+
+table examples are the pattern potentials of [14, 15];            the QP, and repeat. To find violated constraints, a
+connectivity potentials of [16, 17]; cardinality poten-           loss-augmented MAP problem must be solved: y − =
+tials of [18, 19, 4]; order-based and composite poten-            maxŷ [L(ŷ; x) + ∆(ŷ)] . This procedure converges in
+tials of [4]; and the near-bounding-box-border con-               polynomial time [8].
+straints of [20]. This research has produced a rich
+                                                                  The central interpretation in our approach is that the
+algorithmic toolbox to make MAP inference tractable
+                                                                  loss-augmented MAP problem can be phrased as a
+for these models. We utilize and extend this toolbox in
+                                                                  (possibly approximate) inference problem in a factor
+this paper. These methods of expressing desired prop-
+                                                                  graph that includes terms both for the energy and for
+erties in the model likelihood, such as adding terms
+                                                                  the loss. In this light, assuming that we know how
+to the energy that favor object labelings that are con-
+                                                                  to compute message for all factors in the model, we
+nected or convex, are complementary to our approach
+                                                                  can directly apply modern message passing algorithms
+of adding structure to the loss function that the model
+                                                                  such as max-product belief propagation (MPBP) or
+seeks to optimize during learning.
+                                                                  tree-reweighted max-product (TRW). Thus, to admit
+A broader aim of incorporating additional forms of                high order loss functions into a large margin learning
+supervision, like we discuss here, has also been a pop-           formulation, we need only derive efficient message up-
+ular theme recently in machine learning. A variety                dates for factors representing loss functions of interest.
+of methods for modifying the learning objective via
+                                                                  One Slack Formulation [23].               A more efficient
+adding regularization-like terms have been proposed,
+                                                                  formulation turns out to be equivalent. As usual, at
+such as Posterior Regularization [21] and Generalized                                                                    −
+                                                                  iteration t, on example j, find a negative example y(j)  .
+Expectation [22]. Our approach can be seen as an al-
+ternative, which puts this information directly into the          Add one constraint in the form of Eq. (2) for a single
+loss function.                                                    y(j) to a constraint set St . After finding most vio-
+                                                                  lated constraints for all instances, add the averaged
+3    Background and Notation                                      constraints
+                                                                       !"                                # !
+                                                                                +            −                  −
+Structural SVMs.                   Given an input image             wT     φ(y(j) , x(j))−φ(y(j) , x(j) ) ≥ ∆(y(j) )−ξ (3)
+                                                                    +    −                            +     −
+x with N pixels at test time and feature responses                (y(j),y(j))∈St                    (y(j) ,y(j) )∈St
+φ(x), our goal is to produce an output image labeling
+y ∈ {0, . . . , K − 1}N . We will assume K = 2 through-           to the quadratic program for each t. In this formu-
+out, but the loss formulations apply equally well to              lation, there is a single ξ, and the size of the QP
+problems with larger K. A structural SVM works by                 grows with the number of iterations rather than num-
+mapping x to y via maximizing an input-dependent                  ber of iterations times number of training examples.
+(log) likelihood function: y = arg maxŷ L(ŷ; x) =               Especially with large data sets, this is a significantly
+arg maxŷ wT φ(ŷ; x), which is governed by parameters            more efficient, yet surprisingly equivalent, formulation.
+w. The learning problem is to find a w that maximizes             From here forward, we drop subscripts (j) indicating
+                                             ∗                    the training example. Later, we will use the notation
+a margin between the ground truth y(j)          and all other
+outputs y(j) for all training examples j. This can be             yi to refer to the ith variable in the output vector y.
+written as a quadratic program (QP):
+                        !                                         4     Learning with High Order Losses
+ min.w,ξ wT w + C            ξ(j)
+                 "        n                   #
+                     ∗                                            In this section, we begin with a minor generalization
+      s.t. wT φ(y(j)   , x(j))−φ(y(j) , x(j) ) ≥ 1− ξ(j) (1)
+                                                                  of the standard structural SVM formulation (in Sec-
+where ξ(j) ≥ 0 and the constraint is replicated for               tion 4.1). Then in Section 4.2, we return to the in-
+                                       ∗
+each example j and for all y(j) $= y(j)  . C is a regular-        terpretation of loss augmented MAP as approximate
+ization parameter. To incorporate a loss function ∆,              inference and give our main contributions: defining
+the margin-scaling approach enforces a loss-dependent             factor computations that allow several practical high
+variable margin for different labelings, replacing Eq.            order loss functions to be used within the large margin
+(1) with:                                                         learning formulation.
+        "                            #
+            ∗
+s.t. wT φ(y(j), x(j))−φ(y(j) , x(j) ) ≥ ∆(y(j) )− ξ(j) (2)        4.1    Finding Positive and Negative Examples
+Even for a single example, Eq. (2) represents an ex-              Positive Examples: Partially labeled training data
+ponentially large number of constraints, so explicitly            do not provide full ground truths. Instead, there is
+instantiating the QP is intractable. A common strat-              a set of pixels with known labels (e.g., with bound-
+egy is to start with an empty set of constraints, suc-            ing boxes, pixels outside the bounding box are back-
+cessively add the most violated constraint, re-solve              ground) and a set of pixels with unknown labels (e.g.,
+                                                           1214
+                          Structured Output Learning with High Order Loss Functions
+
+
+pixels inside the bounding box may be either fore-               of the first N1 sorted incoming message values from
+ground or background). A loss function defined in                variables where y ∗ = 0, and κ is a constant.
+terms of partial labels implicitly expresses properties
+                                                                 The full details of the message computations for the
+that we desire in a positive example, but we need a
+                                                                 PASCAL factor are given in the Appendix. Here, we
+single labeling y + to compute φ(y + , x). To deal with
+                                                                 give a sketch, along with the intuition. The key insight
+this issue, we run inference to find the labeling that
+                                                                 is that the optimal setting of y−i , and thus the full out-
+has zero loss and highest likelihood under the model.
+                                                                 going message optimization Eq. (4) can be easily com-
+We call this the 0-Loss Constrained MAP problem:
+                                                                 puted from the choice of N0 and N1 that optimizes f .
+y + = maxŷ:∆(ŷ)=0 L(ŷ; x). Note that when full label-
+                                                                 The secondary insight is that after relaxing N0 and N1
+ings are given as training data (such as in our first
+                                                                 to be real-valued, f is quasi-concave restricted to the
+set of experiments below), there is typically only one
+                                                                 domain of interest: N0 , N1 ≥ 0. This leads to the sim-
+labeling with zero loss, so this reduces to using the
+                                                                 ple (but possibly suboptimal) optimization approach
+ground truth as the positive example.
+                                                                 that we found to work well, which is to use local search
+Negative Examples:          The loss-augmented MAP               to find the optimal N0 or N1 , then to use N0 and N1 to
+problem is equivalent to a MAP inference problem in              compute y−i . Although the procedure could theoret-
+a factor graph for the model with an additional factor           ically get stuck at suboptimal points, in experiments
+for the loss function. For a factor representing loss            to test this, it always reached the optimum, and it did
+function ∆, the needed MPBP messages are,                        so very quickly. (An alternative choice would use bi-
+                                                               section to guarantee convergence to an $-suboptimal
+                                 !                               solution in log2 ( 1" ) iterations.)
+   m∆→i (yi )= max∆(yi , y−i )+   mi" →∆ (yi" ) , (4)
+                   y−i                                           Each outgoing message requires optimizing f with
+                                  i" %=i
+                                                                 slightly different incoming message values. Since the
+where y−i is the set of all variables excluding the ith.         problems are so similar, we find that we get signifi-
+Note there is a separate message for each variable and           cantly faster convergence by warm starting the opti-
+each value it can take on, so naively there are 2N opti-         mization for one outgoing message with the result from
+mizations to perform. A theme in developing efficient            the previous calculation. Empirically, solving the first
+message passing algorithms is to share the work be-              optimization takes linear time, then solving the latter
+tween these different optimizations. In the following            N problems takes constant time each (usually 0, 1, or
+section, we show how to efficiently compute these mes-           2 steps of local search). Thus, we expect the sort op-
+sages for factors representing several loss functions of         eration to dominate the complexity and runtime for
+interest.                                                        computing all N outgoing messages from a factor to
+                                                                 scale like N log N i.e., log N time amortized per mes-
+4.2   Factor Computations                                        sage. Indeed, for an image with ten thousand pixels,
+Here, we develop three loss functions and algorithms             like we use in our experiments, exact computation at
+for incorporating additional non-decomposable super-             the loss factor in each iteration takes .03 seconds. Em-
+vision into the learning objective.                              pirical runtimes on larger problems indicate the scaling
+                                                                 to be roughly N log N (10k pixels: .03s, 100k pixels:
+(A) PASCAL Loss.               The loss used to evaluate         .32s, 1M pixels: 3.3s, 10M pixels: 34.5s).
+the PASCAL Segmentation Challenge, restricted to a
+single class, can be written as                                  Comparison to [11]. The preceding formulation is
+                            ( ∗               (                  superior to the piecewise linear approximation (PLA)
+                             i yi (1 − yi ) − i yi∗
+      ∆PASCAL
+         y∗      (y) = 1 +  (   ∗
+                                     (             ∗ .   (5)     of [11] in several respects. First, the scale is sig-
+                             i yi +    i yi (1 − yi )            nificantly greater; our algorithms operate on tens of
+                (            (                                   thousands of output variables (one per pixel) as op-
+Let N + = i yi∗ , N0 = i:y∗ =1 (1 − yi ), and N1 =
+(                                  i                             posed to the approximately 50 output variables used
+   i:yi∗ =0 yi be the number of ground truth pixels, false       by PLA. The computation benefit comes from the fact
+negatives, and false positives, respectively. We can             that rather than solving many linear programs (one
+                                                   +
+                                              0 −N
+rewrite the loss as ∆PASCAL
+                         y∗     (y) = 1 + N  N + +N1 and the     per piece of the approximation to the loss function)
+objective inside the maximization in Eq. (4) as                  to find a violated constraint, the above approach uses
+                                                                 highly efficient special-purpose algorithms, which com-
+                   N0 − N +                                      municate using message passing. Second, the above
+  f (N0 , N1 ) =            + s0 (N0 ) + s1 (N1 ) + κ, (6)
+                   N + + N1                                      formulation is exact in cases where the PLA approach
+where s0 (N0 ) is the cumulative sum of the first N0             is not, because the message passing operates on the
+sorted negative incoming message values from vari-               exact loss and computes exact outgoing messages. Fi-
+ables where y ∗ = 1 and s1 (N1 ) is the cumulative sum           nally, the above approach is more modular, as different
+
+                                                          1215
+                                                Daniel Tarlow, Richard S. Zemel
+
+
+HOLs can easily be combined with other forms of su-
+pervision and/or other modeling components.
+(B) Bounding Box % Fullness Loss.                          Suppose
+we are given bounding box labels at training time
+and wish to optimize for performance on a per-pixel
+segmentation task. This situation may arise if we
+are training a segmentation model and would like to
+augment the set of detailed per-pixel ground truths                       Figure 1: (Left) Illustration of LBC loss. The white re-
+with a set of easier-to-obtain, coarser bounding box                      gion is foreground, and the black is background. The
+ground truths. We assume that bounding boxes con-                         gray can take either label, but a penalty of α is in-
+tain roughly a fraction R foreground pixels (and 1 − R                    curred for each outwards path that changes from back-
+background pixels). Let y ∗ be the coarse labeling                        ground to foreground as it moves away from the object.
+where yi∗ indicates whether pixel i is within the bound-                  (Right) Example of eroded Aeroplane labeling.
+ing box. A reasonable (and novel) loss function is
+                             )                                )
+                             )                                )           neighbors a pixel in F). We then traverse the path
+                !            )  !                  !          )
+  ∆BB   (y) =          y   + )         y ∗
+                                           y − R          y ∗)
+                                                            i ) . (7)     backwards, from q to p and add a monotonicity con-
+    y ∗                  i   )           i i
+              i:yi∗ =0       )i:yi∗ =1           i:yi∗ =1     )           straint on this ordered set Q0 = (q0 , . . . , p0 ) of pixels.
+                                                                          We repeat this for each pixel on the U - B boundary
+This loss can be decomposed into low order parts over                     that has not already been used in a shortest path, then
+pixels outside the bounding box and a high order part                     through other pixels in U that have not been used in
+over pixels inside the bounding box. The high order                       any shortest path. From each of these starting pixels,
+term can be written as a function of the(number of                        we find a shortest path through U to F, constructing
+pixels on inside the bounding box i.e., f ( i:y∗ =1 yi ),                 ordered sets Qk for each path. When all pixels in U
+                                                i
+so the cardinality potential from [4] can be used with-                   have been used in at least one path, we have our set
+out modification. The 0-loss Constrained MAP can                          of constraints Q = {Q0 , . . . , Qm }. The loss is then,
+                                                                                         !                   !
+also use an unmodified cardinality potential. A range                        ∆LBC
+                                                                               y∗  (y) =    1{yi $= yi∗ } +      g(yq , . . . , yp ), (8)
+of other functions could be used for the inside the                                      i∈F ∪B            (q,...,p)∈Q
+bounding box term. For example, we might assign zero
+loss to several different pixel value counts and vari-                    where g(y0 , . . . , ym ) = 0 if yi ≥ yj for all i < j and α
+ous penalties to deviations from these preferred values.                  otherwise.
+Any such loss can easily be used in this formulation.                     To maximize the loss, we need to define a not-
+(C) Local Border Convexity Loss.              A second                    monotonic factor. This is an order-based potential
+form of weak labeling that is easier for humans to pro-                   [4], We describe a dynamic programming algorithm
+duce than a full per-pixel labeling is a rough inner-                     for this factor in the supplementary materials. The
+bound on the true labeling plus a rough outline of the                    algorithm computes all N outgoing messages in O(N )
+object to serve as an outer bound. For example, a pop-                    time, i.e., O(1) amortized time per message. The 0-
+ular form of labeling in interactive image segmentation                   loss constrained MAP uses a slightly modified version
+derives from a user drawing a few strokes to mark the                     of the convexity potential described in [4], which is
+internal skeleton of the object, and a crude circular                     equally efficient (see supplementary materials).
+stroke around the outside. We would like to use such
+a labeling to define a loss function. We assume that                      5     Experimental Evaluation
+the strokes define the inner core of the object, so if
+follow any ray extending out from the stroke towards                      5.1    Deformable Shape Loss
+the boundary of the object, the labeling along the ray
+will be monotonic—i.e., of the form 1m 0n .                               As a first experiment, we simulated a setting where the
+                                                                          relative location of a set of points is important, but the
+This motivates our local border convexity (LBC) loss,
+                                                                          precise location is not. Such a setup is motivated by
+illustrated in Fig. 1 (a) and described intuitively in
+                                                                          the task of recognizing deformable shapes given noisy
+the caption. Formally, we start with a set of pixels F
+                                                                          observations of landmarks.
+that are labeled foreground in the and a set of pixels
+B that are labeled background. The remaining unla-                        Inputs come in the form of noisy observations of a set
+beled pixels will be denoted U (gray in Fig. 1). We                       of point locations on a 2D grid. Specifically, the task
+construct shortest paths through pixels in U from an                      is to jointly predict the location of three special points
+outermost pixel p ∈ U (i.e., one that neighbors a pixel                   on a grid, given feature responses at each grid location.
+in B) to any innermost pixel in q ∈ U (i.e., one that                     We compare two losses: a low order loss that penalizes
+                                                                   1216
+                                Structured Output Learning with High Order Loss Functions
+
+  !!!
+                       !!!
+                         Evaluate                               on pairwise features are constrained to be positive, so
+      Train                !!! Pixel Error    HO Error
+                                  !                             that the resulting pairwise potentials are submodular.
+        High Med Low
+                         Pixel-loss 7.1%        3.2%            This produces models with approximately 10,000 to
+                          HO-loss   10.1%       1.4%            20,000 variables and 20,000 to 40,000 edges per image.
+                         Pixel-loss 26.9%       9.7%            Inference. We use the COMPOSE framework [24] to
+                          HO-loss   28.2%       5.2%            compute messages for the entire pairwise model using
+                         Pixel-loss 84.3%      44.9%            dynamic graph cuts [25]. With decomposable (per-
+                          HO-loss   67.5%      15.8%            pixel) losses, this guarantees that inference is exact,
+                                                                even though the grid graph contains loops. With high
+Figure 2: Synthetic results. Error on pixel-based error         order losses, inference is not guaranteed to be exact,
+and high order (HO) error for different levels of noise         but we find this framework to work significantly better
+and train time loss functions.                                  than standard max-product belief propagation with a
+                                                                static message passing schedule.
+
+any error in predicting special point locations; and a          We use an asynchronous schedule across subproblems,
+high order loss that cares only about the relative order-       where the full grid model is treated as one subproblem,
+ing of the points from top to bottom and from left to           and the loss is treated as a second subproblem. We al-
+right. Due to space, we describe experimental details           ternate between the loss factor(s) and the submodular
+in the supplementary materials. The important result,           grid factor, having each send all outgoing messages
+however, is that learning according to the high order           at each step. We use damping of .95 for all exper-
+loss function leads the model to favor the features that        iments and set a maximum number of 50 iterations.
+are less reliable predictors of the exact location but          Solving the QP is very fast, so the bottleneck is the
+that are more accurate predictors of the general re-            loss-augmented MAP calls. We parallelize them over
+gion where a point lies; learning according to the low          four CPUs. One loss-augmented MAP call takes be-
+order loss leads the model to favor a set of features that      tween a couple seconds and two minutes, depending
+gives a stronger indicator of the precise location of the       on the model and loss function being used. With-
+special points but that has a non-local noise model.            out pairwise potentials, only one iteration of message
+Quantitative results (Fig. 2) show that except for the          passing is typically required for the loss-augmented
+high noise case, the high order-trained model performs          MAP, so learning is very fast. For learning, we set
+best on the high order loss, and the low order-trained          C = .01 for experiments with per-pixel ground truths
+model performs best according to the low order loss.            and C = .0001 for experiments with weakly labeled
+The low order loss, in a sense, leads to learning a model       ground truths. All our learned models are submodu-
+that cannot see the forest for the trees.                       lar, so we run the graph cuts algorithm of [26] at test
+                                                                time to find the optimal MAP labeling.
+5.2    Three Image Labeling Experiments                         (A). PASCAL Loss. We first examine how training
+                                                                on different loss functions affects test performance. We
+Data.      We took subsets of images from the PAS-              look at three loss functions: 0-1 Loss is the constant-
+CAL VOC Segmentation challenge data set contain-                margin structural SVM Eq. (1); Pixel Loss and PAS-
+ing a given object—Aeroplane, Car, Cow, and Dog.                CAL Loss are loss-augmented structural SVM train-
+The database provided pixel-wise segmentations and              ing with the respective loss functions. We pair all com-
+bounding boxes for each image. We then created                  binations of training objective and test evaluation, be-
+ground truth labels by assigning a pixel to foreground          tween pixel and PASCAL accuracy. We also evaluate
+if it was labeled {Aeroplane, Car, Cow, Dog} in the             the tradeoff associated with using pairwise potentials
+VOC labels and background otherwise. We scaled the              in the model. On one hand, we know that objects
+images so that the minimum dimension was 100 pixels.            in images are smooth, so introducing pairwise interac-
+We also created eroded data by eroding the per-pixel            tions should make the model more realistic. On the
+ground truths with a disk of radius 5.5. We then cre-           other hand, when paired with high order losses, loss-
+ated an uncertain region by dilating the eroded labels          augmented MAP inference is no longer guaranteed to
+by 10 pixels. See Fig. 1 (b) for an example.                    be exact, which might hurt learning performance.
+Model.       We use 84 per-pixel features that repre-           Fig. 3 (a) shows results for a unary only model trained
+sent color and texture in the patch surrounding a pixel         to optimize the three loss functions, where inference is
+(the unary model). We use a standard pairwise 4-                always exact. Fig. 3 (b) shows results for a unary +
+connected grid model, with 1 constant pairwise feature          pairwise model trained with the same loss functions.
+and 12 pairwise features that are based on boundary             For the 0-1 and pixel loss, inference is exact. For the
+appearance (the unary + pairwise model). Weights
+                                                         1217
+                                                 Daniel Tarlow, Richard S. Zemel
+
+!!!
+       !!!Evaluate
+ Train      !!! Pixel Acc.                       PASCAL Acc.
+                  !
+           0-1 Loss 82.1%                           28.6
+         Pixel Loss 91.2%                           47.5
+      PASCAL Loss   88.5%                           51.6
+                          (a) Unary only model
+!!
+     !!! Evaluate
+           !!!       Pixel Acc.                  PASCAL Acc.
+  Train           !!
+            0-1 Loss   79.0%                        28.8              Figure 4: Example test results on Cow dataset. Meth-
+          Pixel Loss  92.7%                         54.1              ods from left to right: (Left) Raw image. (Middle)
+       PASCAL Loss     90.0%                        58.4              Pixel Loss. (Right) PASCAL Loss. Additional exam-
+                       (b) Unary + pairwise model                     ples can be found in the supplementary material.
+  !!!
+         !!!
+           Evaluate                                                   bounding box is treated as the ground truth segmenta-
+   Train    !!! Pixel Acc.                        PASCAL Acc.
+                  !                                                   tion. Fig. 5 shows test results for Aeroplane and Cow
+                      Pixel Loss    80.4%              6.7            evaluated on both pixel and PASCAL loss. In Fig. 5
+     Dog Cow Car
+
+
+
+
+                   PASCAL Loss      72.9%             37.0            (b,c,d), we see that performance peaks near the true
+                      Pixel Loss    80.3%             23.3            percentage observed in the data, denoted by the verti-
+                   PASCAL Loss      79.4%             48.1            cal red line. Note that the location of this vertical red
+                      Pixel Loss    81.5%             16.6            line can itself be viewed as a type of non-decomposable
+                   PASCAL Loss      75.9%             38.3            supervision, which we could reliably predict from do-
+               (c) Unary + pairwise model; other objects              main knowledge or a small number of fully labeled ex-
+Figure 3: Test accuracies for training-test loss function             amples. This demonstrates that the model utilizes the
+combinations. In (c), all models are unary + pairwise.                weak labels in the bounding box, out-performing the
+A labeling of all background gives pixel accuracies of                SVM that ignores these pixels.
+79.8%, 78.9%, and 80.2%, on Car, Cow, and Dog re-                     (C). Local Border Convexity Loss.                Finally,
+spectively.                                                           we compare two methods for learning with partially-
+                                                                      labeled images, as illustrated in Fig. 1. In the base-
+PASCAL loss, inference is approximate. However, re-                   line method, we train an SVM with a modified loss
+sults show that the combination of richer model, high                 function, where unlabeled pixels can be assigned ei-
+order loss, and approximate inference produces the                    ther label without incurring any loss. This amounts
+best results out of all models when evaluated on the                  to discarding the unlabeled pixels during training. We
+PASCAL objective. In particular, it outperforms both                  refer to this as the Modified Loss SVM. The second
+exact PASCAL loss training with unary-only poten-                     method is our structural SVM with LBC Loss. In
+tials and exact training of a unary + pairwise model                  this loss function, there are many labelings of the un-
+but with a pixel loss.                                                labeled pixels that are assigned zero loss, but penalties
+                                                                      are imposed on non-locally convex labelings.
+In Fig. 3 (c), we take the strongest baseline (unary +
+pairwise model, pixel loss) and compare it to a unary                 Fig. 5 shows results on four object classes. In all cases,
++ pairwise model trained to optimize the PASCAL                       the LBC loss is an improvement over the baseline when
+loss on a variety of other object classes. As before, we              evaluating with respect to the PASCAL score (and
+find that training the model for the same loss func-                  in three of four cases with respect to pixel accuracy).
+tion as is being evaluated at test time produces re-                  Note that the loss being optimized is not exactly ei-
+sults that are clearly superior. In Fig. 4, we show                   ther the PASCAL or pixel loss. In the other cases,
+training and test outputs for unary + pairwise models                 the improvements are more modest, likely because the
+trained on the pixel loss (middle column) and the PAS-                Modified Loss SVM is not significantly worse than
+CAL loss (right column). Visually, we can see that the                the methods that train on fully labeled ground truths
+PASCAL-trained model labels more pixels foreground,                   (Fig. 3), so there is not much room for improvement.
+correcting the overly conservative pixel-trained model.               The largest gap in performance between strongly la-
+                                                                      beled and weakly labeled is on Aeroplane, which is
+(B). Bounding Box % Fullness Loss. Here, we                           likely caused by the high proportion of small planes –
+consider the problem of learning to label pixels in im-               our erosion method completely eliminates some small
+ages when only a bounding box is given as supervision.                objects, making it impossible for the LBC loss to re-
+We use the bounding box loss given in (9) and use a                   cover them at training time. Surprisingly, on the Dog
+range of settings of the “fullness” parameter R. When                 data set, the results are even better than training with
+R = 1, we have a baseline low-order model where the                   per-pixel labels.
+                                                               1218
+                                                                  Structured Output Learning with High Order Loss Functions
+
+                                   92                                                      50
+                                                                                                                                       Based on these results, and the efficiency of the high
+
+
+
+
+                                                                         PASCAL Accuracy
+              Pixel Accuracy (%)
+                                   90                                                      40
+                                   88                                                                                                  order factors (e.g., the PASCAL factor defined over 10
+                                                                                           30
+                                   86
+                                                                                           20
+                                                                                                                                       million variables requires only approximately 30 sec-
+                                   84
+                                                                                           10
+                                                                                                                                       onds per iteration), we expect there to be many more
+                                   82
+                                   80                                                      0
+                                                                                                                                       scenarios where tractable high order loss functions can
+                                     0              50             100                      0              50             100
+                                         Bounding Box Fullness (%)                              Bounding Box Fullness (%)              improve performance, both in computer vision and be-
+                                                 (a)                                                    (b)                            yond. Specifically, all of the losses here are applicable
+                                   81                                                      40
+                                                                                                                                       to multilabel problems. A second natural extension
+
+
+                                                                         PASCAL Accuracy
+              Pixel Accuracy (%)
+
+
+
+
+                                   80
+                                                                                           30                                          is to formulate high order losses that do not just ap-
+                                   79
+                                                                                           20                                          ply to many outputs within an image but that apply
+                                   78
+                                                                                           10
+                                                                                                                                       to many outputs across multiple images. For example,
+                                   77
+                                                                                                                                       we might define a loss function in terms of the smooth-
+                                   76                                                      0
+                                     0              50
+                                         Bounding Box Fullness (%)
+                                                                   100                      0              50
+                                                                                                Bounding Box Fullness (%)
+                                                                                                                          100
+                                                                                                                                       ness of a pattern of pixels moving through frames of a
+                                                 (c)                                                    (d)                            video.
+
+    !!!                                                                                                                                Given this extension of the range of loss functions that
+          !!! Evaluate                                                                                                                 can be efficiently optimized in structural SVMs, an
+    Train       !!! Pixel Acc. PASCAL Acc.
+                      !                                                                                                                interesting modeling choice that arises is whether to
+    Dog Cow Car Aero
+
+
+
+
+      Mod. Loss SVM         90.2%            36.4                                                                                      add structure to the model, to the loss function, or
+             LBC Loss       90.6%           38.1                                                                                       to both. There are two potential benefits of adding
+      Mod. Loss SVM         79.8%             0                                                                                        structure to the loss rather than the model. First, it
+             LBC Loss       80.2%            5.3                                                                                       may facilitate learning. Some constraints or desired
+      Mod. Loss SVM        78.4%             15.6                                                                                      properties of the labeling are easier to express rela-
+             LBC Loss       76.8%           32.3                                                                                       tive to the ground truth, which is available at training
+      Mod. Loss SVM         80.2%             0                                                                                        time but not at test. For example, if we would like
+             LBC Loss       82.4%           24.2                                                                                       to build some translation-invariance into the model,
+                          (e)                                                                                                          we can construct a loss function that assigns zero loss
+Figure 5: (a-d) Bounding box results: test accuracy                                                                                    to segmentations in which the target object is trans-
+versus bounding box fullness parameter R. Vertical                                                                                     lated by one or two pixels. This can be expressed as
+line shows true average bounding box fullness. (a)                                                                                     a high-order loss, but would be nearly impossible to
+Aeroplane pixel score. (b) Aeroplane PASCAL score.                                                                                     put into the likelihood. Second, it allows for flexi-
+(c) Cow pixel score. (d) Cow PASCAL score. (e) Local                                                                                   ble modeling while also permitting fast test-time in-
+border convexity results for training-test loss function                                                                               ference. Adding structure to the loss function but not
+combinations on eroded data. Modified Loss SVM is                                                                                      the model creates a variational-like learning scenario,
+an independent SVM that discards pixels in the gray                                                                                    where the model must learn to use its restricted de-
+region at training time.                                                                                                               grees of freedom to best optimize the loss. The simpler
+                                                                                                                                       likelihood can make test-time inference very fast. Ex-
+                                                                                                                                       ploring the tradeoffs between these alternative model
+6                      Discussion and Future Work
+                                                                                                                                       formulations is a direction of future work. More gen-
+Though low order loss functions are convenient for op-                                                                                 erally, we believe that the flexibility and efficiency of
+timization, they can impose a significant bias on the                                                                                  our loss functions opens up a wide range of exciting
+learned model. In this work, we show several exam-                                                                                     applications.
+ples where model performance can be improved by us-
+ing more complex loss functions without significantly                                                                                  References
+sacrificing computationally efficiency. A larger class
+of loss functions provides more flexibility in designing                                                                                [1] Kishore Papineni, Salim Roukos, Todd Ward, and
+a training criteria, allowing one to tailor the loss to                                                                                     Wei-Jing Zhu. BLEU: a method for automatic
+the application, e.g., training a model to optimize the                                                                                     evaluation of machine translation. In ACL, 2002.
+PASCAL loss significantly improves performance when
+                                                                                                                                        [2] M. Everingham, L. Van Gool, C. K. I. Williams,
+it is evaluated on the PASCAL loss, while training a
+                                                                                                                                            J. Winn, and A. Zisserman. The PASCAL visual
+model to optimize the deformable shape loss is effec-
+                                                                                                                                            object classes (VOC) challenge. IJCV, 88(2):303–
+tive at guiding the model to focus its capacity on the
+                                                                                                                                            338, June 2010.
+features most relevant to the true task. The other two
+losses give a meaningful way of doing semi-supervised                                                                                   [3] M. Taylor, J. Guiver, S. Robertson, and T. Minka.
+learning, where a loss is defined in terms of how a par-                                                                                    Softrank: Optimising non-smooth rank metrics.
+tial labeling is extended to a full labeling.                                                                                               In WSDM, 2008.
+                                                                                                                                1219
+                                       Daniel Tarlow, Richard S. Zemel
+
+
+ [4] D. Tarlow, I. Givoni, and R. Zemel. HOP-MAP:            [19] Brian Potetz and Tai Sing Lee. Efficient belief
+     Efficient message passing with high order poten-             propagation for higher order cliques using linear
+     tials. In AISTATS, 2010.                                     constraint nodes. CVIU, 112(1):39–54, Oct 2008.
+
+ [5] Carsten Rother and Sebastian Nowozin. Tutorial          [20] V. Lempitsky, P. Kohli, C. Rother, and T. Sharp.
+     at CVPR 2010: Higher-order models in computer                Image segmentation with a bounding box prior.
+     vision, 2010.                                                In ICCV, 2009.
+
+ [6] T. Joachims. A support vector method for multi-         [21] K Ganchev, J. Graa, J. Gillenwater, and
+     variate performance measures. In ICML, 2005.                 B. Taskar. Posterior regularization for structured
+                                                                  latent variable models.
+ [7] Ben Taskar, Carlos Guestrin, and Daphne Koller.
+     Max-margin markov networks. In NIPS, 2003.              [22] G. Mann and A McCallum. Generalized expecta-
+                                                                  tion criteria with application to semi-supervised
+ [8] I. Tsochantaridis, T. Joachims, T. Hofmann, and              classification and sequence modeling. Journal of
+     Y. Altun. Large margin methods for structured                Machine Learning Research (JMLR), 2010.
+     and interdependent output variables. Journal
+                                                             [23] T. Joachims, T. Finley, and Chun-Nam Yu.
+     of Machine Learning Research (JMLR), 6:1453–
+                                                                  Cutting-plane training of structural SVMs. Ma-
+     1484, 2005.
+                                                                  chine Learning, 77(1):27–59, 2009.
+ [9] T. Hazan and R. Urtasun.               A primal-
+                                                             [24] John Duchi, Daniel Tarlow, Gal Elidan, and
+     dual message-passing algorithm for approximated
+                                                                  Daphne Koller. Using combinatorial optimization
+     large scale structured prediction. In NIPS, 2010.
+                                                                  within max-product belief propagation. In NIPS,
+[10] Martin Szummer, Pushmeet Kohli, and Derek                    2007.
+     Hoiem. Learning CRFs using graph cuts. In               [25] Pushmeet Kohli and Philip H. S. Torr. Dynamic
+     ECCV, 2008.                                                  graph cuts for efficient inference in markov ran-
+                                                                  dom fields. PAMI, 29(12):2079–2088, 2007.
+[11] Mani Ranjbar, Greg Mori, and Yang Wang. Op-
+     timizing complex loss functions in structured pre-      [26] Yuri Boykov and Vladimir Kolmogorov. An ex-
+     diction. In ECCV, 2010.                                      perimental comparison of min-cut/max-flow algo-
+                                                                  rithms for energy minimization in vision. PAMI,
+[12] F. J. Och. Minimum error rate training in statis-
+                                                                  26(9):1124–1137, 2004.
+     tical machine translation. In ACL, 2003.
+
+[13] P. Pletscher and P. Kohli. Learning low-order
+     models for enforcing high-order statistics. In AIS-
+     TATS, 2012.
+
+[14] C. Rother, P. Kohli, W. Feng, and J.Y. Jia. Min-
+     imizing sparse higher order energy functions of
+     discrete variables. In CVPR, pages 1382–1389,
+     2009.
+
+[15] N. Komodakis and N. Paragios. Beyond pairwise
+     energies: Efficient optimization for higher-order
+     MRFs. In CVPR, 2009.
+
+[16] S. Vicente, V. Kolmogorov, and C. Rother. Graph
+     cut based image segmentation with connectivity
+     priors. In CVPR, 2008.
+
+[17] S. Nowozin and C.H. Lampert. Global connectiv-
+     ity potentials for random field models. In CVPR,
+     2009.
+
+[18] R. Gupta, A. Diwan, and S. Sarawagi. Efficient
+     inference with cardinality-based clique potentials.
+     In ICML, 2007.
+                                                      1220
+

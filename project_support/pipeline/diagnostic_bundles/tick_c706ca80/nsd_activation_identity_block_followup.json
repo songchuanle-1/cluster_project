@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-06T19:50:52.822568+00:00",
+  "passed": false,
+  "status": "SUBSTANTIVE_NSD_OPERATIONAL_IDENTITY_BLOCK_CONFIRMED_NO_EXECUTION",
+  "reviewer_actual_child_thread": "01a1a5a9-7056-7c92-bc3b-ca205451add4",
+  "scope": "Separate append-only follow-up; prior conditional increment review and frozen packages remain unchanged.",
+  "prior_increment_review": {
+    "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_activation_independent_review.json",
+    "sha256": "6c9515eda76164fee72bea59d1d508b0fb469489cef29fb2a4c695cd36d08e58"
+  },
+  "mother_independent_review": {
+    "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_native_prepare_independent_review.json",
+    "sha256": "293b633cc049f688fb81b70027dca525a8e284e8011243e52de88dd875dc9106"
+  },
+  "material_concerns": [
+    {
+      "kind": "operational_candidate_identity_mismatch",
+      "expected_external_NSD_candidate_id": "hierarchy-native-spatial-dirichlet-composition",
+      "actual_mother_and_activation_remote_CANDIDATE": "hierarchy-native-position-feature-cross-scatter-composition",
+      "affected_paths": [
+        {
+          "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_native_prepare/operational/remote_ops.py",
+          "sha256": "0837ae36942457171ed2aa355fc36fea8db3ddcb147d76eadd7dd0acb522d7db"
+        },
+        {
+          "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_current_activation/remote_ops.py",
+          "sha256": "0837ae36942457171ed2aa355fc36fea8db3ddcb147d76eadd7dd0acb522d7db"
+        }
+      ],
+      "affected_code_lines": [
+        23,
+        48,
+        55,
+        216
+      ],
+      "effect": "Remote identity production, binding validation and result validation still use PSC candidate id with NSD sourcef625. Correct NSD binding is rejected; operational identity is substantively invalid."
+    }
+  ],
+  "acknowledgement": "My233-check increment review verified copy/hash consistency and explicitly required mother review before release, but did not independently check the copied remote CANDIDATE against external NSD identity. That omission missed this substantive operational block. Its conditional PASS must not be interpreted as operational readiness.",
+  "actual_negative_control": {
+    "scope": "Pure expression extracted from actual old remote Foreign binding check; no module import, filesystem mutation, remote request or GPU.",
+    "binding_candidate_id": "hierarchy-native-spatial-dirichlet-composition",
+    "binding_code_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+    "actual_original_condition_accepts_correct_NSD_binding": false
+  },
+  "root_did_not_release_or_run_verified": {
+    "adapter_release_absent": true,
+    "nsd_execution_directory_absent": true
+  },
+  "latest_original1020sec_run_start_utc": "2026-11-06T19:48:17.840971+00:00",
+  "deadline_unchanged": "2026-11-06T20:05:17.840971+00:00",
+  "safe_GPU_test_this_owner": "NOT_RUN; no late run, replay, threshold reduction or lease extension.",
+  "v2_requirements": [
+    "Separately saved DISABLED operational correction; do not rewrite mother/currentactivation/oldPASS.",
+    "Remote CANDIDATE must match independent explicit NSD identity, not merely adapter/template agreement.",
+    "Preserve original worker/source/YAML/protocol/resources and all ten execution NULL fields; no active binding or release.",
+    "Recompute operational/release/preparation/FROZEN graph and independently test expected NSD identities plus wrong PSC/source/config controls."
+  ],
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "reviewer_SSH_GPU_model_or_shared_source_mutation": false
+}

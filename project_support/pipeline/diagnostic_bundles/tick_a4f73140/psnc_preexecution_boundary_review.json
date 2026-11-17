@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-23T22:11:57.261316+00:00",
+  "project": "cluster_project",
+  "reviewer_agent": "/root/mdc_review",
+  "candidate_id": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "experiment_id": "M210-PSNC",
+  "verdict": "LOCAL_SOURCE_CONFIGURATION_AUTHORIZATION_AND_FROZEN_ANCHORS_VALID_FRESH_LIVE_BINDING_STILL_REQUIRED",
+  "material_concerns": [],
+  "scope": "Bounded local preexecution review only. No adapter method/transport invocation, fixture/test rerun, SSH/GPU/native work or shared-state mutation.",
+  "foreground_snapshot": {
+    "token": "a4f7314098ed4dbd8351aa005661583d",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-23T22:09:39.758328+00:00",
+    "deadline_at": "2026-10-23T23:09:39.758328+00:00",
+    "context_sha256": "3741f249966a754bc9e69d485c49c7ed05b4128f3c3ddb215083d24643c09f48",
+    "pending_sha256": "2978ce3df7f79613b4a465a77782d5999d0f16b550c4c70e224a033a0d8200a3"
+  },
+  "owner_checks": {
+    "root_owner_matches_configured_target": true,
+    "actual_reviewer_environment_thread_id": "01a15a44-4930-7e13-9aa4-be131458c3a4",
+    "reviewer_is_delegated_child_not_root_execution_identity": true,
+    "context_pending_goal_hashes_match": true,
+    "original_current_deadline_not_extended": true
+  },
+  "candidate_source_identity": {
+    "source_code_commit": "43dce016c1a1713c2a5dab7061810dc2efde8954",
+    "native_execution_code_commit_observed": null,
+    "candidate_stage_at_read": "blocked",
+    "resume_stage": "validation",
+    "blocker_kind": "exclusive_gpu_slot",
+    "config": "configs/Quard/ctf_hcg_csort_psnc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc.yaml",
+    "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+    "no_scoped_human_or_numerical_hold": true,
+    "no_unreviewed_implementation_revision": true
+  },
+  "three_external_anchors": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/preparation.json",
+      "sha256": "551011dcdaeb361abd8676ac0bf771e62712d2d55578b18723ba0043843733e0",
+      "actual_hash_and_current_candidate_reference_match": true
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/native/preparation.json",
+      "sha256": "eebd34a6d2123cc8728d5e2dd6ebc8d055473e5bbf8da1fd33f909ae4e1c77d6",
+      "actual_hash_and_current_candidate_reference_match": true
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/adapter_release.json",
+      "sha256": "a4000485b1cffdff7cb623ed2840a4d6b3c531baac5ed1b4a6a04cb04b48c749",
+      "actual_hash_and_current_candidate_reference_match": true
+    }
+  ],
+  "frozen_file_maps": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/preparation.json",
+      "entries": 28,
+      "all_hashes_match": true
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/native/preparation.json",
+      "entries": 14,
+      "all_hashes_match": true
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/native/manifest_template.json",
+      "entries": 12,
+      "all_hashes_match": true
+    }
+  ],
+  "static_release_exact_template_and_module_hashes": true,
+  "preparation_original42ce_token_is_provenance_only": true,
+  "manifest_template_execution_fields_all_null": true,
+  "source_package_binding": {
+    "source43_single_parent74f": true,
+    "exact9_Git43_source_blobs_match_prepared8sources_plus_originalYAML": true,
+    "source_version_binding_sha256": "544d5d85e1bca26bf06cbcd171e9cfada53412d8425a5ff5819cfd7505d6b40c",
+    "local_original_M95_common_assets_match_manifest": {
+      "backbone.py": true,
+      "hier_postprocess.py": true,
+      "loss.py": true,
+      "sample_model.py": true,
+      "network.py": true,
+      "dec.py": true,
+      "__init__.py": true,
+      "dataset_source": true,
+      "tools_train": true
+    },
+    "remote_assets_pretrain_checkpoint_annotation_runtime_HEAD": "NOT_INDEPENDENTLY_OBSERVED; frozen native runtime must reverify actual assets before computation"
+  },
+  "native_configuration_and_budget": {
+    "candidate_yaml_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "byte_frozen_original_native_YAML": true,
+    "train": {
+      "seed": 1999,
+      "epochs": 50,
+      "interval": 1,
+      "pretrain": "/home/songcl/data/data/sp_unet_backbone.pth",
+      "save_epoch": 100,
+      "grad_clip": 0.1
+    },
+    "lr_scheduler": {
+      "type": "PolyLR",
+      "max_iters": 70,
+      "power": 4.0,
+      "constant_ending": 0.0
+    },
+    "dataloader": {
+      "train": {
+        "batch_size": 2,
+        "num_workers": 4,
+        "persistent_workers": true
+      },
+      "val": {
+        "batch_size": 1,
+        "num_workers": 2,
+        "persistent_workers": true
+      },
+      "test": {
+        "batch_size": 1,
+        "num_workers": 1,
+        "persistent_workers": true
+      }
+    },
+    "decoder": {
+      "cluster_mode": "ctf_hcg_csort",
+      "csort_weight": 0.01,
+      "num_layer": 6,
+      "d_model": 256,
+      "nhead": 8,
+      "hidden_dim": 1024,
+      "dropout": 0.0,
+      "activation_fn": "gelu",
+      "iter_pred": true,
+      "contrastive_align_loss": true,
+      "num_proposal_fine": 512,
+      "cluster_layer_nums": [
+        256,
+        64,
+        8
+      ],
+      "per_layer_topk_list": [
+        32,
+        16,
+        8
+      ],
+      "cluster_att_num_layers": 1,
+      "cluster_att_init": 0.1
+    },
+    "default_counted_FLOPs_limit_G": 10.0,
+    "resource_protocol": "Original bs1/lang1/warm20/repeat100, original fvcore handlers/unsupported dictionaries and matched M95 input; preserved unchanged worker69e2",
+    "memory_condition": "Peak allocated/reserved relative increase15% retains original >=+0.003mIoU condition; do not invent a new protocol or assume benefit",
+    "native_two_TRAIN_steps_loss_backward_optimizer_and_intended_path": "PENDING_REAL_EXECUTION"
+  },
+  "authorization_and_resource_scope": {
+    "standing": {
+      "path": "pipeline/authorizations/experiment_first_20261021.json",
+      "sha256": "2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8"
+    },
+    "actual_standing_hash_and_native_check_operation_valid": true,
+    "current_GPU0_human_grant": {
+      "path": "pipeline/authorizations/server4_gpu0_only_20261022_gpu1_pause_105409.json",
+      "sha256": "1871f8c9777c548acfda87b9e91b72c2d5fc94ac78920430c52bdceea1cbd51e"
+    },
+    "allowed_physical_gpus": [
+      0
+    ],
+    "selected_UUID": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "single_slot": true,
+    "snapshot_live_whitelist_consistent": true,
+    "pinned_SSH_target": "songcl@192.168.1.115",
+    "expected_hostname": "dl04-MS-7E06",
+    "GPU1": "released to others; no query/compute permitted",
+    "M206": {
+      "launch_verification": "user_paused",
+      "resume_authorized": false,
+      "no_live_task_PID_registered": true,
+      "dispatch_hold": "User paused M206 to release GPU1 to others. No automatic resume or GPU0 migration; wait for explicit resume instruction and full source/checkpoint/resource validation."
+    }
+  },
+  "local_version_boundaries": {
+    "primary_HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "primary_index_empty": true,
+    "protected28_byte_rescan_performed": false,
+    "PSNC_isolated_HEAD43_clean": true,
+    "BTC_isolated_HEAD00e_clean_and_single_parent43": true,
+    "active_remote_checkout_changed_by_reviewer": false,
+    "future_canonical_fresh_dispatch_needs_primary_HEAD_task_commit_equality": true
+  },
+  "local_registry_at_review": {
+    "running_server4": {
+      "0": "M209-PSBR"
+    },
+    "PSBR_queue": {
+      "id": "M209-PSBR",
+      "status": "running",
+      "pid": 2372658,
+      "gpu": "0",
+      "launch_verified": true,
+      "launch_verification": "training_progress"
+    },
+    "interpretation": "Registry state is not a fresh remote PID/idle observation. Root owns exact PSBR terminal/GPU0 verification and canonical archival before prepare. If registration is still present, _local_idle must refuse and must not be bypassed."
+  },
+  "mandatory_execution_preconditions": [
+    "Root confirms exact PSBR original PID/log terminal and physicalGPU0 free, completes canonical archive and releases its registered slot; no signal/eviction assumed.",
+    "Invoke reviewed adapter as actual owning root environment with the current a4f token/context/pending/original deadline; do not override thread identity.",
+    "Create a fresh tick_a4f73140/psnc_execution binding/manifest/lease and fresh psnc_a4f73140 remote stage only after live UUID/idle/three-lock checks. Old42ce preparation token is never an execution lease.",
+    "Preserve current primary/active remote source during diagnostics; staged candidate43 is distinct from separately observed runtime checkout74f and must pass exact runtime/source/asset verification.",
+    "Four actual M95/candidate TRAIN2 and original resource raw results require semantic pairing/independent review; local preparation/static tests are not native PASS or admission.",
+    "Retain exact request/PID/start/argv/result on uncertainty; do not replay an old request or extend the original deadline."
+  ],
+  "limits": [
+    "No physical GPU idleness/exclusive lock availability or live runtime/assets were independently verified by this local review.",
+    "No new efficacy, parameter inventory, FP32 DCT control, gradient, loss, memory, timing or FLOP result is asserted.",
+    "No original packet/tool logic was modified or test suite rerun; integrity rests on current exact frozen hash maps and preserved prior reviewed source."
+  ],
+  "executed": {
+    "SSH": false,
+    "GPU": false,
+    "torch_import": false,
+    "tests_or_mock": false,
+    "adapter_transport_or_prepare_method": false,
+    "shared_ledger_or_source_or_git_or_lease_write": false,
+    "only_new_review_file_written": true
+  }
+}

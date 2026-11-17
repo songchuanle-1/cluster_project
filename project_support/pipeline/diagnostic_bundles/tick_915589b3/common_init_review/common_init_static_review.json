@@ -1,0 +1,228 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-09T01:22:13.665072+00:00",
+  "owner": {
+    "token": "915589b3154c4c3c99b1db658f610a1f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T01:12:12.491733+00:00",
+    "deadline_at": "2026-11-09T02:12:12.491733+00:00",
+    "context_sha256": "dada34d7594e909fafb5912692a196a80a7f11a55681e45cb7b1736039e08e5e",
+    "pending_sha256": "d5e94794b90053aff865886bb78f0d94483538397354b954968aa5e13566ffd7"
+  },
+  "reviewer_agent": "/root/actual_chain_fast",
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "source_commit": "0f8cc0f978b38c24e159d3a2d37344f59cc9a0be",
+  "scope": "STATIC_SOURCE_AND_HISTORICAL_INIT_EVIDENCE_REVIEW_NO_TORCH_IMPORT_MODEL_TEST_GPU_SSH_OR_SOURCE_MUTATION",
+  "verdict": "HARNESS_COMMON_INIT_AND_FIVE_PARAMETER_OBSERVATION_CORRECT_STATICALLY; RETAINED_RVE_SOURCE_HAS_UNGUARDED_EXTRA_CONSTRUCTOR_RNG_DRAWS; ACTUAL_RVE_GATE_UNMEASURED",
+  "reviewed_sources": {
+    "RVE_native_frozen": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/FROZEN.json",
+      "sha256": "43058e2ab1e54c0b0b27a1eda9d76dfb8c129bd6f6a86138f1c9da18b250112d"
+    },
+    "RVE_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/worker.py",
+      "sha256": "f02e5d137fabb5fedd22ee2ce81c001b3d54ce5e82ff99fad3c087a36c60585f"
+    },
+    "RVE_hierarchy": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/candidate_model/hier_postprocess.py",
+      "sha256": "dcee33e0f3e6b5cd4118ce8a06e008995b07e35d37ed29b28d813be4231318be"
+    },
+    "RVE_operator": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/candidate_model/receiver_vector_exchange.py",
+      "sha256": "3b2ed3dc9f99d62a0a9108d3154792752e06a85a8c493b47317be9ec264099d3"
+    },
+    "RVE_decoder": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/candidate_model/dec.py",
+      "sha256": "42e5e737bbf3bbe5a689b02f2143c42b8ccc38046ab89d4d720abc1d7dfce44c"
+    },
+    "RVE_network": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/candidate_model/network.py",
+      "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d"
+    },
+    "M95_native_train": {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    },
+    "NDE_hierarchy_with_RNG_guard": {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_resource_native_active/candidate_model/hier_postprocess.py",
+      "sha256": "2f802153fba7483c84cdb8b778108e0edadc44c83d4b2e266094d84a0b315ac5"
+    },
+    "NDE_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_resource_native_active/worker.py",
+      "sha256": "b37fe5cf29ce04b8110752c7321d34b8d1a26218a6d8e02940b5773d9e4d5f72"
+    },
+    "historical_NDE_smoke": {
+      "path": "pipeline/diagnostic_bundles/tick_f6536795/nde_execution/smoke_candidate_execution.json",
+      "sha256": "1cf19f28ca2c1f8e266d004af2e416628c437b9afbc1ace452fe45f0590420fe"
+    },
+    "historical_M95_smoke": {
+      "path": "pipeline/diagnostic_bundles/tick_71e15360/nde_execution/smoke_champion_execution.json",
+      "sha256": "adb5f2659a34b6c7622f20155fc4ff41fda08383df8c2b0c653ccb509b474a7b"
+    },
+    "prior_peer_seam_review": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/operational_review/rve_common_init_core_observer_seam_audit.json",
+      "sha256": "9201587954cf38ecaa32dc34a42a48edad82448bf2b5e52937ebc2afee38d01c"
+    },
+    "current_source_reverification": {
+      "path": "pipeline/diagnostic_bundles/tick_915589b3/current_source/source_version.json",
+      "sha256": "475d1b2261d9aad995379e63903bbaf327937c115561f6b7a38996d24b5089c5"
+    }
+  },
+  "seeding_and_reference": {
+    "verdict": "STATIC_MATCH_TO_NATIVE_ORDER",
+    "worker_lines": [
+      55,
+      58,
+      89,
+      117
+    ],
+    "native_train_lines": [
+      415,
+      452
+    ],
+    "detail": "Seed1999 before target constructor, native model then optimizer/scheduler then original backbone pretrain. Reference M95 constructor/pretrain is observed from a saved Python/NumPy/Torch CPU/CUDA entry state and that entry state is restored before candidate construction. No candidate parameter copy/reinitialization/reseed or post-reference stream substitution occurs. Reference omits optimizer/scheduler creation, which is not a demonstrated random consumer in the original standard AdamW/scheduler path. Any actual name/shape/dtype/value/hash mismatch stops before TRAIN loader construction."
+  },
+  "common_parameter_scope": {
+    "verdict": "CORRECT_IDENTICAL_EXCLUSION_ON_BOTH_ARMS",
+    "worker_lines": [
+      87,
+      95,
+      119,
+      146,
+      162,
+      169
+    ],
+    "exclude_exact_prefixes_on_both_arms": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn_norm.0.",
+      "dec.cluster_att.fine_exchange."
+    ],
+    "middle_coarse_retained": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.cluster_ffn.2.",
+      "dec.cluster_att.cluster_ffn_norm.1.",
+      "dec.cluster_att.cluster_ffn_norm.2."
+    ],
+    "comparison": "Both maps derived from actual named_parameters; names, shapes, dtypes, exact torch.equal values and canonical full-map SHA256 compared. No hardcoded841 success check. All common parameters after the new constructor remain included."
+  },
+  "substantive_issue": {
+    "kind": "SOURCE_CONSTRUCTOR_RNG_SEAM; NOT_FALSE_POSITIVE_HARNESS_FILTER_OR_MEASUREMENT",
+    "severity": "COMMON_INIT_GATE_EXPECTED_TO_FAIL_UNTIL_ACTUALLY_MEASURED_OR_SEPARATELY_REVISED",
+    "evidence": [
+      {
+        "file": "RVE_hierarchy",
+        "lines": [
+          722,
+          728
+        ],
+        "fact": "Superclass completes ordinary M95 hierarchy/three FFNs and norms; then the new FineLeafReceiverVectorExchange is constructed without fork_rng; only fine FFN0/norm0 removed."
+      },
+      {
+        "file": "RVE_operator",
+        "lines": [
+          123,
+          135
+        ],
+        "fact": "Five CPU parameters receive nn.init.uniform_ draws through the global CPU generator."
+      },
+      {
+        "file": "RVE_decoder",
+        "lines": [
+          403,
+          431
+        ],
+        "fact": "cluster_att construction precedes all encoder_layers and decoder_layers, which construct further random linear/attention parameters."
+      },
+      {
+        "file": "RVE_network",
+        "lines": [
+          70,
+          98
+        ],
+        "fact": "Model is constructed on CPU, moved to CUDA afterward; init_weights subsequently sets BatchNorm constants only and does not restore the decoder stream."
+      }
+    ],
+    "implication": "Middle/coarse FFN/norm values are constructed before the extra draws and preserved by source inheritance. Later shared encoder/decoder random values and the subsequent data RNG stream can shift; same seed alone cannot establish all-common initialization equality. This is a static inference, not an actual measured RVE mismatch."
+  },
+  "prior_successful_NDE_M95": {
+    "historical_original_owners_preserved": true,
+    "NDE_owner_token": "f653679598744de7ac2fafb23a96c1ea",
+    "M95_owner_token": "71e15360fb3349f08e5af82b14daea55",
+    "both_original_returncode": 0,
+    "both_execution_completed": true,
+    "actual_common_tensor_count": 835,
+    "actual_common_sha256": "5c80b2ad41397f3c19b149bfa7acf120edd6127a000129cdc3a8dcbe139c5d49",
+    "actual_common_names_shapes_hash_equal": true,
+    "NDE_exclusions": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.cluster_ffn.2.",
+      "dec.cluster_att.distribution_embedding."
+    ],
+    "NDE_source_lines": [
+      564,
+      568
+    ],
+    "source_difference": "NDE creates its new distribution_embedding within torch.random.fork_rng(devices=[]), then removes the three replaced FFNs. This preserves the subsequent native CPU RNG stream without manual seed changes or common weight copying. The NDE exclusion835 gate cannot be reused for RVE."
+  },
+  "RVE_expected_count": {
+    "value": 841,
+    "status": "DERIVED_ONLY_NOT_MEASURED",
+    "derivation": "Prior measured NDE common835 + eight parameter tensors in middle/coarse FFN1/2 - two excluded fine LayerNorm0 tensors =841. Native RVE counts and hash equality must actually be measured."
+  },
+  "whole_core_observation": {
+    "verdict": "CORRECT_ALL_FIVE_ACTUAL_PARAMETERS_STATICALLY",
+    "worker_lines": [
+      191,
+      202,
+      336,
+      357
+    ],
+    "parameter_names": [
+      "wr",
+      "wd",
+      "w2",
+      "b1",
+      "b2"
+    ],
+    "source_shapes": {
+      "wr": [
+        8,
+        32,
+        32
+      ],
+      "wd": [
+        8,
+        32,
+        32
+      ],
+      "w2": [
+        8,
+        32,
+        32
+      ],
+      "b1": [
+        8,
+        32
+      ],
+      "b2": [
+        8,
+        32
+      ]
+    },
+    "source_numel": 25088,
+    "detail": "Tracks exact dict(actual fine_exchange.named_parameters()), asserts five-name set and25088numel, observes every actual criterion gradient nonNone/finite and each before/after parameter hash changes on both native optimizer steps. Requires a nonzero whole-core matrix gradient and actual natural offdiagonal support; no weight/bias suffix omission. Explicit per-parameter shape checks are not present in worker, but shapes are bound by exact frozen source/config and actual gradient summaries. Runtime observations remain unmeasured."
+  },
+  "minimal_correction": {
+    "current_packet": "Keep the existing exact measurement/fail-before-TRAIN gate. Preserve the first actual mismatch and its names/hashes; do not widen exclusions, copy common values, choose another seed, resample, or restore a different RNG after comparison.",
+    "prospective_source_revision_only": "If matched-common initialization is required after the measured finding, independently preregister/review a new source revision that wraps ONLY the new FineLeafReceiverVectorExchange constructor at hierarchy lines725-726 in with torch.random.fork_rng(devices=[]):, without manual_seed. This uses the same entry draws for all five new CPU tensors while restoring the inherited native stream before shared encoder/decoder construction, as prior NDE does. It changes the versioned constructor source and requires a new retained source proof/freeze and actual common-init comparison; it cannot alter or relabel0f8cc0f9 or repair an already-compared instance. No such change was performed."
+  },
+  "actual_RVE_common_initialization": "NOT_MEASURED_BY_REVIEWER",
+  "actual_RVE_five_parameter_gradients_updates": "NOT_MEASURED_BY_REVIEWER",
+  "scientific_admission": false,
+  "efficacy": "UNKNOWN",
+  "Torch_import_or_model_execution": false,
+  "SSH_GPU_execution": false,
+  "source_or_Git_or_research_work_mutation": false
+}

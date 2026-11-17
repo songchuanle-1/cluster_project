@@ -1,0 +1,115 @@
+{
+  "id": "M218-HPC",
+  "candidate_id": "hierarchy-tree-resolvent-nonlinear-composition",
+  "config": "configs/Quard/ctf_hcg_csort_hpc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hpc.yaml",
+  "code_commit": "6282263d805c1741234f97afc981a05aca2ad6e3",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "recorded_at": "2026-10-28T10:31:00.750739+00:00",
+  "steps": 2,
+  "losses": [
+    9.246618270874023,
+    13.913176536560059
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/smoke_champion_execution.json",
+      "sha256": "9e277a47cd8123637b2e82c75ac6be05c1e7f2967ec61617a94e4947239a07c3"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/smoke_candidate_execution.json",
+      "sha256": "69cbd8df280f4a4a0e3dc8d928ca4ac47f7a655839660df9a2615d8a3011cc8b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/resources_champion_execution.json",
+      "sha256": "3b44268082a894085cdf85ad299dc74c44646e6f3c6e28335c2942eb2405ee9b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/resources_candidate_execution.json",
+      "sha256": "bdc125ac0f20d2d6b11fb428f6e7d88cb412e32d36fbc9491f129f5460c099e9"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/native_manifest.json",
+      "sha256": "ef5bb2dfdba6655020636f568b7d3f56cfa12728a747f459c19827e7bf3776f5"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/execution_binding.json",
+      "sha256": "1b23dcbf7444b476d9c3324d3d10c7fb7eebc3b952563d86c191380177bda37c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_execution/execution_lease.json",
+      "sha256": "d97a0ad2fa9efb769afac7ad6dc28f594f08a6350c551146a427f44a4fb9b27a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_actual_independent_review.json",
+      "sha256": "35fc729cc4029e5e3146003b7ca316816eb240d4bce501415cfefebf6fb8e078"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2b832a02/hpc_actual_four_result_review.json",
+      "sha256": "5244f24f59d5fbede98091e21b66f734fb1bcb81c72bd1ea9ee3c98927d7d091"
+    }
+  ],
+  "limitations": {
+    "efficacy": "UNKNOWN",
+    "novelty": "UNKNOWN",
+    "pure_TRAIN_memory": "UNKNOWN; smoke has observers, resource process no optimizer",
+    "offdiagonal": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "optional_boundaries": "Only actual natural coverage; absent cases NOT_EXERCISED",
+    "timing": "Actual slower/faster measurements are descriptive, no new latency gate",
+    "initial_import_failure": "Previous0f02 original HPC control import rc1 retained separately; current source-compatible new requests are not replay or proof of root-cause repair"
+  }
+}

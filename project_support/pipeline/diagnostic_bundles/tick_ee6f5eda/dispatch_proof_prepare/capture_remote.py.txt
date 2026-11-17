@@ -1,0 +1,34 @@
+"""Read-only actual PID start/production/marker identity capture; no inferred paths."""
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,os,socket,stat,sys
+P=json.load(sys.stdin)
+assert socket.gethostname()=="dl04-MS-7E06" and os.getuid()==os.geteuid()==1001
+assert datetime.now(timezone.utc)<datetime.fromisoformat(P["owner"]["deadline_at"])
+def sha(raw):return hashlib.sha256(raw).hexdigest()
+def checked(path,expected=None):
+ q=Path(path);s=os.lstat(q);assert q.resolve()==q and stat.S_ISREG(s.st_mode) and s.st_uid==1001 and not stat.S_ISLNK(s.st_mode)
+ assert s.st_size<=2*1024*1024;raw=q.read_bytes()
+ if expected:assert sha(raw)==expected
+ return raw
+stage=Path(P["stage"]);assert stage.resolve()==stage and stage.is_relative_to(Path("/data/songcl/Project/Cluster_project/pipeline/runtime"))
+assert Path(P["binding_path"]).parent==stage and Path(P["core_path"]).parent==stage
+binding=json.loads(checked(P["binding_path"],P["binding_sha256"]))
+assert binding==P["binding"] and binding["kind"]=="production" and binding["stage"]==str(stage)
+assert binding["source_commit"]==P["source_commit"] and binding["runtime_root"]==P["runtime_root"]
+checked(binding["entry"],P["entry_sha256"]);checked(P["core_path"],P["core_sha256"])
+proc=Path("/proc")/str(P["pid"]);assert proc.stat().st_uid==1001 and (proc/"cwd").resolve()==Path(P["runtime_root"])
+def identity():
+ fields=(proc/"stat").read_text().rsplit(")",1)[1].split();assert fields[0] not in ("Z","X");return fields[19],fields[0]
+start,state=identity()
+argv=[x.decode("utf-8",errors="replace") for x in (proc/"cmdline").read_bytes().split(b"\0") if x]
+assert argv[1:]==binding["argv"] and Path(argv[0]).resolve()==Path(binding["python_realpath"])
+marker_path=Path(binding["one_shot_marker"]);assert marker_path.parent==stage
+marker_raw=checked(marker_path);marker=json.loads(marker_raw)
+assert marker["pid"]==P["pid"] and marker["uid"]==1001 and marker["source_commit"]==P["source_commit"] and marker["runtime_root"]==P["runtime_root"] and marker["argv"]==binding["argv"]
+assert marker["activation_receipt_sha256"]==binding["activation_receipt_sha256"]
+log=Path(P["log"]);assert log.resolve()==log and log.is_relative_to(Path(P["runtime_root"])/"logs") and log.is_file()
+assert identity()[0]==start
+proof={key:P[key] for key in ("owner","task_id","source_commit","pid","runtime_root","log","binding_path","binding_sha256","entry_sha256","core_path","core_sha256")}
+proof.update(start_ticks=start,marker_sha256=sha(marker_raw),recorded_at=datetime.now(timezone.utc).isoformat(),actual_identity_capture={"hostname":socket.gethostname(),"uid":1001,"proc_state":state,"argv":argv,"marker_path":str(marker_path),"marker_pid":marker["pid"],"PID_start_checked_twice":True,"remote_files_written":False,"signals_sent":False,"GPU_use":False})
+print(json.dumps(proof))

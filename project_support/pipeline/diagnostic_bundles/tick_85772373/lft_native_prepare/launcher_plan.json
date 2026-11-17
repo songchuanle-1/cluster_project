@@ -1,0 +1,58 @@
+{
+  "status": "PLAN_ONLY_EXECUTION_DISABLED_NO_RELEASE",
+  "candidate_id": "hierarchy-nonlinear-lifting-analysis-synthesis",
+  "code_commit": "5931d403a8bfc9f4d3fe6115a194bbeb55a9e8b1",
+  "runtime_expected_commit": "18e64b8d95ed0ba5c1053ead114c0f91a4b0c324",
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "requires": "Independent observer review and separately frozen operational activation/release, currentroot-owner/deadline/resources, actual idle selected physicalGPU0 and3locks. Preserve both running original jobs.",
+  "four_future_worker_commands": [
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "smoke",
+      "--target",
+      "champion"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "smoke",
+      "--target",
+      "candidate"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "resources",
+      "--target",
+      "champion"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "resources",
+      "--target",
+      "candidate"
+    ]
+  ],
+  "stage_formula": "lft_<fresh_owner_token8>_gpu0",
+  "local_execution_directory": "lft_execution",
+  "no_active_manifest_lease_request_result_release": true
+}

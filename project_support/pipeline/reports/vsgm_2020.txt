@@ -1,0 +1,811 @@
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                                        MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+              Visual-Semantic Graph Matching for Visual Grounding
+                    Chenchen Jing                                                    Yuwei Wu∗                                             Mingtao Pei
+           chenchen.jing@bit.edu.cn                                         wuyuwei@bit.edu.cn                                         peimt@bit.edu.cn
+         Beijing Institute of Technology                               Beijing Institute of Technology                          Beijing Institute of Technology
+                  Beijing, China                                                Beijing, China                                           Beijing, China
+
+                          Yao Hu                                                      Yunde Jia                                               Qi Wu
+           yaoohu@alibaba-inc.com                                           jiayunde@bit.edu.cn                                    qi.wu01@adelaide.edu.au
+          Alibaba Youku Cognitive and                                  Beijing Institute of Technology                              University of Adelaide
+                 Intelligent Lab                                                Beijing, China                                        Adelaide, Australia
+                 Beijing, China
+
+ABSTRACT                                                                                                            1                  1   umbrella          pink
+Visual Grounding is the task of associating entities in a natural lan-                                          2
+guage sentence with objects in an image. In this paper, we formulate                                                                         over                          tan
+
+visual grounding as a graph matching problem to find node cor-                                              3                                                        3
+respondences between a visual scene graph and a language scene                                                                         2    woman        with         shoulder bag
+graph. These two graphs are heterogeneous, representing structure                                                                             Expression: a pink umbrella over a
+                                                                                                                                              woman with a tan shoulder bag
+layouts of the sentence and image, respectively. We learn unified                                                   (a)                                      (b)
+contextual node representations of the two graphs by using a cross-
+modal graph convolutional network to reduce their discrepancy.
+                                                                                                     Figure 1: Illustration of graph matching between a visual
+The graph matching is thus relaxed as a linear assignment problem
+                                                                                                     scene graph (a) and a language scene graph (b) for referring
+because the learned node representations characterize both node
+                                                                                                     expression comprehension. Green boxes represent a refer-
+information and structure information. A permutation loss and
+                                                                                                     ent object in the visual graph and a referent entity in the lan-
+a semantic cycle-consistency loss are further introduced to solve
+                                                                                                     guage graph. Red boxes represent context objects and con-
+the linear assignment problem with or without ground-truth corre-
+                                                                                                     text entities. Yellow boxes represent objects irrelevant to the
+spondences. Experimental results on two visual grounding tasks,
+                                                                                                     language expression.
+i.e., referring expression comprehension and phrase localization,
+demonstrate the effectiveness of our method.
+
+CCS CONCEPTS                                                                                         1   INTRODUCTION
+• Computing methodologies → Computer vision; Natural lan-                                            Visual grounding is to associate entities in a natural language sen-
+guage processing.                                                                                    tence with objects in an image. It is a fundamental building block for
+                                                                                                     vision-language tasks such as visual captioning [8, 38], visual ques-
+KEYWORDS                                                                                             tion answering [3, 14, 44], and vision-language navigation [2, 43].
+Visual Grounding, Graph Matching, Visual Scene Graph, Language                                       Recently, visual grounding tasks such as referring expression com-
+Scene Graph                                                                                          prehension and phrase localization have gained considerable atten-
+ACM Reference Format:                                                                                tion. Referring expression comprehension is to ground a referring
+Chenchen Jing, Yuwei Wu, Mingtao Pei, Yao Hu, Yunde Jia, and Qi Wu.                                  expression to an object described by the expression, and phrase
+2020. Visual-Semantic Graph Matching for Visual Grounding. In Proceedings                            localization is to ground all noun phrases in an image description
+of the 28th ACM International Conference on Multimedia (MM ’20), October                             to objects in the corresponding image. Both tasks are challenging
+12–16, 2020, Seattle, WA, USA. ACM, New York, NY, USA, 10 pages. https:                              because establishing such fine-grained correspondences requires
+//doi.org/10.1145/3394171.3413902                                                                    comprehensively understanding textual semantics and visual con-
+                                                                                                     cepts, modeling similarities between the semantics and concepts,
+∗ corresponding author
+                                                                                                     and finding their correspondences, i.e., one-to-one mapping.
+                                                                                                        Most existing methods [6, 10, 24, 32, 34, 41] for visual grounding
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed                focus more on modeling object-phrase similarities than finding
+for profit or commercial advantage and that copies bear this notice and the full citation            their correspondences in a global manner, which may result in
+on the first page. Copyrights for components of this work owned by others than ACM                   matching ambiguity. In this paper, we formulate visual grounding
+must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,
+to post on servers or to redistribute to lists, requires prior specific permission and/or a          as a graph matching problem to find node correspondences between
+fee. Request permissions from permissions@acm.org.                                                   a visual scene graph and a language scene graph. We present an
+MM ’20, October 12–16, 2020, Seattle, WA, USA.                                                       end-to-end visual-semantic graph matching method that jointly
+© 2020 Association for Computing Machinery.
+ACM ISBN 978-1-4503-7988-5/20/10. . . $15.00                                                         models similarities between objects and phrases and finds their
+https://doi.org/10.1145/3394171.3413902                                                              correspondences to achieve accurate visual grounding.
+
+
+
+
+                                                                                              4041
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                 MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+   The scene graph is a prevailing structure to represent the contex-           object proposals is identified as the referent object. Early methods
+tual layouts of both images and sentences, and has been proven to               [12, 27, 28, 50] adopt a CNN/LSTM framework to find the region
+be effective in various vision-language tasks [13, 24, 47]. We observe          that maximizes the likelihood of the language expression. The ma-
+that referring expression comprehension and phrase localization                 jor difference among these methods is how they model the visual
+can be naturally cast as a graph matching problem between the                   context. For example, Hu et al. [12] used the whole image as con-
+visual scene graph and language scene graph. Graph matching is                  text. Yu et al. [50] adopted the visual difference between objects
+to find node correspondences between two graphs to maximize the                 as context. Another line of works [11, 26, 34, 39, 49] project the
+corresponding node and edge’s affinity [42, 53]. Figure 1 shows the             objects and the language expressions into a common feature space
+graph matching by taking referring expression comprehension as                  to measure the similarity. Luo et al. [26] used the softmax loss as
+an example. By solving the graph matching of the language scene                 the matching loss function, while Mao et al. [27] exploited the max-
+graph and the visual scene graph, textual semantics in the sentence             margin loss. Specifically, Yu et al. [49] propose to exploit different
+and visual concepts in the image can be fully aligned for accurate              types of information in expressions including subject, location, and
+visual grounding. To this end, two challenges must be considered:               relationship, and comprehensively measure the similarity between
+(1) The nodes and edges of the two graphs lie in heterogeneous                  each object and the expression.
+spaces and thus are not ready for matching due to the gap between                  Recently, various methods that resort to graphs to represent
+the language domain and the vision domain. (2) The graph match-                 the structure information of images or expressions to achieve rela-
+ing is generally regarded as a quadratic assignment programming                 tional reasoning have been proposed. Visual-graph-based methods
+problem, an NP-hard combinatorial optimization problem.                         [10, 41, 45, 46] represent images as graphs, learn context-aware
+   To address these challenges, we propose to jointly learn node rep-           node representations via graph networks, and measure the similar-
+resentations of the two graphs and find their correspondences for               ity between the nodes and the language expressions to determine
+visual grounding. We build a novel cross-modal graph convolutional              referent objects. Language-graph-based methods [9, 21, 22] parse
+network to learn unified node representations, which character-                 expressions to a graph structure to capture the semantics in expres-
+ize both node information and implicit structure information, for               sions and perform reasoning over the structure. Our work differs
+reducing the discrepancy of the two heterogeneous graphs. Con-                  from them in that we perform joint reasoning over both the lan-
+sidering that the node representations are enriched with structure              guage graph and visual graph for more comprehensive context
+information, the graph matching is relaxed as a linear assignment               modeling to fully align visual concepts and textually semantics.
+problem. For phrase localization, we introduce a permutation loss
+to solve the linear assignment problem. For referring expression
+comprehension, the ground-truth node correspondences for graph                  2.2    Phrase localization
+matching are unavailable, because the context objects mentioned                 Phrase localization [40] is to ground phrases in an image descrip-
+in sentences to determine the referred object are usually unlabeled.            tion to corresponding objects in the image. Pioneering works [31,
+Apart from a standard referent object matching loss, we further                 32, 34, 52] for visual grounding usually independently ground each
+introduce a semantic cycle-consistency loss, which encourages one-              phrase in the description and ignore visual and textually contex-
+to-one mapping between the two graphs in a self-supervised man-                 tual information. Rohrbach et al. [34] presented an attention-based
+ner, to solve the linear assignment problem without ground-truth                method to attend to relevant object proposals for a given phrase
+correspondences for referring expression comprehension.                         and designed a loss to reconstruct the phrase. Yu et al. [52] focused
+   We evaluate the proposed method on both phrase localization                  on the proposal generation which aims to generate diverse and
+and referring expression comprehension. Experimental results show               discriminative object proposals for phrase localization.
+the effectiveness of our method. The contributions of this paper are               Recent methods take into account the contextual information to
+summarized as follows:                                                          achieve accurate visual grounding. Dongan et al. [6] adopted chain-
+    (1) We formulate visual grounding as a graph matching prob-                 structured Long Short-Term Memory networks (LSTMs) [35] to en-
+        lem and present a visual-semantic graph matching method                 code the contextual information in the language and image domains,
+        to fully align visual concepts and textually semantics for              respectively. Liu and Hockenmaier [23] used chain-structured con-
+        accurate visual grounding.                                              ditional random fields to model dependencies among regions for
+    (2) We propose a novel cross-modal graph convolutional net-                 adjacent phrases. Bajaj et al. [4] exploited graphs to characterize the
+        work to learn unified context-aware node representations to             contextual information and fused the two graphs to capture cross-
+        facilitate graph matching, and a semantic cycle-consistency             modal relationships. The aforementioned methods focus on model-
+        loss to solve the graph matching without ground-truth cor-              ing similarities between objects and phrases but ignore finding the
+        respondences.                                                           assignment of objects and phrases and thus may lead to grounding
+                                                                                ambiguity. Only a few methods [15, 24, 40] take into account the
+2 RELATED WORK                                                                  one-to-one mapping constraint, that is, while the contextual infor-
+                                                                                mation in both the textual and visual domain are fully modeled
+2.1 Referring expression comprehension                                          each object corresponds to one entity and vice versa. However, they
+Referring expression comprehension is to localize the object de-                either are unable to model multi-order relationships [15, 15, 40],
+scribed by a language expression in an image. Typically, this task              which may lead to the assumption of one-to-one mapping con-
+is formulated as an object retrieval task, where the object with                straint invalid, or only find the assignment via post-processing [24].
+the highest similarity with the language expression from a set of               Thus their solutions are sub-optimal. In this paper, we formulate the
+
+
+
+
+                                                                         4042
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                   MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+                                                   Visual
+                                                Scene Graph
+
+
+
+
+      Expression: a pink umbrella over a
+                                                 Language
+       woman with a tan shoulder bag            Scene Graph
+
+                                                Graph               Graph                             Graph
+                   Input                                                                                                              Output
+                                              Construction        Convolution                        Matching
+
+Figure 2: Diagram of our method. It constructs two graphs from an image and a sentence, respectively, uses a cross-modal
+graph convolutional network to learn unified contextual node representations, and solves the graph matching to find node
+correspondences. Golden arrows denote the edges in the language graph. Gray arrows and black arrows denote intra-class and
+inter-class edges in the visual graph, respectively. We do not show all the edges in the visual graph for convenience.
+
+visual grounding as a graph matching problem, aiming to find node                  where A ∈ {0, 1} M ×N is an assignment matrix indicating the node
+correspondences between two graphs to maximize the correspond-                    correspondences such that Ai j = 1 if viL and v jI are matched, and
+ing node and edge’s affinity [42, 53], and solve graph matching in                0 otherwise. K ∈ RM N ×M N is the affinity matrix whose diagonal
+an end-to-end manner for better compatibility.                                    elements and off-diagonal ones encode the node-to-node and edge-
+                                                                                  to-edge affinity between two graphs, respectively. As illustrated in
+3     METHOD                                                                      the constraint in Eq. (1), each node in the language scene graph
+                                                                                  should be assigned a corresponding node in the visual graph.
+In this section, we formally define visual grounding as a graph
+                                                                                      The QAP problem is a well-known NP-hard problem. Traditional
+matching problem and describe our method shown in Figure 2.
+                                                                                  graph matching methods [19, 55] usually relax the binary constraint
+The proposed method constructs two graphs from an image and a
+                                                                                  and solve the QAP problem approximately with a fixed affinity ma-
+sentence, respectively, uses a cross-modal graph convolutional net-
+                                                                                  trix. These methods are inapplicable to our task because both the
+work to learn unified contextual node representations, and solves
+                                                                                  nodes and edges of the language graph and those of the visual graph
+the graph matching to find node correspondences.
+                                                                                  lie in heterogeneous spaces. Thus we introduce a cross-modal graph
+                                                                                  convolutional network to learn unified contextual node representa-
+3.1      Formulation                                                                                 N and U L = {u L } M , that characterize both node
+                                                                                  tions, U I = {uiI }i=1           i i=1
+Referring expression comprehension and phrase localization are                    information and structure information, for reducing the discrep-
+two visual grounding tasks. Referring expression comprehension                    ancy of the two graphs. Considering that the node representations
+aims to localize the object described by a referring expression L                 characterize both node information and structure information, the
+in the image I represented by a set of objects O = {oi }i=1       N . N           graph matching is thus relaxed as a linear assignment problem,
+is the number of objects. Phrase localization aims to localize all                                              J (A) = CT A,
+objects mentioned in an image description L in an image I . For                                                                                       (2)
+                                                                                                       s.t . A1 = 1, A⊤ 1 ≤ 1
+convenience, here we use the same notations L and I to represent
+the input sentence (i.e. the description/expression) and the image,                where C ∈ RM ×N is an assignment cost matrix whose element
+respectively.                                                                     Ci j = d(uiL , u jI ) represents the distance between uiL and u jI . Be-
+    We formulate each grounding task as graph matching to achieve                 cause C encodes both node similarity and edge similarity, the QAP
+the alignments between textual semantics and visual concepts.                     problem can be relaxed as a linear assignment problem.
+Specifically, we construct a visual scene graph G I = {V I , E I } and a              For phrase localization, we introduce a permutation loss to di-
+language scene graph G L = {V L , E L } to represent the image I and              rectly optimize the assignment matrix A for minimizing Eq. (2)
+                                                                     N
+the sentence L, respectively. In the visual scene graph, V I = {viI }i=1          because the ground-truth node correspondences are available. For
+is a set of nodes corresponding to the objects in the image and                   referring expression comprehension, we introduce a self-supervised
+E I = {eiI j }i,Nj=1 denotes the relationships among objects. Similarly,          semantic cycle-consistency loss to learn appropriate node represen-
+                                                                                  tations for matching to minimizing Eq. (2). The cycle-consistency
+             M and E L = {e L } M
+V L = {viL }i=1              i j i, j=1 represent the objects and rela-           loss enforces all nodes in the language graph to satisfy the semantic
+tionships mentioned in the sentence. Usually, we have M ≤ N as                    cycle-consistency constraint to guarantee that the minimal element
+all entities mentioned in the sentence should appear in the image.                of each row is also the minimal element of the corresponding col-
+    To accurately associate the objects and entities, both the unary              umn, in the assignment cost matrix. Thus by assigning 1 to the
+similarity and the pairwise similarity of the two graphs should be                corresponding positions of the cost matrix C and 0 to other posi-
+taken into account. Thus the graph matching problem is naturally                  tions, we can obtain the assignment matrix A such that Eq. (2) is
+a quadratic assignment programming (QAP) problem [25],                            minimized. In the following sections, we illustrate how we learn
+                         J (A) = vec(A)⊤ Kvec(A),                                 the unified node representations and obtain the assignment matrix.
+                                                                    (1)
+                              s.t . A1 = 1, A⊤ 1 ≤ 1
+
+
+
+
+                                                                           4043
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                                             MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+              Initial                                          Joint Convolution #1                     Joint Convolution #2            Joint Convolution #3             Graphs
+        (a) Graphs            Feature Encoding
+                                                                    (LC+EAVC)                                (LC+NAVC)                       (LC+NAVC)                     for
+                                                                                                                                                                         Matching
+
+                                                                     Cross-modal graph convolutional network
+
+
+
+
+                                                                                                                                                   0.4
+                                                                                         0.5
+        (b)
+                                                                                                0.1                                                           0.1
+                                                                                                                                                  0.3
+                                                                                          0.4
+
+                                                                                                                                                        0.2
+                             Node                       Edge                                                      Node                                                     Node
+                         Representation             Representation                                            Representation                                           Representation
+                        Language Convolution (LC)                        Edge-Attention-based Visual Convolution (EAVC)               Node-Attention-based Visual Convolution (NAVC)
+
+Figure 3: Illustration of the cross-modal graph convolutional network. (a) shows the architecture of the network. It consists of
+a feature encoding module to project representations of the constructed graphs into a common space, and three joint convo-
+lution modules to learn context-aware representations. (b) shows the language convolution operation and two kinds of visual
+convolution operations. Red nodes and blue nodes show nodes in a language scene graph or a visual scene graph, respectively.
+The black node/edge represents a node/edge selected for convolution and the corresponding dark area is the receptive field.
+
+3.2     Graph Construction                                                                               The feature encoding module uses specific transformation ma-
+For the image I , we construct a visual scene graph G I = {V I , E I }                                trices to project the node representations and edge representations
+where each node viI represents a corresponding object oi and each                                     of the two graphs into a common space Rd as
+edge eiI j denotes the visual relationship between oi and o j . For each                                              I
+                                                                                                                     vi,0    I
+                                                                                                                          = Wnode viI ,       eiI j,0 = Wedдe
+                                                                                                                                                         I
+                                                                                                                                                              eiI j ,
+node, we concatenate two types of features, an appearance feature                                                     L      L
+                                                                                                                                                                                        (3)
+ai extracted by a pre-trained CNN and a spatial feature si encoding                                                  vi,0 = Wnode viL ,                 L
+                                                                                                                                              eiLj,0 = Wedдe eiLj ,
+its location information and size, to obtain its representation viI . We                                       I       I       L            L
+                                                                                                      where Wnode  , Wedдe , Wnode , and Wedдe   are learnable matrices.
+establish two types of edges, intra-class edges E I,int r a and inter-
+                                                                                                      The obtained representations are used as the input of the first joint
+class edges E I,int er according to categories of the linked objects.
+                                                                                                      convolution module.
+For each node viI , we rank other objects based on their distances
+to viI , select the top-5 ranked intra-class objects and top-5 ranked                                 3.3.2 Cascaded Joint Convolution Modules.
+inter-class objects, and establish corresponding edges between these                                     The joint convolution module enables joint updating of the two
+objects and viI . The relative spatial information between two nodes                                  graphs for context-aware representation learning. Specifically, in
+is used as the edge representation eiI j .                                                            each joint convolution module, we first perform language graph
+    For the sentence L, we use a rule-based scene graph parser [36]                                   convolution to update the representations of the language scene
+to construct the graph G L . The nodes of the language scene graph                                    graph. The updated language scene graph is further exploited to
+are nouns with modifiers such as determinants or adjectives, and                                      guide the visual graph convolution to minimize the influence of
+the edges are relations between nouns. We directly concatenate                                        the irrelevant objects and relationships in images. We devise edge-
+the modifiers with the nouns to represent the nodes. To obtain the                                    attention-based visual convolution and node-attention-based visual
+embeddings for the nodes and the edges, we use Bi-LSTM [35] to                                        convolution to exploit edges and nodes of the language graph as
+encode the sentence L and represent each word by concatenating                                        explicit guidance to guide the visual graph convolution process,
+corresponding forward and backward hidden vectors. The embed-                                         respectively. The two visual convolution operations use graph-
+dings of words for each node or edge are averaged to obtain the                                       level edge/node attention to assign different weights for different
+node representation viL or edge representation eiLj .                                                 edges/nodes in visual graph convolution. In each joint convolution
+                                                                                                      module only one kind of visual convolution operation is exploited.
+                                                                                                      All the graph convolution operations are shown in Figure 3 (b).
+3.3     Cross-modal Graph Convolutional                                                                  Language Graph Convolution. We devise specific graph con-
+        Network                                                                                       volution operations for edges and nodes of the language graph to
+                                                                                                      obtain context-aware representations. In the t-th joint convolution
+The cross-modal graph convolutional network as shown in Figure
+                                                                                                      module, for an edge eiLj , we enrich its representations eiLj,t −1 with
+3 (a) consists of a feature encoding module and three cascaded joint                                                                                       L            L
+convolution modules. The feature encoding module is to project                                    the representations of the nodes it connects, vi,t           −1 and v j,t −1 , via
+node representations and edge representations of the two graphs
+                                                                                                              eiLj,t = WrLel vi,t
+                                                                                                                             L         L            L
+                                                                                                                                  −1 ; ei j,t −1 ; v j,t −1 ,
+                                                                                                                                                           
+                                                                                                                                                                                 (4)
+into a common space. The cascaded joint convolution modules,
+where the two graphs are jointly updated via graph convolution,                                   where WrLel is a learnable weight matrix and · ; · denotes the
+                                                                                                                                                                  
+are used to learn context-aware representations.                                                  concatenation operation of two vectors. Since a node viL can be the
+                                                                                                  “subject” and the “object” simultaneously in different relationships,
+3.3.1   Feature Encoding Module.                                                                  two transformation matrices are introduced and its context-aware
+
+
+
+
+                                                                                      4044
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                           MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+representation is computed by                                                                                        not cycle
+                                                                                                                     consistent
+         L      1 Õ L  L
+       vi,t  =        Wsub vi,t −1 ; eiLj,t −1 ; v j,t
+                                                    L     
+               Mi j                                    −1                                                             cycle
+                                                                                                                    consistent
+                                                                      (5)
+                       L  L          L          L      
+                  Õ
+                +    Wob j vk,t −1 ; eki,t −1 ; vi,t −1 ,
+                  k
+        L
+where Wsub and Wob  L are learnable weight matrices. M is the
+                      j                               i
+number of relationships where viL appears.                                                    Feature Space                        Cost Matrix
+   Edge-attention-based visual convolution. The graph-level                                            (a)                                 (b)
+edge attention aims to highlight important edges for each node in
+the graph convolution. It consists of two types of edge attention                  Figure 4: Illustration of the semantic cycle-consistency. (a)
+mechanisms, intra-class edge attention and inter-class edge atten-                 shows a language graph and a visual graph in the common
+                                                             L
+tion. Suppose there are MeL edges in the language graph and ek,t −1                feature space. The black cycle represents a cycle-consistent
+is the representation of the k-th edge ekL . In the t-th joint convolu-            node in the language scene graph while the red cycle in the
+tion module, for a node viI , each type of edge attention computes                 left corner is a non-cycle-consistent node. (b) shows the cost
+                            k,type                                                 matrix of the two graphs. For the cycle-consistent node, the
+the attention weight α i j,t         between each corresponding edge               corresponding element in the cost matrix is the minimal in
+ I,type                    L
+ei j,t −1 and each edge ek,t  −1
+                                 in the language graph. The attention              both the row and the column it belongs to.
+            k,type
+weights α i j,t    are first normalized via the softmax function over
+j, and then averaged over k to obtain the final attention weight
+  type                                                                             first joint convolution module uses edge-attention-based visual con-
+Ai j,t , which is given by
+                                                                                   volution to enrich the node representations with relative location
+    k,type    ⊤            a       L         a      I,type                        information. The following modules use the node-attention-based
+  α i j,t  =wa,type  tanh WL,type ek,t −1 +WI,type ei j,t −1 ,
+                                                                                   visual convolution to fully capture the interaction among objects
+                 Me L
+                                                                      (6)          relevant to the expression for modeling high-order relationships.
+    type       1 Õ                     k,type 
+   Ai j,t =             So f tmax j α i j,t       ,                                The output of the last module, vi,3I and v L , which characterize
+          MeL k                                                                                                                i,3
+                                                                                   rich structure information for graph matching, is regarded as the
+       a          a
+where WL,type , WI,type , and wa,type are learnable weights. To                    unified contextual representations uiI and uiL , respectively.
+update the representation vi,t  I           I
+                                  −1 for vi , we aggregate its two types
+of edges respectively, and concatenate the obtained representations                3.4    Graph Matching
+with the input representation. Concretely, the edge-attention-based                By learning unified contextual node representations, the QAP prob-
+visual convolution is performed by                                                 lem is relaxed as a linear assignment problem. Traditional methods
+     I      I                r a I,int r a         er I,int er 
+                       Aint                    Aint                                to solve linear assignment problem given by Eq. (2) either optimize
+                    Õ                       Õ
+   vi,t = vi,t −1 ;      i j,t ei j,t −1 ;      ik,t eik,t −1 .       (7)
+                        j                       k
+                                                                                   the cost matrix C with the assignment matrix A fixed or optimize
+                                                                                   C and A iteratively [48]. By contrast, we solve this problem in an
+   Node-attention-based visual convolution. Similarly, for each
+                                                                                   end-to-end manner for better compatibility by introducing specific
+node, the graph-level node attention aims to highlight its neigh-
+                                                                                   loss functions for the cross-modal graph convolutional network.
+borhoods relevant to the sentence. The node attention weight for a
+node viI in the t-th joint convolution module is computed by                       3.4.1 Graph Matching for Referring Expression Comprehension.
+   k,node     ⊤               a       L        a      I                                 For referring expression comprehension, we exploit the semantic
+ α i,t    =wa,node    tanh WL,node  vk,t −1 +WI,node vi,t −1 ,
+                                                            
+                                                                                   cycle-consistency between the two graphs to learn node represen-
+                M                                                     (8)          tations appropriate for matching in an end-to-end manner, inspired
+              1 Õ               k,node 
+   Anode
+    i,t =         So f tmax i α i,t      ,                                         by the temporal cycle-consistency used in video alignment [7].
+              M
+                  k                                                                We introduce a semantic cycle-consistency loss, which forces all
+           a         a
+where WL,node , WI,node    , and wa,node are learnable weights, and                nodes in the language scene graph to be cycle-consistent nodes,
+ L
+vk,t −1 is the representation of the k-th node in the language graph.              to encourage one-to-one mapping between the two graphs. Fig-
+                                                                                   ure 4 (a) shows a cycle-consistent node and a non-cycle-consistent
+For each node viI , we aggregate the representations of its neigh-
+                                                                                   node in the common feature space. For a node viL in the language
+borhoods and concatenate the obtained representation with the
+                                                                                   scene graph, its nearest neighbor in the visual graph is denoted as
+input representation. Concretely, the node-attention-based visual
+                                                                                   v jI = arg minv I ∈V I d(ulI , uiL ) and the nearest neighbor of v jI in the
+convolution is performed by                                                                        l
+
+                                    N                                              language graph is denoted as vkL = arg minv L ∈V L d(ulL , u jI ). The
+                                                                                                                                       l
+                 I
+                                          Anode,t
+                        I          Õ
+                                                    I 
+                vi,t = vi,t −1 ;           j      v j,t .             (9)          node viL is a cycle-consistent node if and only if i = k.
+                                    j=1                                               To guarantee the differentiability of the cycle-consistency loss,
+   Note that in each joint convolution module, only one kind of                    for each node viL , we first find its soft nearest neighbor vejI in the
+language-guided visual graph convolution is used. Specifically, the                visual graph and treat the identification of the nearest neighbor of
+
+
+
+
+                                                                            4045
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                    MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+v jI as a classification task. The soft nearest neighbor of the selected          obtained matrix via a differentiable Sinkhorn layer as [42] to obtain
+point viL is computed via the softmax function given by                           Â.
+                                                                                      Apart from the permutation loss, we further use an extra bound-
+               N
+                                                                                  ing box regression loss to estimate a 4-d offset vector of each object
+                      αl ulI ,   αl = So f tmaxl cos ulI , uiL .
+               Õ
+       eIj =
+       u
+                                                              
+                                                                   (10)
+                                                                                  proposal as
+               l                                                                                         Õ
+                                                                                             Lr eд =              SmoothL1 R̂i − Ri ,
+                                                                                                                                      
+Then we measure the similarity between the u     eIj and all the nodes                                                                              (17)
+                                                                                                      i ∈ {x,y,w,h }
+in the language scene graph, and obtain the predicted labels as
+                                                                                  where R is the ground-truth offset vector. R̂ is the predicted vector
+                                                      ejI .
+         ŷi,l = so f tmaxl x i,l , x i,l = cos ulL , u
+                                                        
+                                                                   (11)
+                                                                                  computed by R̂ = Wr eд [u L ; u I ], where u L and u I represent the
+The semantic cycle-consistency loss of an image and a sentence is                 visual and textual nodes, respectively. The overall training objective
+thus given by                                                                     for phrase localization is given by
+                                        M
+                                        Õ                                                             Lpl = Lperm + ηLr eд ,                            (18)
+                          Lcycl e = −       yi log ŷi ,
+                                                      
+                                                                   (12)
+                                        i
+                                                                                  where η is a hyper-parameter to balance the two loss terms.
+where yi , whose the i-th element is 1 and others are 0, is the ground-
+                                                                                  4     EXPERIMENTS
+truth label for the classification task of viL .
+   Apart from the self-supervised cycle-consistent loss, we incor-                We apply the proposed method on referring expression comprehen-
+porate a supervised matching loss function to make full use of                    sion and phrase localization to evaluate its effectiveness.
+referent object annotations. Considering that the referent object is
+usually the center node modified by others, we regard the node in                 4.1    Referring Expression Comprehension
+the language graph whose in-degree is zero as the referent node,                  4.1.1 Experimental setting.
+denoted as v ∗L . Its similarity with each node viI in the visual graph           Datasets. We conduct experiments on three widely-used referring
+is measured as                                                                    expression comprehension datasets based on MS-COCO dataset
+                                                                                  [20]: RefCOCO [50], RefCOCO+ [50], and RefCOCOg [27]. The
+               si = tanh WLu ∗L · tanh WI uiI ,
+                                                
+                                                                    (13)          RefCOCO [50] consists of 142, 210 referring expressions for 50, 000
+where WL and WI are two learnable weight matrices. The super-                     objects in 19, 994 images. The RefCOCO+ [50] consists of 141, 564
+vised matching loss of an image and a sentence is given by                        referring expressions for 49, 856 objects in 19, 992 images. The two
+                                                                                  datasets were collected in an interactive game [16] and thus the
+             Lmatch = −l log so f tmax s ,
+                                           
+                                                           (14)
+                                                                                  referring expressions are usually short phrases. The difference be-
+where l is the one-hot label whose element representing the ground-               tween them is that absolute location words are not allowed in the
+truth object is 1 and others are 0. Note that here we use the represen-           referring expressions of the RefCOCO+. Both the two datasets have
+tation of the referent node rather than holistic linguistic represen-             four splits: “train”, “val”, “testA”, and “testB”. The “testA” split evalu-
+tations of the sentence. The overall training objective for referring             ates images containing multiple people, while the “testB” evaluates
+expression comprehension is given by                                              images containing multiple instances of all other objects. The Ref-
+                     Lr ef er = λLcycl e + Lmat ch ,                              COCOg [27] was collected in a non-interactive setting and consists
+                                                                   (15)
+                                                                                  of 95, 010 long declarative referring expressions for 49, 822 objects
+where λ is a hyper-parameter which balances the two loss terms.                   in 21, 899 images. We adopt the partition in [28], where objects are
+   As shown in Figure 4 (b), by encouraging a node viL to be cycle-               divided into “train” split, “val” split, and “test” split by restricting
+consistent, we obtain an element Ci j that is the minimal in both the             all objects of an image to appear in only one split.
+row and the column it belongs to. Intuitively, by forcing all nodes               Implementation details. In our implementations, we use ground-
+in the language graph to be cycle-consistent, we can guarantee that               truth object regions contained in the MS-COCO dataset. Same as
+in C the minimal element of each row is also the minimal in the                   [41], we use VGG16 [37] as the backbone to extract features with
+corresponding column. Thus by assigning 1 to the corresponding                    the dimension of 512 for objects in images. For linguistic input, we
+positions (green filled circles in the figure) of C and 0 to other                pre-process the referring expression to a maximum of 10 words
+positions, we can obtain the assignment matrix A.                                 for RefCOCO and RefCOCO+, and 20 words for RefCOCOg. The
+                                                                                  extra words are discarded and the shorter language expressions
+3.4.2 Graph Matching for Phrase Localization.
+                                                                                  are padded with vectors of zeros. We build our model based on the
+   For phrase localization, the ground-truth node correspondences
+                                                                                  PyTorch framework [29]. The batch size is fixed as 30. All sentences
+are available, thus we introduce a permutation loss to directly opti-
+                                                                                  associated with these images are fed into the model. We use Adam
+mize the assignment matrix A for minimizing Eq. (2) as
+                                                                                  [17] as the training optimizer and set the initial learning rate as
+                                            дt 
+                    AGT
+               Õ
+  Lperm = −          i, j log Âi, j + 1 − Ai, j log 1 − Âi, j ,
+                                                               
+                                                                                  0.001, which decays by a factor of 10 every 6000 iterations. In
+                                                                  (16)
+                   i, j                                                           training, the trade-off parameter λ is fixed as 0.01.
+where AGT is the ground-truth assignment matrix and Â is the                     4.1.2 Results.
+predicted assignment matrix. We compute pairwise similarity ma-                   Comparisons with the State-of-the-Art. The results of the pro-
+trix of contextual representations U I and U L and transform the                  posed method and the state-of-the-art are listed in Table 1. We
+
+
+
+
+                                                                           4046
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                 MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+               Table 1: Results on referring expression comprehension datasets. All methods use VGG16 features.
+
+                                                             RefCOCO                    RefCOCO+           RefCOCOg
+                                      Methods
+                                                      val      testA testB       val      testA testB     val    test
+                                    MMI [27]           -       71.72 71.09        -        58.42 51.23      -      -
+                                  NegBag [28]        76.90     75.60 78.00        -          -     -        -   68.40
+                                    CMN [11]           -       75.94 79.57        -        59.29 59.34      -      -
+                                  listener [51]      77.48     76.58 78.94       60.5      61.39 58.11   69.93 69.03
+                                VariContxt [54]        -       78.98 82.39        -        62.56 62.90      -      -
+                                 MAttNet [49]        80.94     79.99 82.30      63.07      65.04 61.77   73.04 72.79
+                                ParallelAttn [56]    81.67     80.81 81.32      64.18      66.31 61.46      -      -
+                                 RVGTREE [9]         79.04     78.82 80.53      62.38      62.82 61.28   72.32 71.95
+                               AccumulateAttn [5]    81.27     81.17 80.01      65.56      68.76 60.63      -      -
+                                  LGRAN [41]          82.0      81.2  84.0       66.6       67.6 65.5     75.4   74.7
+                                       Ours          82.68     82.06 84.24      67.70     69.34 65.74    75.73 75.31
+
+
+Table 2: Ablation studies of the proposed method on refer-                      expression is fully modeled to better understand and ground the
+ring expression comprehension datasets.                                         multi-order relationships. However, we also find that if more than
+                                                                                three joint convolution modules are cascaded, the accuracy of the
+                                    RefCOCO+          RefCOCOg                  proposed method will decrease. A possible reason is that the overly
+          Methods
+                             val      testA testB     val   test                complex convolution process brings redundant information.
+       Ours w/o cycle       66.72      69.04 64.78   74.29 74.76                    Secondly, we study the effectiveness of the cycle-consistency
+        Ours w/o JC         62.97      63.93 60.13   70.15 70.53                loss in the proposed method. We use only the matching loss to train
+         Ours JC(#1)        65.53      68.46 63.39   73.71 73.89                a model denoted as “Ours w/o cycle”. We observe that the cycle-
+       Ours JC(#1+#2)       67.21      69.04 65.47   75.25 74.83
+                                                                                consistency loss improves the accuracy of our method although
+    Ours JC(#1+#2+#3+#4)    67.46     69.40 65.02    75.02 74.60
+            Ours            67.70      69.34 65.74   75.73 75.31
+                                                                                no additional supervision information is introduced. Particularly,
+                                                                                it brings more improvement in the RefCOCOg because language
+                                                                                expressions in this dataset contain more context objects.
+
+didn’t compare with [45] and [46], because they use the Visual                  4.2     Phrase Localization
+Genome [18] as an additional dataset to train the object detector,
+                                                                                4.2.1 Experimental setting.
+but most existing methods only use the MSCOCO dataset [20]. As
+                                                                                Dataset. We conduct experiments on the Flickr30k Entities dataset
+shown in the table, benefiting from the representation capacity
+                                                                                [32] to evaluate the effectiveness of our method for phrase localiza-
+of graphs and full alignments of textual semantics and visual con-
+                                                                                tion. The Flickr30k Entities dataset contains 31, 783 images, over
+cepts, the proposed method outperforms the others in all datasets.
+                                                                                275K bounding boxes and over 360K phrases. Each image is asso-
+In particular, the LGRAN [41] performs reasoning over the visual
+                                                                                ciated with 5 captions. We use 29, 783/1000/1000 images for train-
+scene graph while the RVGTREE [9] performs reasoning over the
+                                                                                ing/validation/testing. For each phrase, the grounding is regarded
+dependency parsing tree in a bottom-up manner. By contrast, the
+                                                                                as correct if the IoU (intersection over union) between the predicted
+proposed method can achieve joint reasoning over the language
+                                                                                region and the ground-truth region is higher than 0.5. If a phrase is
+graph and the visual graph via the cross-modal graph convolutional
+                                                                                associated with multiple ground-truth bounding boxes, we merge
+network for more comprehensive context modeling. Besides, the
+                                                                                them into a new enclosing box as prior work [23, 24, 34].
+self-supervised semantic cycle-consistency loss guarantees that our
+                                                                                Implementation details. For visual input, we use the Faster R-
+method can fully capture fine-grained correspondences between the
+                                                                                CNN [33] from Anderson et al. [1] to generate 100 proposals for
+two modalities as extra supervision information. Thus our method
+                                                                                each image. Note that for phrase localization we perform proposal
+outperforms the LGRAN and the RVGTREE.
+                                                                                pruning to select a small set of high-quality proposals for each
+Ablation Studies. To evaluate the effectiveness of several impor-
+                                                                                phrase as [24, 32, 34]. For textual input, we use the 1024-d con-
+tant components of our method, we re-train different versions of
+                                                                                textualized word embeddings from the last layer of ELMo [30] to
+our model by ablating certain components. The results of those
+                                                                                initialize the word embeddings as [23]. In training, the trade-off
+models on the RefCOCO and the RefCOCOg are listed in Table 2.
+                                                                                parameter η is fixed as 10.
+   Firstly, to investigate the influence of the joint convolution mod-
+ule, we cascade different numbers of joint convolution modules in               4.2.2 Results.
+the cross-modal graph convolutional network. It can be found that               Comparisons with the State-of-the-Art. The results of state-of-
+the number of joint convolution modules is critical to our method.              the-art methods and our method on the Flickr30k Entities dataset
+Taking into account no relative information among objects, “Ours                are listed in Table 3. As shown in the table, our method outperforms
+w/o JC” performs much worse than “Ours JC(#1)”, which only con-                 all other methods. The main reason is that our model can thoroughly
+tains the first joint convolution module. By cascading more mod-                characterize contextual information of images and sentences and
+ules with node attention, the performance can be further improved               achieve full alignments of textual semantics and visual concepts.
+since contextual information of both the image and the language                 Note that the LCMCG [24] and the G3RAPHGROUND++ [4] also
+
+
+
+
+                                                                         4047
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                                                                                         MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+                                 Table 3: Results of our method and the state-of-the-art on the Flickr30k Entities dataset
+
+                            Methods                                  Overll          People           Clothing                 Bodyparts          Animal             Vehicles             Instruments              Scene          Other
+                           SMPL [40]                                 42.08            57.89            34.61                     15.87             55.98              52.25                   23.46                34.22          26.23
+                         GroundeR [34]                               47.81            61.00            38.12                     10.33             62.55              68.75                   36.42                58.18          29.08
+                            SPC [26]                                 55.49            71.69            50.95                     25.24             76.23              66.50                   35.80                51.51          35.98
+                           CITE [31]                                 59.27            73.20            52.34                     30.59             76.25              75.75                   48.15                55.64          42.83
+                        SeqGROUND [6]                                61.60            76.02            56.94                     26.18             75.56              66.00                   39.36                68.69          40.60
+                     G3RAPHGROUND++ [4]                              66.93            78.86            68.34                     39.80             81.38              76.58                   42.35                68.82          45.08
+                           DDPN [52]                                 73.30              -                 -                        -                 -                  -                       -                    -              -
+                         SL-CCRF [23]                                74.69            84.41            78.51                     46.74             88.89              81.41                   64.97                75.95          57.57
+                          LCMCG [24]                                 76.74           86.82             79.92                     53.54             90.73              84.75                  63.58                 77.12          58.65
+                              Ours                                   76.87            86.57            79.92                     52.77             91.89              85.25                   58.64                78.78          59.04
+
+
+
+
+        Description: a young skateboarder in a pile of leaves       Description: a group of kids walk down an urban street        Description: a man in a gray shirt looks past the camera        Description: a woman wearing a white shirt and gray
+        with a smile on his face                                    passing by graffiti and a small car and a couple bicycles     while a girl in a blue sweatshirt sits behind him to his left   shorts using a shovel to dig in snow
+
+
+
+
+        Description: a little boy is holding a mexican flag as he   Description: people waiting to cross the street in front      Description: a guy is sitting on the floor, getting his         Description: a hiker wearing a red jacket, is walking up
+        walks down the street with a woman                          of a pharmacy with lit up sign                                haircut by one guy, and being photographed by another           a dirt path on a grassy mountain, with other mountains
+                                                                                                                                  one                                                             in the background
+
+Figure 5: Qualitative examples from the test split of the Flickr30k Entities dataset. The predicted objects are marked via bound-
+ing boxes whose color is the same as corresponding noun phrases in descriptions. In the third column, the boxes with thinner
+lines represent predictions of models without the constraint of one-to-one mapping. The last column shows failure cases,
+where black boxes are the incorrect predictions and white boxes are ground-truths.
+
+use graphs to represent the contextual structure of the image and                                                                     shown in the last column. Our method may fail to ground objects
+the sentence. However, the G3RAPHGROUND++ fuse visual graphs                                                                          or background in images accurately with huge occlusions.
+and language graphs to get the final grounding decision rather
+than finding the correspondences between graphs. The LCMCG                                                                            5        CONCLUSION
+only uses the graph matching as a post-processing procedure. By                                                                       In this paper, we have presented a visual-semantic graph matching
+contrast, our method learns informative node representations and                                                                      method for visual grounding. Our method achieves full alignments
+finds their correspondences in a unified framework.                                                                                   between textual semantics and visual concepts by solving the graph
+Qualitative Results. We show some qualitative examples of the                                                                         matching between a visual scene graph and a language scene graph.
+proposed method in Figure 5 to demonstrate the effectiveness of                                                                       Using a cross-modal graph convolutional network, the proposed
+our framework for localizing multiple noun phrases in an image.                                                                       method learns unified visual-semantic node representations for the
+Specifically, examples in the first column show our method can                                                                        two heterogeneous graphs. The introduction of a permutation loss
+localize different kinds of entities with huge overlaps among the                                                                     and a self-supervised semantic cycle-consistency loss further en-
+corresponding objects. The second column shows the effectiveness                                                                      ables one-to-one mapping between the two graphs with or without
+of our method in grounding noun phrases that corresponding to                                                                         ground-truth correspondences. Experimental results on referring
+several objects in the image, such as “a group of kids”, “a couple                                                                    expression comprehension and phrase localization demonstrate
+bicycles”, and “people”. In the third column, the boxes with thinner                                                                  that our method can effectively associate the noun phrases in sen-
+lines represent predictions of a model via a KL-divergence loss                                                                       tences with the corresponding objects in images.
+without the one-to-one mapping constraint. In the upper sample
+of the third column, the model without the constraint associates                                                                      ACKNOWLEDGMENTS
+the shirt of the man with two entities (“a gray shirt” and “a blue                                                                    This work was supported in part by the Natural Science Foundation
+sweatshirt”) while our method can correctly ground the two entities.                                                                  of China (NSFC) under Grants No. 61773062 and No. 61702037, and
+This demonstrates that our method can avoid matching ambigu-                                                                          Alibaba Group through Alibaba Innovative Research Program. Qi
+ity benefiting from the graph matching. Several failure cases are                                                                     Wu is not supported by any of the projects above.
+
+
+
+
+                                                                                                                               4048
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                                       MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+REFERENCES                                                                                             the IEEE International Conference on Computer Vision (ICCV). 4673–4682.
+ [1] Peter Anderson, Xiaodong He, Chris Buehler, Damien Teney, Mark Johnson,                      [23] Jiacheng Liu and Julia Hockenmaier. 2019. Phrase Grounding by Soft-Label Chain
+     Stephen Gould, and Lei Zhang. 2018. Bottom-up and top-down attention for                          Conditional Random Field. In Proceedings of the 2019 Conference on Empirical
+     image captioning and visual question answering. In Proceedings of IEEE Conference                 Methods in Natural Language Processing (EMNLP). Association for Computational
+     on Computer Vision and Pattern Recognition (CVPR). 6077–6086.                                     Linguistics, 5115–5125.
+ [2] Peter Anderson, Qi Wu, Damien Teney, Jake Bruce, Mark Johnson, Niko Sün-                     [24] Yongfei Liu, Bo Wan, Xiaodan Zhu, and Xuming He. 2020. Learning Cross-
+     derhauf, Ian Reid, Stephen Gould, and Anton van den Hengel. 2018. Vision-and-                     modal Context Graph for Visual Grounding. In Thirty-Fourth AAAI Conference
+     language navigation: Interpreting visually-grounded navigation instructions in                    on Artificial Intelligence. 11645–11652.
+     real environments. In Proceedings of the IEEE Conference on Computer Vision and              [25] Eliane Maria Loiola, Nair Maria Maia de Abreu, Paulo Oswaldo Boaventura-Netto,
+     Pattern Recognition (CVPR). 3674–3683.                                                            Peter Hahn, and Tania Querido. 2007. A survey for the quadratic assignment
+ [3] Stanislaw Antol, Aishwarya Agrawal, Jiasen Lu, Margaret Mitchell, Dhruv Batra,                    problem. European journal of operational research 176, 2 (2007), 657–690.
+     C Lawrence Zitnick, and Devi Parikh. 2015. Vqa: Visual question answering.                   [26] Ruotian Luo and Gregory Shakhnarovich. 2017. Comprehension-guided referring
+     In Proceedings of the IEEE International Conference on Computer Vision (ICCV).                    expressions. In Proceedings of IEEE Conference on Computer Vision and Pattern
+     2425–2433.                                                                                        Recognition (CVPR). 7102–7111.
+ [4] Mohit Bajaj, Lanjun Wang, and Leonid Sigal. 2019. G3raphGround: Graph-Based                  [27] Junhua Mao, Jonathan Huang, Alexander Toshev, Oana Camburu, Alan L Yuille,
+     Language Grounding. In The IEEE International Conference on Computer Vision                       and Kevin Murphy. 2016. Generation and comprehension of unambiguous object
+     (ICCV). 4281–4290.                                                                                descriptions. In Proceedings of IEEE Conference on Computer Vision and Pattern
+ [5] Chaorui Deng, Qi Wu, Qingyao Wu, Fuyuan Hu, Fan Lyu, and Mingkui Tan. 2018.                       Recognition (CVPR). 11–20.
+     Visual grounding via accumulated attention. In Proceedings of IEEE Conference                [28] Varun K Nagaraja, Vlad I Morariu, and Larry S Davis. 2016. Modeling context
+     on Computer Vision and Pattern Recognition (CVPR). 7746–7755.                                     between objects for referring expression understanding. In Proceedings of the
+ [6] Pelin Dogan, Leonid Sigal, and Markus Gross. 2019. Neural sequential phrase                       European Conference on Computer Vision (ECCV). Springer, 792–807.
+     grounding (seqground). In Proceedings of IEEE Conference on Computer Vision                  [29] Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang,
+     and Pattern Recognition (CVPR). 4175–4184.                                                        Zachary DeVito, Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer.
+ [7] Debidatta Dwibedi, Yusuf Aytar, Jonathan Tompson, Pierre Sermanet, and Andrew                     2017. Automatic differentiation in pytorch. (2017).
+     Zisserman. 2019. Temporal Cycle-Consistency Learning. In Proceedings of IEEE                 [30] Matthew E. Peters, Mark Neumann, Mohit Iyyer, Matt Gardner, Christopher
+     Conference on Computer Vision and Pattern Recognition (CVPR). 1801–1810.                          Clark, Kenton Lee, and Luke Zettlemoyer. 2018. Deep contextualized word
+ [8] Sergio Guadarrama, Niveda Krishnamoorthy, Girish Malkarnenkar, Subhashini                         representations. In Proceedings of the North American Chapter of the Association
+     Venugopalan, Raymond Mooney, Trevor Darrell, and Kate Saenko. 2013.                               for Computational Linguistics (NAACL).
+     Youtube2text: Recognizing and describing arbitrary activities using semantic                 [31] Bryan A Plummer, Paige Kordas, M Hadi Kiapour, Shuai Zheng, Robinson Pira-
+     hierarchies and zero-shot recognition. In Proceedings of the IEEE International                   muthu, and Svetlana Lazebnik. 2018. Conditional image-text embedding networks.
+     Conference on Computer Vision (ICCV). 2712–2719.                                                  In Proceedings of the European Conference on Computer Vision (ECCV). Springer,
+ [9] Richang Hong, Daqing Liu, Xiaoyu Mo, Xiangnan He, and Hanwang Zhang.                              249–264.
+     2019. Learning to Compose and Reason with Language Tree Structures for                       [32] Bryan A Plummer, Liwei Wang, Chris M Cervantes, Juan C Caicedo, Julia Hock-
+     Visual Grounding. IEEE Transactions on Pattern Analysis and Machine Intelligence                  enmaier, and Svetlana Lazebnik. 2015. Flickr30k entities: Collecting region-to-
+     (TPAMI) (2019).                                                                                   phrase correspondences for richer image-to-sentence models. In Proceedings of
+[10] Ronghang Hu, Anna Rohrbach, Trevor Darrell, and Kate Saenko. 2019. Language-                      the IEEE International Conference on Computer Vision (ICCV). 2641–2649.
+     Conditioned Graph Networks for Relational Reasoning. In Proceedings of the IEEE              [33] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. 2015. Faster r-cnn:
+     International Conference on Computer Vision (ICCV). 10294–10303.                                  Towards real-time object detection with region proposal networks. In Advances
+[11] Ronghang Hu, Marcus Rohrbach, Jacob Andreas, Trevor Darrell, and Kate Saenko.                     in Neural Information Processing Systems (NeurIPS). 91–99.
+     2017. Modeling relationships in referential expressions with compositional                   [34] Anna Rohrbach, Marcus Rohrbach, Ronghang Hu, Trevor Darrell, and Bernt
+     modular networks. In Proceedings of IEEE Conference on Computer Vision and                        Schiele. 2016. Grounding of textual phrases in images by reconstruction. In
+     Pattern Recognition (CVPR). 1115–1124.                                                            Proceedings of the European Conference on Computer Vision (ECCV). Springer,
+[12] Ronghang Hu, Huazhe Xu, Marcus Rohrbach, Jiashi Feng, Kate Saenko, and                            817–834.
+     Trevor Darrell. 2016. Natural language object retrieval. In Proceedings of IEEE              [35] Mike Schuster and Kuldip K Paliwal. 1997. Bidirectional recurrent neural net-
+     Conference on Computer Vision and Pattern Recognition (CVPR). 4555–4564.                          works. IEEE Transactions on Signal Processing 45, 11 (1997), 2673–2681.
+[13] Drew Hudson and Christopher D Manning. 2019. Learning by abstraction:                        [36] Sebastian Schuster, Ranjay Krishna, Angel Chang, Li Fei-Fei, and Christopher D
+     The neural state machine. In Advances in Neural Information Processing Systems                    Manning. 2015. Generating semantically precise scene graphs from textual
+     (NeurIPS). 5901–5914.                                                                             descriptions for improved image retrieval. In Proceedings of the fourth workshop
+[14] Chenchen Jing, Yuwei Wu, Xiaoxun Zhang, Jia Yunde, and Qi Wu. 2020. Over-                         on vision and language. 70–80.
+     coming Language Priors in VQA via Decomposed Linguistic Representations. In                  [37] Karen Simonyan and Andrew Zisserman. 2014. Very deep convolutional networks
+     Thirty-Forth AAAI Conference on Artificial Intelligence. 11181–11188.                             for large-scale image recognition. arXiv preprint arXiv:1409.1556 (2014).
+[15] Justin Johnson, Ranjay Krishna, Michael Stark, Li-Jia Li, David Shamma, Michael              [38] Oriol Vinyals, Alexander Toshev, Samy Bengio, and Dumitru Erhan. 2015. Show
+     Bernstein, and Li Fei-Fei. 2015. Image retrieval using scene graphs. In Proceedings               and tell: A neural image caption generator. In Proceedings of IEEE Conference on
+     of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR). 3668–                   Computer Vision and Pattern Recognition (CVPR). 3156–3164.
+     3678.                                                                                        [39] Liwei Wang, Yin Li, and Svetlana Lazebnik. 2016. Learning deep structure-
+[16] Sahar Kazemzadeh, Vicente Ordonez, Mark Matten, and Tamara Berg. 2014.                            preserving image-text embeddings. In Proceedings of IEEE Conference on Computer
+     Referitgame: Referring to objects in photographs of natural scenes. In Proceedings                Vision and Pattern Recognition (CVPR). 5005–5013.
+     of the 2014 conference on empirical methods in natural language processing (EMNLP).          [40] Mingzhe Wang, Mahmoud Azab, Noriyuki Kojima, Rada Mihalcea, and Jia Deng.
+     787–798.                                                                                          2016. Structured matching for phrase localization. In Proceedings of the European
+[17] Diederik P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic opti-                         Conference on Computer Vision (ECCV). Springer, 696–711.
+     mization. arXiv preprint arXiv:1412.6980 (2014).                                             [41] Peng Wang, Qi Wu, Jiewei Cao, Chunhua Shen, Lianli Gao, and Anton van den
+[18] Ranjay Krishna, Yuke Zhu, Oliver Groth, Justin Johnson, Kenji Hata, Joshua                        Hengel. 2019. Neighbourhood watch: Referring expression comprehension via
+     Kravitz, Stephanie Chen, Yannis Kalantidis, Li-Jia Li, David A Shamma, et al.                     language-guided graph attention networks. In Proceedings of IEEE Conference on
+     2017. Visual genome: Connecting language and vision using crowdsourced dense                      Computer Vision and Pattern Recognition (CVPR). 1960–1968.
+     image annotations. International Journal of Computer Vision 123, 1 (2017), 32–73.            [42] Runzhong Wang, Junchi Yan, and Xiaokang Yang. 2019. Learning Combinato-
+[19] Marius Leordeanu and Martial Hebert. 2005. A spectral technique for correspon-                    rial Embedding Networks for Deep Graph Matching. In Proceedings of the IEEE
+     dence problems using pairwise constraints. In Proceedings of the IEEE International               International Conference on Computer Vision (ICCV). 3056–3065.
+     Conference on Computer Vision (ICCV). 1482–1489.                                             [43] Xin Wang, Qiuyuan Huang, Asli Celikyilmaz, Jianfeng Gao, Dinghan Shen, Yuan-
+[20] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva                      Fang Wang, William Yang Wang, and Lei Zhang. 2019. Reinforced cross-modal
+     Ramanan, Piotr Dollár, and C Lawrence Zitnick. 2014. Microsoft coco: Common                       matching and self-supervised imitation learning for vision-language navigation.
+     objects in context. In Proceedings of the European Conference on Computer Vision                  In Proceedings of IEEE Conference on Computer Vision and Pattern Recognition
+     (ECCV). Springer, 740–755.                                                                        (CVPR). 6629–6638.
+[21] Daqing Liu, Hanwang Zhang, Zheng-Jun Zha, and Fanglin Wang. 2019. Referring                  [44] Qi Wu, Damien Teney, Peng Wang, Chunhua Shen, Anthony Dick, and Anton
+     Expression Grounding by Marginalizing Scene Graph Likelihood. arXiv preprint                      van den Hengel. 2017. Visual question answering: A survey of methods and
+     arXiv:1906.03561 (2019).                                                                          datasets. Computer Vision and Image Understanding 163 (2017), 21–40.
+[22] Daqing Liu, Hanwang Zhang, Zheng-Jun Zha, and Feng Wu. 2019. Learning to                     [45] Sibei Yang, Guanbin Li, and Yizhou Yu. 2019. Cross-Modal Relationship Infer-
+     Assemble Neural Module Tree Networks for Visual Grounding. In Proceedings of                      ence for Grounding Referring Expressions. In Proceedings of IEEE Conference on
+                                                                                                       Computer Vision and Pattern Recognition (CVPR). 4145–4154.
+
+
+
+
+                                                                                           4049
+Poster Session E3: Multimedia Fusion and Embedding & Music, Speech                                                       MM '20, October 12–16, 2020, Seattle, WA, USA
+and Audio & Summarization, Analytics and Storytelling
+
+
+
+
+[46] Sibei Yang, Guanbin Li, and Yizhou Yu. 2019. Dynamic graph attention for                     [52] Zhou Yu, Jun Yu, Chenchao Xiang, Zhou Zhao, Qi Tian, and Dacheng Tao.
+     referring expression comprehension. In Proceedings of the IEEE International                      2018. Rethinking Diversified and Discriminative Proposal Generation for Vi-
+     Conference on Computer Vision (ICCV). 4644–4653.                                                  sual Grounding. Proceedings of the International Joint Conference on Artificial
+[47] Xu Yang, Kaihua Tang, Hanwang Zhang, and Jianfei Cai. 2019. Auto-encoding                         Intelligence (IJCAI).
+     scene graphs for image captioning. In Proceedings of IEEE Conference on Computer             [53] Andrei Zanfir and Cristian Sminchisescu. 2018. Deep learning of graph matching.
+     Vision and Pattern Recognition (CVPR). 10685–10694.                                               In Proceedings of IEEE Conference on Computer Vision and Pattern Recognition
+[48] Mang Ye, Jiawei Li, Andy J Ma, Liang Zheng, and Pong C Yuen. 2019. Dynamic                        (CVPR). 2684–2693.
+     graph co-matching for unsupervised video-based person re-identification. IEEE                [54] Hanwang Zhang, Yulei Niu, and Shih-Fu Chang. 2018. Grounding referring
+     Transactions on Image Processing (TIP) 28, 6 (2019), 2976–2990.                                   expressions in images by variational context. In Proceedings of IEEE Conference
+[49] Licheng Yu, Zhe Lin, Xiaohui Shen, Jimei Yang, Xin Lu, Mohit Bansal, and                          on Computer Vision and Pattern Recognition (CVPR). 4158–4166.
+     Tamara L Berg. 2018. Mattnet: Modular attention network for referring ex-                    [55] Feng Zhou and Fernando De la Torre. 2012. Factorized graph matching. In
+     pression comprehension. In Proceedings of IEEE Conference on Computer Vision                      Proceedings of IEEE Conference on Computer Vision and Pattern Recognition (CVPR).
+     and Pattern Recognition (CVPR). 1307–1315.                                                        127–134.
+[50] Licheng Yu, Patrick Poirson, Shan Yang, Alexander C Berg, and Tamara L Berg.                 [56] Bohan Zhuang, Qi Wu, Chunhua Shen, Ian Reid, and Anton van den Hengel.
+     2016. Modeling context in referring expressions. In Proceedings of the European                   2018. Parallel attention: A unified framework for visual object discovery through
+     Conference on Computer Vision (ECCV). Springer, 69–85.                                            dialogs and queries. In Proceedings of IEEE Conference on Computer Vision and
+[51] Licheng Yu, Hao Tan, Mohit Bansal, and Tamara L Berg. 2017. A joint speaker-                      Pattern Recognition (CVPR). 4252–4261.
+     listener-reinforcer model for referring expressions. In Proceedings of IEEE Confer-
+     ence on Computer Vision and Pattern Recognition (CVPR). 7282–7290.
+
+
+
+
+                                                                                           4050
+

@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\run_nde_operation.py", line 60, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\run_nde_operation.py", line 52, in main
+    elif a.operation=='run':result=adapter.run(a.mode,a.target)
+                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\adapter.py", line 571, in run
+    self._previous_complete(current,directory,binding)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\adapter.py", line 563, in _previous_complete
+    require(prior.get('identity')==self._identity(binding,request['request_id'],'run')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and prior.get('returncode')==0 and self._raw_result_identity(prior.get('result'),binding,mode,target)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and prior['result'].get('execution_completed') is True,'Prior request failed/identity unknown; no further run')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\adapter.py", line 85, in require
+    raise Refused(reason)
+nde_reviewed_adapter.Refused: Prior request failed/identity unknown; no further run

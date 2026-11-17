@@ -1,0 +1,13 @@
+{
+  "actions": [
+    "上海2026-10-21 20:09 begin完成监控/目标与已有队列派发检查：仅server4 GPU0容量1，M205 running、M206 waiting/ready；无终态或运维故障，reserve/creation0。M205 Best=.4872、19/50、no_improve2/10，未超过历史M95 .5020。",
+    "20:09:50严格pinned主机/GPU0 UUID核验：18643MiB/util25%，当前仅见M205 CUDA PID3842306，原argv/cwd/starttime一致；native第19轮3901→3902/4686递增、日志更新距查询0.33秒。GPU0仍占用，无法启动M206。",
+    "同M206 waiting/GPU0/resume_waiting、launch_verified=false，无activePID/log/claimed_gpu或dispatch_hold/admission_error；双resume proof hash匹配，running仅GPU0=M205。固定checkpoint存在936269892bytes，未重hash/载入，仍待从第9轮full native resume。",
+    "本轮resource_check/blocked绑定M206和新证据；0新候选/0native诊断/0准入/0队列新增/0启动。HAP已备储备继续等待，native数值/梯度/资源UNKNOWN；8旧hold未到复核窗口且无新解锁信号，不重复审查。"
+  ],
+  "decisions": [
+    "保留M205现有训练，仅server4 GPU0范围不变。GPU0实际全空闲后优先同M206 full native --resume epoch9，启动前核精确source/checkpoint SHA及新PID/log/nativeprogress。",
+    "正常训练与同一资源等待，没有新完成/失败/用户事项或研究结论，按约定静默；不从训练中验证波动改参或宣称最终收益。",
+    "reserve/creation0，不新增变体/重复HAP诊断、不重开旧hold，不使用GPU1或其他服务器，不改goal/资源/禁用项/调度。完整六段留档并实际finish，不预写PASS。"
+  ]
+}

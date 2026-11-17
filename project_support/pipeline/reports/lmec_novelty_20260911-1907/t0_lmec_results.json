@@ -1,0 +1,230 @@
+{
+  "probe": "t0_lmec_formula",
+  "formula": {
+    "m_qn": "sigmoid(mask_logits[q, n])",
+    "v_plus": "sum_n m_qn f_n / (sum_n m_qn)",
+    "v_minus": "sum_n (1 - m_qn) f_n / (sum_n (1 - m_qn))",
+    "e_q": "g(v_plus, l) - g(v_minus, l)",
+    "s_q": "u_q + lambda * e_q"
+  },
+  "gradient": {
+    "max_abs_error": 1.1035349023469365e-10,
+    "max_rel_error": 7.395691112902288e-10,
+    "passed": true,
+    "numeric_head": [
+      0.03240825,
+      -0.0697768,
+      -0.03984658,
+      0.06590913
+    ],
+    "analytic_head": [
+      0.03240825,
+      -0.0697768,
+      -0.03984658,
+      0.06590913
+    ]
+  },
+  "whole_scene": {
+    "positive_equals_scene_mean": true,
+    "complement_equals_zero": true,
+    "evidence": -0.36435469713648794,
+    "collapses_to_zero_support": true
+  },
+  "saturation": {
+    "rows": [
+      {
+        "mask_logit_scale": 0.0,
+        "mean_sigmoid": 0.5,
+        "d_evidence_d_logit": -2.7755575615628914e-11,
+        "abs_d_evidence_d_logit": 2.7755575615628914e-11
+      },
+      {
+        "mask_logit_scale": 0.25,
+        "mean_sigmoid": 0.5017314400375172,
+        "d_evidence_d_logit": -0.004815111628864166,
+        "abs_d_evidence_d_logit": 0.004815111628864166
+      },
+      {
+        "mask_logit_scale": 0.5,
+        "mean_sigmoid": 0.5034395905449,
+        "d_evidence_d_logit": -0.01877199565236687,
+        "abs_d_evidence_d_logit": 0.01877199565236687
+      },
+      {
+        "mask_logit_scale": 1.0,
+        "mean_sigmoid": 0.5067184536341531,
+        "d_evidence_d_logit": -0.06805298269352278,
+        "abs_d_evidence_d_logit": 0.06805298269352278
+      },
+      {
+        "mask_logit_scale": 2.0,
+        "mean_sigmoid": 0.5126939334793562,
+        "d_evidence_d_logit": -0.1945913739032079,
+        "abs_d_evidence_d_logit": 0.1945913739032079
+      },
+      {
+        "mask_logit_scale": 4.0,
+        "mean_sigmoid": 0.524314996979669,
+        "d_evidence_d_logit": -0.33920358166739106,
+        "abs_d_evidence_d_logit": 0.33920358166739106
+      },
+      {
+        "mask_logit_scale": 6.0,
+        "mean_sigmoid": 0.5352886209800067,
+        "d_evidence_d_logit": -0.384175084633398,
+        "abs_d_evidence_d_logit": 0.384175084633398
+      },
+      {
+        "mask_logit_scale": 8.0,
+        "mean_sigmoid": 0.5435755851789646,
+        "d_evidence_d_logit": -0.4103093282914472,
+        "abs_d_evidence_d_logit": 0.4103093282914472
+      }
+    ],
+    "peak_index": 7,
+    "peak_attenuation_vs_saturated": 1.0,
+    "saturation_attenuates_gradient": false,
+    "interpretation": "the quotient normalization cancels the sigmoid factor, so the logit-to-evidence gradient does not attenuate at the expected m(1-m) rate; this is a design property that needs justification, not by itself a proof of instability"
+  },
+  "language_invariance": {
+    "dim": 6,
+    "n_candidates": 5,
+    "linear_g_same_order_under_l_change": false,
+    "linear_g_same_order_under_scale_only": true,
+    "linear_g_same_order_under_scaling": true,
+    "bilinear_g_same_order_under_l_change": false,
+    "mlp_g_same_order_under_l_change": false,
+    "affine_or_bilinear_g_is_language_invariant_within_scene": false,
+    "e_linear_a": [
+      -1.168107,
+      -0.772048,
+      0.574338,
+      -0.616036,
+      1.263646
+    ],
+    "e_linear_b": [
+      -0.587281,
+      1.424392,
+      1.078161,
+      2.129424,
+      -0.167169
+    ],
+    "e_mlp_a": [
+      0.156016,
+      -0.535247,
+      0.995769,
+      -0.188332,
+      0.243581
+    ],
+    "e_mlp_b": [
+      0.69731,
+      -0.272341,
+      0.965364,
+      -0.03644,
+      0.225797
+    ],
+    "interpretation": "within one scene all candidates share l, so an affine g never compares candidates through different language content; it maps the candidate margin vector through one fixed language direction. Whether that fixed direction carries the intended semantic disambiguation cannot be decided from synthetic features and is left as an open risk, not a pass."
+  },
+  "area_balance": {
+    "rows": [
+      {
+        "area": 1,
+        "positive_term": 0.06660627432693977,
+        "complement_term": -0.24746559774361826,
+        "evidence": 0.31407187207055803,
+        "evidence_sign": 1
+      },
+      {
+        "area": 2,
+        "positive_term": -1.0001161968786416,
+        "complement_term": -0.1868198287322648,
+        "evidence": -0.8132963681463768,
+        "evidence_sign": -1
+      },
+      {
+        "area": 4,
+        "positive_term": 0.36759819698639606,
+        "complement_term": -0.32411500155967193,
+        "evidence": 0.691713198546068,
+        "evidence_sign": 1
+      },
+      {
+        "area": 8,
+        "positive_term": 0.250442553866273,
+        "complement_term": -0.4003486536106422,
+        "evidence": 0.6507912074769152,
+        "evidence_sign": 1
+      },
+      {
+        "area": 12,
+        "positive_term": 0.5697487640438028,
+        "complement_term": -0.7220906212125431,
+        "evidence": 1.291839385256346,
+        "evidence_sign": 1
+      },
+      {
+        "area": 16,
+        "positive_term": 0.1872967823744042,
+        "complement_term": -0.662598485857231,
+        "evidence": 0.8498952682316352,
+        "evidence_sign": 1
+      },
+      {
+        "area": 24,
+        "positive_term": -0.2774789178640876,
+        "complement_term": -0.11816665337339076,
+        "evidence": -0.15931226449069685,
+        "evidence_sign": -1
+      },
+      {
+        "area": 31,
+        "positive_term": -0.26469459382575267,
+        "complement_term": 0.600705152873105,
+        "evidence": -0.8653997466988577,
+        "evidence_sign": -1
+      }
+    ],
+    "sign_flips_with_area": true,
+    "complement_abs_grows_as_area_shrinks": false
+  },
+  "mask_permutation": {
+    "evidence_original": -0.23771304188873724,
+    "evidence_permuted": -0.2377130418887371,
+    "permutation_equivariant": true
+  },
+  "tiny_mask_language_shuffle": {
+    "area_1": {
+      "e_l_a": -1.5502081486008743,
+      "e_l_b": -1.0462030784444787,
+      "language_sensitivity": 0.5040050701563956
+    },
+    "area_3": {
+      "e_l_a": -1.0620453043774711,
+      "e_l_b": -0.5280875616631072,
+      "language_sensitivity": 0.5339577427143639
+    },
+    "area_20": {
+      "e_l_a": -0.9439404649525269,
+      "e_l_b": -0.4500197538288566,
+      "language_sensitivity": 0.4939207111236703
+    }
+  },
+  "gates": {
+    "G1_gradient_matches_finite_difference": true,
+    "G2_whole_scene_support_collapses": true,
+    "G4_mask_permutation_equivariant": true
+  },
+  "observations": {
+    "O1_quotient_cancels_sigmoid_attenuation": true,
+    "O2_language_direction_not_semantically_verified": true
+  },
+  "blockers": {
+    "B2_complement_dominates_at_small_area": true
+  },
+  "verdict": {
+    "gradient_and_degeneracy_ok": true,
+    "quotient_form_is_well_defined": true,
+    "admits_training": false,
+    "reason": "The quotient form has clean analytic gradients, a well-defined whole-scene collapse, and permutation equivariance. It does not admit training yet: the area-normalized complement term can dominate and flip sign with mask area, the quotient cancels the expected sigmoid attenuation without justification, and the semantic content carried by the single language direction is unverified. No production config may be created from the current formula."
+  }
+}

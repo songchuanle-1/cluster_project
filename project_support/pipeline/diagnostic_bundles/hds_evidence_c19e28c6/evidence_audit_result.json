@@ -1,0 +1,109 @@
+{
+  "recorded_at": "2026-10-16T10:18:24.969969+00:00",
+  "candidate_id": "m202-native-validation-checkpoint-evidence-audit",
+  "native_progress_confirmed": true,
+  "checkpoint_state_fields_passed": {
+    "model_tensors": true,
+    "optimizer_states": true,
+    "optimizer_param_groups": true,
+    "scheduler_state": true,
+    "epoch": true,
+    "best_miou": true,
+    "patience_state": true
+  },
+  "native_best_miou": 0.3337104618549347,
+  "native_validation_epoch": 1,
+  "native_validation_expression_count": [
+    9508
+  ],
+  "checkpoint_native_type": "numpy.float32",
+  "checkpoint_sha256": "98e1896ddda28b6c94e9a9d71f589df035569d4a0fdf708516c86e98868f0904",
+  "checkpoint_optimizer_states": 642,
+  "saver_resume_source_reviewed": true,
+  "actual_resume_executed": false,
+  "schema_controls": [
+    {
+      "name": "all_native_state_fields",
+      "passed": true
+    },
+    {
+      "name": "remove_model_tensors",
+      "passed": true
+    },
+    {
+      "name": "remove_optimizer_states",
+      "passed": true
+    },
+    {
+      "name": "remove_optimizer_param_groups",
+      "passed": true
+    },
+    {
+      "name": "remove_scheduler_state",
+      "passed": true
+    },
+    {
+      "name": "remove_epoch",
+      "passed": true
+    },
+    {
+      "name": "remove_best_miou",
+      "passed": true
+    },
+    {
+      "name": "remove_patience_state",
+      "passed": true
+    },
+    {
+      "name": "reject_nonfinite_best",
+      "passed": true
+    },
+    {
+      "name": "reject_string_best",
+      "passed": true
+    }
+  ],
+  "scene_evidence_audit": {
+    "native_eval_return": [
+      "miou"
+    ],
+    "active_file_export_sinks": [],
+    "writer_scalar_calls": 10,
+    "scene_ids_and_ious_accumulated_in_memory": true,
+    "per_expression_scene_payload_exported": false,
+    "current_run_files": [
+      "events.out.tfevents.1792143282.dl04-MS-7E06",
+      "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hds_canon_r1.yaml",
+      "20261016_173442.log",
+      "best.pth",
+      "last.pth"
+    ],
+    "checkpoint_top_keys": [
+      "meta",
+      "model",
+      "optimizer",
+      "scheduler"
+    ],
+    "train_source_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+    "meaning": "Actual eval persists aggregates/TensorBoard scalars, not paired expression/scene arrays. This run alone cannot produce scene-clustered paired intervals; independent scene count, matched M95 predictions, subgroup harm and noise floor remain unmeasured/unknown. Not an efficacy failure."
+  },
+  "limitations": "Only one early validation epoch. Resume-field presence is not an executed resume or exact stochastic replay. Current NVML is not a training peak. No tuning/new model/revision, no active training mutation.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/hds_evidence_c19e28c6/current_native_observation.json",
+      "sha256": "e1c5db98e08e886e0154e3ce01ef2855b383a7b7c881bb4adc637610133aca61"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/hds_evidence_c19e28c6/checkpoint_audit.json",
+      "sha256": "d917d941c2da755bb264db7eac5c251721599f3edc1f35d179b1e468daeb6a17"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/hds_evidence_c19e28c6/checkpoint_scalar_type_review.json",
+      "sha256": "b49f9370576e8549cb90912fb49e715cc5a530890105e08d1a19aa41e2ecb064"
+    },
+    {
+      "path": "pipeline/designs/exp_design_20261016_hier_support_admitted.md",
+      "sha256": "e03b138638da520f1a873e81e2ee501a2f3b18bc5545c98aed9fc9c4127f1fca"
+    }
+  ]
+}

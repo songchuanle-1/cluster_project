@@ -1,0 +1,20 @@
+--- frozen_v1/run_setup_once.py
++++ fresh_v2/run_setup_once.py
+@@ -35,7 +35,7 @@
+     require_arguments(args)
+     assert args.action
+     owner, receipt, server = guard(args)
+-    execution = TICK / "cso_setup_execution"
++    execution = TICK / "cso_setup_execution_v2"
+     execution.mkdir(exist_ok=True)
+     intent, result_path = (execution / (args.action + "_" + name + ".json")
+                            for name in ("intent", "actual"))
+@@ -65,7 +65,7 @@
+             assert request["observation_independent_review"]["sha256"] == args.observation_review_sha256
+             peer = read(args.observation_review)
+             assert peer["passed"] is True and peer["owner"] == owner and peer["material_concerns"] == []
+-            assert peer["reviewer_thread_id"] not in (owner["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops")
++            assert peer["reviewer_thread_id"] not in (owner["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops", "/root/cso_readiness")
+             assert peer["source_commit"] == SOURCE
+             assert peer["actual_observation_sha256"] == request["actual_observation_sha256"]
+             assert peer["collect_actual_sha256"] == sha(execution / "collect_actual.json")

@@ -1,0 +1,114 @@
+{
+  "id": "M198-PDC",
+  "candidate_id": "m95-native-point-detail-field",
+  "config": "configs/Quard/pdc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pdc.yaml",
+  "code_commit": "9a315ace4f9ace79f674a09aa89e214d9fb8f362",
+  "goal_sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b",
+  "decision": {
+    "path": "pipeline/decisions/20261009-095443_next_batch.md",
+    "sha256": "9458a10a43fd6d0c4a1b42d075d1ab8cb2c4c04cf99585a501c852f6ec4d4f6b"
+  },
+  "gates": {
+    "diagnosis": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reports/m95_point_detail_population_prereg_20261009.md",
+          "sha256": "ee097d5f6d72dea8137b9594b524c032956984afe866dffbb2811fa72dcfadb9"
+        },
+        {
+          "path": "pipeline/reports/m95_point_detail_population_20261009.json",
+          "sha256": "f7161ef29fe63c576191a9a68a086979ac9b6a9bb3b636b219822333112e0fb8"
+        }
+      ]
+    },
+    "controls": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reports/pdc_sorted_native_20261009.json",
+          "sha256": "9d72d01622fab16d0e3ee0f38247a7519471ab417e564e7e1c28165d12dd6313"
+        },
+        {
+          "path": "pipeline/reports/pdc_sorted_batch2_20261009.json",
+          "sha256": "5041536060e2bd2f268205360bc6cfca15bf25e0008af2727c7002bc1a9a7f0f"
+        },
+        {
+          "path": "pipeline/reports/pdc_operator_verified_20261009.json",
+          "sha256": "5689d8ea020ab573937a32a442c6d66f1c6ba3bc4fba7b3909c3d26b47ce9cf2"
+        }
+      ]
+    },
+    "native_backward": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reports/pdc_sorted_native_20261009.json",
+          "sha256": "9d72d01622fab16d0e3ee0f38247a7519471ab417e564e7e1c28165d12dd6313"
+        },
+        {
+          "path": "pipeline/reports/pdc_sorted_batch2_20261009.json",
+          "sha256": "5041536060e2bd2f268205360bc6cfca15bf25e0008af2727c7002bc1a9a7f0f"
+        }
+      ]
+    },
+    "resources": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reports/pdc_sorted_admission_audit_20261009.json",
+          "sha256": "292b7d1bf6ed50ebc8cc24d5d7d787a7e566625257380a359489713e25e4f22f"
+        }
+      ]
+    },
+    "independence": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reports/pdc_sorted_admission_audit_20261009.json",
+          "sha256": "292b7d1bf6ed50ebc8cc24d5d7d787a7e566625257380a359489713e25e4f22f"
+        },
+        {
+          "path": "pipeline/reviews/pdc_constraints_independence_20261009.md",
+          "sha256": "600332906a6ea0750d577f610340e09082c8970b416a517abb31eea7528d80d0"
+        }
+      ]
+    },
+    "constraints": {
+      "passed": true,
+      "evidence": [
+        {
+          "path": "pipeline/reviews/pdc_constraints_independence_20261009.md",
+          "sha256": "600332906a6ea0750d577f610340e09082c8970b416a517abb31eea7528d80d0"
+        },
+        {
+          "path": "pipeline/designs/exp_design_20261009-0912.md",
+          "sha256": "18e9e4d58b04677429ec78f587bc1f44b1f207652490a68de8781a06cb6df6b1"
+        },
+        {
+          "path": "pipeline/reports/pdc_sorted_admission_audit_20261009.json",
+          "sha256": "292b7d1bf6ed50ebc8cc24d5d7d787a7e566625257380a359489713e25e4f22f"
+        }
+      ]
+    }
+  },
+  "created_at": "2026-10-09T09:54:56.773817+08:00",
+  "evaluation_plan": {
+    "primary": "ScanRefer VAL mIoU",
+    "baseline": 0.4894,
+    "champion": 0.502,
+    "clustering_unit": "scene",
+    "noise_floor": "unknown",
+    "material_subgroup_harm": "0.002 decline with scene uncertainty; inadequate data inconclusive",
+    "memory_retention": "If peak memory+15%, require trained mIoU gain>=0.003 to retain",
+    "design": {
+      "path": "pipeline/designs/exp_design_20261009-0912.md",
+      "sha256": "18e9e4d58b04677429ec78f587bc1f44b1f207652490a68de8781a06cb6df6b1"
+    },
+    "seed": 1999,
+    "epochs": 50,
+    "max_iters": 70
+  },
+  "literature_limit": "Point refinement is prior art; exhaustive novelty unverified.",
+  "trained_efficacy_known": false
+}

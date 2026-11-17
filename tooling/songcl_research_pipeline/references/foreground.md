@@ -1,0 +1,317 @@
+# Foreground Research Ticks
+
+This is the shared execution contract for foreground research heartbeats.
+The saved prompt supplies the project and its isolation constraints; the
+automation supplies the schedule and destination. Do not create another
+automation, task, fork, or background decision process. Do not invoke
+headless_tick_local.sh, tick_full.bat, codex_tick_exec.sh or codex exec.
+Research decisions and tests happen visibly in the owning task; training
+continues on the authorized remote servers.
+
+For approved experiment-first projects read references/experiment_first.md.
+The acquired snapshot is authoritative: when experiment_first.enabled=true,
+its bounded four-step loop replaces sections 3/4's legacy scientific review,
+exhaustion, global cooldown and per-candidate handoff requirements. Sections
+1/2/5 and every resource, data, ownership and running-job safeguard still apply.
+Do not retrofit an opt-in onto a snapshot acquired before the policy switch.
+
+## 1. Scope And Authorization
+
+Use only C:/Users/chuanle song/.codex/skills/songcl_research_pipeline as the
+executable skill directory. Set PROJECT_ROOT=D:/project and
+PYTHONDONTWRITEBYTECODE=1; use python, and the installed Git bin directory
+when shell helpers require it. Quote absolute paths containing spaces.
+Missing canonical entry points are faults, not permission to use old copies.
+
+Before ANY mutating preflight, read the foreground override in SKILL.md,
+project pipeline/execution_mode.json, goal.json and SERVERS.yaml, and applicable
+project instructions. Verify the actual task is the configured owner; a stored
+ID or task title alone is not identity verification. Respect newer explicit
+user pauses, resource bans, frozen protocols and phase restrictions. This
+heartbeat authorizes research, not changes to its own goal, gates or scheduler.
+Windows Pipeline-<project> must remain disabled. A conflicting enabled
+scheduler, unclear ownership or authorization means report and stop, not repair
+the conflict by running both or silently changing policy.
+
+Check these small configuration files once per tick. Re-read a specific file
+only after a relevant change; project artifacts override stale task history.
+
+## 2. Acquire And Snapshot
+
+Run with the canonical absolute script path:
+
+    python "<skill>/foreground_tick.py" <project> begin --thread-id <verified-owning-task-id> --auto-steady
+
+- Exit 0: read .tick_model_view.json (at most 12,000 UTF-8 bytes). The full
+  .tick_context.json is validator input, NOT the default model read. begin
+  already ran monitor/goal once and generated factual report tables.
+  With --auto-steady, a steady tick also finishes and releases its lease:
+  require COMPLETE and absent owned lock; do not finish it twice.
+  For event/design retain token/deadline and read short codex_memory.md.
+- Exit 75: SKIPPED_BUSY. No new tick was acquired. Do not use the old context
+  as a fresh snapshot, call finish/abort on another writer, or mutate reports,
+  memory, queue or research state. Report the observed owner/lock and timestamp.
+- Other errors or missing output: FAILED_PRECHECK. Do not continue research
+  from an old snapshot. Preserve the error and inspect any partial side effects
+  read-only before a later retry.
+
+The monitor also returns 75 if its project lock is held. If begin already acquired
+its own foreground lease, it records SKIPPED_BUSY and releases only that lease;
+it does not query goals, commit a context, clear prior unhealthy state or touch
+the other monitor's lock. A skipped monitor is never a successful observation.
+
+Exception: --auto-steady may acquire a lease successfully and then fail
+postflight. Its explicit POSTFLIGHT FAILED result is INCOMPLETE, not a failed
+acquisition. Reconcile the returned owned token and finish/abort under section 5;
+do not leave that lease behind or acquire another one.
+
+begin checks that pipeline/closure_policy.json explicitly enables closure
+BEFORE running a mutating monitor. Exit 2 with CLOSURE_NOT_ENABLED means no
+preflight was performed. Report the missing policy; do not silently enable it
+or normalize historical research stages to make a check pass.
+
+Never remove a lock because it is old. For a foreground lease left by a forced
+interruption, verify the exact previous turn has ended and its helper processes
+are no longer writing. A task being active now does not prove the old turn
+is still running. If that evidence is unavailable, report recovery needed.
+Only a verified ended foreground turn may be aborted with its original token
+and an explicit interruption reason before acquiring a fresh tick. Background
+locks need their own verified owner recovery; foreground abort cannot clear them.
+An existing token from this SAME continuing tick is resumed, not reacquired.
+
+## 3. Mode-Specific Work
+
+Use the compact context's bounded manifests. No full-history logs, directory
+dumps or repetitive reviews. Read reference sections only when needed.
+
+- steady: use the report generated by begin --auto-steady; do not
+  invent a design, rewrite unchanged memory or log a no-op decision. A healthy
+  steady tick can finish immediately; the continuous-design loop does not apply.
+- event: handle listed terminal/crash/launch-verification changes and resume
+  research_work.due_ids. Zero admission budget does not forbid a due diagnostic,
+  but does not authorize extra admissions. Do not repeatedly review closed work.
+- Evidenced scoped holds, including human_revision_authorization, are parked
+  separately from actionable reserve. With spare reserve_budget continue other
+  independent authorized work; do not resume the held route or infer permission.
+  pending_count includes parked work and queued tasks, with a bounded pending_limit.
+  When that limit or queued preparation target is full, blocked-only work waits:
+  first/changed wait is event mode, unchanged wait is steady. A due blocked retry
+  is an event evidence check, not mandatory new research. Force-design does not
+  bypass the cap. Unknown blocks still need review; executable work still advances.
+  Preserve scientific no-gain cooldowns and project/phase holds.
+  A numerical_control_failure with verified evidence and implementation/inconclusive
+  scope is a candidate-specific research hold, not usable reserve or missing human
+  permission. Recheck for new evidence; never relax its frozen numerical control.
+- preflight.operational_issues exposes connection, source verification, sync and
+  launch failures even if monitor_rc=0. A changed failure/recovery wakes event
+  handling. Report the actual fault, not "no tasks" or missing human permission;
+  validate current identity/assets/resources before any already-authorized retry.
+- design: read references/autonomous_design.md, references/closure.md and the
+  relevant formats.md sections only when that artifact is needed.
+  If `design_bootstrap.required=true` in the compact view, create at least one
+  stable `diagnosis` candidate before broad route review or abort; conceptual
+  overlap is not a rejection, and a route review without a candidate test is
+  not progress. Resume stable executable candidate IDs first, nearest
+  admission/deployment before earlier stages; due held IDs are evidence checks,
+  not a reason to suppress independent design_bootstrap. While a
+  legally executable next test or evidence-backed independent route remains
+  and the real deadline allows it, execute, evaluate, persist evidence and
+  continue within THIS tick. A gate failure or stage transition alone is not
+  a stopping condition. candidate_budget limits new admissions, not attempts.
+  If research.reserve_only=true, read the Research Reserve and Implementation
+  Revisions sections of closure.md. Prepare at most research.reserve_budget
+  stable candidates without new queue entries or launches; the training budget
+  remains zero. Stop after bounded preparation, not after filling GPUs.
+
+Concentrate on one executable candidate's remaining gates before opening another
+route. Reuse valid evidence for unchanged code/protocol, execute the next missing
+test and continue through admission and verified launch when already authorized.
+Record a genuine negative or scoped blocker and switch routes when appropriate.
+Do not require a new tick for each stage, and do not promise a performance gain.
+
+Use `foreground_tick.py <project> candidate --id <id>` for one current
+candidate and `candidates --offset <n>` for four due IDs per page. The compact
+view states omitted counts; omitted does not mean absent or completed.
+Read each relevant item once, reuse tool results, and batch independent probes.
+Do not dump the full work ledger, all references, all prompts, or old tick logs.
+
+For each candidate record its falsifiable hypothesis, matched control, actual
+test, evidence path/hash, gate result and next_action. Keep stable IDs; reject
+only with disconfirming evidence. Unrun tests are pending, not PASS or failure.
+Preserve diagnosis, controls, native backward, resources, independence and
+goal constraints. Model analysis cannot impersonate required human judgments.
+Do not confuse synthetic feasibility, old champion metrics or gradients with
+trained efficacy. Never reopen banned routes under new names or fill slots
+with tuning-only/duplicate/placeholder variants.
+Classify failure scope before rejecting a whole mechanism. A local realization
+may receive bounded pre-registered revisions under the same stable ID; a small
+layer/connection fix is not required to be another novel contribution. Preserve
+failed evidence and all project bans. Existing rejected IDs need explicit reopen
+authorization; do not turn a pre-training gradient conflict into trained harm.
+
+GPU use requires current whitelist, live occupation and lease checks, not an
+old idle snapshot. Preserve foreign jobs. Busy GPUs block GPU tests only;
+perform useful authorized non-GPU work first. New dispatch uses the existing
+gated monitor path after real admission; it is not another preflight. A PID
+alone is not launch success: verify increasing native training steps.
+
+## 4. Bounds And Honest Termination
+
+Use the actual deadline_at from begin; never extend or rewrite it to pass
+postflight. Budget for commands and final reporting. Do not launch a diagnostic
+that cannot finish safely before that deadline; authorized long training may
+continue remotely after launch verification. Do not wait for whole training
+runs merely to finish a tick.
+
+Stop research when the admission target is met, phase restrictions apply,
+remaining work has evidenced external blockers, the real deadline is near,
+or independently tested routes demonstrate no information gain. Use the exact
+early-stop schema in closure.md; no live executable candidate may be abandoned.
+The admission target is this tick's candidate_budget, not necessarily all free
+capacity. Only actual queued, receipt-validated tasks count; a stage label alone
+does not. Never exceed the tick budget. If other executable IDs remain untouched
+after quota completion or at the real deadline, preserve them and write the
+current tick_handoff from closure.md. This is explicit carryover, not a fabricated
+external blocker, scientific rejection or proof that no work remains.
+Evidence-backed early exhaustion is permitted without waiting for the deadline.
+Validated stops can establish a research cooldown up to four hours; blocked-only
+resource or mixed stops at most two hours, human-only stops at most four hours,
+and neither may extend beyond the earliest candidate retry. Terminal records,
+including frozen closed history, are not pending work. Monitor and goal checks
+still run every tick.
+Goal/phase, queue, research evidence changes or a due retry wake research;
+unchanged blocked work must not generate another review or equivalent probe.
+Unfinished candidates require specific blockers/next actions and retry or
+unblock conditions. Follow closure.md's exact design_cycle schema when needed.
+Never invent attempted alternatives, exhaustion, external blocks or an
+elapsed deadline.
+
+Repeated finish calls with unchanged evidence cannot fix a failed postflight.
+Continue only with a concrete repair or executable test. If the checker cannot
+accept an honest disposition, or tools/time prevent further safe progress,
+preserve evidence, abort and report INCOMPLETE with the exact failed check.
+Do not sleep until the deadline, fabricate progress or weaken gates merely
+to obtain a successful exit. Prompt instructions do not override executable
+closure checks; report a mismatch rather than silently patching the checker.
+
+## 5. Persist, Validate And Release
+
+With an acquired lease, reuse begin's script-generated six-section fact tables and
+update the seven-section memory (<120 lines) on event/design ticks. Persist
+real decisions and hashed candidate evidence. Before calling finish the report
+must not claim a postflight result that has not happened.
+
+For event/design write a small JSON notes file with `actions` and `decisions`
+arrays of Chinese strings, then run:
+
+    python "<skill>/foreground_tick.py" <project> report --token <token> --notes <notes.json>
+
+Only sections 4/5 need authored research text. Sections 0-3 are deterministic
+and explicitly timestamped to preflight; they do not claim to include later
+launches. Record later changes with verified timestamps in section 4.
+The renderer marks unavailable GPU utilization/metrics unknown, not idle/zero.
+Keep the complete six-section report as the audit artifact. In the task present
+the Chinese reader brief from visible_reporting.md, not the raw report or logs.
+Do not change the saved automation's notification policy.
+
+    python "<skill>/foreground_tick.py" <project> finish --token <token>
+
+Exit 0 means the helper validated artifacts, committed pending context state
+and released this lease. Verify the command result. Tick completion does NOT
+prove a method is effective, every candidate passed, or training was started.
+A scientifically blocked outcome may be a valid completed tick.
+
+For an `exclusive_gpu_slot` hold with a project queue opening, collect fresh
+physical occupation evidence before finish using the canonical entry point:
+
+    python "<skill>/gpu_occupation.py" <project> --token <token> --server <server>
+
+This reads hostname, GPU inventory and compute PIDs without changing remote
+state. It binds the raw log and observation to the current candidate, token,
+snapshot and server whitelist. Postflight recomputes physical availability;
+queue space alone does not prove a GPU is free. Unknown/failed queries, missing
+devices, an idle authorized device, or evidence older than five minutes cannot
+justify the hold. If refresh is required, use a new `--label` to preserve the
+previous immutable observation. This evidence never authorizes a launch.
+
+finish requires closure --require-enabled with an explicit PASS, and unchanged
+context/pending-state hashes bound to the begin token. Missing state, altered
+deadlines, an old snapshot or a legacy lease without these hashes cannot close
+successfully. Reconcile and abort such a lease; do not reconstruct a missing
+snapshot from task memory. Integrity checks still apply near the deadline.
+
+The helper writes pipeline/tick_receipts/<token>.json before releasing the
+lease. VALIDATED means postflight passed but context commit is not yet recorded;
+FINALIZED means context commit is recorded, not necessarily lock release.
+lease_release starts as pending. After a successful release, only that token's
+receipt is updated to released with lease_released_at; no shared snapshot,
+report, usage window or next lease is rewritten. Release failures record
+retained (same owner confirmed) or unknown, never a false released/COMPLETE.
+If the post-release receipt write fails, the command reports this explicitly
+and does not retry cleanup or touch a newer lease. Older pending receipts are
+not proof of a live lock: verify the matching owner and command result.
+If interrupted after commit, retain the receipt and reconcile rather than
+replaying mutations. A recovery abort records whether context was already
+committed; it does not erase that fact.
+
+Receipts include per-response token usage and candidate/evidence/launch-stage
+counts. Usage is only the local log window from begin to receipt, excludes
+earlier reading, late records and the final reply, and is NOT a provider bill.
+Cache tokens are part of input; reasoning is part of output. Unavailable usage
+is unknown, never zero. Keep raw usage and stage counts in the receipt; expose
+them in the reader brief only when requested or needed to explain an outcome.
+Do not rewrite the project report after lease release. Counts measure recorded
+changes, not scientific benefit; no token quota relaxes admission gates.
+
+Postflight rejection retains the lease: correct the specific issue and retry
+within this tick only after relevant progress. A nonzero exit alone does not
+prove retention; abort, busy preflight and post-release audit errors can leave
+no owned lease. Verify the matching token before recovery. If finishing is not possible, persist
+the partial result and run:
+
+    python "<skill>/foreground_tick.py" <project> abort --token <token> --reason <specific-reason>
+
+The helper's abort exit 1 is intentional: it marks the tick incomplete, discards
+pending context state and releases the owned lease. Verify its output and lock
+state; do not retry abort simply because it returned 1. If the release itself
+fails, report LOCK_RECOVERY_REQUIRED. Never silently leave an acquired lease
+at a normal turn end. A forcibly interrupted turn is recovered under section 2.
+
+## 6. Visible Reporting
+
+At start show project, snapshot time, mode and the next concrete action. During
+work show concise Chinese updates about tests and evidence, not private chain
+of thought or repeated promises. Preserve the existing notification policy.
+
+There are two outputs with different readers:
+- Audit: the saved report keeps all six headings and required columns from
+  formats.md. Keep timestamps, unknowns and evidence; closure checks are unchanged.
+- User: follow visible_reporting.md. Show a Chinese conclusion, compact experiment
+  progress, actual research results, and the next step or necessary user decision.
+  Do not paste raw goal/monitor output, long config paths, hash lists or receipts.
+
+The compact view and audit report expose pending human next_action items; listing
+an item never grants authorization. If a tested bundle needs a scoped commit,
+ask once with the candidate, exact file bundle and operation (local commit,
+push and training are separate). An unambiguous human reply in the owning chat
+can be recorded according to project policy; do not demand magic wording or a
+user-authored authorization file. Never manufacture consent or repeatedly request
+the same unchanged confirmation on routine polling.
+
+This research brief does not override an explicitly requested status-only 0-4
+template or a request for the full report. For SKIPPED_BUSY/FAILED_PRECHECK give
+the same readable explanation in the task only, clearly saying the tick did not
+run. Unchecked data remains unknown; cached evidence carries its actual time.
+Do not write project reports without owning the lease.
+
+Separate execution success from scientific success: a verified finish means the
+tick's checks and records completed, not that a method works or training started.
+Explain actual finish/abort failure and required user action in plain Chinese.
+Registry "running" without confirmed live progress is not proof of training;
+call it "登记为运行，训练进程/进度未确认" when that is all the evidence supports.
+No change means no new research conclusion. Cumulative candidate counts are not
+this tick's progress or a training success rate. Never substitute zero for an
+unobserved count. Do not rewrite the report after lease release.
+
+Only state an exact next scheduled time when verified from the saved automation;
+otherwise describe the next action and its unblock condition.

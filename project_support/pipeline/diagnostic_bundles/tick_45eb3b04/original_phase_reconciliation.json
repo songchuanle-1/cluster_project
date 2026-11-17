@@ -1,0 +1,128 @@
+{
+  "owner_token": "45eb3b045c6243518d56eade38d5cd17",
+  "command_scope": "Bounded readonly original registered PID and own log tails; no unknown PID lookup or process operation.",
+  "returncode": 0,
+  "stderr": "",
+  "result": {
+    "observed_at": "2026-10-26T04:54:43.248051+00:00",
+    "hostname": "dl04-MS-7E06",
+    "tasks": [
+      {
+        "id": "M213-BFC",
+        "gpu": 0,
+        "process": {
+          "pid": 219369,
+          "present": false,
+          "observation": "Original registered PID not present at read time; no exit reason inferred."
+        },
+        "admitted_scientific_source": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+        "runtime_HEAD": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+        "source8": {
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/dec.py": "f14f67558d2997b18147e1596c1ac6e50659f23cfe8371bd85fed11f311ce8d5",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/hier_postprocess.py": "00d3bc92783641fac31e51fb1e16b5fba61d6eb7829c29b9900606a9d4f8e6a5",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/middle_butterfly.py": "9752c75f04ec20d711e732a3896e1fae2121426c2b37e580b28d983a3b759946",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+        },
+        "YAML_sha256": "77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea",
+        "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc_20261026_003517.log",
+        "log_bytes": 26759161,
+        "log_age_seconds": 736.2567899227142,
+        "train_progress": [
+          20,
+          50,
+          3832,
+          4686
+        ],
+        "val_progress": null,
+        "terminal_or_metric_lines": [
+          "Train[20/50]:  82%|████████████████▎   | 3832/4686 [22:41<05:15,  2.70it/s, lr=2.8e-05, eta=13:57:15, iter_time=0.36]Traceback (most recent call last):",
+          "RuntimeError: Caught RuntimeError in DataLoader worker process 0.",
+          "Original Traceback (most recent call last):",
+          "RuntimeError: unsupported operation: some elements of the input tensor and the written-to tensor refer to a single memory location. Please clone() the tensor before performing the operation."
+        ],
+        "tail_last_lines": [
+          "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\", line 52, in <listcomp>",
+          "    data = [self.dataset[idx] for idx in possibly_batched_index]",
+          "  File \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/framework/dataset/scannetv2.py\", line 376, in __getitem__",
+          "    sp_ins_label, _ = self.get_sp_label(superpoint, instance_label, semantic_label)",
+          "  File \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/framework/dataset/scannetv2.py\", line 341, in get_sp_label",
+          "    gt_spmask = torch_scatter.scatter_mean(ref_lbl.float(), superpoint, dim=-1)",
+          "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/scatter.py\", line 41, in scatter_mean",
+          "    out = scatter_sum(src, index, dim, out, dim_size)",
+          "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/scatter.py\", line 23, in scatter_sum",
+          "    return out.scatter_add_(dim, index, src)",
+          "RuntimeError: unsupported operation: some elements of the input tensor and the written-to tensor refer to a single memory location. Please clone() the tensor before performing the operation.",
+          "",
+          "",
+          "Train[20/50]:  82%|████████████████▎   | 3832/4686 [23:12<05:10,  2.75it/s, lr=2.8e-05, eta=13:57:15, iter_time=0.36]"
+        ],
+        "gpu_inventory": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 41, 0",
+        "gpu_contexts": ""
+      },
+      {
+        "id": "M212-BCR",
+        "gpu": 1,
+        "process": {
+          "pid": 1215422,
+          "present": false,
+          "observation": "Original registered PID not present at read time; no exit reason inferred."
+        },
+        "admitted_scientific_source": "11a811618179ab1ddc0cee299194667413b7fdb9",
+        "runtime_HEAD": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+        "source8": {
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/dec.py": "306b3cbd37c6bf372b5fc67f40dd9a96cb7e37fb3fb779c0ba668f9542a9e2c0",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/hier_postprocess.py": "122ee1d5ad8f8e41a5fe20df79b88e42f32ddc5361e1e386b0180bc969f8fb7c",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/middle_complement.py": "b8d01a31a5f691b00afe7c6d96f6c0b806304307c49a27945091ee64fd28e54e",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+          "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+        },
+        "YAML_sha256": "77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea",
+        "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr_20261025_115717.log",
+        "log_bytes": 37250555,
+        "log_age_seconds": 2179.7003026008606,
+        "train_progress": [
+          27,
+          50,
+          4686,
+          4686
+        ],
+        "val_progress": [
+          27,
+          50,
+          363,
+          363
+        ],
+        "terminal_or_metric_lines": [
+          "Early stopping at epoch 27: no improvement for 10 epochs (best=0.4995)"
+        ],
+        "tail_last_lines": [
+          "Val[27/50]:  97%|███████████████████▍| 352/363 [03:27<00:05,  1.85it/s]",
+          "Val[27/50]:  98%|███████████████████▌| 354/363 [03:28<00:03,  2.34it/s]",
+          "Val[27/50]:  98%|███████████████████▌| 355/363 [03:29<00:03,  2.15it/s]",
+          "Val[27/50]:  98%|███████████████████▌| 356/363 [03:29<00:03,  2.02it/s]",
+          "Val[27/50]:  98%|███████████████████▋| 357/363 [03:30<00:03,  1.87it/s]",
+          "Val[27/50]:  99%|███████████████████▋| 358/363 [03:30<00:02,  2.25it/s]",
+          "Val[27/50]:  99%|███████████████████▊| 359/363 [03:31<00:01,  2.01it/s]",
+          "Val[27/50]:  99%|███████████████████▉| 361/363 [03:31<00:00,  2.39it/s]",
+          "Val[27/50]: 100%|███████████████████▉| 362/363 [03:32<00:00,  2.22it/s]",
+          "Val[27/50]: 100%|████████████████████| 363/363 [03:32<00:00,  2.65it/s]",
+          "Val[27/50]: 100%|████████████████████| 363/363 [03:32<00:00,  1.71it/s]",
+          "mIOU: 0.484. Acc_50: 0.540. Acc_25: 0.591",
+          "spmIOU: 0.445. spAcc_50: 0.495. spAcc_25: 0.583",
+          "Early stopping at epoch 27: no improvement for 10 epochs (best=0.4995)"
+        ],
+        "gpu_inventory": "1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 15, 0",
+        "gpu_contexts": ""
+      }
+    ],
+    "read_only": true,
+    "signals_sent": false
+  }
+}

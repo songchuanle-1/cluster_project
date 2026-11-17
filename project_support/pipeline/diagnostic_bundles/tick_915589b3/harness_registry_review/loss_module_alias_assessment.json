@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-09T01:51:33.263239+00:00",
+  "owner": {
+    "token": "915589b3154c4c3c99b1db658f610a1f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T01:12:12.491733+00:00",
+    "deadline_at": "2026-11-09T02:12:12.491733+00:00",
+    "context_sha256": "dada34d7594e909fafb5912692a196a80a7f11a55681e45cb7b1736039e08e5e",
+    "pending_sha256": "d5e94794b90053aff865886bb78f0d94483538397354b954968aa5e13566ffd7"
+  },
+  "reviewer_agent": "/root/actual_chain_fast",
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "source_commit": "0f8cc0f978b38c24e159d3a2d37344f59cc9a0be",
+  "scope": "STATIC_CONDITIONAL_ASSESSMENT_OF_ONE_LOSS_IMPORT_ALIAS_ONLY_NOT_NEW_WORKER_FREEZE_OR_EXECUTION_APPROVAL",
+  "actual_failure": {
+    "artifact": {
+      "path": "pipeline/diagnostic_bundles/tick_915589b3/rvec_native_execution/run_smoke_candidate_actual.json",
+      "sha256": "1ed4fdf967dea378b9b642454047feb93708e905dc8f4b888dd890612e4fcefb"
+    },
+    "worker_returncode": 1,
+    "execution_completed": false,
+    "error": "\"An object named 'Criterion' was already registered in 'losses' registry!\\nOr let `force=True` to cover the origin\"",
+    "native_optimizer_steps": 0,
+    "native_loss_forwards": 0,
+    "common_reference_constructed": false,
+    "common_init_measured": false,
+    "failure_scope": "HARNESS_IMPORT_REGISTRY_COLLISION; NOT_COMMON_INIT_RNG_MISMATCH",
+    "traceback_evidence": "setup line91 imports unchanged baseline package -> original baseline network.py line13 imports .loss -> identical loss.py Criterion decorator line123/124 attempts duplicate gorilla.LOSSES registration."
+  },
+  "acceptable_in_principle": true,
+  "material_concerns_if_all_guards_enforced": [],
+  "why_lineage_is_preserved": {
+    "candidate_loss_sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "baseline_loss_sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "actual_local_bytes_equal": true,
+    "loss_module_relative_imports": false,
+    "loss_module_package_name_file_dependent_math": false,
+    "loss_class_mutable_class_state_assignments": false,
+    "criterion_constructor_lines": [
+      125,
+      142
+    ],
+    "detail": "Both source files are byte-identical. Original Network imports only Criterion/get_iou from .loss. Reusing the already loaded identical module skips duplicate registration/JIT decoration only; baseline Network source and constructor remain original. Each Network still calls Criterion(**criterion) to create a separate instance and its own loss_weight buffer; no candidate/reference parameter or optimizer object is tied. The inspected loss module has no relative imports or package-name-dependent math."
+  },
+  "minimal_alias_boundary": {
+    "location": "Inside candidate smoke reference-only setup, immediately before baseline_module = importlib.import_module(framework.model.Quard_model + base_name), after candidate package already loaded. Leave RNG capture/restore and all model/pretrain order intact.",
+    "operation": "sys.modules[baseline_qualified + .loss] = sys.modules[candidate_qualified + .loss]",
+    "guards": [
+      "Read and assert staged candidate loss.py SHA256 == actual original runtime baseline loss.py SHA256 == frozen c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5 before inserting any alias.",
+      "Require candidate loss key exists, its __file__ resolves to authenticated staged candidate loss.py, and candidate Network module Criterion/get_iou are that module objects.",
+      "Require baseline loss key does not already exist; never overwrite a preexisting module. Unexpected import state must stop.",
+      "Insert ONLY the baseline .loss alias. Do not alias baseline network, dec, hierarchy, backbone or any model instance; their distinct constructors/class-level decoder initialization state must remain separate.",
+      "After baseline package import, verify sys.modules baseline.loss is candidate.loss and baseline network Criterion/get_iou are those same immutable code objects; instantiate a new original baseline Network as before. Record source paths/hashes/alias keys/identities in result metadata.",
+      "Keep exact common name/shape/dtype/value/hash comparison and exact fine FFN0/norm0/fine_exchange exclusions unchanged on both arms."
+    ]
+  },
+  "prohibited": [
+    "gorilla registry force=True, clearing/deleting/replacing registry entries or editing any loss/model source",
+    "class/global function monkeypatches or mutable state copied between models",
+    "candidate/reference weight copy or tied parameter/buffer instances",
+    "manual reseed, extra model initialization, post-reference RNG substitution or repair after comparison",
+    "pretending this actual registry failure measured common initialization or consumed a model implementation revision"
+  ],
+  "release_requirements": [
+    "Freeze a NEW harness packet/worker hash with the single guarded import alias and truthful metadata, independently review the exact delta, update manifest/producer hashes and use a fresh exclusive-create stage/request/intent under the current owner/deadline. Preserve this failed stage/result; no replay.",
+    "Source retained0f8cc0f9 and its nine source hashes remain unchanged; this is a harness import repair, not RVE revision1.",
+    "New actual native result must still measure the original r0 common-init gate. The conditional fork_rng source plan remains dormant unless a subsequent genuine comparison differs.",
+    "If hash equality, loaded-module origin or namespace isolation cannot be established, stop; a separately bound comparator process is the fallback, not registry force."
+  ],
+  "reviewed_sources": {
+    "candidate_loss": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/candidate_model/loss.py",
+      "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5"
+    },
+    "baseline_loss": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/loss.py",
+      "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5"
+    },
+    "original_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_prepare_v1/worker.py",
+      "sha256": "f02e5d137fabb5fedd22ee2ce81c001b3d54ce5e82ff99fad3c087a36c60585f"
+    }
+  },
+  "Torch_GPU_SSH_or_model_execution_by_reviewer": false,
+  "source_registry_or_Git_mutation_by_reviewer": false,
+  "scientific_admission": false
+}

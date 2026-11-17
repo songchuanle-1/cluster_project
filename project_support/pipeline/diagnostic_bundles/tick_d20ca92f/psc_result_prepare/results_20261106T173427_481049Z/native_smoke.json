@@ -1,0 +1,260 @@
+{
+  "id": "M231-PSC",
+  "candidate_id": "hierarchy-native-position-feature-cross-scatter-composition",
+  "config": "configs/Quard/ctf_hcg_csort_psc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc.yaml",
+  "code_commit": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "recorded_at": "2026-11-06T17:34:27.510959+00:00",
+  "passed": true,
+  "steps": 2,
+  "losses": [
+    9.213239669799805,
+    13.907380104064941
+  ],
+  "champion_losses": [
+    9.52912425994873,
+    13.909586906433105
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "owner_provenance": {
+    "owner": {
+      "token": "0bb874337dde412e98bbbaac369f3370",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-06T15:05:46.633721+00:00",
+      "deadline_at": "2026-11-06T16:05:46.633721+00:00",
+      "context_sha256": "e23733a2b2bace02c86253baecfba6cdd70f568460871f183fd88a200a04df46",
+      "pending_sha256": "3319194dccd61b99a2c36cf5cd605b3c25d526c9aeefd95efb084a5dcd672a62"
+    },
+    "execution_directory": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution",
+    "independent_actual_review": {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_partial_actual_independent_review.json",
+      "sha256": "371d6354e24c8db8806b518e279b293341f36ee457fcdf8d92b4b9400088168c"
+    },
+    "reuse": "Immutable validated actual smoke only",
+    "historical_expired_lease_used_for_new_execution": false,
+    "copied_raw_into_current_execution": false
+  },
+  "validated_historical_smoke_reused": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "train": {
+      "data_root": "/home/songcl/data/data/",
+      "prefix": "train",
+      "type": "scannetv2_sample_graph_edge",
+      "training": true
+    },
+    "val": {
+      "data_root": "/home/songcl/data/data/",
+      "prefix": "val",
+      "type": "scannetv2_sample_graph_edge",
+      "training": false
+    }
+  },
+  "paired_TRAIN_batches": {
+    "shared_initialization_verified": true,
+    "two_natural_train_batches": true,
+    "common_tensor_count": 835,
+    "common_parameter_count": 155907386,
+    "common_sha256": "5c80b2ad41397f3c19b149bfa7acf120edd6127a000129cdc3a8dcbe139c5d49",
+    "excluded_name_prefixes": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.cluster_ffn.2.",
+      "dec.cluster_att.position_feature_scatter."
+    ],
+    "batches": [
+      {
+        "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+        "scan_ids": [
+          "scene0031_00",
+          "scene0673_00"
+        ],
+        "ann_ids": [
+          24,
+          25,
+          26,
+          27,
+          40,
+          41,
+          42,
+          43
+        ],
+        "scenes_len": [
+          4,
+          4
+        ]
+      },
+      {
+        "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+        "scan_ids": [
+          "scene0505_00",
+          "scene0315_00"
+        ],
+        "ann_ids": [
+          120,
+          121,
+          122,
+          123,
+          92,
+          93,
+          94,
+          95
+        ],
+        "scenes_len": [
+          4,
+          4
+        ]
+      }
+    ]
+  },
+  "whole_PSC_core_original_loss_gradient_and_update": [
+    {
+      "forward": 1,
+      "aggregate_weight_gradient": {
+        "finite": true,
+        "abs_max": 3.33464122377336e-05,
+        "observed_weight_tensors": 2,
+        "scope": "Aggregate across entire position_feature_scatter; individual map zeros/unused legal"
+      },
+      "aggregate_weight_updated": true,
+      "aggregate_module_updated": true
+    },
+    {
+      "forward": 2,
+      "aggregate_weight_gradient": {
+        "finite": true,
+        "abs_max": 3.072580511798151e-05,
+        "observed_weight_tensors": 2,
+        "scope": "Aggregate across entire position_feature_scatter; individual map zeros/unused legal"
+      },
+      "aggregate_weight_updated": true,
+      "aggregate_module_updated": true
+    }
+  ],
+  "actual_PSC_path_observations": [
+    {
+      "forward": 1,
+      "native_positions_sha256": "43983705178b7ea1ef94b385dfec6ba64020bfd9d61700f32364be8f78f8f096",
+      "exact_original_decoder_padded_positions_reference": true,
+      "exact_original_encoder_feature_and_mask_references": true,
+      "normalized_bank_sha256": "4e030b8abf277a2f82badadde6cfcdc98ff3cc5e6bfd7abc9b69fb8e433bfd34",
+      "native_observer_scope": "Actual original padded native coordinates, original valid point/coordinate masking and native dtype cast, true support plan, eleven original group means, three original signed centered3xC cross products, actual within+between total, five returned moments, exact10C pack and original shared factor/split/restoration. Wrappers call originals once and return original objects; no coordinate/statistic/feature/model/loss replay.",
+      "extra_FP32_Jacobian_minimum_effect_gate": "NOT_IMPLEMENTED_NOT_REQUIRED",
+      "actual_true_fine_paths": 2048,
+      "actual_supported_scene_count": 8,
+      "actual_stats_calls": 8,
+      "actual_group_mean_calls": 88,
+      "actual_centered_cross_calls": 24,
+      "actual_within_between_add_calls": 8,
+      "actual_pack_calls": 8,
+      "actual_factor_calls": 8,
+      "actual_linear_calls": 16,
+      "actual_GELU_calls": 8,
+      "actual_final_index_copy_calls": 24,
+      "statistics_and_packing_from_actual_production_calls": true,
+      "no_feature_or_statistic_replay": true,
+      "actual_internal_backward_callbacks": 176,
+      "all_observed_internal_gradients_finite": true,
+      "internal_gradient_scope": "Only finite flags aggregated, no per-call/branch/row positivity or callback-completeness gate. Whole PSC-core original-loss gradient/update controls trainability."
+    },
+    {
+      "forward": 2,
+      "native_positions_sha256": "f15ec2530e7c48003280b9955460c5d82decc94d69251272f8fe850ca52e34f7",
+      "exact_original_decoder_padded_positions_reference": true,
+      "exact_original_encoder_feature_and_mask_references": true,
+      "normalized_bank_sha256": "abaa8aa38e7efd1ce07906a03f3452b0e6295124a4d674fd79e1071b97a13b80",
+      "native_observer_scope": "Actual original padded native coordinates, original valid point/coordinate masking and native dtype cast, true support plan, eleven original group means, three original signed centered3xC cross products, actual within+between total, five returned moments, exact10C pack and original shared factor/split/restoration. Wrappers call originals once and return original objects; no coordinate/statistic/feature/model/loss replay.",
+      "extra_FP32_Jacobian_minimum_effect_gate": "NOT_IMPLEMENTED_NOT_REQUIRED",
+      "actual_true_fine_paths": 2048,
+      "actual_supported_scene_count": 8,
+      "actual_stats_calls": 8,
+      "actual_group_mean_calls": 88,
+      "actual_centered_cross_calls": 24,
+      "actual_within_between_add_calls": 8,
+      "actual_pack_calls": 8,
+      "actual_factor_calls": 8,
+      "actual_linear_calls": 16,
+      "actual_GELU_calls": 8,
+      "actual_final_index_copy_calls": 24,
+      "statistics_and_packing_from_actual_production_calls": true,
+      "no_feature_or_statistic_replay": true,
+      "actual_internal_backward_callbacks": 176,
+      "all_observed_internal_gradients_finite": true,
+      "internal_gradient_scope": "Only finite flags aggregated, no per-call/branch/row positivity or callback-completeness gate. Whole PSC-core original-loss gradient/update controls trainability."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/smoke_champion_execution.json",
+      "sha256": "69b53092a479612040648778ce43157c9ced264618e02ce6f8ad3ae6e8443a42"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/smoke_candidate_execution.json",
+      "sha256": "26c3c9fdab9b4a0500ad287d530ec9ace3c412c9650d15898c5df627ca21cbfe"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_champion_execution.json",
+      "sha256": "2d45a0b5f2fb33663380065d05e8b40098a3783d88b4aad4904785b3a199a347"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_candidate_execution.json",
+      "sha256": "2630c5d2c52590b0f77c117b99070b257a897cfbde3248652a3262bc9a348e3b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/native_manifest.json",
+      "sha256": "b346033a4d10266f40cf47ac4e4311593792ed1fb167cf802c4dd122fe7eef85"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/execution_binding.json",
+      "sha256": "09a194a73fe95b020422f119937783ab6bc3ff09ced8b26489a8e2bcbd062c9b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/execution_lease.json",
+      "sha256": "bb3b0b920c755fc24e2d8acd29ab5407c16a285852e10c0fcc55e3aba79c00ed"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/native_manifest.json",
+      "sha256": "c4cde3d1d58ab1112cd7ba17415e8c4abb2d716e62e006b5c37228eadcec9718"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/execution_binding.json",
+      "sha256": "c0c8b9e7c91c6f19363a4a1d4b4a76f4ed6acb1fae7015edb6d1c4c7bb91ef31"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/execution_lease.json",
+      "sha256": "424b4bdffe113590d904633cb1b9d6f6bf2c65a956f1e90b50bbb6afa7082f68"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_partial_actual_independent_review.json",
+      "sha256": "371d6354e24c8db8806b518e279b293341f36ee457fcdf8d92b4b9400088168c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_12e364dc/psc_compatible_source/compatible_source_version.json",
+      "sha256": "9c6308fe6d166216123ef23e871eeacec5e8e3b2b3b9c02fb448364a44d13083"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_12e364dc/psc_compatible_source_independent_review.json",
+      "sha256": "7098b020bc414f34eab9013f6f3b94a72ad0d842249ceff7c30a1310cd2bf6d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0f3c54ec/reserve_candidate_prepare/native_protocol.md",
+      "sha256": "98b12c011260550efd1a87a10dc834d80468ee3523cb3301ddb18c2a4671976a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_current_activation/native/worker.py",
+      "sha256": "530a5230021fad8d880c37a34c18973b4c556e7dc1536b6c4faaffdd6d6f93d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_current_activation/native/native_runtime.py",
+      "sha256": "2468966c25ef12b0c1d06907b39c9f341daa07e2771c026c8920899f8acb72a7"
+    }
+  ],
+  "limitations": [
+    "Two natural TRAIN steps establish technical execution only, not trained efficacy or novelty.",
+    "Smoke memory includes observer hooks and snapshots; it is not pure optimizer TRAIN memory.",
+    "Individual rows/maps/biases/statistic components may be zero; no additional coverage or positivity gate was added."
+  ]
+}

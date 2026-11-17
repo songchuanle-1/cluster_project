@@ -1,0 +1,156 @@
+{
+  "owner": {
+    "token": "ab79f63290c94b4d8d34b65fbbb5f47c",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-28T08:08:46.470809+00:00",
+    "deadline_at": "2026-10-28T09:08:46.470809+00:00",
+    "context_sha256": "a65a423d52177a7df6ef06d400b0b2544f87e6b474e4f1d8665afedab7fd71ae",
+    "pending_sha256": "968d5e211b064f1a36fa95fcf535dc5532ce7da8caad03e594b7225f3a1a252e"
+  },
+  "observed_at": "2026-10-28T08:26:11.603957+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import socket,os,json,subprocess,hashlib,time,re\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=json.loads('\"'\"'{\"pid\": 118189, \"root\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1\", \"commit\": \"d58576b396cfb54577652be972f3ffaffda508c9\", \"log\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre_20261028_024115.log\", \"config\": \"configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml\", \"name\": \"model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre\", \"hashes\": {\"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/__init__.py\": \"327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/backbone.py\": \"1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/dec.py\": \"6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/hier_postprocess.py\": \"6cd338ba1bb16ae9778273bff96ae0973854767d7075b97f65715a2fbc632dc7\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/loss.py\": \"c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/network.py\": \"5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/root_exchange.py\": \"369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/sample_model.py\": \"b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999\", \"configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml\": \"a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a\"}}'\"'\"');pid=p['\"'\"'pid'\"'\"'];proc=Path('\"'\"'/proc'\"'\"')/str(pid)\nassert proc.exists() and proc.stat().st_uid==os.getuid()\ndef identity():\n cmd=(proc/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode();env=dict(v.split(b'\"'\"'='\"'\"',1) for v in (proc/'\"'\"'environ'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if b'\"'\"'='\"'\"' in v)\n assert '\"'\"'tools/train.py'\"'\"' in cmd and p['\"'\"'config'\"'\"'] in cmd and str((proc/'\"'\"'cwd'\"'\"').resolve())==p['\"'\"'root'\"'\"']\n initial_env=env.get(b'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"');assert initial_env in (None,b'\"'\"'0'\"'\"')\n return {'\"'\"'pid'\"'\"':pid,'\"'\"'argv'\"'\"':cmd,'\"'\"'cwd'\"'\"':str((proc/'\"'\"'cwd'\"'\"').resolve()),'\"'\"'start_ticks'\"'\"':(proc/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19],'\"'\"'initial_cuda_environment'\"'\"':initial_env.decode() if initial_env is not None else '\"'\"'NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT'\"'\"'}\nbefore=identity();head=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',p['\"'\"'root'\"'\"'],'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip();assert head==p['\"'\"'commit'\"'\"']\ngpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nrow=[x.strip() for x in gpu.split('\"'\"','\"'\"')];assert row[0]=='\"'\"'0'\"'\"' and row[1]=='\"'\"'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\"'\"'\ncontexts=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nassert str(pid) in [line.split('\"'\"','\"'\"')[0].strip() for line in contexts.splitlines()]\nhashes={}\nfor rel,want in p['\"'\"'hashes'\"'\"'].items():\n actual=hashlib.sha256((Path(p['\"'\"'root'\"'\"'])/rel).read_bytes()).hexdigest();hashes[rel]=actual\n assert actual==(want if rel.endswith('\"'\"'.py'\"'\"') else '\"'\"'77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea'\"'\"')\ndef sample():\n path=Path(p['\"'\"'log'\"'\"']);size=path.stat().st_size\n with path.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,size-1200000));data=f.read()\n txt=data.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"');steps=[(int(a),int(b)) for a,b in re.findall(r'\"'\"'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',txt)]\n assert not any(e in txt for e in ['\"'\"'Traceback'\"'\"','\"'\"'CUDA out of memory'\"'\"','\"'\"'RuntimeError'\"'\"'])\n return {'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'log_size'\"'\"':size,'\"'\"'tail_sha256'\"'\"':hashlib.sha256(data).hexdigest(),'\"'\"'last_native_step'\"'\"':steps[-1] if steps else None,'\"'\"'max_native_step'\"'\"':max(steps) if steps else None,'\"'\"'tail_exception_seen'\"'\"':False}\na=sample();time.sleep(3);b=sample();after=identity();assert before==after\nfd=[]\nfor f in (proc/'\"'\"'fd'\"'\"').iterdir():\n try:\n  target=str(f.resolve())\n  if target.endswith('\"'\"'.log'\"'\"') and target.startswith('\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/'\"'\"'+p['\"'\"'name'\"'\"']+'\"'\"'/'\"'\"'):fd.append(target)\n except (FileNotFoundError,PermissionError):pass\nfd=sorted(set(fd));metric_lines=[]\nif len(fd)==1:\n with open(fd[0],errors='\"'\"'replace'\"'\"') as f:\n  for line in f:\n   if '\"'\"'mIoU :'\"'\"' in line or '\"'\"'resume start_epoch:'\"'\"' in line:metric_lines.append(line.strip())\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'identity_before'\"'\"':before,'\"'\"'identity_after'\"'\"':after,'\"'\"'runtime_commit'\"'\"':head,'\"'\"'source_hashes'\"'\"':hashes,'\"'\"'samples'\"'\"':[a,b],'\"'\"'native_logger_paths'\"'\"':fd,'\"'\"'metric_lines'\"'\"':metric_lines,'\"'\"'checkpoint_body_read'\"'\"':False,'\"'\"'GPU_queries'\"'\"':'\"'\"'Read-only GPU0 UUID/compute-PID queries only'\"'\"','\"'\"'GPU0'\"'\"':gpu,'\"'\"'GPU0_contexts'\"'\"':contexts,'\"'\"'signals_sent'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stdout_sha256": "492d9b5e3c4b845daaffd88f6f4138c26f48fe7179f3c9e3a9049ef0a7479285",
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-10-28T08:26:12.766471+00:00",
+    "hostname": "dl04-MS-7E06",
+    "identity_before": {
+      "pid": 118189,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "74301620",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "identity_after": {
+      "pid": 118189,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "74301620",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "runtime_commit": "d58576b396cfb54577652be972f3ffaffda508c9",
+    "source_hashes": {
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/hier_postprocess.py": "6cd338ba1bb16ae9778273bff96ae0973854767d7075b97f65715a2fbc632dc7",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/root_exchange.py": "369dba8c717cb3199aee002fc4d18fe3c0a756abac7d7594ebdde8bd719a9232",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+      "configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml": "77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea"
+    },
+    "samples": [
+      {
+        "observed_at": "2026-10-28T08:26:09.748759+00:00",
+        "log_size": 36110423,
+        "tail_sha256": "e5b9d3afa45c61ed19ca24cfae46b6aadeca9c4911e4314aab35386506ca4755",
+        "last_native_step": [
+          28,
+          1210
+        ],
+        "max_native_step": [
+          28,
+          1210
+        ],
+        "tail_exception_seen": false
+      },
+      {
+        "observed_at": "2026-10-28T08:26:12.756880+00:00",
+        "log_size": 36112763,
+        "tail_sha256": "efdb4d2bd84033f16b21f924a1f2f8284ec20eef8d872855bc1d8b6528aac200",
+        "last_native_step": [
+          28,
+          1219
+        ],
+        "max_native_step": [
+          28,
+          1219
+        ],
+        "tail_exception_seen": false
+      }
+    ],
+    "native_logger_paths": [
+      "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre/20261028_024122/20261028_024122.log"
+    ],
+    "metric_lines": [
+      "2026-10-28 03:09:50,313 - INFO - mIoU : 0.3040314316749573",
+      "2026-10-28 03:38:12,261 - INFO - mIoU : 0.3866102993488312",
+      "2026-10-28 04:07:02,144 - INFO - mIoU : 0.41127362847328186",
+      "2026-10-28 04:35:43,287 - INFO - mIoU : 0.42369019985198975",
+      "2026-10-28 05:04:16,564 - INFO - mIoU : 0.4267507791519165",
+      "2026-10-28 05:32:53,713 - INFO - mIoU : 0.4529625177383423",
+      "2026-10-28 06:01:26,374 - INFO - mIoU : 0.4664355516433716",
+      "2026-10-28 06:30:55,247 - INFO - mIoU : 0.47290608286857605",
+      "2026-10-28 07:00:45,246 - INFO - mIoU : 0.481265664100647",
+      "2026-10-28 07:30:27,649 - INFO - mIoU : 0.4844745695590973",
+      "2026-10-28 08:00:06,961 - INFO - mIoU : 0.4861379563808441",
+      "2026-10-28 08:29:33,473 - INFO - mIoU : 0.4914175868034363",
+      "2026-10-28 08:58:19,454 - INFO - mIoU : 0.48881950974464417",
+      "2026-10-28 09:27:11,422 - INFO - mIoU : 0.482899010181427",
+      "2026-10-28 09:56:23,313 - INFO - mIoU : 0.48809826374053955",
+      "2026-10-28 10:25:56,594 - INFO - mIoU : 0.4933528006076813",
+      "2026-10-28 10:55:39,696 - INFO - mIoU : 0.49346956610679626",
+      "2026-10-28 11:25:20,233 - INFO - mIoU : 0.4855860471725464",
+      "2026-10-28 11:56:48,736 - INFO - mIoU : 0.49509793519973755",
+      "2026-10-28 12:32:12,731 - INFO - mIoU : 0.4961479902267456",
+      "2026-10-28 13:05:01,401 - INFO - mIoU : 0.4937715530395508",
+      "2026-10-28 13:40:29,870 - INFO - mIoU : 0.4886096119880676",
+      "2026-10-28 14:13:13,608 - INFO - mIoU : 0.48475390672683716",
+      "2026-10-28 14:45:41,944 - INFO - mIoU : 0.48515668511390686",
+      "2026-10-28 15:18:10,778 - INFO - mIoU : 0.4868737757205963",
+      "2026-10-28 15:50:21,515 - INFO - mIoU : 0.4861319363117218",
+      "2026-10-28 16:19:09,575 - INFO - mIoU : 0.48100632429122925"
+    ],
+    "checkpoint_body_read": false,
+    "GPU_queries": "Read-only GPU0 UUID/compute-PID queries only",
+    "GPU0": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 19755, 50",
+    "GPU0_contexts": "118189, 19702",
+    "signals_sent": false
+  },
+  "precise_native_validation": {
+    "values": [
+      0.3040314316749573,
+      0.3866102993488312,
+      0.41127362847328186,
+      0.42369019985198975,
+      0.4267507791519165,
+      0.4529625177383423,
+      0.4664355516433716,
+      0.47290608286857605,
+      0.481265664100647,
+      0.4844745695590973,
+      0.4861379563808441,
+      0.4914175868034363,
+      0.48881950974464417,
+      0.482899010181427,
+      0.48809826374053955,
+      0.4933528006076813,
+      0.49346956610679626,
+      0.4855860471725464,
+      0.49509793519973755,
+      0.4961479902267456,
+      0.4937715530395508,
+      0.4886096119880676,
+      0.48475390672683716,
+      0.48515668511390686,
+      0.4868737757205963,
+      0.4861319363117218,
+      0.48100632429122925
+    ],
+    "best": 0.4961479902267456,
+    "no_improve": 7,
+    "scope": "Exact live original logger mIoU lines only; no checkpoint read, current training incomplete."
+  }
+}

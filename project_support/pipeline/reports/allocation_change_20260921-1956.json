@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "project": "cluster_project",
+  "changed_at": "2026-09-21T19:56:45+08:00",
+  "requested_allocation": {
+    "server": "server-6",
+    "gpus": [7],
+    "max_tasks_per_gpu": 2,
+    "capacity": 2
+  },
+  "effective_dispatch": {
+    "server-6": {
+      "allowed_gpus": [7],
+      "max_tasks_per_gpu": 2,
+      "dispatch_enabled": true,
+      "capacity": 2
+    },
+    "server-4": {
+      "allowed_gpus": [],
+      "max_tasks_per_gpu": 1,
+      "dispatch_enabled": false,
+      "capacity": 0,
+      "note": "Removed from the project whitelist at user request; foreign jobs are not touched."
+    }
+  },
+  "connectivity_check": {
+    "server-6_monitor": "pass",
+    "server-6_project_training_process": "none",
+    "server-6_gpu7_capacity": "not fully exercised because no admitted waiting task exists",
+    "server-4_monitor": "skipped_by_project_whitelist",
+    "code_sync_performed": false,
+    "training_launched": false
+  },
+  "safety": {
+    "m197_action": "preserve stopped_unknown; no automatic restart",
+    "new_server_6_dispatch": "authorized by current allocation",
+    "new_server_4_dispatch": "forbidden",
+    "foreign_processes_touched": false,
+    "legacy_sync_used": false
+  },
+  "validation": {
+    "capacity_parser": "server-6 GPU7 x max_tasks_per_gpu=2 => 2",
+    "monitor_output": "server-6 reports no training process; server-4 is whitelist-skipped",
+    "goal_constraints": "18 constraints preserved; 11 bans unchanged",
+    "goal_sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b"
+  }
+}

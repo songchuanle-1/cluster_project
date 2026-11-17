@@ -1,0 +1,72 @@
+{
+  "observed_at": "2026-10-19T06:36:05.428518+00:00",
+  "metadata": {
+    "epoch": 5,
+    "best_miou": 0.43399661779403687,
+    "epochs_no_improve": 0,
+    "saved_at_native": "Mon Oct 19 12:07:38 2026"
+  },
+  "finiteness": {
+    "model": {
+      "tensor_count": 1165,
+      "numel": 168554565,
+      "all_finite": true
+    },
+    "optimizer": {
+      "tensor_count": 1926,
+      "numel": 65282806,
+      "all_finite": true
+    }
+  },
+  "nonfinite_tensors": [],
+  "resume_functions": [
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/solver/checkpoint.py",
+      "file_sha256": "05a25338d6436b755937ada88807173d3f11446e6432b20f26a2e66649a0a53d",
+      "name": "resume",
+      "line": 143,
+      "source": "def resume(model: nn.Module,\n           filename: str,\n           optimizer: Optional[Optimizer] = None,\n           scheduler: Optional[Tuple[_LRScheduler, ReduceLROnPlateau]] = None,\n           resume_optimizer: bool = True,\n           resume_scheduler: bool = True,\n           map_location: Optional[Union[str, Callable]] = \"default\",\n           strict: bool = True,\n           **kwargs):\n\n    logger = logging.getLogger(__name__)\n    if map_location == \"default\":\n        if torch.cuda.is_available():\n            device_id = torch.cuda.current_device()\n            checkpoint = load_checkpoint(\n                model,\n                filename,\n                strict=strict,\n                map_location=lambda storage, loc: storage.cuda(device_id),\n                **kwargs)\n        else:\n            checkpoint = load_checkpoint(model,\n                                         filename,\n                                         strict=strict,\n                                         **kwargs)\n    else:\n        checkpoint = load_checkpoint(model,\n                                     filename,\n                                     strict=strict,\n                                     map_location=map_location,\n                                     **kwargs)\n    logger.info(f\"Loading checkpoint from {filename}\")\n\n    if \"optimizer\" in checkpoint and resume_optimizer:\n        if optimizer is None:\n            warnings.warn(\"optimizer is None, skip the optimizer loading\")\n        elif isinstance(optimizer, Optimizer):\n            optimizer.load_state_dict(checkpoint['optimizer'])\n        elif isinstance(optimizer, dict):\n            for k in optimizer.keys():\n                optimizer[k].load_state_dict(checkpoint[\"optimizer\"][k])\n        else:\n            raise TypeError(\n                f\"Optimizer should be dict or torch.optim.Optimizer but got {type(optimizer)}\"\n            )\n        logger.info(f\"Loading optimizer from {filename}\")\n\n    if \"scheduler\" in checkpoint and resume_scheduler:\n        if scheduler is None:\n            warnings.warn(\"scheduler is None, skip the scheduler loading\")\n        elif isinstance(scheduler, (_LRScheduler, ReduceLROnPlateau)):\n            scheduler.load_state_dict(checkpoint['scheduler'])\n        elif isinstance(scheduler, dict):\n            for k in scheduler.keys():\n                scheduler[k].load_state_dict(checkpoint[\"scheduler\"][k])\n        else:\n            raise TypeError(\n                f\"scheduler should be dict or torch.optim.lr_scheduler._LRScheduler/ReduceLROnPlateau \"\n                f\"but got {type(scheduler)}\"\n            )\n        logger.info(f\"Loading scheduler from {filename}\")\n\n    meta = checkpoint.get(\"meta\", {})\n\n    return meta"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/solver/checkpoint.py",
+      "file_sha256": "05a25338d6436b755937ada88807173d3f11446e6432b20f26a2e66649a0a53d",
+      "name": "save_checkpoint",
+      "line": 227,
+      "source": "def save_checkpoint(model,\n                    filename,\n                    optimizer=None,\n                    scheduler=None,\n                    meta=None):\n    r\"\"\"Save checkpoint to file.\n    The checkpoint will have 3 fields:\n        ``meta``, ``state_dict`` and ``optimizer``.\n        By default ``meta`` will contain version and time info.\n    Args:\n        model (Module): Module whose params are to be saved.\n        filename (str): Checkpoint filename.\n        optimizer (:obj:`Optimizer`, optional): Optimizer to be saved.\n        meta (dict, optional): Metadata to be saved in checkpoint.\n    \"\"\"\n    # prevent save incomplete checkpoint due to key interrupt\n    with DelayedKeyboardInterrupt():\n        if meta is None:\n            meta = {}\n        elif not isinstance(meta, dict):\n            raise TypeError(\n                f\"meta must be a dict or None, but got {type(meta)}\")\n        meta.update(time=time.asctime())\n\n        os.makedirs(osp.dirname(filename), exist_ok=True)\n        if is_module_wrapper(model):\n            model = model.module\n\n        checkpoint = {\n            \"meta\": meta,\n            \"model\": weights_to_cpu(get_state_dict(model))\n        }\n        # save optimizer state dict in the checkpoint\n        if optimizer is not None:\n            if isinstance(optimizer, Optimizer):\n                checkpoint[\"optimizer\"] = optimizer.state_dict()\n            elif isinstance(optimizer, dict):\n                checkpoint[\"optimizer\"] = {}\n                for name, optim in optimizer.items():\n                    checkpoint[\"optimizer\"][name] = optim.state_dict()\n            else:\n                raise TypeError(\n                    f\"Optimizer should be dict or torch.optim.Optimizer but got {type(optimizer)}\"\n                )\n\n        # save lr_scheduler state dict in the checkpoint\n        if scheduler is not None:\n            if isinstance(scheduler, (_LRScheduler, ReduceLROnPlateau)):\n                checkpoint[\"scheduler\"] = scheduler.state_dict()\n            elif isinstance(scheduler, dict):\n                checkpoint[\"scheduler\"] = {}\n                for name, sche in scheduler.items():\n                    checkpoint[\"scheduler\"][name] = sche.state_dict()\n            else:\n                raise TypeError(\n                    f\"scheduler should be dict or torch.optim.lr_scheduler._LRScheduler/ReduceLROnPlateau \"\n                    f\"but got {type(scheduler)}\"\n                )\n\n        # immediately flush buffer\n        with open(filename, \"wb\") as f:\n            torch.save(checkpoint, f)\n            f.flush()"
+    }
+  ],
+  "scheduler_state": {
+    "max_iters": 70,
+    "power": 4.0,
+    "constant_ending": 0.0,
+    "base_lrs": [
+      0.0001,
+      0.0001,
+      0.0001,
+      0.0001,
+      0.0001
+    ],
+    "last_epoch": 5,
+    "_step_count": 6,
+    "_is_initial": false,
+    "_get_lr_called_within_step": false,
+    "_last_lr": [
+      7.434662640566433e-05,
+      7.434662640566433e-05,
+      7.434662640566433e-05,
+      7.434662640566433e-05,
+      7.434662640566433e-05
+    ]
+  },
+  "rng_state_present": false,
+  "exact_mid_epoch_replay": false,
+  "planned_start_epoch": 6,
+  "native_log": {
+    "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/20261019_093003/20261019_093003.log",
+    "sha256": "baaa3e81b5c1c72a08bf62694756e8304c41ff2f5f9c736ba22603db8c9353c7",
+    "bytes": 2578661
+  },
+  "cuda_initialized": false,
+  "training_launches": 0,
+  "remote_writes": 0
+}

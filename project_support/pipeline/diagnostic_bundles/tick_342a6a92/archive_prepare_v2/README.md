@@ -1,0 +1,7 @@
+V2 supersedes UNEXECUTED v1; v1 remains frozen. Default NOP.
+
+Root only: python -B archive_crashed_once.py --execute-root --terminal-review-sha256 f60b33c4ee0f3bbee1c04e8746b4df31bb8141cd3cfa706cc9064e00390ed8ab --archive-review ACTUAL_V2_SOURCE_REVIEW_JSON --archive-review-sha256 ACTUAL_SHA
+
+Requires current owner and both genuine terminal/source peer reviews. Exact registeredstdout/native logger raw files SCP to project Checkpoints/server_4/M234-RVE_terminal_342a6a92_v2/{registered_stdout,actual_native_logger}/ with observed sizes/tailsha validation. Fullraw archive/hash permitted; ONLY final128KiB of each log decoded. No full CR-log parsing. best=None/UNKNOWN; partialepoch2/step4297 derives bounded stdout; precise completed epoch UNKNOWN in this wrapper, independent reviewed metadata may supplement later. No checkpoint load or transfer.
+
+Calls original canonical finalize_task/_finish_archive unchanged and ignores function return. Success checked from exact experiment.log_local/status/archiveid, pendingjournalabsence, queue/running mutation and protectedstatehashes. Scoped pull_log returns exact verified stdout; scoped ssh disables canonicalremotecommands. No earlystop/deathwatchforcing/signals/restart/resume/dispatch/sync/model/GPU. Only M234 removed; M206/M227/source/SERVERS/research_work/memory/deathwatch preserved. Output ../archive_execution_v2/archive_actual.json. Uncertainty/pending journal: reconcile/recover original archive without wrapper replay.

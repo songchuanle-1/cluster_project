@@ -1,0 +1,81 @@
+% 1.5 page:
+\section{Introduction}
+\label{sec_introduction}
+
+% --------------------------------------------------------
+\begin{wrapfigure}{r}{0.45\textwidth}
+\centering
+\vspace{-6mm}
+%\captionsetup{font=scriptsize}
+\captionsetup{font=small}
+\includegraphics[width=0.9\linewidth]{Figures/CoT_teaser_figure.pdf}
+
+\caption{Overview of our approach, where we first predict a chain of anchors in a logical order. % similar to the human perception system before localizing the referred object%.
+In this example, to reach the \texttt{chair} target, we first have to localize the \texttt{white and red boxes}, then the \texttt{bookshelf}.}
+\vspace{-2mm}
+\label{fig_teaser}
+\end{wrapfigure} 
+% ------------------------------------------------------
+
+% 3D visual grounding task and the recent progress on it:
+The 3D visual grounding task involves identifying and localizing objects in a 3D scene based on a natural language description or query. This task is crucial for many applications, such as robotics \citep{nguyen2019vision, karnan2022voila, wijmans2019embodied}, virtual reality \citep{puig2018virtualhome, ghasemi2022deep, park2020deep, osborne2020social, liu2019edge}, and autonomous driving \citep{qian20223d, cui2021deep, jang2017end, deng2021transvg}.
+The goal is to enable machines to understand natural language and interpret it in the context of a 3D environment.
+% --------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure      %%%%%%%%%%%%%%%%%%%%
+\begin{figure*}
+\vspace{-6mm}
+%\captionsetup{font=scriptsize}
+\captionsetup{font=small}
+\begin{minipage}[c]{0.99\textwidth}
+    \begin{center}
+    \includegraphics[width=0.9\textwidth]{Figures/COT-3D_results_2x_SAT_MVT_3k_700.png}
+    \end{center}
+\end{minipage}
+\vfill
+\begin{minipage}[c]{0.99\textwidth}
+    \begin{center}
+    \includegraphics[width=0.9\textwidth]{Figures/COT-3D_results_2x_LAR_VIL_3k_700.png}
+    \end{center}
+\end{minipage}
+\caption{Data efficiency results. 
+To show the effectiveness of our CoT architecture, we integrate it into four architectures, i.e., MVT \citep{huang2022multi}, SAT \citep{yang2021sat}, LAR \citep{bakr2022look} and ViL \citep{chen2022language}, across different amounts of training data (10\% - 100\%).
+\vspace{-5mm}
+}
+
+\label{fig_data_eff}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure    %%%%%%%%%%%%%%%%%%
+% --------------------------------------------------------
+% Motivate the CoT importance:
+Although 3D visual grounding has significantly advanced, current solutions cannot imitate the human perception system nor be interpretable. 
+To address this gap, we propose a Chain-of-Thoughts 3D visual grounding framework, termed {\papernameAbbrev}. 
+One of the biggest challenges in machine learning is understanding how the model arrives at its decisions. 
+Thus, the concept of Chain-of-Thoughts (CoT) comes in.
+Although CoT is widely applied in Natural Language Processing (NLP) applications \citep{wei2022chain, chowdhery2022palm, lyu2023faithful, wang2022self, zhang2023multimodal, madaan2022text}, it is less explored in vision applications.
+Understanding the CoT is crucial for several reasons. Firstly, it helps explain how the model arrived at its decision, which is essential for transparency and interpretability. Secondly, it helps identify potential biases or errors in the model, which can be addressed to improve its accuracy and reliability.
+Third, it is a critical step toward intelligent systems that mimic human perception.
+Similar to machine learning models, our perception system can be thought of as a Chain-of-Thoughts \citep{mcvay2009conducting, chen2017unified} - a series of intermediate steps that enable us to arrive at our final perception of the world.
+
+% Introduce our approach:
+In this paper, we mainly answer the following question: Can we design an interpretable 3D visual grounding framework that has the potential to mimic the human perception system?
+To this end, we formulate the 3D visual grounding problem as a sequence-to-sequence (Seq2seq) task.
+The input sequence combines 3D objects from the input scene and an input utterance describing a specific object.
+On the output side, in contrast to the existing 3D visual grounding architectures, we predict the target object and a chain of anchors in a causal manner.
+This chain of anchors is based on the logical sequence of steps a human will follow to reach the target.
+For instance, in Figure \ref{fig_teaser}, to reach the \texttt{chair} target, we first have to localize the \texttt{white and red boxes}, then the \texttt{bookshelf}.
+By imitating the human learning process, we can devise a transparent and interpretable 3D framework that details the model's steps until localizing the target.
+To show that our proposed framework can be easily integrated into any existing architecture, we incorporated it into four different baselines: LAR \citep{bakr2022look}, SAT \citep{yang2021sat}, MVT \citep{huang2022multi}, and ViL \citep{chen2022language}.
+{\papernameAbbrev} achieves state-of-the-art results on Sr3D, Nr3D \citep{achlioptas2020referit3d}, and ScanRefer \citep{chen2020scanrefer} without requiring additional manual annotations by devising an efficient pseudo-label generator to provide inexpensive guidance to improve learning efficiency.
+Whereas it boosts the performance by 3.6\%, 4\%, 5\%, 0.5\% on Nr3D and 10\%, 11\%, 9\%, 1\% on Sr3D, respectively.
+Proper design of such an approach is pivotal in attaining a significant performance gain while circumventing the need for intensive human annotations. A pertinent example can be drawn from the labeling procedure employed in PhraseRefer \citep{yuan2022toward}, which demanded a cumulative workforce commitment of 3664 hours, roughly equivalent to an extensive five-month timespan.
+Moreover, using additional manual annotations on the Nr3D dataset led to a noteworthy enhancement in referring accuracy, boosting the performance by 9\% compared to the baselines: LAR, SAT, and MVT, respectively. 
+Consequently, using ScanRefer, our approach surpasses SAT and MVT by 6.5\% and 6.8\%, respectively.
+In addition, as depicted in Figure \ref{fig_data_eff}, {\papernameAbbrev} shows a remarkable capability of learning from limited data, where training on only 10\% of the data is enough to beat all the baselines, which are trained on the entire data.
+% Contributions:
+Our contributions are summarized as follows:
+\begin{itemize}
+    \item We propose a 3D data-efficient Chain-of-Thoughts based framework, {\papernameAbbrev}, that generates an interpretable chain of predictions till localizing the target.
+    \item We devise an efficient pseudo-label generator to provide inexpensive guidance to improve learning efficiency.
+   \item Our proposed framework achieves state-of-the-art performance on Nr3D, Sr3D, and ScanRefer benchmarks without requiring manually annotated data.
+    \item Using 10\% of the data, our framework surpasses the existing state-of-the-art methods.
+\end{itemize}

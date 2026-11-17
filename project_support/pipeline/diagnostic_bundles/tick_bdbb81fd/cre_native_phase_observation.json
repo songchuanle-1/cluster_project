@@ -1,0 +1,108 @@
+{
+  "owner": {
+    "token": "bdbb81fdd0524376a9d8ecb6c787f71b",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-28T06:12:16.861854+00:00",
+    "deadline_at": "2026-10-28T07:12:16.861854+00:00",
+    "context_sha256": "3ff77efc3575dd2f0f4d4216266f45ca383194f65849a213156087121b6ef686",
+    "pending_sha256": "b4edce10d3e1615830b182c370c7d7a2635e8e3b7159cc048b32c9632e537998"
+  },
+  "recorded_at": "2026-10-28T06:14:12.306624+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import socket,json,os,time,re,hashlib\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=json.loads('\"'\"'{\"identity\": {\"pid\": 118189, \"argv\": \"python tools/train.py configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml --gpu_ids 0 --num_gpus 1 \", \"cwd\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1\", \"start_ticks\": \"74301620\", \"initial_cuda_environment\": \"NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT\"}, \"log\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre_20261028_024115.log\"}'\"'\"');want=p['\"'\"'identity'\"'\"'];proc=Path('\"'\"'/proc'\"'\"')/str(want['\"'\"'pid'\"'\"'])\ndef identity():\n assert proc.exists() and proc.stat().st_uid==os.getuid()\n argv=(proc/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode();cwd=str((proc/'\"'\"'cwd'\"'\"').resolve())\n start=(proc/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19]\n assert (argv,cwd,start)==(want['\"'\"'argv'\"'\"'],want['\"'\"'cwd'\"'\"'],want['\"'\"'start_ticks'\"'\"'])\n return {'\"'\"'pid'\"'\"':want['\"'\"'pid'\"'\"'],'\"'\"'argv'\"'\"':argv,'\"'\"'cwd'\"'\"':cwd,'\"'\"'start_ticks'\"'\"':start}\nbefore=identity();path=Path(p['\"'\"'log'\"'\"']);assert path.stat().st_uid==os.getuid()\ndef sample():\n size=path.stat().st_size\n with path.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,size-16000));raw=f.read()\n text=raw.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"').replace('\"'\"'\\r'\"'\"','\"'\"'\\n'\"'\"')\n markers=[{'\"'\"'phase'\"'\"':a,'\"'\"'epoch'\"'\"':int(b),'\"'\"'epochs'\"'\"':int(c),'\"'\"'step'\"'\"':int(d),'\"'\"'steps'\"'\"':int(e)} for a,b,c,d,e in re.findall(r'\"'\"'([A-Za-z]+)\\[(\\d+)/(\\d+)\\]:[^\\n]*?\\|\\s*(\\d+)/(\\d+)'\"'\"',text)]\n return {'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'log_size'\"'\"':size,'\"'\"'tail_sha256'\"'\"':hashlib.sha256(raw).hexdigest(),'\"'\"'last_native_markers'\"'\"':markers[-3:],'\"'\"'exception_seen'\"'\"':any(x in text for x in ['\"'\"'Traceback'\"'\"','\"'\"'CUDA out of memory'\"'\"','\"'\"'RuntimeError'\"'\"']),'\"'\"'last_600_characters'\"'\"':text[-600:]}\na=sample();time.sleep(3);b=sample();after=identity();assert before==after\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'identity_before'\"'\"':before,'\"'\"'identity_after'\"'\"':after,'\"'\"'samples'\"'\"':[a,b],'\"'\"'signals_sent'\"'\"':False,'\"'\"'GPU_computation_or_query'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "prior_physical_source_observation": {
+    "path": "pipeline/diagnostic_bundles/tick_bdbb81fd/cre_training_progress_observation.json",
+    "sha256": "6bbbf03dd4ef695dfb33408b81c7450d4202448dc9830eb7f2da17741c272482"
+  },
+  "observation": {
+    "observed_at": "2026-10-28T06:14:13.422320+00:00",
+    "hostname": "dl04-MS-7E06",
+    "identity_before": {
+      "pid": 118189,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "74301620"
+    },
+    "identity_after": {
+      "pid": 118189,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_cre/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cre.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "74301620"
+    },
+    "samples": [
+      {
+        "observed_at": "2026-10-28T06:14:10.421153+00:00",
+        "log_size": 30539990,
+        "tail_sha256": "b463f0d420777cf5437a0a9d805b41e2ac4d1daca94235b88deb5be9d2932d6d",
+        "last_native_markers": [
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 124,
+            "steps": 4686
+          },
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 124,
+            "steps": 4686
+          },
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 125,
+            "steps": 4686
+          }
+        ],
+        "exception_seen": false,
+        "last_600_characters": "14:18:17, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 123/4686 [00:50<29:18,  2.59it/s, lr=2e-05, eta=14:18:17, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 123/4686 [00:50<29:18,  2.59it/s, lr=2e-05, eta=14:18:21, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 124/4686 [00:50<29:54,  2.54it/s, lr=2e-05, eta=14:18:21, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 124/4686 [00:50<29:54,  2.54it/s, lr=2e-05, eta=14:18:21, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 125/4686 [00:50<30:13,  2.52it/s, lr=2e-05, eta=14:18:21, iter_time=0.41]"
+      },
+      {
+        "observed_at": "2026-10-28T06:14:13.421983+00:00",
+        "log_size": 30541862,
+        "tail_sha256": "ca561c23c80a7399ab6fd3cbd75f938b50db13eefa36ef9a38aed22c0191e53e",
+        "last_native_markers": [
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 132,
+            "steps": 4686
+          },
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 132,
+            "steps": 4686
+          },
+          {
+            "phase": "Train",
+            "epoch": 24,
+            "epochs": 50,
+            "step": 133,
+            "steps": 4686
+          }
+        ],
+        "exception_seen": false,
+        "last_600_characters": "14:16:29, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 131/4686 [00:53<29:19,  2.59it/s, lr=2e-05, eta=14:16:29, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 131/4686 [00:53<29:19,  2.59it/s, lr=2e-05, eta=14:16:02, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 132/4686 [00:53<29:09,  2.60it/s, lr=2e-05, eta=14:16:02, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 132/4686 [00:54<29:09,  2.60it/s, lr=2e-05, eta=14:16:04, iter_time=0.41]\nTrain[24/50]:   3%|▌                   | 133/4686 [00:54<29:43,  2.55it/s, lr=2e-05, eta=14:16:04, iter_time=0.41]"
+      }
+    ],
+    "signals_sent": false,
+    "GPU_computation_or_query": false
+  }
+}

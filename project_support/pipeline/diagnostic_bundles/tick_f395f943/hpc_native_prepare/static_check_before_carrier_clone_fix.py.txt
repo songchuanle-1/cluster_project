@@ -1,0 +1,117 @@
+"""Small stdlib-only checks of exact production solver and new observer callbacks.
+
+List carriers exercise software ordering/identity, not Torch/GELU/gradients/native.
+"""
+from pathlib import Path
+from datetime import datetime, timezone
+import ast
+import copy
+import hashlib
+import json
+import math
+
+HERE=Path(__file__).resolve().parent
+ROOT=Path('D:/project/cluster_project')
+SOURCE=ROOT/'pipeline/diagnostic_bundles/tick_d08825b5/new_candidate_prepare'
+MODEL=SOURCE/'staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hpc'
+OLD=ROOT/'pipeline/diagnostic_bundles/tick_7e492595/cre_native_prepare'
+CHECKS=[]
+def check(value,label):
+    assert value,label
+    CHECKS.append(label)
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def funcs(p):return {n.name:n for n in ast.parse(Path(p).read_text('utf-8')).body if isinstance(n,ast.FunctionDef)}
+worker=funcs(HERE/'worker.py');old=funcs(OLD/'worker.py')
+check(ast.dump(worker['resources'],include_attributes=False)==ast.dump(old['resources'],include_attributes=False),'entire original resource function AST unchanged')
+for p in [HERE/'worker.py',HERE/'assemble_worker.py']:
+    compile(p.read_text('utf-8'),str(p),'exec')
+check(True,'source compilation only, no module import')
+check(not any(isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr in ('backward','grad') for n in ast.walk(worker['smoke'])),'no auxiliary backward or autograd.grad call')
+train_calls=[n for n in ast.walk(worker['smoke']) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and isinstance(n.func.value,ast.Name) and n.func.value.id=='train' and n.func.attr=='train']
+check(len(train_calls)==1,'one original train.train entry')
+setup_text=ast.get_source_segment((HERE/'worker.py').read_text('utf-8'),worker['setup'])
+check("common={name:p.detach() for name,p in model.named_parameters()}" in setup_text and 'excluded = ' not in setup_text and "'excluded_name_prefixes':[]" in setup_text,'entire actual named-parameter initialization, no excluded prefixes/fixed count')
+smoke_text=ast.get_source_segment((HERE/'worker.py').read_text('utf-8'),worker['smoke'])
+check('for level in (ffn_levels if not candidate else ()):' in smoke_text and 'hpc_delta_snapshots' in smoke_text,'champion direct-FFN skip reference separated from HPC synthesis output')
+check("assert any(g['abs_max']>0 for g in weights)" in smoke_text and 'native_parameter_block_gradients' not in smoke_text,'only three original FFN aggregate weight nonzero/update groups')
+check('for owner,name,original in reversed(global_replacements):setattr(owner,name,original)' in smoke_text and 'for hook in hooks:hook.remove()' in smoke_text,'all Tensor/function replacements and hooks finally restored')
+check('numerical_residual_gate_added=False' in smoke_text and 'per_row_or_call_nonzero_gate=False' in smoke_text,'no residual/per-call nonzero gate')
+# Reuse only the existing plain-list interface class definitions, not its208-case runner.
+source_test=ast.parse((SOURCE/'static_check.py').read_text('utf-8'))
+carrier_nodes=[copy.deepcopy(n) for n in source_test.body if isinstance(n,ast.ClassDef) and n.name in ('T','Torch')]
+ns={'copy':copy}
+exec(compile(ast.fix_missing_locations(ast.Module(body=carrier_nodes,type_ignores=[])),'<list_interfaces_only>','exec'),ns)
+T,Torch=ns['T'],ns['Torch'];Torch.Tensor=T
+original_init=T.__init__;counter=[100000]
+def initialize(self,data):
+    original_init(self,data);counter[0]+=100000;self._pointer=counter[0];self.requires_grad=True
+T.__init__=initialize;T.dtype='PLAIN_PYTHON_LIST_CARRIER';T.element_size=lambda self:1
+T.data_ptr=lambda self:self._pointer
+T.stride=lambda self,axis:math.prod(self.shape[axis+1:])
+def view(self,index):
+    out=T(self.data[index]);out._pointer=self._pointer+index*self.stride(0);return out
+T.__getitem__=view
+original_new=T.new_tensor
+def new_tensor(self,data):
+    out=original_new(self,data);out.requires_grad=False;return out
+T.new_tensor=new_tensor
+production={'torch':Torch}
+source_functions=[copy.deepcopy(n) for n in ast.parse((MODEL/'hierarchy_resolvent.py').read_text('utf-8')).body if isinstance(n,ast.FunctionDef)]
+exec(compile(ast.fix_missing_locations(ast.Module(body=source_functions,type_ignores=[])),'<actual_production_solver>','exec'),production)
+meta={'copy':copy}
+exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(worker[n]) for n in ['hpc_coverage_preflight','hpc_plan_observation']],type_ignores=[])),'<actual_worker_metadata>','exec'),meta)
+coverage=meta['hpc_coverage_preflight'];observe_plan=meta['hpc_plan_observation']
+members=([0,0,2,3],[1,0,1,2],[0,1,1]);widths=[5,4,3]
+check(coverage([members])['real_cross_level_component_possible'],'actual coverage accepts supported two-fine cross-level component')
+check(not coverage([([0],[0],[0])])['real_cross_level_component_possible'],'actual coverage classifies single-fine-only core inconclusive')
+check(not coverage([([],[],[])])['real_cross_level_component_possible'],'actual coverage classifies empty core inconclusive before watches')
+plan=production['build_resolvent_plan'](*members,widths)
+observed=observe_plan(plan,*members,widths)
+check(observed['fine_ids']==[0,2,3] and observed['middle_ids']==[1,2] and observed['coarse_ids']==[1],'actual plan observer retains original IDs/Schur forest')
+check(observed['optional_boundary_counts']['batch_padding_rows']==[1,1,1],'optional padding counts are observations, not required native coverage')
+nested={n.name:n for n in ast.walk(worker['smoke']) if isinstance(n,ast.FunctionDef)}
+callback_names=['same_batch_view','observe_operation','method_wrapper','observed_solver']
+cases=[]
+for case_name,membership_batches in [('one_supported_scene',[members]),('empty_then_supported_scene',[([],[],[]),members])]:
+    plans=[production['build_resolvent_plan'](*m,widths) for m in membership_batches]
+    levels=[T([[[float(100*l+10*b+2*i+1),float(100*l+10*b+2*i+2)] for i in range(widths[l])] for b in range(len(plans))]) for l in range(3)]
+    state={'forward_index':1,'norm_outputs':dict(enumerate(levels)),'norm_counts':[1,1,1],'ffn_counts':[1,1,1],
+        'hpc_context':{'solver_count':0,'actual_plans_object':plans,'record':{'solver_calls':[]}}}
+    watches=[];original_returns=[];original_count=[0]
+    def summary(value):
+        def leaves(x):
+            if isinstance(x,list):
+                for y in x:yield from leaves(y)
+            else:yield x
+        vals=list(leaves(value.data));return {'shape':list(value.shape),'dtype':value.dtype,'finite':all(math.isfinite(v) for v in vals)}
+    def fingerprint(torch,value):
+        def unwrap(x):return x.data if isinstance(x,T) else [unwrap(v) for v in x] if isinstance(x,list) else x
+        return hashlib.sha256(json.dumps(unwrap(value),sort_keys=True).encode()).hexdigest()
+    def watch(value,record,key):
+        # Software interface routing only. No gradient values or native PASS are fabricated.
+        watches.append(key)
+    def original_solver(values,actual_plans):
+        original_count[0]+=1;out=production['solve_resolvent_levels'](values,actual_plans);original_returns.append(out);return out
+    names=('index_select','index_add','index_copy','new_tensor');originals={n:getattr(T,n) for n in names}
+    env={'state':state,'torch':Torch,'summary':summary,'watch':watch,'fingerprint':fingerprint,'original_solver':original_solver,'method_names':names,'originals':originals}
+    exec(compile(ast.fix_missing_locations(ast.Module(body=[copy.deepcopy(nested[n]) for n in callback_names],type_ignores=[])),'<actual_worker_solver_callbacks>','exec'),env)
+    try:
+        for name in names:setattr(T,name,env['method_wrapper'](name))
+        analyzed=env['observed_solver'](levels,plans)
+        check(analyzed is original_returns[-1],case_name+': analysis preserves exact original return object')
+        nonlinear=[value*1.25 for value in analyzed]  # Interface stand-in; not GELU/FFN or native evidence.
+        state['ffn_outputs']=dict(enumerate(nonlinear))
+        deltas=env['observed_solver'](nonlinear,plans)
+        check(deltas is original_returns[-1] and original_count[0]==2,case_name+': two original solver calls only, no observer replay')
+        calls=state['hpc_context']['record']['solver_calls']
+        check([x['phase'] for x in calls]==['analysis','synthesis'],case_name+': actual phase order')
+        check(all(len(x['operations'])==12 for x in calls),case_name+': actual supported scene has5gather/2add/3copy/2Schur captures')
+        check(all(x['transparent_original_return'] and all(y['exact'] for y in x['outputs_from_actual_index_copy_or_empty_identity']) for x in calls),case_name+': original writeback/empty-identity outputs captured without solve replay')
+        check('active_hpc_solver' not in state and watches,case_name+': active context cleared and finite-gradient watch routes installed')
+        cases.append({'case':case_name,'original_solver_calls':original_count[0],'operation_counts':[x['actual_batch_operation_counts'] for x in calls],'watch_route_count':len(watches),'actual_gradient_or_Torch_tested':False})
+    finally:
+        for name in names:setattr(T,name,originals[name])
+check(all(getattr(T,n) is originals[n] for n in names),'software fixture restores original list-carrier methods')
+report={'status':'SMALL_HPC_NATIVE_HARNESS_SOFTWARE_CHECKS_PASSED_NOT_NATIVE_PASS','recorded_at':datetime.now(timezone.utc).isoformat(),'check_count':len(CHECKS),'checks':CHECKS,'solver_callback_software_cases':cases,'worker_sha256':sha(HERE/'worker.py'),'original_resource_reference_sha256':sha(OLD/'worker.py'),'source_preparation_sha256':sha(SOURCE/'preparation.json'),'Torch_native_FP32_autograd_gradient_optimizer_data_or_resource_tested':False,'old208_34_38_19_suites_rerun':False,'material_concerns':[]}
+with (HERE/'static_validation.json').open('x',encoding='utf-8',newline='\n') as f:json.dump(report,f,ensure_ascii=False,indent=2,allow_nan=False);f.write('\n')
+print(json.dumps({'check_count':len(CHECKS),'sha256':sha(HERE/'static_validation.json'),'native_resources':'NOT_RUN'}))

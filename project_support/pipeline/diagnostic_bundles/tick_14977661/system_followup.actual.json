@@ -1,0 +1,92 @@
+{
+  "owner": {
+    "token": "149776616efc47dcaffa369bf8e78307",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T14:07:34.772609+00:00",
+    "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+    "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+    "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d"
+  },
+  "certainty": "terminal",
+  "local_ssh_pid": 80240,
+  "kind": "CURRENT_TARGETED_APPORT_AND_CORRECTED_KERNEL_QUERY",
+  "read_only": true,
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "owner": {
+      "token": "149776616efc47dcaffa369bf8e78307",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-09T14:07:34.772609+00:00",
+      "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+      "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+      "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d"
+    },
+    "observed_at": "2026-11-09T14:57:56.008096+00:00",
+    "kind": "TARGETED_CORRECTED_KERNEL_APPORT_AND_UNCERTAIN_HELPER_FOLLOWUP",
+    "hostname": "dl04-MS-7E06",
+    "uid": 1001,
+    "failure_window_original_logmtime_anchor": {
+      "since": "2026-11-09 11:27:46 UTC",
+      "until": "2026-11-09 11:37:46 UTC",
+      "exact_failure_time_claimed": false
+    },
+    "kernel_journal": {
+      "label": "corrected_target_PID_kernel_records",
+      "argv": [
+        "journalctl",
+        "-k",
+        "--no-pager",
+        "--since",
+        "2026-11-09 11:27:46 UTC",
+        "--until",
+        "2026-11-09 11:37:46 UTC",
+        "--output=short-iso",
+        "--lines=40",
+        "--grep",
+        "(^|[^0-9])(3815203|3813109)([^0-9]|$)"
+      ],
+      "capture_cap_bytes": 16000,
+      "available": true,
+      "pid": 979324,
+      "certainty": "terminal",
+      "returncode": 1,
+      "stdout": "-- No entries --\n",
+      "stderr": "Hint: You are currently not seeing messages from other users and the system.\n      Users in groups 'adm', 'systemd-journal' can see all messages.\n      Pass -q to turn off this notice.\n",
+      "captured_bytes": 202,
+      "output_truncated": false,
+      "signals_sent": false
+    },
+    "old_helper_reconciliation": {
+      "pid": 883090,
+      "exists": false,
+      "command_repeated": false,
+      "signals_sent": false
+    },
+    "apport_reports": {
+      "selection": "TWO_EXACT_PROJECT_PYTHON_BASENAMES_UID1001_ONLY",
+      "directory_scan_or_other_users_reports": false,
+      "reports": [
+        {
+          "path": "/var/crash/_home_songcl_.conda_envs_project_cluster_bin_python3.10.1001.crash",
+          "exists": false
+        },
+        {
+          "path": "/var/crash/_home_songcl_.conda_envs_project_cluster_bin_python.1001.crash",
+          "exists": false
+        }
+      ]
+    },
+    "apport_log": {
+      "path": "/var/log/apport.log",
+      "available": false,
+      "error_type": "PermissionError",
+      "error": "[Errno 13] Permission denied: '/var/log/apport.log'"
+    },
+    "root_cause": "UNKNOWN",
+    "Torch_or_GPU_or_native_extension_calls": false,
+    "signals_restart_resume_sudo_or_remote_writes": false,
+    "prior_uname_or_failed_kernel_command_blindly_repeated": false
+  },
+  "transport_passed": true
+}

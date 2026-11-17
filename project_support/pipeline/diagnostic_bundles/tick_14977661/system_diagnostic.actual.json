@@ -1,0 +1,797 @@
+{
+  "owner": {
+    "token": "149776616efc47dcaffa369bf8e78307",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T14:07:34.772609+00:00",
+    "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+    "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+    "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d"
+  },
+  "certainty": "terminal",
+  "local_ssh_pid": 69568,
+  "kind": "CURRENT_TARGETED_WORKER_SYSTEM_FORENSIC_OBSERVATION",
+  "body_sha256": "90fb7ccb5184fcb2011c32e74169cf577db435df73a928ec67e128e1f8423f4e",
+  "read_only": true,
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "owner": {
+      "token": "149776616efc47dcaffa369bf8e78307",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-09T14:07:34.772609+00:00",
+      "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+      "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+      "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d"
+    },
+    "observed_at": "2026-11-09T14:39:04.006533+00:00",
+    "kind": "TARGETED_READONLY_DATALOADER_SIGSEGV_SYSTEM_DIAGNOSTIC",
+    "hostname": "dl04-MS-7E06",
+    "uid": 1001,
+    "main_pid": 3813109,
+    "worker_pid": 3815203,
+    "original_logs": {
+      "registered_stdout": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec_20261109_175751.log",
+        "available": true,
+        "bytes": 2671896,
+        "mtime_ns": 1794223966407313020,
+        "mtime_utc": "2026-11-09T11:32:46.407313+00:00",
+        "content_read": false
+      },
+      "native_logger": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800/20261109_175800.log",
+        "available": true,
+        "bytes": 929903,
+        "mtime_ns": 1794223936418877445,
+        "mtime_utc": "2026-11-09T11:32:16.418877+00:00",
+        "content_read": false
+      }
+    },
+    "failure_window": {
+      "since": "2026-11-09 11:27:46 UTC",
+      "until": "2026-11-09 11:37:46 UTC",
+      "anchor": "CURRENT_REGISTERED_STDOUT_MTIME",
+      "exact_failure_timestamp_proven": false
+    },
+    "current_core_pattern": {
+      "path": "/proc/sys/kernel/core_pattern",
+      "available": true,
+      "text": "|/usr/share/apport/apport -p%p -s%s -c%c -d%d -P%P -u%u -g%g -F%F -- %E\n",
+      "truncated": false,
+      "observation_scope": "CURRENT_NOT_HISTORICAL"
+    },
+    "current_os_release": {
+      "path": "/etc/os-release",
+      "available": true,
+      "text": "PRETTY_NAME=\"Ubuntu 24.04.2 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.2 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+      "truncated": false,
+      "observation_scope": "CURRENT_NOT_HISTORICAL"
+    },
+    "commands": [
+      {
+        "label": "worker_coredump_info",
+        "argv": [
+          "coredumpctl",
+          "--no-pager",
+          "--since",
+          "2026-11-09 11:27:46 UTC",
+          "--until",
+          "2026-11-09 11:37:46 UTC",
+          "info",
+          "COREDUMP_PID=3815203",
+          "COREDUMP_UID=1001"
+        ],
+        "capture_cap_bytes": 20000,
+        "available": false,
+        "certainty": "terminal",
+        "reason": "EXECUTABLE_NOT_FOUND"
+      },
+      {
+        "label": "target_PID_kernel_records",
+        "argv": [
+          "journalctl",
+          "--kernel",
+          "--no-pager",
+          "--since",
+          "2026-11-09 11:27:46 UTC",
+          "--until",
+          "2026-11-09 11:37:46 UTC",
+          "--output=short-iso",
+          "--lines=40",
+          "--grep",
+          "(^|[^0-9])(3815203|3813109)([^0-9]|$)"
+        ],
+        "capture_cap_bytes": 16000,
+        "available": true,
+        "pid": 883087,
+        "certainty": "terminal",
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "/usr/bin/journalctl: unrecognized option '--kernel'\n",
+        "captured_bytes": 52,
+        "output_truncated": false,
+        "signals_sent": false
+      },
+      {
+        "label": "current_shm_df_NOT_PAST_USAGE",
+        "argv": [
+          "df",
+          "-B1",
+          "/dev/shm"
+        ],
+        "capture_cap_bytes": 2048,
+        "available": true,
+        "pid": 883089,
+        "certainty": "terminal",
+        "returncode": 0,
+        "stdout": "Filesystem        1B-blocks  Used    Available Use% Mounted on\ntmpfs          101149011968 12288 101148999680   1% /dev/shm\n",
+        "stderr": "",
+        "captured_bytes": 124,
+        "output_truncated": false,
+        "signals_sent": false
+      },
+      {
+        "label": "current_uname",
+        "argv": [
+          "uname",
+          "-srvm"
+        ],
+        "capture_cap_bytes": 2048,
+        "available": true,
+        "pid": 883090,
+        "certainty": "uncertain",
+        "reason": "TIMEOUT_OR_PENDING_PIPE; PID retained, no signal/retry",
+        "stdout": "Linux 6.17.0-35-generic #35~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Tue May 26 19:30:42 UTC 2 x86_64\n",
+        "stderr": "",
+        "captured_bytes": 96,
+        "output_truncated": false,
+        "signals_sent": false
+      }
+    ],
+    "versions_from_source_metadata": {
+      "training_environment": "/home/songcl/.conda/envs/project_cluster",
+      "packages": [
+        {
+          "package": "torch",
+          "metadata_matches": [
+            {
+              "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch-2.8.0+cu128.dist-info/METADATA",
+              "header_fields": {
+                "Name": [
+                  "torch"
+                ],
+                "Version": [
+                  "2.8.0+cu128"
+                ]
+              },
+              "header_bytes_read": 8192,
+              "header_sha256": "1014dd4c4145e012607525b4de26f301ee9ba7f9172cf7a1a95929b6a5c4e0cf"
+            }
+          ]
+        },
+        {
+          "package": "numpy",
+          "metadata_matches": [
+            {
+              "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/numpy-1.26.4.dist-info/METADATA",
+              "header_fields": {
+                "Name": [
+                  "numpy"
+                ],
+                "Version": [
+                  "1.26.4"
+                ]
+              },
+              "header_bytes_read": 8192,
+              "header_sha256": "75f20585b7baaa89b29ce894aa825b802a4367afe6158a1e2271514faa329a13"
+            }
+          ]
+        },
+        {
+          "package": "scipy",
+          "metadata_matches": [
+            {
+              "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/scipy-1.15.3.dist-info/METADATA",
+              "header_fields": {
+                "Name": [
+                  "scipy"
+                ],
+                "Version": [
+                  "1.15.3"
+                ]
+              },
+              "header_bytes_read": 8192,
+              "header_sha256": "208500457bbfbbd628216a911e6aa8c530e68c58a4d074fdda43d6091689e81d"
+            }
+          ]
+        },
+        {
+          "package": "gorilla",
+          "metadata_matches": []
+        }
+      ],
+      "python_metadata": [
+        {
+          "path": "/home/songcl/.conda/envs/project_cluster/conda-meta/python-3.10.20-h267e890_1_cpython.json",
+          "available": false,
+          "error_type": "AssertionError",
+          "error": ""
+        }
+      ],
+      "package_imports": false,
+      "diagnostic_python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+      "observation_scope": "CURRENT_SOURCE_METADATA_NOT_PROVEN_FAILURE_TIME_ABI"
+    },
+    "installed_DataLoader_source": [
+      {
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/signal_handling.py",
+        "bytes": 3171,
+        "mtime_ns": 1782094216563021598,
+        "bytes_read": 3171,
+        "complete_file_read": true,
+        "source_prefix_sha256": "f995b62e24df3a7e8fd8caa2ea94013e8a858b66531b15f00b5bfa045bc3424d",
+        "matched_lines": [
+          19,
+          24,
+          40,
+          43,
+          49,
+          54,
+          61,
+          62,
+          73,
+          79
+        ],
+        "selected_lines_truncated": true,
+        "selected_lines": [
+          {
+            "line": 17,
+            "text": "When an error happens in a worker process, the main process received a SIGCHLD,"
+          },
+          {
+            "line": 18,
+            "text": "and Python will eventually call the handler registered below"
+          },
+          {
+            "line": 19,
+            "text": "(in `_set_SIGCHLD_handler`). In the handler, the `_error_if_any_worker_fails`"
+          },
+          {
+            "line": 20,
+            "text": "call checks all registered worker pids and raise proper error message to"
+          },
+          {
+            "line": 21,
+            "text": "prevent main process from hanging waiting for data from worker."
+          },
+          {
+            "line": 22,
+            "text": ""
+          },
+          {
+            "line": 23,
+            "text": "Additionally, at the beginning of each worker's `_utils.worker._worker_loop`,"
+          },
+          {
+            "line": 24,
+            "text": "`_set_worker_signal_handlers` is called to register critical signal handlers"
+          },
+          {
+            "line": 25,
+            "text": "(e.g., for SIGSEGV, SIGBUS, SIGFPE, SIGTERM) in C, which just prints an error"
+          },
+          {
+            "line": 26,
+            "text": "message to stderr before triggering the default handler. So a message will also"
+          },
+          {
+            "line": 38,
+            "text": "# be used `_utils.signal_handling.XXXXX`."
+          },
+          {
+            "line": 39,
+            "text": "from torch._C import (  # noqa: F401"
+          },
+          {
+            "line": 40,
+            "text": "    _error_if_any_worker_fails,"
+          },
+          {
+            "line": 41,
+            "text": "    _remove_worker_pids,"
+          },
+          {
+            "line": 42,
+            "text": "    _set_worker_pids,"
+          },
+          {
+            "line": 43,
+            "text": "    _set_worker_signal_handlers,"
+          },
+          {
+            "line": 44,
+            "text": ")"
+          },
+          {
+            "line": 45,
+            "text": ""
+          },
+          {
+            "line": 47,
+            "text": ""
+          },
+          {
+            "line": 48,
+            "text": ""
+          },
+          {
+            "line": 49,
+            "text": "_SIGCHLD_handler_set = False"
+          },
+          {
+            "line": 50,
+            "text": "r\"\"\"Whether SIGCHLD handler is set for DataLoader worker failures. Only one"
+          },
+          {
+            "line": 51,
+            "text": "handler needs to be set for all DataLoaders in a process.\"\"\""
+          },
+          {
+            "line": 52,
+            "text": ""
+          },
+          {
+            "line": 53,
+            "text": ""
+          },
+          {
+            "line": 54,
+            "text": "def _set_SIGCHLD_handler():"
+          },
+          {
+            "line": 55,
+            "text": "    # Windows doesn't support SIGCHLD handler"
+          },
+          {
+            "line": 56,
+            "text": "    if IS_WINDOWS:"
+          },
+          {
+            "line": 59,
+            "text": "    if not isinstance(threading.current_thread(), threading._MainThread):  # type: ignore[attr-defined]"
+          },
+          {
+            "line": 60,
+            "text": "        return"
+          },
+          {
+            "line": 61,
+            "text": "    global _SIGCHLD_handler_set"
+          },
+          {
+            "line": 62,
+            "text": "    if _SIGCHLD_handler_set:"
+          },
+          {
+            "line": 63,
+            "text": "        return"
+          },
+          {
+            "line": 64,
+            "text": "    previous_handler = signal.getsignal(signal.SIGCHLD)"
+          },
+          {
+            "line": 71,
+            "text": "        # This following call uses `waitid` with WNOHANG from C side. Therefore,"
+          },
+          {
+            "line": 72,
+            "text": "        # Python can still get and update the process status successfully."
+          }
+        ],
+        "module_imported": false,
+        "complete_file_sha256": "f995b62e24df3a7e8fd8caa2ea94013e8a858b66531b15f00b5bfa045bc3424d"
+      },
+      {
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py",
+        "bytes": 13800,
+        "mtime_ns": 1782094216563107754,
+        "bytes_read": 13800,
+        "complete_file_read": true,
+        "source_prefix_sha256": "d3652cf902df501a6e824659b5a07941db9b689834a2acd18dabf16f2e0633e8",
+        "matched_lines": [
+          134,
+          228,
+          253,
+          257,
+          287,
+          299,
+          343,
+          349,
+          355,
+          358
+        ],
+        "selected_lines_truncated": true,
+        "selected_lines": [
+          {
+            "line": 132,
+            "text": ""
+          },
+          {
+            "line": 133,
+            "text": "@dataclass(frozen=True)"
+          },
+          {
+            "line": 134,
+            "text": "class _IterableDatasetStopIteration:"
+          },
+          {
+            "line": 135,
+            "text": "    worker_id: int"
+          },
+          {
+            "line": 136,
+            "text": ""
+          },
+          {
+            "line": 226,
+            "text": ""
+          },
+          {
+            "line": 227,
+            "text": ""
+          },
+          {
+            "line": 228,
+            "text": "def _worker_loop("
+          },
+          {
+            "line": 229,
+            "text": "    dataset_kind,"
+          },
+          {
+            "line": 230,
+            "text": "    dataset,"
+          },
+          {
+            "line": 251,
+            "text": "        # again."
+          },
+          {
+            "line": 252,
+            "text": "        # https://docs.python.org/3/library/signal.html#execution-of-python-signal-handlers"
+          },
+          {
+            "line": 253,
+            "text": "        signal_handling._set_worker_signal_handlers()"
+          },
+          {
+            "line": 254,
+            "text": ""
+          },
+          {
+            "line": 255,
+            "text": "        torch.multiprocessing._set_thread_name(\"pt_data_worker\")"
+          },
+          {
+            "line": 256,
+            "text": ""
+          },
+          {
+            "line": 257,
+            "text": "        torch.set_num_threads(1)"
+          },
+          {
+            "line": 258,
+            "text": "        seed = base_seed + worker_id"
+          },
+          {
+            "line": 259,
+            "text": "        random.seed(seed)"
+          },
+          {
+            "line": 285,
+            "text": "        try:"
+          },
+          {
+            "line": 286,
+            "text": "            if init_fn is not None:"
+          },
+          {
+            "line": 287,
+            "text": "                init_fn(worker_id)"
+          },
+          {
+            "line": 288,
+            "text": ""
+          },
+          {
+            "line": 289,
+            "text": "            fetcher = _DatasetKind.create_fetcher("
+          },
+          {
+            "line": 297,
+            "text": "        # When using Iterable mode, some worker can exit earlier than others due"
+          },
+          {
+            "line": 298,
+            "text": "        # to the IterableDataset behaving differently for different workers."
+          },
+          {
+            "line": 299,
+            "text": "        # When such things happen, an `_IterableDatasetStopIteration` object is"
+          },
+          {
+            "line": 300,
+            "text": "        # sent over to the main process with the ID of this worker, so that the"
+          },
+          {
+            "line": 301,
+            "text": "        # main process won't send more tasks to this worker, and will send"
+          },
+          {
+            "line": 341,
+            "text": "                continue"
+          },
+          {
+            "line": 342,
+            "text": "            idx, index = r"
+          },
+          {
+            "line": 343,
+            "text": "            data: Union[_IterableDatasetStopIteration, ExceptionWrapper]"
+          },
+          {
+            "line": 344,
+            "text": "            if init_exception is not None:"
+          },
+          {
+            "line": 345,
+            "text": "                data = init_exception"
+          },
+          {
+            "line": 347,
+            "text": "            else:"
+          },
+          {
+            "line": 348,
+            "text": "                try:"
+          }
+        ],
+        "module_imported": false,
+        "complete_file_sha256": "d3652cf902df501a6e824659b5a07941db9b689834a2acd18dabf16f2e0633e8"
+      },
+      {
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py",
+        "bytes": 1953,
+        "mtime_ns": 1782094216562906751,
+        "bytes_read": 1953,
+        "complete_file_read": true,
+        "source_prefix_sha256": "57f9c395570126aa68a0579ed5afe4d327fd1d5567929af74cd3d95f88b567be",
+        "matched_lines": [
+          43,
+          46,
+          49,
+          50,
+          52,
+          55
+        ],
+        "selected_lines_truncated": false,
+        "selected_lines": [
+          {
+            "line": 41,
+            "text": "        else:"
+          },
+          {
+            "line": 42,
+            "text": "            data = next(self.dataset_iter)"
+          },
+          {
+            "line": 43,
+            "text": "        return self.collate_fn(data)"
+          },
+          {
+            "line": 44,
+            "text": ""
+          },
+          {
+            "line": 45,
+            "text": ""
+          },
+          {
+            "line": 46,
+            "text": "class _MapDatasetFetcher(_BaseDatasetFetcher):"
+          },
+          {
+            "line": 47,
+            "text": "    def fetch(self, possibly_batched_index):"
+          },
+          {
+            "line": 48,
+            "text": "        if self.auto_collation:"
+          },
+          {
+            "line": 49,
+            "text": "            if hasattr(self.dataset, \"__getitems__\") and self.dataset.__getitems__:"
+          },
+          {
+            "line": 50,
+            "text": "                data = self.dataset.__getitems__(possibly_batched_index)"
+          },
+          {
+            "line": 51,
+            "text": "            else:"
+          },
+          {
+            "line": 52,
+            "text": "                data = [self.dataset[idx] for idx in possibly_batched_index]"
+          },
+          {
+            "line": 53,
+            "text": "        else:"
+          },
+          {
+            "line": 54,
+            "text": "            data = self.dataset[possibly_batched_index]"
+          },
+          {
+            "line": 55,
+            "text": "        return self.collate_fn(data)"
+          }
+        ],
+        "module_imported": false,
+        "complete_file_sha256": "57f9c395570126aa68a0579ed5afe4d327fd1d5567929af74cd3d95f88b567be"
+      }
+    ],
+    "static_extension_metadata": [
+      {
+        "label": "voxelization_pointgroup",
+        "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so",
+        "bytes": 14128696,
+        "mtime_ns": 1793763823688006644,
+        "ELF_header_bytes_read": 64,
+        "ELF_header_sha256": "364352e36c230e20319a7dedeee13130997e64d967a1ef5565529c4170b2c0e2",
+        "native_extension_loaded_or_called": false,
+        "ldd_executed": false,
+        "readelf_result": {
+          "label": "static_ELF_voxelization_pointgroup",
+          "argv": [
+            "readelf",
+            "--notes",
+            "--dynamic",
+            "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so"
+          ],
+          "capture_cap_bytes": 4096,
+          "available": true,
+          "pid": 883099,
+          "certainty": "terminal",
+          "returncode": 0,
+          "stdout": "\nDynamic section at offset 0x70b20 contains 31 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libc10.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libtorch_cpu.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libtorch_python.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libcudart.so.12]\n 0x0000000000000001 (NEEDED)             Shared library: [libc10_cuda.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x000000000000000c (INIT)               0x32000\n 0x000000000000000d (FINI)               0x5c854\n 0x0000000000000019 (INIT_ARRAY)         0x70840\n 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x70858\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x17d20\n 0x0000000000000005 (STRTAB)             0x1f358\n 0x0000000000000006 (SYMTAB)             0x19340\n 0x000000000000000a (STRSZ)              50747 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000003 (PLTGOT)             0x70fe8\n 0x0000000000000002 (PLTRELSZ)           18384 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x2d3a0\n 0x0000000000000007 (RELA)               0x2c2d8\n 0x0000000000000008 (RELASZ)             4296 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000006ffffffe (VERNEED)            0x2c198\n 0x000000006fffffff (VERNEEDNUM)         4\n 0x000000006ffffff0 (VERSYM)             0x2b994\n 0x000000006ffffff9 (RELACOUNT)          39\n 0x0000000000000000 (NULL)               0x0\n\nDisplaying notes found in: .note.gnu.property\n  Owner                Data size \tDescription\n  GNU                  0x00000010\tNT_GNU_PROPERTY_TYPE_0\n      Properties: x86 feature: IBT, SHSTK\n\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 7d2b4aa074b8eaddb55469260087cc6687288137\n",
+          "stderr": "",
+          "captured_bytes": 2251,
+          "output_truncated": false,
+          "signals_sent": false
+        },
+        "current_binary_sha256": "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033",
+        "binary_hash_bytes_read": 14128696
+      },
+      {
+        "label": "torch_scatter_CPU",
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_scatter_cpu.so",
+        "bytes": 534160,
+        "mtime_ns": 1782093745898246406,
+        "ELF_header_bytes_read": 64,
+        "ELF_header_sha256": "5797c1e9ce358584ac3f5425b71fc46d88273390002451c6a4df382504012aba",
+        "native_extension_loaded_or_called": false,
+        "ldd_executed": false,
+        "readelf_result": {
+          "label": "static_ELF_torch_scatter_CPU",
+          "argv": [
+            "readelf",
+            "--notes",
+            "--dynamic",
+            "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_scatter_cpu.so"
+          ],
+          "capture_cap_bytes": 4096,
+          "available": true,
+          "pid": 883101,
+          "certainty": "terminal",
+          "returncode": 0,
+          "stdout": "\nDynamic section at offset 0x808b8 contains 28 entries:\n  Tag        Type                         Name/Value\n 0x0000000000000001 (NEEDED)             Shared library: [libc10.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libtorch_cpu.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x000000000000000c (INIT)               0x1c000\n 0x000000000000000d (FINI)               0x6efc4\n 0x0000000000000019 (INIT_ARRAY)         0x80fb8\n 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x80fd0\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x2f0\n 0x0000000000000005 (STRTAB)             0x5cc0\n 0x0000000000000006 (SYMTAB)             0x10d0\n 0x000000000000000a (STRSZ)              64093 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000003 (PLTGOT)             0x81fe8\n 0x0000000000000002 (PLTRELSZ)           10176 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x18870\n 0x0000000000000007 (RELA)               0x15eb8\n 0x0000000000000008 (RELASZ)             10680 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000006ffffffe (VERNEED)            0x15d78\n 0x000000006fffffff (VERNEEDNUM)         3\n 0x000000006ffffff0 (VERSYM)             0x1571e\n 0x000000006ffffff9 (RELACOUNT)          30\n 0x0000000000000000 (NULL)               0x0\n\nDisplaying notes found in: .note.gnu.property\n  Owner                Data size \tDescription\n  GNU                  0x00000010\tNT_GNU_PROPERTY_TYPE_0\n      Properties: x86 feature: IBT, SHSTK\n\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 07bb3a2a91f5735f3997b5f22048451f46e294b1\n",
+          "stderr": "",
+          "captured_bytes": 2021,
+          "output_truncated": false,
+          "signals_sent": false
+        }
+      },
+      {
+        "label": "TokenizerFast_native",
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/tokenizers/tokenizers.cpython-310-x86_64-linux-gnu.so",
+        "bytes": 17916457,
+        "mtime_ns": 1782094534818803527,
+        "ELF_header_bytes_read": 64,
+        "ELF_header_sha256": "ec665c512c74da62129e48e8b0551d8e57ca887382069d6fc30915786939e56e",
+        "native_extension_loaded_or_called": false,
+        "ldd_executed": false,
+        "readelf_result": {
+          "label": "static_ELF_TokenizerFast_native",
+          "argv": [
+            "readelf",
+            "--notes",
+            "--dynamic",
+            "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/tokenizers/tokenizers.cpython-310-x86_64-linux-gnu.so"
+          ],
+          "capture_cap_bytes": 4096,
+          "available": true,
+          "pid": 883102,
+          "certainty": "terminal",
+          "returncode": 0,
+          "stdout": "\nDynamic section at offset 0x1114c68 contains 36 entries:\n  Tag        Type                         Name/Value\n 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN/../tokenizers.libs]\n 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libssl-cd1d6220.so.1.0.2k]\n 0x0000000000000001 (NEEDED)             Shared library: [libcrypto-d3570994.so.1.0.2k]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [librt.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libpthread.so.0]\n 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libdl.so.2]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]\n 0x000000000000000c (INIT)               0xb9000\n 0x000000000000000d (FINI)               0x647100\n 0x0000000000000019 (INIT_ARRAY)         0x8ca420\n 0x000000000000001b (INIT_ARRAYSZ)       24 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x8ca438\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x95b028\n 0x0000000000000005 (STRTAB)             0x95eee8\n 0x0000000000000006 (SYMTAB)             0x95d000\n 0x000000000000000a (STRSZ)              4926 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000003 (PLTGOT)             0x94bb10\n 0x0000000000000002 (PLTRELSZ)           816 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0xb7f88\n 0x0000000000000007 (RELA)               0x36b8\n 0x0000000000000008 (RELASZ)             739536 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x0000000000000018 (BIND_NOW)           \n 0x000000006ffffffb (FLAGS_1)            Flags: NOW\n 0x000000006ffffffe (VERNEED)            0x34b8\n 0x000000006fffffff (VERNEEDNUM)         10\n 0x000000006ffffff0 (VERSYM)             0x3254\n 0x000000006ffffff9 (RELACOUNT)          30527\n 0x0000000000000000 (NULL)               0x0\n\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 4282469062c8df2d2d1841fb3cd4811f71cbf27c\n",
+          "stderr": "",
+          "captured_bytes": 2413,
+          "output_truncated": false,
+          "signals_sent": false
+        }
+      },
+      {
+        "label": "NumPy_native",
+        "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/numpy/core/_multiarray_umath.cpython-310-x86_64-linux-gnu.so",
+        "bytes": 7426841,
+        "mtime_ns": 1782095205650233316,
+        "ELF_header_bytes_read": 64,
+        "ELF_header_sha256": "24000b72fa02c300600058f6c43f74f89ead005b72c82875727eee21e8abd4db",
+        "native_extension_loaded_or_called": false,
+        "ldd_executed": false,
+        "readelf_result": {
+          "label": "static_ELF_NumPy_native",
+          "argv": [
+            "readelf",
+            "--notes",
+            "--dynamic",
+            "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/numpy/core/_multiarray_umath.cpython-310-x86_64-linux-gnu.so"
+          ],
+          "capture_cap_bytes": 4096,
+          "available": true,
+          "pid": 883103,
+          "certainty": "terminal",
+          "returncode": 0,
+          "stdout": "\nDynamic section at offset 0x711000 contains 28 entries:\n  Tag        Type                         Name/Value\n 0x000000000000000f (RPATH)              Library rpath: [$ORIGIN/../../numpy.libs]\n 0x0000000000000001 (NEEDED)             Shared library: [libopenblas64_p-r0-0cf96a72.3.23.dev.so]\n 0x0000000000000001 (NEEDED)             Shared library: [libm.so.6]\n 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]\n 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]\n 0x000000000000000c (INIT)               0x2b000\n 0x000000000000000d (FINI)               0x508664\n 0x0000000000000019 (INIT_ARRAY)         0x67e110\n 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)\n 0x000000000000001a (FINI_ARRAY)         0x67e118\n 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)\n 0x000000006ffffef5 (GNU_HASH)           0x6c3028\n 0x0000000000000005 (STRTAB)             0x6c9210\n 0x0000000000000006 (SYMTAB)             0x1388\n 0x000000000000000a (STRSZ)              16642 (bytes)\n 0x000000000000000b (SYMENT)             24 (bytes)\n 0x0000000000000003 (PLTGOT)             0x680000\n 0x0000000000000002 (PLTRELSZ)           16224 (bytes)\n 0x0000000000000014 (PLTREL)             RELA\n 0x0000000000000017 (JMPREL)             0x26480\n 0x0000000000000007 (RELA)               0xae20\n 0x0000000000000008 (RELASZ)             112224 (bytes)\n 0x0000000000000009 (RELAENT)            24 (bytes)\n 0x000000006ffffffe (VERNEED)            0xad90\n 0x000000006fffffff (VERNEEDNUM)         3\n 0x000000006ffffff0 (VERSYM)             0xa6b2\n 0x000000006ffffff9 (RELACOUNT)          4528\n 0x0000000000000000 (NULL)               0x0\n\nDisplaying notes found in: .note.gnu.build-id\n  Owner                Data size \tDescription\n  GNU                  0x00000014\tNT_GNU_BUILD_ID (unique build ID bitstring)\n    Build ID: 254b9d95bd0a5a68563e54bc0edf04579e59ebd2\n",
+          "stderr": "",
+          "captured_bytes": 1871,
+          "output_truncated": false,
+          "signals_sent": false
+        }
+      }
+    ],
+    "diagnostic_command_certainty": "uncertain",
+    "root_cause": "UNKNOWN",
+    "core_file_fallback": {
+      "candidates": [],
+      "directories": [
+        {
+          "directory": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+          "entries_checked": 24,
+          "scan_complete": true,
+          "recursive": false
+        },
+        {
+          "directory": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800",
+          "entries_checked": 5,
+          "scan_complete": true,
+          "recursive": false
+        }
+      ],
+      "core_contents_read": false
+    },
+    "scope_limits": {
+      "private_foreign_user_logs_or_contexts_requested": false,
+      "current_shm_usage_proves_past_failure_pressure": false,
+      "absence_or_access_denial_proves_no_core_or_kernel_failure": false,
+      "Torch_imports_or_GPU_queries": false,
+      "remote_files_written": false,
+      "signals_restart_resume_config_or_system_changes": false,
+      "sudo_or_password_access": false
+    }
+  },
+  "transport_passed": true
+}

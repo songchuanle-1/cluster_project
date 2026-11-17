@@ -1,0 +1,477 @@
+"""Read-only BEC R1 actual four-result reviewer. Never emits standard PASS/receipt/queue.
+Common/resource/directory checks derive from frozen dfb6440d PSBR reviewer;
+BEC actual up split/private mean/coarse-once/down/HCG and twelve aggregate blocks follow unchanged worker7e5 observations. No actual results exist at preparation.
+"""
+import argparse
+import ast
+import copy
+import hashlib
+import json
+import math
+from pathlib import Path
+import re
+import statistics
+
+CID='hierarchy-cross-level-bipartite-edge-composition'
+EID='M215-BEC'
+COMMIT='026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563'
+RUNTIME_EXPECTED='4e80006047d5cb3dcdfb9c1102e02c33f354a07d'
+GOAL='0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85'
+NAME='model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort'
+CONFIG='configs/Quard/ctf_hcg_csort_bec/'+NAME+'_bec.yaml'
+FROZEN=PREP_SHA=TEMPLATE_SHA=RELEASE=RELEASE_SHA=None
+UUIDS={0:'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'}
+PAIRS=[('smoke','champion'),('smoke','candidate'),('resources','champion'),('resources','candidate')]
+HANDLERS={'flop_count':'b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba','jit_analysis':'110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31','jit_handles':'ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129'}
+ORIGIN='pipeline/diagnostic_bundles/tick_f86d1cfa/bec_native_prepare'
+ORIGIN_PREP_SHA='322c8ce812ffccda6cfa3d6d2d6e1dd8f73859ab5d3a9835d0c1110328c3e3ff'
+WORKER_SHA='7e5d0f5b109e85d0d2f0bb7f2f806dd9db73fb7885add5abc372ce244ee753e3'
+SOURCE_PREP_SHA='2ef488c483bf1fb5234dc9615069f7ec2a9232370d186ec4f92cb2bfb3212731'
+YAML_SHA='a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a'
+CONTRACT_SHA='d44bfea3e5d67ff54a57cb01a5084894695ae4430c908872b5c3db50ff98f5b9'
+class Refused(ValueError):pass
+
+
+def need(value, message):
+    if not value:
+        raise Refused(message)
+
+def finite(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+def digest(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def read(path):
+    def reject(value):
+        raise Refused('Nonstandard JSON number: ' + value)
+    return json.loads(Path(path).read_text(encoding='utf-8-sig'), parse_constant=reject)
+
+def hash_string(value):
+    return isinstance(value, str) and re.fullmatch('[0-9a-f]{64}', value) is not None
+
+def tensor(value, nonzero=False):
+    need(isinstance(value, dict), 'Missing tensor observation')
+    need(value['finite'] is True and value['nonfinite_count'] == 0, 'Nonfinite tensor observation')
+    need(isinstance(value['shape'], list) and value['dtype'] == 'torch.float32', 'Missing shape or changed native FP32 dtype')
+    need(finite(value['abs_max']) and value['abs_max'] >= 0, 'Invalid observed tensor magnitude')
+    if nonzero:
+        need(value['abs_max'] > 0, 'Required native branch has zero gradient')
+
+def gradients(record, key, nonzero=False):
+    need(isinstance(record[key], list) and record[key], 'Missing actual gradient hook: ' + key)
+    for value in record[key]:
+        tensor(value, nonzero)
+
+def common(raw, manifest, mode, target):
+    need(isinstance(raw,dict),'Actual raw result must be a JSON object')
+    need(not str(raw.get('coverage_status','')).startswith('INCONCLUSIVE') and 'INCONCLUSIVE_COVERAGE' not in str(raw.get('error','')),'INCONCLUSIVE: original fixed TRAIN batch did not exercise required BEC path; no replacement sample')
+    need(raw['execution_completed'] is True and not raw.get('error_type') and not raw.get('error'), 'Worker did not complete successfully')
+    need((raw['mode'], raw['target'], raw['candidate_id'], raw['code_commit'], raw['goal_sha256']) ==
+         (mode, target, CID, COMMIT, GOAL), 'Raw identity/mode/target mismatch')
+    package = 'framework.model.Quard_model.' + NAME + ('_bec' if target == 'candidate' else '')
+    need(raw['model_package'] == package, 'Wrong/fallback model resolver')
+    expected_sources = manifest['candidate_source_hashes'] if target == 'candidate' else manifest['assets']['source_hashes']
+    need(raw['source_hashes'] == expected_sources, 'Raw source hashes do not match exact manifest')
+    need(raw['native_model_and_yaml_unchanged'] is True, 'Native source/YAML claim absent')
+    need(raw['config_sha256'] == raw['original_config_sha256'] == manifest['candidate_config_sha256'], 'Native YAML hash mismatch')
+    need(hash_string(raw['runtime_config_sha256']), 'Runtime YAML hash missing')
+    init = raw['initialization']
+    need(init['kind'] == 'native_train_pretrain' and init['seed'] == 1999 and init['trained_m95_checkpoint_loaded'] is False,
+         'Wrong seed or full-model initialization')
+    need(init['path'] == manifest['assets']['pretrain'] and init['sha256'] == manifest['assets']['pretrain_sha256'], 'Pretrain mismatch')
+    need(init['loader'] == 'gorilla.load_checkpoint(strict=False,map_location=cpu)', 'Pretrain loader changed')
+    need(raw['native_train_source_sha256'] == manifest['assets']['native_train_source_sha256'], 'Native train source mismatch')
+    selected_name = NAME + ('_bec' if target == 'candidate' else '')
+    need(raw['config_source'] == (manifest['stage'] + '/candidate.yaml' if target == 'candidate' else manifest['assets']['config_path']), 'Wrong native source config path')
+    need(raw['runtime_config_path'] == manifest['stage'] + '/runtime_config_' + mode + '_' + target + '/' + selected_name + '.yaml', 'Wrong private native config resolver path')
+    adaptation = raw['configuration_adaptations']
+    need(set(adaptation) == {'work_dir', 'dist'} and adaptation['dist'] == 'False, native single-GPU CLI default' and
+         adaptation['work_dir']['to'] == manifest['stage'] + '/native_' + mode + '_' + target and adaptation['work_dir']['from'], 'Non-path native config adaptation')
+    need(raw['new_training'] == 0, 'Unexpected formal training in diagnostic')
+    need(raw['data_source']['train']['training'] is True, 'Raw train data source absent')
+
+def named_hashes(value, names):
+    need(isinstance(value, dict) and set(value) == set(names) and all(hash_string(x) for x in value.values()), 'Incomplete tracked-module fingerprints')
+
+def resources(raw):
+    need((raw['batch_size'], raw['lang_num_max'], raw['warmup'], raw['repeat']) == (1, 1, 20, 100), 'Resource protocol changed')
+    need(raw['optimizer_steps'] == raw['native_loss_forwards'] == raw['native_criterion_backwards'] == 0 and raw['native_predict_calls'] == 121, 'Resource process contains training or lacks actual measured calls')
+    values = raw['measurements_ms']
+    need(len(values) == 100 and all(finite(x) and x > 0 for x in values), '100 finite timing observations required')
+    ordered = sorted(values); p90 = ordered[89] + (ordered[90] - ordered[89]) * 0.1
+    # Encoding/derived-statistic consistency, not a latency acceptance threshold.
+    need(math.isclose(raw['median_ms'], statistics.median(values), rel_tol=1e-12, abs_tol=1e-12) and
+         math.isclose(raw['p90_ms'], p90, rel_tol=1e-12, abs_tol=1e-12), 'Reported timing statistics disagree with measurements')
+    need(hash_string(raw['input_sha256']) and raw['scan_ids'] and raw['ann_ids'], 'Missing real resource sample identity')
+    need(raw['parameter_flags_preserved'] is True and raw['source_body_executed_without_replacement'] is True and
+         raw['validation_accuracy_evaluated_for_selection'] is False, 'Resource path/validation boundary changed')
+    for k in ('parameters', 'peak_allocated_bytes', 'peak_reserved_bytes'):
+        need(type(raw[k]) is int and raw[k] > 0, 'Invalid actual resource observation: ' + k)
+    profile = raw['profile']
+    need(profile['profiler_file_sha256'] == HANDLERS, 'Historical fvcore handlers changed')
+    need(finite(profile['flops']) and profile['flops'] > 0 and finite(profile['flops_g']) and profile['flops_g'] == profile['flops'] / 1e9, 'Invalid counted FLOPs')
+    need(profile['within10G'] is (profile['flops'] <= 10e9), 'FLOPs budget flag inconsistent')
+    need(isinstance(profile['unsupported_ops'], dict) and isinstance(profile['by_operator'], dict) and profile['fvcore_version'], 'Missing unsupported/operator/profiler disclosure')
+    need(all(type(n) is int and n >= 0 for n in profile['unsupported_ops'].values()), 'Malformed unsupported-op counts')
+    need(raw['full_optimizer_training_peak'].startswith('UNKNOWN'), 'Resource profile must not claim full TRAIN peak')
+
+def revision_lineage(project,candidate,contract):
+    """Immutable R1 provenance only; mutable result/evidence never gate raw truth."""
+    pinned={
+      'revision_preregistration':('pipeline/diagnostic_bundles/tick_45eb3b04/bec_revision1_preregistration.json','3fa782b8970de909a219cc090e2188983e1afeab1ac99cac43df07b4f1e5b527'),
+      'revision_CPU_evidence':('pipeline/diagnostic_bundles/tick_45eb3b04/bec_r1_cpu_trace_evidence.json','390ac50aef6ac17c121427a49956aebef4526b6e3b6ac8e3dd0eb4e21d16ac5f'),
+      'revision_source_preparation':('pipeline/diagnostic_bundles/tick_45eb3b04/bec_r1_prepare/preparation.json',SOURCE_PREP_SHA),
+      'source_version':('pipeline/diagnostic_bundles/tick_45eb3b04/bec_r1_version_operation/isolated_source_version.json','617203db75c05528e4d0a58b94309edb6b86888bcb91f3a73cf5fc18e1bc089e')}
+    refs=[]
+    for key,(name,h) in pinned.items():
+        item={'path':name,'sha256':h};path=(Path(project)/name).resolve()
+        need(contract[key]==item and path.is_relative_to(Path(project).resolve()) and digest(path)==h,'Immutable R1 provenance changed: '+key)
+        refs.append(item)
+    registration=read(Path(project)/pinned['revision_preregistration'][0])['preregistration']
+    revisions=[r for r in candidate.get('revision_history',[]) if type(r.get('revision')) is int and r.get('revision')==1]
+    need(len(revisions)==1,'Exactly one immutable R1 registration required')
+    for key in ('revision','failure_scope','reason','change','prediction','failure_evidence','preregistered_at'):
+        need(revisions[0].get(key)==registration[key],'R1 immutable registration field changed: '+key)
+    # Current result/evidence legitimately evolve after actual validation/admission.
+    source=read(Path(project)/pinned['source_version'][0])
+    need(source['code_commit']==COMMIT and source['parent_commit']==RUNTIME_EXPECTED and source['revision']==1 and source['single_parent'] is True and source['exact_additions_count']==9,'Actual R1 source version differs')
+    prepared=read(Path(project)/pinned['revision_source_preparation'][0])
+    need(prepared['source_files']==source['frozen_source_files']==source['committed_blob_sha256'],'R1 original9 source hash/version evidence differs')
+    return refs
+
+
+def configure_current_anchors(project):
+    global FROZEN,PREP_SHA,TEMPLATE_SHA,RELEASE,RELEASE_SHA
+    project=Path(project).resolve()
+    need(hash_string(CONTRACT_SHA),'Real frozen external packet contract is unbound; no placeholder/None authorization')
+    contract_path=Path(__file__).resolve().with_name('external_packet_contract.json')
+    need(digest(contract_path)==CONTRACT_SHA,'Exact BEC external contract changed');contract=read(contract_path)
+    c=next(x for x in read(project/'pipeline/research_work.json')['candidates'] if x['id']==CID)
+    need(c['code_commit']==COMMIT and c['goal_sha256']==GOAL,'Current BEC candidate identity changed')
+    native=c['worker_preparation']['preparation'];outer=c['execution_adapter']['preparation'];release=c['execution_adapter']['release']
+    for item,key in [(native,'native_preparation'),(outer,'operational_preparation'),(release,'static_release')]:
+        need(item==contract[key],'Current BEC packet is not the exact independently reviewable frozen version')
+        path=(project/item['path']).resolve();need(path.is_relative_to(project) and digest(path)==item['sha256'],'External BEC package anchor mismatch')
+    FROZEN=Path(native['path']).parent.as_posix();PREP_SHA=native['sha256'];RELEASE=release['path'];RELEASE_SHA=release['sha256']
+    prep=read(project/native['path']);TEMPLATE_SHA=prep['prepared_file_hashes']['manifest_template.json']
+    need(TEMPLATE_SHA==contract['manifest_template_sha256'],'BEC template differs from frozen contract')
+    need(prep['code_commit']==prep['source_commit']==COMMIT and prep['source_parent_commit']==prep['runtime_expected_commit']==RUNTIME_EXPECTED and prep['draft_execution_disabled'] is False,'Actual R1 source026c/parent4e8 operational copy required')
+    need(digest(project/ORIGIN/'preparation.json')==ORIGIN_PREP_SHA and digest(project/FROZEN/'worker.py')==WORKER_SHA,'Original disabled322c or exact7e5 observer changed')
+    need(digest(project/FROZEN/'native_runtime.py')==contract['runtime_sha256'],'Exact reviewed BEC runtime changed')
+    proof=read(project/FROZEN/'source_version_binding.json')
+    need(proof['code_commit']==COMMIT and proof['parent_commit']==proof['runtime_expected_commit']==RUNTIME_EXPECTED and proof['original_source_preparation_sha256']==SOURCE_PREP_SHA and len(proof['source_files'])==9,'Actual BEC R1 source026c/runtime4e8 binding differs')
+    for item,key in [(proof['isolated_source_version'],'source_version')]:
+        path=(project/item['path']).resolve();need(item==contract[key] and path.is_relative_to(project) and digest(path)==item['sha256'],'Actual BEC source version proof changed')
+    package=read(project/outer['path']);need(package['candidate_id']==CID and package['code_commit']==COMMIT,'Outer BEC identity differs')
+    for name,h in package['prepared_file_hashes'].items():
+        path=(project/Path(outer['path']).parent/name).resolve();need(path.is_relative_to((project/Path(outer['path']).parent).resolve()) and digest(path)==h,'Externally anchored BEC package changed: '+name)
+    grant=project/'pipeline/authorizations/server4_gpu0_only_20261026.json';need(digest(grant)=='94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09','Explicit current GPU0-only resource grant changed')
+    revision_refs=revision_lineage(project,c,contract)
+    return [dict(native),dict(outer),dict(release),{'path':grant.relative_to(project).as_posix(),'sha256':digest(grant)},{'path':ORIGIN+'/preparation.json','sha256':ORIGIN_PREP_SHA}]+revision_refs
+
+
+def review_directory(project,directory):
+    anchors=configure_current_anchors(project)
+    result=_review_directory_bound(project,directory)
+    result['evidence'].extend(anchors)
+    result['standard_PASS_receipt_queue_written']=False
+    return result
+
+
+def _review_directory_bound(project, directory):
+    project, directory = Path(project).resolve(), Path(directory).resolve()
+    need(directory.is_relative_to(project), 'Execution directory outside project')
+    binding, manifest = read(directory/'execution_binding.json'), read(directory/'native_manifest.json')
+    need(set(binding['owner'])=={'token','thread_id','generated_at','deadline_at','context_sha256','pending_sha256'},'Binding owner must contain exactly original six fields')
+    need(binding['owner']['thread_id']=='01a159c5-29ab-7a22-ba7f-e79174757253','Original binding belongs to a different root thread')
+    need(binding['candidate_id'] == CID and binding['code_commit'] == COMMIT and binding['goal_sha256'] == GOAL, 'Foreign execution binding')
+    need(binding['frozen_preparation_sha256'] == PREP_SHA and binding['frozen_template_sha256'] == TEMPLATE_SHA and binding['adapter_release_sha256'] == RELEASE_SHA, 'Execution binding does not match external frozen package anchors')
+    need(digest(project/FROZEN/'preparation.json') == PREP_SHA and digest(project/FROZEN/'manifest_template.json') == TEMPLATE_SHA and digest(project/RELEASE) == RELEASE_SHA, 'External prepared artifacts changed')
+    prep = read(project/FROZEN/'preparation.json')
+    for name, expected_hash in prep['prepared_file_hashes'].items():
+        f = (project/FROZEN/name).resolve()
+        need(f.is_relative_to((project/FROZEN).resolve()) and digest(f) == expected_hash, 'Frozen prepared file changed: ' + name)
+    release = read(project/RELEASE)
+    for name, expected_hash in release['source_hashes'].items():
+        need(digest((project/RELEASE).parent/name) == expected_hash, 'Frozen adapter source changed: ' + name)
+    need(digest(directory/'native_manifest.json') == binding['native_manifest_sha256'] and digest(directory/'execution_lease.json') == binding['execution_lease_sha256'], 'Manifest/lease bytes changed')
+    need(binding['runtime_code_commit']==RUNTIME_EXPECTED,'R1 execution used an unexpected runtime checkout')
+    need(binding['server_binding']['allowed_gpus']==[0],'R1 execution is restricted to physical GPU0 only')
+    need(binding['stage'] == manifest['stage'] and binding['owner']['token'] == manifest['current_token'] and binding['physical_gpu'] == manifest['physical_gpu'] and type(binding['physical_gpu']) is int and binding['physical_gpu'] in UUIDS and binding['gpu_uuid'] == manifest['gpu_uuid'], 'Stage/token/selected physical GPU binding mismatch')
+    need(binding['stage'] == '/data/songcl/Project/Cluster_project/pipeline/bec_r1_' + binding['owner']['token'][:8] + '_gpu' + str(binding['physical_gpu']) and
+         binding['gpu_uuid'] == UUIDS[binding['physical_gpu']], 'Wrong fixed stage or physical GPU UUID')
+    template = read(project/FROZEN/'manifest_template.json')
+    expected_manifest = copy.deepcopy(template)
+    old = binding['owner']
+    expected_manifest.update(current_token=old['token'], stage=binding['stage'], tick_generated_at=old['generated_at'], deadline_at=old['deadline_at'],
+                             physical_gpu=binding['physical_gpu'], gpu_uuid=binding['gpu_uuid'], allowed_gpus=binding['server_binding']['allowed_gpus'],
+                             context_sha256=old['context_sha256'], pending_sha256=old['pending_sha256'], runtime_code_commit=binding['runtime_code_commit'])
+    need(manifest == expected_manifest, 'Manifest is not exact frozen template plus execution binding')
+    lease = read(directory/'execution_lease.json')
+    expected_lease = {'project': 'cluster_project', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253',
+                      'native_manifest_sha256': binding['native_manifest_sha256'], 'token': old['token'], 'generated_at': old['generated_at'],
+                      'deadline_at': old['deadline_at'], 'server_id': 'server-4', 'physical_gpu': binding['physical_gpu'], 'gpu_uuid': binding['gpu_uuid'],
+                      'allowed_gpus': binding['server_binding']['allowed_gpus'], 'goal_sha256': GOAL,
+                      'context_sha256': old['context_sha256'], 'pending_sha256': old['pending_sha256']}
+    need(lease == expected_lease, 'Lease is not exact original binding; it is never renewed for review')
+    raws, evidence, process_observations = {}, [], {}
+    for mode, target in PAIRS:
+        name = mode + '_' + target
+        request, envelope = read(directory/(name+'_request.json')), read(directory/(name+'_execution.json'))
+        expected = {'project': 'cluster_project', 'candidate_id': CID, 'code_commit': COMMIT, 'stage': binding['stage'],
+                    'token': binding['owner']['token'], 'request_id': request['request_id'], 'operation': 'run',
+                    'physical_gpu': binding['physical_gpu'], 'gpu_uuid': binding['gpu_uuid'], 'native_manifest_sha256': binding['native_manifest_sha256']}
+        need(request == dict(expected, mode=mode, target=target) and envelope['identity'] == expected and envelope['certainty'] == 'terminal' and type(envelope['returncode']) is int and envelope['returncode'] == 0, 'Missing/uncertain/wrong original request execution: ' + name)
+        command = envelope['command']
+        tail = ['-B', binding['stage']+'/worker.py', '--lease', binding['stage']+'/execution_lease.json', '--mode', mode, '--target', target]
+        process = envelope['original_process_identity']
+        need(isinstance(command, list) and len(command) == 9 and command[1:] == tail and process['argv'] in (command, []) and
+             type(envelope['pid']) is int and envelope['pid'] > 0 and process['pid'] == envelope['pid'] and
+             isinstance(process['start_ticks'], str) and process['start_ticks'].isdigit(), 'Missing/wrong original native worker argv or PID/startticks: ' + name)
+        process_observations[name] = {'pid': envelope['pid'], 'start_ticks': process['start_ticks'],
+                                      'early_proc_argv_observed_equal': process['argv'] == command,
+                                      'scope': 'Exact constructed Popen command/direct terminal wait/result chain verified. Empty early /proc argv is unobserved, not independent PID identity proof for later signals.'}
+        need(all(hash_string(envelope[k]) for k in ('result_sha256', 'stdout_sha256', 'stderr_sha256')), 'Missing actual remote result/stdout/stderr file hashes')
+        raws[name] = envelope['result']
+        need(hashlib.sha256(json.dumps(raws[name], indent=2, allow_nan=False).encode('utf-8')).hexdigest()==envelope['result_sha256'], 'Actual Linux worker result serialization hash mismatch: '+name)
+        need(raws[name]['native_manifest_sha256']==binding['native_manifest_sha256'], 'Raw manifest hash differs from actual original binding')
+        for suffix in ('_request.json', '_execution.json'):
+            f = directory/(name+suffix)
+            evidence.append({'path': f.relative_to(project).as_posix(), 'sha256': digest(f)})
+    observations = review_payloads(raws, manifest)
+    for f in (directory/'execution_binding.json', directory/'native_manifest.json', directory/'execution_lease.json', project/FROZEN/'worker.py'):
+        evidence.append({'path': f.relative_to(project).as_posix(), 'sha256': digest(f)})
+    return {'review_status': 'RAW_SEMANTICS_VALIDATED_NOT_ADMISSION', 'id': EID, 'candidate_id': CID, 'config': CONFIG,
+            'code_commit': COMMIT, 'revision': 1, 'failure_scope': 'implementation', 'runtime_code_commit': binding['runtime_code_commit'],
+            'runtime_scope': 'Runtime checkout identity is separately observed; candidateR1 is staged hash-bound026c; actual runtime4e8 is distinct. No synchronization is inferred.',
+            'goal_sha256': GOAL, 'process_observations': process_observations, 'observations': observations, 'evidence': evidence,
+            'standard_smoke_fields_mapping': {'steps': 'observed optimizer_steps integer2, not raw steps list', 'losses': 'candidate actual two losses',
+                'command': 'candidate actual_train_command', 'data_source': 'candidate data_source.train', 'split': 'train',
+                'identity': 'M215-BEC R1/config/026c/goal from independently validated binding', 'native_flags': 'Only validated actual true fields; never defaulted'},
+            'remaining_admission_boundary': 'Owning root must review constraints/independence/current policy and resource retention condition, then separately create standard artifacts and receipt. This reviewer writes none.'}
+
+
+def plan_metadata(plan):
+    """Validate recorded active original-ID metadata without inventing missing point lists.
+
+    No feature mean/GELU/Linear/FFN is recomputed. Original full point membership
+    arrays are not separately persisted; frozen7e5 validates their actual objects.
+    """
+    need(isinstance(plan,dict),'Missing actual BEC production plan')
+    widths=plan['widths'];prefix=plan['prefixes']
+    need(len(widths)==len(prefix)==3 and all(type(x) is int and x>=0 for x in widths+prefix) and all(k<=w for k,w in zip(prefix,widths)),'Malformed original bank widths/prefixes')
+    ids=[plan[k] for k in ('fine_ids','middle_ids','coarse_ids')]
+    for values,k in zip(ids,prefix):need(isinstance(values,list) and values==sorted(set(values)) and all(type(i) is int and 0<=i<k for i in values),'Invalid true-supported original IDs')
+    fine,middle,coarse=ids;fe=plan['fine_edges'];me=plan['middle_edges']
+    need(len(plan['fine_parent_ids'])==len(fine) and len(plan['middle_parent_ids'])==len(middle),'BEC parent-source list length differs')
+    need(fe==[[i,p] for i,p in zip(fine,plan['fine_parent_ids'])] and len(fe)==len(fine),'Fine edge/source ID order differs')
+    need(me==[[i,p] for i,p in zip(middle,plan['middle_parent_ids'])] and len(me)==len(middle),'Middle edge/source ID order differs')
+    need(all(type(p) is int and 0<=p<prefix[1] for _,p in fe) and sorted({p for _,p in fe})==middle,'Fine parent support differs')
+    need(all(type(p) is int and 0<=p<prefix[2] for _,p in me) and sorted({p for _,p in me})==coarse,'Middle parent support differs')
+    fg=[[p,[i for i,(_,parent) in enumerate(fe) if parent==p]] for p in middle]
+    mg=[[p,[i for i,(_,parent) in enumerate(me) if parent==p]] for p in coarse]
+    need(plan['fine_mean_groups']==fg and plan['middle_mean_groups']==mg,'Private means are not equal one-row-per-supported-child groups')
+    fd={str(p):len(rows) for p,rows in fg};md={str(p):len(rows) for p,rows in mg}
+    return {'fine_ids':fine,'middle_ids':middle,'coarse_ids':coarse,'fine_edges':len(fe),'middle_edges':len(me),
+        'fine_parent_supported_child_degrees':fd,'middle_parent_supported_child_degrees':md,
+        'singleton_fine_parent_groups':sum(x==1 for x in fd.values()),'singleton_middle_parent_groups':sum(x==1 for x in md.values()),
+        'degree_ge2_fine_parent_groups':sum(x>=2 for x in fd.values()),'degree_ge2_middle_parent_groups':sum(x>=2 for x in md.values())}
+
+
+
+
+
+def bec_record(record):
+    need(isinstance(record,dict) and isinstance(record['batches'],list),'Missing actual BEC branch record')
+    support=[];up=[];down=[];means=[];by_batch={};widths=None
+    for batch in record['batches']:
+        b=batch['batch'];need(type(b) is int and b==len(by_batch),'BEC batch order differs')
+        plan=batch['original_plan'];meta=plan_metadata(plan);support.append(meta);by_batch[b]=plan
+        if widths is None:widths=plan['widths']
+        need(plan['widths']==widths and batch['true_support']==meta,'Actual true support/source metadata differs')
+        need([batch['fine_prefix'],batch['middle_prefix'],batch['coarse_prefix']]==plan['prefixes'],'Original BEC prefix differs')
+        for level,key in enumerate(('unsupported_internal_fine_ids','unsupported_internal_middle_ids','unsupported_internal_coarse_ids')):
+            need(batch[key]==sorted(set(range(plan['prefixes'][level]))-set(plan[('fine_ids','middle_ids','coarse_ids')[level]])),'Unsupported BEC IDs differ')
+        need(batch['padding_rows']==[w-k for w,k in zip(widths,plan['prefixes'])],'BEC batch padding differs')
+        if meta['fine_edges']:up.append((b,'up_fine',meta['fine_edges']));down.append((b,'down_fine',meta['fine_edges']))
+        if meta['middle_edges']:up.append((b,'up_middle',meta['middle_edges']));down.insert(len(down)-int(bool(meta['fine_edges'])),(b,'down_middle',meta['middle_edges']))
+        means.extend([(b,0,meta['fine_edges'],plan['fine_mean_groups'],widths[1]),(b,1,meta['middle_edges'],plan['middle_mean_groups'],widths[2])])
+    expected_pre={'batches':support,'fine_edges':sum(x['fine_edges'] for x in support),'middle_edges':sum(x['middle_edges'] for x in support),
+        'core_path_possible':any(x['fine_edges']>0 and x['middle_edges']>0 for x in support),
+        'degree_boundary_scope':'Record only; absent degree>=2/singleton/empty/padding is NOT_EXERCISED, not another hard gate'}
+    need(expected_pre['core_path_possible'],'INCONCLUSIVE: original fixed TRAIN batch lacks BEC real edges at both levels; no sample replacement')
+    need(record['native_coverage_preflight']==expected_pre and record['actual_fine_edges']==expected_pre['fine_edges'] and record['actual_middle_edges']==expected_pre['middle_edges'],'Actual BEC preflight/edge counts differ')
+    need(record['core_path_observed'] is True and record['actual_builder_calls']==len(support),'Missing actual BEC core/builder path')
+    for key in ('actual_two_up_split_private_mean_two_down_path','actual_original_coarse_skip_masked_and_consumed','original_ID_restoration_and_unsupported_padding_delta0_exact','actual_a2_enters_original_LN2','unsupported_coarse_bias_masked_in_reference'):
+        need(record[key] is True,'Missing original BEC path control: '+key)
+    need(record['coarse_original_LN_FFN_calls']==1 and record['original_LN_calls']=={'0':1,'1':1,'2':1},'Original coarse transform/three LN calls changed')
+    B=len(support)
+    for level,key in enumerate(('fine_input','middle_input','coarse_raw_input')):
+        tensor(record[key]);need(record[key]['shape']==[B,widths[level],256],'Original BEC bank shape differs')
+    need(len(record['outputs'])==len(record['output_sha256'])==3,'BEC helper must return three banks')
+    for level,value in enumerate(record['outputs']):
+        tensor(value);need(value['shape']==[B,widths[level],256],'BEC output bank shape differs');need(hash_string(record['output_sha256'][level]),'BEC output fingerprint missing')
+        gradients(record,'native_helper_level'+str(level)+'_output_gradients')
+    for key in ('native_fine_norm_input_gradients','native_middle_norm_input_gradients','native_coarse_raw_input_gradients','native_collected_coarse_input_gradients'):gradients(record,key)
+    for key in ('coarse_collected_input_sha256','coarse_actual_FFN_output_sha256','coarse_supported_mask_sha256','coarse_masked_delta_sha256'):need(hash_string(record[key]),'Original collected-coarse/mask fingerprint missing')
+    operators=record['operator_calls'];need(len(operators)==len(up)+len(down),'Wrong actual BEC operator count')
+    by_op={}
+    for call,(b,name,rows) in zip(operators,up+down):
+        need(call['batch']==b and call['operator']==name and call['forward']==record['forward'] and call['actual_real_edges']==rows,'BEC up/coarse/down source order/count differs')
+        need(call['actual_original_branch_inputs_match'] is True and call['original_GELU_calls']==1,'Actual captured branch/activation control missing')
+        for key in ('input','linear_output','output'):tensor(call[key])
+        columns=512 if name.startswith('up_') else 256
+        need(call['input']['shape']==[rows,512] and call['linear_output']['shape']==call['output']['shape']==[rows,columns] and call['field_shapes']==[[rows,256],[rows,256]],'BEC new map dimensions changed')
+        need(len(call['field_sha256'])==2 and all(hash_string(h) for h in call['field_sha256']),'BEC captured input-field fingerprints missing')
+        for key in ('input_sha256','linear_output_sha256','output_sha256'):need(hash_string(call[key]),'BEC captured actual map fingerprint missing')
+        for key in ('native_input_gradients','native_linear_output_gradients','native_output_gradients'):gradients(call,key) # legal per-call zero
+        if name.startswith('up_'):
+            views=call['actual_split_views'];need(set(views)=={'retained_sha256','upward_sha256'} and all(hash_string(h) for h in views.values()),'Missing actual U/V split')
+            need(call['native_split_output_gradients'],'Missing original-loss U/V split readout')
+            for pair in call['native_split_output_gradients']:
+                tensor(pair['retained']);tensor(pair['upward']);need(pair['retained']['shape']==pair['upward']['shape']==[rows,256],'BEC U/V split gradient shape differs')
+        else:
+            retained=by_op[(b,'up_middle' if name=='down_middle' else 'up_fine')]['actual_split_views']['retained_sha256']
+            need(call['field_sha256'][0]==retained,'Actual retained U branch did not enter corresponding down map')
+        by_op[(b,name)]=call
+    private=record['private_mean_calls'];need(len(private)==len(means),'Actual private mean call count differs')
+    for call,(b,level,rows,groups,width) in zip(private,means):
+        need(call['forward']==record['forward'] and call['batch']==b and call['level']==level and call['groups']==groups and call['width']==width and call['actual_supported_rows']==rows,'Private mean original child groups/count/order differs')
+        need(call['original_mean_calls']==1 and call['means_recomputed_by_observer'] is False and call['equal_child_row_counts']==[len(v) for _,v in groups],'Private mean must consume original outputs once with equal child rows')
+        tensor(call['input']);tensor(call['output']);need(call['input']['shape']==[rows,256] and call['output']['shape']==[width,256],'Private mean shape differs')
+        need(hash_string(call['input_sha256']) and hash_string(call['output_sha256']),'Private actual mean fingerprints absent')
+        if rows:
+            name='up_fine' if level==0 else 'up_middle';need(call['input_sha256']==by_op[(b,name)]['actual_split_views']['upward_sha256'],'Actual upward V split did not enter private mean')
+            gradients(call,'native_mean_input_gradients');gradients(call,'native_mean_output_gradients')
+        else:need(call['empty_boundary_status'].startswith('NOT_EXERCISED'),'Empty private mean boundary overclaimed')
+    need(record['offdiagonal_dependency_probe']=='NOT_IMPLEMENTED_NOT_MEASURED','Unimplemented BEC probe overclaimed')
+    return expected_pre
+
+
+def required_weight_blocks(raw,candidate):
+    expected={name+'_'+out+'_'+field for name in ('up_fine','up_middle') for out in ('retained','upward') for field in ('child','parent')}
+    expected|={name+'_'+field for name in ('down_middle','down_fine') for field in ('retained','context')}
+    if not candidate:expected=set()
+    for step in raw['steps']:
+        need(set(step['native_parameter_block_gradients'])==set(step['parameter_block_before_step_hash'])==set(step['parameter_block_after_step_hash'])==expected,'Missing actual BEC12 aggregate weight slices')
+        for name,value in step['native_parameter_block_gradients'].items():
+            tensor(value,True);need(value['shape']==[256,256],'BEC aggregate slice shape differs')
+            before=step['parameter_block_before_step_hash'][name];after=step['parameter_block_after_step_hash'][name]
+            need(hash_string(before) and hash_string(after) and before!=after,'BEC aggregate slice update absent; weight decay alone is insufficient')
+
+
+def smoke(raw,candidate):
+    need(type(raw['optimizer_steps']) is int and raw['optimizer_steps']==2,'Need two actual optimizer steps')
+    need(raw['native_loss_forwards']==raw['native_criterion_backwards']==2 and raw['native_predict_calls']==0,'Native TRAIN counts mismatch')
+    for flag in ('native_data_loaded','backward_finite','intended_path_observed','native_train_function_executed','native_smoke_checks_passed','observer_readout_complete','wrappers_and_hooks_restored','native_tracked_each_module_updated'):
+        need(raw[flag] is True,'Missing native actual flag: '+flag)
+    need(raw['auxiliary_autograd_grad_or_backward_used'] is False and raw['training_checkpoint_saved'] is False and raw['native_failure_is_not_whole_mechanism_rejection'] is True,'Diagnostic backward/checkpoint/scope changed')
+    need(raw['actual_train_command'] and raw['native_train_cli_reference'] and raw['data_source']['train']['prefix']=='train','Missing actual original TRAIN provenance')
+    need(len(raw['losses'])==2 and all(finite(v) for v in raw['losses']),'Two finite native losses required')
+    need(len(raw['loss_tensor_observations'])==len(raw['loss_component_observations'])==2,'Missing actual native loss/component observations')
+    for v in raw['loss_tensor_observations']:tensor(v)
+    for values in raw['loss_component_observations']:
+        need(values,'Empty native loss components')
+        for v in values.values():tensor(v)
+    for key in ('steps','batches','native_backward_records','raw_bank_observations','hcg_readbacks','inst_to_mask_path_observations'):
+        need(len(raw[key])==2,'Missing original two-forward observations: '+key)
+    need(len(raw['ffn_calls'])==(2 if candidate else 6) and len(raw['csort_raw_input_observations'])==4,'FFN/CSORT actual call counts changed')
+    for batch in raw['batches']:need(hash_string(batch['sha256']) and batch['scan_ids'] and batch['ann_ids'],'Missing real TRAIN batch fingerprint')
+    tracked=('ffn_2','up_fine','up_middle','down_middle','down_fine') if candidate else ('ffn_0','ffn_1','ffn_2')
+    named_hashes(raw['native_tracked_initial_hash'],tracked);named_hashes(raw['native_tracked_after_hash'],tracked)
+    need(all(raw['native_tracked_initial_hash'][n]!=raw['native_tracked_after_hash'][n] for n in tracked),'Tracked original module did not update')
+    for record in raw['steps']:
+        need(record['all_observed_gradients_finite'] is True and record['gradient_tensor_count']>0 and record['nonfinite_parameter_names']==[] and record['optimizer_step_completed'] is True,'Native optimizer/backward incomplete')
+        need(set(record['tracked_module_gradients'])==set(tracked),'Wrong original tracked map/FFN inventory')
+        for name in tracked:
+            grads=record['tracked_module_gradients'][name]
+            need(grads and all(v is not None for v in grads.values()),'Missing original FFN/map native parameter gradient')
+            for pname,value in grads.items():tensor(value,pname.endswith('weight'))
+            need(record['module_before_step_hash'][name]!=record['module_after_step_hash'][name] and record['weight_before_step_hash'][name]!=record['weight_after_step_hash'][name],'Actual FFN/map weight update absent')
+    required_weight_blocks(raw,candidate)
+    for record in raw['native_backward_records']:need(record['count']==1,'Extra/missing original loss backward');tensor(record['gradient'])
+    levels=[2] if candidate else [0,1,2]
+    for forward in (1,2):need([v['level'] for v in raw['ffn_calls'] if v['forward']==forward]==levels,'Original remaining FFN calls changed')
+    for record in raw['ffn_calls']:
+        tensor(record['input']);tensor(record['output']);gradients(record,'native_input_gradients');gradients(record,'native_output_gradients')
+    for record in raw['raw_bank_observations']:
+        need(all(record[k] is True for k in ('unchanged_after_full_forward','ids_unchanged_after_full_forward','maps_unchanged_after_full_forward')),'Raw banks/IDs/maps mutated')
+        need(all(hash_string(record[k]) for k in ('raw_sha256','id_sha256','map_sha256')),'Raw bank identity absent')
+    for record in raw['csort_raw_input_observations']:
+        need(record['original_raw_objects'] is True and record['original_childmap_object'] is True and record['original_calls']==1,'CSORT raw source changed');tensor(record['output'])
+    for record in raw['hcg_readbacks']:
+        tensor(record['output']);gradients(record,'native_point_message_gradients',True)
+        if candidate:
+            need(record['original_residual_levels']=={} and record['BEC_original_three_skip_HCG_inputs']==[True,True,True] and record['BEC_helper_coarse_object_exact'] is True,'Original BEC three skips/coarse object did not reach HCG')
+        else:need(record['original_residual_levels']=={str(i):True for i in levels},'Original M95 skip path changed')
+    for record in raw['inst_to_mask_path_observations']:
+        need(record['single_native_inst_update_exact'] is True and record['new_extra_injection'] is False,'Original single point update changed');tensor(record['gate'])
+        for key in ('native_post_cluster_inst_gradients','native_post_ILA_inst_gradients','native_final_mask_gradients'):gradients(record,key,True)
+    inv=raw['dynamic_parameter_inventory'];expected={'0':0 if candidate else 525568,'1':0 if candidate else 525568,'2':525568}
+    need(inv['original_FFN_parameters_by_level']==expected and inv['new_declared_parameters']==(787968 if candidate else 0) and inv['new_registered_buffer_names']==[],'Replacement parameter/buffer inventory changed')
+    edges=raw['BEC_edge_observations'];need(len(edges)==(2 if candidate else 0),'Unexpected actual BEC branch count')
+    preflights=raw.get('native_coverage_preflight_observations',[])
+    need(len(preflights)==(2 if candidate else 0),'Missing/unexpected original-batch coverage preflight')
+    for index,record in enumerate(edges):
+        need(preflights[index]==bec_record(record),'Actual before-watch coverage preflight differs from source support')
+    need(raw['offdiagonal_dependency_probe']=='NOT_IMPLEMENTED_NOT_MEASURED' and raw['pure_training_peak_memory'].startswith('UNKNOWN') and raw['smoke_memory_scope'],'Unmeasured probe/pure TRAIN claim changed')
+    for key in ('smoke_peak_allocated_bytes','smoke_peak_reserved_bytes'):need(type(raw[key]) is int and raw[key]>0,'Missing actual smoke memory')
+
+
+def review_payloads(raws,manifest):
+    need(isinstance(raws,dict) and set(raws)=={mode+'_'+target for mode,target in PAIRS} and all(isinstance(v,dict) for v in raws.values()),'Exactly four actual raw JSON objects are required')
+    need(isinstance(manifest,dict),'Actual manifest must be a JSON object')
+    need(manifest['candidate_id']==CID and manifest['code_commit']==COMMIT and manifest['goal_sha256']==GOAL and manifest['config']==CONFIG and manifest['experiment_id']==EID and manifest['tolerance']==1e-6,'Foreign BEC manifest or changed frozen metadata')
+    need(manifest['runtime_code_commit']==manifest['runtime_expected_commit']==manifest['source_parent_commit']==RUNTIME_EXPECTED and manifest['source_version_commit']==COMMIT,'Candidate9b67 and actual runtime48fc must remain distinct exact identities')
+    need(manifest['source_preparation_sha256']==SOURCE_PREP_SHA and manifest['candidate_config_sha256']==YAML_SHA and manifest['diagnostic_files']['worker.py']==WORKER_SHA,'Original BEC source/YAML/observer lineage differs')
+    need(type(manifest['physical_gpu']) is int and manifest['physical_gpu'] in UUIDS and manifest['gpu_uuid']==UUIDS[manifest['physical_gpu']],'Selected authorized physical GPU/UUID mismatch')
+    for mode,target in PAIRS:
+        raw=raws[mode+'_'+target];common(raw,manifest,mode,target)
+        need(raw['experiment_id']==EID and raw['config']==CONFIG and raw['stage']==manifest['stage'] and raw['physical_gpu']==manifest['physical_gpu'] and raw['gpu_uuid']==manifest['gpu_uuid'],'Wrong actual BEC execution metadata')
+        need(raw['diagnostic_worker_sha256']==manifest['diagnostic_files']['worker.py'] and raw['runtime_sha256']==manifest['diagnostic_files']['native_runtime.py'] and raw['source_preparation_sha256']==manifest['source_preparation_sha256'],'Worker/runtime/source-preparation hash mismatch')
+        need(all(raw[k]==manifest[k] for k in ('current_token','tick_generated_at','deadline_at','context_sha256','pending_sha256')),'Raw owner differs from original execution manifest')
+        smoke(raw,target=='candidate') if mode=='smoke' else resources(raw)
+    s,c=raws['smoke_candidate'],raws['smoke_champion'];a,b=raws['resources_candidate'],raws['resources_champion']
+    need(s['batches']==c['batches'] and s['initialization']==c['initialization'] and s['native_dataloader_config']==c['native_dataloader_config'] and s['data_source']==c['data_source'],'Original TRAIN batch/init/loader/data pair mismatch')
+    ci,bi=s['common_initialized_parameters'],c['common_initialized_parameters']
+    for k in ('names','tensor_count','parameter_count','sha256','excluded_name_prefixes'):need(ci[k]==bi[k],'Same original common named initialization differs: '+k)
+    exclusions=['dec.cluster_att.cluster_ffn.0.','dec.cluster_att.cluster_ffn.1.','dec.cluster_att.bipartite_edges.']
+    need(ci['excluded_name_prefixes']==exclusions and ci['tensor_count']==len(ci['names']) and hash_string(ci['sha256']) and all(any(n.startswith('dec.cluster_att.cluster_ffn_norm.'+str(i)+'.') for n in ci['names']) for i in range(3)) and any(n.startswith('dec.cluster_att.cluster_ffn.2.') for n in ci['names']),'Common exact prefix scope changed or middle LayerNorm omitted')
+    need(not any(n.startswith(tuple(exclusions)) for n in ci['names']),'Excluded replacement parameters leaked into common pairing')
+    need(all(a[k]==b[k] for k in ('input_sha256','scan_ids','ann_ids','initialization','data_source')) and a['profile']['fvcore_version']==b['profile']['fvcore_version'],'Resource sample/init/data/profiler pair mismatch')
+    need(a['profile']['flops']<=10e9,'Candidate exceeds original standard10G budget')
+    need(a['parameters']==s['dynamic_parameter_inventory']['actual_full_model_parameters'] and b['parameters']==c['dynamic_parameter_inventory']['actual_full_model_parameters'],'Actual model parameter inventory disagrees across modes')
+    need(a['parameters']-b['parameters']==787968-2*525568,'Actual replacement parameter delta differs from frozen source inventory')
+    delta=lambda x,y:100*(x/y-1)
+    facts={'candidate':{k:a[k] for k in ('parameters','median_ms','p90_ms','peak_allocated_bytes','peak_reserved_bytes')},'champion':{k:b[k] for k in ('parameters','median_ms','p90_ms','peak_allocated_bytes','peak_reserved_bytes')},'candidate_standard_flops':a['profile']['flops'],'champion_standard_flops':b['profile']['flops'],'delta_flops':a['profile']['flops']-b['profile']['flops'],'delta_parameters':a['parameters']-b['parameters'],'delta_median_pct':delta(a['median_ms'],b['median_ms']),'delta_p90_pct':delta(a['p90_ms'],b['p90_ms']),'delta_predict_allocated_pct':delta(a['peak_allocated_bytes'],b['peak_allocated_bytes']),'delta_predict_reserved_pct':delta(a['peak_reserved_bytes'],b['peak_reserved_bytes']),'delta_smoke_allocated_pct':delta(s['smoke_peak_allocated_bytes'],c['smoke_peak_allocated_bytes']),'delta_smoke_reserved_pct':delta(s['smoke_peak_reserved_bytes'],c['smoke_peak_reserved_bytes']),'unsupported_ops_candidate':a['profile']['unsupported_ops'],'unsupported_ops_champion':b['profile']['unsupported_ops'],'same_input_sha256':a['input_sha256'],'same_profiler_handlers':HANDLERS,'pure_training_peak':'UNKNOWN; smoke includes actual topology/observer/source-recording overhead','unmeasured_no_cluster_baseline':'UNKNOWN; control is original M95'}
+    triggered=a['peak_allocated_bytes']>1.15*b['peak_allocated_bytes'] or s['smoke_peak_allocated_bytes']>1.15*c['smoke_peak_allocated_bytes'];facts['existing_memory_15pct_retention_condition_observed']=triggered;facts['memory_condition_scope']='Existing +15% condition on observed prediction/smoke allocated peaks; smoke is not pure TRAIN. No new latency/numeric gate.'
+    records=s['BEC_edge_observations']
+    return {'candidate_losses':s['losses'],'native_optimizer_steps':s['optimizer_steps'],'paired_TRAIN_batches':s['batches'],
+      'common_initialized_parameter_observations':{'names_equal':True,'tensor_count':ci['tensor_count'],'parameter_count':ci['parameter_count'],'fingerprints_equal':True,'sha256':ci['sha256'],'scope':ci['scope'],'excluded_name_prefixes':exclusions,'full_buffer_values':'NOT_RECORDED'},
+      'actual_fine_edge_counts':[v['actual_fine_edges'] for v in records],
+      'actual_middle_edge_counts':[v['actual_middle_edges'] for v in records],
+      'actual_new_operator_call_counts':[{n:sum(c['operator']==n for c in v['operator_calls']) for n in ('up_fine','up_middle','down_middle','down_fine')} for v in records],
+      'actual_private_mean_call_counts':[len(v['private_mean_calls']) for v in records],
+      'actual_required_weight_blocks':sorted(s['steps'][0]['native_parameter_block_gradients']),
+      'actual_optional_boundary_counts':[[{'singleton_fine':b['true_support']['singleton_fine_parent_groups'],'singleton_middle':b['true_support']['singleton_middle_parent_groups'],'degree_ge2_fine':b['true_support']['degree_ge2_fine_parent_groups'],'degree_ge2_middle':b['true_support']['degree_ge2_middle_parent_groups'],'unsupported':[len(b[k]) for k in ('unsupported_internal_fine_ids','unsupported_internal_middle_ids','unsupported_internal_coarse_ids')],'padding':b['padding_rows']} for b in v['batches']] for v in records],
+      'first_raw_bank_digest_comparison':{k:s['raw_bank_observations'][0][k]==c['raw_bank_observations'][0][k] for k in ('raw_sha256','id_sha256','map_sha256')},
+      'raw_bank_digest_scope':'Cross-target exact intermediate output equality is not a new gate. Digest differences do not establish magnitude/cause or efficacy.',
+      'offdiagonal_dependency_probe':'NOT_IMPLEMENTED_NOT_MEASURED','resource_observations':facts,
+      'existing_memory_condition_needs_separate_retention_decision':triggered,'native_semantics_and_pairing_checked':True,'resource_protocol_checked':True,
+      'admission_authorized_by_this_report':False,'efficacy':'UNKNOWN'}
+
+
+def main():
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--project',default='D:/project/cluster_project');parser.add_argument('--execution-dir',required=True);parser.add_argument('--output')
+    args=parser.parse_args()
+    try:result=review_directory(args.project,args.execution_dir)
+    except (Refused,KeyError,TypeError,ValueError,OSError,StopIteration,AttributeError,IndexError) as error:result={'review_status':('INCONCLUSIVE_ORIGINAL_BATCH_COVERAGE' if 'INCONCLUSIVE' in str(error) else 'REFUSED_MISSING_OR_INVALID_ACTUAL_EVIDENCE'),'error_type':type(error).__name__,'error':str(error),'candidate_id':CID,'code_commit':COMMIT,'admission_authorized_by_this_report':False,'standard_artifacts_written':False}
+    result['standard_PASS_receipt_queue_written']=False
+    if args.output:
+        path=Path(args.output).resolve();root=Path(args.project).resolve();need(path.is_relative_to(root/'pipeline/diagnostic_bundles'),'Report outside diagnostics')
+        with path.open('x',encoding='utf-8') as stream:json.dump(result,stream,ensure_ascii=False,indent=2,allow_nan=False);stream.write('\n')
+    print(json.dumps(result,ensure_ascii=False,indent=2,allow_nan=False))
+    return 0 if result.get('review_status')=='RAW_SEMANTICS_VALIDATED_NOT_ADMISSION' else 2
+
+if __name__=='__main__':raise SystemExit(main())

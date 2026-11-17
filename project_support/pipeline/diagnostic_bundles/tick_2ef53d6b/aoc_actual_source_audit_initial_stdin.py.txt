@@ -1,0 +1,42 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import json,hashlib,subprocess,os,ast
+R=Path('D:/project/cluster_project');B=R/'pipeline/diagnostic_bundles/tick_2ef53d6b';P=B/'aoc_version_prepare/isolated_source_version.json';x=json.loads(P.read_text(encoding='utf-8'));sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();ref=lambda p:{'path':p.relative_to(R).as_posix(),'sha256':sha(p)}
+assert sha(P)=='83d8bedd7ae1fae56c835028460f380ae797ed57f1b99f1016f155a88fec414e'
+code='0314b932a92a8cc7f67804068ecb1c1f7a5f2e33';parent='9c42fdc4e9168acec18980d782ee9c163e043bb7';current='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391';assert x['code_commit']==code and x['parent_commit']==parent and x['runtime_expected_parent_commit']==parent
+prepP=R/x['source_preparation']['path'];prep=json.loads(prepP.read_text(encoding='utf-8'));assert sha(prepP)==x['source_preparation']['sha256']=='f7b85c78198a538985661e04714b8eb48de7e2173547f93f1a3ba7fede53f9dd';files=prep['source_files'];dest=Path(x['worktree']);repo=R/'Cluster'
+assert len(files)==9 and x['frozen_source_files']==x['committed_blob_sha256']==files
+calls=[];env=dict(os.environ,GIT_OPTIONAL_LOCKS='0',GIT_TERMINAL_PROMPT='0')
+def git(path,*args):
+ command=['C:/Program Files (x86)/Git/cmd/git.exe','--no-optional-locks','-c','core.fsmonitor=false','-C',str(path),*args]
+ run=subprocess.run(command,capture_output=True,timeout=30,env=env)
+ assert run.returncode==0,run.stderr.decode('utf-8',errors='replace');calls.append({'command':command,'returncode':0,'stdout_sha256':hashlib.sha256(run.stdout).hexdigest()});return run.stdout
+assert git(dest,'rev-list','--parents','-n','1',code).decode().split()==[code,parent]
+assert set(git(dest,'diff-tree','--no-commit-id','--name-status','-r',code).decode().splitlines())=={'A\t'+n for n in files}
+for n,h in files.items():assert hashlib.sha256(git(dest,'show',code+':'+n)).hexdigest()==sha(dest/n)==sha(prepP.parent/'staged_repository'/n)==h,n
+assert not git(dest,'status','--porcelain=v1','--untracked-files=all','-z')
+base=json.loads((B/'protected_assets_before.json').read_text(encoding='utf-8'));assert git(repo,'rev-parse','HEAD').decode().strip()==base['head']==current
+assert git(repo,'status','--porcelain=v1','--untracked-files=all','-z').hex()==base['status_hex']
+assert not git(repo,'diff','--cached','--name-only','-z')
+index=Path(git(repo,'rev-parse','--git-path','index').decode().strip());index=index if index.is_absolute() else repo/index;assert sha(index)==base['index_sha256']
+for n,h in base['files'].items():assert sha(repo/n)==h,n
+for n,h in base['protected_ledgers'].items():assert sha(R/'pipeline'/n)==h,n
+assert x['protected_before']==x['protected_after']
+assert all(sha(R/'pipeline'/n)==h for n,h in x['protected_after']['ledgers'].items())
+assert sha(R/'pipeline/research_work.json')==x['protected_after']['work_sha256'] and sha(R/'pipeline/codex_memory.md')==x['protected_after']['memory_sha256']
+work=json.loads((R/'pipeline/research_work.json').read_text(encoding='utf-8'))
+assert len(work['candidates'])==len(base['candidate_digests'])==148
+for c in work['candidates']:assert hashlib.sha256(json.dumps(c,sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()==base['candidate_digests'][c['id']],c['id']
+for q in [prepP,prepP.parent/'source_manifest.json',prepP.parent/'candidate_record.json']:
+ z=json.loads(q.read_text(encoding='utf-8'));assert all(z[n] is None for n in ['code_commit','source_commit','source_parent_commit'])
+assert len(base['files'])==28 and len(base['protected_ledgers'])==24
+report={'schema_version':1,'status':'ACTUAL_AOC_ISOLATED_SOURCE_VERSION_BYTES_PARENT_AND_PROTECTION_INDEPENDENTLY_VERIFIED_NOT_NATIVE_PASS','recorded_at':datetime.now(timezone.utc).isoformat(),'candidate_id':x['candidate_id'],'experiment_id':x['experiment_id'],'code_commit':code,'parent_commit':parent,'current_primary_runtime_commit':current,'material_concerns':[],
+ 'anchors':{'source_version':ref(P),'source_preparation':ref(prepP),'source_manifest':x['source_manifest'],'native_protocol':x['native_protocol'],'source_independent_review':x['independent_source_review'],'PES_parent_source_version':x['parent_source_version'],'protected_before':ref(B/'protected_assets_before.json'),'source_save_helper':ref(B/'save_aoc_source_version.py')},
+ 'source_files_exact9':files,
+ 'actual_readonly_verification':{'single_parent_9c_actual_Git_object':True,'exact9_added_paths_actual_Git_tree':True,'all9_committed_blobs_isolated_bytes_and_frozen_original_match':True,'isolated_worktree_index_clean':True,'primary_actual_HEAD_still5c':True,'primary_dirty28_status_and_bytes_unchanged':True,'primary_empty_index_and_hash_unchanged':True,'24_lifecycle_ledgers_work_memory_unchanged':True,'all148_candidate_digests_unchanged_at_review':True,'original_NULL_source_code_parent_metadata_unchanged':True,'readonly_Git_call_count':len(calls),'readonly_Git_evidence':calls},
+ 'conditional_compatibility':{'actual_parent_is_PES_source9c':True,'current5c_not_promoted':True,'future_native_expected_runtime':parent,'execution_precondition':'PES must first have genuine required actual results and main/runtime must actually be9c; this source save and this review do not establish that condition.','if_PES_not_promoted_or_main_changes':'Preserve this exact isolated version and original prototype. Keep AOC unexecuted; construct/test an actually compatible unchanged-nine source version. No sibling/18A ff, force promotion or historical raw relabel.','reference_only_original_future_parent':'Original f7b85 reference5c/NULL is unchanged; the actual parent9c is explicitly separate version evidence.'},
+ 'implementation_scope':{'source_graph_model9_seed_YAML_protocol_unchanged':True,'implementation_revision_created':False,'main_or_runtime_sync_ff':False,'native':'NOT_RUN','resources':'NOT_RUN','Torch_FP32_autograd':'NOT_RUN','efficacy_novelty':'UNKNOWN','queue_receipt_active_binding_created_by_source_save':False,'old33_or84_or_other_suite_rerun':False},
+ 'reviewer_actions':{'only_private_report_local_bytes_and_readonly_Git_objects_status':True,'Git_mutation_or_root_helper_executed':False,'SSH_GPU_Torch_or_shared_write':False,'old655_grants_or_checkpoint_bodies_read':False}}
+p=B/'aoc_actual_source_version_independent_review.json'
+with p.open('x',encoding='utf-8',newline='\n') as f:json.dump(report,f,indent=2,allow_nan=False);f.write('\n')
+print(json.dumps({'path':p.relative_to(R).as_posix(),'sha256':sha(p),'material_concerns':report['material_concerns'],'readonly_git_calls':len(calls)}))

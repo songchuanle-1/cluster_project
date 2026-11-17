@@ -1,0 +1,7 @@
+Default NOP. Root only under current foreground owner: python -B archive_crashed_once.py --execute-root --terminal-review-sha256 f60b33c4ee0f3bbee1c04e8746b4df31bb8141cd3cfa706cc9064e00390ed8ab
+
+Requires genuine current terminal peer for exact reconcile actuala2c1. Acquires canonical project lock, checks exact registered M234 PID/source/log/task, and journals unique local intent. Copies ONLY exact registered stdout and FD-discovered native logger by strict-key SCP. Requires observed exact size and tail digest before parsing. Canonical parse_native_lineage uses the full exact logger for best or preserves UNKNOWN. Partial epoch/batch derives from actual stdout; no precise completed-epoch count inferred.
+
+Calls unchanged canonical finalize_task/_finish_archive. Only scoped pull_log transport returns the actual exact verified local stdout, avoiding original broad remote_pull.sh filename fallback; no archive/metric/Git results faked. monitor.ssh is disabled during finalization. No early-stop, deathwatch forcing, signals, dispatch, restart/resume, sync, model/Torch/GPU work or checkpoint transfer.
+
+Canonical archive changes experiment/ledger/analysis and removes only M234 queue/running registration; verifies M206/M227/unrelated queue and all protected source/memory/work/SERVERS/deathwatch hashes unchanged. Any uncertainty or pending journal requires reconciliation/canonical recover, never wrapper replay. Does not modify research candidate or memory; root updates outer candidate after actual archive.

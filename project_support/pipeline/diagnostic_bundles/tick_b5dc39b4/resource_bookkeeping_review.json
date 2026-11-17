@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-25T22:27:02.132702+00:00",
+  "status": "RESOURCE_CONTENTION_BOOKKEEPING_STATICALLY_REVIEWED_NOT_EXECUTED",
+  "candidate_id": "hierarchy-parent-cyclic-triadic-state-composition",
+  "material_concerns": [
+    {
+      "code": "ADDITIONAL_UNKNOWN_GPU_CONTEXT_ON_BOTH_AUTHORIZED_CARDS",
+      "PID": 1565126,
+      "physical_GPUs": [
+        0,
+        1
+      ],
+      "memory_used_MiB": {
+        "0": 9594,
+        "1": 9804
+      },
+      "owner": "UNKNOWN",
+      "matches_current_project_queue_PID": false,
+      "ownership_limit": "Minimal process ownership/start/script read raised PermissionError; no sudo, bypass, retry or other-project read.",
+      "effect": "New native/diagnostic GPUuse remains blocked, even after an original job ends if this extra context persists. Original BFC/BCR still verified growing and no scientific model failure is inferred.",
+      "required_boundary_action": "Correct the initial unexecuted unique-context summary; preserve rawproof and extra process; keep resource_check blocked without eviction/signals/restart."
+    }
+  ],
+  "bookkeeping_specific_blockers": [],
+  "anchors": {
+    "helper": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/persist_observation_tick.py",
+      "sha256": "79ac2c88bd6a6f9bb0cd1da02c236215dd147947661ff29e63cd71d42dafe272"
+    },
+    "root_actual_original_progress": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/active_runs_progress_observation.json",
+      "sha256": "94db2bf8bcab2c3870d7a9d5fb91c32056da93ce4006685e8261304ede22ac62"
+    },
+    "root_actual_additional_resource_probe": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/additional_gpu_context_probe.json",
+      "sha256": "3eb859cd4be49b516f36576df29d50455719096470ca37dc4aeb1c63ae7f0552"
+    },
+    "root_current_guard": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/cts_actual_local_guard_integration.json",
+      "sha256": "5543eb11dd7ae41d92799784f737564ee97a4d2433f2360bf0e6a1ee3a0df0ee"
+    },
+    "independent_progress_readiness_review": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/progress_and_readiness_review.json",
+      "sha256": "4118fb5675ccbcc1ad55debe9407bb338a184a018cc2ef318504dd3b8d8c74c8"
+    },
+    "local_current_project_queue": {
+      "path": "pipeline/queue.json",
+      "sha256": "be03645cec7539ee2cbbfe0cfd74b5138c1a531d0612c23bfdf1de8c19abda88"
+    },
+    "protected_before_snapshot": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/protected_assets_before.json",
+      "sha256": "49b9308e54622cb81ab1bd1ff1f6bf097260a5c2b7d35e03e5d78456b78be678"
+    }
+  },
+  "local_queue_PID_normalization": {
+    "schema": "All tasks across current project gpu_queues; normalize positive int or digit-string PID to canonical decimal string, exclude bool/None. No other project read.",
+    "task_rows": 37,
+    "pid_type_counts": {
+      "NoneType": 35,
+      "int": 2
+    },
+    "malformed_nonempty_PID_fields": [],
+    "target_PID": 1565126,
+    "target_matches": [],
+    "current_project_only_not_global_ownership_certification": true
+  },
+  "actual_saved_resource_facts": {
+    "root_probe_observed_at": "2026-10-25T22:18:31.412358+00:00",
+    "original_training_second_observation_at": "2026-10-25T22:13:16.366838+00:00",
+    "additional_context_PID": 1565126,
+    "additional_memory_MiB": {
+      "0": 9594,
+      "1": 9804
+    },
+    "original_context_memory_MiB": {
+      "M213-BFC": 19714,
+      "M212-BCR": 19724
+    },
+    "GPU_inventory": {
+      "0": {
+        "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+        "used_MiB": 29366,
+        "total_MiB": 32607,
+        "utilization_percent": 58,
+        "memory_used_percent": 90.06041647499003
+      },
+      "1": {
+        "uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+        "used_MiB": 29563,
+        "total_MiB": 32607,
+        "utilization_percent": 28,
+        "memory_used_percent": 90.66458122489036
+      }
+    },
+    "ownership_start_script": "UNKNOWN_PERMISSION_ERROR",
+    "extra_contexts_present_on_both_cards": true,
+    "minimal_identity_attempt_stopped_without_escalation": true,
+    "signals_or_eviction": false,
+    "scientific_training_failure_inferred": false
+  },
+  "helper_boundary_checks": {
+    "nonempty_material_concern_required_and_preserved": true,
+    "resource_check_result_blocked_not_native_PASS": true,
+    "notification_NOTIＦY_resource_change_preserved": true,
+    "corrects_unexecuted_unique_context_assumption_without_overwriting94db": true,
+    "no_unique_context_or_exclusive_training_claim_for_current_samples": true,
+    "both_original_training_progressions_retained": true,
+    "only_CTS_and_BFC_BCR_observation_metadata_may_change": true,
+    "all_other_candidates_including_BEC_and_old9_preserved_by_equality_assertion": true,
+    "protected10_queue_running_experiments_receipts_hashes_current_match": true,
+    "M206_pause_no_resume_scope_preserved": true,
+    "canonical_project_lock_and_once_only_intent_before_shared_save": true,
+    "seven_memory_sections": 7,
+    "rendered_memory_lines": 56,
+    "current_memory_best_UNKNOWN": true,
+    "no_new_candidate_admission_queue_launch_or_model_revision": true,
+    "no_process_signal_restart_migration_GPU_Git_SSH_dispatch_or_permission_bypass_code": true,
+    "native_resource_wait_is_not_a_global_block_on_all_legal_CPU_preparation": true
+  },
+  "notes": [
+    "Original process/source/native growth and additional current-project-unregistered context can both be true. Do not label the extra process a known other project/user or infer ownership from PermissionError.",
+    "NVML total memory percentages are approximately90%; GPU utilization values are58% and28%, and are not described as90% utilization.",
+    "Progress sample22:13:16 and extra memory probe22:18:31 are separate actual observations; the3eb evidence carries the latter precise resource timestamp.",
+    "This review binds the unexecuted79ac script only. Root plans a later lawful BEC source-version operation; any revised persistence helper adding that metadata needs its actual source result/review and an updated check.",
+    "Resource native/diagnostic execution is blocked while contexts persist, but local source/version organization remains a distinct lawful action; this is not global route exhaustion or a model rejection."
+  ],
+  "notification_recommendation": "NOTIFY_RESOURCE_CHANGE",
+  "reviewer_execution_scope": "Only current-project local JSON/source/queue metadata reads, PID normalization, AST/compile and memory-string AST rendering. No helper main, SSH/GPU/Git/tests/shared write; only this new private report."
+}

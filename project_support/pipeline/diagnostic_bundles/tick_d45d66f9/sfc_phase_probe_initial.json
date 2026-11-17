@@ -1,0 +1,61 @@
+{
+  "owner": {
+    "token": "d45d66f9370543b8aa443e6b42199826",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-30T22:05:17.105390+00:00",
+    "deadline_at": "2026-10-30T23:05:17.105390+00:00",
+    "context_sha256": "aa2e9272651a097e028a28e3a311fb2d45dbfcc4914b91c781159dd2da88eba8",
+    "pending_sha256": "e7ef21fcc41887b217301ff6634f52313ea3b5a385797ae0a1f6250b26bd8cbc"
+  },
+  "returncode": 0,
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import socket,os,json,re\nfrom pathlib import Path\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=Path('\"'\"'/proc/3696093'\"'\"');assert p.exists() and p.stat().st_uid==os.getuid()\nassert p.joinpath('\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19]=='\"'\"'96568246'\"'\"'\nassert str(p.joinpath('\"'\"'cwd'\"'\"').resolve())=='\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'\"'\"'\nf=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc_20261030_163221.log'\"'\"')\nassert str(p.joinpath('\"'\"'fd/1'\"'\"').resolve())==str(f)\nwith f.open('\"'\"'rb'\"'\"') as h:h.seek(max(0,f.stat().st_size-16000));tail=h.read().decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"')\nlogs=[]\nfor x in p.joinpath('\"'\"'fd'\"'\"').iterdir():\n try:\n  t=str(x.resolve())\n  if t.endswith('\"'\"'.log'\"'\"') and '\"'\"'/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/'\"'\"' in t:logs.append(t)\n except (OSError,PermissionError):pass\nout={'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'pid'\"'\"':3696093,'\"'\"'start_ticks'\"'\"':'\"'\"'96568246'\"'\"','\"'\"'status'\"'\"':p.joinpath('\"'\"'status'\"'\"').read_text().splitlines()[:7],'\"'\"'stdout_tail'\"'\"':tail[-5000:],'\"'\"'native_log_paths'\"'\"':sorted(set(logs))}\nif len(set(logs))==1:\n text=Path(logs[0]).read_text(errors='\"'\"'replace'\"'\"');out['\"'\"'native_metric_lines'\"'\"']=[l for l in text.splitlines() if '\"'\"'mIoU :'\"'\"' in l];out['\"'\"'native_tail'\"'\"']=text[-3000:]\nprint(json.dumps(out))\n'"
+  ],
+  "stderr": "",
+  "observation": {
+    "hostname": "dl04-MS-7E06",
+    "pid": 3696093,
+    "start_ticks": "96568246",
+    "status": [
+      "Name:\tpython",
+      "Umask:\t0002",
+      "State:\tR (running)",
+      "Tgid:\t3696093",
+      "Ngid:\t0",
+      "Pid:\t3696093",
+      "PPid:\t1"
+    ],
+    "stdout_tail": "150/363 [01:20<02:20,  1.52it/s]\rVal[18/50]:  42%|████████▎           | 151/363 [01:21<01:56,  1.81it/s]\rVal[18/50]:  42%|████████▎           | 152/363 [01:21<02:02,  1.73it/s]\rVal[18/50]:  42%|████████▍           | 153/363 [01:22<02:07,  1.64it/s]\rVal[18/50]:  42%|████████▍           | 154/363 [01:23<02:34,  1.35it/s]\rVal[18/50]:  43%|████████▌           | 155/363 [01:24<02:24,  1.44it/s]\rVal[18/50]:  43%|████████▌           | 156/363 [01:24<02:16,  1.51it/s]\rVal[18/50]:  43%|████████▋           | 157/363 [01:25<02:10,  1.57it/s]\rVal[18/50]:  44%|████████▋           | 158/363 [01:25<02:02,  1.67it/s]\rVal[18/50]:  44%|████████▊           | 159/363 [01:26<02:03,  1.65it/s]\rVal[18/50]:  44%|████████▊           | 160/363 [01:27<02:07,  1.59it/s]\rVal[18/50]:  44%|████████▊           | 161/363 [01:27<01:41,  2.00it/s]\rVal[18/50]:  45%|████████▉           | 162/363 [01:27<01:45,  1.91it/s]\rVal[18/50]:  45%|████████▉           | 163/363 [01:28<01:57,  1.71it/s]\rVal[18/50]:  45%|█████████           | 164/363 [01:29<01:59,  1.66it/s]\rVal[18/50]:  45%|█████████           | 165/363 [01:29<01:57,  1.68it/s]\rVal[18/50]:  46%|█████████▏          | 166/363 [01:30<02:07,  1.55it/s]\rVal[18/50]:  46%|█████████▏          | 167/363 [01:31<02:06,  1.55it/s]\rVal[18/50]:  46%|█████████▎          | 168/363 [01:31<02:05,  1.55it/s]\rVal[18/50]:  47%|█████████▎          | 169/363 [01:32<02:05,  1.55it/s]\rVal[18/50]:  47%|█████████▎          | 170/363 [01:32<01:34,  2.04it/s]\rVal[18/50]:  47%|█████████▍          | 171/363 [01:33<01:36,  1.99it/s]\rVal[18/50]:  47%|█████████▍          | 172/363 [01:33<01:45,  1.82it/s]\rVal[18/50]:  48%|█████████▌          | 173/363 [01:34<01:27,  2.17it/s]\rVal[18/50]:  48%|█████████▌          | 174/363 [01:34<01:34,  1.99it/s]\rVal[18/50]:  48%|█████████▋          | 175/363 [01:35<01:44,  1.81it/s]\rVal[18/50]:  48%|█████████▋          | 176/363 [01:36<01:47,  1.74it/s]\rVal[18/50]:  49%|█████████▊          | 177/363 [01:36<01:51,  1.68it/s]\rVal[18/50]:  49%|█████████▊          | 178/363 [01:37<01:54,  1.62it/s]\rVal[18/50]:  49%|█████████▊          | 179/363 [01:37<01:45,  1.74it/s]\rVal[18/50]:  50%|█████████▉          | 180/363 [01:38<01:50,  1.66it/s]\rVal[18/50]:  50%|█████████▉          | 181/363 [01:39<01:48,  1.67it/s]\rVal[18/50]:  50%|██████████          | 182/363 [01:39<01:46,  1.70it/s]\rVal[18/50]:  50%|██████████          | 183/363 [01:40<01:49,  1.64it/s]\rVal[18/50]:  51%|██████████▏         | 184/363 [01:40<01:35,  1.88it/s]\rVal[18/50]:  51%|██████████▏         | 185/363 [01:41<01:44,  1.70it/s]\rVal[18/50]:  51%|██████████▏         | 186/363 [01:42<01:45,  1.68it/s]\rVal[18/50]:  52%|██████████▎         | 187/363 [01:42<01:35,  1.85it/s]\rVal[18/50]:  52%|██████████▎         | 188/363 [01:42<01:12,  2.40it/s]\rVal[18/50]:  52%|██████████▍         | 189/363 [01:43<01:16,  2.27it/s]\rVal[18/50]:  52%|██████████▍         | 190/363 [01:43<01:24,  2.06it/s]\rVal[18/50]:  53%|██████████▌         | 191/363 [01:44<01:37,  1.76it/s]\rVal[18/50]:  53%|██████████▌         | 192/363 [01:45<01:58,  1.44it/s]\rVal[18/50]:  53%|██████████▋         | 193/363 [01:46<02:16,  1.24it/s]\rVal[18/50]:  53%|██████████▋         | 194/363 [01:47<02:06,  1.33it/s]\rVal[18/50]:  54%|██████████▋         | 195/363 [01:47<01:54,  1.46it/s]\rVal[18/50]:  54%|██████████▊         | 196/363 [01:48<01:49,  1.52it/s]\rVal[18/50]:  54%|██████████▊         | 197/363 [01:48<01:34,  1.75it/s]\rVal[18/50]:  55%|██████████▉         | 198/363 [01:48<01:22,  2.00it/s]\rVal[18/50]:  55%|██████████▉         | 199/363 [01:49<01:27,  1.87it/s]\rVal[18/50]:  55%|███████████         | 200/363 [01:50<01:33,  1.74it/s]\rVal[18/50]:  55%|███████████         | 201/363 [01:50<01:34,  1.72it/s]\rVal[18/50]:  56%|███████████▏        | 202/363 [01:51<01:15,  2.13it/s]\rVal[18/50]:  56%|███████████▏        | 203/363 [01:51<01:30,  1.76it/s]\rVal[18/50]:  56%|███████████▏        | 204/363 [01:52<01:30,  1.75it/s]\rVal[18/50]:  56%|███████████▎        | 205/363 [01:52<01:31,  1.73it/s]\rVal[18/50]:  57%|███████████▎        | 206/363 [01:53<01:25,  1.84it/s]\rVal[18/50]:  57%|███████████▍        | 207/363 [01:54<01:34,  1.65it/s]\rVal[18/50]:  57%|███████████▍        | 208/363 [01:54<01:35,  1.63it/s]\rVal[18/50]:  58%|███████████▌        | 209/363 [01:55<01:30,  1.70it/s]\rVal[18/50]:  58%|███████████▌        | 210/363 [01:56<01:34,  1.62it/s]\rVal[18/50]:  58%|███████████▋        | 211/363 [01:56<01:29,  1.70it/s]\rVal[18/50]:  58%|███████████▋        | 212/363 [01:57<01:28,  1.70it/s]\rVal[18/50]:  59%|███████████▋        | 213/363 [01:57<01:30,  1.66it/s]\rVal[18/50]:  59%|███████████▊        | 214/363 [01:57<01:08,  2.18it/s]\rVal[18/50]:  59%|███████████▊        | 215/363 [01:58<00:52,  2.82it/s]\rVal[18/50]:  60%|███████████▉        | 216/363 [01:58<01:09,  2.12it/s]\rVal[18/50]:  60%|███████████▉        | 217/363 [01:59<01:11,  2.06it/s]\rVal[18/50]:  60%|████████████        | 218/363 [01:59<01:13,  1.97it/s]\rVal[18/50]:  60%|████████████        | 219/363 [02:00<01:17,  1.86it/s]",
+    "native_log_paths": [
+      "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/20261030_163228.log"
+    ],
+    "native_metric_lines": [
+      "2026-10-30 17:12:58,696 - INFO - mIoU : 0.3073377013206482",
+      "2026-10-30 17:58:01,042 - INFO - mIoU : 0.37622618675231934",
+      "2026-10-30 18:43:34,164 - INFO - mIoU : 0.4080076515674591",
+      "2026-10-30 19:29:07,367 - INFO - mIoU : 0.4253402352333069",
+      "2026-10-30 20:14:56,419 - INFO - mIoU : 0.4498423635959625",
+      "2026-10-30 21:00:34,748 - INFO - mIoU : 0.45643317699432373",
+      "2026-10-30 21:46:11,872 - INFO - mIoU : 0.4725380837917328",
+      "2026-10-30 22:31:48,310 - INFO - mIoU : 0.4787389039993286",
+      "2026-10-30 23:17:37,862 - INFO - mIoU : 0.48678353428840637",
+      "2026-10-31 00:03:14,126 - INFO - mIoU : 0.48706188797950745",
+      "2026-10-31 00:48:49,790 - INFO - mIoU : 0.48312410712242126",
+      "2026-10-31 01:34:54,277 - INFO - mIoU : 0.4915812015533447",
+      "2026-10-31 02:20:35,068 - INFO - mIoU : 0.49100181460380554",
+      "2026-10-31 03:06:26,116 - INFO - mIoU : 0.4907829463481903",
+      "2026-10-31 03:51:46,851 - INFO - mIoU : 0.48979461193084717",
+      "2026-10-31 04:37:20,766 - INFO - mIoU : 0.49655306339263916",
+      "2026-10-31 05:22:41,876 - INFO - mIoU : 0.4932810366153717"
+    ],
+    "native_tail": "sk_bce_loss: 0.0028, mask_dice_loss: 0.0164, sem_loss: -0.4398, indi_loss: 0.0941, sample_loss: 0.1467, layer_0_score_loss: 0.0032, layer_0_mask_bce_loss: 0.0041, layer_0_mask_dice_loss: 0.0270, layer_0_sem_loss: -0.4321, layer_0_indi_loss: 0.0997, layer_1_score_loss: 0.0025, layer_1_mask_bce_loss: 0.0025, layer_1_mask_dice_loss: 0.0192, layer_1_sem_loss: -0.4404, layer_1_indi_loss: 0.0965, layer_2_score_loss: 0.0016, layer_2_mask_bce_loss: 0.0024, layer_2_mask_dice_loss: 0.0170, layer_2_sem_loss: -0.4357, layer_2_indi_loss: 0.0978, layer_3_score_loss: 0.0027, layer_3_mask_bce_loss: 0.0024, layer_3_mask_dice_loss: 0.0149, layer_3_sem_loss: -0.4407, layer_3_indi_loss: 0.0934, layer_4_score_loss: 0.0021, layer_4_mask_bce_loss: 0.0027, layer_4_mask_dice_loss: 0.0152, layer_4_sem_loss: -0.4420, layer_4_indi_loss: 0.0930, orth_reg_loss: 0.0099, loss: 0.6945, grad_total_norm: 1.7216\n2026-10-31 06:04:48,728 - INFO - Epoch [18/50][4670/4686]  lr: 3.3e-05, eta: 22:28:57, data_time: 0.00, iter_time: 0.54, score_loss: 0.0008, mask_bce_loss: 0.0026, mask_dice_loss: 0.0137, sem_loss: -1.6935, indi_loss: 0.1304, sample_loss: 0.1361, layer_0_score_loss: 0.0006, layer_0_mask_bce_loss: 0.0044, layer_0_mask_dice_loss: 0.0176, layer_0_sem_loss: -1.6895, layer_0_indi_loss: 0.1263, layer_1_score_loss: 0.0004, layer_1_mask_bce_loss: 0.0034, layer_1_mask_dice_loss: 0.0146, layer_1_sem_loss: -1.6841, layer_1_indi_loss: 0.1314, layer_2_score_loss: 0.0005, layer_2_mask_bce_loss: 0.0029, layer_2_mask_dice_loss: 0.0142, layer_2_sem_loss: -1.6940, layer_2_indi_loss: 0.1291, layer_3_score_loss: 0.0005, layer_3_mask_bce_loss: 0.0029, layer_3_mask_dice_loss: 0.0143, layer_3_sem_loss: -1.6928, layer_3_indi_loss: 0.1293, layer_4_score_loss: 0.0006, layer_4_mask_bce_loss: 0.0025, layer_4_mask_dice_loss: 0.0143, layer_4_sem_loss: -1.6920, layer_4_indi_loss: 0.1303, orth_reg_loss: 0.0100, loss: 0.2047, grad_total_norm: 1.5475\n2026-10-31 06:04:54,002 - INFO - Epoch [18/50][4680/4686]  lr: 3.3e-05, eta: 22:28:47, data_time: 0.00, iter_time: 0.54, score_loss: 0.0007, mask_bce_loss: 0.0070, mask_dice_loss: 0.0251, sem_loss: -0.9667, indi_loss: 0.5300, sample_loss: 0.1413, layer_0_score_loss: 0.0016, layer_0_mask_bce_loss: 0.0134, layer_0_mask_dice_loss: 0.0366, layer_0_sem_loss: -0.9005, layer_0_indi_loss: 0.6294, layer_1_score_loss: 0.0017, layer_1_mask_bce_loss: 0.0119, layer_1_mask_dice_loss: 0.0314, layer_1_sem_loss: -0.9964, layer_1_indi_loss: 0.4902, layer_2_score_loss: 0.0017, layer_2_mask_bce_loss: 0.0099, layer_2_mask_dice_loss: 0.0303, layer_2_sem_loss: -0.9813, layer_2_indi_loss: 0.5171, layer_3_score_loss: 0.0005, layer_3_mask_bce_loss: 0.0075, layer_3_mask_dice_loss: 0.0258, layer_3_sem_loss: -0.9857, layer_3_indi_loss: 0.5179, layer_4_score_loss: 0.0020, layer_4_mask_bce_loss: 0.0069, layer_4_mask_dice_loss: 0.0249, layer_4_sem_loss: -0.9721, layer_4_indi_loss: 0.5320, orth_reg_loss: 0.0100, loss: 0.6862, grad_total_norm: 4.9389\n2026-10-31 06:04:56,884 - INFO - Validation\n"
+  }
+}

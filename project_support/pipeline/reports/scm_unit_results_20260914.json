@@ -1,0 +1,47 @@
+{
+  "cpu_torch.bfloat16": {
+    "loss": 0.13432715833187103,
+    "finite_gradient": true
+  },
+  "cpu_gradcheck_empty": "PASS",
+  "cuda_torch.float16": {
+    "loss": 0.09010939300060272,
+    "finite_gradient": true
+  },
+  "cuda_torch.bfloat16": {
+    "loss": 0.09012021869421005,
+    "finite_gradient": true
+  },
+  "cuda_gradcheck_empty": "PASS",
+  "ddp": [
+    {
+      "counts": [
+        1,
+        3
+      ],
+      "gradient": 0.25,
+      "global_valid": 4.0,
+      "expected": 0.25
+    },
+    {
+      "counts": [
+        0,
+        4
+      ],
+      "gradient": 0.25,
+      "global_valid": 4.0,
+      "expected": 0.25
+    },
+    {
+      "counts": [
+        0,
+        0
+      ],
+      "gradient": 0.0,
+      "global_valid": 0.0,
+      "expected": 0.0
+    }
+  ],
+  "torch": "2.8.0+cu128",
+  "device": "NVIDIA H100 80GB HBM3"
+}

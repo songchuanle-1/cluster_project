@@ -1,0 +1,14 @@
+{
+  "actions": [
+    "17:09:59 快照：Phase 1 目标 0.5100、冠军 M95 0.5020、基线 0.4894；运行/认领/等待均 0，容量及候选预算均 2；本轮 design 租约持有。",
+    "17:15-17:26：server-6 CPU 冻结 TRAIN 256 条，物理同类 peer 对照 2 个碎片案例共 49 superpoint，best-positive 覆盖 0/49；26 条部署失败/成功中 positive-peer leakage 3/8 与 2/18。回顾性关联非因果。",
+    "17:33-17:46：预注册的三层梯度诊断：final-feature BCE、LayerNorm query-state BCE 均 26/26 同类 peer 与目标方向冲突，异类对照也冲突；原生比例 BCE+Dice 的碎片组目标更新 2/2 有利、peer 0/2 有利。仅 final mask head，不等于完整模型新机制反传。",
+    "科学准入仍为 diagnosis：六门槛未通过、没有新机制、没有入队/推送/训练；未占用 GPU。下一步须独立预测盲监督或信息路径、同前向安慰剂，再做原生 backward/效率/独立性核验。",
+    "17:54 首次 finish 返回 CLOSURE_INCOMPLETE：容量缺口仍有可执行研究 m95-sample-context-support，租约保留。真实剩余方向尚未完成六门槛；不重复无变化的 finish，保留证据后 abort。"
+  ],
+  "decisions": [
+    "保持稳定 ID m95-sample-context-support 为 diagnosis；同类 peer 物理存在但 best-positive 不覆盖不等于新 loss 缺陷。",
+    "反传方向与 native BCE+Dice 不支持碎片特异竞争损失；不把普通 target-positive/peer-negative 对立或旧 selector、union、PIRS 改名准入。",
+    "server-6 GPU7 仅获授权、非独占空闲；本轮未训练。后置检查确认为容量缺口未闭合，保留上述真实证据并标记 INCOMPLETE，不放宽准入。"
+  ]
+}

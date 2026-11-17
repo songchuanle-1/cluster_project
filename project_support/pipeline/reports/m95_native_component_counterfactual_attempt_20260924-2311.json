@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "contract": "m95_native_component_counterfactual_attempt_v1",
+  "timestamp": "2026-09-24T23:11:33+08:00",
+  "source_capture": {
+    "host": "server-6",
+    "path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813/capture.json",
+    "sha256": "f90286842d9d82d835652a29048100a10b6286ee5630e0d7c296363e95880025",
+    "capture_completed": true,
+    "rows": 256,
+    "artifact_files": 250,
+    "artifact_rows": 256,
+    "native_match_cause_rows": 0
+  },
+  "analyzer": {
+    "path": "scripts/native_component_counterfactual_20260924.py",
+    "sha256": "ebb940a11a6ed8b5d2a163fd09801d265342d62b187c95344f3e85067cc0355a"
+  },
+  "result": {
+    "executed_on_server6_cpu": true,
+    "status": "fail_closed",
+    "error_type": "KeyError",
+    "error": "native_match_cause",
+    "exit_code": 1,
+    "output_created": false
+  },
+  "conclusion": [
+    "The existing complete identity capture is sufficient for identity and score-selection controls.",
+    "It is not sufficient for the repeated-GT mask component counterfactual because the producer was run without --capture-match-causes.",
+    "A new full capture with native matcher causes is required before the mask-only, label-only and coupled arms can be evaluated."
+  ],
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable efficacy",
+    "novelty"
+  ]
+}

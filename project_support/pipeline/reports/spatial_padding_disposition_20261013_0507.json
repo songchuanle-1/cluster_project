@@ -1,0 +1,22 @@
+{
+  "stage": "rejected",
+  "hypothesis_id": "padded-superpoint-columns-contribute-to-native-mask-loss-and-gradient",
+  "next_action": "Reject only direct spatial-padding contamination at this native BCE/Dice loss boundary. Preserve v1/v2 strict-repeat failures and same-input numerical difference; no model-repeat PASS or production repair. New decoder-padding or nonzero score-path evidence would be a separate test.",
+  "result": "Frozen8groups/32expressions,4paired native collations,16padded expressions/3132padded support slots. All actual boundary padded gradients0 and padding-only lossdelta0 in two seed1999 passes. Broken-filter control positive4/4. One first-pair valid-gradient strict failure7.275957614183426e-12 also present in unchanged-input repeat; raw-record exact_repeat=false retained. Synthetic decoder/assignment, no native forward/FPS/semantic alignment; original score component zero.",
+  "gates": {
+    "diagnosis": {"passed": false, "reason": "Actual direct padding gradient and loss contamination absent in the tested mask-loss boundary; no population or model-wide claim."},
+    "controls": {"passed": false, "status": "partial", "reason": "Broken filtering separates4/4; exact valid-gradient and raw-record repeat tests fail and are not waived."},
+    "native_backward": {"passed": false, "status": "not_run_complete_model"},
+    "resources": {"passed": false, "status": "not_run"},
+    "independence": {"passed": false, "status": "not_run"},
+    "constraints": {"passed": true, "reason": "CPU native loss-boundary diagnostic only; unchanged TRAIN/config, no training, production or policy changes."}
+  },
+  "evidence": [
+    {"path": "pipeline/reports/spatial_padding_audit_20261013_0507.json"},
+    {"path": "scripts/spatial_padding_audit_v1_20261013_0507.py"},
+    {"path": "scripts/spatial_padding_audit_v2_20261013_0507.py"},
+    {"path": "scripts/spatial_padding_audit_v3_20261013_0507.py"},
+    {"path": "pipeline/reports/spatial_padding_adapter_failure_20261013_0507.json"},
+    {"path": "pipeline/reports/spatial_padding_v2_failure_20261013_0507.json"}
+  ]
+}

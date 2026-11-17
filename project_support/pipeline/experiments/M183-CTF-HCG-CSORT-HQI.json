@@ -1,0 +1,53 @@
+{
+  "id": "M183-CTF-HCG-CSORT-HQI",
+  "config": "configs/Quard/ctf_hcg_csort_hqi/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hqi.yaml",
+  "status": "done_earlystop",
+  "gpu": "1",
+  "label": "M183 Hierarchy-informed query initialization - concatenate sampled seed with fixed ancestor cluster context",
+  "depends_on": [],
+  "note": "designed 2026-09-08 18:20 after M177 normal early stop and M178 launch; independent M95 package; identical seed/schedule/loss config; new context-to-initial-query path, no recurrent mask feedback; code9065ae5 synced both servers preserving deployment diffs; CUDA topology/gradient/batch isolation and full-model finite-output tests passed; matched bs1 warmup20 repeat100 profile9.787698252G, peak allocated894.117MiB vs M95 893.367MiB; decision20260908-182949_next_batch.md",
+  "validation_report": "pipeline/reports/hqi_validation_20260908/hqi_profile.json",
+  "server": "server-4",
+  "registry_created_at": "2026-09-08T21:11:16",
+  "history": [
+    {
+      "ts": "2026-09-08T21:11:16",
+      "action": "metadata_reconciled",
+      "decision": "20260908-211039_other.md",
+      "source": "queue.json; decisions/20260908-182949_next_batch.md"
+    },
+    {
+      "ts": "2026-09-09T12:08:49.534077",
+      "action": "launched",
+      "gpu": "1"
+    },
+    {
+      "ts": "2026-09-09T12:25:27",
+      "action": "placement_metadata_reconciled",
+      "gpu": "1",
+      "decision": "20260909-122335_other.md",
+      "source": "running.json; launch history; live PID2939408"
+    },
+    {
+      "ts": "2026-09-10T13:12:15.108027",
+      "status": "done_earlystop",
+      "best_miou": "0.4915",
+      "epochs": "24/50"
+    }
+  ],
+  "launched": "2026-09-09T12:08:49",
+  "final_best": "0.4915",
+  "finished_at": "2026-09-10T13:12:15",
+  "log_local": "D:\\project\\cluster_project\\Checkpoints\\server-4\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hqi\\20260909_120847\\20260909_120847.log",
+  "epochs_final": "24/50",
+  "ended_at_remote": "2026-09-10T12:40:45.686",
+  "best_miou_exact": 0.49154922366142273,
+  "best_epoch": 14,
+  "best_acc50": 0.545,
+  "best_spmiou": 0.455,
+  "validations_completed": 24,
+  "no_improve_final": 10,
+  "log_sha256": "d2fcedfc902e9274687c0f6327c311536b735e97a31d1f3eefc73d421a4cc80e",
+  "analysis": "D:\\project\\cluster_project\\pipeline\\analyses\\M183-CTF-HCG-CSORT-HQI_done_earlystop_20260910-131000.md",
+  "terminal_evidence": "Explicit trainer marker and contiguous epochs; no kill"
+}

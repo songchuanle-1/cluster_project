@@ -1,0 +1,189 @@
+{
+  "recorded_at": "2026-10-26T05:24:00.547559+00:00",
+  "owner_token": "45eb3b045c6243518d56eade38d5cd17",
+  "preregistration": {
+    "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_revision1_preregistration.json",
+    "sha256": "3fa782b8970de909a219cc090e2188983e1afeab1ac99cac43df07b4f1e5b527"
+  },
+  "preregistered_at": "2026-10-26T05:16:16.347940+00:00",
+  "transport": "SSH_KEY_BATCHMODE_STRICT_KNOWN_HOST",
+  "returncode": 0,
+  "stderr": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "result": {
+    "observed_at": "2026-10-26T05:24:02.048530+00:00",
+    "hostname": "dl04-MS-7E06",
+    "torch_version": "2.8.0+cu128",
+    "fvcore_version": "0.1.5.post20221221",
+    "profiler_file_sha256": {
+      "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+      "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+      "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+    },
+    "cases": [
+      {
+        "case": "empty",
+        "ids": [],
+        "input_shape": [
+          2,
+          8,
+          256
+        ],
+        "mask_shape": [
+          2,
+          8
+        ],
+        "mask_dtype": "torch.bool",
+        "eager_bool_int_exact": true,
+        "mask_true_count": 0,
+        "branches": {
+          "original_bool": {
+            "JIT": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            },
+            "original_fvcore": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            }
+          },
+          "integer_one": {
+            "JIT": {
+              "succeeded": true,
+              "eager_mask_exact": true,
+              "graph_sha256": "1a7c3eb23f6abe0f8e9105648e0d6d6717f98ec55376b4a8aaadde16c65921ca",
+              "aten_index_fill_count": 2,
+              "warnings": []
+            },
+            "original_fvcore": {
+              "succeeded": true,
+              "flops": 0.0,
+              "by_operator": {},
+              "unsupported_ops": {
+                "aten::index_fill": 2
+              },
+              "warnings": []
+            }
+          }
+        }
+      },
+      {
+        "case": "nonempty",
+        "ids": [
+          0,
+          3,
+          7
+        ],
+        "input_shape": [
+          2,
+          8,
+          256
+        ],
+        "mask_shape": [
+          2,
+          8
+        ],
+        "mask_dtype": "torch.bool",
+        "eager_bool_int_exact": true,
+        "mask_true_count": 6,
+        "branches": {
+          "original_bool": {
+            "JIT": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            },
+            "original_fvcore": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            }
+          },
+          "integer_one": {
+            "JIT": {
+              "succeeded": true,
+              "eager_mask_exact": true,
+              "graph_sha256": "6456979acdcead1edafeb00fcbec9f5a20c38bf67f621cf4c9c06f6afb13b290",
+              "aten_index_fill_count": 2,
+              "warnings": []
+            },
+            "original_fvcore": {
+              "succeeded": true,
+              "flops": 0.0,
+              "by_operator": {},
+              "unsupported_ops": {
+                "aten::index_fill": 2
+              },
+              "warnings": []
+            }
+          }
+        }
+      },
+      {
+        "case": "repeated",
+        "ids": [
+          2,
+          2,
+          5
+        ],
+        "input_shape": [
+          2,
+          8,
+          256
+        ],
+        "mask_shape": [
+          2,
+          8
+        ],
+        "mask_dtype": "torch.bool",
+        "eager_bool_int_exact": true,
+        "mask_true_count": 4,
+        "branches": {
+          "original_bool": {
+            "JIT": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            },
+            "original_fvcore": {
+              "succeeded": false,
+              "error_type": "RuntimeError",
+              "error": "0 INTERNAL ASSERT FAILED at \"/pytorch/torch/csrc/jit/ir/alias_analysis.cpp\":624, please report a bug to PyTorch. We don't have an op for aten::index_fill but it isn't a special case.  Argument types: Tensor, int, Tensor, bool, \n\nCandidates:\n\taten::index_fill.int_Tensor(Tensor self, int dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar(Tensor self, int dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Scalar(Tensor self, str dim, Tensor index, Scalar value) -> Tensor\n\taten::index_fill.Dimname_Tensor(Tensor self, str dim, Tensor index, Tensor value) -> Tensor\n\taten::index_fill.int_Scalar_out(Tensor self, int dim, Tensor index, Scalar value, *, Tensor(a!) out) -> Tensor(a!)\n\taten::index_fill.int_Tensor_out(Tensor self, int dim, Tensor index, Tensor value, *, Tensor(a!) out) -> Tensor(a!)"
+            }
+          },
+          "integer_one": {
+            "JIT": {
+              "succeeded": true,
+              "eager_mask_exact": true,
+              "graph_sha256": "27da922ee949861edaf412ada8b196d10832313b425a9b4c9e4ab69bc284e905",
+              "aten_index_fill_count": 2,
+              "warnings": []
+            },
+            "original_fvcore": {
+              "succeeded": true,
+              "flops": 0.0,
+              "by_operator": {},
+              "unsupported_ops": {
+                "aten::index_fill": 2
+              },
+              "warnings": []
+            }
+          }
+        }
+      }
+    ],
+    "registered_prediction_supported_by_CPU_test": true,
+    "actual_native_model_TRAIN_resource_gate": "NOT_RUN_BY_THIS_TEST",
+    "original_model_imported": false,
+    "CUDA_or_torch_cuda_API_used": false,
+    "GPU_queried": false,
+    "forward_scope": "Only tiny explicitly defined CPU mask-line module, not original model",
+    "backward_optimizer_or_training": false,
+    "remote_source_or_file_modified": false,
+    "no_custom_or_ignored_handlers": true
+  },
+  "failed_stdout": null,
+  "source_changed": false,
+  "native_resource_or_TRAIN_pass_claimed": false
+}

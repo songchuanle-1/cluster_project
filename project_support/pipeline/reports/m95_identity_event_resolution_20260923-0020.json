@@ -1,0 +1,122 @@
+{
+  "contract": "m95_identity_event_resolution_v1",
+  "generated_at": "2026-09-23T00:23:40.796686+08:00",
+  "mode": "event",
+  "native_capture_completed": true,
+  "registered_analysis_completed": true,
+  "candidate_admission": false,
+  "queue_mutation": false,
+  "new_gpu_launch": false,
+  "tests": {
+    "frozen_analyzer_passed": 7,
+    "descriptive_handoff_passed": 3
+  },
+  "gpu_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "memory_used_mib": 42025,
+    "memory_total_mib": 81559,
+    "capture_pid_1578754_present": false,
+    "foreign_jobs_touched": false
+  },
+  "registered_primary": {
+    "available": 65,
+    "name": "scene_balanced_paired_target_iou_uplift",
+    "pooled_mean": 0.6648917611321752,
+    "rejection_reasons": [],
+    "scene_balanced_mean": 0.6648917611321752,
+    "scene_bootstrap_95ci": {
+      "draws": 10000,
+      "hi": 0.7397966126396509,
+      "lo": 0.5863504511351585,
+      "point_estimate": 0.6648917611321752,
+      "scene_count": 65,
+      "seed": 1999,
+      "unit": "scene"
+    },
+    "scenes": 65,
+    "score_match": {
+      "available": 65,
+      "max_absolute_score_difference": 0.09590262174606323,
+      "mean_absolute_score_difference": 0.01955023998251328
+    },
+    "supported": true
+  },
+  "descriptive": {
+    "common_support_positive_minus_target_objectness": {
+      "available": 243,
+      "scenes": 213,
+      "pooled_mean": -0.0002805836139169472,
+      "scene_bootstrap_95ci": {
+        "draws": 10000,
+        "seed": 1999,
+        "unit": "scene",
+        "point_estimate": -0.0003201024327784891,
+        "scene_count": 213,
+        "lo": -0.0009603072983354673,
+        "hi": 0.0
+      }
+    },
+    "common_support_expressions": 243,
+    "excluded_from_common_support": 13,
+    "primary_missingness": {
+      "ambiguous_no_score_matched_pair": 58,
+      "ambiguous_no_peer_query": 5,
+      "class_unique_no_peer_by_design": 128
+    },
+    "failure_counts": {
+      "total": 56,
+      "selection_with_acceptable_candidate": 40,
+      "positive_repairs": 27,
+      "target_objectness_repairs": 25,
+      "no_acceptable_candidate": 16
+    },
+    "expressions": 256,
+    "scenes": 220
+  },
+  "limitations": [
+    "Common-support comparison is post-capture descriptive, not a new primary test.",
+    "Target-objectness uses the true target union; it is not any-instance objectness.",
+    "Positive-versus-known-wrong target IoU is an oracle contrast, not deployable efficacy.",
+    "Only score-match-eligible ambiguous rows enter the primary estimand.",
+    "Feature margins use a target-positive query and overlapping prototypes; not causal mediation.",
+    "Cross-stage cosine differences alone cannot diagnose modality or identity destruction.",
+    "No new mechanism, novelty, resource gate, native candidate backward, or admission is established."
+  ],
+  "provenance_note": "Initial orchestration assertion compared entry and composite producer hashes. Source inspection resolved field semantics; all eight local/remote dependencies match, and unchanged analyzer succeeded.",
+  "pending_questions_24h": [],
+  "candidate_next_actions": {
+    "referent-supervision-axis": "Using the completed 256-row analysis, enumerate the 40 deployed failures with an acceptable query and partition native-positive eligibility versus score rank. Test whether a distinct supervision unit is evidenced without reopening PIRS, generic ranking, or mask-aware matching. Remain diagnosis until a nonduplicate mechanism is specified; no admission from oracle uplift.",
+    "referent-causality-audit": "Audit registered pair membership against target-positive and dominant-peer overlap in the existing 65 pairs, then compare the 243 common-support rows by exact selected query ID. Quantify target-informed control overlap and eligibility selection; do not call oracle contrast deployable causality or native-positive-specific benefit.",
+    "modality-identity-preservation": "Use existing 250 hash-bound feature shards on server-6 CPU to compare stage margins for deployed wrong versus acceptable target queries in the 40 selection failures, with self-overlap explicitly reported. No new capture or modality-fusion mechanism; current target-positive margins do not establish modality identity destruction.",
+    "referent-discrimination": "On the existing 40 recoverable selection failures, use frozen manifest target/peer IDs and deployed dominant-instance IDs to tabulate same-class, cross-class, no-instance and mixed-support errors with denominators. Keep 16 no-acceptable cases separate; do not propose a class selector.",
+    "instance-identity-representation": "Audit existing frozen query masks and feature shards for whether deployed wrong-query identity margins differ from acceptable-query margins on matched scenes. Report prototype-mask self-overlap and missingness before any identity-representation mechanism; no new GPU capture is needed."
+  },
+  "evidence": [
+    {
+      "path": "pipeline/reports/m95_capture_provenance_20260923-0012.json",
+      "sha256": "ff7e9f83d951e8938edf8a864685dd941b18d60907ee00d65f0cdd88bfec5b5e"
+    },
+    {
+      "path": "pipeline/reports/m95_manifest_identity_analysis_20260923-0012.json",
+      "sha256": "1980ac6fe2731dd5cd3b03194e1529905562e4eeceaac04b96823f6de5da131f"
+    },
+    {
+      "path": "pipeline/reports/m95_identity_handoff_20260923-0020.json",
+      "sha256": "f531f259ef593a64c1add5555f26bb7c783244475c3235cacf76cee485f74898"
+    },
+    {
+      "path": "scripts/m95_identity_handoff_20260923.py",
+      "sha256": "55b691ca4cdf86daf807ff08aee9d5ee1c7b85354741b8038f36fa7d098047f9"
+    },
+    {
+      "path": "scripts/test_m95_identity_handoff_20260923.py",
+      "sha256": "3a0115fc4287f87c4a85a3a0ec45de6f61fb4cc2f1043c77e8a0bf8e57cd91ab"
+    },
+    {
+      "path": "pipeline/decisions/20260923-001844_route_change.md",
+      "sha256": "495eab16d3fa6ace1c7fd8e40b14b7f7d49f357564eef98ceac3c1b6856c2b14"
+    }
+  ]
+}

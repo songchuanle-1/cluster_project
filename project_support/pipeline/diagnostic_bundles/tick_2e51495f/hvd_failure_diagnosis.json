@@ -1,0 +1,117 @@
+{
+  "recorded_at": "2026-11-06T13:59:21.365803+00:00",
+  "scope": "Read-only CPU source/log inspection; no import/Torch model/checkpoint load/SSH/GPU/restart or repository mutation.",
+  "experiment_id": "M230-HVD",
+  "runtime_source": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+  "evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_2e51495f/hvd_exit_observation.json",
+    "sha256": "7ae26704b7b807857ca7193b004af116856a9ece4f90c06c4b5f2378a5655840"
+  },
+  "observed_facts": {
+    "trainer_absent": true,
+    "last_native_phase": [
+      "Train",
+      "5",
+      "50",
+      "1449",
+      "4686"
+    ],
+    "exception": "TypeError: argument of type 'MultiheadAttention' is not iterable",
+    "stack_site": "torch/nn/modules/module.py:2855 if self not in memo, reached recursively via named_modules from _named_members/named_parameters/parameters/list(parameters).",
+    "guardian_released_at": "2026-11-06T13:49:46.377575+00:00",
+    "three_kernel_locks_empty": true,
+    "checkpoint_files_preserved_but_not_loaded": [
+      {
+        "directory": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236",
+        "files": [
+          {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236/best.pth",
+            "bytes": 891298516,
+            "mtime_ns": 1793972474800388124
+          },
+          {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236/last.pth",
+            "bytes": 891298516,
+            "mtime_ns": 1793972480552452704
+          }
+        ]
+      }
+    ]
+  },
+  "source_findings": [
+    {
+      "finding": "tools/train.py line129 invokes clip_grad_norm_(model.parameters(), cfg.train.grad_clip) after loss.backward and before optimizer.step on each finite-loss batch.",
+      "implication": "The observed parameter-list/traversal stack is compatible with this existing gradient-clipping path. The provided final18lines omit the initial call frame, so exact caller is inferred, not directly proved."
+    },
+    {
+      "finding": "HVD dec.py imports custom MultiheadAttention from framework.torch.nn; its activation.py class directly subclasses torch.nn.Module and defines only __init__, _reset_parameters, __setstate__, forward.",
+      "custom_MHA_own_methods": [
+        "__init__",
+        "_reset_parameters",
+        "__setstate__",
+        "forward"
+      ],
+      "implication": "No local custom named_modules/parameters override was found in that attention class. Its appearance in the error does not establish an attention forward math error."
+    },
+    {
+      "finding": "HVD variance_decomposition.py has no named_modules/parameters/named_parameters/_named_members override.",
+      "actual_AST_check_passed": true,
+      "implication": "No direct link from the new variance core to module traversal method mutation was found; this does not rule out an indirect runtime/lifecycle issue."
+    },
+    {
+      "finding": "Memo membership failure reports a MultiheadAttention object in a container position normally used by the traversal memo set.",
+      "implication": "A wrong memo value or method-binding/call-signature/runtime state problem is a concrete direction to investigate. No live object state, installed PyTorch source or reproduction was inspected, so this is a hypothesis only."
+    }
+  ],
+  "source_read_provenance": [
+    {
+      "path": "tools/train.py",
+      "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+      "commit_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+      "local_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+      "local_matches_commit": true
+    },
+    {
+      "path": "framework/torch/nn/modules/activation.py",
+      "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+      "commit_sha256": "d1b1b3b971c17fa4cc208a507cbe1046dea96a4db6857e34bf96dddf5cbe2f46",
+      "local_sha256": "d1b1b3b971c17fa4cc208a507cbe1046dea96a4db6857e34bf96dddf5cbe2f46",
+      "local_matches_commit": true
+    },
+    {
+      "path": "framework/torch/nn/modules/module.py",
+      "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+      "commit_sha256": "6ae5a63da4808b188c0ffb268471c0b2398f2805b8aa042e6922b995616e9a40",
+      "local_sha256": "6ae5a63da4808b188c0ffb268471c0b2398f2805b8aa042e6922b995616e9a40",
+      "local_matches_commit": true
+    },
+    {
+      "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/dec.py",
+      "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+      "commit_sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "local_sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "local_matches_commit": true
+    },
+    {
+      "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/variance_decomposition.py",
+      "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+      "commit_sha256": "3297ac8d1a00de943351b7f86610af18caaa4a1a528dd74eea1e2dd29b537dc3",
+      "local_sha256": "3297ac8d1a00de943351b7f86610af18caaa4a1a528dd74eea1e2dd29b537dc3",
+      "local_matches_commit": true
+    }
+  ],
+  "root_cause": "UNKNOWN",
+  "failure_scope": "runtime_implementation_inconclusive",
+  "not_established": [
+    "Not established as HVD mechanism ineffectiveness or numerical divergence.",
+    "No CUDA/OOM marker was found in supplied bounded evidence.",
+    "No actual installed PyTorch version/source/bound-method state inspection or CPU reproduction has been executed.",
+    "Latest exact best/last checkpoint epoch and metric are not established by file metadata alone."
+  ],
+  "next_diagnostics_without_automatic_resume": [
+    "Preserve original bounded traceback and exact frozen source/environment provenance.",
+    "Before any future recovery decision, obtain actual initial exception caller frames and installed torch.nn.Module.named_modules source/signature provenance; inspect custom attention bound named_modules and module tree without training or checkpoint mutation.",
+    "If safely executable in actual environment, a bounded CPU-only construction/traversal test can distinguish persistent source/import/binding failure from lost in-process state. A passing new model traversal would not explain the crashed object.",
+    "Keep original checkpoint, pause/bans, seed/schedule and failure evidence; no restart, GPU test, automatic resume or scientific rejection is authorized by this diagnosis."
+  ]
+}

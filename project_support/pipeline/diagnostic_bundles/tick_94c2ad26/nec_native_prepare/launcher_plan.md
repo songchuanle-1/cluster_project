@@ -1,0 +1,4 @@
+Future CLI contract only; DO NOT execute this DRAFT:
+- Fresh reviewed operational Adapter must first bind current owner/source6bc-parent-runtime4457, physicalGPU1 and real idle/three-lock observations, then stage exact candidate_model8+candidate.yaml+worker/runtime/sourcebinding.
+- Actual remote worker CLI remains `python -B worker.py --lease <fresh execution_lease.json> --mode smoke --target champion|candidate` and same `--mode resources`; DRAFTTrue rejects before manifest/NVML/Torch.
+- Four future raw arms are separate fresh original requests, never current results or a lease from prior ticks. Missing/partial requests use read-only reconcile, never blind replay. PCE owns the separate current nec_operational_prepare safety adapter/default-NOP launcher; this native packet adds no remote transport or release.

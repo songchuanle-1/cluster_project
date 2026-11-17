@@ -1,0 +1,16 @@
+{
+  "owner": {
+    "token": "eb84540382834ffd88f5a83a0b797ee3",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T15:16:05.075512+00:00",
+    "deadline_at": "2026-11-09T16:16:05.075512+00:00",
+    "context_sha256": "5fc4b32a051066c9ae26d4ae02d77e48175687907a4501b0279a708b16270308",
+    "pending_sha256": "801708609a3df72ccd311cd45604bf534a09998c6cdb9cc1795244021d01238f"
+  },
+  "recorded_at": "2026-11-09T15:53:27.655216+00:00",
+  "wrapper_sha256": "3acca9b5d36148099392498f157c56494e8d3f0e5bba2414930bc2947780ad5e",
+  "body": "\nimport json,os,socket,subprocess,time\nassert socket.gethostname()==\"dl04-MS-7E06\" and os.getuid()==os.geteuid()==1001\npayload=json.load(__import__(\"sys\").stdin)\nassert payload[\"owner\"][\"token\"]==\"eb84540382834ffd88f5a83a0b797ee3\"\nfrom datetime import datetime,timezone\nassert datetime.now(timezone.utc)<datetime.fromisoformat(payload[\"owner\"][\"deadline_at\"])\nout=os.memfd_create(\"gpu0_identity_out\",os.MFD_CLOEXEC)\nerr=os.memfd_create(\"gpu0_identity_err\",os.MFD_CLOEXEC)\np=subprocess.Popen([\"/usr/bin/nvidia-smi\",\"-i\",\"0\",\"--query-gpu=index,uuid,memory.free\",\n                    \"--format=csv,noheader,nounits\"],stdin=subprocess.DEVNULL,stdout=out,stderr=err)\nstart=(__import__(\"pathlib\").Path(\"/proc\")/str(p.pid)/\"stat\").read_text().rsplit(\")\",1)[1].split()[19]\nstop=time.monotonic()+5\nwhile p.poll() is None and time.monotonic()<stop:time.sleep(.02)\nrc=p.poll()\nraw=os.pread(out,1024,0).decode(\"utf-8\",\"replace\")\nerror=os.pread(err,1024,0).decode(\"utf-8\",\"replace\")\nr={\"owner\":payload[\"owner\"],\"observed_at\":datetime.now(timezone.utc).isoformat(),\n   \"hostname\":socket.gethostname(),\"uid\":os.getuid(),\"pid\":p.pid,\"start_ticks\":start,\n   \"certainty\":\"terminal\" if rc is not None else \"uncertain\",\"returncode\":rc,\n   \"stdout\":raw,\"stderr\":error,\"physical_device_requested\":0,\n   \"CUDA_context_or_training_started\":False,\"signals_sent\":False,\n   \"GPU_resource_gate_or_budget_pass_claimed\":False}\nif rc==0:\n fields=[x.strip() for x in raw.strip().split(\",\")]\n assert len(fields)==3 and fields[0]==\"0\" and fields[1]==\"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\"\n r.update(index=0,uuid=fields[1],free_memory_mib=int(fields[2]),identity_matched=True)\nprint(json.dumps(r))\n",
+  "kind": "READONLY_PHYSICAL_GPU0_IDENTITY_FOR_CPU_PROBE_BINDING",
+  "no_CUDA_context_or_training": true,
+  "no_replay": true
+}

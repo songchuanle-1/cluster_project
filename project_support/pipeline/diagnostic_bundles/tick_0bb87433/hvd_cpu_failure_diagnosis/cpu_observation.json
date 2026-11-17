@@ -1,0 +1,123 @@
+{
+  "recorded_at": "2026-11-06T15:11:53.852295+00:00",
+  "root_owner_provenance_only": {
+    "token": "0bb874337dde412e98bbbaac369f3370",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T15:05:46.633721+00:00",
+    "deadline_at": "2026-11-06T16:05:46.633721+00:00",
+    "context_sha256": "e23733a2b2bace02c86253baecfba6cdd70f568460871f183fd88a200a04df46",
+    "pending_sha256": "3319194dccd61b99a2c36cf5cd605b3c25d526c9aeefd95efb084a5dcd672a62"
+  },
+  "actual_child_thread_id": "01a1b0fe-bdcf-7132-97e7-d47e966333c2",
+  "request_sha256": "23bd88392d6ebe307268c71288565ee84cb6ef5fb19db9ee1ff168f89d0c51b6",
+  "script_sha256": "e132785331eabcbfc7b6143404095aeb5c170d280e29928c58a6deb878260a17",
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1 /home/songcl/.conda/envs/project_cluster/bin/python -B -"
+  ],
+  "returncode": 0,
+  "stderr": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "observation": {
+    "recorded_at": "2026-11-06T15:11:53.179937+00:00",
+    "hostname": "dl04-MS-7E06",
+    "python_executable": "/home/songcl/.conda/envs/project_cluster/bin/python",
+    "CUDA_VISIBLE_DEVICES": "",
+    "scope": "Read-only CPU source/introspection and a newly constructed small CPU module tree. No dataset, checkpoint, forward, backward, optimizer, GPU/NVML or training.",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106",
+    "runtime_source": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "torch": {
+      "version": "2.8.0+cu128",
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/__init__.py",
+      "module_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+      "module_file_sha256": "0cb24956454199a46e8fc37a7cce4fc1cff52130f25fb6eb052745e9eca89067"
+    },
+    "installed_methods": {
+      "parameters": {
+        "signature": "(self, recurse: bool = True) -> collections.abc.Iterator[torch.nn.parameter.Parameter]",
+        "module": "torch.nn.modules.module",
+        "qualname": "Module.parameters",
+        "source_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+        "first_line": 2651,
+        "source_sha256": "be760a33b3944208c64d632ae8bbe85f71e6afc62a7931e8532bc3a8c105ba06",
+        "source": "    def parameters(self, recurse: bool = True) -> Iterator[Parameter]:\n        r\"\"\"Return an iterator over module parameters.\n\n        This is typically passed to an optimizer.\n\n        Args:\n            recurse (bool): if True, then yields parameters of this module\n                and all submodules. Otherwise, yields only parameters that\n                are direct members of this module.\n\n        Yields:\n            Parameter: module parameter\n\n        Example::\n\n            >>> # xdoctest: +SKIP(\"undefined vars\")\n            >>> for param in model.parameters():\n            >>>     print(type(param), param.size())\n            <class 'torch.Tensor'> (20L,)\n            <class 'torch.Tensor'> (20L, 1L, 5L, 5L)\n\n        \"\"\"\n        for _name, param in self.named_parameters(recurse=recurse):\n            yield param\n",
+        "source_truncated": false
+      },
+      "named_parameters": {
+        "signature": "(self, prefix: str = '', recurse: bool = True, remove_duplicate: bool = True) -> collections.abc.Iterator[tuple[str, torch.nn.parameter.Parameter]]",
+        "module": "torch.nn.modules.module",
+        "qualname": "Module.named_parameters",
+        "source_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+        "first_line": 2676,
+        "source_sha256": "a5cf801eda9c82c1e6e7eb2ac634f295a35e9524d348f5424bc5fa3f67b9eb1a",
+        "source": "    def named_parameters(\n        self, prefix: str = \"\", recurse: bool = True, remove_duplicate: bool = True\n    ) -> Iterator[tuple[str, Parameter]]:\n        r\"\"\"Return an iterator over module parameters, yielding both the name of the parameter as well as the parameter itself.\n\n        Args:\n            prefix (str): prefix to prepend to all parameter names.\n            recurse (bool): if True, then yields parameters of this module\n                and all submodules. Otherwise, yields only parameters that\n                are direct members of this module.\n            remove_duplicate (bool, optional): whether to remove the duplicated\n                parameters in the result. Defaults to True.\n\n        Yields:\n            (str, Parameter): Tuple containing the name and parameter\n\n        Example::\n\n            >>> # xdoctest: +SKIP(\"undefined vars\")\n            >>> for name, param in self.named_parameters():\n            >>>     if name in ['bias']:\n            >>>         print(param.size())\n\n        \"\"\"\n        gen = self._named_members(\n            lambda module: module._parameters.items(),\n            prefix=prefix,\n            recurse=recurse,\n            remove_duplicate=remove_duplicate,\n        )\n        yield from gen\n",
+        "source_truncated": false
+      },
+      "_named_members": {
+        "signature": "(self, get_members_fn, prefix='', recurse=True, remove_duplicate: bool = True)",
+        "module": "torch.nn.modules.module",
+        "qualname": "Module._named_members",
+        "source_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+        "first_line": 2631,
+        "source_sha256": "eb15b8046105757d20d76a4735a8b6326ba7e834d1d2c4366f5749b9ac93919e",
+        "source": "    def _named_members(\n        self, get_members_fn, prefix=\"\", recurse=True, remove_duplicate: bool = True\n    ):\n        r\"\"\"Help yield various names + members of modules.\"\"\"\n        memo = set()\n        modules = (\n            self.named_modules(prefix=prefix, remove_duplicate=remove_duplicate)\n            if recurse\n            else [(prefix, self)]\n        )\n        for module_prefix, module in modules:\n            members = get_members_fn(module)\n            for k, v in members:\n                if v is None or v in memo:\n                    continue\n                if remove_duplicate:\n                    memo.add(v)\n                name = module_prefix + (\".\" if module_prefix else \"\") + k\n                yield name, v\n",
+        "source_truncated": false
+      },
+      "named_modules": {
+        "signature": "(self, memo: Optional[set['Module']] = None, prefix: str = '', remove_duplicate: bool = True)",
+        "module": "torch.nn.modules.module",
+        "qualname": "Module.named_modules",
+        "source_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+        "first_line": 2818,
+        "source_sha256": "44aab62f175b54b1f76d15a699737af1e7fe3eb00966ff9abaa4e12c72ac6d7b",
+        "source": "    def named_modules(\n        self,\n        memo: Optional[set[\"Module\"]] = None,\n        prefix: str = \"\",\n        remove_duplicate: bool = True,\n    ):\n        r\"\"\"Return an iterator over all modules in the network, yielding both the name of the module as well as the module itself.\n\n        Args:\n            memo: a memo to store the set of modules already added to the result\n            prefix: a prefix that will be added to the name of the module\n            remove_duplicate: whether to remove the duplicated module instances in the result\n                or not\n\n        Yields:\n            (str, Module): Tuple of name and module\n\n        Note:\n            Duplicate modules are returned only once. In the following\n            example, ``l`` will be returned only once.\n\n        Example::\n\n            >>> l = nn.Linear(2, 2)\n            >>> net = nn.Sequential(l, l)\n            >>> for idx, m in enumerate(net.named_modules()):\n            ...     print(idx, '->', m)\n\n            0 -> ('', Sequential(\n              (0): Linear(in_features=2, out_features=2, bias=True)\n              (1): Linear(in_features=2, out_features=2, bias=True)\n            ))\n            1 -> ('0', Linear(in_features=2, out_features=2, bias=True))\n\n        \"\"\"\n        if memo is None:\n            memo = set()\n        if self not in memo:\n            if remove_duplicate:\n                memo.add(self)\n            yield prefix, self\n            for name, module in self._modules.items():\n                if module is None:\n                    continue\n                submodule_prefix = prefix + (\".\" if prefix else \"\") + name\n                yield from module.named_modules(\n                    memo, submodule_prefix, remove_duplicate\n                )\n",
+        "source_truncated": false
+      }
+    },
+    "custom_attention": {
+      "class_module": "framework.torch.nn.modules.activation",
+      "source_file": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/framework/torch/nn/modules/activation.py",
+      "source_sha256": "d1b1b3b971c17fa4cc208a507cbe1046dea96a4db6857e34bf96dddf5cbe2f46",
+      "class_own_methods": [
+        "_reset_parameters",
+        "forward"
+      ],
+      "named_modules_in_class_dict": false,
+      "named_modules_signature": "(memo: Optional[set['Module']] = None, prefix: str = '', remove_duplicate: bool = True)",
+      "bound_self_is_instance": true,
+      "bound_func_is_installed_Module_named_modules": true,
+      "parameter_devices": [
+        "cpu"
+      ]
+    },
+    "cpu_reproduction": {
+      "completed": true,
+      "iterations": 128,
+      "nesting_wrappers": 6,
+      "counts_unique": [
+        [
+          10,
+          12,
+          0.0
+        ]
+      ],
+      "all_parameter_devices": [
+        "cpu"
+      ],
+      "remove_duplicate_false_count": 14,
+      "duplicate_memo_path_exercised": true,
+      "clip_norm_no_gradients": true,
+      "original_failure_reproduced": false,
+      "limitation": "Fresh small CPU tree only. It does not reconstruct the crashed HVD object, its batch, prior forward/backward history or original CUDA runtime state."
+    },
+    "conclusion": "Persistent parameter-enumeration failure was not reproduced in this bounded installed-library/custom-attention CPU observation. Original HVD crash root cause remains UNKNOWN.",
+    "finished_at": "2026-11-06T15:11:53.776460+00:00"
+  },
+  "raw_stdout_if_failed": null
+}

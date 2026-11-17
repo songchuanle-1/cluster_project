@@ -1,0 +1,41 @@
+{
+  "kind": "static_formula_and_existing_evidence_audit",
+  "partition": {
+    "total": 8,
+    "observable_different_winner": 6,
+    "observable_same_winner": 0,
+    "unobservable": 2
+  },
+  "counterexample": {
+    "losses": [
+      0,
+      10
+    ],
+    "marginal_loss": 0.6931017816607284,
+    "gradient_wrt_losses": [
+      0.9999546021312976,
+      4.5397868702434395e-05
+    ],
+    "finite_difference": [
+      0.9999546021322024,
+      4.539786324642136e-05
+    ]
+  },
+  "singleton_identity": true,
+  "disposition": "Reject marginal-likelihood aggregation as a remedy for hard-description failures: its loss gradient favors the already-easy expression. This does not reject all multi-description training or require pretrained hard-IoU gains.",
+  "limitations": "Independent loss variables; no model-gradient or efficacy claim. Conditional Bernoulli target probability is illustrative, not the native composite loss.",
+  "evidence": [
+    {
+      "path": "pipeline/reports/same_target_native_20260916_metadata_corrected.json",
+      "sha256": "0a40b1495bd2802b4f9ee2ba92a8d239a2a470517668ef813668d494e227c874"
+    },
+    {
+      "path": "pipeline/reports/same_target_summary_20260916.json",
+      "sha256": "cf9f337e7b30c42aa88564a3d9c8f662825728766d92a19b69c3d73c75c58656"
+    },
+    {
+      "path": "scripts/description_group_objective_audit_20260916.py",
+      "sha256": "ab5dbacb7f93f89e3ea946109c8c7341f8af7aed32916aa485f7e15567fe0a54"
+    }
+  ]
+}

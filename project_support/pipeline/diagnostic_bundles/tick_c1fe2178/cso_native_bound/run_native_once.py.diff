@@ -1,0 +1,50 @@
+--- tick_7caf419d/run_native_once.py
++++ tick_c1fe2178/run_native_once.py
+@@ -14,14 +14,14 @@
+ ROOT = Path("D:/project/cluster_project")
+ HERE = Path(__file__).resolve().parent
+ OWNER = {
+-    "token": "7caf419d15d145459592faa2810e3776",
++    "token": "c1fe217800894083b65baac45f79aa83",
+     "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+-    "generated_at": "2026-11-10T23:07:51.623609+00:00",
+-    "deadline_at": "2026-11-11T00:07:51.623609+00:00",
+-    "context_sha256": "a200efcc530b267bc1bb670cc5edf81947f97333564b0bc66eafc00dd724ea7b",
+-    "pending_sha256": "ede9654dfc7e7034614422dacea50ad08b331ccd58f2dd1da18fc45602d8fcfd"
++    "generated_at": "2026-11-14T01:52:47.538159+00:00",
++    "deadline_at": "2026-11-14T02:52:47.538159+00:00",
++    "context_sha256": "e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4",
++    "pending_sha256": "3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6"
+ }
+-REMOTE_STAGE = "/data/songcl/Project/Cluster_project/pipeline/cso_7caf419d_gpu0"
++REMOTE_STAGE = "/data/songcl/Project/Cluster_project/pipeline/cso_c1fe2178_gpu0"
+ 
+ 
+ def sha(path):
+@@ -69,8 +69,9 @@
+     assert review["worker_sha256"] == sha(HERE / "worker.py")
+     assert review["runtime_sha256"] == sha(HERE / "native_runtime.py")
+     assert review["transport_sha256"] == sha(__file__)
+-    assert review["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod")
++    assert review["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops")
+     assert review["source_and_native_protocol_review_passed"] is True
++    assert review["direct_memory_free_guard_integration_review_passed"] is True
+     # The local canonical queue blocks transport while M235 or any server4/GPU0 project slot is active.
+     queue = read(ROOT / "pipeline/queue.json")
+     occupied = [task for task in queue["gpu_queues"].get("server-4", [])
+@@ -93,13 +94,13 @@
+ assert 'torch' not in sys.modules,'Native guards must precede Torch import'
+ payload=json.load(sys.stdin)
+ owner=payload['owner']
+-assert owner['token']=='7caf419d15d145459592faa2810e3776'
++assert owner['token']=='c1fe217800894083b65baac45f79aa83'
+ assert owner['thread_id']=='01a159c5-29ab-7a22-ba7f-e79174757253'
+ assert (datetime.fromisoformat(owner['deadline_at'])-datetime.now(timezone.utc)).total_seconds()>300
+ root='/data/songcl/Project/Cluster_project/Cluster_nsd_20261107'
+ actual=subprocess.check_output(['/usr/bin/git','--no-optional-locks','-c','core.fsmonitor=false','-C',root,'rev-parse','HEAD'],text=True,timeout=15).strip()
+ assert actual=='b1e639b3ceb14bb5c65d9f81a084d41c834b951c'
+-stage=pathlib.Path('/data/songcl/Project/Cluster_project/pipeline/cso_7caf419d_gpu0')
++stage=pathlib.Path('/data/songcl/Project/Cluster_project/pipeline/cso_c1fe2178_gpu0')
+ new=not stage.exists()
+ if payload.get('collect_only'):assert not new,'Collection cannot stage or launch'
+ if new:stage.mkdir(mode=0o700,exist_ok=False)

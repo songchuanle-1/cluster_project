@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-09-17T08:15:37+08:00",
+  "mode": "design",
+  "candidate_budget": 1,
+  "candidate_id": "decision-aligned-referent-supervision",
+  "stage": "rejected",
+  "question": "Does an expression-level top-1/listwise referent loss define a novel core mechanism after PIRS was found to be prior-art score-target supervision?",
+  "diagnostic_basis": {
+    "deployed_train_selection_success_scene_balanced": 0.6875,
+    "positive_oracle_success_scene_balanced": 0.8671875,
+    "paired_delta_scene_balanced": 0.1796875,
+    "fixed": 22,
+    "broken": 0,
+    "mask_ok_training_negative_queries": 2455,
+    "failure_decomposition": "32 of 38 failures select a non-positive query; 33 of 38 failures contain at least one acceptable query.",
+    "evidence": [
+      {
+        "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+        "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639"
+      }
+    ]
+  },
+  "proposed_mechanism": {
+    "summary": "Replace independent query-quality targets with a set-level loss over the query population: assign probability mass by softmax over referent logits and minimize the probability mass carried by mask-unacceptable queries, or equivalently optimize the probability that the deployed argmax lies in the acceptable set.",
+    "reason_considered": "It directly matches the deployed top-1 selection decision and does not regress an auxiliary mask-quality score.",
+    "status": "not designed or implemented"
+  },
+  "primary_source_audit": [
+    {
+      "id": "2107.11669v2",
+      "title": "Rank & Sort Loss for Object Detection and Instance Segmentation",
+      "url": "https://arxiv.org/abs/2107.11669",
+      "archive_url": "https://export.arxiv.org/e-print/2107.11669v2",
+      "archive_path": "pipeline/reports/ranksort_2107.11669v2_source.tar",
+      "archive_sha256": "db3a2c4b512185bbdb2b09e369419d0db79a228f4a4549a3c0f353a57278ef33",
+      "relevant_source": [
+        "sections/4.RankSortLoss.tex lines 3-8"
+      ],
+      "finding": "The original method defines a purely ranking-based classifier loss that ranks each positive above all negatives and sorts positives by continuous localisation quality such as IoU. It explicitly removes the need for an auxiliary IoU/quality head. This covers the core causal mechanism proposed here, namely aligning the classifier ranking/decision directly with predicted-mask quality rather than independently regressing per-query quality.",
+      "additional_finding": "The method is demonstrated on object detection and instance segmentation, so transferring the objective to 3D-RES changes the application surface and candidate construction but not the core decision-aligned ranking mechanism."
+    },
+    {
+      "id": "2211.15766v1",
+      "title": "Superpoint Transformer for 3D Scene Instance Segmentation",
+      "finding": "SPFormer already uses predicted-mask quality to supervise query scores, so a local listwise reparameterisation cannot claim novelty from quality-aware referent ranking alone.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/3d_res_original_source_audit_20260917-0614.json",
+          "sha256": "27a024c08b5d56b8f746a49a2f6a0c2471a2a430ccd99d5b9635704f1e16eb85"
+        }
+      ]
+    }
+  ],
+  "verdict": {
+    "literature_gate": "fail for a new core mechanism",
+    "reason": "The candidate's whole-mechanism claim would be decision-aligned quality ranking. Rank & Sort Loss already establishes that mechanism, including positive-vs-negative ranking and quality sorting without an auxiliary quality head. A set-softmax/top-1 formulation in the existing referent head is an alternative objective parameterisation of that prior mechanism, not a distinct causal mechanism.",
+    "disposition": "Reject before motivation_review, exp_design, implementation, admission or enqueue. Leave the one open design slot empty and do not reopen this idea under a renamed top-1, listwise, softmax-ranking, or hard-negative ID."
+  },
+  "actions": {
+    "admitted_new_candidates": 0,
+    "enqueued": false,
+    "queue_mutation": false,
+    "training_launch": false,
+    "code_sync": false,
+    "rejected_remainder": [
+      "decision-aligned-referent-supervision"
+    ]
+  },
+  "limitations": [
+    "This is a bounded primary-source audit, not an exhaustive literature proof.",
+    "The audit rejects the claim of a new core mechanism; it does not assert that the candidate would fail empirically.",
+    "No native backward, resource, admission or training evidence was generated because the candidate failed the literature gate."
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "actions": [
+    "03:09:51 快照：Phase 1 冠军 M95=0.5020，目标 0.5100；运行/认领/等待均为 0，授权容量 2。本轮继续稳定候选 m95-sample-context-support 的 diagnosis。",
+    "审计原生训练加载器发现 shuffle=true、drop_last=true 不满足冻结样本完整且确定次序；修正 31 表达捕获适配器为 batch_size=1、无随机、无丢尾，七项 CPU 契约测试及 AST 检查通过。证据 pipeline/reports/m95_native_31_loader_guard_20260928-0313.md；这是采样契约验证，不是 CUDA 模型结果。",
+    "03:11 实时 SSH 核实 server-6 GPU7 外部用户进程 PID 709354 占用约 13199 MiB 且利用率 98%；原始数据、注释及图 SHA256 与冻结值吻合，但远端适配器和清单尚未部署。未申请独占诊断租约，未同步/运行 GPU 捕获，未推送训练。",
+    "科学状态 diagnosis；原生同前向因果干预/安慰剂及六项准入仍待完成。GPU7 真正空闲后先核对 checkpoint/代码哈希和独占租约，再运行冻结捕获；不以 CPU 检查宣布有效。"
+  ],
+  "decisions": [
+    "2026-09-28 03:14 route_change：修复有序、无丢尾原生捕获契约，保持稳定候选 ID 与冻结清单，外部 GPU 任务未结束前不启动诊断；见 pipeline/decisions/20260928-031401_route_change.md。",
+    "准入 0/预算 2，保留空槽；不放宽调参禁令、科学门槛或外部任务保护。"
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "scope": "Static archive and evaluation-contract tests only. No native capture.",
+  "tests_passed": 7,
+  "recomputed_intervention": {
+    "expressions": 123,
+    "scenes": 32,
+    "scene_balanced_delta": 0.1796875,
+    "scene_balanced_deployed": 0.6875,
+    "fixed": 22,
+    "broken": 0
+  },
+  "archive_support_audits": {
+    "intervention": {
+      "rows": 123,
+      "missing_axes_counts": {
+        "capture_id": 123,
+        "scene": 0,
+        "ann_id": 123,
+        "expression_slot": 123,
+        "original_superpoint_ids": 123,
+        "sample_inverse": 123
+      },
+      "physical_join_ready": false
+    },
+    "ownership": {
+      "rows": 19,
+      "missing_axes_counts": {
+        "capture_id": 19,
+        "scene": 0,
+        "ann_id": 0,
+        "expression_slot": 19,
+        "original_superpoint_ids": 19,
+        "sample_inverse": 19
+      },
+      "physical_join_ready": false
+    },
+    "instance": {
+      "rows": 28,
+      "missing_axes_counts": {
+        "capture_id": 28,
+        "scene": 0,
+        "ann_id": 28,
+        "expression_slot": 0,
+        "original_superpoint_ids": 28,
+        "sample_inverse": 28
+      },
+      "physical_join_ready": false
+    },
+    "membership": {
+      "rows": 123,
+      "missing_axes_counts": {
+        "capture_id": 123,
+        "scene": 0,
+        "ann_id": 123,
+        "expression_slot": 123,
+        "original_superpoint_ids": 123,
+        "sample_inverse": 123
+      },
+      "physical_join_ready": false
+    }
+  },
+  "connected_control_ids": [
+    {
+      "scene": "scene0421_00",
+      "ann_id": 75,
+      "node_id": 2
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 5,
+      "node_id": 3
+    },
+    {
+      "scene": "scene0110_00",
+      "ann_id": 7,
+      "node_id": 1
+    },
+    {
+      "scene": "scene0420_00",
+      "ann_id": 98,
+      "node_id": 1
+    },
+    {
+      "scene": "scene0416_00",
+      "ann_id": 74,
+      "node_id": 1
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_id": 2
+    },
+    {
+      "scene": "scene0452_00",
+      "ann_id": 59,
+      "node_id": 3
+    }
+  ],
+  "instance_scene_counts": {
+    "scene0493_00": 1,
+    "scene0481_00": 3,
+    "scene0288_00": 2,
+    "scene0289_00": 3,
+    "scene0220_00": 1,
+    "scene0076_00": 2,
+    "scene0421_00": 2,
+    "scene0223_00": 1,
+    "scene0319_00": 1,
+    "scene0192_00": 1,
+    "scene0110_00": 2,
+    "scene0632_00": 1,
+    "scene0420_00": 2,
+    "scene0416_00": 1,
+    "scene0320_00": 2,
+    "scene0452_00": 1,
+    "scene0588_00": 2
+  },
+  "modality_required_capture": [
+    "scene, annotation ID, object IDs, point/superpoint support hashes and expression slot",
+    "selected and oracle-best IoU plus all query IoUs, indis and score ranks",
+    "native positive membership and best rank over every mask with IoU above .5",
+    "paired raw/projected/fused/final target and distractor features on identical support",
+    "same-class and different-class controls; phrase-conditioned contrast, not neighbour retrieval",
+    "owned/relocated/disabled endpoint map for seven connected controls; preserve twelve disconnected controls",
+    "report all 85/33/5 strata only after same-forward membership verification"
+  ],
+  "indexing_limitations": [
+    "Static source contract plus synthetic indexing, not native cache provenance verification.",
+    "clip_feat cache producer and source per-view/visibility metadata remain unverified.",
+    "Independent captures do not persist vectors/support IDs; matching expression IDs alone cannot establish tensor alignment across runs.",
+    "Aligned rows do not guarantee semantic alignment or justify fusion novelty.",
+    "Point subsampling changes 3D aggregation; cached2D comes from precomputed SPs. This distinction is not evidence of harmful mismatch."
+  ],
+  "interpretation": [
+    "The exact scene-balanced baseline is .6875, not pooled .6910569.",
+    "Keep pre-registered thresholds; report pooled and scene-balanced separately.",
+    "All-acceptable rank is not the rank of the single highest-IoU query.",
+    "These archives cannot certify a cross-capture physical join.",
+    "Seven connected text controls are not seven bound physical interventions.",
+    "Do not infer missing information in native data from missing archive fields.",
+    "Pending native endpoint capture remains executable work, not an external blocker."
+  ],
+  "sources": [
+    {
+      "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+      "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639"
+    },
+    {
+      "path": "pipeline/reports/ownership_path_contract_20260916.json",
+      "sha256": "208412404e95cb0f7b9a8495eb007d07ef7e7444b7971b5bed6bc633f8861445"
+    },
+    {
+      "path": "pipeline/reports/instance_feature_separability_20260916.json",
+      "sha256": "b9f25cc733f8f58b80edd3b676e621f620fecbd47dcdc78409440e1611f76dfe"
+    },
+    {
+      "path": "pipeline/reports/matched_positive_composition_20260916.json",
+      "sha256": "96ef931141c755b42a37d8c41c79472b25b79df2a3b6b717d65e4a5ae4328b20"
+    },
+    {
+      "path": "pipeline/reports/modality_identity_claim_audit_20260916.json",
+      "sha256": "a8e8c72e6e958c27e11a092123d091e33d9ec87dd0d6492aa0184214d5e11d96"
+    },
+    {
+      "path": "pipeline/reports/modality_index_contract_20260916.json",
+      "sha256": "19d4f42e9469da19586602426322f9602d496de28efe2dd34ccae10012640db9"
+    },
+    {
+      "path": "scripts/evaluation_contract_20260916.py",
+      "sha256": "50068b8a2bb721db1c4c65b2dd8634eb0bcb0706b088018a4357754befd2bc61"
+    }
+  ]
+}

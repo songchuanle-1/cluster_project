@@ -1,0 +1,17 @@
+{
+  "actions": [
+    "本轮前台快照2026-10-16 18:09:30+08为design：活跃1/容量2、等待0、准入预算1、储备4/2、储备预算0、到期候选0。只执行本项目begin已有的一次preflight，不跨项目、不改调度；科学状态training，执行结果待实际finish。",
+    "原生核验18:15:06与收尾18:20:05：同一server4物理GPU0 PID216566持续训练，最后Train[2/50]2361→2365/4686，GPU UUID与3个生命周期锁正确，未采样到Traceback/OOM。瞬时显存15053MiB已用/17057MiB空闲、利用率38%，不当全程峰值；未占用额外GPU。",
+    "第1轮原生TRAIN及VAL均已完成，验证363个batch、9508条表达，完整精度mIoU0.3337104618549347，来自18:05日志及checkpoint而不是两个已完成验证轮次。独立scene数量未知，不能把363个batch当363个scene；历史champion0.5020、baseline0.4894、目标0.5100与差距0.0080不变。早期结果不构成提升或最终机制失败。",
+    "先预注册稳定诊断m202-native-validation-checkpoint-evidence-audit，再在CPU只读当前运行稳定last.pth并校验哈希/读前后stat、实际原生saver/resume函数及tools/train.py一致源文件。模型1165项状态、优化器642项状态及param_groups、scheduler、epoch1/best_miou/epochs_no_improve0均存在；真实best值与日志一致。未实际执行恢复、未重启或中断训练，不把字段存在称为恢复执行通过。",
+    "保留checkpoint_audit.json首次元数据解析器对numpy.float32的误判。checkpoint_scalar_type_review.json按numbers.Real和有限值复核确认best_miou原本存在且为0.3337104618549347；没有缺字段、模型修订或放宽科学阈值。10项正例/逐一缺字段/非有限值/错误类型schema检查均通过；这是读写契约诊断，不是10次训练实验。",
+    "实际原生eval AST及本次文件清单确认：scene_ids和pious在内存累计，但eval只返回miou并输出汇总/TensorBoard scalar，没有启用逐表达/scene payload导出。因此当前聚合产物不能支持冻结计划的scene配对95%区间、子组伤害或噪声底结论，均记未测/未知；未伪造区间或用总体mIoU替代。",
+    "本轮产出是1个完整证据就绪性诊断、真实新验证/连续性/checkpoint证据、10项schema对照和决策日志；新模型变体、新训练准入/启动、模型修订、目标和调度改动均0。完整六段留档；用量仅在收据保留begin→receipt局部窗口，未知如实标注，缓存已含输入、不重复相加，不当账单。"
+  ],
+  "decisions": [
+    "继续已获准的同一M202-HDS原模型、seed1999、batch2、原loss/optimizer及epochs50/max_iters70；不依据单个早期VAL结果改实现、调参或停止，不因空槽重复启动。",
+    "checkpoint恢复字段就绪不等于已做原生恢复测试；场景级不确定性证据仍缺，继续按已冻结计划收集有效训练后匹配证据，不修改活跃训练循环、不声称已提升。",
+    "其余4个辅助监督候选仍是既有human_authorization范围保留，未因定时触发或空槽重开。当前design_cycle的external_resource_blocked仅描述这些辅助授权，不是物理GPU阻塞或主线科学路线耗尽；本轮诊断已完成，没有遗弃可执行审计。",
+    "本轮收尾只在实际finish成功且租约释放核验后称完成；远端长训练继续。下次触发时刻未读取，记未知，不变更已保存自动化或通知策略。"
+  ]
+}

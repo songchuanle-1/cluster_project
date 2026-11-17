@@ -1,0 +1,3 @@
+Default NOP, execution-disabled prospective NSD root transport. REVIEW_SHA=NULL; no collect/render/stage/intents/requests/results exist. This author did not use SSH.
+After independent controller review and real native/resources/admission/source-deployment gates pass, root must create a separately reviewed fresh activation copy with exact peer review SHA and retained six owner fields, fixed deadline, current SERVERS/context/pending hashes. Frozen draft is never edited. Existing collect/render process is preserved.
+Actual activation receipt, observation, interpreter/inodes and production graph stay unfilled until real CPU collect and root/peer review. No GPU use or trainer launch is authorized.

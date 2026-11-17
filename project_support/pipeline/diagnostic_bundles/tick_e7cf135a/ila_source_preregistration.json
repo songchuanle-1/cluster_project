@@ -1,0 +1,36 @@
+{
+  "preregistered_at": "2026-10-20T15:14:40.003179+00:00",
+  "candidate_id": "m95-final-ila-expression-source-dependence",
+  "token": "e7cf135a487f4ec4b53c386489ba38f1",
+  "hypothesis_id": "final-native-language-to-point-update-is-expression-invariant",
+  "hypothesis": "With the receiving point features and final decoder query held fixed, the trained M95 final ILA update is effectively invariant to which within-scene expression supplies the language source; this would reveal a missing expression-specific point-feature path independently of hierarchy scale composition.",
+  "source_scope": "Capture actual source/query/mask at final active encoder.ila, not the unused query argument of cluster gather. Replay this unchanged native module directly and the frozen native prediction_head; do not edit an attention formula or train language routing.",
+  "cohort": {
+    "path": "pipeline/diagnostic_bundles/tick_e7cf135a/cohort.json",
+    "sha256": "76ce49a13c0d5288d279a386084aea96042123360d4be98a6fa80dcfe8ec7ba2"
+  },
+  "assets": {
+    "path": "pipeline/diagnostic_bundles/tick_e7cf135a/native_manifest.json",
+    "sha256": "004df91acc007c6d3dd230cbf67b5d69c379d10dd88e461e0ea5c28cc191e647"
+  },
+  "primary_intervention": "Within each native scene language group, use the unique one-position cyclic expression permutation for ILA source language features AND aligned language padding mask. Keep ILA point-query tensor, point order, model weights, final native decoder query and original selected query unchanged. Donor choice never uses GT or model outcomes.",
+  "negative_controls": [
+    "Same source/native ILA identity<=1e-6",
+    "Prediction-head identity<=1e-6",
+    "Cycle language source and mask then inverse-restore before ILA, output and mask identity<=1e-6",
+    "Direct replay output equals native encoder final inst_feats<=1e-6",
+    "Frozen receiving point-query tensor unchanged; source+mask multiset exact under inverse"
+  ],
+  "readouts": [
+    "Native source/query support and shape; changed valid receiver count and inst_feats max delta",
+    "Frozen selected-query mask-logit delta and all/foreground/non-target probability-MAE changes",
+    "After inference only, label donor pairs as same-object/different-object using preexisting annotations; retain empty strata",
+    "Scene means and every expression, no favorable scene or query selection"
+  ],
+  "falsifier": "Reject the expression-invariance/missing-path explanation on this cohort if correctly controlled within-scene source exchange changes actual valid inst_feats AND fixed-query mask logits beyond original1e-6. Computational sensitivity is not task benefit; mixed error directions cannot establish a new mechanism.",
+  "distinction": "Earlier HDS query swap changes cluster query input that is unused given its bank; earlier native hierarchy-message swap changes a hierarchy output while preserving ILA. This test changes the actual language source into unchanged ILA and freezes the receiving point query. It is not a new attention/routing architecture or reopening of HDS/FLE/CPA/PCE.",
+  "diagnostic_only": true,
+  "tolerance": 1e-06,
+  "new_training": 0,
+  "optimizer_steps": 0
+}

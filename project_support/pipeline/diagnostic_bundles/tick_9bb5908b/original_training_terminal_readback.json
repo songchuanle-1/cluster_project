@@ -1,0 +1,276 @@
+{
+  "owner": {
+    "token": "9bb5908b9875410eba1ffbb87a62e3d5",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-31T10:08:14.388754+00:00",
+    "deadline_at": "2026-10-31T11:08:14.388754+00:00",
+    "context_sha256": "d81e5f0d9611b2f25f786473d2e579af3bd32751f362c76078c986e73578019b",
+    "pending_sha256": "f7dfb8c143066c731f44eac414c4b04febcd7a82fe7718bcd4305fb88e4d1aa8"
+  },
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import os,json,subprocess,socket,hashlib,re,time\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\npayload=[{'\"'\"'id'\"'\"': '\"'\"'M224-SFC'\"'\"', '\"'\"'pid'\"'\"': 3696093, '\"'\"'stdout'\"'\"': '\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc_20261030_163221.log'\"'\"', '\"'\"'native_log'\"'\"': '\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/20261030_163228.log'\"'\"'}, {'\"'\"'id'\"'\"': '\"'\"'M225-ELC'\"'\"', '\"'\"'pid'\"'\"': 3786531, '\"'\"'stdout'\"'\"': '\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc_20261030_165149.log'\"'\"', '\"'\"'native_log'\"'\"': '\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/20261030_165159.log'\"'\"'}]\nout=[]\nfor item in payload:\n proc=Path('\"'\"'/proc'\"'\"')/str(item['\"'\"'pid'\"'\"']);row=dict(item);row['\"'\"'proc_exists'\"'\"']=proc.exists();row['\"'\"'proc_uid'\"'\"']=proc.stat().st_uid if proc.exists() else None;row['\"'\"'query_uid'\"'\"']=os.getuid();row['\"'\"'logs'\"'\"']={}\n for key in ['\"'\"'stdout'\"'\"','\"'\"'native_log'\"'\"']:\n  path=Path(item[key]);assert str(path).startswith('\"'\"'/data/songcl/Project/Cluster_project/'\"'\"');st=path.stat();size=st.st_size\n  with path.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,size-1600000));tail=f.read()\n  text=tail.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"');lasttrain=re.findall(r'\"'\"'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',text);lastval=re.findall(r'\"'\"'Val\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',text)\n  markers=[line[-1200:] for line in text.splitlines() if re.search(r'\"'\"'early|stop|finish|complete|Traceback|Error|Exception|killed|Killed|Saving|save|best|validation|Validation|mIoU'\"'\"',line)][-55:]\n  metric=[]\n  if key=='\"'\"'native_log'\"'\"':\n   with path.open('\"'\"'r'\"'\"',encoding='\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"') as f:metric=[x.strip() for x in f if '\"'\"'mIoU :'\"'\"' in x or '\"'\"'resume start_epoch:'\"'\"' in x]\n  row['\"'\"'logs'\"'\"'][key]={'\"'\"'path'\"'\"':str(path),'\"'\"'size'\"'\"':size,'\"'\"'mtime'\"'\"':st.st_mtime,'\"'\"'tail_sha256'\"'\"':hashlib.sha256(tail).hexdigest(),'\"'\"'last_train'\"'\"':lasttrain[-1] if lasttrain else None,'\"'\"'last_val'\"'\"':lastval[-1] if lastval else None,'\"'\"'markers'\"'\"':markers,'\"'\"'metric_lines'\"'\"':metric}\n out.append(row)\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'uptime_seconds'\"'\"':Path('\"'\"'/proc/uptime'\"'\"').read_text().split()[0],'\"'\"'runtime_commit'\"'\"':subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"','\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'\"'\"','\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip(),'\"'\"'runs'\"'\"':out,'\"'\"'signals_sent'\"'\"':False,'\"'\"'checkpoint_body_read'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observed_at": "2026-10-31T10:10:23.330839+00:00",
+  "observation": {
+    "observed_at": "2026-10-31T10:10:23.394381+00:00",
+    "hostname": "dl04-MS-7E06",
+    "uptime_seconds": "1057961.30",
+    "runtime_commit": "18e64b8d95ed0ba5c1053ead114c0f91a4b0c324",
+    "runs": [
+      {
+        "id": "M224-SFC",
+        "pid": 3696093,
+        "stdout": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc_20261030_163221.log",
+        "native_log": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/20261030_163228.log",
+        "proc_exists": false,
+        "proc_uid": null,
+        "query_uid": 1001,
+        "logs": {
+          "stdout": {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc_20261030_163221.log",
+            "size": 40778639,
+            "mtime": 1793435159.6929502,
+            "tail_sha256": "7af35c89113b03b4cb042bc0d595272d1758b83c4a2bdde1596e7e37007b6928",
+            "last_train": [
+              "30",
+              "4686"
+            ],
+            "last_val": [
+              "30",
+              "363"
+            ],
+            "markers": [
+              "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/last.pth",
+              "Early stopping at epoch 30: no improvement for 10 epochs (best=0.4966)"
+            ],
+            "metric_lines": []
+          },
+          "native_log": {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/20261030_163228.log",
+            "size": 14526691,
+            "mtime": 1793435159.232099,
+            "tail_sha256": "9f329f1ac4c8b181e1c121584a09b3a5ccb61666fd0488139d8cfb897576c716",
+            "last_train": null,
+            "last_val": null,
+            "markers": [
+              "2026-10-31 13:29:56,746 - INFO - Validation",
+              "2026-10-31 13:36:24,040 - INFO - mIoU : 0.4874526858329773",
+              "2026-10-31 13:36:30,349 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/last.pth",
+              "2026-10-31 14:33:07,273 - INFO - Validation",
+              "2026-10-31 14:39:20,854 - INFO - mIoU : 0.48959213495254517",
+              "2026-10-31 14:39:26,760 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/last.pth",
+              "2026-10-31 15:36:57,515 - INFO - Validation",
+              "2026-10-31 15:40:16,251 - INFO - mIoU : 0.4824161231517792",
+              "2026-10-31 15:40:22,423 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/20261030_163228/last.pth",
+              "2026-10-31 16:22:39,243 - INFO - Validation",
+              "2026-10-31 16:25:59,230 - INFO - mIoU : 0.4849090874195099",
+              "2026-10-31 16:25:59,232 - INFO - Early stopping at epoch 30: no improvement for 10 epochs (best=0.4966)"
+            ],
+            "metric_lines": [
+              "2026-10-30 17:12:58,696 - INFO - mIoU : 0.3073377013206482",
+              "2026-10-30 17:58:01,042 - INFO - mIoU : 0.37622618675231934",
+              "2026-10-30 18:43:34,164 - INFO - mIoU : 0.4080076515674591",
+              "2026-10-30 19:29:07,367 - INFO - mIoU : 0.4253402352333069",
+              "2026-10-30 20:14:56,419 - INFO - mIoU : 0.4498423635959625",
+              "2026-10-30 21:00:34,748 - INFO - mIoU : 0.45643317699432373",
+              "2026-10-30 21:46:11,872 - INFO - mIoU : 0.4725380837917328",
+              "2026-10-30 22:31:48,310 - INFO - mIoU : 0.4787389039993286",
+              "2026-10-30 23:17:37,862 - INFO - mIoU : 0.48678353428840637",
+              "2026-10-31 00:03:14,126 - INFO - mIoU : 0.48706188797950745",
+              "2026-10-31 00:48:49,790 - INFO - mIoU : 0.48312410712242126",
+              "2026-10-31 01:34:54,277 - INFO - mIoU : 0.4915812015533447",
+              "2026-10-31 02:20:35,068 - INFO - mIoU : 0.49100181460380554",
+              "2026-10-31 03:06:26,116 - INFO - mIoU : 0.4907829463481903",
+              "2026-10-31 03:51:46,851 - INFO - mIoU : 0.48979461193084717",
+              "2026-10-31 04:37:20,766 - INFO - mIoU : 0.49655306339263916",
+              "2026-10-31 05:22:41,876 - INFO - mIoU : 0.4932810366153717",
+              "2026-10-31 06:08:15,186 - INFO - mIoU : 0.4943600594997406",
+              "2026-10-31 06:53:42,170 - INFO - mIoU : 0.4960343837738037",
+              "2026-10-31 07:39:10,395 - INFO - mIoU : 0.49663493037223816",
+              "2026-10-31 08:24:40,917 - INFO - mIoU : 0.49375447630882263",
+              "2026-10-31 09:09:54,470 - INFO - mIoU : 0.49365943670272827",
+              "2026-10-31 09:55:23,632 - INFO - mIoU : 0.48972615599632263",
+              "2026-10-31 10:40:55,626 - INFO - mIoU : 0.49121421575546265",
+              "2026-10-31 11:26:33,224 - INFO - mIoU : 0.48532429337501526",
+              "2026-10-31 12:31:50,305 - INFO - mIoU : 0.4914668798446655",
+              "2026-10-31 13:36:24,040 - INFO - mIoU : 0.4874526858329773",
+              "2026-10-31 14:39:20,854 - INFO - mIoU : 0.48959213495254517",
+              "2026-10-31 15:40:16,251 - INFO - mIoU : 0.4824161231517792",
+              "2026-10-31 16:25:59,230 - INFO - mIoU : 0.4849090874195099"
+            ]
+          }
+        },
+        "precise_native_validation": {
+          "values": [
+            0.3073377013206482,
+            0.37622618675231934,
+            0.4080076515674591,
+            0.4253402352333069,
+            0.4498423635959625,
+            0.45643317699432373,
+            0.4725380837917328,
+            0.4787389039993286,
+            0.48678353428840637,
+            0.48706188797950745,
+            0.48312410712242126,
+            0.4915812015533447,
+            0.49100181460380554,
+            0.4907829463481903,
+            0.48979461193084717,
+            0.49655306339263916,
+            0.4932810366153717,
+            0.4943600594997406,
+            0.4960343837738037,
+            0.49663493037223816,
+            0.49375447630882263,
+            0.49365943670272827,
+            0.48972615599632263,
+            0.49121421575546265,
+            0.48532429337501526,
+            0.4914668798446655,
+            0.4874526858329773,
+            0.48959213495254517,
+            0.4824161231517792,
+            0.4849090874195099
+          ],
+          "best": 0.49663493037223816,
+          "no_improve": 10
+        }
+      },
+      {
+        "id": "M225-ELC",
+        "pid": 3786531,
+        "stdout": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc_20261030_165149.log",
+        "native_log": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/20261030_165159.log",
+        "proc_exists": false,
+        "proc_uid": null,
+        "query_uid": 1001,
+        "logs": {
+          "stdout": {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc_20261030_165149.log",
+            "size": 42119802,
+            "mtime": 1793435556.108165,
+            "tail_sha256": "4d45fd66ce1b6b168b3d4103c7a4d532977178ede34f3f06e64206e493cac095",
+            "last_train": [
+              "31",
+              "4686"
+            ],
+            "last_val": [
+              "31",
+              "363"
+            ],
+            "markers": [
+              "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/last.pth",
+              "Early stopping at epoch 31: no improvement for 10 epochs (best=0.5015)"
+            ],
+            "metric_lines": []
+          },
+          "native_log": {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/20261030_165159.log",
+            "size": 15011118,
+            "mtime": 1793435555.7481604,
+            "tail_sha256": "b288136b5c84a34ff4a505310802e96f5e47816a5057792e5f9e14e35e19399e",
+            "last_train": null,
+            "last_val": null,
+            "markers": [
+              "2026-10-31 14:14:10,099 - INFO - Validation",
+              "2026-10-31 14:16:58,832 - INFO - mIoU : 0.4848535656929016",
+              "2026-10-31 14:17:04,125 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/last.pth",
+              "2026-10-31 14:59:33,502 - INFO - Validation",
+              "2026-10-31 15:02:20,971 - INFO - mIoU : 0.4821739196777344",
+              "2026-10-31 15:02:26,617 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/last.pth",
+              "2026-10-31 15:45:10,333 - INFO - Validation",
+              "2026-10-31 15:48:02,120 - INFO - mIoU : 0.4856525957584381",
+              "2026-10-31 15:48:07,902 - INFO - save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/last.pth",
+              "2026-10-31 16:30:20,447 - INFO - Validation",
+              "2026-10-31 16:32:35,747 - INFO - mIoU : 0.4837685525417328",
+              "2026-10-31 16:32:35,748 - INFO - Early stopping at epoch 31: no improvement for 10 epochs (best=0.5015)"
+            ],
+            "metric_lines": [
+              "2026-10-30 17:37:27,403 - INFO - mIoU : 0.3176555037498474",
+              "2026-10-30 18:23:04,844 - INFO - mIoU : 0.3869154751300812",
+              "2026-10-30 19:09:03,066 - INFO - mIoU : 0.4125078022480011",
+              "2026-10-30 19:55:14,038 - INFO - mIoU : 0.4419926106929779",
+              "2026-10-30 20:41:22,054 - INFO - mIoU : 0.4476255774497986",
+              "2026-10-30 21:27:25,925 - INFO - mIoU : 0.4649178087711334",
+              "2026-10-30 22:13:36,752 - INFO - mIoU : 0.47884783148765564",
+              "2026-10-30 22:59:44,798 - INFO - mIoU : 0.4801415205001831",
+              "2026-10-30 23:45:57,192 - INFO - mIoU : 0.4800925850868225",
+              "2026-10-31 00:31:54,814 - INFO - mIoU : 0.4861147999763489",
+              "2026-10-31 01:18:31,472 - INFO - mIoU : 0.4859965145587921",
+              "2026-10-31 02:04:38,100 - INFO - mIoU : 0.4904188811779022",
+              "2026-10-31 02:51:00,881 - INFO - mIoU : 0.4950491487979889",
+              "2026-10-31 03:37:00,515 - INFO - mIoU : 0.4948608875274658",
+              "2026-10-31 04:22:47,538 - INFO - mIoU : 0.4888874888420105",
+              "2026-10-31 05:08:45,023 - INFO - mIoU : 0.5002608299255371",
+              "2026-10-31 05:54:37,480 - INFO - mIoU : 0.4969792068004608",
+              "2026-10-31 06:40:54,376 - INFO - mIoU : 0.49429813027381897",
+              "2026-10-31 07:26:47,286 - INFO - mIoU : 0.49413642287254333",
+              "2026-10-31 08:12:42,842 - INFO - mIoU : 0.4981438219547272",
+              "2026-10-31 08:58:21,423 - INFO - mIoU : 0.5015384554862976",
+              "2026-10-31 09:44:19,357 - INFO - mIoU : 0.49480801820755005",
+              "2026-10-31 10:30:10,229 - INFO - mIoU : 0.49518507719039917",
+              "2026-10-31 11:16:02,638 - INFO - mIoU : 0.4900944232940674",
+              "2026-10-31 12:01:38,801 - INFO - mIoU : 0.4904356300830841",
+              "2026-10-31 12:46:23,581 - INFO - mIoU : 0.4873431921005249",
+              "2026-10-31 13:31:46,741 - INFO - mIoU : 0.4843410551548004",
+              "2026-10-31 14:16:58,832 - INFO - mIoU : 0.4848535656929016",
+              "2026-10-31 15:02:20,971 - INFO - mIoU : 0.4821739196777344",
+              "2026-10-31 15:48:02,120 - INFO - mIoU : 0.4856525957584381",
+              "2026-10-31 16:32:35,747 - INFO - mIoU : 0.4837685525417328"
+            ]
+          }
+        },
+        "precise_native_validation": {
+          "values": [
+            0.3176555037498474,
+            0.3869154751300812,
+            0.4125078022480011,
+            0.4419926106929779,
+            0.4476255774497986,
+            0.4649178087711334,
+            0.47884783148765564,
+            0.4801415205001831,
+            0.4800925850868225,
+            0.4861147999763489,
+            0.4859965145587921,
+            0.4904188811779022,
+            0.4950491487979889,
+            0.4948608875274658,
+            0.4888874888420105,
+            0.5002608299255371,
+            0.4969792068004608,
+            0.49429813027381897,
+            0.49413642287254333,
+            0.4981438219547272,
+            0.5015384554862976,
+            0.49480801820755005,
+            0.49518507719039917,
+            0.4900944232940674,
+            0.4904356300830841,
+            0.4873431921005249,
+            0.4843410551548004,
+            0.4848535656929016,
+            0.4821739196777344,
+            0.4856525957584381,
+            0.4837685525417328
+          ],
+          "best": 0.5015384554862976,
+          "no_improve": 10
+        }
+      }
+    ],
+    "signals_sent": false,
+    "checkpoint_body_read": false
+  }
+}

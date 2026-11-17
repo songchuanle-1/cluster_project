@@ -1,0 +1,32 @@
+{
+  "owner": {
+    "token": "9169196d4bde408385418bf246bd8364",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-29T16:07:15.165957+00:00",
+    "deadline_at": "2026-10-29T17:07:15.165957+00:00",
+    "context_sha256": "a059805c6c396b6f4aa93156a0298c571e70d09ea61dfcb6db73829a471dcb6b",
+    "pending_sha256": "951e5c047ad0d3c9193d4b6879aac4a3a6970e63c2da1249e13315c54cd25829"
+  },
+  "calls": [
+    {
+      "recorded_at": "2026-10-29T16:28:09.107781+00:00",
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "songcl@192.168.1.115",
+        "export PYTHONDONTWRITEBYTECODE=1 && python3 -B -c 'import socket\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\nimport json,subprocess\ncommands={'\"'\"'hostname'\"'\"': ['\"'\"'hostname'\"'\"'], '\"'\"'gpu'\"'\"': ['\"'\"'nvidia-smi'\"'\"', '\"'\"'-i'\"'\"', '\"'\"'0'\"'\"', '\"'\"'--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total'\"'\"', '\"'\"'--format=csv,noheader,nounits'\"'\"'], '\"'\"'compute'\"'\"': ['\"'\"'nvidia-smi'\"'\"', '\"'\"'-i'\"'\"', '\"'\"'0'\"'\"', '\"'\"'--query-compute-apps=gpu_uuid,pid'\"'\"', '\"'\"'--format=csv,noheader,nounits'\"'\"']}\nqueries={}\nfor key,command in commands.items():\n r=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=20)\n queries[key]=dict(rc=r.returncode,stdout=r.stdout,stderr=r.stderr,command=command)\nprint(json.dumps(queries))\n'"
+      ],
+      "returncode": 0,
+      "stdout": "{\"hostname\": {\"rc\": 0, \"stdout\": \"dl04-MS-7E06\\n\", \"stderr\": \"\", \"command\": [\"hostname\"]}, \"gpu\": {\"rc\": 0, \"stdout\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 16, 19719, 32607\\n\", \"stderr\": \"\", \"command\": [\"nvidia-smi\", \"-i\", \"0\", \"--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total\", \"--format=csv,noheader,nounits\"]}, \"compute\": {\"rc\": 0, \"stdout\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 3437349\\n\", \"stderr\": \"\", \"command\": [\"nvidia-smi\", \"-i\", \"0\", \"--query-compute-apps=gpu_uuid,pid\", \"--format=csv,noheader,nounits\"]}}\n",
+      "stderr": "",
+      "read_only": true,
+      "only_physical_gpu": 0
+    }
+  ],
+  "scope": "GPU0-only actual transport for canonical collector; queries/raw hash proof in canonical output."
+}

@@ -1,0 +1,56 @@
+{
+  "changes": [
+    {
+      "old": "CUDA_VISIBLE_DEVICES=\"1\"",
+      "new": "CUDA_VISIBLE_DEVICES=\"0\"",
+      "count": 1
+    },
+    {
+      "old": "\"sysu311-MS-7C59\"",
+      "new": "\"dl04-MS-7E06\"",
+      "count": 1
+    },
+    {
+      "old": "manifest[\"physical_gpu\"] == 1",
+      "new": "manifest[\"physical_gpu\"] == 0",
+      "count": 1
+    },
+    {
+      "old": "\"pipeline/server3_fallback_abdff23d\"",
+      "new": "\"pipeline/evidence_producer_21500d1a\"",
+      "count": 1
+    },
+    {
+      "old": "\"-i\", \"1\"",
+      "new": "\"-i\", \"0\"",
+      "count": 2
+    },
+    {
+      "old": "[\"1\", manifest[\"gpu_uuid\"]]",
+      "new": "[\"0\", manifest[\"gpu_uuid\"]]",
+      "count": 1
+    },
+    {
+      "old": "\"/sdc1/songcl/IPDN/data/\"",
+      "new": "\"/home/songcl/data/data/\"",
+      "count": 1
+    },
+    {
+      "old": "        import torch\n",
+      "new": "        from tools import train as native_train\n        import torch\n",
+      "count": 1
+    },
+    {
+      "old": "    deadline = datetime.fromisoformat(args.deadline)\n",
+      "new": "    deadline = datetime.fromisoformat(args.deadline)\n    assert (deadline - datetime.now(timezone.utc)).total_seconds() > 360\n",
+      "count": 1
+    }
+  ],
+  "original_runner_sha256": "75e2dbaa572c13404bc9c9c6c29207b5f307c2fffa1af487085067091b636657",
+  "target_runner_sha256": "0f955d06be60a385ff1e1348bc223805d3d1d6368844645f84f998f678ff0c53",
+  "original_cpu_controls": "13passed, cached from prior tick; not rerun/countable this tick",
+  "source_frozen": true,
+  "seed_groups_controls_unchanged": true,
+  "static_compile_files": 3,
+  "scope": "Path/GPU/runtime trusted-loader/deadline transport only, not a model revision or scientific gate change"
+}

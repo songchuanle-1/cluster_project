@@ -1,0 +1,1 @@
+NDE diagnostic software packet only. DRAFT=True and ten execution NULLs. No actual manifest, lease, binding, request, release or remote stage. Native/resources/Torch/autograd NOT_RUN. Only a separately reviewed root activation may enable a separate execution copy.

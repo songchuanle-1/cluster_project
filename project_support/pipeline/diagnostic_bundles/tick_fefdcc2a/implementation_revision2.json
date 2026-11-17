@@ -1,0 +1,39 @@
+{
+  "preregistered_at": "2026-10-20T06:41:08.380989+00:00",
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "revision": 2,
+  "failure_scope": "implementation",
+  "reason": "Measured CPU contact construction724-921ms dominates833.84ms full predict; revision1 strict input-gradient equivalence failed at6.7353e-6 although outputs were identical.",
+  "change": "Restore exact original exchange/backward, replace ONLY Python per-voxel graph joins with NumPy exact coordinate-key joins and full Cartesian membership joins. All co-occupied/six-face contacts retained; no donor pruning or numeric-ID ownership.",
+  "prediction": "Original attention output/gradient is exact, original/new graph edge sets are exact on native geometry and co-occupancy controls, total median latency decreases without memory gate violation.",
+  "tests": "Native resource-sample graph equality plus batched/co-occupied synthetic graph controls; original8-expression operator controls; full model original20/100 resources; full-source controls/native backward.",
+  "tolerance": 1e-06,
+  "maximum_revisions": 2,
+  "nonclaims": "This is an implementation repair, not a second architecture or a waiver of failed full-source numeric gates.",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/section_profile_result.json",
+      "sha256": "16a81e07ac836616253a895fd76b75f0eddbbf636b5497a1fb93b3345552e447"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/implementation_r1/operator_candidate_result.json",
+      "sha256": "35f832b79f71fbb514ffd77e3f13c5d5f7461c86efa1424ff742795465a32c87"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/gradient_repeatability_result.json",
+      "sha256": "e6c649033ec147b420b5b2a2d417e6ff5a36738cd2dabc26cd10e52a28586886"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/implementation_r1/resources_candidate_result.json",
+      "sha256": "8dc27e743d29424b75225f4896fcbbf0c07abd364428e2a151a80d7bae3bb2a6"
+    }
+  ],
+  "original_source": {
+    "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/contact_exchange_original.py",
+    "sha256": "f60f8531145dad48bda169665cf843a2bf6984843afe961a9345215404914d0e"
+  },
+  "revision1_source": {
+    "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/contact_exchange_degree_batched_r1.py",
+    "sha256": "0a2a088a0ec9fa46120b5d7defbced014be9ae66938583122520c079aa90010d"
+  }
+}

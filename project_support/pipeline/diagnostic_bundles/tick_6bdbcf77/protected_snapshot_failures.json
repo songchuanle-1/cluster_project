@@ -1,0 +1,9 @@
+{
+  "model_revision": false,
+  "shared_state_or_remote_mutation": false,
+  "failures": [
+    {"attempt":"verify_protected_assets.py before","error":"AssertionError: Expected frozen protected files, not new directories","cause":"Default git status condensed untracked directories; historical baseline lists 28 expanded files.","preserved_source":"verify_protected_assets_v1_failed.py","repair":"New v2 uses --untracked-files=all and checks exact baseline file hashes."},
+    {"attempt":"inline Python creation of v2","error":"PowerShell quoting error: files is not recognized","effect":"No v2 file was created; no shared write occurred.","repair":"Literal-path Copy-Item plus apply_patch."},
+    {"attempt":"v2 execution after failed inline creation","error":"can't open file verify_protected_assets_v2.py: No such file or directory","effect":"No execution or shared writes."}
+  ]
+}

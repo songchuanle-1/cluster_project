@@ -1,0 +1,348 @@
+"""Root-only bounded readonly worker-system diagnostic; no Torch/GPU or signals."""
+from pathlib import Path
+from datetime import datetime, timedelta, timezone
+import hashlib
+import json
+import os
+import re
+import selectors
+import shutil
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {
+    "token": "149776616efc47dcaffa369bf8e78307",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T14:07:34.772609+00:00",
+    "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+    "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+    "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d",
+}
+RUNTIME = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+WORK = Path("/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800")
+STDOUT = RUNTIME / "logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec_20261109_175751.log"
+NATIVE = WORK / "20261109_175800.log"
+ENV = Path("/home/songcl/.conda/envs/project_cluster")
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+
+def failure(error):
+    return {"available": False, "error_type": type(error).__name__, "error": str(error)[:600]}
+
+
+def log_metadata(path):
+    try:
+        pin()
+        info = os.lstat(path)
+        assert path.resolve() == path and stat.S_ISREG(info.st_mode) and info.st_uid == 1001
+        return {"path": str(path), "available": True, "bytes": info.st_size,
+                "mtime_ns": info.st_mtime_ns, "mtime_utc": datetime.fromtimestamp(
+                    info.st_mtime_ns / 1e9, timezone.utc).isoformat(), "content_read": False}
+    except Exception as error:
+        return {"path": str(path), **failure(error)}
+
+
+def current_public_text(path, limit=4096):
+    try:
+        pin()
+        with open(path, "rb") as stream:
+            raw = stream.read(limit + 1)
+        return {"path": str(path), "available": True, "text": raw[:limit].decode("utf-8", "replace"),
+                "truncated": len(raw) > limit, "observation_scope": "CURRENT_NOT_HISTORICAL"}
+    except Exception as error:
+        return {"path": str(path), **failure(error)}
+
+
+def command(label, executable, arguments, cap=32768, timeout=8):
+    pin()
+    assert 0 < cap <= 32768 and 0 < timeout <= 8
+    program = shutil.which(executable, path="/usr/sbin:/usr/bin:/sbin:/bin")
+    record = {"label": label, "argv": [executable, *arguments], "capture_cap_bytes": cap}
+    if not program:
+        return {**record, "available": False, "certainty": "terminal", "reason": "EXECUTABLE_NOT_FOUND"}
+    env = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LC_ALL": "C", "LANG": "C", "TZ": "UTC",
+           "SYSTEMD_PAGER": "cat", "SYSTEMD_COLORS": "0", "PAGER": "cat",
+           "PYTHONDONTWRITEBYTECODE": "1"}
+    try:
+        process = subprocess.Popen([program, *arguments], stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    except OSError as error:
+        return {**record, **failure(error), "certainty": "terminal"}
+    PROCESSES.append(process)  # Keep uncertain children/pipe handles; never terminate or kill.
+    record.update(available=True, pid=process.pid, certainty="uncertain")
+    selector = selectors.DefaultSelector()
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    for name, stream in (("stdout", process.stdout), ("stderr", process.stderr)):
+        os.set_blocking(stream.fileno(), False)
+        selector.register(stream, selectors.EVENT_READ, name)
+    deadline = time.monotonic() + timeout
+    truncated = False
+    try:
+        while selector.get_map() and time.monotonic() < deadline:
+            for key, _ in selector.select(timeout=min(0.1, max(0, deadline - time.monotonic()))):
+                try:
+                    raw = os.read(key.fileobj.fileno(), 4096)
+                except BlockingIOError:
+                    continue
+                if not raw:
+                    selector.unregister(key.fileobj)
+                    continue
+                room = max(0, cap - sum(map(len, buffers.values())))
+                buffers[key.data].extend(raw[:room])
+                truncated |= len(raw) > room
+        returncode = process.poll()
+        if returncode is not None and not selector.get_map():
+            record.update(certainty="terminal", returncode=returncode)
+        else:
+            record["reason"] = "TIMEOUT_OR_PENDING_PIPE; PID retained, no signal/retry"
+    finally:
+        selector.close()  # Does not close child pipes or signal the child.
+    record.update({name: bytes(raw).decode("utf-8", "replace") for name, raw in buffers.items()})
+    record.update(captured_bytes=sum(map(len, buffers.values())), output_truncated=truncated,
+                  signals_sent=False)
+    return record
+
+
+def core_metadata():
+    rows, checked = [], []
+    for directory in (RUNTIME, WORK):
+        try:
+            pin()
+            assert directory.resolve() == directory
+            count, complete = 0, True
+            with os.scandir(directory) as entries:
+                for entry in entries:
+                    count += 1
+                    if count > 256:
+                        complete = False
+                        break
+                    if not (entry.name == "core" or re.search(r"(^|[^0-9])(3815203|3813109)([^0-9]|$)", entry.name)):
+                        continue
+                    if not (entry.name == "core" or entry.name.startswith("core.") or entry.name.endswith(".core")):
+                        continue
+                    info = entry.stat(follow_symlinks=False)
+                    if stat.S_ISREG(info.st_mode) and info.st_uid == 1001:
+                        rows.append({"path": str(Path(directory) / entry.name), "bytes": info.st_size,
+                                     "mtime_ns": info.st_mtime_ns, "content_read": False,
+                                     "attribution": "NAME_ONLY_NOT_VALIDATED_CORE_CONTENT"})
+                        if len(rows) >= 16:
+                            complete = False
+                            break
+            checked.append({"directory": str(directory), "entries_checked": min(count, 256),
+                            "scan_complete": complete, "recursive": False})
+        except Exception as error:
+            checked.append({"directory": str(directory), **failure(error)})
+    return {"candidates": rows, "directories": checked, "core_contents_read": False}
+
+
+def versions_from_metadata():
+    site = ENV / "lib/python3.10/site-packages"
+    results = []
+    for package in ("torch", "numpy", "scipy", "gorilla"):
+        matches = sorted(site.glob(package + "-*.dist-info/METADATA"))[:3]
+        record = {"package": package, "metadata_matches": []}
+        for path in matches:
+            try:
+                pin()
+                info = os.lstat(path)
+                assert stat.S_ISREG(info.st_mode) and path.resolve() == path
+                with path.open("rb") as stream:
+                    raw = stream.read(8192)
+                text = raw.decode("utf-8", "replace")
+                fields = {key: re.findall(r"(?m)^" + key + r": ([^\r\n]+)", text)[:1]
+                          for key in ("Name", "Version")}
+                record["metadata_matches"].append({"path": str(path), "header_fields": fields,
+                    "header_bytes_read": len(raw), "header_sha256": hashlib.sha256(raw).hexdigest()})
+            except Exception as error:
+                record["metadata_matches"].append({"path": str(path), **failure(error)})
+        results.append(record)
+    python_rows = []
+    for path in sorted((ENV / "conda-meta").glob("python-*.json"))[:3]:
+        try:
+            with path.open("rb") as stream:
+                raw = stream.read(32769)
+            assert len(raw) <= 32768
+            value = json.loads(raw)
+            python_rows.append({"path": str(path), **{key: value.get(key) for key in ("name", "version", "build")}})
+        except Exception as error:
+            python_rows.append({"path": str(path), **failure(error)})
+    return {"training_environment": str(ENV), "packages": results, "python_metadata": python_rows,
+            "package_imports": False, "diagnostic_python": sys.version.splitlines()[0],
+            "observation_scope": "CURRENT_SOURCE_METADATA_NOT_PROVEN_FAILURE_TIME_ABI"}
+
+
+def installed_worker_source():
+    base = ENV / "lib/python3.10/site-packages/torch/utils/data/_utils"
+    targets = {
+        "signal_handling.py": ("_set_SIGCHLD_handler", "_error_if_any_worker_fails",
+                               "_set_worker_signal_handlers", "_SIGCHLD_handler_set"),
+        "worker.py": ("def _worker_loop", "_set_worker_signal_handlers",
+                      "torch.set_num_threads", "fetcher.fetch(index)", "init_fn(worker_id)",
+                      "_IterableDatasetStopIteration"),
+        "fetch.py": ("class _MapDatasetFetcher", "__getitems__", "self.dataset[idx]",
+                     "self.collate_fn(data)"),
+    }
+    rows = []
+    for filename, tokens in targets.items():
+        path = base / filename
+        try:
+            pin()
+            info = os.lstat(path)
+            assert path.resolve() == path and stat.S_ISREG(info.st_mode) and info.st_uid in (0, 1001)
+            with path.open("rb") as stream:
+                raw = stream.read(32768)
+            lines = raw.decode("utf-8", "replace").splitlines()
+            selected = set()
+            matches = []
+            for index, line in enumerate(lines):
+                if any(token in line for token in tokens):
+                    matches.append(index + 1)
+                    selected.update(range(max(0, index - 2), min(len(lines), index + 3)))
+            keep = sorted(selected)[:36]
+            row = {"path": str(path), "bytes": info.st_size, "mtime_ns": info.st_mtime_ns,
+                   "bytes_read": len(raw), "complete_file_read": info.st_size <= len(raw),
+                   "source_prefix_sha256": hashlib.sha256(raw).hexdigest(),
+                   "matched_lines": matches[:24], "selected_lines_truncated": len(selected) > len(keep),
+                   "selected_lines": [{"line": index + 1, "text": lines[index][:240]} for index in keep],
+                   "module_imported": False}
+            if info.st_size <= len(raw):
+                row["complete_file_sha256"] = row["source_prefix_sha256"]
+            rows.append(row)
+        except Exception as error:
+            rows.append({"path": str(path), **failure(error)})
+    return rows
+
+
+def static_extension_metadata():
+    site = ENV / "lib/python3.10/site-packages"
+    patterns = [
+        ("voxelization_pointgroup", RUNTIME / "framework/lib/pointgroup_ops",
+         "pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so"),
+        ("torch_scatter_CPU", site / "torch_scatter", "_scatter_cpu*.so"),
+        ("TokenizerFast_native", site / "tokenizers", "tokenizers*.so"),
+        ("NumPy_native", site / "numpy/core", "_multiarray_umath*.so"),
+    ]
+    rows = []
+    for label, directory, pattern in patterns:
+        pin()
+        matches = sorted(directory.glob(pattern))[:3]
+        if len(matches) != 1:
+            rows.append({"label": label, "available": False, "reason": "NO_UNIQUE_EXPECTED_EXTENSION",
+                         "matching_paths": [str(path) for path in matches]})
+            continue
+        path = matches[0]
+        try:
+            info = os.lstat(path)
+            assert path.resolve() == path and stat.S_ISREG(info.st_mode) and info.st_uid in (0, 1001)
+            with path.open("rb") as stream:
+                header = stream.read(64)
+            assert header[:4] == b"\x7fELF"
+            build_hash = {}
+            if label == "voxelization_pointgroup":
+                if info.st_size <= 32 * 1024 * 1024:
+                    digest = hashlib.sha256()
+                    consumed = 0
+                    with path.open("rb") as stream:
+                        while True:
+                            chunk = stream.read(65536)
+                            if not chunk:
+                                break
+                            consumed += len(chunk)
+                            assert consumed <= 32 * 1024 * 1024
+                            digest.update(chunk)
+                    after = os.lstat(path)
+                    assert consumed == info.st_size and (
+                        info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) == (
+                        after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+                    build_hash = {"current_binary_sha256": digest.hexdigest(),
+                                  "binary_hash_bytes_read": consumed}
+                else:
+                    build_hash = {"current_binary_sha256": None,
+                                  "reason": "EXCEEDS_EXPLICIT_32MIB_HASH_BUDGET"}
+            record = command("static_ELF_" + label, "readelf",
+                             ["--notes", "--dynamic", str(path)], cap=4096, timeout=3)
+            rows.append({"label": label, "path": str(path), "bytes": info.st_size,
+                         "mtime_ns": info.st_mtime_ns, "ELF_header_bytes_read": len(header),
+                         "ELF_header_sha256": hashlib.sha256(header).hexdigest(),
+                         "native_extension_loaded_or_called": False, "ldd_executed": False,
+                         "readelf_result": record, **build_hash})
+        except Exception as error:
+            rows.append({"label": label, "path": str(path), **failure(error)})
+    return rows
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_EXPLICIT_ROOT_PAYLOAD_REQUIRED"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    logs = {"registered_stdout": log_metadata(STDOUT), "native_logger": log_metadata(NATIVE)}
+    center = logs["registered_stdout"].get("mtime_utc")
+    window_anchor = "CURRENT_REGISTERED_STDOUT_MTIME"
+    if not center:
+        center = "2026-11-09T11:32:00+00:00"
+        window_anchor = "REPORTED_APPROX_FAILURE_11_32_UTC_FALLBACK_NOT_EXACT"
+    commands = []
+    if center:
+        timestamp = datetime.fromisoformat(center)
+        since = (timestamp - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S UTC")
+        until = (timestamp + timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S UTC")
+        commands.append(command("worker_coredump_info", "coredumpctl",
+            ["--no-pager", "--since", since, "--until", until, "info",
+             "COREDUMP_PID=3815203", "COREDUMP_UID=1001"], cap=20000))
+        commands.append(command("target_PID_kernel_records", "journalctl",
+            ["--kernel", "--no-pager", "--since", since, "--until", until,
+             "--output=short-iso", "--lines=40", "--grep",
+             "(^|[^0-9])(3815203|3813109)([^0-9]|$)"], cap=16000))
+        window = {"since": since, "until": until, "anchor": window_anchor,
+                  "exact_failure_timestamp_proven": False}
+    else:
+        window = {"available": False, "reason": "Stdout mtime unavailable; no guessed journal window"}
+    commands.append(command("current_shm_df_NOT_PAST_USAGE", "df", ["-B1", "/dev/shm"], cap=2048))
+    commands.append(command("current_uname", "uname", ["-srvm"], cap=2048))
+    worker_source = installed_worker_source()
+    extension_metadata = static_extension_metadata()
+    collector = next((record for record in commands if record["label"] == "worker_coredump_info"), {})
+    all_commands = commands + [row["readelf_result"] for row in extension_metadata if "readelf_result" in row]
+    result = {"owner": OWNER, "observed_at": datetime.now(timezone.utc).isoformat(),
+        "kind": "TARGETED_READONLY_DATALOADER_SIGSEGV_SYSTEM_DIAGNOSTIC",
+        "hostname": socket.gethostname(), "uid": os.getuid(), "main_pid": 3813109, "worker_pid": 3815203,
+        "original_logs": logs, "failure_window": window,
+        "current_core_pattern": current_public_text("/proc/sys/kernel/core_pattern"),
+        "current_os_release": current_public_text("/etc/os-release"),
+        "commands": commands, "versions_from_source_metadata": versions_from_metadata(),
+        "installed_DataLoader_source": worker_source, "static_extension_metadata": extension_metadata,
+        "diagnostic_command_certainty": "uncertain" if any(
+            row.get("certainty") == "uncertain" for row in all_commands) else "terminal",
+        "root_cause": "UNKNOWN",
+        "core_file_fallback": core_metadata() if not collector.get("returncode") == 0 else
+            {"performed": False, "reason": "Targeted coredumpctl info returned success"},
+        "scope_limits": {"private_foreign_user_logs_or_contexts_requested": False,
+            "current_shm_usage_proves_past_failure_pressure": False,
+            "absence_or_access_denial_proves_no_core_or_kernel_failure": False,
+            "Torch_imports_or_GPU_queries": False, "remote_files_written": False,
+            "signals_restart_resume_config_or_system_changes": False, "sudo_or_password_access": False}}
+    for record in reversed(all_commands):
+        while len(json.dumps(result, ensure_ascii=True).encode()) > 65536 and (
+                record.get("stdout") or record.get("stderr")):
+            for key in ("stdout", "stderr"):
+                if record.get(key):
+                    record[key] = record[key][:len(record[key]) // 2]
+            record["whole_output_budget_truncated"] = True
+    encoded = json.dumps(result, ensure_ascii=True)
+    assert len(encoded.encode()) <= 65536
+    print(encoded)
+
+
+if __name__ == "__main__":
+    main()

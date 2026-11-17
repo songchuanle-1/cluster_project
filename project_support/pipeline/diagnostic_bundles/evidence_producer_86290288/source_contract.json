@@ -1,0 +1,36 @@
+{
+  "observed_at": "2026-10-17T04:16:04.644905+00:00",
+  "passed": true,
+  "sources": {
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hds_canon_r1/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "tools/train.py": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+    "framework/dataset/scannetv2.py": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "framework/dataset/__init__.py": "eb3f092f427ec70c62adfa5c7e4586335fbc925ea76d175ef33387f9fa4da33c"
+  },
+  "prediction_methods_ast_identical": true,
+  "prediction_fields": [
+    "ann_id",
+    "gt_pmask",
+    "indi",
+    "nt_label",
+    "object_ids",
+    "p_r_iou",
+    "piou",
+    "pred_pmask",
+    "sample_ind",
+    "scan_id",
+    "seed_ind",
+    "sp_r_iou",
+    "spiou"
+  ],
+  "native_aggregation": "torch.stack(pious, dim=0).cpu().numpy().mean(); float32",
+  "scope": "ScanRefer task_type=res; nt_labels empty, so no Multi3DRefer metadata relabeling",
+  "batch_contract": "predict_by_feat uses scan_ids[0]; inference batch_size=1; training batch2 unchanged",
+  "missing_metadata": "Not fabricated; optional fields remain unmeasured",
+  "line_references": {
+    "predict": 133,
+    "predict_by_feat": 152,
+    "native_eval": 256
+  }
+}

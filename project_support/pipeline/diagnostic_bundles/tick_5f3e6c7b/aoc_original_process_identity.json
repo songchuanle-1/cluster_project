@@ -1,0 +1,38 @@
+{
+  "owner": {
+    "token": "5f3e6c7bf05a445cbed49fa0243ee535",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-29T14:04:06.172709+00:00",
+    "deadline_at": "2026-10-29T15:04:06.172709+00:00",
+    "context_sha256": "9dee4135f941ebd5c3e5d0d1c5111c9df74d4600d2c430bd531baa6be6ef0cd2",
+    "pending_sha256": "f567ada3c23065fcbfa1ac2904ce8ec107963547cd9044a4ac40318d550cba31"
+  },
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'T={'\"'\"'pid'\"'\"': 3437349, '\"'\"'config'\"'\"': '\"'\"'configs/Quard/ctf_hcg_csort_aoc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_aoc.yaml'\"'\"', '\"'\"'log'\"'\"': '\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_aoc_20261029_222527.log'\"'\"', '\"'\"'code_commit'\"'\"': '\"'\"'0314b932a92a8cc7f67804068ecb1c1f7a5f2e33'\"'\"'}\nimport socket,os,json,subprocess\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=Path('\"'\"'/proc'\"'\"')/str(T['\"'\"'pid'\"'\"']);assert p.exists() and p.stat().st_uid==os.getuid()\ncmd=(p/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode();cwd=str((p/'\"'\"'cwd'\"'\"').resolve());fd1=str((p/'\"'\"'fd/1'\"'\"').resolve());start=(p/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19]\nassert '\"'\"'tools/train.py'\"'\"' in cmd and T['\"'\"'config'\"'\"'] in cmd and fd1==T['\"'\"'log'\"'\"'] and cwd=='\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'\"'\"'\nhead=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',cwd,'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip();assert head==T['\"'\"'code_commit'\"'\"']\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'pid'\"'\"':T['\"'\"'pid'\"'\"'],'\"'\"'argv'\"'\"':cmd,'\"'\"'cwd'\"'\"':cwd,'\"'\"'fd1'\"'\"':fd1,'\"'\"'start_ticks'\"'\"':start,'\"'\"'runtime_commit'\"'\"':head,'\"'\"'signals_sent'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "observation": {
+    "observed_at": "2026-10-29T14:26:35.612380+00:00",
+    "hostname": "dl04-MS-7E06",
+    "pid": 3437349,
+    "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_aoc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_aoc.yaml --gpu_ids 0 --num_gpus 1 ",
+    "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+    "fd1": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_aoc_20261029_222527.log",
+    "start_ticks": "90046755",
+    "runtime_commit": "0314b932a92a8cc7f67804068ecb1c1f7a5f2e33",
+    "signals_sent": false
+  },
+  "canonical_dispatch": {
+    "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/aoc_dispatch_result.json",
+    "sha256": "76bfdfae1bab49de6451673758045ec71950656b1ebcb4ff4556f4508a262e63"
+  },
+  "scope": "Actual original canonical new AOC process identity only; no training-growth claim from PID."
+}

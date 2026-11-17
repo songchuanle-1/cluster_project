@@ -1,0 +1,71 @@
+{
+  "owner": {
+    "token": "1aa2d994ab004c93b2ea069c90ef9356",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T05:07:20.849412+00:00",
+    "deadline_at": "2026-11-10T06:07:20.849412+00:00",
+    "context_sha256": "eff960250947a7e168ea5f144742d7a877fd810d38f3f958cca86ab058cc9a93",
+    "pending_sha256": "d7e6661624a7282adbfadedf6e35e015206fb97cb7ab4add04a79974af7a6f58"
+  },
+  "recorded_at": "2026-11-10T06:04:46.732751+00:00",
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "passed": true,
+  "material_concerns": [],
+  "actual_sha256": "b70dc8c4f2cee9bc7b0eeb8de1e8a863d1b27f5745887c7657de6b29b833fc61",
+  "actual_path": "pipeline/diagnostic_bundles/tick_1aa2d994/sinc_native_execution/run_smoke_candidate_actual.json",
+  "native_smoke_passed": true,
+  "scope": "INDEPENDENT_LOCAL_TRUE_NATIVE_TRAIN2_RESULT_REVIEW_ONLY; NO_SSH_TORCH_DATA_GPU_OR_REPLAY",
+  "observed": {
+    "outer_returncode": 0,
+    "remote_worker_returncode": 0,
+    "remote_pid": 681215,
+    "common_tensor_count": 841,
+    "actual_common_reference_and_candidate_sha256": "45fb14bdd33369fa1b77df21ffcf9816da6f5c4a818d3b47140c7fbd99793bc3",
+    "natural_batch_sha256": [
+      "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c"
+    ],
+    "native_loss_values": [
+      9.584244728088379,
+      13.911832809448242
+    ],
+    "native_criterion_backwards": 2,
+    "original_optimizer_steps": 2,
+    "all_seven_nonzero_finite_gradients_and_actual_updates_each_step": true,
+    "raw_bank_membership_and_csort_preserved": true,
+    "actual_HCG_inst_feats_mask_backward_observed": true,
+    "core_calls": 2,
+    "graph_calls": 16,
+    "distinct_physical_scene_supports": 4,
+    "unique_graph_fallback_leaves": [
+      6,
+      8,
+      5,
+      3
+    ],
+    "unique_graph_factor_counts": [
+      4308,
+      3040,
+      4315,
+      5703
+    ],
+    "GPU0_free_MiB_before": 32509,
+    "GPU0_free_MiB_after_lock": 32509,
+    "locks_held": 3
+  },
+  "checks": [
+    "Current owner/context and actual/request/intent/manifest/source/review hashes close; parsed transport stdout equals observation, reconstructed result SHA equals remote result SHA and both terminal returncodes0.",
+    "Actual unchanged M95 in-process reference and candidate have identical841 common names/shapes/dtypes/hash with entry RNG restored, no copied weights or reseed substitution.",
+    "Both original natural TRAIN batches match retained signatures; native original train/loss/backward/AdamW/PolyLR executed two steps, all7 core parameters have finite nonzero task gradients and real updates.",
+    "Raw banks/IDs/maps and four original CSORT calls unchanged; fine message identity reaches HCG, exact single original inst_feats writeback, postILA and actual final-mask gradients finite.16 original per-expression graph calls/4 distinct physical supports preserve no-crossleaf support; explicit Qhull fallback counts retained.",
+    "Fresh GPU0 UUID/free>=20GB before/after original three-lock acquisition and source/environment guards passed. Resources remain separate from instrumented smoke."
+  ],
+  "resources": "NOT_RUN_IN_SMOKE_ARM_SEPARATE_ARM_PENDING",
+  "scientific_admission": false,
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "limitations": [
+    "Two natural TRAIN batches establish native execution/integration/finite task backward only, not full-training stability, accuracy or M234 original-fault repair.",
+    "Smoke has observers; its graph timing and peak memory are not the original uninstrumented resource gate. Separate bs1/warmup20/repeat100/FLOPs/resource result is still required."
+  ]
+}

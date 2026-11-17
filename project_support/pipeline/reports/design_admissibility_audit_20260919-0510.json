@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "created": "2026-09-19T05:10:00+08:00",
+  "scope": "CPU-only bounded design audit. No model forward, GPU execution, queue mutation, admission receipt, or efficacy claim.",
+  "tick_snapshot": {
+    "mode": "design",
+    "candidate_budget": 1,
+    "active_count": 1,
+    "capacity": 2,
+    "pirs_status": "running",
+    "pirs_config": "configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml",
+    "due_ids": []
+  },
+  "decision": {
+    "admitted_candidates": [],
+    "slot_action": "keep_empty",
+    "reason": "All structurally distinct alternatives fail a measured diagnosis, constraint, primary-source, or closed-branch gate. Filling the slot would require a renamed duplicate or an unsupported placeholder."
+  },
+  "rejected_candidates": [
+    {
+      "id": "preterminal-mask-quality-successor",
+      "decision": "reject",
+      "reason": "PIRS is still running and its branch-stop gate is preterminal. A score-target successor would both preempt that gate and duplicate the closed PIRS/listwise/hard-negative families.",
+      "evidence_ids": [
+        "decision-aligned-referent-supervision",
+        "referent-exclusivity-supervision"
+      ]
+    },
+    {
+      "id": "same-forward-mask-coverage",
+      "decision": "reject",
+      "reason": "118/123 fixed TRAIN expressions already contain an acceptable query; only 5 are mask-limited and fixed sampling loses 0/117 covered targets.",
+      "evidence_ids": [
+        "same-forward-coverage-diagnosis"
+      ]
+    },
+    {
+      "id": "relation-or-modality-identity-fusion",
+      "decision": "reject",
+      "reason": "The same-forward 2D identity signal is not aligned to referent language (top-5 6.1%; prefers-target 51.5%-57.6%), and RefMask3D already covers language/geometric-group mask identification.",
+      "evidence_ids": [
+        "relation-conditioned-identity-transport"
+      ]
+    },
+    {
+      "id": "same-target-consistency-or-listwise-ranking",
+      "decision": "reject",
+      "reason": "Both are established closed routes and would only rename multi-positive or rank-and-sort supervision.",
+      "evidence_ids": [
+        "same-target-description-consistency",
+        "decision-aligned-referent-supervision"
+      ]
+    }
+  ],
+  "next_executable_work": [
+    "At/after 2026-09-19T05:25:00+08:00, retry the seven due native referent diagnostics only if GPU7 has fewer than two processes and sufficient measured free memory.",
+    "Monitor M197-PIRS to terminal before evaluating or replacing the referent-supervision branch."
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/headless/.tick_context.json",
+      "sha256": "e8258f7684161d8fc0260e4858c1fd395f282d1a1164db027fdbc285976341a2",
+      "bytes": 233514
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "9ca0ceab49311eca448dd5e9efdd02a62f72de7b93ac214728e4dc0027218700",
+      "bytes": 10576
+    },
+    {
+      "path": "pipeline/queue.json",
+      "sha256": "596656f51e9d19d80cf25b052ffe09fa8b94a007825bed9b91f499315cc9d729",
+      "bytes": 20861
+    },
+    {
+      "path": "pipeline/research_work.json",
+      "sha256": "f35a43f8208adb0526836194e32ffd708d5d8bfd5d78636d8ec817de4e8eb4aa",
+      "bytes": 306327
+    },
+    {
+      "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+      "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639",
+      "bytes": 52446
+    },
+    {
+      "path": "pipeline/reports/referent_selection_admissibility_20260918-2116.json",
+      "sha256": "d72692dd5f312d070e77e41fe63f7b34790e3a2dd48da0c0908cc484393b645f",
+      "bytes": 6823
+    },
+    {
+      "path": "pipeline/decisions/20260917-131234_route_change.md",
+      "sha256": "da5b9711ed5b2f5350bf24477bff3d2c1148f0ea3e6b56d42cc00a350029fc42",
+      "bytes": 666
+    },
+    {
+      "path": "pipeline/designs/exp_design_20260918-0517.md",
+      "sha256": "0372cb963b2c7e00f6d8176d27858dee504bcb6f0e8d079ee768353414353298",
+      "bytes": 4583
+    },
+    {
+      "path": "pipeline/designs/exp_design_20260916-1150.md",
+      "sha256": "e3b9ec3df8eeaf481109ffc86097f80bcd004385cfc63996c844dca63f109d1a",
+      "bytes": 6853
+    }
+  ]
+}

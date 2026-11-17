@@ -1,0 +1,694 @@
+{
+  "contract": "read_only_remote_registry_inventory_v1",
+  "remote": {
+    "observed_at_utc": "2026-09-19T18:16:01.752831+00:00",
+    "root": "/data3/songcl/Project/Cluster_project/Cluster",
+    "dataset": {
+      "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/dataset/scannetv2.py",
+      "exists": true,
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+      "bytes": 37794,
+      "stable": true
+    },
+    "config": {
+      "path": "/data3/songcl/Project/Cluster_project/Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml",
+      "exists": true,
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+      "bytes": 2661,
+      "stable": true
+    },
+    "config_text": "work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints\ntrain:\n  seed: 1999\n  epochs: 50\n  interval: 1\n  pretrain: /home/songcl/data/data/sp_unet_backbone.pth\n  save_epoch: 100\n  grad_clip: 0.1\n\ntest:\n  seed: 1999\n  test_topk_per_scene: 100\n  test_score_thresh: 0.0\n  test_npoint_thresh: 100\n\ndataloader:\n  train:\n    batch_size: 2\n    num_workers: 4\n    persistent_workers: True\n  val:\n    batch_size: 1\n    num_workers: 2\n    persistent_workers: True\n  test:\n    batch_size: 1\n    num_workers: 1\n    persistent_workers: True\n\ndata:\n  train:\n    type: scannetv2_sample_graph_edge\n    dataset: scanrefer\n    data_root: /home/songcl/data/data/\n    prefix: train\n    suffix: .pth\n    training: True\n    mode: 4\n    aug: True\n    with_elastic: True\n    use_xyz: True\n    voxel_cfg:\n      scale: 50\n      spatial_shape: [128, 512]\n      max_npoint: 2500000\n    max_des_len: 78\n    lang_num_max: 4\n  val:\n    type: scannetv2_sample_graph_edge\n    dataset: scanrefer\n    data_root: /home/songcl/data/data/\n    prefix: val\n    suffix: .pth\n    training: False\n    mode: 4\n    aug: False\n    with_elastic: False\n    use_xyz: True\n    voxel_cfg:\n      scale: 50\n      spatial_shape: [128, 512]\n      max_npoint: 2500000\n    max_des_len: 78\n    lang_num_max: 32\n\nmodel:\n  data_root: /home/songcl/data/data/\n  input_channel: 6\n  blocks: 5\n  block_reps: 2\n  media: 32\n  normalize_before: True\n  return_blocks: True\n  pool: mean\n  infer_mode: sem\n  fps_num: 256\n  task_type: res\n  sampling_module:\n    num_proposal: 128\n    pc_dim: 256\n    lang_dim: 256\n    d_model: 256\n  dec:\n    cluster_mode: ctf_hcg_csort\n    csort_weight: 0.01\n    num_layer: 6\n    d_model: 256\n    nhead: 8\n    hidden_dim: 1024\n    dropout: 0.0\n    activation_fn: gelu\n    iter_pred: True\n    contrastive_align_loss: True\n    num_proposal_fine: 512\n    cluster_layer_nums: [256, 64, 8]\n    per_layer_topk_list: [32, 16, 8]\n    # PosA ordering with cluster refinement enabled only on encoder layer 6.\n    cluster_att_num_layers: 1\n    cluster_att_init: 0.1\n  criterion:\n    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]\n    cost_weight: [1.0, 1.0, 0.1]\n    loss_fun: focal\n    match_last_layer: True\n    layer_differ_weight: True\n  test_cfg:\n    topk_insts: 100\n    score_thr: 0.0\n    npoint_thr: 100\n  norm_eval: False\n  fix_module:\n    - text_encoder\n\noptimizer:\n  type: AdamW\n  lr: 0.0001\n  weight_decay: 0.0005\n  paramwise_cfg:\n    text_encoder:\n      lr_mult: 0.001\n    input_conv:\n      lr_mult: 0.01\n    unet:\n      lr_mult: 0.01\n    output_layer:\n      lr_mult: 0.01\n    dec:\n      lr_mult: 1.0\n\nlr_scheduler:\n  type: PolyLR\n  max_iters: 70\n  power: 4.0\n  constant_ending: 0.0\n",
+    "dataset_grouping_source": "self.scanrefer.sort(key=lambda x: x['scene_id'])\nscene_list = sorted(list(set([data[\"scene_id\"] for data in self.scanrefer])))\nscanrefer_new = []\nscanrefer_new_scene = []\nscene_id = \"\"\nfor data in self.scanrefer:\n    if data[\"scene_id\"] in scene_list:\n        if scene_id != data[\"scene_id\"]:\n            scene_id = data[\"scene_id\"]\n            if len(scanrefer_new_scene) > 0:\n                scanrefer_new.append(scanrefer_new_scene)\n            scanrefer_new_scene = []\n        if len(scanrefer_new_scene) >= lang_num_max:\n            scanrefer_new.append(scanrefer_new_scene)\n            scanrefer_new_scene = []\n        scanrefer_new_scene.append(data)\nscanrefer_new.append(scanrefer_new_scene)\nself.scene_inputs = scanrefer_new",
+    "model_source_sha256": "cf4ce01548cecf186ba4677f5c13977f9fa527b2e33af6c82f564a7150a4c1d0",
+    "model_files": [
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/__init__.py",
+        "exists": true,
+        "sha256": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+        "bytes": 52,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/backbone.py",
+        "exists": true,
+        "sha256": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+        "bytes": 6872,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/dec.py",
+        "exists": true,
+        "sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+        "bytes": 23440,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/hier_postprocess.py",
+        "exists": true,
+        "sha256": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f",
+        "bytes": 32509,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/loss.py",
+        "exists": true,
+        "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+        "bytes": 27972,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py",
+        "exists": true,
+        "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+        "bytes": 11433,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/sample_model.py",
+        "exists": true,
+        "sha256": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+        "bytes": 3362,
+        "stable": true
+      }
+    ],
+    "producer_sources": [
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/capture_support_20260916.py",
+        "exists": true,
+        "sha256": "8ed9e62427981d7ad5a413ac8114ebf95c25f6bb517d7c6db741c799f5475975",
+        "bytes": 5376,
+        "stable": true
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/frozen_capture_contract_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/hierarchical_partition_contract_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/native_endpoint_capture_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/native_frozen_capture_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/native_geometry_runtime_20260919.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/native_registry_geometry_runner_20260920.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/native_support_capture_v2_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/paired_capture_evaluation_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/physical_mask_endpoints_20260916.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_capture_20260919.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_control_20260919.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_registry_20260919.py",
+        "exists": false
+      },
+      {
+        "path": "/data3/songcl/Project/Cluster_project/scripts/referent_registry_binding_20260919.py",
+        "exists": false
+      }
+    ],
+    "registry": {
+      "path": "/data3/songcl/Project/Cluster_project/pipeline/reports/referent_control_pairing_20260918-1812.json",
+      "exists": false
+    },
+    "checkpoint_root": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort",
+    "checkpoints": [],
+    "annotation": {
+      "path": "/data3/songcl/data/data_cluster/scanrefer/ScanRefer_train_new.json",
+      "exists": true,
+      "sha256": "018754b90bcc27d5746bb50d6c35d6e7a35fd39519ac669e3fbe3fa6f425922d",
+      "bytes": 19617196,
+      "stable": true,
+      "stable_after_grouping": true
+    },
+    "grouping_lang_num_max": 4,
+    "metadata_method": "Executed only AST-located native constructor metadata grouping",
+    "native_dataset_instantiated": false,
+    "gpu_allocated": false,
+    "gpu": "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 81559, 62483, 18597, 100",
+    "gpu_processes": "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 1134192, 19956\nGPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 3827570, 42488",
+    "training": {
+      "pid": 1134192,
+      "command": "python tools/train.py configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml --gpu_ids 7 --num_gpus 1 ",
+      "log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs_20260916_122540.log",
+      "tail": "<42:44,  2.53s/it, lr=1.9e-05, eta=3 days, 20:40:53, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3673/4686 [2:52:57<42:44,  2.53s/it, lr=1.9e-05, eta=3 days, 20:42:48, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3674/4686 [2:52:57<1:02:43,  3.72s/it, lr=1.9e-05, eta=3 days, 20:42:48, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3674/4686 [2:52:58<1:02:43,  3.72s/it, lr=1.9e-05, eta=3 days, 20:41:29, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3675/4686 [2:52:58<46:12,  2.74s/it, lr=1.9e-05, eta=3 days, 20:41:29, iter_time=2.82]  \rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3675/4686 [2:52:59<46:12,  2.74s/it, lr=1.9e-05, eta=3 days, 20:40:23, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3676/4686 [2:52:59<36:40,  2.18s/it, lr=1.9e-05, eta=3 days, 20:40:23, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3676/4686 [2:53:05<36:40,  2.18s/it, lr=1.9e-05, eta=3 days, 20:42:07, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3677/4686 [2:53:05<56:36,  3.37s/it, lr=1.9e-05, eta=3 days, 20:42:07, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3677/4686 [2:53:06<56:36,  3.37s/it, lr=1.9e-05, eta=3 days, 20:40:59, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3678/4686 [2:53:06<43:35,  2.59s/it, lr=1.9e-05, eta=3 days, 20:40:59, iter_time=2.82]\rTrain[25/50]:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3678/4686 [2:53:07<43:35,  2.59s/it, lr=1.9e-05, eta=3 days, 20:40:16, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3679/4686 [2:53:07<38:30,  2.29s/it, lr=1.9e-05, eta=3 days, 20:40:16, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3679/4686 [2:53:12<38:30,  2.29s/it, lr=1.9e-05, eta=3 days, 20:41:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3680/4686 [2:53:12<53:10,  3.17s/it, lr=1.9e-05, eta=3 days, 20:41:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3680/4686 [2:53:14<53:10,  3.17s/it, lr=1.9e-05, eta=3 days, 20:40:35, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3681/4686 [2:53:14<43:09,  2.58s/it, lr=1.9e-05, eta=3 days, 20:40:35, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3681/4686 [2:53:16<43:09,  2.58s/it, lr=1.9e-05, eta=3 days, 20:40:10, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3682/4686 [2:53:16<40:57,  2.45s/it, lr=1.9e-05, eta=3 days, 20:40:10, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3682/4686 [2:53:20<40:57,  2.45s/it, lr=1.9e-05, eta=3 days, 20:40:40, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3683/4686 [2:53:20<47:47,  2.86s/it, lr=1.9e-05, eta=3 days, 20:40:40, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3683/4686 [2:53:21<47:47,  2.86s/it, lr=1.9e-05, eta=3 days, 20:39:48, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3684/4686 [2:53:21<39:58,  2.39s/it, lr=1.9e-05, eta=3 days, 20:39:48, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3684/4686 [2:53:27<39:58,  2.39s/it, lr=1.9e-05, eta=3 days, 20:41:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3685/4686 [2:53:27<57:03,  3.42s/it, lr=1.9e-05, eta=3 days, 20:41:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3685/4686 [2:53:28<57:03,  3.42s/it, lr=1.9e-05, eta=3 days, 20:40:32, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3686/4686 [2:53:28<46:47,  2.81s/it, lr=1.9e-05, eta=3 days, 20:40:32, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3686/4686 [2:53:34<46:47,  2.81s/it, lr=1.9e-05, eta=3 days, 20:42:17, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3687/4686 [2:53:34<1:03:37,  3.82s/it, lr=1.9e-05, eta=3 days, 20:42:17, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3687/4686 [2:53:35<1:03:37,  3.82s/it, lr=1.9e-05, eta=3 days, 20:41:03, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3688/4686 [2:53:35<47:25,  2.85s/it, lr=1.9e-05, eta=3 days, 20:41:03, iter_time=2.82]  \rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3688/4686 [2:53:36<47:25,  2.85s/it, lr=1.9e-05, eta=3 days, 20:40:12, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3689/4686 [2:53:36<39:48,  2.40s/it, lr=1.9e-05, eta=3 days, 20:40:12, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3689/4686 [2:53:42<39:48,  2.40s/it, lr=1.9e-05, eta=3 days, 20:41:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3690/4686 [2:53:42<57:43,  3.48s/it, lr=1.9e-05, eta=3 days, 20:41:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b    | 3690/4686 [2:53:43<57:43,  3.48s/it, lr=1.9e-05, eta=3 days, 20:40:46, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3691/4686 [2:53:43<44:44,  2.70s/it, lr=1.9e-05, eta=3 days, 20:40:46, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3691/4686 [2:53:48<44:44,  2.70s/it, lr=1.9e-05, eta=3 days, 20:41:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3692/4686 [2:53:48<55:12,  3.33s/it, lr=1.9e-05, eta=3 days, 20:41:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3692/4686 [2:53:50<55:12,  3.33s/it, lr=1.9e-05, eta=3 days, 20:41:23, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3693/4686 [2:53:50<49:24,  2.99s/it, lr=1.9e-05, eta=3 days, 20:41:23, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3693/4686 [2:53:51<49:24,  2.99s/it, lr=1.9e-05, eta=3 days, 20:40:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3694/4686 [2:53:51<39:25,  2.38s/it, lr=1.9e-05, eta=3 days, 20:40:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3694/4686 [2:53:57<39:25,  2.38s/it, lr=1.9e-05, eta=3 days, 20:42:02, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3695/4686 [2:53:57<57:34,  3.49s/it, lr=1.9e-05, eta=3 days, 20:42:02, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3695/4686 [2:53:58<57:34,  3.49s/it, lr=1.9e-05, eta=3 days, 20:40:54, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3696/4686 [2:53:58<44:15,  2.68s/it, lr=1.9e-05, eta=3 days, 20:40:54, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3696/4686 [2:54:03<44:15,  2.68s/it, lr=1.9e-05, eta=3 days, 20:42:16, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3697/4686 [2:54:03<57:57,  3.52s/it, lr=1.9e-05, eta=3 days, 20:42:16, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3697/4686 [2:54:04<57:57,  3.52s/it, lr=1.9e-05, eta=3 days, 20:41:18, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3698/4686 [2:54:04<45:58,  2.79s/it, lr=1.9e-05, eta=3 days, 20:41:18, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3698/4686 [2:54:05<45:58,  2.79s/it, lr=1.9e-05, eta=3 days, 20:40:13, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3699/4686 [2:54:05<36:24,  2.21s/it, lr=1.9e-05, eta=3 days, 20:40:13, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3699/4686 [2:54:07<36:24,  2.21s/it, lr=1.9e-05, eta=3 days, 20:39:42, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3700/4686 [2:54:07<36:11,  2.20s/it, lr=1.9e-05, eta=3 days, 20:39:42, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3700/4686 [2:54:12<36:11,  2.20s/it, lr=1.9e-05, eta=3 days, 20:40:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3701/4686 [2:54:12<47:09,  2.87s/it, lr=1.9e-05, eta=3 days, 20:40:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3701/4686 [2:54:13<47:09,  2.87s/it, lr=1.9e-05, eta=3 days, 20:39:32, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3702/4686 [2:54:13<37:09,  2.27s/it, lr=1.9e-05, eta=3 days, 20:39:32, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3702/4686 [2:54:14<37:09,  2.27s/it, lr=1.9e-05, eta=3 days, 20:38:26, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3703/4686 [2:54:14<30:10,  1.84s/it, lr=1.9e-05, eta=3 days, 20:38:26, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3703/4686 [2:54:20<30:10,  1.84s/it, lr=1.9e-05, eta=3 days, 20:40:01, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3704/4686 [2:54:20<49:58,  3.05s/it, lr=1.9e-05, eta=3 days, 20:40:01, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3704/4686 [2:54:20<49:58,  3.05s/it, lr=1.9e-05, eta=3 days, 20:38:55, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3705/4686 [2:54:20<39:02,  2.39s/it, lr=1.9e-05, eta=3 days, 20:38:55, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3705/4686 [2:54:21<39:02,  2.39s/it, lr=1.9e-05, eta=3 days, 20:37:57, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3706/4686 [2:54:21<32:40,  2.00s/it, lr=1.9e-05, eta=3 days, 20:37:57, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3706/4686 [2:54:27<32:40,  2.00s/it, lr=1.9e-05, eta=3 days, 20:39:14, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3707/4686 [2:54:27<48:54,  3.00s/it, lr=1.9e-05, eta=3 days, 20:39:14, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3707/4686 [2:54:28<48:54,  3.00s/it, lr=1.9e-05, eta=3 days, 20:38:19, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3708/4686 [2:54:28<40:03,  2.46s/it, lr=1.9e-05, eta=3 days, 20:38:19, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3708/4686 [2:54:29<40:03,  2.46s/it, lr=1.9e-05, eta=3 days, 20:37:05, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3709/4686 [2:54:29<30:50,  1.89s/it, lr=1.9e-05, eta=3 days, 20:37:05, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3709/4686 [2:54:34<30:50,  1.89s/it, lr=1.9e-05, eta=3 days, 20:38:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3710/4686 [2:54:34<50:18,  3.09s/it, lr=1.9e-05, eta=3 days, 20:38:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3710/4686 [2:54:36<50:18,  3.09s/it, lr=1.9e-05, eta=3 days, 20:37:56, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3711/4686 [2:54:36<42:40,  2.63s/it, lr=1.9e-05, eta=3 days, 20:37:56, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3711/4686 [2:54:40<42:40,  2.63s/it, lr=1.9e-05, eta=3 days, 20:38:36, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3712/4686 [2:54:40<50:09,  3.09s/it, lr=1.9e-05, eta=3 days, 20:38:36, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3712/4686 [2:54:43<50:09,  3.09s/it, lr=1.9e-05, eta=3 days, 20:38:27, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3713/4686 [2:54:43<47:57,  2.96s/it, lr=1.9e-05, eta=3 days, 20:38:27, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3713/4686 [2:54:44<47:57,  2.96s/it, lr=1.9e-05, eta=3 days, 20:37:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3714/4686 [2:54:44<38:42,  2.39s/it, lr=1.9e-05, eta=3 days, 20:37:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3714/4686 [2:54:46<38:42,  2.39s/it, lr=1.9e-05, eta=3 days, 20:36:50, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3715/4686 [2:54:46<35:15,  2.18s/it, lr=1.9e-05, eta=3 days, 20:36:50, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3715/4686 [2:54:50<35:15,  2.18s/it, lr=1.9e-05, eta=3 days, 20:37:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3716/4686 [2:54:50<46:06,  2.85s/it, lr=1.9e-05, eta=3 days, 20:37:38, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3716/4686 [2:54:50<46:06,  2.85s/it, lr=1.9e-05, eta=3 days, 20:36:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3717/4686 [2:54:50<34:40,  2.15s/it, lr=1.9e-05, eta=3 days, 20:36:21, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3717/4686 [2:54:52<34:40,  2.15s/it, lr=1.9e-05, eta=3 days, 20:35:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3718/4686 [2:54:52<30:19,  1.88s/it, lr=1.9e-05, eta=3 days, 20:35:29, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3718/4686 [2:54:57<30:19,  1.88s/it, lr=1.9e-05, eta=3 days, 20:36:59, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3719/4686 [2:54:57<49:02,  3.04s/it, lr=1.9e-05, eta=3 days, 20:36:59, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a    | 3719/4686 [2:54:59<49:02,  3.04s/it, lr=1.9e-05, eta=3 days, 20:36:11, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3720/4686 [2:54:59<41:14,  2.56s/it, lr=1.9e-05, eta=3 days, 20:36:11, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3720/4686 [2:55:04<41:14,  2.56s/it, lr=1.9e-05, eta=3 days, 20:37:20, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3721/4686 [2:55:04<53:07,  3.30s/it, lr=1.9e-05, eta=3 days, 20:37:20, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3721/4686 [2:55:05<53:07,  3.30s/it, lr=1.9e-05, eta=3 days, 20:36:22, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3722/4686 [2:55:05<42:26,  2.64s/it, lr=1.9e-05, eta=3 days, 20:36:22, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3722/4686 [2:55:09<42:26,  2.64s/it, lr=1.9e-05, eta=3 days, 20:36:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3723/4686 [2:55:09<47:28,  2.96s/it, lr=1.9e-05, eta=3 days, 20:36:47, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3723/4686 [2:55:12<47:28,  2.96s/it, lr=1.9e-05, eta=3 days, 20:36:50, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3724/4686 [2:55:12<47:41,  2.97s/it, lr=1.9e-05, eta=3 days, 20:36:50, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3724/4686 [2:55:13<47:41,  2.97s/it, lr=1.9e-05, eta=3 days, 20:35:45, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3725/4686 [2:55:13<37:26,  2.34s/it, lr=1.9e-05, eta=3 days, 20:35:45, iter_time=2.82]\rTrain[25/50]:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3725/4686 [2:55:14<37:26,  2.34s/it, lr=1.9e-05, eta=3 days, 20:34:42, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3726/4686 [2:55:14<30:36,  1.91s/it, lr=1.9e-05, eta=3 days, 20:34:42, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3726/4686 [2:55:19<30:36,  1.91s/it, lr=1.9e-05, eta=3 days, 20:36:12, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3727/4686 [2:55:19<48:56,  3.06s/it, lr=1.9e-05, eta=3 days, 20:36:12, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3727/4686 [2:55:20<48:56,  3.06s/it, lr=1.9e-05, eta=3 days, 20:35:08, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3728/4686 [2:55:20<38:34,  2.42s/it, lr=1.9e-05, eta=3 days, 20:35:08, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3728/4686 [2:55:22<38:34,  2.42s/it, lr=1.9e-05, eta=3 days, 20:34:44, iter_time=2.82]\rTrain[25/50]:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589    | 3729/4686 [2:55:22<37:14,  2.33s/it, lr=1.9e-05, eta=3 days, 20:34:44, iter_time=2.82]",
+      "steps": []
+    }
+  },
+  "comparisons": {
+    "dataset_matches": true,
+    "model_matches": true,
+    "config_bytes_match": true,
+    "registry_matches": false,
+    "producer_missing": [
+      "/data3/songcl/Project/Cluster_project/scripts/frozen_capture_contract_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/hierarchical_partition_contract_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/native_endpoint_capture_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/native_frozen_capture_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/native_geometry_runtime_20260919.py",
+      "/data3/songcl/Project/Cluster_project/scripts/native_registry_geometry_runner_20260920.py",
+      "/data3/songcl/Project/Cluster_project/scripts/native_support_capture_v2_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/paired_capture_evaluation_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/physical_mask_endpoints_20260916.py",
+      "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_capture_20260919.py",
+      "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_control_20260919.py",
+      "/data3/songcl/Project/Cluster_project/scripts/referent_geometry_registry_20260919.py",
+      "/data3/songcl/Project/Cluster_project/scripts/referent_registry_binding_20260919.py"
+    ],
+    "producer_mismatches": []
+  },
+  "metadata_plan": {
+    "contract": "fixed_registry_native_binding_v1",
+    "registry_sha256": "a1a87913b30ffa3151c5eb33316cc239193cd349f636d01861475f88d8d5d3a7",
+    "dataset_metadata_sha256": "cf6ebb82d64cca87366d5dbfcab0be7ad845b37a7dfcfdf3cd1a5d2e17629d38",
+    "rows": [
+      {
+        "pair_id": "scene0493_00:3:11",
+        "status": "planned",
+        "dataset_indices": [
+          6752
+        ],
+        "dataset_index": 6752,
+        "scene": "scene0493_00",
+        "expression_slot": 3,
+        "ann_id": 11,
+        "target_object_id": 3,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0481_00:0:80",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 0,
+        "ann_id": 80,
+        "target_object_id": 6,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0481_00:1:81",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 1,
+        "ann_id": 81,
+        "target_object_id": 52,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0481_00:3:83",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 3,
+        "ann_id": 83,
+        "target_object_id": 4,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0288_00:0:28",
+        "status": "planned",
+        "dataset_indices": [
+          3893
+        ],
+        "dataset_index": 3893,
+        "scene": "scene0288_00",
+        "expression_slot": 0,
+        "ann_id": 28,
+        "target_object_id": 39,
+        "control_object_id": 38
+      },
+      {
+        "pair_id": "scene0288_00:3:31",
+        "status": "planned",
+        "dataset_indices": [
+          3893
+        ],
+        "dataset_index": 3893,
+        "scene": "scene0288_00",
+        "expression_slot": 3,
+        "ann_id": 31,
+        "target_object_id": 25,
+        "control_object_id": 24
+      },
+      {
+        "pair_id": "scene0289_00:0:64",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 0,
+        "ann_id": 64,
+        "target_object_id": 10,
+        "control_object_id": 17
+      },
+      {
+        "pair_id": "scene0289_00:1:65",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 1,
+        "ann_id": 65,
+        "target_object_id": 19,
+        "control_object_id": 16
+      },
+      {
+        "pair_id": "scene0289_00:2:66",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 2,
+        "ann_id": 66,
+        "target_object_id": 20,
+        "control_object_id": 16
+      },
+      {
+        "pair_id": "scene0220_00:1:21",
+        "status": "planned",
+        "dataset_indices": [
+          3011
+        ],
+        "dataset_index": 3011,
+        "scene": "scene0220_00",
+        "expression_slot": 1,
+        "ann_id": 21,
+        "target_object_id": 42,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0076_00:0:76",
+        "status": "planned",
+        "dataset_indices": [
+          1097
+        ],
+        "dataset_index": 1097,
+        "scene": "scene0076_00",
+        "expression_slot": 0,
+        "ann_id": 76,
+        "target_object_id": 7,
+        "control_object_id": 10
+      },
+      {
+        "pair_id": "scene0076_00:1:77",
+        "status": "planned",
+        "dataset_indices": [
+          1097
+        ],
+        "dataset_index": 1097,
+        "scene": "scene0076_00",
+        "expression_slot": 1,
+        "ann_id": 77,
+        "target_object_id": 8,
+        "control_object_id": 6
+      },
+      {
+        "pair_id": "scene0421_00:2:74",
+        "status": "planned",
+        "dataset_indices": [
+          5708
+        ],
+        "dataset_index": 5708,
+        "scene": "scene0421_00",
+        "expression_slot": 2,
+        "ann_id": 74,
+        "target_object_id": 14,
+        "control_object_id": 11
+      },
+      {
+        "pair_id": "scene0223_00:0:24",
+        "status": "planned",
+        "dataset_indices": [
+          3040
+        ],
+        "dataset_index": 3040,
+        "scene": "scene0223_00",
+        "expression_slot": 0,
+        "ann_id": 24,
+        "target_object_id": 20,
+        "control_object_id": 19
+      },
+      {
+        "pair_id": "scene0223_00:1:25",
+        "status": "planned",
+        "dataset_indices": [
+          3040
+        ],
+        "dataset_index": 3040,
+        "scene": "scene0223_00",
+        "expression_slot": 1,
+        "ann_id": 25,
+        "target_object_id": 17,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0319_00:1:33",
+        "status": "planned",
+        "dataset_indices": [
+          4278
+        ],
+        "dataset_index": 4278,
+        "scene": "scene0319_00",
+        "expression_slot": 1,
+        "ann_id": 33,
+        "target_object_id": 2,
+        "control_object_id": 3
+      },
+      {
+        "pair_id": "scene0319_00:2:34",
+        "status": "planned",
+        "dataset_indices": [
+          4278
+        ],
+        "dataset_index": 4278,
+        "scene": "scene0319_00",
+        "expression_slot": 2,
+        "ann_id": 34,
+        "target_object_id": 4,
+        "control_object_id": 20
+      },
+      {
+        "pair_id": "scene0192_00:2:6",
+        "status": "planned",
+        "dataset_indices": [
+          2690
+        ],
+        "dataset_index": 2690,
+        "scene": "scene0192_00",
+        "expression_slot": 2,
+        "ann_id": 6,
+        "target_object_id": 2,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0110_00:0:4",
+        "status": "planned",
+        "dataset_indices": [
+          1524
+        ],
+        "dataset_index": 1524,
+        "scene": "scene0110_00",
+        "expression_slot": 0,
+        "ann_id": 4,
+        "target_object_id": 16,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0632_00:3:19",
+        "status": "planned",
+        "dataset_indices": [
+          8686
+        ],
+        "dataset_index": 8686,
+        "scene": "scene0632_00",
+        "expression_slot": 3,
+        "ann_id": 19,
+        "target_object_id": 6,
+        "control_object_id": 2
+      },
+      {
+        "pair_id": "scene0420_00:1:97",
+        "status": "planned",
+        "dataset_indices": [
+          5685
+        ],
+        "dataset_index": 5685,
+        "scene": "scene0420_00",
+        "expression_slot": 1,
+        "ann_id": 97,
+        "target_object_id": 41,
+        "control_object_id": 40
+      },
+      {
+        "pair_id": "scene0420_00:2:98",
+        "status": "planned",
+        "dataset_indices": [
+          5685
+        ],
+        "dataset_index": 5685,
+        "scene": "scene0420_00",
+        "expression_slot": 2,
+        "ann_id": 98,
+        "target_object_id": 25,
+        "control_object_id": 6
+      },
+      {
+        "pair_id": "scene0416_00:0:72",
+        "status": "planned",
+        "dataset_indices": [
+          5567
+        ],
+        "dataset_index": 5567,
+        "scene": "scene0416_00",
+        "expression_slot": 0,
+        "ann_id": 72,
+        "target_object_id": 27,
+        "control_object_id": 26
+      },
+      {
+        "pair_id": "scene0416_00:2:74",
+        "status": "planned",
+        "dataset_indices": [
+          5567
+        ],
+        "dataset_index": 5567,
+        "scene": "scene0416_00",
+        "expression_slot": 2,
+        "ann_id": 74,
+        "target_object_id": 43,
+        "control_object_id": 42
+      },
+      {
+        "pair_id": "scene0320_00:1:17",
+        "status": "planned",
+        "dataset_indices": [
+          4286
+        ],
+        "dataset_index": 4286,
+        "scene": "scene0320_00",
+        "expression_slot": 1,
+        "ann_id": 17,
+        "target_object_id": 15,
+        "control_object_id": 31
+      },
+      {
+        "pair_id": "scene0320_00:3:19",
+        "status": "planned",
+        "dataset_indices": [
+          4286
+        ],
+        "dataset_index": 4286,
+        "scene": "scene0320_00",
+        "expression_slot": 3,
+        "ann_id": 19,
+        "target_object_id": 34,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0452_00:0:56",
+        "status": "planned",
+        "dataset_indices": [
+          6122
+        ],
+        "dataset_index": 6122,
+        "scene": "scene0452_00",
+        "expression_slot": 0,
+        "ann_id": 56,
+        "target_object_id": 21,
+        "control_object_id": 23
+      },
+      {
+        "pair_id": "scene0452_00:3:59",
+        "status": "planned",
+        "dataset_indices": [
+          6122
+        ],
+        "dataset_index": 6122,
+        "scene": "scene0452_00",
+        "expression_slot": 3,
+        "ann_id": 59,
+        "target_object_id": 19,
+        "control_object_id": 20
+      },
+      {
+        "pair_id": "scene0588_00:1:89",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 1,
+        "ann_id": 89,
+        "target_object_id": 44,
+        "control_object_id": 30
+      },
+      {
+        "pair_id": "scene0588_00:2:90",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 2,
+        "ann_id": 90,
+        "target_object_id": 0,
+        "control_object_id": 1
+      },
+      {
+        "pair_id": "scene0588_00:3:91",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 3,
+        "ann_id": 91,
+        "target_object_id": 19,
+        "control_object_id": 20
+      }
+    ],
+    "counts": {
+      "planned": 31
+    },
+    "native_execution_verified": false
+  },
+  "local_runner_manifest": {
+    "contract": "registry_geometry_runner_v1",
+    "sources": [
+      {
+        "path": "capture_support_20260916.py",
+        "sha256": "8ed9e62427981d7ad5a413ac8114ebf95c25f6bb517d7c6db741c799f5475975"
+      },
+      {
+        "path": "frozen_capture_contract_20260916.py",
+        "sha256": "cea431df835fb5ab0fe7acc88b5539c700cc3cd37a816ecdb9bf2fd1f843f788"
+      },
+      {
+        "path": "hierarchical_partition_contract_20260916.py",
+        "sha256": "1633e31d46109c7055c93b761dc43bdebcae131bdef8b04b611464981cb1537e"
+      },
+      {
+        "path": "native_endpoint_capture_20260916.py",
+        "sha256": "7da5b69f6cf27962a4d555b7f42f7f635a68caa65f1dd7847673ed73d3b639e7"
+      },
+      {
+        "path": "native_frozen_capture_20260916.py",
+        "sha256": "d85791b08754ce9d53213deb479c946234eddd7c347592eda90adbd6fed1bff3"
+      },
+      {
+        "path": "native_geometry_runtime_20260919.py",
+        "sha256": "b17fc40872a957ade8bfbcc553ea06f07284020627664e3d21b25d867836d411"
+      },
+      {
+        "path": "native_registry_geometry_runner_20260920.py",
+        "sha256": "109a973095702dfff686f48e9ab7bdb555f1c31f7960f3eadbb9ab7af9d8124d"
+      },
+      {
+        "path": "native_support_capture_v2_20260916.py",
+        "sha256": "458cc198d6d4a5d240f99d3c852ac41d5935edff2de3241463547a90a89b7915"
+      },
+      {
+        "path": "paired_capture_evaluation_20260916.py",
+        "sha256": "bc5d99bc3ab4c656c84b898624246890ed3d9fa74a5727746e98b3c8b0cb74d6"
+      },
+      {
+        "path": "physical_mask_endpoints_20260916.py",
+        "sha256": "30c6706951110d1832b8bb1b1acbfe4d9c19a7ebd791b956b8c3526008239931"
+      },
+      {
+        "path": "referent_geometry_capture_20260919.py",
+        "sha256": "71bfa35e9cabc1f4a13bb45e48342877a379213a6224ffe2e3a3cc49630a5631"
+      },
+      {
+        "path": "referent_geometry_control_20260919.py",
+        "sha256": "3a349bf4eaf96aafe54ded7c75acfe76e3d9b668d092f699cc60887ad3baab27"
+      },
+      {
+        "path": "referent_geometry_registry_20260919.py",
+        "sha256": "219818764e50d79a86a0881d5ee18fe05b910389c80eb69275f34aaa2dda420a"
+      },
+      {
+        "path": "referent_registry_binding_20260919.py",
+        "sha256": "e14c67e5c15c0e6e2bdc49b58cee8c4f1d8093ceaaac461813eedfa2b595ae2a"
+      }
+    ],
+    "producer_sha256": "88b51c997a746a246fe90d97562ec64e8a46ef7a9a62e49393961a9f86c7519a",
+    "external_imports": [
+      "argparse",
+      "ast",
+      "collections",
+      "copy",
+      "framework.dataset",
+      "gorilla",
+      "hashlib",
+      "importlib",
+      "inspect",
+      "json",
+      "logging",
+      "math",
+      "numbers",
+      "os",
+      "pathlib",
+      "random",
+      "subprocess",
+      "sys",
+      "tempfile",
+      "torch"
+    ],
+    "scope": "Transitive local producer scripts; not a full environment attestation"
+  },
+  "native_execution_completed": false,
+  "physical_bindings_verified": 0,
+  "scientific_validation_complete": false,
+  "limitations": [
+    "Source-derived metadata plan is not instantiated dataset or physical capture.",
+    "Exact remote config semantics still require review before binding.",
+    "No producer deployment, expected-binding approval or checkpoint loading.",
+    "Hard-link capability not tested: remote filesystem was read-only.",
+    "Geometry is annotation-assisted nuisance, not independent objectness."
+  ]
+}

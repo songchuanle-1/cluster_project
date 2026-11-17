@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T17:30:19.325465+00:00",
+  "passed": false,
+  "source_metadata_projection_passed": true,
+  "owner": {
+    "token": "8a3431facc69449d9cbb681e512733aa",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T17:12:25.818193+00:00",
+    "deadline_at": "2026-11-08T18:12:25.818193+00:00",
+    "context_sha256": "17d3570ccf2b9677ea549d0757a5615a23f8d370950789ff485f59cc821814c9",
+    "pending_sha256": "5ac1360d2e0a47c22aa15d5e24144abb7cfd41f5ee33467a735bce1e6101ba06"
+  },
+  "reviewer_agent": "/root/fresh_peer",
+  "reviewer_thread_id": "/root/fresh_peer",
+  "reviewer_identity_kind": "canonical_subagent_path",
+  "scope": "DISPATCH_SOURCE_REVIEW_AND_CURRENT_RUNTIME_READINESS_FINDING_ONLY",
+  "dispatch_FROZEN": {
+    "path": "pipeline/diagnostic_bundles/tick_8a3431fa/nde_dispatch_active/FROZEN.json",
+    "sha256": "744df841e464879290457493887f0bf4b1f5c2059f4832c5f8d7208a9556ab5b"
+  },
+  "helper": {
+    "path": "pipeline/diagnostic_bundles/tick_8a3431fa/nde_dispatch_active/dispatch_nde_once.py",
+    "sha256": "ce4ae3c4301c6ee7c1135a7d3f585d8e8d2ec4be3c7c6a5020a1f27628c9e481"
+  },
+  "original_helper": {
+    "path": "pipeline/diagnostic_bundles/tick_2218a502/nde_dispatch_active/dispatch_nde_once.py",
+    "sha256": "f94dabb1e63822da16587df64719f346eb28880bf319c6429a4e6708cd7a9bfe"
+  },
+  "fresh_current_runtime": {
+    "path": "pipeline/diagnostic_bundles/tick_8a3431fa/nde_current_runtime_observation.json",
+    "sha256": "e973edda8a8648c028ad2c9a2aad64fa3862f710a7b3f63f602903ac63dc2005"
+  },
+  "checks": {
+    "entire_dispatch_module_AST_exact_after_only_explicit_owner_and_new_shim_path_projection": true,
+    "same_canonical_monitor_process_queue_and_safe_launch_unmodified": true,
+    "strictSSH_no_signals_oneShot_noReplay_resource_overlay_projectmax1_guards_retained": true
+  },
+  "material_concerns": [
+    {
+      "severity": "BLOCKS_DISPATCH_WITH_CURRENT_ORIGINAL_YAML",
+      "finding": "The prelaunch remote probe requires current runtime YAML bytes to equal production binding runtime_config_sha256 before canonical safe_launch adapts and writes the YAML. Current observed bytes are source YAML a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a, with original checkpoint root /home/songcl/3dres/project/cluster_project/Checkpoints. The bound canonical preview uses /data/songcl/Project/Cluster_project/Cluster_checkpoints and PyYAML serialization, so that exact prelaunch requirement will refuse the current runtime.",
+      "evidence": "dispatch program asserts SHA(root/config)==P[config_sha256]; params config_sha256=production.binding.runtime_config_sha256. canonical closure.safe_launch lines398-428 computes mappings and writes adapted YAML later, after this probe.",
+      "required_resolution": "Use a fresh reviewed source version whose prelaunch YAML check accepts exactly the observed original commit YAML hash or authenticated canonical preview hash, while leaving canonical safe_launch as the YAML writer and keeping the production entry exact adapted-config hash check. Do not mutate the old frozen packet or relax other guards."
+    }
+  ],
+  "canonical_launcher": {
+    "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/closure.py",
+    "sha256": "31fdab566c2967a24a61c86802b0a26d7fcbe41da0c051a361080960ba8926ca",
+    "function": "safe_launch"
+  },
+  "training_launch_authorized_by_this_review": false,
+  "external_actions_by_reviewer": false
+}

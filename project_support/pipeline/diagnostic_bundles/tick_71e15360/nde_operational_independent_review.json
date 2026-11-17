@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-07T23:36:12.452991+00:00",
+  "project": "cluster_project",
+  "candidate_id": "hierarchy-native-distribution-embedding-composition",
+  "experiment_id": "M233-NDE",
+  "owner_provenance_only": {
+    "token": "71e15360fb3349f08e5af82b14daea55",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T23:07:14.137502+00:00",
+    "deadline_at": "2026-11-08T00:07:14.137502+00:00",
+    "context_sha256": "9220d454970fcb19526fff4d5b066f4389e1a37742b2dc868b0815806a56f947",
+    "pending_sha256": "dd58143138e7e62740adc458db4b44e37416ff254e1a7ab8e1c11c898e718cea"
+  },
+  "reviewer_agent": "/root/nde_gate_review",
+  "reviewer_thread_id": "01a1b846-538d-78f3-9610-c280a081da14",
+  "passed": false,
+  "scope": "INDEPENDENT_INCREMENTAL_FROZEN_OPERATIONAL_IDENTITY_GRAPH_REVIEW_NOT_EXECUTION",
+  "check_count": 4,
+  "checks": [
+    {
+      "name": "actual_frozen_operational_hashes",
+      "passed": true
+    },
+    {
+      "name": "actual_owner_six_current_binding",
+      "passed": true
+    },
+    {
+      "name": "candidate_source46_parent_runtimef625_metadata",
+      "passed": true
+    },
+    {
+      "name": "adapter_remote_root_equals_current_binding_and_manifest",
+      "passed": false
+    }
+  ],
+  "material_concerns": [
+    {
+      "kind": "RUNTIME_ROOT_LITERAL_IDENTITY_MISMATCH",
+      "adapter_REMOTE_ROOT": "/data/songcl/Project/Cluster_project/Cluster_nde_20261107",
+      "remote_ops_ROOT": "/data/songcl/Project/Cluster_project/Cluster_nde_20261107",
+      "actual_binding_runtime_root": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+      "native_manifest_root": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+      "expected_root_under_latest_root_steering": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+      "effect": "Adapter._activation_details requires binding.runtime_root == REMOTE_ROOT and guard requires server remote_code_root == REMOTE_ROOT; the frozen operational code cannot validate its own actual runtime binding and would refuse before the intended NDE diagnostics. Do not execute/promote this frozen graph unchanged.",
+      "minimal_repair_scope": "Preserve this disabled frozen package and failed review. In a separately versioned corrected/active copy restore exactly the adapter REMOTE_ROOT and remote_ops ROOT literals to the already deployed NSD parent runtime; bind actual changed producer hashes in current_binding/release/preparation and independently review the resulting graph. Do not change SERVERS, candidate source, gates, old NULLs or lease."
+    }
+  ],
+  "known_documentation_correction_already_acknowledged_by_root": "worker has no DRAFT flag and must remain byte-exact; only native_runtime has that flag. ROOT_ACTIVATION.md frozen text remains historical.",
+  "operational_FROZEN_sha256": "1077bc129c48e142e3daec4569f93bcf67ea988fdfa61499fd94df7fb50d2091",
+  "input_files": {
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_operational_prepare\\FROZEN.json": {
+      "sha256": "1077bc129c48e142e3daec4569f93bcf67ea988fdfa61499fd94df7fb50d2091",
+      "bytes": 1538
+    },
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_operational_prepare\\adapter.py": {
+      "sha256": "1bf7c876a56357a8bf94db9810adea7d45c2bdb9ebd9d7890f2f5667cd5cac9b",
+      "bytes": 43726
+    },
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_operational_prepare\\remote_ops.py": {
+      "sha256": "9655daa3809b53ab61433749265270c7fe851835db69b3de6ab1fec33418afb3",
+      "bytes": 17431
+    },
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_operational_prepare\\current_binding.json": {
+      "sha256": "2f50ebaad05474ccf3b2ba2c99ff2fdaf7fcbe015038738449a6144f99b3ba9c",
+      "bytes": 3703
+    },
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_operational_prepare\\release_template.json": {
+      "sha256": "6fdb77ee4b9828d3cfc796cc66a1999364bc1adfb3c0cb4bb95974df14876a2d",
+      "bytes": 3384
+    },
+    "pipeline\\diagnostic_bundles\\tick_71e15360\\nde_native_prepare\\manifest_template.json": {
+      "sha256": "a06955aa4f88a23ab703cdb332f088bdf0adfb70b2f5fbb5ab86ff09b749f9bd",
+      "bytes": 6435
+    }
+  },
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "GPU_SSH_or_adapter_execution_by_reviewer": false,
+  "native_review_unchanged": {
+    "path": "pipeline/diagnostic_bundles/tick_71e15360/nde_native_independent_review.json",
+    "sha256": "583d945c3567d8515993e6941ef4e77e1625076cfc33372b71c19cfc7bbb0c7b"
+  }
+}

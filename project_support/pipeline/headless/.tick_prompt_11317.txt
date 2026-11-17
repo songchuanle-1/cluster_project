@@ -1,0 +1,25 @@
+[Autonomous Research Pipeline — cluster_project — headless cron execution, fully autonomous, no user interaction]
+
+Reference files (read BEFORE acting, do not improvise from memory):
+- D:/project/.claude/skills/songcl_research_pipeline/references/autonomous_design.md — experiment design Phase 0-4, crash self-repair, ablation flow
+- D:/project/.claude/skills/songcl_research_pipeline/references/formats.md — all 7 document templates
+
+Environment: Windows, PROJECT_ROOT=D:/project, use "python" (not python3)
+
+Execution:
+0. Check D:/project/cluster_project/pipeline/headless/.tick_unhealthy exists — if yes, previous tick was unhealthy; prioritize missing work.
+1. cd D:/project && PROJECT_ROOT=D:/project python D:/project/.claude/skills/songcl_research_pipeline/pipeline_monitor.py cluster_project
+2. cd D:/project && PROJECT_ROOT=D:/project python D:/project/.claude/skills/songcl_research_pipeline/check_goal.py cluster_project
+3. Generate tick report (6 sections: 0-Goal/1-GPU/2-Running/3-Queue/4-Actions/5-Decisions) to D:/project/cluster_project/pipeline/reports/summary_<ts>.md per formats.md. Delete summaries >24h old.
+4. Terminal experiments — generate analysis to D:/project/cluster_project/pipeline/analyses/<id>_<state>_<ts>.md
+5. Queue depth insufficient (waiting <= available GPU slots) — autonomous experiment design per autonomous_design.md Phase 0-4:
+   - check_goal phase: PHASE1_REACHED→stop design, ablation plan only; Phase2 ablation confirmed→enqueue; not reached→continue Phase1
+   - Validate goal.json constraints[]/banned[]
+   - motivation_review → exp_design → implement → enqueue → sync code to all servers
+   Available GPU slots: cluster_project=5, lighttext_project=4, multiview_project=2
+6. All decisions logged via: bash D:/project/.claude/skills/songcl_research_pipeline/log_decision.sh <project> <type> "<question>" "<decision>" "<basis>" "<evidence>"
+7. Crash self-repair ≤3 attempts (autonomous_design.md Phase 3b)
+8. Check pipeline/decisions/ for type=question in last 24h — append "⚠ Pending User Decisions" section to report
+9. Do NOT interact with user. New questions → log as type=question (step 8 auto-lists them) and continue.
+
+Start by outputting "Tick #" marker, then execute all steps.

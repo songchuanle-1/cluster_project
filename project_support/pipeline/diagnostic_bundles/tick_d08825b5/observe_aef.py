@@ -1,0 +1,60 @@
+"""Exact original AEF process/log/source readback; no signal or GPU computation."""
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,shlex,subprocess
+from anchor import guard,ROOT,EXPECTED,sha
+HERE=Path(__file__).resolve().parent
+REMOTE_ROOT='/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'
+PID=759301;COMMIT='56b2a96dc48cc8a88f0f7105527ef448113b1060'
+def main():
+ guard();exp=json.loads((ROOT/'pipeline/experiments/M216-AEF.json').read_text('utf8'));assert exp['pid']==PID and exp['code_commit']==COMMIT and exp['status']=='running'
+ original=json.loads((ROOT/'pipeline/diagnostic_bundles/tick_458bf62f/aef_root_ff_result.json').read_text('utf8'))
+ payload={'pid':PID,'root':REMOTE_ROOT,'commit':COMMIT,'log':exp['log'],'config':exp['config'],'name':Path(exp['config']).stem,'hashes':original['source_paths']}
+ script='''import socket,os,json,subprocess,hashlib,time,re
+from pathlib import Path
+from datetime import datetime,timezone
+assert socket.gethostname()=='dl04-MS-7E06'
+p=json.loads(PAYLOAD);pid=p['pid'];proc=Path('/proc')/str(pid)
+assert proc.exists() and proc.stat().st_uid==os.getuid()
+def identity():
+ cmd=(proc/'cmdline').read_bytes().replace(b'\\0',b' ').decode();env=dict(v.split(b'=',1) for v in (proc/'environ').read_bytes().split(b'\\0') if b'=' in v)
+ assert 'tools/train.py' in cmd and p['config'] in cmd and str((proc/'cwd').resolve())==p['root'] and env[b'CUDA_VISIBLE_DEVICES']==b'0'
+ return {'pid':pid,'argv':cmd,'cwd':str((proc/'cwd').resolve()),'start_ticks':(proc/'stat').read_text().rsplit(') ',1)[1].split()[19],'physical_gpu_environment':env[b'CUDA_VISIBLE_DEVICES'].decode()}
+before=identity();head=subprocess.check_output(['git','--no-optional-locks','-C',p['root'],'rev-parse','HEAD'],text=True).strip();assert head==p['commit']
+hashes={}
+for rel,want in p['hashes'].items():
+ actual=hashlib.sha256((Path(p['root'])/rel).read_bytes()).hexdigest();hashes[rel]=actual
+ assert actual==(want if rel.endswith('.py') else '77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea')
+def sample():
+ path=Path(p['log']);size=path.stat().st_size
+ with path.open('rb') as f:f.seek(max(0,size-24000));data=f.read()
+ txt=data.decode('utf8',errors='replace');steps=[(int(a),int(b)) for a,b in re.findall(r'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+',txt)]
+ assert steps and not any(e in txt for e in ['Traceback','CUDA out of memory','RuntimeError'])
+ return {'observed_at':datetime.now(timezone.utc).isoformat(),'log_size':size,'tail_sha256':hashlib.sha256(data).hexdigest(),'last_native_step':steps[-1],'max_native_step':max(steps),'tail_exception_seen':False}
+a=sample();time.sleep(3);b=sample();after=identity();assert before==after and b['max_native_step']>a['max_native_step']
+fd=[]
+for f in (proc/'fd').iterdir():
+ try:
+  target=str(f.resolve())
+  if target.endswith('.log') and target.startswith('/data/songcl/Project/Cluster_project/Cluster_checkpoints/'+p['name']+'/'):fd.append(target)
+ except (FileNotFoundError,PermissionError):pass
+fd=sorted(set(fd));metric_lines=[]
+if len(fd)==1:
+ with open(fd[0],errors='replace') as f:
+  for line in f:
+   if 'mIoU :' in line or 'resume start_epoch:' in line:metric_lines.append(line.strip())
+print(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'identity_before':before,'identity_after':after,'runtime_commit':head,'source_hashes':hashes,'samples':[a,b],'native_logger_paths':fd,'metric_lines':metric_lines,'checkpoint_body_read':False,'GPU_queries':0,'signals_sent':False}))
+'''.replace('PAYLOAD',repr(json.dumps(payload)))
+ args=['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=8','songcl@192.168.1.115','export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c '+shlex.quote(script)]
+ guard();run=subprocess.run(args,capture_output=True,timeout=45)
+ record={'owner':EXPECTED,'observed_at':datetime.now(timezone.utc).isoformat(),'command':args,'returncode':run.returncode,'stdout_sha256':hashlib.sha256(run.stdout).hexdigest(),'stderr':run.stderr.decode('utf8',errors='replace')}
+ if run.returncode==0:
+  record['observation']=json.loads(run.stdout);lines='\n'.join(record['observation']['metric_lines'])
+  import sys;sys.path.insert(0,'C:/Users/chuanle song/.codex/skills/songcl_research_pipeline');import pipeline_monitor as mon
+  values,best,missed=mon.parse_native_lineage(lines,resumed=False)
+  record['precise_native_validation']={'values':values,'best':best,'no_improve':missed,'scope':'Exact live original logger mIoU lines only; no checkpoint read, current training incomplete.'}
+ guard()
+ with (HERE/'aef_training_progress_observation.json').open('x',encoding='utf8') as f:json.dump(record,f,ensure_ascii=False,indent=2);f.write('\n')
+ assert run.returncode==0,record['stderr']
+ print(json.dumps({'samples':record['observation']['samples'],'precise_native_validation':record['precise_native_validation'],'source_runtime_original_preserved':True,'sha256':sha(HERE/'aef_training_progress_observation.json')},ensure_ascii=False))
+if __name__=='__main__':main()

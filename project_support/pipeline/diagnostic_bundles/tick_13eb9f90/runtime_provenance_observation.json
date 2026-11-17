@@ -1,0 +1,142 @@
+{
+  "observed_at": "2026-11-07T21:26:05.322710+00:00",
+  "python_realpath": "/home/songcl/.conda/envs/project_cluster/bin/python3.10",
+  "python_sha256": "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5",
+  "python_version": "3.10.20 | packaged by conda-forge | (main, Jun 11 2026, 03:31:56) [GCC 14.3.0]",
+  "torch_version": "2.8.0+cu128",
+  "torch_import_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/__init__.py",
+  "versions": {
+    "torch": {
+      "version": "2.8.0+cu128",
+      "metadata_path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch-2.8.0+cu128.dist-info"
+    },
+    "torch-scatter": {
+      "version": "2.1.2",
+      "metadata_path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter-2.1.2.dist-info"
+    },
+    "torch-sparse": null,
+    "torch-cluster": null,
+    "spconv": null,
+    "spconv-cu120": null,
+    "numpy": {
+      "version": "1.26.4",
+      "metadata_path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/numpy-1.26.4.dist-info"
+    },
+    "gorilla-core": {
+      "version": "0.2.7.8",
+      "metadata_path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla_core-0.2.7.8.dist-info"
+    }
+  },
+  "target_source_files": [
+    {
+      "relative": "torch/__init__.py",
+      "bytes": 102960,
+      "sha256": "2f0deb66d5dff6b9c02a62832c3bf3824c2ee031c462a3afeb9ca170466da5bf",
+      "RECORD_sha256": "2f0deb66d5dff6b9c02a62832c3bf3824c2ee031c462a3afeb9ca170466da5bf",
+      "matches_installed_RECORD": true,
+      "target_definition": []
+    },
+    {
+      "relative": "torch/nn/modules/module.py",
+      "bytes": 126775,
+      "sha256": "0cb24956454199a46e8fc37a7cce4fc1cff52130f25fb6eb052745e9eca89067",
+      "RECORD_sha256": "0cb24956454199a46e8fc37a7cce4fc1cff52130f25fb6eb052745e9eca89067",
+      "matches_installed_RECORD": true,
+      "target_definition": []
+    },
+    {
+      "relative": "torch/utils/_python_dispatch.py",
+      "bytes": 28557,
+      "sha256": "4498a17d8d1b8ca9baaa3d06301c15b62cf603f9a1181510fca3ebafae11a115",
+      "RECORD_sha256": "4498a17d8d1b8ca9baaa3d06301c15b62cf603f9a1181510fca3ebafae11a115",
+      "matches_installed_RECORD": true,
+      "target_definition": [
+        {
+          "function": "is_traceable_wrapper_subclass",
+          "start_line": 371,
+          "source_excerpt": "def is_traceable_wrapper_subclass(t: object) -> TypeIs[TensorWithFlatten]:\n    \"\"\"\n    Returns whether or not a tensor subclass that implements __torch_dispatch__\n    is 'traceable' with torch.compile.\n    In order for a tensor subclass to support TorchDispatchMode-style tracing in PT2,\n    It must implement two magic methods: __tensor_flatten__ and __tensor_unflatten__.\n    It is also expected to obey some restrictions around traceability and aliasing:\n        * The subclass's __torch_dispatch__() implementation should desugar into pytorch\n            dispatcher operations that can be traced into a graph.\n        * The subclass should use return_and_correct_aliasing(). This is needed today to make\n            sure that torch.compile does the right thing in a few cases around input mutation\n            and output aliasing.\n\n    Expected magic method signatures:\n        attrs, ctx = t.__tensor_flatten__()\n            attrs: list of attribute name strings for inner tensors\n            ctx: dict containing any other subclass-specific metadata needed for unflattening\n\n        t = MySubClass.__tensor_unflatten__(inner_tensors, ctx, outer_size, outer_stride)\n            inner_tensors: dict mapping attribute name -> tensor for each inner tensor\n            ctx: dict with subclass metadata in the form that __tensor_flatten__() produces\n            outer_size: expected (possibly symbolic) size that the returned subclass\n                instance should have. Note that this arg is useful for certain subclasses\n                that require the shape info to be constructed. In most cases, this arg can be\n                safely ignored.\n            outer_stride: expected (possibly symbolic) stride that the returned subclass\n                instance should have. Note that this arg is useful for certain subclasses\n                that require the stride info to be constructed. In most cases, this arg can be\n                safely ignored.\n    \"\"\"\n    is_subclass = isinstance(t, torch.Tensor) and type(t) != torch.Tensor\n    return (\n        is_subclass\n        and hasattr(t, \"__tensor_flatten__\")\n        and hasattr(t, \"__tensor_unflatten__\")\n    )"
+        }
+      ]
+    },
+    {
+      "relative": "torch/functional.py",
+      "bytes": 88875,
+      "sha256": "aabc3c345c7670842c2537284139ac398fb7d80cb9f515c1ed04ac692399e962",
+      "RECORD_sha256": "aabc3c345c7670842c2537284139ac398fb7d80cb9f515c1ed04ac692399e962",
+      "matches_installed_RECORD": true,
+      "target_definition": []
+    },
+    {
+      "relative": "torch/_jit_internal.py",
+      "bytes": 53877,
+      "sha256": "fb87a208a0d4f38c9ff759b9ae06aadf6508f7b685ccea6ec9b100f1574e6ef2",
+      "RECORD_sha256": "fb87a208a0d4f38c9ff759b9ae06aadf6508f7b685ccea6ec9b100f1574e6ef2",
+      "matches_installed_RECORD": true,
+      "target_definition": []
+    },
+    {
+      "relative": "torch/_tensor.py",
+      "bytes": 72764,
+      "sha256": "991589d60a0c177977a17ecd5a6f4b800fa942900cd11e2021fde44985c69637",
+      "RECORD_sha256": "991589d60a0c177977a17ecd5a6f4b800fa942900cd11e2021fde44985c69637",
+      "matches_installed_RECORD": true,
+      "target_definition": []
+    }
+  ],
+  "binary_identity_observations": [
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_C.cpython-310-x86_64-linux-gnu.so",
+      "bytes": 25481,
+      "sha256": "7ebf704b024577720e8ace3c37bfff24fc333c8796d8655911c2af74984a0169"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/lib/libtorch_python.so",
+      "bytes": 27795209,
+      "sha256": "d6a6132e0bd2256f0f07b4bfd5589de3032a0daa1abf198113b6fc2ebb225676"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_segment_coo_cuda.so",
+      "bytes": 5109896,
+      "sha256": "254937a851ecc0d2179b5c292ed2e91818710372fa5b260540feb8459b83a78b"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_segment_csr_cuda.so",
+      "bytes": 3852344,
+      "sha256": "074fbbfc64d0e8e73b4897a8a125777552ab9c1509678e77d4af2e54850a542e"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_version_cuda.so",
+      "bytes": 134800,
+      "sha256": "f1262b1f1ef75dc5b781eaa5539e4e8f56918b21db56a395bad6559ca2da08d9"
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/_scatter_cuda.so",
+      "bytes": 1730592,
+      "sha256": "b5d0553b7e8df26391c40df0b28cdd2f71750063daa8c0314469e30b1ff94e87"
+    }
+  ],
+  "fresh_import_bindings": {
+    "python_dispatch_torch_type": "module",
+    "python_dispatch_same_torch_module": true,
+    "module_torch_type": "module",
+    "module_same_torch_module": true,
+    "functional_torch_type": "module",
+    "functional_same_torch_module": true,
+    "named_modules_type": "function",
+    "is_traceable_wrapper_subclass_type": "function"
+  },
+  "GPU_hidden": true,
+  "GPU_model_forward_backward_or_training_invoked": false,
+  "observed_old_process_object_state": false,
+  "root_cause": "UNKNOWN",
+  "scope": "CPU_FRESH_IMPORT_AND_TARGET_DISK_RECORD_PROVENANCE_ONLY_NOT_REPRODUCTION_OR_REPAIR",
+  "signals_sent": false,
+  "owner": {
+    "token": "13eb9f90892a472b8102218b83e99ea8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T21:06:15.452582+00:00",
+    "deadline_at": "2026-11-07T22:06:15.452582+00:00",
+    "context_sha256": "1f30bbf6b19d15e61582a00e3f349e4de62ad805ea709d14bf75609fcf40a5f1",
+    "pending_sha256": "2472b72d89ed09556611b3b4a703fa6de1fc11a9247e427e6d8c113b4d1c3a1e"
+  }
+}

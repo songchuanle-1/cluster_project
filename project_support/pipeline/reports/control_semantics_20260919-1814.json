@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T18:17:27.852017+08:00",
+  "scope": "CPU-only shared diagnostic correction, not mechanism admission",
+  "finding": "Native ious measure query masks against designated target; not objectness.",
+  "gpu_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "process_count": 2,
+    "total_mib": 81559,
+    "used_mib": 62483,
+    "free_mib": 18597,
+    "utilization_percent": 100,
+    "processes": [
+      {
+        "pid": 1134192,
+        "memory_mib": 19956,
+        "role": "M197"
+      },
+      {
+        "pid": 3827570,
+        "memory_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "training_progress": {
+    "source": "bounded live tail from exact /proc/1134192/fd/1 log",
+    "log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs_20260916_122540.log",
+    "epoch": 23,
+    "first_visible_step": 3717,
+    "last_visible_step": 3754,
+    "steps_per_epoch": 4686,
+    "best_miou_preflight": 0.4918,
+    "limitation": "Recent sequential steps in one bounded tail, not two timed samples."
+  },
+  "validation": {
+    "pre_fix_tests": 22,
+    "pre_fix_failures_including_subtests": 9,
+    "focused_tests_passed": 69,
+    "synthetic_chain_checks": 6,
+    "support_permutations": 720,
+    "fps_permutations": 6,
+    "query_permutations": 6
+  },
+  "limitations": [
+    "Synthetic objectness values validate code only, not native availability.",
+    "Semantics declaration is not proof of score independence.",
+    "Prior synthetic permutation calibration is not native control specificity.",
+    "Separate seed-inside-ANY-instance intervention is unaffected by this adapter bug."
+  ],
+  "source_evidence_refresh": [
+    {
+      "candidate_id": "referent-causality-audit",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "referent-causality-audit",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "referent-causality-audit",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "modality-identity-preservation",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "modality-identity-preservation",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "modality-identity-preservation",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "referent-discrimination",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "referent-discrimination",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "referent-discrimination",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "instance-identity-representation",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "instance-identity-representation",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "instance-identity-representation",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "referent-query-selection",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "referent-query-selection",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "referent-query-selection",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "input-modality-distinguishability",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "input-modality-distinguishability",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "input-modality-distinguishability",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "candidate_id": "same-target-description-grounding",
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "previous_sha256": "f82e330387c5c88ee51eed3c4e2be6caecc041222ddfeef01bc62c7ca48f4c5c",
+      "current_sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "candidate_id": "same-target-description-grounding",
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "previous_sha256": "5918369aef696e7e9f03d39aa5b55467d01c55beb503861c6400072a08e9aa18",
+      "current_sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "candidate_id": "same-target-description-grounding",
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "previous_sha256": "780e463a0bc2065d0edf961c3ca2a312315b732977bde5ff444baf4172587aaf",
+      "current_sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "sha256": "1e3d476422df86fa24338645043f3e58a5bbffb141503321cc0b4973d07c3485"
+    },
+    {
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "sha256": "61ad335f06e93521ead95f6b509b0e2dc602cf935821e8fad4a600a8db0f7e67"
+    },
+    {
+      "path": "scripts/referent_native_chain_selftest_20260919.py",
+      "sha256": "98552bbd04503a5be07cdeeab4b8b45c5321d855fffe469c63195e98390b4351"
+    },
+    {
+      "path": "scripts/native_support_capture_v2_20260916.py",
+      "sha256": "458cc198d6d4a5d240f99d3c852ac41d5935edff2de3241463547a90a89b7915"
+    },
+    {
+      "path": "pipeline/reports/referent_native_chain_selftest_20260919-1812.json",
+      "sha256": "b73f34e105810b8ff8e52897f676d1d63f3c43c4f2ff0af561a02e656f7b6dd3"
+    },
+    {
+      "path": "pipeline/bugfixes/bugfix_20260919-1812.md",
+      "sha256": "0ad2b1466731433e9ce828e1d6d2e00dcbd0715dd6f569fdc8460ef08626a81c"
+    },
+    {
+      "path": "pipeline/decisions/20260919-181314_route_change.md",
+      "sha256": "88d031167c2b5d435c2ce23b2b5f262a23b5830f2ea6cf6280623cb555b8214f"
+    },
+    {
+      "path": "scripts/persist_control_semantics_20260919.py",
+      "sha256": "5f9c8745353669ce5496047e18be676db89e522cf76523bbf0399d9d1dc2f942"
+    }
+  ],
+  "next_action": "First complete CPU control-source derivation: specify a target-independent negative-control score and its source, matched-target invariance test, degeneracy and rejection rules; version the capture producer only after that review. Existing frozen capture has target IoU only and cannot satisfy paired rank/control semantics. Do not substitute a quality head or relabel oracle IoU. Recheck GPU7 after 2026-09-19T19:07:00+08:00; native execution requires fewer than two processes and enough measured memory, plus the corrected producer contract. Then validate FPS composition, identity, coverage gate and score provenance without imputation; no admission yet.",
+  "blocker": "Live server-6 GPU7 query on 2026-09-19 18:08 Asia/Shanghai found M197 pid1134192 (19956 MiB) and foreign pid3827570 (42488 MiB), at the two-process cap; 18597 MiB free. Do not launch native capture.",
+  "retry_after": "2026-09-19T19:07:00+08:00",
+  "native_execution_completed": false,
+  "queue_changed": false
+}

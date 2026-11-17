@@ -1,0 +1,141 @@
+{
+  "probe": "t1_lmec_repair",
+  "original_formula": "e_q = g(v_q+, l) - g(v_q-, l)",
+  "repaired_formula": "e_q = sqrt(|S_q|*|S_q^c|/N) * (g(v_q+, l) - g(v_q-, l))",
+  "derivation": "difference of independent sample means has variance sigma^2*(1/|S| + 1/|S^c|) = sigma^2*N/(|S||S^c|); dividing by the standard error yields the scale-free factor sqrt(|S||S^c|/N)",
+  "gradient": {
+    "max_abs_error": 1.8648901867202028e-10,
+    "passed": true,
+    "numeric_head": [
+      0.29098109,
+      -0.02134517,
+      0.10414035,
+      -0.02654389
+    ],
+    "analytic_head": [
+      0.29098109,
+      -0.02134517,
+      0.10414035,
+      -0.02654389
+    ]
+  },
+  "trivial_partition": {
+    "original_whole_scene_evidence": 0.5030307771996061,
+    "repaired_whole_scene_evidence": 0.0,
+    "original_empty_evidence": -0.5030307771996061,
+    "repaired_empty_evidence": 0.0,
+    "repaired_trivial_partition_vanishes": true
+  },
+  "permutation": {
+    "original": -0.5489747548973889,
+    "permuted": -0.5489747548973886,
+    "permutation_equivariant": true
+  },
+  "null_area_bias": {
+    "n_trials": 400,
+    "areas": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      24,
+      32,
+      48
+    ],
+    "uniform_win_rate": 0.125,
+    "original_win_rate": [
+      0.285,
+      0.2375,
+      0.135,
+      0.07,
+      0.07,
+      0.0575,
+      0.055,
+      0.09
+    ],
+    "repaired_win_rate": [
+      0.125,
+      0.125,
+      0.115,
+      0.085,
+      0.14,
+      0.13,
+      0.13,
+      0.15
+    ],
+    "original_smallest_mask_win_rate": 0.285,
+    "repaired_smallest_mask_win_rate": 0.125,
+    "abs_deviation_original": 0.0706,
+    "abs_deviation_repaired": 0.0125
+  },
+  "target_recovery": {
+    "n_trials": 200,
+    "signal": 1.5,
+    "rows": [
+      {
+        "target_area": 1,
+        "original_accuracy": 0.715,
+        "repaired_accuracy": 0.575
+      },
+      {
+        "target_area": 2,
+        "original_accuracy": 0.805,
+        "repaired_accuracy": 0.78
+      },
+      {
+        "target_area": 4,
+        "original_accuracy": 0.875,
+        "repaired_accuracy": 0.94
+      },
+      {
+        "target_area": 8,
+        "original_accuracy": 0.9,
+        "repaired_accuracy": 0.98
+      },
+      {
+        "target_area": 16,
+        "original_accuracy": 0.96,
+        "repaired_accuracy": 1.0
+      },
+      {
+        "target_area": 32,
+        "original_accuracy": 0.98,
+        "repaired_accuracy": 1.0
+      }
+    ],
+    "original_mean_accuracy": 0.8725,
+    "repaired_mean_accuracy": 0.8792,
+    "repaired_minus_original": 0.0067
+  },
+  "gates": {
+    "G1_gradient_matches_finite_difference": true,
+    "G2_trivial_partition_vanishes": true,
+    "G3_permutation_equivariant": true,
+    "G4_null_area_bias_reduced": true,
+    "G5_smallest_mask_false_positive_reduced": true,
+    "G6_target_recovery_not_worse": true
+  },
+  "correction_to_t0": {
+    "note": "The previous tick reported the whole-scene case as a pass under 'G2_whole_scene_support_collapses'. That label was wrong: the support mean equals the scene mean and the complement mean is zero, but the original evidence then equals <l, scene_mean>, a non-zero scene-level term. That is the degeneracy the probe was meant to catch, not a pass.",
+    "original_whole_scene_evidence": 0.5030307771996061
+  },
+  "observations": {
+    "O3_tiny_mask_sensitivity_regression": {
+      "target_area": 1,
+      "original_accuracy": 0.715,
+      "repaired_accuracy": 0.575,
+      "delta": -0.14,
+      "interpretation": "standardizing the contrast removes the spurious tiny-mask advantage, and it also removes genuine tiny-mask sensitivity; a 1-point support carries little evidence, so this is the honest cost of an unbiased null rather than a regression in the mechanism's useful range"
+    },
+    "O4_single_language_direction": {
+      "note": "with an affine or bilinear g the evidence is a scalar projection of the support-minus-complement margin onto one language direction; it is language-dependent but cannot express interactions that need more than one direction"
+    }
+  },
+  "verdict": {
+    "repair_passes_t1_offline": true,
+    "target_recovery_not_worse": true,
+    "admits_training": false,
+    "reason": "The standardized two-sample contrast repairs the trivial-partition degeneracy and reduces the null area bias without a free parameter. It still does not admit training: a fresh N1 re-check is required, the single language direction limitation remains, and no matched trained control exists yet."
+  }
+}

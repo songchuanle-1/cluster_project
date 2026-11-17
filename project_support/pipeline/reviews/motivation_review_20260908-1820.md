@@ -1,0 +1,108 @@
+================================================================================
+  Motivation Review - cluster_project
+  2026-09-08 18:20 Asia/Shanghai
+================================================================================
+
+## 1. Goal
+Complete binding goal.json snapshot:
+```json
+{
+  "metric": {"name": "mIoU", "target": 0.51, "dataset": "ScanRefer"},
+  "baseline_experiment_id": "model_base1",
+  "description": "cluster: 多尺度 cluster context 机制 — cluster bank 聚合点云特征→cluster_attn 把多尺度 context 回写更新 inst_feats→提升定位精度。注: 原'聚类路由'假设已被证伪(routing 生效反降点), 收益来自 context 而非 routing。目标 mIoU ≥ 0.51",
+  "findings": {
+    "A0_baseline": "model_base1 = 0.4894 (无 cluster)",
+    "A1_context_only": "champion Lite = 0.5012 (多尺度 context 按 ID 回写, 路由算了但 _cluster_to_points 丢弃不用 → 实质 context-only)",
+    "A3_routing_active": "TrueRoute = 0.4468 (路由索引真影响 message) → 比 A1 低 0.0544, routing 生效反害",
+    "context_claim": "A1−A0 = 0.0118 ≥ 0.005 ✓ 确认 (多尺度 context 有效)",
+    "routing_claim": "A3−A1 = -0.0544 < 0.002 ✗ 证伪 (routing 无独立收益, 反有害)",
+    "A4_shuffle_control": "running(07-20 13:03 启动, 0.3900@ep4 early) — 验证 A3 的崩是内容路由有害还是结构注入有害",
+    "D1_detail_relause": "D1-detail(relaunch)=0.5003@ep28 stopped_unknown — 距 champion 0.5012 仅 0.0009, detail 单独有效(γ=+0.0109); detail > detail+residual(E4=0.4944)",
+    "E4_res_detail_terminal": "E4-residual+detail=0.4944@ep23 stopped_unknown — residual与detail无协同, residual上限~0.4944(=B5单独), 组合无增益",
+    "pending_mechanisms": "M1-QGC(query-gated context, running 07-20 16:03); M6-QSF(waiting); M16-CSR(waiting); M17-ORT(orth reg, waiting)"
+  },
+  "constraints": [
+    "FLOPs ≤ 10.0G; 峰值显存 +15% 需 ≥+0.003 mIoU 才保留",
+    "整体统一修正前禁止单变体改 schedule (epochs=50/max_iters=70 不一致暂保持)",
+    "【Phase1 硬性·用户 07-28】Phase 1 禁止调参。只允许结构性机制变更 (新 forward/新 loss/新模块/结构消融)。所有候选变体入队前必须通过 autonomous_design.md Phase 1.6 调参气味检测。禁止: 超参扫参、纯 config 变体改数值不改结构、'在X处加一个LayerNorm/Linear/Scaling'式微调(参数<5K且无新计算图)。解除需用户明示。",
+    "分支停止: 提升 <0.002 且收敛平台不升 → 停该分支",
+    "机制声称(更新): context 需 A1−A0≥0.005 [✓已确认 0.0118]; routing 需 A3−A1≥0.002 [✗已证伪 -0.0544]; A4-shuffle 对照待定 (running)",
+    "收敛定义: 近5次验证均值Δ<0.001 且5连不刷Best; 结构首筛统一 seed 1999",
+    "【已解除·用户 08-10】原'cluster只更新inst_feats/仅最后1层'约束解除 — 突破方向: ①cluster context 调制 decoder query ②多层注入. 保留: 禁 N² attention",
+    "效率测量: bs=1 warmup20 repeat100 median/P90; 实测延迟/显存为主, FLOPs 为辅"
+  ],
+  "banned": [
+    "gate系 (cag/cfe/layerscale 三连败)",
+    "语言路由系 (langroute/langc2f/scale <+0.002)",
+    "attnpool/qcond/agg/multi (复杂度无优势)",
+    "prune (先单独修 benchmark)",
+    "nomask 扩展 (19.9G 仅作上限对照)",
+    "3/4/6 层重复注入 (已证退化)",
+    "大型 Q/K/V/O 投影 (与轻量目标冲突)",
+    "Phase1 调参系 (orth_weight 扫参/topk 扫参/nhead 扫参/scale 增减/init 扫参/layer_num 扫参/dropout 改值/activation_fn 改值/改数值不改结构 → 进 Phase 2 再说)",
+    "【Phase1 调参原则·用户 07-30】以下均视为调参, 不受 banned 列表穷举限制: (a) 参数增量 <5K 且无新计算图结构 (Linear(d,1)/LayerNorm/learnable scalar); (b) 唯一变化是改变数值分布(归一化/缩放/温度系数)不改信息流; (c) 超参无推导依据('先试0.1'); (d) 变体可概括为'在X处加了一个{单层/单算子}'。判定标准见 autonomous_design.md Phase 1.6",
+    "true_route / 显式 routing 注入 (A3=0.4468 已证 -0.054 有害, 除非 A4-shuffle 证明内容路由有效)",
+    "residual 系 (B5=0.4944, E4=0.4944 — 上限固定, 与 detail 组合无协同)"
+  ]
+}
+```
+Target0.5100; champion M95=0.5020; gap0.0080; baseline0.4894.
+The old findings fields contain stale statuses; current CSV/queue override them.
+
+## 2. Story Status
+| Hypothesis | Status | Evidence | Gap |
+|------------|--------|----------|-----|
+| Multi-scale context helps | supported | A1 0.5012 vs0.4894 | Target and multi-seed robustness |
+| Explicit routing helps | rejected | A3 0.4468; shuffle0.4941 | Do not reopen |
+| Coherent hierarchy retrieval helps | provisional | M169 0.5000 | Partial patience and seed fragility |
+| Full-path bottleneck improves it | unsupported | M177 0.49627879 after genuine patience10 | Stop expanding bottleneck scores |
+| Prediction feedback is affordable | contradicted | M177/M178 profiles10.18G | Old <=10G declarations were unmeasured |
+| Context should inform query initialization | untested | Existing query starts from a sampled local feature | New feed-forward context path before decoder |
+
+## 3. Experiment Assessment
+Source review: experiments.csv and the terminal-analysis collection, recent
+designs, full route_change/question records. Registry contains duplicate and
+legacy IDs; missing historical exact-name matches are not fresh model crashes.
+| Experiment/Family | mIoU | Relation To Motivation | Story Contribution |
+|-------------------|------|------------------------|--------------------|
+| Baseline/A1/A3/A4 | 0.4894/0.5012/0.4468/0.4941 | Context versus routing | Context supported, routing rejected |
+| Gate/language-routing/complex pooling | <=0.4967 | Reweighting rather than new source | Banned; not reopened |
+| Detail/residual/CCP/reaggregate combinations | <=0.5008 | Message and context delivery | No reliable additive benefit |
+| CTF-HCG/M95 | 0.5012/0.5020 | Strong platform | Preserve architecture and protocol |
+| CSORT/MLay/MFP seed controls | about0.487-0.496 | Reproducibility | Strong single seed is not causal proof |
+| DCA/DCM/DCMV/DUAL combinations | <=0.5010 | More decoder access paths | Do not repeat cross-attention combinations |
+| Cluster losses/orthogonal writeback | <=0.5000 | Additional supervision or transforms | No target-reaching mechanism |
+| M159/M160 | 0.4840/0.4910 | Geometry mask modifiers | Do not reopen geometry-score shaping |
+| M161/M162 | 0.4920/0.4980 | Aligned versus shuffled feedback | Simple alignment claim unsupported |
+| M163/M166/M167/M168 | 0.4899/0.4899/0.4910/0.4900 | Contrast/reciprocity/competition/time delta | Closed as weak |
+| M169/M170/M172 | 0.5000/0.4970/0.4966 | Coherent path/counterfactual/stable mask | Hierarchy path remains suggestive only |
+| M164/M165/M171/M173 | 0.4950/0.4911/0.4936/0.4921 | Uncertainty/generic hierarchy/competition/inconsistency | No expansion; incomplete terminal evidence |
+| M174 | exact0.49349165 | Soft consensus | Premature stop; preserve checkpoint |
+| M177 | exact0.49627879 | Bottleneck branch | Full-patience test below champion;10.18G |
+| M175/M176 | interim0.48683766/0.49115670 | Hierarchy flow/siblings | Still running; no conclusion |
+| M178-M182 | running/waiting | Alternative hierarchy topologies | No results; resource eligibility requires audit |
+
+## 4. Gap Analysis
+- Query initialization uses only selected local seed content; ancestors enter
+  later indirectly, or through repeated prediction feedback in recent variants.
+- Hard mask feedback may amplify an early incorrect object choice and costs
+  roughly0.42G over M95. M177 does not justify additional score modifications.
+- No completed/queued experiment joins the sampled seed and its fixed geometric
+  ancestor tokens before the first query-generation MLP.
+- Waiting4 at configured capacity4 triggers reserve refill to at least5.
+- No active reservation in goal constraints or latest ten decision originals.
+
+## 5. Design Rationale
+- M183-HQI uses fixed geometric ancestry, not predicted-mask routing. Concatenate
+  the sampled seed with its three ancestor cluster features, then use the existing
+  three-layer query generator with a matching input width.
+- This creates a new context-to-query initialization path without gates, extra
+  attention, numeric sweep, repeated injection, or changed sampling decisions.
+- Success supports an initialization bottleneck; failure rejects this placement
+  rather than suggesting a better scalar. Parameter increment follows source
+  dimensionality, not an arbitrary hidden-width search.
+- Require measured full-model <=10G and gradient/topology tests before enqueue.
+
+## 6. Next Batch
+See pipeline/designs/exp_design_20260908-1820.md.
+================================================================================

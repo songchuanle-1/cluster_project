@@ -1,0 +1,41 @@
+{
+  "preregistered_at": "2026-10-20T07:05:17.687250+00:00",
+  "token": "3259705f09e24e0b90718a29a9015c27",
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "implementation": "Exact existing independent PCE package; no model edits or new implementation revision.",
+  "resources": {
+    "targets": [
+      "champion",
+      "candidate"
+    ],
+    "processes": "fresh isolated process per target",
+    "input": "same first native VAL expression, original deterministic nonaugmented loader",
+    "batch_size": 1,
+    "warmup": 20,
+    "repeat": 100,
+    "statistics": [
+      "median_ms",
+      "p90_ms"
+    ],
+    "counter": "Original fvcore FlopCountAnalysis(model,(sample,'predict')); unchanged historical handlers",
+    "memory": "matched full predict allocated/reserved peak; full optimizer peak unknown",
+    "threshold": "Default total counted FLOPs<=10G; original memory/Pareto constraint unchanged",
+    "accuracy": "No validation accuracy evaluation or selection; resource sample only"
+  },
+  "controls": {
+    "input": "Same two fixed TRAIN scenes/eight expressions as prior native capture",
+    "source": "Actual native loss then original full hierarchy-bank/encoder recomputation, NOT frozen-bank replacement.",
+    "repeat": "Three exact encoder recomputations with unchanged inputs/memberships/dtype",
+    "permutation": "Reverse valid SP rows, inverse-map contact edges and first-level membership rows; recompute all banks/full encoder and restore rows.",
+    "negative": "Delete all contacts, compare original verified parent gather with fresh full bank recomputation.",
+    "tolerance": 1e-06,
+    "limits": "Not whole-model SP renumbering/FPS-equivariance. Preserve failed controls; no threshold/precision/operator waiver.",
+    "decision": "No admission from frozen-bank controls or efficacy from untrained readouts."
+  },
+  "seed": 1999,
+  "epochs": 50,
+  "max_iters": 70,
+  "new_training": 0,
+  "optimizer_steps": 0,
+  "production_changes": false
+}

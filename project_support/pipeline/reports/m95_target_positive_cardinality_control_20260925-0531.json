@@ -1,0 +1,104 @@
+{
+  "contract": "m95_target_positive_cardinality_control_v1",
+  "expressions": 256,
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable efficacy",
+    "population effect",
+    "novelty",
+    "whole-mechanism benefit"
+  ],
+  "paired_controls": {
+    "native_positive_minus_random_mean": {
+      "available": 256,
+      "pooled_mean": 0.3223643296244863,
+      "scene_bootstrap_95ci": {
+        "draws": 10000,
+        "hi": 0.3543030390479905,
+        "lo": 0.2872547491971551,
+        "point_estimate": 0.3208197861115743,
+        "scene_count": 220,
+        "seed": 1999,
+        "unit": "scene"
+      },
+      "scenes": 220
+    },
+    "native_positive_minus_topk": {
+      "available": 256,
+      "pooled_mean": 0.09666510719899751,
+      "scene_bootstrap_95ci": {
+        "draws": 10000,
+        "hi": 0.13806120463301377,
+        "lo": 0.06869772261073165,
+        "point_estimate": 0.10228510977421706,
+        "scene_count": 220,
+        "seed": 1999,
+        "unit": "scene"
+      },
+      "scenes": 220
+    },
+    "native_success_minus_random_mean": {
+      "available": 256,
+      "pooled_mean": 0.371044921875,
+      "scene_bootstrap_95ci": {
+        "draws": 10000,
+        "hi": 0.41324431818181817,
+        "lo": 0.32846363636363635,
+        "point_estimate": 0.37042386363636365,
+        "scene_count": 220,
+        "seed": 1999,
+        "unit": "scene"
+      },
+      "scenes": 220
+    }
+  },
+  "positive_cardinality": {
+    "maximum": 51,
+    "mean": 7.015625,
+    "minimum": 1
+  },
+  "positive_set_quantile": {
+    "mean": 0.7451289062500001,
+    "native_at_or_below_random_median_rate": 0.14453125,
+    "native_strictly_above_random_rate": 0.0
+  },
+  "random_control": {
+    "cardinality": "exactly the native-positive query count",
+    "draws_per_expression": 2000,
+    "sampling": "uniform without replacement from all query indices",
+    "seed": 1999,
+    "selection": "highest frozen score inside the sampled subset"
+  },
+  "scenes": 220,
+  "schema_version": 1,
+  "scope": "CPU-only cardinality-matched placebo control over frozen M95 identity-control rows. No model execution, native backward, training, resource, admission or deployable efficacy claim.",
+  "selectors": {
+    "native_positive_top_score": {
+      "available": 256,
+      "mean_iou": 0.7784340867637815,
+      "scene_balanced_success": 0.8863636363636364,
+      "scenes": 220,
+      "success_rate": 0.8828125
+    },
+    "random_mean_iou": {
+      "available": 256,
+      "mean_iou": 0.4560697571392952,
+      "mean_success": 0.511767578125,
+      "scenes": 220
+    },
+    "same_cardinality_top_score": {
+      "available": 256,
+      "mean_iou": 0.681768979564784,
+      "scene_balanced_success": 0.7772727272727272,
+      "scenes": 220,
+      "success_rate": 0.78125
+    }
+  },
+  "source_analysis": {
+    "path": "D:\\project\\cluster_project\\pipeline\\reports\\m95_identity_control_analysis_20260924-231333.json",
+    "sha256": "c7b6e78c64e29144d3abfea5007e5ec0843142b3e7aa6294c600e8eb114d4abb"
+  },
+  "topk_selector_changed_rows": 49
+}

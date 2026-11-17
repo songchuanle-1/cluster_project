@@ -1,0 +1,13 @@
+{
+  "actions": [
+    "继续M234 worker SIGSEGV诊断，不重启训练、不重新准入或创建机制变体。复用上轮真实部分结果：四个fresh有效CPU输入case共32次调用及不变量通过；fork carrier因项目Python3.10缺少os.memfd_create，在fork前退出，未产生fork子进程或完成上下文比较。",
+    "本轮准备fork-only CPU诊断v2：由独立3.12 supervisor创建匿名FD并传给项目Python carrier，复用原fresh32次结果，不重复已通过模型/数据/资源门槛。本草稿未取得fork-only actual或实际独审，执行状态PENDING，不声明通过。",
+    "实际GPU0身份记录2d8dea572aed1023290f64859db7e94a383fde179d60c69866df6b6b9978ee23确认授权UUID，当前free9926MiB低于20000MiB启动门槛；此身份查询未建立CUDA context，也不是GPU使用/资源门槛通过。",
+    "本稿与默认NOP记录脚本仅在新tick目录准备；草稿作者未执行SSH、Torch/native、数据/模型测试或GPU操作，未修改共享work、memory或正式report。"
+  ],
+  "decisions": [
+    "根因保持UNKNOWN；上轮carrier失败属于诊断harness失败，不能写成pointgroup原生失败、历史故障复现或训练修复。不得补写未执行fork cells的结论。",
+    "本轮结果须按真实actual与独审另存新标签：传输成功、各子进程终态、诊断不变量与因果判断分开；fresh/fork差异只缩小上下文问题，全部通过也不证明历史故障已修复或ABI/效力全面通过。",
+    "保留原失败、immutable revision_history与terminal_observation及M206/M227人工暂停。仅记录候选外层诊断证据和真实tick_attempt；不重标旧owner，不改变训练协议、源码或资源授权。"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "created_at": "2026-10-19T14:52:01.304281+00:00",
+  "token": "4e35c1cefe914c04b862004d0c677110",
+  "candidate_id": "hierarchy-native-batch-minimum-resolution",
+  "hypothesis": "The native minimum-scene-length clamp changes M95 fine hierarchy resolution with the batch peer on actual unchanged TRAIN supports, not merely a constructed short scene.",
+  "source_trigger": "PointCloudPartitioner.forward sets layer_nums[0] = min(layer_nums[0], min(lens)).",
+  "matched_controls": "Execute the exact AST RHS: large peers retain256; short peer100 changes256to100; row order leaves256; masked tensor padding without changing valid batch_offsets leaves256.",
+  "population": "Every unique scene_id in the hash-bound ScanRefer_train_new.json, sorted lexically; no VAL/test or outcome selection.",
+  "measurement": "Read original native scene tuple. For points<=2500000, source sample_rdn retains all points and np.unique remapping preserves exact support cardinality. Scenes above the cap are UNKNOWN, not counted as no clamp.",
+  "decision": "Reject only the actual-TRAIN batch-minimum-resolution premise if every expected scene is read successfully, every support is exact, and no support<256. If any support<256, retain diagnosis and next run fixed-scene native paired-peer intervention. Missing files/sampled supports are inconclusive.",
+  "limits": "No new model, source repair, optimizer, training, query selection, annotation changes or claim of efficacy/novelty. This is not the closed appended-padding/global-mean audit.",
+  "runner": {
+    "path": "pipeline/diagnostic_bundles/tick_4e35c1ce/native_resolution_census.py",
+    "sha256": "62246573c0a5cbacca9b7520e8d4b9d56f4ada4ad1a0c9cae2f3be2b9cd1dde3"
+  },
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+}

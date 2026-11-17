@@ -1,0 +1,13 @@
+# Current two-GPU resource proof, prepared only
+
+The body and wrapper have only been parsed as source. They have not been imported, run, or sent over SSH by the author. The default wrapper route returns NOP before launching a process. No live resource result is asserted here.
+
+A distinct peer must inspect the frozen body and wrapper and provide a current-owner review inside this tick. Required review fields are `owner`, nonempty `reviewer_thread_id` distinct from the owner, `/root`, and `/root/fresh_ops`, `passed: true`, `material_concerns: []`, and exact `frozen_sha256`, `wrapper_sha256`, `body_sha256`. The root then owns any execution decision. Root execution also requires `-B`, no optimization, `GIT_OPTIONAL_LOCKS=0`, the matching `CODEX_THREAD_ID`, unchanged owner/context/pending/goal/SERVERS bindings, and at least 60 seconds remaining at entry.
+
+The once-only wrapper creates exclusive `dual_resource.intent.json`, `dual_resource.actual.json`, and transport captures in this new directory. Existing intent or result blocks replay. It uses existing SSH keys with strict host-key checking and disabled password/keyboard authentication. The remote command checks the registered hostname and UID before the stdlib body checks them again. The canonical runtime root and d214 commit are pinned; the historical producer entry is opened read-only with no symlink following, hashed, and never executed.
+
+The body observes GPU0 and GPU1 identities, free/total memory, and compute UUID/PID/reported memory using two bounded nvidia-smi queries. UUIDs must match SERVERS. Only the original three pinned GPU0 lock files may be opened, read-only and without creation, writing, or replacement; nonblocking acquisition is released only by the owner. If any lock is unavailable, partial acquisitions are released before the read-only queries. No GPU1 lock is created.
+
+The 20000 MiB comparison is a snapshot comparison. Empty compute rows are recorded as a momentary observation, not proof that all contexts are absent. The saved allowed_gpus `[0]` and max_tasks_per_gpu `1` remain unchanged. GPU1 dispatch/admission, CUDA allocation, training, configuration/budget changes, and external task intervention are outside this packet.
+
+Remote helper stdout/stderr use memfds, and local transport uses exclusive files. A helper or SSH soft timeout records PID/start evidence and retains unknown output; no signal or automatic retry is allowed. Remote soft window: 12 seconds; each nvidia-smi query: 3 seconds; local SSH observation: 30 seconds. Constructor v5 is frozen separately and this resource observation does not modify it.

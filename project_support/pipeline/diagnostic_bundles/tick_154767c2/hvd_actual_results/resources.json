@@ -1,0 +1,403 @@
+{
+  "id": "M230-HVD",
+  "candidate_id": "hierarchy-native-variance-decomposition-composition",
+  "config": "configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml",
+  "code_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "recorded_at": "2026-11-06T09:51:54.400910+00:00",
+  "schema_version": 1,
+  "experiment_id": "M230-HVD",
+  "passed": true,
+  "decision": "ORIGINAL_RESOURCE_GATE_PASSED_ACTUAL_MATCHED_SAME_OWNER_FIXTURE",
+  "champion_actual": {
+    "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/resources_champion_execution.json",
+    "sha256": "727c6dbcb143c811084d5fa26143a5524715da3cb63ab2cf052eaa214635022c"
+  },
+  "candidate_actual": {
+    "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/resources_candidate_execution.json",
+    "sha256": "4a6656d5701e5249e4a9db2b1407889416bd2d154f7395f41acbe2abcc635335"
+  },
+  "pairing": {
+    "input_sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+    "scan_ids": [
+      "scene0011_00"
+    ],
+    "ann_ids": [
+      0
+    ],
+    "batch_size": 1,
+    "lang_num_max": 1,
+    "warmup": 20,
+    "repeat": 100
+  },
+  "runtime_code_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+  "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "measured": {
+    "flops_g": {
+      "champion": 9.762532428,
+      "candidate": 9.698045004
+    },
+    "median_ms": {
+      "champion": 35.87415115907788,
+      "candidate": 35.48713191412389
+    },
+    "p90_ms": {
+      "champion": 37.26633223704994,
+      "candidate": 37.462812033481896
+    },
+    "peak_allocated_bytes": {
+      "champion": 936763392,
+      "candidate": 931769344
+    },
+    "peak_reserved_bytes": {
+      "champion": 1191182336,
+      "candidate": 1184890880
+    },
+    "parameters": {
+      "champion": 157484090,
+      "candidate": 156235578
+    }
+  },
+  "delta": {
+    "flops_g": {
+      "absolute": -0.0644874239999993,
+      "percent": -0.6605604076155736
+    },
+    "median_ms": {
+      "absolute": -0.38701924495399,
+      "percent": -1.0788248152209023
+    },
+    "p90_ms": {
+      "absolute": 0.19647979643195868,
+      "percent": 0.5272313765201098
+    },
+    "peak_allocated_bytes": {
+      "absolute": -4994048,
+      "percent": -0.5331173317242532
+    },
+    "peak_reserved_bytes": {
+      "absolute": -6291456,
+      "percent": -0.5281690140845119
+    },
+    "parameters": {
+      "absolute": -1248512,
+      "percent": -0.7927861157276284
+    }
+  },
+  "full_profile": {
+    "champion": {
+      "flops": 9762532428.0,
+      "flops_g": 9.762532428,
+      "within10G": true,
+      "fvcore_version": "0.1.5.post20221221",
+      "profiler_file_sha256": {
+        "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+        "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+        "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+      },
+      "by_operator": {
+        "mm": 337393664.0,
+        "batch_norm": 10543552.0,
+        "layer_norm": 27256320.0,
+        "linear": 8362490368.0,
+        "matmul": 9750528.0,
+        "bmm": 960490496.0,
+        "einsum": 54607500.0
+      },
+      "unsupported_ops": {
+        "prim::PythonOp.Voxelization": 1,
+        "aten::add": 110,
+        "aten::zero_": 1,
+        "aten::scatter_add_": 14,
+        "aten::lt": 7,
+        "aten::div_": 7,
+        "aten::repeat": 10,
+        "prim::PythonOp.FurthestPointSampling": 4,
+        "aten::rsub": 1,
+        "aten::mul": 152,
+        "aten::ne": 1,
+        "aten::cumsum": 1,
+        "aten::embedding": 3,
+        "aten::add_": 31,
+        "aten::div": 89,
+        "aten::softmax": 52,
+        "aten::gelu": 27,
+        "aten::fill_": 1,
+        "aten::cdist": 3,
+        "aten::min": 3,
+        "aten::sort": 3,
+        "aten::sub": 6,
+        "aten::pow": 1,
+        "aten::sum": 9,
+        "aten::exp": 1,
+        "aten::sigmoid": 5,
+        "aten::topk": 1,
+        "aten::masked_fill_": 30,
+        "aten::mean": 1,
+        "aten::expand_as": 1,
+        "aten::argmax": 1
+      }
+    },
+    "candidate": {
+      "flops": 9698045004.0,
+      "flops_g": 9.698045004,
+      "within10G": true,
+      "fvcore_version": "0.1.5.post20221221",
+      "profiler_file_sha256": {
+        "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+        "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+        "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+      },
+      "by_operator": {
+        "mm": 337393664.0,
+        "batch_norm": 10543552.0,
+        "layer_norm": 27256320.0,
+        "linear": 8298002944.0,
+        "matmul": 9750528.0,
+        "bmm": 960490496.0,
+        "einsum": 54607500.0
+      },
+      "unsupported_ops": {
+        "prim::PythonOp.Voxelization": 1,
+        "aten::add": 111,
+        "aten::zero_": 1,
+        "aten::scatter_add_": 14,
+        "aten::lt": 7,
+        "aten::div_": 7,
+        "aten::repeat": 10,
+        "prim::PythonOp.FurthestPointSampling": 4,
+        "aten::rsub": 1,
+        "aten::mul": 152,
+        "aten::ne": 1,
+        "aten::cumsum": 1,
+        "aten::embedding": 3,
+        "aten::add_": 31,
+        "aten::div": 97,
+        "aten::softmax": 52,
+        "aten::gelu": 25,
+        "aten::fill_": 1,
+        "aten::cdist": 3,
+        "aten::min": 3,
+        "aten::sort": 3,
+        "aten::sub": 9,
+        "aten::pow": 1,
+        "aten::sum": 9,
+        "aten::exp": 1,
+        "aten::sigmoid": 5,
+        "aten::topk": 1,
+        "aten::masked_fill_": 30,
+        "aten::resolve_conj": 3,
+        "aten::resolve_neg": 3,
+        "aten::index_add": 16,
+        "aten::new_ones": 8,
+        "aten::clamp_min": 8,
+        "aten::index_select": 9,
+        "aten::square": 3,
+        "aten::index_copy": 3,
+        "aten::mean": 1,
+        "aten::expand_as": 1,
+        "aten::argmax": 1
+      }
+    }
+  },
+  "all100_times_each_and_statistics_recomputed": true,
+  "original_gates": {
+    "whole_model_counted_FLOPs_at_most10G": true,
+    "peak_prediction_allocated_memory_increase_above15percent": false,
+    "conditional_retention_gain_requirement_triggered": false,
+    "trained_mIoU_gain_measured": false,
+    "new_latency_cutoff_added": false
+  },
+  "resource_boundary_observations": {
+    "champion": {
+      "before": {
+        "observed_at": "2026-11-06T09:43:48.513670+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 98, 32607, 0",
+        "contexts": "",
+        "external_contexts": [],
+        "memory_used_mib": 98,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 32509,
+        "utilization_percent": 0,
+        "idle": true,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 0,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "after": {
+        "observed_at": "2026-11-06T09:44:04.609727+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1831, 32607, 0",
+        "contexts": "2249726, 1730",
+        "external_contexts": [],
+        "memory_used_mib": 1831,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 30776,
+        "utilization_percent": 0,
+        "idle": false,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 3,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+      "exclusive_measurement_claimed": false
+    },
+    "candidate": {
+      "before": {
+        "observed_at": "2026-11-06T09:44:11.095717+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 93, 32607, 0",
+        "contexts": "",
+        "external_contexts": [],
+        "memory_used_mib": 93,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 32514,
+        "utilization_percent": 0,
+        "idle": true,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 0,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "after": {
+        "observed_at": "2026-11-06T09:44:27.262995+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1825, 32607, 58",
+        "contexts": "2251288, 1724",
+        "external_contexts": [],
+        "memory_used_mib": 1825,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 30782,
+        "utilization_percent": 58,
+        "idle": false,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 3,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+      "exclusive_measurement_claimed": false
+    }
+  },
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/smoke_champion_execution.json",
+      "sha256": "4530c83b7f8fe58d5aa9cb47d453b565ecffa4ffc4ba2cdf3dca4a7a9491e8c5"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/smoke_candidate_execution.json",
+      "sha256": "d8f61c42ee38042e7756f90cc9860b0cfa4767b761589cce89e2bdb95b401090"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/resources_champion_execution.json",
+      "sha256": "727c6dbcb143c811084d5fa26143a5524715da3cb63ab2cf052eaa214635022c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/resources_candidate_execution.json",
+      "sha256": "4a6656d5701e5249e4a9db2b1407889416bd2d154f7395f41acbe2abcc635335"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/native_manifest.json",
+      "sha256": "a75877f5c1a38d1f321023a730032a7af40c090342b2201ecbf9d65c900c5fc0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/execution_binding.json",
+      "sha256": "a574f886f2a6f163145fce1fd0ad36f48b50df7d74e8f217a5b20ed0967881fc"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_execution/execution_lease.json",
+      "sha256": "87937946b8cdb8304942c5b73e7b9c2b8ae6b9b61c1c65acd1b5a3959d59286e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_1138a3fc/hvd_compatible_source_version.json",
+      "sha256": "7e3c09ea021de7350e74a7797e535c91990e3a9b226a20af1ed1917c06e8bc41"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_1138a3fc/hvd_compatible_source_independent_review.json",
+      "sha256": "315562b89da60d17939678f14e52048fa14f75270519ed7288f41fa77eaecf6d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_265517f1/new_candidate_prepare/native_protocol.md",
+      "sha256": "afa18d714089d39d82e0d56a016f80cc21592a8b8a7c4f792d753dc981fee5dd"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_c7451cf1/hvd_native_prepare/native/worker.py",
+      "sha256": "f91bddf7be81cc2e823f5c2e38a16d3a666e45022d885c6cb7a4ff654806646c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_current_activation/native_runtime.py",
+      "sha256": "f7780dbbee1bc16ff08be371288cd81355913a6a8d188cc8deb2e796218b77bd"
+    }
+  ],
+  "limitations": [
+    "Sequential authorized-overlay measurements; not exclusive timing or a causal speed claim.",
+    "Complete original profiler unsupported-op counts are retained; counted FLOPs use the original standard.",
+    "Full optimizer TRAIN peak and no-cluster baseline delta remain UNKNOWN.",
+    "Memory increase is below15%; no trained +0.003 mIoU condition is triggered. Efficacy/novelty remain UNKNOWN."
+  ]
+}

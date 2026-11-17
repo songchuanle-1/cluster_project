@@ -1,0 +1,8 @@
+# M95 frozen cohort native-group coverage
+
+- Stable ID: `m95-sample-context-support`; diagnosis only.
+- Frozen manifest: SHA256 `85e108e8c86d65bcdbdc25061987e0a973fa45b35b00030d0721d359da720040`, 31 selected expression IDs across `scene0029_00` and `scene0065_00`, not a 31-item native DataLoader.
+- Native TRAIN config has `lang_num_max: 4`; `ScanNetDataset_sample_graph_edge` first sorts annotations by `scene_id` and partitions each scene into groups of at most four. Read-only remote inspection found 55 unique annotation IDs in scene0029_00 and 50 in scene0065_00, in increasing 0-based order.
+- The frozen IDs intersect 13 native groups in scene0029_00 and 8 in scene0065_00: **21 native groups** in total. The corrected ordered/no-drop loader processes every expression in those selected groups and retains only the frozen 31 expression outcomes. A new CPU fixture reproduces the actual 4-per-group grouping and checks exactly 21 selected groups / 31 selected rows. Eight CPU contract tests pass. This is not an observed native GPU result.
+- At 2026-09-28 04:13 Asia/Shanghai, server-6 GPU7 still has external PID 709354 (13184 MiB), so an exclusive native run was not started. Current utilization was 3% at one instant, which does not make an occupied GPU idle. No remote files were staged and no queue or training task was created.
+- Native runtime and checkpoint hashes, same-forward intervention/placebo, backward and resource gates remain unverified. When GPU7 becomes free, acquire an exclusive diagnostic lease and verify all inputs before executing the frozen capture; aggregate by scene and physical target rather than treating 31 expressions as independent.

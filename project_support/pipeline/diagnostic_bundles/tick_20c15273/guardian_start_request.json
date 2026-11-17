@@ -1,0 +1,90 @@
+{
+  "owner": {
+    "token": "20c15273b622479495bada469c5f3c99",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T12:22:03.958138+00:00",
+    "deadline_at": "2026-11-06T13:22:03.958138+00:00",
+    "context_sha256": "c380048424bbfb55c1440ecbd5cb65c34ff59cd08df6cd9967ec5ad92386c534",
+    "pending_sha256": "828553b40ed4f920492366459d82381051ed5f10e4d12823792b1c3a65748fa5"
+  },
+  "recorded_at": "2026-11-06T12:42:40.595544+00:00",
+  "scope": "Once-only CPU guardian for existing exact trainer; no GPU/trainer launch/signals.",
+  "binding_sha256": "22a8ccf5998e390febb09ca287c3583e91b55b6a53dd6f5e85d054dec35ff288",
+  "binding": {
+    "owner": {
+      "token": "20c15273b622479495bada469c5f3c99",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-06T12:22:03.958138+00:00",
+      "deadline_at": "2026-11-06T13:22:03.958138+00:00",
+      "context_sha256": "c380048424bbfb55c1440ecbd5cb65c34ff59cd08df6cd9967ec5ad92386c534",
+      "pending_sha256": "828553b40ed4f920492366459d82381051ed5f10e4d12823792b1c3a65748fa5"
+    },
+    "project": "cluster_project",
+    "experiment_id": "M230-HVD",
+    "operation": "postlaunch_existing_training_cooperative_lock_protection",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106",
+    "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "trainer_pid": 2829477,
+    "trainer_starttime": "158248846",
+    "trainer_uid": 1001,
+    "trainer_argv": [
+      "python",
+      "tools/train.py",
+      "configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml",
+      "--gpu_ids",
+      "0",
+      "--num_gpus",
+      "1"
+    ],
+    "trainer_log": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log",
+    "guardian_script_sha256": "83cda70864923f77da6ac0d3a69f303dbd257a2396ff2680a0b3f22749851cc4",
+    "remote_start_program_sha256": "e25521195a4d1af2e2919ab05f6670efd5a08cbc96d0259b254a23eba066c3de",
+    "controller_sha256": "89b47e2d2910ad85cfc1b69a017266d0e46dad029bafd27344e885bcb2b0a914",
+    "resource_authorization_sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88",
+    "servers_sha256": "6a87d428190d77955500b34d58bff0310eecb13c8b233c7b3e4fd7ef253787a7",
+    "admission_receipt_sha256": "c92fcd22366cd5d84253c33ab37b2b72857915e239cfc5bb7741a58baa549a33",
+    "observation_sha256": "075efea931c8a3b0a019725307d0c26098284b532ee0eb53e81bc63e68f44729",
+    "missing_lock_observation_at": "2026-11-06T12:27:24.885427+00:00",
+    "expected_existing_lockfiles": [
+      {
+        "kind": "training",
+        "path": "/tmp/cluster_project_gpu0_training.lock",
+        "inode": 92537152,
+        "device_major": 259,
+        "device_minor": 4
+      },
+      {
+        "kind": "diagnostic",
+        "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+        "inode": 92537153,
+        "device_major": 259,
+        "device_minor": 4
+      },
+      {
+        "kind": "exclusive",
+        "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+        "inode": 92537154,
+        "device_major": 259,
+        "device_minor": 4
+      }
+    ],
+    "postlaunch_correction": true,
+    "prelaunch_lock_check_proven": false,
+    "lifetime": "Exact already-authorized trainer natural pidfd exit only. Current owner deadline controls startup; no GPU, signals, restart, migration, research or scheduling."
+  },
+  "guardian_script_sha256": "83cda70864923f77da6ac0d3a69f303dbd257a2396ff2680a0b3f22749851cc4",
+  "remote_start_sha256": "e25521195a4d1af2e2919ab05f6670efd5a08cbc96d0259b254a23eba066c3de",
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c '\"\"\"Once-only CPU guardian startup; this program never launches a trainer.\"\"\"\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nimport base64\nimport hashlib\nimport json\nimport os\nimport socket\nimport subprocess\nimport sys\nimport time\n\nassert socket.gethostname() == \"dl04-MS-7E06\"\npacket = json.load(sys.stdin)\nbinding = packet[\"binding\"]\nstage = Path(packet[\"stage\"])\nassert str(stage) == \"/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m230_20c15273\"\nassert binding[\"project\"] == \"cluster_project\" and binding[\"experiment_id\"] == \"M230-HVD\"\nassert binding[\"owner\"][\"token\"] == \"20c15273b622479495bada469c5f3c99\"\nassert binding[\"postlaunch_correction\"] is True and binding[\"prelaunch_lock_check_proven\"] is False\nassert datetime.now(timezone.utc) < datetime.fromisoformat(binding[\"owner\"][\"deadline_at\"])\nassert binding[\"trainer_pid\"] == 2829477 and binding[\"trainer_starttime\"] == \"158248846\"\nassert binding[\"trainer_uid\"] == os.getuid() == 1001\nproc = Path(\"/proc\") / str(binding[\"trainer_pid\"])\n\n\ndef starttime(pid):\n    text = (Path(\"/proc\") / str(pid) / \"stat\").read_text()\n    return text[text.rfind(\")\") + 2:].split()[19]\n\n\ndef trainer():\n    assert starttime(binding[\"trainer_pid\"]) == binding[\"trainer_starttime\"]\n    assert proc.stat().st_uid == os.getuid() == binding[\"trainer_uid\"]\n    assert os.readlink(proc / \"cwd\") == binding[\"runtime_root\"]\n    assert os.readlink(proc / \"fd/1\") == binding[\"trainer_log\"]\n    assert [x.decode() for x in (proc / \"cmdline\").read_bytes().split(b\"\\0\") if x] == binding[\"trainer_argv\"]\n\n\ntrainer()\nassert subprocess.check_output(\n    [\"git\", \"-C\", binding[\"runtime_root\"], \"rev-parse\", \"HEAD\"], text=True,\n).strip() == binding[\"source_commit\"]\nscript = base64.b64decode(packet[\"script_base64\"])\nassert hashlib.sha256(script).hexdigest() == binding[\"guardian_script_sha256\"]\nassert not stage.exists(), \"Existing stage/start must reconcile; never replay\"\nassert not Path(\"/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m230_12e364dc\").exists()\nfor record in binding[\"expected_existing_lockfiles\"]:\n    info = Path(record[\"path\"]).stat()\n    assert info.st_ino == record[\"inode\"]\n    assert os.major(info.st_dev) == record[\"device_major\"]\n    assert os.minor(info.st_dev) == record[\"device_minor\"]\nstage.parent.mkdir(parents=True, exist_ok=True)\nstage.mkdir()\ncode = stage / \"guardian.py\"\nbinding_path = stage / \"binding.json\"\nwith code.open(\"xb\") as stream:\n    stream.write(script)\nwith binding_path.open(\"x\") as stream:\n    json.dump(binding, stream, indent=2)\n    stream.write(\"\\n\")\ntrainer()\nassert datetime.now(timezone.utc) < datetime.fromisoformat(binding[\"owner\"][\"deadline_at\"])\nwith (stage / \"guardian_stdout.log\").open(\"ab\", buffering=0) as out:\n    child = subprocess.Popen(\n        [\"/usr/bin/python3\", \"-B\", str(code), str(binding_path)],\n        cwd=stage, env=dict(os.environ, PYTHONDONTWRITEBYTECODE=\"1\"),\n        stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,\n        start_new_session=True,\n    )\nspawn = {\n    \"guardian_pid\": child.pid, \"guardian_starttime\": starttime(child.pid),\n    \"recorded_at\": datetime.now(timezone.utc).isoformat(),\n}\nwith (stage / \"spawn.json\").open(\"x\") as stream:\n    json.dump(spawn, stream, indent=2)\n    stream.write(\"\\n\")\nstate = None\nfor _ in range(50):\n    if (stage / \"state.json\").exists():\n        state = json.loads((stage / \"state.json\").read_text())\n        break\n    if child.poll() is not None:\n        break\n    time.sleep(.2)\nif state is None or state.get(\"status\") != \"HOLDING\":\n    print(json.dumps({\n        \"stage\": str(stage), \"spawn\": spawn, \"binding\": binding, \"state\": state,\n        \"stderr_tail\": (stage / \"guardian_stdout.log\").read_text(errors=\"replace\")[-2000:],\n        \"requires_reconciliation\": True,\n    }))\n    raise SystemExit(2)\nassert state[\"guardian_pid\"] == spawn[\"guardian_pid\"]\nassert state[\"guardian_starttime\"] == spawn[\"guardian_starttime\"]\nassert child.poll() is None\nassert starttime(child.pid) == spawn[\"guardian_starttime\"]\ntrainer()\nassert len(state[\"locks\"]) == 3 and state[\"trainer_pid\"] == binding[\"trainer_pid\"]\ntable = Path(\"/proc/locks\").read_text().splitlines()\nlive_locks = []\nfor record in state[\"locks\"]:\n    info = Path(record[\"path\"]).stat()\n    assert info.st_ino == record[\"inode\"]\n    key = \"%02x:%02x:%d\" % (record[\"device_major\"], record[\"device_minor\"], record[\"inode\"])\n    rows = [line for line in table if len(line.split()) > 5 and line.split()[5] == key]\n    assert len(rows) == 1\n    fields = rows[0].split()\n    assert fields[1] == \"FLOCK\" and fields[3] == \"WRITE\" and int(fields[4]) == child.pid\n    live_locks.append(rows[0])\nassert child.poll() is None\nprint(json.dumps({\n    \"stage\": str(stage), \"spawn\": spawn, \"binding\": binding, \"state\": state,\n    \"live_lock_table\": live_locks, \"live_three_locks_confirmed\": True,\n    \"trainer_unchanged\": True, \"CPU_guardian_only\": True, \"training_launches\": 0,\n    \"signals_sent\": False, \"postlaunch_correction\": True,\n    \"prelaunch_lock_check_proven\": False,\n}))\n'"
+  ]
+}

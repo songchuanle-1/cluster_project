@@ -1,0 +1,72 @@
+{
+  "owner": {
+    "token": "94c2ad26b7464980b44134a7f42bed27",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-31T14:09:05.368671+00:00",
+    "deadline_at": "2026-10-31T15:09:05.368671+00:00",
+    "context_sha256": "9d2ad21fd7aa2f41a1cce83001d7652b60fff92950a9bc9d5517a09277e69cb1",
+    "pending_sha256": "f45e5e9f6091cad8b86c50bccbd668724e7d1c2e88fc98dbc91d96df94f14897"
+  },
+  "recorded_at": "2026-10-31T14:27:29.383992+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import json,socket,subprocess,os\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\nqueries={}\nfor name,argv in {'\"'\"'gpu'\"'\"':['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],'\"'\"'compute'\"'\"':['\"'\"'nvidia-smi'\"'\"','\"'\"'--query-compute-apps=gpu_uuid,pid'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"']}.items():\n r=subprocess.run(argv,capture_output=True,text=True,timeout=15);assert r.returncode==0\n queries[name]={'\"'\"'command'\"'\"':argv,'\"'\"'returncode'\"'\"':r.returncode,'\"'\"'stdout'\"'\"':r.stdout,'\"'\"'stderr'\"'\"':r.stderr}\noriginals=[]\nfor pid,start in [(2085005,'\"'\"'105948793'\"'\"'),(2685912,'\"'\"'106767833'\"'\"')]:\n p=Path('\"'\"'/proc'\"'\"')/str(pid);assert p.stat().st_uid==os.getuid()\n actual=(p/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19];assert actual==start\n assert '\"'\"'tools/train.py'\"'\"' in (p/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode()\n originals.append({'\"'\"'pid'\"'\"':pid,'\"'\"'start_ticks'\"'\"':actual})\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'queries'\"'\"':queries,'\"'\"'originals'\"'\"':originals,'\"'\"'signals_or_training_entry'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "raw_stdout": "{\"observed_at\": \"2026-10-31T14:27:29.607805+00:00\", \"hostname\": \"dl04-MS-7E06\", \"queries\": {\"gpu\": {\"command\": [\"nvidia-smi\", \"--query-gpu=index,uuid,memory.used,utilization.gpu\", \"--format=csv,noheader,nounits\"], \"returncode\": 0, \"stdout\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 19705, 14\\n1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 19759, 67\\n\", \"stderr\": \"\"}, \"compute\": {\"command\": [\"nvidia-smi\", \"--query-compute-apps=gpu_uuid,pid\", \"--format=csv,noheader,nounits\"], \"returncode\": 0, \"stdout\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 2085005\\nGPU-7f82edb9-f620-8045-caea-a75232265cd1, 2685912\\n\", \"stderr\": \"\"}}, \"originals\": [{\"pid\": 2085005, \"start_ticks\": \"105948793\"}, {\"pid\": 2685912, \"start_ticks\": \"106767833\"}], \"signals_or_training_entry\": false}\n",
+  "candidate_id": "hierarchy-coupled-node-edge-state-composition",
+  "scope": "Current actual occupation of authorized physical0/1 only, no new CUDA computation or training; other jobs preserved.",
+  "observation": {
+    "observed_at": "2026-10-31T14:27:29.607805+00:00",
+    "hostname": "dl04-MS-7E06",
+    "queries": {
+      "gpu": {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=index,uuid,memory.used,utilization.gpu",
+          "--format=csv,noheader,nounits"
+        ],
+        "returncode": 0,
+        "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 19705, 14\n1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 19759, 67\n",
+        "stderr": ""
+      },
+      "compute": {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=gpu_uuid,pid",
+          "--format=csv,noheader,nounits"
+        ],
+        "returncode": 0,
+        "stdout": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 2085005\nGPU-7f82edb9-f620-8045-caea-a75232265cd1, 2685912\n",
+        "stderr": ""
+      }
+    },
+    "originals": [
+      {
+        "pid": 2085005,
+        "start_ticks": "105948793"
+      },
+      {
+        "pid": 2685912,
+        "start_ticks": "106767833"
+      }
+    ],
+    "signals_or_training_entry": false
+  },
+  "idle_gpu_ids": [],
+  "busy_gpu_ids": [
+    0,
+    1
+  ],
+  "result": "blocked",
+  "native_executed": false,
+  "resource_profile_executed": false
+}

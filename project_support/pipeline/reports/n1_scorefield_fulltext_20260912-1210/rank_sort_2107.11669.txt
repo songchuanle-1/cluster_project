@@ -1,0 +1,1450 @@
+                                        Rank & Sort Loss for Object Detection and Instance Segmentation
+
+                                                       Kemal Oksuz, Baris Can Cam, Emre Akbas, Sinan Kalkan*
+                                         Dept. of Computer Engineering, Middle East Technical University, Ankara, Turkey
+
+                                             {kemal.oksuz, can.cam, eakbas, skalkan}@metu.edu.tr
+
+arXiv:2107.11669v2 [cs.CV] 30 Aug 2021                          Abstract                                (a) Ranking positives (+) above negatives (-)
+
+                                           We propose Rank & Sort (RS) Loss, a ranking-based loss       Anchor ID () 0 1 2 3 4 5 6 7
+                                        function to train deep object detection and instance seg-
+                                        mentation methods (i.e. visual detectors). RS Loss super-       Classification Logits 3.0 2.0 1.0 0.0 -1.0 -2.0 -3.0 -4.0
+                                        vises the classifier, a sub-network of these methods, to rank
+                                        each positive above all negatives as well as to sort positives  Binary Labels 1 1 0 0 1 0 1 0                                           (+)
+                                        among themselves with respect to (wrt.) their localisation
+                                        qualities (e.g. Intersection-over-Union - IoU). To tackle the   Target Ranking () 0, 4, 1, 6 (any order) 2, 3, 5, 7 (any order)         (-)
+                                        non-differentiable nature of ranking and sorting, we refor-
+                                        mulate the incorporation of error-driven update with back-      (b) Rank&Sort Loss: Rank (+) above (-) & Sort (+) wrt their IoU labels
+                                        propagation as Identity Update, which enables us to model
+                                        our novel sorting error among positives. With RS Loss, we       Anchor ID () 0 1 2 3 4 5 6 7
+                                        significantly simplify training: (i) Thanks to our sorting ob-
+                                        jective, the positives are prioritized by the classifier with-  Classification Logits 3.0 2.0 1.0 0.0 -1.0 -2.0 -3.0 -4.0
+                                        out an additional auxiliary head (e.g. for centerness, IoU,
+                                        mask-IoU), (ii) due to its ranking-based nature, RS Loss is     Continuous Labels (IoU) 0.9 0.4 0.0 0.0 0.8 0.0 0.1 0.0                 (+)
+                                        robust to class imbalance, and thus, no sampling heuris-
+                                        tic is required, and (iii) we address the multi-task nature     RS Loss Target Ranking () 0 4 1 6 2, 3, 5, 7 (any order)                (-)
+                                        of visual detectors using tuning-free task-balancing coeffi-
+                                        cients. Using RS Loss, we train seven diverse visual detec-     Figure 1. A ranking-based classification loss vs RS Loss. (a) En-
+                                        tors only by tuning the learning rate, and show that it con-    forcing to rank positives above negatives provides a useful objec-
+                                        sistently outperforms baselines: e.g. our RS Loss improves      tive for training, however, it ignores ordering among positives. (b)
+                                        (i) Faster R-CNN by  3 box AP and aLRP Loss (ranking-           Our RS Loss, in addition to raking positives above negatives, aims
+                                        based baseline) by  2 box AP on COCO dataset, (ii) Mask         to sort positives wrt. their continuous IoUs (positives: a green tone
+                                        R-CNN with repeat factor sampling (RFS) by 3.5 mask AP          based on its label, negatives: orange). We propose Identity Update
+                                        ( 7 AP for rare classes) on LVIS dataset; and also out-         (Section 3), a reformulation of error-driven update with backprop-
+                                        performs all counterparts. Code is available at: https:         agation, to tackle these ranking and sorting operations which are
+                                        //github.com/kemaloksuz/RankSortLoss.                           difficult to optimize due to their non-differentiable nature.
+
+                                        1. Introduction                                                 CNN), weighted by a hyper-parameter kt . In such formu-
+                                                                                                        lations, the number of hyper-parameters can easily exceed
+                                           Owing to their multi-task (e.g. classification, box regres-  10 [28], with additional hyper-parameters arising from task-
+                                        sion, mask prediction) nature, object detection and instance    specific imbalance problems [29], e.g. the positive-negative
+                                        segmentation methods rely on loss functions of the form:        imbalance in the classification task, and if a cascaded ar-
+                                                                                                        chitecture is used (e.g. HTC [7] employs 3 R-CNNs with
+                                        LV D =                  kt Ltk,             (1)                 different kt ). Thus, although such loss functions have led
+                                                                                                        to unprecedented successes, they require tuning, which is
+                                                         kK tT                                          time consuming, leads to sub-optimal solutions and makes
+                                                                                                        fair comparison of methods challenging.
+                                        which combines Lkt , the loss function for task t on stage
+                                        k (e.g. |K| = 2 for Faster R-CNN [32] with RPN and R-              Recently proposed ranking-based loss functions, namely
+                                                                                                        "Average Precision (AP) Loss" [6] and "average Locali-
+                                        *Equal contribution for senior authorship.                      sation Recall Precision (aLRP) Loss" [28], offer two im-
+                                                                                                        portant advantages over the classical score-based functions
+                                                                                                        (e.g. Cross-entropy Loss and Focal Loss [22]): (1) They di-
+                                                                                                        rectly optimize the performance measure (e.g. AP), thereby
+                                                                                                        providing consistency between training and evaluation ob-
+                                                                                                        jectives. This also reduces the number of hyper-parameters
+                                                                                                        as the performance measure (e.g. AP) does not typically
+                                                                                                        have any hyper-parameters. (2) They are robust to class-
+imbalance due to their ranking-based error definition. Al-       2. Related Work
+though these losses have yielded state-of-the-art (SOTA)
+performances, they need longer training and more augmen-            Auxiliary heads and continuous labels. Predicting the
+tation.                                                          localisation quality of a detection with an aux. centerness
+                                                                 [38, 44], IoU [15, 17], mask IoU [14] or uncertainty head
+   Broadly speaking, the ranking-based losses (AP Loss           [13] and combining these predictions with the classifica-
+and aLRP Loss) focus on ranking positive examples over           tion scores for NMS are shown to improve detection per-
+negatives, but they do not explicitly model positive-to-         formance. Lin et al. [18] discovered that using continuous
+positive interactions. However, there is evidence that it is     IoUs of predictions to supervise the classifier outperforms
+helpful to prioritize predictions wrt. their localisation qual-  using an aux. head. Currently, Lin et al.'s "Quality Focal
+ities by using an auxiliary (aux. - e.g. IoU, centerness) head   Loss" [18] is the only method that is robust to class im-
+[15, 17, 38, 44] or by supervising the classifier to directly    balance [29] and uses continuous labels to train the classi-
+regress IoUs of the predictions without an aux. head (as         fier. With RS Loss, we investigate the generalizability of
+shown by Li et al. [18] in Quality Focal Loss - QFL).            this idea on different networks (e.g. multi-stage networks
+                                                                 [2, 32]) and on a different task (i.e. instance segmentation).
+   In this paper, we propose Rank & Sort (RS) Loss as a
+ranking-based loss function to train visual detection (VD           Ranking-based losses in VD. Despite their advantages,
+­ i.e. object detection and instance segmentation) meth-         ranking-based losses are non-differentiable and difficult to
+ods. RS Loss not only ranks positives above negatives (Fig.      optimize. To address this challenge, black-box solvers [34]
+1(a)) but also sorts positives among themselves with respect     use an interpolated AP surface, though yielding little gain
+to their continuous IoU values (Fig. 1(b)). This approach        in object detection. DR Loss [31] achieves ranking between
+brings in several crucial benefits. Due to the prioritization    positives and negatives by enforcing a margin with Hinge
+of positives during training, detectors trained with RS Loss     Loss. Finally, AP Loss [6] and aLRP Loss [28] optimize
+do not need an aux. head, and due to its ranking-based na-       the performance metrics, AP and LRP [26] respectively, by
+ture, RS Loss can handle extremely imbalanced data (e.g.         using the error-driven update of perceptron learning [35]
+object detection [29]) without any sampling heuristics. Be-      for the non-differentiable parts. However, they need longer
+sides, except for the learning rate, RS Loss does not need       training and heavy augmentation. The main difference of
+any hyper-parameter tuning thanks to our tuning-free task-       RS Loss is that it also considers continuous localisation
+balancing coefficients. Owing to this significant simplifica-    qualities as labels.
+tion of training, we can apply RS Loss to different methods
+(i.e. multi-stage, one-stage, anchor-based, anchor-free) eas-       Objective imbalance in VD. The common strategy in
+ily (i.e. only by tuning the learning rate) and demonstrate      VD is to use tk (Eq. 1), a scalar multiplier, on each task and
+that RS Loss consistently outperforms baselines.                 tune them by grid search [1, 17]. Recently, Oksuz et al. [28]
+                                                                 employed a self-balancing strategy to balance classification
+   Our contributions can be summarized as follows:               and box regression heads, both of which compete for the
+                                                                 bounded range of aLRP Loss. Similarly, Chen et al. [5] use
+(1) We reformulate the incorporation of error-driven             the ratio of classification and regression losses to balance
+optimization into backpropagation to optimize non-               these tasks. In our design, each loss Lkt for a specific head
+differentiable ranking-based losses as Identity Update,          has its own bounded range and thus, no competition ensues
+which uniquely provides interpretable loss values during         among heads. Besides, we use Lkt s with similar ranges, and
+training and allows definition of intra-class errors (e.g. the   show that our RS Loss can simply be combined with a sim-
+sorting error among positives).                                  ple task balancing strategy based on loss values, and hence
+                                                                 does not require any tuning except the learning rate.
+(2) We propose Rank & Sort Loss that defines a ranking ob-
+jective between positives and negatives as well as a sorting     3. Identity Update for Ranking-based Losses
+objective to prioritize positives wrt. their continuous IoUs.
+Due to this ranking-based nature, RS Loss can train models          Using a ranking-based loss function is attractive thanks
+in the presence of highly imbalanced data.                       to its compatibility with common performance measures
+                                                                 (e.g. AP). It is challenging, however, due to the non-
+(3) We present the effectiveness of RS Loss on a diverse         differentiable nature of ranking. Here, we first revisit
+set of four object detectors and three instance segmenta-        an existing solution [6, 28] that overcomes this non-
+tion methods only by tuning the learning rate and without        differentiability by incorporating error-driven update [35]
+any aux. heads or sampling heuristics on the widely-used         into backpropagation (Section 3.1), and then present our re-
+COCO and long-tailed LVIS benchmarks: E.g. (i) Our RS-           formulation (Section 3.2), which uniquely (i) provides in-
+R-CNN improves Faster-CNN by  3 box AP on COCO,                  terpretable loss values and (ii) takes into account intra-class
+(ii) our RS-Mask R-CNN improves repeat factor sampling           errors, which is crucial for using continuous labels.
+by  3.5 mask AP ( 7 AP for rare classes) on LVIS.
+Logits Step 1              Difference          Step 2         Primary Terms           Step 3          Loss   model parameters. Among the three computation steps
+                           Transforms                                                                 Value
+                                                                                                             (Fig. 2 orange arrows), Step 1 and Step 3 are differentiable,
+   1                11 ... 1 ... 1 Eq.2 or Eq.5          11 ... 1          ... 1           1           
+          =  -        ...  ...         ... (require ())       ...     ...              =                     whereas a primary term Lij is not a differentiable function
+    ...                                                                          ...
+                                                                                                   ,
+
+                    1 ...  ...                           1 ...  ...                                          of difference transforms. Denoting this update in xij by
+
+    ...      =  -1    ...  ...         ...        xij         ...     ...    ...       1                     xij  and  using  the  chain  rule,  L   can  be  expressed  as:
+                                                                                       =                                                         si
+                    1 ...  ...                           1 ...  ...
+
+Figure 2. Three-step computation (green arrows) and optimization                                             L    =        L   xjk    xjk  =     1        xji - xij .
+(orange arrows) algorithms of ranking-based loss functions. Our                                              si           Ljk         si         Z
+identity update (i) yields interpretable loss values (see Appendix                                                   j,k                             j        j
+A for an example on our RS Loss), (ii) replaces Eq. 2 of previous
+work [28] by Eq. 5 (green arrow in Step 2) to allow intra-class                                                                                                               (3)
+errors, crucial to model our RS Loss, and (iii) results in a simple
+"Identity Update" rule (orange arrow in Step 2): xij = Lij.                                                  Chen et al. [6] incorporate the error-driven update [35] and
+                                                                                                             replace xij by -(Lij - Lij) where Lij is the target pri-
+                                                                                                             mary term indicating the desired error for pair (i, j). Both
+
+                                                                                                             AP Loss [6] and aLRP Loss [28] are optimized this way.
+
+3.1. Revisiting the Incorporation of Error-Driven                                                            3.2. Our Reformulation: Identity Update
+      Optimization into Backpropagation
+                                                                                                             We first identify two drawbacks of the formulation in
+
+         Definition of the Loss. Oksuz et al. [28] propose writing                                           Section 3.1: (D1) Resulting loss value (L) does not consider
+                                                                                                             the target Lij, and thus, is not easily interpretable when
+a  ranking-based           loss  as         L  =  1                (i) where Z is a prob-                    Lij = 0 (cf. aLRP Loss [28] and our RS Loss - Section 4);
+                                                  Z                                                          (D2) Eq. 2 assigns a non-zero primary term only if i  P
+                                                       iP
+                                                                                                             and j  N , effectively ignoring intra-class errors. These
+lem specific normalization constant, P is the set of positive
+
+examples and (i) is the error term computed on i  P.
+
+         Computation of the Loss. Given logits (si), L can be                                                errors become especially important with continuous labels:
+                                                                                                             The larger the label of i  P, the larger should si be.
+computed in three steps [6, 28] (Fig. 2 green arrows):
+                                                                                                                Definition of the Loss. We redefine the loss function as:
+Step 1. The difference transform between logits si and sj is
+
+computed by xij = sj - si.                                                                                                      1           ( (i) - (i)),                     (4)
+Step 2. Using xij, errors originating from each pair of ex-                                                               L=
+                                                                                                                                   Z
+                                                                                                                                      iP N
+amples are calculated as primary terms (Lij):
+
+                                (i)p(j|i), for i  P, j  N                                                    where (i) is the desired error term on i  P. Our loss
+                Lij = 0,                                                                              (2)    definition has two benefits: (i) L directly measures the dif-
+                                                       otherwise,                                            ference between the target and the desired errors, yielding
+                                                                                                             an interpretable loss value to address (D1), and (ii) we do
+where p(j|i) is a probability mass function (pmf) that dis-                                                  not constrain L to be defined only on positives and replace
+                                                                                                             "i  P" with "i  P  N ". Although we do not use
+tributes (i), the error computed on i  P, over j  N                                                          "i  P  N " to model RS Loss, it makes the definition
+                                                                                                             of L complete in the sense that, if necessary to obtain L, in-
+where N is the set of negative examples. By definition, the                                                  dividual errors ( (i)) can be computed on each output, and
+                                                                                                             hence, L can be approximated more precisely or a larger set
+ranking-based error (i), and thus Lij, requires pairwise-                                                    of ranking-based loss functions can be represented.
+
+binary-ranking relation between outputs i and j, which                                                          Computation of the Loss. In order to compute L (Eq.
+                                                                                                             4), we only replace Eq. 2 with:
+is determined by the non-differentiable unit step function
+
+H(x) (i.e. H(x) = 1 if x  0 and H(x) = 0 otherwise)
+
+with input xij.
+
+         Using H(xij), different ranking-based functions can be
+
+introduced to define (i) and p(j|i): e.g. the rank of the                                                                     Lij = (i) - (i) p(j|i),                         (5)
+
+ith example, rank(i) =                                   H(xij); the rank of the
+
+                                               j P N                                                         in three-step algorithm (Section 3.1, Fig. 2 green arrows)
+
+ith example among positives, rank+(i) =                                                   H(xij );           and allow all pairs to have a non-zero error, addressing (D2).
+
+                                                                                      jP                        Optimization of the Loss. Since the error of a pair, Lij,
+                                                                                                             is minimized when (i) = (i), Eq. 5 has a target of Lij =
+and number of false positives with logits larger than si,                                                    0 regardless of L. Thus, xij in Eq. 3 is simply the primary
+                                                                                                             term itself: xij = -(Lij - Lij) = -(0 - Lij) = Lij,
+NFP(i) = H(xij). As an example, for AP Loss [6],                                                             concluding the derivation of our Identity Update.
+
+                 jN
+
+using these definitions, (i) and p(j|i) can be simply de-
+
+fined    as  NFP (i)       and  H(xij )        respectively           [28].
+             rank(i)            NFP (i)
+
+Step 3. Finally, L is calculated as the normalized sum of the
+
+primary      terms   [28]:      L      =    1            (i)       =  1               Lij .                  4. Rank & Sort Loss
+                                            Z                         Z
+                                               iP                          iP jN
+
+         Optimization of the Loss. Here, the aim is to find up-                                                 In order to supervise the classifier of visual detectors by
+                                                                                                             considering the localisation qualities of the predictions (e.g.
+dates    L   ,  and   then      proceed           with   backpropagation                  through
+         si
+IoU), RS Loss decomposes the problem into two tasks: (i)                             Optimization.       To  obtain  , LRS     we  simply     replace  xij
+
+                                                                                                                      si
+Ranking task, which aims to rank each positive higher than                           (Eq. 3) by the primary terms of RS Loss, Lij (Eq. 9), fol-
+
+all negatives, and (ii) sorting task, which aims to sort the                         lowing Identity Update (Section 3.2).         The resulting        LRS
+                                                                                                                                                        si
+logits si in descending order wrt. continuous labels yi (e.g.                        for i  N then becomes (see Appendix A for derivations):
+IoUs). We define RS Loss and compute its gradients using
+                                                                                               LRS           1
+our Identity Update (Section 3.2 ­ Fig. 2).                                                     si       =                  R(j)pR(i|j).               (11)
+
+   Definition. Given logits si and their continuous labels                                                  |P |
+
+yi  [0, 1] (e.g. IoU), we define RS Loss as the average                                                              jP
+
+of the differences between the current ( RS(i)) and target                           Owing to the additional sorting error (Eq.        7, 8),     LRS       for
+( RS(i)) RS errors over positives (i.e. yi > 0):                                                                                                  si
+                                                                                     i  P includes update signals for both promotion and de-
+
+                      1                                                              motion to sort the positives accordingly:
+           LRS := |P|                            RS
+                                     RS(i) -              (i)    ,           (6)      1
+                                                                                     |P |
+                          iP                                                                   R S(i) - RS(i) +                S(j) -     (j  )  pS (i|j )  .
+                                                                                                                                       S
+
+where RS(i) is a summation of the current ranking error                                    Update signal to promote i jP
+and current sorting error:
+                                                                                                                            Update signal to demote i
+
+                                                 H(xij)(1 - yj)                                                                                        (12)
+
+RS(i) :=       NFP(i)                    + jP rank+(i)                           .   Note that the directions of the first and second part of Eq.
+               rank(i)
+
+                                                                                     12 are different. To place i  P in the desired ranking,
+
+           R(i): Current Ranking Error           S(i): Current Sorting Error             (i)-  RS(i)     0 promotes i based on the error computed
+                                                                                     RS
+                                                                        (7)                                          
+                                                                                     on itself, whereas      S(j) -  S  (j  )  pS(i|j)  0 demotes i
+
+For i  P, while the "current ranking error" is simply the                            based on the signal from j  P. We provide more insight
+
+precision error, the "current sorting error" penalizes the pos-                      for RS Loss on an example in Appendix A.
+
+itives with logits larger than si by the average of their in-                        5. Using RS Loss to Train Visual Detectors
+
+verted labels, 1 - yj. Note that when i  P is ranked above                              This section develops an overall loss function to train de-
+                                                                                     tectors with RS Loss, in which only the learning rate needs
+all j  N , NFP(i) = 0 and target ranking error,                        (i),  is  0.  tuning. As commonly performed in the literature [17, 18],
+                                                                    R                Section 5.2 analyses different design choices on ATSS [44],
+                                                                                     a SOTA one-stage object detector (i.e. k = 1 in Eq. 1); and
+For target sorting error, we average over the inverted labels                        Section 5.3 extends our design to other architectures.
+
+of j  P with larger logits (H(xij)) and labels (yj  yi)                              5.1. Dataset and Implementation Details
+
+than i  P corresponding to the desired sorted order,                                    Unless explicitly specified, we use (i) standard configu-
+                                                                                     ration of each detector and only replace the loss function,
+    (i)    =          0   jP  H(xij)[yj  yi](1 -                    yj )     (8)     (ii) mmdetection framework [8], (iii) 16 images with a size
+RS            ¨R¨(iB¨) +           H(xij)[yj  yi]                       ,            of 1333×800 in a single batch (4 images/GPU, Tesla V100)
+                                                                                     during training, (iv) 1× training schedule (12 epochs), (v)
+                              jP                                                     single-scale test with images with a size of 1333 × 800,
+                                                                                     (vi) ResNet-50 backbone with FPN [21], (vii) COCO train-
+                                     (i):Target  Sorting  Error                      val35K (115K images) and minival (5k images) sets [23] to
+                                  S                                                  train and test our models, (iix) report COCO-style AP.
+
+where [P] is the Iverson Bracket (i.e. 1 if predicate P is                           5.2. Analysis and Tuning-Free Design Choices
+True; else 0), and similar to previous work [6], H(xij) is
+smoothed in the interval [-RS, RS] as xij/2RS + 0.5.                                    ATSS [44] with its classification, box regression and cen-
+                                                                                     terness heads is originally trained by minimizing:
+   Computation. We follow the three-step algorithm (Sec-
+tion 3, Fig. 2) and define primary terms, Lij, using Eq. 5,
+which allows us to express the errors among positives as:
+
+               R(i) -        (i)  pR(j|i),       for i  P, j  N
+                          R
+
+Lij =          S(i) - S(i) pS (j|i), for i  P, j  P, (9)
+
+           0,                                    otherwise,
+
+where ranking (pR(j|i)) and sorting pmfs (pS(j|i)) uni-                                        LAT SS = Lcls + boxLbox + ctrLctr,                      (13)
+formly distribute ranking and sorting errors on i respec-
+tively over examples causing error (i.e. for ranking, j  N
+with sj > si; for sorting, j  P with sj > si but yj < yi):
+
+pR(j|i) =     H(xij )     ;  pS   (j|i)  =       H(xij)[yj < yi] ,                   where Lcls is Focal Loss [22]; Lbox is GIoU Loss [33]; Lctr
+                H(xik )                            H(xik)[yk < yi]                   is Cross-entropy Loss with continuous labels to supervise
+                                                                                     centerness prediction; and box = 2 and ctr = 1. We first
+           kN                               kP                                       remove the centerness head and replace Lcls by our RS Loss
+
+                                                                             (10)
+(a) Common Training of Stage  ( >1 for multi-stage, e.g. Mask-scoring R-CNN)        box ( 0 AP difference on average). Also, we use score-
+                                                                                    based weighting [18] by multiplying the GIoU Loss of each
+             Cls. 0 1 0 0 1                                                         prediction using its classification score (details are in Ap-
+             Head 2.00 1.00 0.00 -1.00 -2.00                                        pendix B). Note that value-based task balancing and score-
+                                                                                    based instance weighting are both hyper-parameter-free and
+Sampling     Box                                                                    easily applicable to all networks. With these design choices,
+Heuristics   Head                                                                   Eq. 14 has only 1 hyper-parameter (i.e. RS in H(·), set to
+                                                                                    0.50, to smooth the unit-step function)
+             Mask
+             Head                                                [0,2]              5.3. Training Different Architectures
+
+             Aux      -1.00          0.50  2.00 0.90                                   Fig. 3 presents a comparative overview on how we adopt
+             Head                                                                   RS Loss to train different architectures: When we use RS
+                                                                                    Loss to train the classifier (Fig. 3(b)), we remove aux. heads
+(b) RS-DET: Using RS Loss to train Stage k of a detector, DET                       (e.g. IoU head in IoU-Net [15]) and sampling heuristics
+                                                                                    (e.g. OHEM in YOLACT [1], random sampling in Faster R-
+             Cls. 0.00 0.50 0.00 0.00 0.90                                          CNN [32]). We adopt score-based weighting in box regres-
+             Head 2.00 1.00 0.00 -1.00 -2.00                                        sion and mask prediction heads, and prefer Dice Loss, in-
+                                                                                    stead of the common Cross-entropy Loss, to train mask pre-
+Sampling     Box                                                 [0,2]              diction head for instance segmentation due to (i) its bounded
+Heuristics   Head                                                [0,1]              range (between 0 and 1), and (ii) holistic evaluation of the
+                                                                                    predictions, both similar to GIoU Loss. Finally, we set kt
+             Mask                                                                   (Eq. 1) to scalar Lkcls/Ltk (i.e. Lcls = LRS) every itera-
+             Head                                                                   tion (Fig. 3(c)) with the single exception of RPN where we
+                                                                                    multiply the losses of RPN by 0.20 following aLRP Loss.
+             Aux      -1.00          0.50  2.00 0.90             
+             Head                                                                   6. Experiments
+                                                               Prediction
+(c) Loss-value based task balancing    =                       Ground Truth            To present the contribution of RS Loss in terms of per-
+                                                               Sigmoid              formance and tuning simplicity, we conduct experiments on
+  =                                                                                 seven visual detectors with a diverse set of architectures:
+                                                                                    four object detectors (i.e. Faster R-CNN [32], Cascade R-
+                                                                                    CNN [2], ATSS [44] and PAA [17] ­ Section 6.1) and three
+                                                                                    instance segmentation methods (i.e. Mask R-CNN [12],
+Figure 3. (a) A generic visual detection pipeline includes many                     YOLACT [1] and SOLOv2 [40] ­ Section 6.2). Finally,
+heads from possibly multiple stages. An aux. head, in addition                      Section 6.3 presents ablation analysis.
+to the standard ones, is common in recent methods (e.g. center-
+ness head for ATSS [44], IoU head for IoU-Net [15], and mask                        6.1. Experiments on Object Detection
+IoU head for Mask-scoring R-CNN [14]) to regress localisation
+quality and prioritize examples during inference (e.g. by multi-                    6.1.1 Multi-stage Object Detectors
+plying classification scores by the predicted localisation quality).
+Sampling heuristics are also common to ensure balanced training.                    To train Faster R-CNN [32] and Cascade R-CNN [2] by
+Such architectures use many hyper-parameters and are sensitive                      our RS Loss (i.e. RS-R-CNN), we remove sampling from
+for tuning. (b) Training detectors with our RS Loss removes (i)                     all stages (i.e. RPN and R-CNNs), use all anchors to train
+aux. heads by directly supervising the classification (Cls.) head                   RPN and m top-scoring proposals/image (by default, m =
+with continuous IoUs (in red & bold), (ii) sampling heuristics ow-                  1000 for Faster R-CNN and m = 2000 Cascade R-CNN
+ing to its robustness against class imbalance. We use losses with                   in mmdetection [8]), replace softmax classifiers by binary
+similar range with our RS Loss in other branches (i.e. GIoU Loss,                   sigmoid classifiers and set the initial learning rate to 0.012.
+Dice Loss) also by weighting each by using classification scores,
+obtained applying sigmoid to logits. (c) Instead of tuning tks, we                     RS Loss reaches 39.6 AP on a standard Faster R-CNN
+simply balance tasks by considering loss values. With this design,                  and outperforms (Table 1): (i) FPN [21] (Cross-entropy &
+we train several detectors only by tuning the learning rate and im-                 Smooth L1 losses) by 3.4 AP, (ii) aLRP Loss [28], a SOTA
+prove their performance consistently.                                               ranking-based baseline, by 2.2 AP, (iii) IoU-Net [15] with
+                                                                                    aux. head by 1.5 AP and (iv) Dynamic R-CNN, closest
+(Section 4), LRS, using IoU(^bi, bi) between a prediction                           counterpart, by 0.7 AP. We, then, use the lightweight Carafe
+box (^bi) and ground truth box (bi) as the continuous labels:                       [39] as the upsampling operation in FPN and obtain 40.8 AP
+                                                                                    (RS-R-CNN+), still maintaining  2 AP gap from Carafe
+            LRS-AT SS = LRS + boxLbox,                                        (14)
+
+where box, the task-level balancing coefficient, is generally
+
+set to a constant scalar by grid search.
+
+Inspired by recent work [5, 28], we investigate two
+
+tuning-free heuristics to determine box every iteration: (i)
+value-based: box = LRS/Lbox, and (ii) magnitude-based:
+
+box =   LRS  / Lbox                  where |·| is L1 norm, b^ and s are
+         ^s
+                   b
+
+box regression and classification head outputs respectively.
+
+In our analysis on ATSS trained with RS Loss, we observed
+
+that value-based task balancing performs similar to tuning
+Table 1. RS-R-CNN uses the standard IoU-based assigner, is sampling-free, employs no aux. head, is almost tuning-free wrt. task-
+balancing weights (kt s ­ Eq. 1), and thus, has the least number of hyper-parameters (H# = 3 ­ two RS, one for each RS Loss to train RPN
+
+& R-CNN, and one RPN weight). Still, RS-R-CNN improves standard Faster R-CNN with FPN by  3 AP; aLRP Loss (ranking-based
+
+loss baseline) by  2 AP; IoU-Net (a method with IoU head) by 1.5 AP. RS-R-CNN+ replaces upsampling of FPN by lightweight Carafe
+
+operation [39] and maintains  2 AP gap from Carafe FPN (38.6 to 40.8 AP). All models use ResNet-50, are evaluated in COCO minival
+
+and trained for 12 epochs on mmdetection except for IoU-Net. H#: Number of hyper-parameters (Appendix C presents details on H#.)
+
+Method    Assigner Sampler Aux. Head AP  AP50  AP75  oLRP  oLRPLoc  oLRPFP  oLRPFN  H#  Venue
+FPN [21]
+          IoU-based Random None 36.5 58.5 39.4 70.1                18.3  27.8  45.8  9 CVPR 17
+
+aLRP Loss [28] IoU-based None    None 37.4 57.9 39.2 69.2          17.6  28.5  46.1  3 NeurIPS 20
+
+GIoU Loss [33] IoU-based Random None 37.6 58.2 41.0 69.2           17.0  28.5  46.3  7 CVPR 19
+
+IoU-Net [15] IoU-based Random IoU Head 38.1 56.3 ­              ­  ­     ­     ­     11 ECCV 18
+
+Libra R-CNN [30] IoU-based IoU-based None 38.3 59.5 41.9 68.8      17.2  27.5  45.4  11 CVPR 19
+
+AutoLoss-A [24] IoU-based Random None 38.5 58.6 41.8 68.4          16.6  27.1  45.5  7 ICLR 21
+
+Carafe FPN [39] IoU-based Random None 38.6 59.9 42.2 68.3          17.2  27.0  44.2  7 ICCV 19
+
+Dynamic R-CNN [43] Dynamic Random None 38.9 57.6 42.7 68.2 15.7          27.7  46.6  10 ECCV 20
+
+RS-R-CNN (Ours) IoU-based None   None 39.6 59.5 43.0 67.9          16.3  27.8  45.4  3
+
+RS-R-CNN+ (Ours) IoU-based None  None 40.8 61.4 43.8 66.9          16.3  26.4  43.7  3
+
+FPN [39] (38.6 AP) and outperforming all methods in all         with box = 1.3 and IoU-based weighting, (ii) default QFL
+AP- and oLRP-based [26, 27] performance measures except         setting: box = 2.0 and score-based weighting) and report
+oLRPLoc, which implies that our main contribution is in         the best result for QFL. While the results of QFL and RS
+classification task trained by our RS Loss and there is still   Loss are similar for ATSS, there is 0.8 AP gap in favor of
+room for improvement in the localisation task. RS Loss also     our RS Loss, which can be due to the different positive-
+improves the stronger baseline Cascade R-CNN [2] by 1           negative assignment method of PAA (Table 2).
+AP from 40.3 AP to 41.3 AP (Appendix C presents detailed
+results for Cascade R-CNN). Finally, RS Loss has the least      6.1.3 Comparison with SOTA
+number of hyper-parameters (H# = 3, Table 1) and does not
+need a sampler, an aux. head or tuning of tks (Eq. 1).          Here, we use our RS-R-CNN since it yields the largest im-
+                                                                provement over its baseline. We train RS-R-CNN for 36
+6.1.2 One-stage Object Detectors                                epochs using multiscale training by randomly resizing the
+                                                                shorter size within [480, 960] on ResNet-101 with DCNv2
+We train ATSS [44] and PAA [17] including a centerness          [45]. Table 3 reports the results on COCO test-dev: Our RS-
+head and an IoU head respectively in their architectures. We    R-CNN reaches 47.8 AP and outperforms similarly trained
+adopt the anchor configuration of Oksuz et al. [28] for all     Faster R-CNN and Dynamic R-CNN by  3 and  1 AP
+ranking-based losses (different anchor configurations do not    respectively. Although we do not increase the number of
+affect performance of standard ATSS [44]) and set learn-        parameters for Faster R-CNN, RS R-CNN outperforms all
+ing rate to 0.008. While training PAA, we keep the scoring      multi-stage detectors including TridentNet [19], which has
+function, splitting positives and negatives, for a fair com-    more parameters. Our RS-R-CNN+ (Section 6.1.1) reaches
+parison among different loss functions.                         48.2 AP, and RS-Mask R-CNN+ (Section 6.2) reaches 49.0
+                                                                AP, outperforming all one- and multi-stage counterparts.
+   Comparison with AP and aLRP Losses, ranking-
+based baselines: We simply replaced Focal Loss by AP            6.2. Experiments on Instance Segmentation
+Loss to train networks, and as for aLRP Loss, similar to our
+RS Loss, we tuned its learning rate as 0.005 due to its tuning  6.2.1 Multi-stage Instance Segmentation Methods
+simplicity. Both for ATSS and PAA, RS Loss provides sig-
+nificant gains over ranking-based alternatives, which were      We train Mask R-CNN [12] on COCO and LVIS datasets
+trained for 100 epochs using SSD-like augmentation [25]         by keeping all design choices of Faster R-CNN the same.
+in previous work [6, 28]: 1.8/2.2 AP gain for ATSS and
+3.7/3.3 gain for PAA for AP/aLRP Loss (Table 2).                   COCO: We observe  2 AP gain for both segmentation
+                                                                and detection performance (Table 4) over Mask R-CNN.
+   Comparison with Focal Loss, default loss function:           Also, RS-Mask R-CNN outperforms Mask-scoring R-CNN
+RS Loss provides around  1 AP gain when both networks           [14], with an additional aux. mask IoU head, by 0.4 mask
+are equally trained without an aux. head (Table 2) and 0.6      AP, 1.8 box AP and 0.9 mask oLRP (Table 4).
+AP gain compared to the default networks with aux. heads.
+                                                                   LVIS: Replacing the Cross-entropy to train Mask R-
+   Comparison with QFL, score-based loss function us-           CNN with repeat factor sampling (RFS) by our RS Loss im-
+ing continuous IoUs as labels: To apply QFL [18] to             proves the performance by 3.5 mask AP on the long-tailed
+PAA, we remove the aux. IoU head (as we did with                LVIS dataset (21.7 to 25.2 with  7APr improvement on
+ATSS), test two possible options ((i) default PAA setting       rare classes) and outperforms recent counterparts (Table 5).
+Table 2. RS Loss has the least number of hyper-parameters (H#) and outperforms (i) rank-based alternatives significantly, (ii) the default
+
+setting with an aux. head (underlined) by 0.6 AP, (iii) score-based alternative, QFL, especially on PAA. We test unified losses (i.e. a loss
+
+considering localisation quality while training classification head) only without aux. head. All models use ResNet-50.
+
+Loss Function Unified Rank-based Aux. Head                                            ATSS [44]                     PAA [17]         H# 
+Focal Loss [22]
+                                                                         AP     AP50  AP75       oLRP   AP    AP50  AP75      oLRP     3
+                                                                         38.7                     68.9  39.9                   68.7    4
+                                                                         39.3   57.6  41.5        68.6  40.4  57.3  43.4       67.7
+
+                                                                                57.5  42.6                    58.4  43.9
+
+AP Loss [6]                                                              38.1 58.2    41.0       69.2 35.3 53.1     38.5      71.5   2
+
+                                                                         37.2 55.6    40.2       70.0 37.3 54.3     41.2      70.5   3
+
+                            QFL [18]                                     39.7 58.1    42.7       68.0 40.2 57.4     43.8      68.3   2
+
+aLRP Loss [28]                                                           37.7 57.4    39.9       69.4 37.7 56.1     40.1      69.9   1
+
+RS Loss (Ours)                                                           39.9 58.9 42.6          67.9 41.0 59.1 44.5 67.3            1
+
+Table 3. Comparison with SOTA for object detection on COCO                            adopt cosine annealing with an initial learning rate of 0.006.
+                                                                                      Then, we remove (i) OHEM, (ii) semantic segmentation
+test-dev using ResNet-101 (except *) with DCN. The result of the                      head, (iii) carefully tuned task weights (i.e. box = 1.5,
+                                                                                      mask = 6.125) and (iv) size-based normalization (i.e.
+similarly trained Faster R-CNN is acquired from Zhang et al. [43].                    normalization of mask head loss of each instance by the
+                                                                                      ground-truth area). Removing each heuristic ensues a slight
++: upsampling of FPN is Carafe [39], *:ResNeXt-64x4d-101                              to significant performance drop (at least requires retuning of
+                                                                                      t ­ Table 6). After these simplifications, our RS-YOLACT
+Ours Multi-stage One-stage   Method          AP AP50 AP75 APS APM APL                 improves baseline by 1.5 mask AP and 3.3 box AP.
+                            ATSS [44]        46.3 64.7 50.4 27.7 49.8 58.4
+                                                                                         SOLOv2: Following Wang et al. [40], we train anchor-
+                            GFL [18]         47.3 66.3 51.4 28.0 51.1 59.2            free SOLOv2 with RS Loss for 36 epochs using multiscale
+                                                                                      training on its two different settings: (i) SOLOv2-light is
+                            PAA [17]         47.4 65.7 51.6 27.9 51.3 60.6            the real-time setting with ResNet-34 and images with size
+                                                                                      448 × 448 at inference. We use 32 images/batch and learn-
+                            RepPointsv2 [10] 48.1 67.5 51.8 28.7 50.9 60.8            ing rate 0.012 for training. (ii) SOLOv2 is the SOTA set-
+                                                                                      ting with ResNet-101 and images with size 1333 × 800 at
+                            Faster R-CNN [43] 44.8 65.5 48.8 26.2 47.6 58.1           inference. We use 16 images/batch and learning rate 0.006
+                                                                                      for training. Since SOLOv2 does not have a box regression
+                            Trident Net [19] 46.8 67.6 51.5 28.0 51.2 60.5            head, we use Dice coefficient as the continuous labels of
+                                                                                      RS Loss (see Appendix C for an analysis of using different
+                            Dynamic R-CNN [43] 46.9 65.9 51.3 28.1 49.6 60.0          localisation qualities as labels). Again, RS Loss performs
+                                                                                      better than the baseline (i.e. Focal Loss and Dice Loss) only
+                            D2Det [3]        47.4 65.9 51.7 27.2 50.4 61.3            by tuning the learning rate (Table 7).
+
+                            RS-R-CNN         47.8 68.0 51.8 28.5 51.1 61.6            6.2.3 Comparison with SOTA
+
+                            RS-R-CNN+        48.2 68.6 52.4 29.0 51.3 61.7            We use our RS-Mask R-CNN (i.e. standard Mask R-CNN
+                                                                                      with RS Loss) to compare with SOTA methods. In order to
+                            RS-Mask R-CNN+ 49.0 69.2 53.4 29.9 52.4 62.8              fit in 16GB memory of our V100 GPUs and keep all set-
+                                                                                      tings unchanged, we limit the number of maximum propos-
+                            RS-Mask R-CNN+* 50.2 70.3 54.8 31.5 53.5 63.9             als in the mask head by 200, which can simply be omit-
+                                                                                      ted for GPUs with larger memory. Following our counter-
+Table 4. Without an aux. head, RS-Mask R-CNN improves Mask                            parts [40, 41], we first train RS-Mask R-CNN for 36 epochs
+                                                                                      with multiscale training between [640, 800] using ResNet-
+R-CNN [12] by  2 AP and outperforms Mask-scoring R-CNN                                101 and reach 40.6 mask AP (Table 8), improving Mask R-
+                                                                                      CNN by 2.3 mask AP and outperforming all SOTA methods
+[14] which employs an additional mask IoU head as aux. head.                          by a notable margin ( 1 AP). Then, we train RS-Mask R-
+                                                                                      CNN+ (i.e. standard Mask R-CNN except upsampling of
+                            Method     Aux     Segmentation Performance  APbox  H#    FPN is lightweight Carafe [39]) also by extending the mul-
+                                       Head  AP  AP50  AP75  oLRP                     tiscale range to [480, 960] and reach 42.0 mask AP, which
+                                                                                      even outperforms all models with DCN. With DCN [45] on
+Mask R-CNN                                   34.7 55.7 37.2 71.2 38.2 8               ResNet-101, our RS-Mask R-CNN+ reaches 43.9 mask AP.
+
+Mask-sc. R-CNN                               36.0 55.8 38.7 71.0 38.2 9
+
+RS-Mask R-CNN                                36.4 57.3 39.2 70.1 40.0 3
+
+Table 5. Comparison on LVIS v1.0 val set. Models are trained with
+
+ResNet-50, multiscale images (range: [640, 800]) for 12 epochs.
+
+                            Method     APmask APr APc APf APbox Venue
+                            RFS [11]     21.7 9.6 21.0 27.8 22.5 CVPR 19
+
+                            BAGS [20]  23.1 13.1 22.5 28.2 23.7 CVPR 20
+
+Eq. Lossv2 [37] 23.7 14.9 22.8 28.6 24.2 CVPR 21
+
+RFS+RS Loss 25.2 16.8 24.3 29.9 25.9
+
+6.2.2 One-stage Instance Segmentation Methods
+
+Here, we train two different approaches with our RS Loss:
+(i) YOLACT [1], a real-time instance segmentation method,
+involving sampling heuristics (e.g. OHEM [36]), aux. head
+and carefully-tuned loss weights, and demonstrate RS Loss
+can discard all by improving its performance (ii) SOLOv2
+[40] as an anchor-free SOTA method.
+
+   YOLACT: Following YOLACT [1], we train and test
+RS-YOLACT by images with size 550 × 550 for 55 epochs.
+Instead of searching for epochs to decay learning rate, care-
+fully tuned for YOLACT as 20, 42, 49 and 52, we simply
+         Table 6. RS-YOLACT does not employ any additional training heuristics and outperforms YOLACT by significant margin.
+
+         Method              Additional Training Heuristics         Segmentation Performance         Detection Performance    H# 
+                 OHEM [36] Size-based Norm. Sem.Segm. Head     AP  AP50  AP75  oLRP           AP  AP50  AP75  oLRP 
+
+                                                               28.4 47.7 29.1 75.4 30.5 52.3 31.8 73.9 5
+
+YOLACT [1]                                                     15.1 27.1 15.0 86.6 12.6 27.8 10.0 88.5 4
+                                                               21.7 40.2 20.7 80.5 30.4 52.2 31.4 74.1 5
+
+                                                               28.1 47.5 28.7 75.6 30.5 51.9 32.0 74.0 4
+
+                                                               13.6 26.4 12.4 87.5 15.1 32.9 12.1 86.3 3
+
+RS-YOLACT                                                      29.9 50.5 30.6 74.7 33.8 54.2 35.4 71.8 1
+
+         Table 7. Comparison on anchor-free SOLOv2.                      Robustness to imbalance: Without tuning, RS Loss can
+                                                                      train models with very different imbalance levels success-
+         Method          Backbone AP AP50 AP75 oLRP  H#               fully (Table 10): Our RS Loss (i) yields 38.5 AP on COCO
+                                                                      with the standard random samplers (i.e. data is relatively
+         SOLOv2-light ResNet-34 32.0 50.7 33.7 73.5 3                 balanced especially for RPN), (ii) utilizes more data when
+                                                                      the samplers are removed, resulting in  1 AP gain (38.5
+RS-SOLOv2-light ResNet-34 32.6 51.7 34.2 72.7 1                       to 39.6 AP), and (iii) outperforms all counterparts on the
+                                                                      long-tailed LVIS dataset (c.f. Table 5), where the imbal-
+         SOLOv2 ResNet-101 39.1 59.8 41.9 67.3 3                      ance is extreme for R-CNN (pos:neg ratio is 1 : 10470 -
+                                                                      Table 10). Appendix C presents detailed discussion.
+         RS-SOLOv2 ResNet-101 39.7 60.6 42.2 66.9 1
+                                                                         Contribution of the sorting error: To see the con-
+Table 8. Comparison with SOTA for instance segmentation on            tribution of our additional sorting error, during training,
+                                                                      we track Spearman's ranking correlation coefficient () be-
+COCO test-dev. All methods (except *) use ResNet-101. The             tween IoUs and classification scores, as an indicator of the
+                                                                      sorting quality, with and without our additional sorting er-
+result of the similarly trained Mask R-CNN is acquired from Chen      ror (see Eq. 6-8). As hypothesized, using sorting error im-
+                                                                      proves sorting quality, , averaged over all/last 100 itera-
+et al. [9]. +: upsampling of FPN is Carafe, *:ResNeXt-64x4d-101       tions, from 0.38/0.42 to 0.42/0.47 for RS-R-CNN.
+
+              Method       AP AP50 AP75 APS APM APL                      Effect on Efficiency: On average, one training itera-
+         Polar Mask [42]   32.1 53.7 33.1 14.7 33.8 45.3              tion of RS Loss takes around 1.5× longer than score-based
+                                                                      losses. See Appendix C for more discussion on the effect of
+w/o DCN  Mask R-CNN [9]    38.3 61.2 40.8 18.2 40.6 54.1              RS Loss on training and inference time.
+
+         SOLOv2 [40]       39.7 60.7 42.9 17.3 42.9 57.4              7. Conclusion
+
+         Center Mask [41]  39.8 ­ ­ 21.7 42.5 52.0                       In this paper, we proposed RS Loss as a ranking-based
+                                                                      loss function to train object detectors and instance seg-
+         BCNet [16]        39.8 61.5 43.1 22.7 42.4 51.1              mentation methods. Unlike existing ranking-based losses,
+                                                                      which aim to rank positives above negatives, our RS Loss
+         RS-Mask R-CNN (Ours) 40.6 62.8 43.9 22.8 43.6 52.8           also sorts positives wrt. their localisation qualities, which
+                                                                      is consistent with NMS and the performance measure, AP.
+         RS-Mask R-CNN+ (Ours) 42.0 64.8 45.6 24.2 45.1 54.6          With RS Loss, we employed a simple, loss-value-based,
+                                                                      tuning-free heuristic to balance all heads in the visual detec-
+         Mask-scoring R-CNN [14] 39.6 60.7 43.1 18.8 41.5 56.2        tors. As a result, we showed on seven diverse visual detec-
+                                                                      tors that RS Loss both consistently improves performance
+w DCN    BlendMask [4]     41.3 63.1 44.6 22.7 44.1 54.5              and significantly simplifies the training pipeline.
+
+         SOLOv2 [40]       41.7 63.2 45.1 18.0 45.0 61.6                 Acknowledgments: This work was supported by the
+                                                                      Scientific and Technological Research Council of Turkey
+         RS-Mask R-CNN+ (Ours) 43.9 67.1 47.6 25.6 47.0 57.8          (TU¨ BITAK) (under grants 117E054 and 120E494). We also
+                                                                      gratefully acknowledge the computational resources kindly
+         RS-Mask R-CNN+* (Ours) 44.8 68.4 48.6 27.1 47.9 58.3         provided by TU¨ BITAK ULAKBIM High Performance and
+                                                                      Grid Computing Center (TRUBA) and Roketsan Missiles
+Table 9. Contribution of the components of RS Loss on ATSS.           Inc. used for this research. Dr. Oksuz is supported by the
+                                                                      TU¨ BITAK 2211-A Scholarship. Dr. Kalkan is supported
+         Architecture RS Loss score-based w. task bal. AP H#          by the BAGEP Award of the Science Academy, Turkey.
+
+                                          38.7 3
+
+ATSS+ResNet50                             39.7 2
+
+         w.o. aux. head                   39.8 2
+
+                                          39.9 1
+
+Table 10. Ablation with different degrees of imbalance on different
+
+datasets and samplers. Number of negatives (neg) corresponding
+
+to a single positive (pos) averaged over the iterations of the first
+
+epoch is presented. Quantitatively, pos:neg ratio varies between
+
+1:7 to 1:10470. RS Loss successfully trains different degrees of
+
+imbalance without tuning (Tables 1 and 5). Details: Appendix C
+
+Dataset      Sampler       Desired Neg #   Actual Neg #  AP
+         RPN R-CNN         RPN R-CNN      RPN R-CNN
+
+         Random Random 1   3              7 702 38.5
+
+COCO None Random 1 N/A 6676 702 39.3
+
+         None None N/A N/A 6676 1142 39.6
+
+LVIS None None N/A N/A 3487 10470 25.2
+
+6.3. Ablation Experiments
+
+   Contribution of the components: Replacing Focal
+Loss by RS Loss improves the performance significantly (1
+AP - Table 9). Score-based weighting has a minor contribu-
+tion and value-based task balancing simplifies tuning.
+References                                                                  and Xiangyu Zhang. Bounding box regression with uncer-
+                                                                            tainty for accurate object detection. In IEEE/CVF Confer-
+ [1] Daniel Bolya, Chong Zhou, Fanyi Xiao, and Yong Jae Lee.                ence on Computer Vision and Pattern Recognition (CVPR),
+      Yolact: Real-time instance segmentation. In IEEE/CVF In-              2019. 2
+      ternational Conference on Computer Vision (ICCV), 2019.         [14] Zhaojin Huang, Lichao Huang, Yongchao Gong, Chang
+      2, 5, 7, 8                                                            Huang, and Xinggang Wang. Mask scoring r-cnn. In
+                                                                            IEEE/CVF Conference on Computer Vision and Pattern
+ [2] Zhaowei Cai and Nuno Vasconcelos. Cascade R-CNN: Delv-                 Recognition (CVPR), 2019. 2, 5, 6, 7, 8
+      ing into high quality object detection. In IEEE/CVF Confer-     [15] Borui Jiang, Ruixuan Luo, Jiayuan Mao, Tete Xiao, and Yun-
+      ence on Computer Vision and Pattern Recognition (CVPR),               ing Jiang. Acquisition of localization confidence for accurate
+      2018. 2, 5, 6, 14                                                     object detection. In The European Conference on Computer
+                                                                            Vision (ECCV), 2018. 2, 5, 6, 14
+ [3] Jiale Cao, Hisham Cholakkal, Rao Muhammad Anwer, Fa-             [16] Lei Ke, Yu-Wing Tai, and Chi-Keung Tang. Deep occlusion-
+      had Shahbaz Khan, Yanwei Pang, and Ling Shao. D2det:                  aware instance segmentation with overlapping bilayers. In
+      Towards high quality object detection and instance segmen-            IEEE/CVF Conference on Computer Vision and Pattern
+      tation. In IEEE/CVF Conference on Computer Vision and                 Recognition (CVPR), 2021. 8
+      Pattern Recognition (CVPR), 2020. 7                             [17] Kang Kim and Hee Seok Lee. Probabilistic anchor assign-
+                                                                            ment with iou prediction for object detection. In The Euro-
+ [4] Hao Chen, Kunyang Sun, Zhi Tian, Chunhua Shen, Yong-                   pean Conference on Computer Vision (ECCV), 2020. 2, 4, 5,
+      ming Huang, and Youliang Yan. Blendmask: Top-down                     6, 7, 12, 13, 14
+      meets bottom-up for instance segmentation. In IEEE/CVF          [18] Xiang Li, Wenhai Wang, Lijun Wu, Shuo Chen, Xiaolin Hu,
+      Conference on Computer Vision and Pattern Recognition                 Jun Li, Jinhui Tang, and Jian Yang. Generalized focal loss:
+      (CVPR), 2020. 8                                                       Learning qualified and distributed bounding boxes for dense
+                                                                            object detection. In Advances in Neural Information Pro-
+ [5] Joya Chen, Dong Liu, Tong Xu, Shilong Zhang, Shiwei Wu,                cessing Systems (NeurIPS), 2020. 2, 4, 5, 6, 7, 12, 13, 16
+      Bin Luo, Xuezheng Peng, and Enhong Chen. Is sampling            [19] Yanghao Li, Yuntao Chen, Naiyan Wang, and Zhaoxiang
+      heuristics necessary in training deep object detectors? arXiv,        Zhang. Scale-aware trident networks for object detection.
+      1909.04868, 2019. 2, 5                                                In IEEE/CVF International Conference on Computer Vision
+                                                                            (ICCV), 2019. 6, 7
+ [6] Kean Chen, Weiyao Lin, Jianguo li, John See, Ji Wang, and        [20] Yu Li, Tao Wang, Bingyi Kang, Sheng Tang, Chunfeng
+      Junni Zou. Ap-loss for accurate one-stage object detection.           Wang, Jintao Li, and Jiashi Feng. Overcoming classifier im-
+      IEEE Transactions on Pattern Analysis and Machine Intelli-            balance for long-tail object detection with balanced group
+      gence (TPAMI), pages 1­1, 2020. 1, 2, 3, 4, 6, 7, 11, 14, 16,         softmax. In IEEE/CVF Conference on Computer Vision and
+      17                                                                    Pattern Recognition (CVPR), 2020. 7
+                                                                      [21] Tsung-Yi Lin, Piotr Dolla´r, Ross B. Girshick, Kaiming He,
+ [7] Kai Chen, Jiangmiao Pang, Jiaqi Wang, Yu Xiong, Xiaoxiao               Bharath Hariharan, and Serge J. Belongie. Feature pyramid
+      Li, Shuyang Sun, Wansen Feng, Ziwei Liu, Jianping Shi,                networks for object detection. In IEEE/CVF Conference on
+      Wanli Ouyang, Chen Change Loy, and Dahua Lin. Hy-                     Computer Vision and Pattern Recognition (CVPR), 2017. 4,
+      brid task cascade for instance segmentation. In IEEE/CVF              5, 6, 14
+      Conference on Computer Vision and Pattern Recognition           [22] Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and
+      (CVPR), 2019. 1                                                       Piotr Dolla´r. Focal loss for dense object detection. IEEE
+                                                                            Transactions on Pattern Analysis and Machine Intelligence
+ [8] Kai Chen, Jiaqi Wang, Jiangmiao Pang, Yuhang Cao, Yu                   (TPAMI), 42(2):318­327, 2020. 1, 4, 7, 16, 17
+      Xiong, Xiaoxiao Li, Shuyang Sun, Wansen Feng, Ziwei             [23] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays,
+      Liu, Jiarui Xu, Zheng Zhang, Dazhi Cheng, Chenchen Zhu,               Pietro Perona, Deva Ramanan, Piotr Dolla´r, and C Lawrence
+      Tianheng Cheng, Qijie Zhao, Buyu Li, Xin Lu, Rui Zhu,                 Zitnick. Microsoft COCO: Common Objects in Context.
+      Yue Wu, Jifeng Dai, Jingdong Wang, Jianping Shi, Wanli                In The European Conference on Computer Vision (ECCV),
+      Ouyang, Chen Change Loy, and Dahua Lin. MMDetec-                      2014. 4, 15
+      tion: Open mmlab detection toolbox and benchmark. arXiv,        [24] Peidong Liu, Gengwei Zhang, Bochao Wang, Hang Xu, Xi-
+      1906.07155, 2019. 4, 5, 15                                            aodan Liang, Yong Jiang, and Zhenguo Li. Loss function
+                                                                            discovery for object detection via convergence-simulation
+ [9] Xinlei Chen, Ross Girshick, Kaiming He, and Piotr Dolla´r.             driven search. In International Conference on Learning Rep-
+      Tensormask: A foundation for dense object segmentation.               resentations (ICLR), 2021. 6, 14
+      In IEEE/CVF International Conference on Computer Vision         [25] Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian
+      (ICCV), 2019. 8                                                       Szegedy, Scott E. Reed, Cheng-Yang Fu, and Alexander C.
+                                                                            Berg. SSD: single shot multibox detector. In The European
+[10] Yihong Chen, Zheng Zhang, Yue Cao, Liwei Wang, Stephen                 Conference on Computer Vision (ECCV), 2016. 6, 13
+      Lin, and Han Hu. Reppoints v2: Verification meets regres-       [26] Kemal Oksuz, Baris Can Cam, Emre Akbas, and Sinan
+      sion for object detection. In Advances in Neural Information          Kalkan. Localization recall precision (LRP): A new perfor-
+      Processing Systems (NeurIPS), 2020. 7
+
+[11] Agrim Gupta, Piotr Dollar, and Ross Girshick. Lvis: A
+      dataset for large vocabulary instance segmentation. In
+      IEEE/CVF Conference on Computer Vision and Pattern
+      Recognition (CVPR), 2019. 7, 15
+
+[12] Kaiming He, Georgia Gkioxari, Piotr Dollar, and Ross Gir-
+      shick. Mask R-CNN. In IEEE/CVF International Confer-
+      ence on Computer Vision (ICCV), 2017. 5, 6, 7
+
+[13] Yihui He, Chenchen Zhu, Jianren Wang, Marios Savvides,
+      mance metric for object detection. In The European Confer-     [40] Xinlong Wang, Rufeng Zhang, Tao Kong, Lei Li, and Chun-
+      ence on Computer Vision (ECCV), 2018. 2, 6                           hua Shen. Solov2: Dynamic and fast instance segmenta-
+[27] Kemal Oksuz, Baris Can Cam, Emre Akbas, and Sinan                     tion. In Advances in Neural Information Processing Systems
+      Kalkan. One metric to measure them all: Localisation recall          (NeurIPS), 2020. 5, 7, 8
+      precision (lrp) for evaluating visual detection tasks. arXiv,
+      2011.10772, 2020. 6                                            [41] Yuqing Wang, Zhaoliang Xu, Hao Shen, Baoshan Cheng,
+[28] Kemal Oksuz, Baris Can Cam, Emre Akbas, and Sinan                     and Lirong Yang. Centermask: Single shot instance segmen-
+      Kalkan. A ranking-based, balanced loss function unifying             tation with point representation. In IEEE/CVF Conference
+      classification and localisation in object detection. In Ad-          on Computer Vision and Pattern Recognition (CVPR), 2020.
+      vances in Neural Information Processing Systems (NeurIPS),           7, 8
+      2020. 1, 2, 3, 5, 6, 7, 11, 12, 13, 16, 17
+[29] Kemal Oksuz, Baris Can Cam, Sinan Kalkan, and Emre Ak-          [42] Enze Xie, Peize Sun, Xiaoge Song, Wenhai Wang, Xuebo
+      bas. Imbalance problems in object detection: A review. IEEE          Liu, Ding Liang, Chunhua Shen, and Ping Luo. Polarmask:
+      Transactions on Pattern Analysis and Machine Intelligence            Single shot instance segmentation with polar representation.
+      (TPAMI), pages 1­1, 2020. 1, 2                                       In IEEE/CVF Conference on Computer Vision and Pattern
+[30] Jiangmiao Pang, Kai Chen, Jianping Shi, Huajun Feng,                  Recognition (CVPR), 2020. 8
+      Wanli Ouyang, and Dahua Lin. Libra R-CNN: Towards bal-
+      anced learning for object detection. In IEEE/CVF Confer-       [43] Hongkai Zhang, Hong Chang, Bingpeng Ma, Naiyan Wang,
+      ence on Computer Vision and Pattern Recognition (CVPR),              and Xilin Chen. Dynamic r-cnn: Towards high quality object
+      2019. 6, 15                                                          detection via dynamic training. In The European Conference
+[31] Qi Qian, Lei Chen, Hao Li, and Rong Jin. Dr loss: Improv-             on Computer Vision (ECCV), 2020. 6, 7, 15
+      ing object detection by distributional ranking. In IEEE/CVF
+      Conference on Computer Vision and Pattern Recognition          [44] Shifeng Zhang, Cheng Chi, Yongqiang Yao, Zhen Lei, and
+      (CVPR), 2020. 2                                                      Stan Z. Li. Bridging the gap between anchor-based and
+[32] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun.                anchor-free detection via adaptive training sample selection.
+      Faster R-CNN: Towards real-time object detection with re-            In IEEE/CVF Conference on Computer Vision and Pattern
+      gion proposal networks. IEEE Transactions on Pattern Anal-           Recognition (CVPR), 2020. 2, 4, 5, 6, 7, 12, 13, 14, 16
+      ysis and Machine Intelligence (TPAMI), 39(6):1137­1149,
+      2017. 1, 2, 5, 13, 15                                          [45] Xizhou Zhu, Han Hu, Stephen Lin, and Jifeng Dai. De-
+[33] Hamid Rezatofighi, Nathan Tsoi, JunYoung Gwak, Amir                   formable convnets v2: More deformable, better results.
+      Sadeghian, Ian Reid, and Silvio Savarese. Generalized in-            In IEEE/CVF Conference on Computer Vision and Pattern
+      tersection over union: A metric and a loss for bounding box          Recognition (CVPR), 2019. 6, 7
+      regression. In IEEE/CVF Conference on Computer Vision
+      and Pattern Recognition (CVPR), 2019. 4, 6, 12, 14             APPENDICES
+[34] Michal Rol´inek, V´it Musil, Anselm Paulus, Marin Vlastel-
+      ica, Claudio Michaelis, and Georg Martius. Optimizing rank-    A. Details of RS Loss
+      based metrics with blackbox differentiation. In IEEE/CVF
+      Conference on Computer Vision and Pattern Recognition             In this section, we present the derivations of gradients
+      (CVPR), 2020. 2                                                and obtain the loss value and gradients of RS Loss on an
+[35] F. Rosenblatt. The perceptron: A probabilistic model for        example in order to provide more insight.
+      information storage and organization in the brain. Psycho-
+      logical Review, pages 65­386, 1958. 2, 3                       A.1. Derivation of the Gradients
+[36] Abhinav Shrivastava, Abhinav Gupta, and Ross Girshick.
+      Training region-based object detectors with online hard ex-       The gradients of a ranking-based loss function can be
+      ample mining. In IEEE/CVF Conference on Computer Vision        determined as follows. Eq. 3 in the paper states that
+      and Pattern Recognition (CVPR), 2016. 7, 8
+[37] Jingru Tan, Xin Lu, Gang Zhang, Changqing Yin, and Quan-                                                       
+      quan Li. Equalization loss v2: A new gradient balance
+      approach for long-tailed object detection. In IEEE/CVF              L 1                 xji -            xij  .
+      Conference on Computer Vision and Pattern Recognition                   =                                             (A.15)
+      (CVPR), 2021. 7, 15                                                 si     Z   
+[38] Zhi Tian, Chunhua Shen, Hao Chen, and Tong He. Fcos:
+      Fully convolutional one-stage object detection. In IEEE/CVF                      j P N            j P N
+      International Conference on Computer Vision (ICCV), 2019.
+      2, 12, 13                                                      Our identity update reformulation suggests replacing xij
+[39] Jiaqi Wang, Kai Chen, Rui Xu, Ziwei Liu, Chen Change Loy,       by Lij which yields:
+      and Dahua Lin. Carafe: Content-aware reassembly of fea-
+      tures. In IEEE/CVF International Conference on Computer                                                       
+      Vision (ICCV), 2019. 5, 6, 7, 14
+                                                                          L 1                                  Lij  .
+                                                                              =                  Lji -                      (A.16)
+                                                                          si        Z  
+
+                                                                                          j P N         j P N
+
+                                                                     We split both summations into two based on the labels of
+
+                                                                     the  examples,  and  express  L   using  four  terms:
+                                                                                                   si
+
+                                                                                                                            
+
+                                                                     L 1
+                                                                          =       Lji + Lji - Lij                   - Lij  .
+                                                                     si       Z
+                                                                                     jP       jN        jP              jN
+
+                                                                                                                            (A.17)
+Then simply by using the primary terms of RS Loss, defined               the terms and pS(j|i) = 1 since pS(j|i) is a pmf:
+in Eq. 9 in the paper as:
+                                                                                                 jP
+
+                                                                                   Lij =          S(i) - S(i) pS(j|i),                    (A.22)
+                                                                                                                                          (A.23)
+              R(i) - R (i) pR(j|i),        for i  P, j  N                      jP          jP                                             (A.24)
+                                           for i  P, j  P,
+                                           otherwise,
+
+Lij = S(i) - S(i) pS(j|i),                                                                                                             1
+
+        0,                                                                              =    S(i) -          (i)      pS (¨j |¨i¨ B),
+                                                                                                          S           ¨
+
+                                                           (A.18)                                                 j¨P
+                                                                                                                  ¨
+
+                                                                                        =    S(i) -       (i).
+                                                                                                       S
+
+With the primary term definitions, we obtain the gradients         · Similarly, Lij reduces to R(i) - R(i):
+of RS Loss using Eq. A.17.
+Gradients for i  N . For i  N , we can respectively                                     jN
+express the four terms in Eq. A.17 as follows:
+
+                                                                                   Lij =          R(i) - R(i) pR(j|i) (A.25)
+                             R
+·       Lji =        R(j) -        (j)     pR(i|j),                         jN             jN
+
+   jP          jP                                                                                                                      1
+
+· Lji = 0 (no negative-to-negative error is defined                                     =    R(i) -          (i)         pR¨(j|¨iB ¨) (A.26)
+                                                                                                          R
+   jN                                                                                                                    ¨
+
+  for RS Loss ­ see Eq. A.18),                                                                                     j¨N
+                                                                                                                  ¨
+
+                                                                                        = R(i) - R (i).                                   (A.27)
+
+· Lij = 0 (no error when j  P and i  N for Lij                     Combining these four cases together, we have the following
+                                                                   gradient for i  P:
+   jP
+
+  ­ see Eq. A.18),
+
+                                                                                     
+
+· Lij = 0 (no negative-to-negative error is defined                LRS = 1                   S(j) - S(j) pS(i|j)                            (A.28)
+                                                                   si          |P |                                                       . (A.29)
+   jN
+                                                                                         jP
+  for RS Loss ­ see Eq. A.18),
+
+which, then, can be expressed as (by also replacing Z = |P|                     -    S(i) -       (i)  -        R(i) -      (i)
+following the definition of RS Loss):                                                          S                         R
+
+                                                                   Finally, for clarity, we rearrange the terms also by using
+
+                                                     0                 (i)  -  RS(i) = -( S(i) -             (i))  -  (  R(i) -           (i)):
+                                                              0    RS                                     S                            R
+                                        0
+LRS      1
+ si  =  |P |         Lji  + L&j& bi - Lij - L&ib &j ,                                                                                  
+                                                                                                             S(j) - S(j) pS(i|j) ,
+
+               jP         jN&              jP           jN&         1           (i)  -  RS(i) +                                     (A.30)
+                          &                             &          |P |     RS
+                                                                         
+
+                                                           (A.19)                                 jP
+
+         1                            0                    (A.20)  concluding the derivation of the gradients when i  P.
+     =               R(j) - ¨R¨(j¨ B) pR(i|j),             (A.21)
+                                                                   A.2. More Insight on RS Loss Computation and
+        |P |                                                              Gradients on an Example
+
+                 jP                                                   In Fig. A.4, we illustrate the input and the computation
+                                                                   of RS Loss. We emphasize that our Identity Update pro-
+        1                                                          vides interpretable loss values when the target value is non-
+     =               R(j)pR(i|j),                                  zero (Fig. A.4(b)). Previous work [6, 28] fail to provide
+        |P |                                                       interpretable loss values.
+              jP
+                                                                      Computation of the Loss. To compute the loss follow-
+concluding the derivation of the gradients if i  N .               ing the three-step algorithm in the paper, the first and the
+Gradients for i  P. We follow the same methodology for             third steps are trivial (Fig. 2 in the paper), thus, here we
+i  P and express the same four terms as follows:                   present in Fig. A.5 (a) how the primary terms (Lij) are
+                                                                   computed for our example (Fig. A.4) following Eq. A.18.
+·       Lji =        S(j) -     (j)     pS (i|j ),
+                             S                                        Optimization of the Loss. Fig. A.5(b) presents and dis-
+                                                                   cusses the gradients obtained using Eq. A.19, A.30.
+   jP          jP
+
+· Lji = 0 (no error when j  N and i  P for Lji
+
+   jN
+
+  ­ see Eq. A.18),
+
+· Lij reduces to S(i) - S(i) simply by rearranging
+
+   jP
+Input id, i (   is underlined)                01234567                                 (a) Obtaining Primary Terms
+
+(a) Input of RS Loss (positive if  > 0; else negative)                                                          Primary terms of i=4            Primary terms of i=6
+                                                                                       Current Errors  4 = 0.40  4 = 0.30                   6 = 0.43  6 = 0.38
+Logits,                               3.00 2.00 1.00 0.00 -1.00 -2.00 -3.00 -4.00                                                      0416235
+                                                                                                                                            6 = 0.00  6 = 0.38
+Labels,                               0.90 0.40 0.00 0.00 0.80 0.00 0.10 0.00          Target Ranking 0 4 1 2 3
+                                                                                                                                      0.00 0.00 0.33 0.33 0.00 0.33 0.00
+                                                                                       Target Errors  4 = 0.00  4 = 0.15
+
+(b) Current&target error and RS Loss on each    (N/A: negatives; bold: non-zero loss)   (| )       0.00 0.00 0.50 0.50 0.00
+
+Current ranking error,                0.00 0.00 N/A N/A 0.40 N/A 0.42 N/A              (|)         0.00 1.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00
+Current sorting error,                0.10 0.35 N/A N/A 0.30 N/A 0.38 N/A
+
+Target ranking error,                 0.00 0.00 N/A N/A 0.00 N/A 0.00 N/A               :          0.00 0.15 0.20 0.20 0.00 0.00 0.00 0.14 0.14 0.00 0.14 0.00
+Target sorting error,                 0.10 0.35 N/A N/A 0.15 N/A 0.38 N/A
+                                                                                       (b) Gradients of RS Loss
+Ranking Loss,   -                     0.00 0.00 N/A N/A 0.40 N/A 0.42 N/A                                                                             Promote  i.e.      <  0
+                                                                                                      0.00 0.15 0.34 0.34 -0.55 0.14 -0.43 0.00                      si
+Sorting Loss,   -                     0.00 0.00 N/A N/A 0.15 N/A 0.00 N/A
+                                                                                          A positive with a high logit but small                                         >  0
+Total Loss, (  +  ) - (  +   ) 0.00 0.00 N/A N/A 0.55 N/A 0.42 N/A                                  label will be demoted.                            Demote,  i.e.  si
+
+RS Loss,  (average over total losses) : 0.24
+
+Figure A.4. An example illustrating the computation of RS Loss.                        Figure A.5. An example illustrating the computation of primary
+(a) The inputs of RS Loss are logits and continuous labels (i.e.
+IoU). (b) Thanks to the "Identity Update" (Section 3.2 in the pa-                      terms in RS Loss. (a) The computation of primary terms. We only
+per), the loss computed on each example considers its target error,
+hence, it is interpretable. E.g. i = 0, 1, 6 have positive current                     show the computation for positives i = 4 and i = 6 since for
+sorting errors, but already sorted properly among examples with
+larger logits, which can be misleading when loss value ignores the                     i = 0 and i = 1 the total loss is 0 (see Fig. A.4(b)); and RS Loss
+target error. Since RS Loss is computed only over positives, N/A
+is assigned for negatives.                                                             does not compute error on negatives by definition (i.e. discretizes
+
+                                                                                       the space only on positives). To compute primary terms, Lij, one
+
+                                                                                       needs current errors, target errors and pmfs for both ranking and
+
+                                                                                       sorting, which are included in the figure respectively. In order to
+
+                                                                                       compute the target errors on a positive i  P, the examples are first
+
+                                                                                       thresholded from si and the ones with larger (i.e. sj  si) logits
+
+                                                                                       are obtained. Then, target rankings are identified using continu-
+
+B. Analyses                                                                            ous labels. The ranking and sorting errors computed for the target
+
+                                                                                       ranking determines target errors,              R (i) and       (i).    The ranking
+                                                                                                                                                   S
+
+   Section B.1 presents our experiments to validate our de-                            and sorting losses,  R(i) -           (i)      and  S(i) -        (i)  respectively,
+sign choices and Section B.2 discusses the drawbacks of                                                             R                                 S
+aLRP Loss, and how we fix them.
+                                                                                       are then distributed over examples causing these losses uniformly
+B.1. Analysis to Determine Design Choices in Lo-
+       calisation Loss                                                                 via pmfs pS(j|i) and pR(j|i) to determine pairwise errors, i.e.
+
+   In this section, we provide our analysis on ATSS [44]                               primary terms. (b) The gradients are obtained simply by using
+to determine our design choices for localisation. First, as
+a baseline, we train ATSS network with the following loss                              primary terms as the update in Eq. 3 following identity update
+function:
+                                                                                       yielding Eq. 11 and A.30 for negatives and positives respectively.
+
+                                                                                       Thanks to the novel sorting objective, RS Loss can assign a gra-
+
+                                                                                       dient to suppress a positive example when it is not ranked among
+
+                                                                                       positives accordingly wrt its continuous label (e.g. i = 1).
+
+          LRS-AT SS = LRS + boxLbox,                                 (A.31)            where LGIoU (^bi, bi) is the GIoU Loss [33], and wi is the
+                                                                                       instance-level importance weight. Unlike no prioritization
+where LRS is our Rank & Sort Loss, box is the task-level                               (i.e. wi = 1 for i  P), recently, a diverse set of heuris-
+balancing coefficient and Lbox is the box regression loss.
+                                                                                       tics assigns different importances over i  P: centerness-
+First, we investigate two tuning-free heuristics
+                                                                                       based importance [38, 44] aims to focus on the proposals
+to determine box every iteration: (i) value-based:
+box = LRS/Lbox, and (ii) magnitude-based:                                              (i.e. point or anchor) closer to the center of bi, score-based
+                                                                                       heuristic [18] uses the maximum of confidence scores of
+box =     / LRS            Lbox  where |·| is L1 norm, b^ and                          a prediction as wi, IoU-based approach [17] increases the
+                            b
+            ^s                                                                         losses of the predictions that are already better localized by
+                                                                                       wi = IoU(^bi, bi), and finally ranking-based weighting [28]
+s are box regression and classification head outputs respec-
+
+tively. Table A.11 presents that value-based task balancing
+
+performs similar to tuning box ( 0 AP on average).                                     uses wi  =   1               H(xki )  , where H(·) can be smoothed
+   Secondly, we delve into Lbox, which is defined as the                                           |P |             rank(k)
+
+weighted average of the individual losses of examples:                                                   kP
+
+                                wi                                                     by an additional hyper-parameter (loc). Note that these
+                                  wj
+          Lbox =                      LGI               (^bi,  bi),  (A.32)            instance-level weighting methods perform similarly (largest
+
+                                              oU                                       gap is 0.2 AP ­ Table A.11) and we prefer score-based
+
+                         iP jP                                                         weighting with RS Loss.
+Table A.11. Comparison of instance- and task-level weighting         ply use linear scheduling hypothesis and set it to 0.024
+                                                                     without further validation. Here, following aLRP Loss
+methods on RS-ATSS. Instance-level importance weighting meth-        (and AP Loss), the test image size is 833 × 500.
+
+ods yield similar performance and value-based SB achieves similar
+performance with constant weighting. Thus, we use score-based
+
+weighting and value-based SB with RS Loss (underlined&bold),            Table A.12 presents the results and we observe the fol-
+                                                                     lowing:
+which are both tuning-free.
+
+                             Task-level balancing coefficient (r)
+
+Instance-level importance Constant weighting Self-balance (SB)       1. For both "heavy training" and "standard training",
+                                                                        aLRP Loss has significantly lower performance after
+weight (wi)                  1 2 3 value magnitude                      the first epoch (17.7 AP vs. 9.2 AP for heavy training
+                                                                        and 22.0 AP vs. 14.4 AP) compared to RS Loss: aLRP
+No prioritization            38.9 39.7 39.7 39.7 39.4                   Loss has a bounded range between 0 and 1, which is
+                                                                        dominated by the classification head especially in the
+Centerness-based [38] 38.8 39.8 39.6 39.6 39.5                          beginning of the training, and hence, the box regres-
+                                                                        sion head is barely trained. To tackle that, Oksuz et
+Score-based [18]             39.1 39.8 39.7 39.9 39.7                   al. [28] dynamically promotes the loss of box regres-
+                                                                        sion head using a self-balance weight, initialized to 50
+IoU-based [17]               39.0 39.7 39.8 39.7 39.6                   and updated based on loss values at the end of every
+                                                                        epoch. However, we observed that this range pressure
+Ranking-based [28] 39.1 39.9 39.6 39.9 39.6                             has an adverse effect on the performance especially at
+                                                                        the beginning of the training, which could not be fully
+Table A.12. Due to epoch-based self-balance and competition of          addressed by self-balance since in the first epoch the
+                                                                        SB weight is not updated.
+tasks for the limited range, aLRP Loss performs significantly
+
+worse in the first epoch. When the model is trained longer using
+
+heavy training (i.e. 100 epochs, SSD-style augmentation [25]),
+
+the default configuration of aLRP Loss, the performance gap rel-
+
+atively decreases at the end of training, however, the gap is still
+
+significant ( 2 AP) for the standard training (i.e. 12 epochs, no
+
+SSD-style augmentation [25]). All experiments are conducted on
+
+Faster R-CNN.      Heavy Training Standard Training
+       Loss
+
+Function Epoch 1 Epoch 100 Epoch 1 Epoch 12
+
+aLRP Loss [28] 9.4           40.7 14.4 37.4                          2. While the gap between RS Loss and aLRP Loss is 0.5
+                                                                        AP for "heavy training", it is 2.2 AP for "standard
+RS Loss         17.7 41.2 22.0 39.6                                     training". After the SB weight of aLRP Loss is up-
+                                                                        dated, the gap can be reduced when the models are
+B.2. A Comparative Analysis with aLRP Loss                              trained for longer epochs. However, the final gap is
+                                                                        still large ( 2 AP) for "standard training" with 12
+   In this section, we list our observations on aLRP Loss               epochs since unlike aLRP Loss, our RS Loss (i) does
+[28] based on our comparative analysis with RS Loss:                    not have a single bounded range for which multiple
+                                                                        tasks compete, and (ii) uses an iteration-based self-
+   Observation 1: Tasks competing with each other                       balance instead of epoch-based.
+within the bounded range of aLRP Loss degrades per-
+formance especially when the models are trained 12                      Observation 2: The target of aLRP Loss does not
+epochs following the common training schedule.                       have an intuitive interpretation.
+
+   To illustrate this, we train Faster R-CNN [32] with aLRP             Self-balance (or range pressure ­ see Observation 1) is
+Loss and our RS Loss using two different settings:                   not the single reason why RS Loss performs better than
+                                                                     aLRP Loss in both scheduling methods in Table A.12.
+   · "Standard Training", which refers to the common                 aLRP Loss uses the following target error for a positive ex-
+      training (e.g. [32, 38, 44]): The network is trained by        ample i:
+      a batch size of 16 images with resolution 1333 × 800
+      without any augmentation except the standard horizon-                          (i)   =  Eloc(i) ,       (A.33)
+      tal flipping. We use 4 GPUs, so each GPU has 4 im-                    aLRP              rank(i)
+      ages during training. We tune the learning rate of aLRP
+      Loss as 0.009 and for our RS Loss we set it to 0.012.          where
+      Consistent with the training image size, the test image
+      size is 1333 × 800.                                                   Eloc(i)  =  1  -  IoU(^bi, bi) ,  (A.34)
+                                                                                              1-
+   · "Heavy Training", which refers to the standard training
+      design of aLRP Loss (and also AP Loss): The network            and  is the positive-negative assignment threshold. How-
+      is trained by a batch size of 32 images with resolution        ever, unlike the target of RS Loss for specifying the error at
+      512 × 512 on 4 GPUs (i.e. 8 images/GPU) using SSD-             the target ranking where positives are sorted wrt their IoUs
+      syle augmentation [25] for 100 epochs. We use the ini-         (see Fig. A.5), the target of aLRP Loss does not have an
+      tial learning rate of 0.012 for aLRP Loss as validated         intuitive interpretation.
+      in the original paper, and for our RS Loss, we sim-
+Table A.13. Using an additional loc to smooth the effect of     Table A.14. We set RS = 0.50, the only hyper-parameter of RS
+ranking-based weighting can contribute to the performance.      Loss, in all our experiments.
+
+   loc 0.00 0.50 1.00 1.50 2.00 Default                              RS 0.25 0.40 0.50 0.60 0.75 1.00
+    AP 39.3 39.4 39.8 39.9 39.8 39.5                                 AP 39.0 39.7 39.9 39.7 39.8 39.4
+
+                                                                Table A.15. RS Loss improves strong baseline Cascade R-CNN
+
+   Observation 3: Setting  in Eq. A.34 to the value             [2].
+of the positive-negative (anchor IoU) assignment thresh-
+old creates ambiguity (e.g. anchor-free detectors do not              Method  AP  AP50  AP75  oLRP 
+have such a threshold).
+                                                                Cascade R-CNN 40.3 58.6 44.0 67.0
+   We identify three obvious reasons: (i) Anchor-free meth-
+ods do not use IoU to assign positives and negatives, (ii) re-  RS Cascade R-CNN 41.3 58.9 44.7 66.6
+cent SOTA anchor-based methods, such as ATSS [44] and
+PAA [17], do not have a sharp threshold to assign posi-         from AP Loss and aLRP Loss, both of which smooth the
+tives and negatives, but instead they use adaptive thresh-      unit step function by using RS = 1.00 as validated by Chen
+olds to determine positives and negatives during training,      et al. [6].
+and furthermore (iii) anchor-based detectors split anchors
+as positives and negatives; however, the loss is computed       C.2. Training Cascade R-CNN [2] with RS Loss
+on the predictions which may have less IoU with ground
+truth than 0.50. Note that our RS Loss directly uses IoUs as       Table A.15 shows that using RS Loss to train Cascade
+the continuous labels without further modifying or thresh-      R-CNN (RS-Cascade R-CNN) also improves baseline Cas-
+olding them.                                                    cade R-CNN by 1.0 AP. We note that unlike the conven-
+                                                                tional training, we do not assign different loss weights over
+   Observation 4: Using an additional hyper-parameter           each R-CNN.
+(loc) for ranking-based weighting yields better perfor-
+mance for the common 12 epoch training.                         C.3. Hyper-parameters of R-CNN Variants in Table
+                                                                       1 of the Paper
+   As also discussed in Section B.1, ranking-based impor-
+tance weighting of the instances corresponds to:                   A two-stage detector that uses random sampling and
+                                                                does not employ a method to adaptively set tk has at least 7
+                                                                hyper-parameters since (i) for random sampling, one needs
+                                                                to tune number of foreground examples and number of
+wi = 1  H(xki)  .    (A.35)                                     background examples to be sampled in both stages (4 hyper-
+|P |      rank(k)                                               parameters), and (ii) at least 3 tks need to be tuned as the
+      kP                                                        task-balancing coefficients in a loss with four components
+                                                                (Eq. 1 in the paper). As a result, except aLRP Loss and
+aLRP Loss, by default, prefers not to smooth the nominator      our RS Loss, all methods have at least 7 hyper-parameters.
+(H(xki)) but rank(k) is computed by the smoothed unit-          When the box regression losses of RPN and R-CNN are L1
+step function. We label this setting as "default" and intro-    Loss, GIoU Loss or AutoLoss, and the network has not an
+duce an additional hyper-parameter loc to further analyse       additional auxiliary head, 7 hyper-parameters aree sufficient
+ranking-based weighting. Note that the larger loc is, the       (i.e. GIoU Loss [33], Carafe FPN [39] and AutoLoss-A
+less effect the logits will have on wi (Eq. A.32). In Ta-       [24]). Below, we list the methods with more than 7 hyper-
+ble A.13, we compare these different settings on RS-ATSS        parameters:
+trained for 12 epochs with our RS Loss, and observe that
+the default ranking-based weighting can be improved with           · FPN [21] uses Smooth L1 in both stages, resulting in
+different loc values. However, for our RS Loss, we adopt              2 more additional additional hyper-parameters () to
+score-based weighting owing to its tuning-free nature.                be tuned for the cut-off from L2 Loss to L1 Loss for
+                                                                      Smooth L1 Loss.
+C. More Experiments on RS Loss
+                                                                   · IoU-Net [15] also has Smooth L1 in both stages. Be-
+   This section presents the experiments that are omitted             sides, there is an additional IoU prediction head trained
+from the paper due to space constraints.                              also by Smooth L1, implying kt for IoU predic-
+                                                                      tion head and  for Smooth L1. In total, there are
+C.1. Effect of RS, the Single Hyper-parameter, for                    7 hyper-parameters in the baseline model, and with
+       RS Loss.                                                       these 4 hyper-parameters, IoU-Net includes 11 hyper-
+                                                                      parameters.
+   Table A.14 presents the effect of RS on RS Loss us-
+ing ATSS. We observe similar performance between RS =
+0.40 and RS = 0.75. Also note that considering positive-
+to-positive errors in the sorting error, we set RS different
+Table A.16. Analysis whether using continuous labels is useful         1. The random samplers from both stages (i.e. from RPN
+                                                                           and R-CNN) are removed.
+for instance segmentation. We use IoU to supervise instance seg-
+                                                                       2. The O + 1-way softmax classifier, where O is the
+mentation methods except SOLOv2, in which we use Dice coeffi-              number of classes in the dataset, is replaced by O bi-
+                                                                           nary (i.e. class-wise) sigmoid classifiers for the second
+cient since bounding boxes are not included in the output. Using           stage of Faster R-CNN (i.e. R-CNN)1.
+
+Dice coefficient also provides similar performance with IoU. Bi-        Note that in order to present the actual imbalance ratio
+                                                                     between positives (pos) and negatives (neg), one needs to
+nary refers to the conventional training (i.e. only ranking without  track the actual task ratio resulting from the binary sigmoid
+                                                                     classifiers. That is, with O individual binary sigmoid clas-
+sorting) without continuous labels.                                  sifiers, each positive instance (e.g. anchor, proposal/region-
+                                                                     of-interest) yields 1 pos and O - 1 neg tasks, and each neg-
+Label  Segmentation                  Detection                       ative instance yields O negative tasks (also refer to Section
+                                                                     3.1 of Tan et al. [37] for details). To illustrate (Table A.17),
+       AP AP50 AP75 AP AP50 AP75                                     when we aim 1:3 pos:neg instance ratio for R-CNN by us-
+                                                                     ing a random sampler, as conventionally done, the actual
+Binary 29.1 49.9 29.4 32.9 53.8 34.2                                 instance pos:neg ratio turns out to be 1:8 since the sampler
+                                                                     pads the fixed batch size (i.e. in terms of proposals/regions-
+IoU    29.9 50.5 30.6 33.8 54.2 35.4                                 of-interest, which is 256 in this case) with negative in-
+                                                                     stances when there is no enough positives. On the other
+Dice   29.8 50.4 30.2 33.5 54.3 35.1                                 hand, the actual task pos:neg ratio is 1:702, implying that
+                                                                     the pos:neg ratio of instances is not representative. As a re-
+(IoU+Dice)/2 29.6 50.2 30.0 33.4 54.1 34.8                           sult, we consider the actual task pos:neg ratio as the actual
+                                                                     imbalance ratio.
+   · To train R-CNN, Libra R-CNN [30] uses IoU-based
+      sampler, which splits the negatives into IoU bins with            Robustness of RS Loss to Imbalance. In order to show
+      an IoU interval width of , then also exploits random           that RS Loss is robust to different degrees of imbalance
+      sampling. Besides it uses Balanced L1 Loss which               without tuning, we trained (i) three Faster R-CNN [32] on
+      adds 2 more hyper-parameters to Smooth L1 Loss (3              COCO dataset [23] by gradually removing the random sam-
+      hyper-parameters in total). As a result, Libra R-CNN           pler from both stages and also (ii) one Mask R-CNN on
+      has 11 hyper-parameters in sampling and loss function          LVIS dataset [11] as an extremely imbalanced case. Ta-
+      in total.                                                      ble A.17 presents pos:neg instance and task ratios averaged
+                                                                     over the iterations during the first epoch2:
+   · Dynamic R-CNN [43] uses Smooth L1 for RPN and
+      adds one more hyper-parameter to the Smooth L1, re-               · When the random samplers are removed from both
+      sulting in 3 additional hyperparameters. As a result, it             stages, the actual pos:neg task ratio increases. Specif-
+      has 10 hyper-parameters.                                             ically, due to the large number of anchors used for
+                                                                           training RPN, actual pos:neg task ratio increases sig-
+C.4. Using Different Localisation Qualities as Con-                        nificantly for RPN (from 1:7 to 1:6676). As for R-
+       tinuous Labels to Supervise Instance Segmen-                        CNN, this change is not as dramatic as RPN on COCO
+       tation Methods                                                      dataset after the sampler is removed (from 1:702 to
+                                                                           1:1142 ­ compare "Random" and "None" for R-CNN
+   In order to provide more insight regarding the employ-                  in Table A.17) since R-CNN is trained with top-1000
+ment of continuous labels for the instance segmentation                    scoring region-of-interests (instead of all anchors in
+methods, we train YOLACT under four different settings:                    RPN) and COCO dataset has 80 classes. Note that RS
+(i) without using continuous labels (c.f. "Binary" in Table                Loss can train all three configurations (whether ran-
+A.16) (ii) using IoU, the bounding box quality, as the con-                dom sampling is removed or not) for COCO dataset
+tinuous label (iii) using Dice coefficient, the segmentation
+quality, as the continuous label and (iv) using the average              1Note that RPN, which aims to determine "objectness", is already im-
+of IoU and Dice coefficient as the continuous label. Table           plemented by a single sigmoid classifier in mmdetection [8]. Hence, no
+A.16 suggests that all of these localisation qualities improve       modification is required for the classifier of RPN.
+performance against ignoring them during training. There-
+fore, we use IoU as the continuous ground truth labels in                2Note that since the anchors, fed to the first stage (i.e. RPN), are fixed
+all of our experiments with the exception of RS-SOLOv2,              in location, scale and aspect ratio during the training, the imbalance ratios
+in which we used Dice coefficient, yielding similar perfor-          in the first epoch also applies for all epochs for RPN; on the other hand, for
+mance to using IoU (Table A.16), since SOLOv2 does not               R-CNN the number of negatives for each positive may increase in the latter
+have a box regression head.                                          epochs since the RPN will be able to classify and locate more objects.
+
+C.5. Details of the Ablation Analysis on Different
+       Degrees of Imbalance
+
+   This section presents details on the discussion on robust-
+ness of RS Loss to imbalance (Section 6.3 in the paper).
+
+   Experimental Setup. Using RS Loss on multi-stage vi-
+sual detectors (e.g. Faster R-CNN or Mask R-CNN) in-
+volves two major changes in the training pipeline:
+      successfully, and when more data is available (i.e.                  C.6.1 Effect on Training Efficiency
+      sampler is "None"), the performance improves from
+      38.5 to 39.6.                                                        Similar to other ranking based loss functions (i.e. AP Loss
+                                                                           [6] and aLRP Loss [28]), RS Loss has also quadratic time
+   · When we train Mask R-CNN using RS Loss on the                         complexity, and as a result, one training iteration of RS Loss
+      long-tailed LVIS dataset without any samplers, we                    takes 1.5× more on average (Table A.19).
+      observed that unlike COCO dataset, R-CNN training
+      is extremely imbalanced (actual pos:neg task ratio is                C.6.2 Effect on Inference Efficiency
+      1:10470) due to the large number of classes in LVIS
+      dataset. Still, our RS Loss achieves SOTA perfor-                    We observed that the methods trained by RS Loss yield
+      mance despite this extreme imbalance (see also Table                 larger confidence scores than the baseline methods, which
+      5 in the paper).                                                     are trained by score-based loss functions (e.g. Cross-
+                                                                           entropy Loss). As a result, for inference efficiency, the score
+   As a result, we conclude that RS Loss can easily be in-                 threshold to discard detections associated with background
+corporated to train data with different levels of imbalance.               before Non-Maximum Suppression (NMS) should be set
+                                                                           carefully4. Here, we provide examples using multi-stage
+   Are Score-based Loss Functions Robust to Imbalance                      visual detectors on two datasets:
+Without Tuning? Here, we investigate how Cross-entropy
+Loss and Focal Loss behave when samplers are removed                          · COCO dataset. Faster R-CNN and Mask R-CNN
+without any tuning.                                                              use 0.05 as the confidence score threshold on COCO
+                                                                                 dataset when they are trained by Cross-entropy Loss,
+   Cross-entropy Loss. As a fair baseline for our RS Loss,                       that is, all the detections with confidence score less
+we use Faster R-CNN with GIoU Loss and only remove                               than 0.05 are regarded as background (i.e. false pos-
+random sampling gradually similar to how we did for RS                           itive), and they are simply removed from the detec-
+Loss. Table A.18 shows that, as opposed to our RS Loss,                          tion set before NMS. Keeping this setting as 0.05,
+the performance significantly drops once the samplers are                        RS-R-CNN with ResNet-50 reaches 39.6 AP and 67.9
+removed for Cross-entropy Loss, and hence Cross-entropy                          oLRP but with slower inference time than the baseline
+Loss cannot be directly employed to train different levels of                    Cross-entropy Loss, which has 21.4 fps. Then, tun-
+imbalance unlike our RS Loss.                                                    ing this score threshold to 0.40, Faster R-CNN trained
+                                                                                 by our RS Loss performs exactly the same (see 39.6
+   Focal Loss. There are many design choices that one                            AP and 67.9 oLRP in Table A.19) at 22.5 fps, slightly
+needs to tune in order replace the standard Cross-entropy                        faster than the baseline Faster R-CNN. Table A.19
+Loss by Focal Loss. Here, instead of tuning each of these                        presents the results on Faster R-CNN and Mask R-
+extensively, we use a commonly used setting in one-stage                         CNN with the tuned confidence score threshold, that is
+detectors [18, 22, 44] to train RPN and R-CNN. In partic-                        0.40. While the performance of models in Table A.19
+ular, we use individual class-wise binary sigmoid classifier                     in terms of oLRP is always equal to the ones with con-
+(as we also did for RS Loss), set the learning rate to 0.01,                     fidence score of 0.05, in some rare cases we observed
+the weight of GIoU Loss to 2 and the bias terms in the last                      negligible performance drop (i.e. up to 0.01 AP points,
+layer of the classification head3 such that the confidence                       e.g. RS Faster R-CNN+ drops from 40.8 AP to 40.7
+scores of the positives are 0.01 to prevent destabilization                      AP).
+of the training due to large loss value originating from neg-
+atives. However, we observed that Focal Loss is not able to                   · LVIS dataset. Table A.21 presents the results of Mask
+perform as good as Cross-entropy Loss and RS Loss with                           R-CNN on LVIS dataset. Similar to COCO dataset,
+this configuration (Table A.17). Hence, as a generalisation                      when we use RS Loss, we prefer a larger confidence
+of Cross-entropy Loss, Focal Loss at least needs to be tuned                     score threshold, that is 0.60, and also we observe that
+carefully in order to yield better performance.                                  RS Loss is robust to this threshold choice, while the
+                                                                                 performance of the standard Mask R-CNN degrades
+   As a result, we conclude that common score-based loss                         rapidly when the score threshold increases. As a re-
+functions (i.e. Cross-entropy Loss and Focal Loss) cannot                        sult, when the score threshold is set accordingly, our
+handle different degrees of imbalance without tuning; while                      RS-Mask R-CNN yields 25.2 AP at 11.7 fps, which
+our RS Loss can.                                                                 outperforms the baseline Mask R-CNN with 21.7 AP
+                                                                                 at 11.0 fps in the best confidence score setting.
+C.6. Effect of RS Loss on Efficiency
+                                                                               4We keep the default settings of the methods in the paper
+   We discuss the effect on efficiency on two levels: (i)
+training and (ii) inference.
+
+    3Note that we also do not tune this bias term for our RS Loss and use
+the default setting for all the detectors that we train.
+Table A.17. Ablation with different degrees of imbalance. Positive:negative (pos:neg) ratios averaged over the iterations of the first epoch
+
+of training with RS Loss on different datasets & samplers. For each pos instance, e.g. anchor, random sampler aims to sample 1 neg
+
+instance in RPN and 3 neg instance in R-CNN. With no sampler (None), there is no desired pos:neg instance ratio, i.e. not available -
+
+N/A. Note that when random sampler cannot find enough pos, the batch is padded with neg; accordingly, actual pos:neg instance ratio is
+
+computed after this padding. Since we use binary sigmoid classifiers on R-CNN; each neg instance has O neg tasks, and each pos instance
+
+has 1 pos and O - 1 neg tasks where O is the number of dataset classes. Using this, actual pos:neg task ratio (underlined) presents the
+
+actual imbalance ratio in the input of RS Loss. Quantitatively, the actual pos:neg task ratio varies between 1:7 to 1:10470. Despite very
+
+different degrees of imbalance, our RS Loss outperforms all counterparts without sampling and tuning in both datasets.
+
+Dataset  Sampler            desired pos:neg instance ratio actual pos:neg instance ratio actual pos:neg task ratio AP
+
+         RPN R-CNN RPN            R-CNN                             RPN     R-CNN  RPN R-CNN
+
+         Random Random 1:1        1:3                               1:7     1:8    1:7  1:702                           38.5
+
+COCO None Random 1:1              N/A                               1:6676  1:8    1:6676 1:702                         39.3
+
+         None None N/A            N/A                               1:6676  1:13   1:6676 1:1142 39.6
+
+LVIS None None N/A                N/A                               1:3487  1:12   1:3487 1:10470 25.2
+
+Table A.18. RS Loss is robust to class imbalance while score-
+
+based loss functions cannot handle imbalanced data in this case.
+
+RS Loss successfully trains Faster R-CNN with both relatively bal-
+
+anced ("Random" sampling) and severely imbalanced ("None" in
+
+the table) data. Numbers in parentheses show positive to negative
+
+ratio of sampled examples.
+
+Loss           RPN R-CNN AP AP50 AP75
+
+              Random Random 37.6 58.2 41.0
+
+Cross-entropy None Random 32.7 49.4 35.9
+
+               None None 30.1 45.3 33.2
+
+              Random Random 31.8 47.4 35.0
+
+Focal Loss [22] None Random 32.0 47.5 35.1
+
+               None None 30.7 44.6 34.2
+
+              Random Random 38.5 58.5 41.5
+
+RS Loss (Ours) None Random 39.3 59.6 42.3
+
+               None None 39.6 59.5 43.0
+
+Table A.19. Average iteration time of methods trained by the stan-
+
+dard loss vs. RS Loss. On average, training with RS Loss incurs
+
+ 1.5× longer time due to its quadratic time complexity similar
+
+to other existing ranking-based loss functions [6, 28].
+
+Method         Standard Loss (sec) RS Loss (sec)
+
+Faster R-CNN                0.42                         0.82
+
+Cascade R-CNN               0.51                         2.26
+
+ATSS                        0.44                         0.70
+
+PAA                         0.57                         0.99
+
+Mask R-CNN                  0.64                         1.04
+
+YOLACT                      0.57                         0.59
+
+SOLOv2-light                0.64                         0.90
+
+As a result, the models trained by our RS Loss outputs
+larger confidence scores, and accordingly, the score thresh-
+old needs to be adjusted accordingly for better efficiency.
+Table A.20. Comprehensive performance results of models trained by RS-Loss on COCO minival. We report AP-based and oLRP-based
+
+performance measures, an also inference time on a single Tesla V100 GPU as fps. We set NMS score threshold of RS-R-CNN and RS-Mask
+
+R-CNN to 0.40 for COCO dataset.
+
+Method                 Backbone Epoch MS train  AP AP50  AP75  oLRP  oLRPLoc  oLRPFP  oLRPFN  fps
+
+Object Detection
+
+RS-Faster R-CNN        R-50      12  ­          39.6 59.5  43.0  67.9  16.3  27.8  45.4 22.5
+
+RS-Mask R-CNN          R-50      12  ­          40.0 59.8  43.4  67.5  16.1  27.6  44.7 22.8
+
+RS-Faster R-CNN+       R-50      12  ­          40.7 61.4  43.8  66.9  16.3  26.4  43.7 21.5
+
+RS-Mask R-CNN+         R-50      12  ­          41.1 61.4  44.8  66.6  16.0  26.2  44.0 21.1
+
+RS-Mask R-CNN          R-101     36 [640, 800] 44.7 64.4   48.8  63.7  14.7  24.5  41.3 17.1
+
+RS-Mask R-CNN+         R-101     36 [480, 960] 46.1 66.2   50.3  62.6  14.5  23.5  39.9 16.6
+
+RS-Faster R-CNN R-101-DCN 36 [480, 960] 47.6 67.8          51.2  61.1  14.4  22.7  37.9 14.1
+
+RS-Faster R-CNN+ R-101-DCN 36 [480, 960] 47.6 68.1         51.9  60.9  14.7  20.9  38.2 13.6
+
+RS-Mask R-CNN+ R-101-DCN 36 [480, 960] 48.7 68.9           53.1  60.2  14.3  21.3  36.9 13.5
+
+RS-Mask R-CNN+ X-101-DCN 36 [480, 960] 49.9 70.0           54.3  59.1  14.0  20.3  36.2            6.4
+
+Instance Segmentation
+
+RS-Mask R-CNN          R-50      12  ­          36.4 57.3  39.2  70.1  18.2  28.7  46.5 17.1
+
+RS-Mask R-CNN+         R-50      12  ­          37.3 58.6  40.2  69.4  18.1  28.0  45.3 16.7
+
+RS-Mask R-CNN          R-101     36 [640, 800] 40.3 61.9   43.8  66.9  17.3  24.3  43.0 14.8
+
+RS-Mask R-CNN+         R-101     36 [480, 960] 41.4 63.6   44.7  65.9  17.1  22.8  42.2 14.3
+
+RS-Mask R-CNN+ R-101-DCN 36 [480, 960] 43.5 66.5           47.2  64.0  17.2  22.3  38.5 11.9
+
+RS-Mask R-CNN+ X-101-DCN 36 [480, 960] 44.4 67.8           47.7  63.1  17.1  21.1  37.7            6.0
+
+Table A.21. The performances of RS-Mask R-CNN and baseline Mask R-CNN (i.e. trained by Cross-entropy Loss) over different con-
+
+fidence score thresholds on LVIS v1.0 val set. RS-Mask R-CNN is robust to score threshold while the performance of Mask R-CNN
+
+degrades rapidly especially for rare classes. Our best method achieves 25.2 mask AP at 11.7 fps (bold), which is also slightly faster than
+
+the best performing method of Mask R-CNN (underlined). Accordingly, we set NMS score threshold of RS-Mask R-CNN to 0.60 for LVIS
+
+dataset. Inference time is reported on a single A100 GPU.
+
+Score threshold        APmask           Mask R-CNN         fps                      RS-Mask R-CNN  fps
+                                 APr APc APf APbox               APmask APr APc APf APbox
+
+10-4                   21.7 9.6 21.0 27.8 22.5 3.2 25.2 16.8 24.3 29.9 25.9 0.2
+
+10-3                   21.7 9.6 21.0 27.8 22.5 11.0 25.2 16.8 24.3 29.9 25.9 0.2
+
+10-2                   21.1 8.3 20.4 27.6 22.0 13.6 25.2 16.8 24.3 29.9 25.9 0.2
+
+0.10                   14.7 2.0 11.6 23.6 15.4 21.4 25.2 16.8 24.3 29.9 25.9 0.2
+
+0.40                   8.5 0.5 4.4 16.5 8.9 24.0 25.2 16.8 24.3 29.9 25.9 1.2
+
+0.60                   6.1 0.4 2.3 12.9 6.4 24.4 25.2 16.8 24.3 29.9 25.9 11.7
+
+0.80                   4.0 0.1 1.1 8.8 4.1 24.8 17.0 6.3 14.3 24.7 17.6 21.2
+

@@ -1,0 +1,10 @@
+def nsd_chain_plan_observation(plan,count):
+    groups=plan['groups'];owners=plan['edge_parent'];ties=sum(len(rows)>1 for rows in groups)
+    assert len(plan['left'])==len(plan['right'])==len(owners)
+    assert sorted(row for rows in groups for row in rows)==list(range(len(plan['point_to_coordinate'])))
+    parent_edges=[owners.count(parent) for parent in range(count)]
+    return {'actual_edge_count':len(owners),'actual_coordinate_tie_group_count':ties,
+        'actual_parent_count':count,'actual_singleton_or_empty_chain_parent_count':sum(n==0 for n in parent_edges),
+        'coordinate_ties_on_original_batch':'EXERCISED' if ties else 'NOT_EXERCISED',
+        'singleton_or_empty_chains_on_original_batch':'EXERCISED' if any(n==0 for n in parent_edges) else 'NOT_EXERCISED',
+        'optional_boundary_coverage_is_not_a_new_nonzero_or_resampling_gate':True}

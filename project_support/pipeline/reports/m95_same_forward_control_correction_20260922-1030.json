@@ -1,0 +1,299 @@
+{
+  "contract": "m95_same_forward_control_correction_v1",
+  "generated_at": "2026-09-22T10:30:00+08:00",
+  "scope": "CPU-only correction of one fallback in the any-seed objectness control. No model forward, queue mutation, admission, or training.",
+  "source_capture": {
+    "path": "pipeline/diagnostic_runs/m95_same_forward_20260922-0945/capture.json",
+    "sha256": "975c718ddefb122ef8368c117439e9562b9893bb40abf8d80d1fc31c05824c80"
+  },
+  "source_control": {
+    "path": "pipeline/reports/m95_same_forward_control_20260922-0955.json",
+    "sha256": "8f6cd55f2edf61dd4af05780108838444871af6194876ba35fcc4b777564d2ab"
+  },
+  "correction_rule": "When no query contains a seed inside any instance, the any-seed control has no valid candidate and is counted unsuccessful. The deployed argmax is not substituted.",
+  "fallback_rows_corrected": 1,
+  "summary": {
+    "expressions": 16,
+    "deployed_success": {
+      "pooled": 0.5,
+      "scene_balanced": 0.5,
+      "scene_bootstrap_95ci": {
+        "mean": 0.499225,
+        "lo": 0.25,
+        "hi": 0.75
+      }
+    },
+    "positive_success": {
+      "pooled": 0.9375,
+      "scene_balanced": 0.9375,
+      "scene_bootstrap_95ci": {
+        "mean": 0.9371,
+        "lo": 0.8125,
+        "hi": 1.0
+      }
+    },
+    "anyseed_success_original": {
+      "pooled": 0.9375,
+      "scene_balanced": 0.9375,
+      "scene_bootstrap_95ci": {
+        "mean": 0.9371,
+        "lo": 0.8125,
+        "hi": 1.0
+      }
+    },
+    "anyseed_success_corrected": {
+      "pooled": 0.875,
+      "scene_balanced": 0.875,
+      "scene_bootstrap_95ci": {
+        "mean": 0.8746125,
+        "lo": 0.75,
+        "hi": 1.0
+      }
+    }
+  },
+  "paired_delta": {
+    "positive_minus_deployed": {
+      "pooled": 0.4375,
+      "scene_balanced": 0.4375,
+      "scene_bootstrap_95ci": {
+        "mean": 0.437875,
+        "lo": 0.25,
+        "hi": 0.625
+      }
+    },
+    "anyseed_corrected_minus_deployed": {
+      "pooled": 0.375,
+      "scene_balanced": 0.375,
+      "scene_bootstrap_95ci": {
+        "mean": 0.3753875,
+        "lo": 0.25,
+        "hi": 0.5
+      }
+    }
+  },
+  "counts": {
+    "deployed_success": 8,
+    "positive_success": 15,
+    "anyseed_success_original": 15,
+    "anyseed_success_corrected": 14,
+    "anyseed_available": 15
+  },
+  "rows": [
+    {
+      "scene": "scene0031_00",
+      "ann_id": 24,
+      "expression_slot": 0,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9722222089767456,
+      "anyseed_query_corrected": 11,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0031_00",
+      "ann_id": 25,
+      "expression_slot": 1,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9166666865348816,
+      "anyseed_query_corrected": 2,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0031_00",
+      "ann_id": 26,
+      "expression_slot": 2,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9428571462631226,
+      "anyseed_query_corrected": 3,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0031_00",
+      "ann_id": 27,
+      "expression_slot": 3,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9047619104385376,
+      "anyseed_query_corrected": 0,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0673_00",
+      "ann_id": 40,
+      "expression_slot": 0,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9318181872367859,
+      "anyseed_query_corrected": 2,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0673_00",
+      "ann_id": 41,
+      "expression_slot": 1,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 1.0,
+      "anyseed_query_corrected": 2,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0673_00",
+      "ann_id": 42,
+      "expression_slot": 2,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.8627451062202454,
+      "anyseed_query_corrected": 4,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0673_00",
+      "ann_id": 43,
+      "expression_slot": 3,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.5909090638160706,
+      "anyseed_query_corrected": 0,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0505_00",
+      "ann_id": 120,
+      "expression_slot": 0,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 1.0,
+      "anyseed_query_corrected": 37,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0505_00",
+      "ann_id": 121,
+      "expression_slot": 1,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.9655172228813171,
+      "anyseed_query_corrected": 13,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0505_00",
+      "ann_id": 122,
+      "expression_slot": 2,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 1.0,
+      "anyseed_query_corrected": 27,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0505_00",
+      "ann_id": 123,
+      "expression_slot": 3,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": false,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": false,
+      "anyseed_iou_corrected": null,
+      "anyseed_query_corrected": null,
+      "fallback_correction_applied": true
+    },
+    {
+      "scene": "scene0315_00",
+      "ann_id": 92,
+      "expression_slot": 0,
+      "deployed_success": true,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.8787878751754761,
+      "anyseed_query_corrected": 0,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0315_00",
+      "ann_id": 93,
+      "expression_slot": 1,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 0.7142857313156128,
+      "anyseed_query_corrected": 6,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0315_00",
+      "ann_id": 94,
+      "expression_slot": 2,
+      "deployed_success": false,
+      "positive_success": true,
+      "anyseed_available": true,
+      "anyseed_success_original": true,
+      "anyseed_success_corrected": true,
+      "anyseed_iou_corrected": 1.0,
+      "anyseed_query_corrected": 15,
+      "fallback_correction_applied": false
+    },
+    {
+      "scene": "scene0315_00",
+      "ann_id": 95,
+      "expression_slot": 3,
+      "deployed_success": false,
+      "positive_success": false,
+      "anyseed_available": true,
+      "anyseed_success_original": false,
+      "anyseed_success_corrected": false,
+      "anyseed_iou_corrected": 0.20000000298023224,
+      "anyseed_query_corrected": 0,
+      "fallback_correction_applied": false
+    }
+  ],
+  "interpretation": "The original control receipt already records 15/16 positive and any-seed success; the 09:50 narrative claim of 13/16 is a downstream misquote. After correcting the unavailable any-seed fallback, the any-seed control still improves over deployed selection. The referent-identity claim remains confounded and is not admission evidence.",
+  "not_evidence_of": [
+    "admission",
+    "efficacy",
+    "population effect",
+    "referent-specific causality",
+    "target-independent objectness"
+  ]
+}

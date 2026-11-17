@@ -1,0 +1,12 @@
+{
+  "stage": "rejected",
+  "hypothesis_id": "model-caption-postfix-displaces-supervised-token-prefix",
+  "actual_test": "Full36665 native tokenizer prefix IDs/offsets with original model postfix,excluding EOS; frozen128 original six-role getter attached token IDs/offsets,wrong-prefix and identity controls.",
+  "result": "Full36665 token/offset drift0. Frozen768 role maps,226 empty roles explicitly excluded from active evidence,1236 active indices with0 drift,0 EOS and0 out-of-range. Wrong-prefix token/offset controls detect changes.",
+  "gate_result": "Original-postfix displacement prerequisite disconfirmed, not all parser/span correctness or full-model/backward/resources/efficacy.",
+  "next_action": "Do not implement an original-postfix token realignment. Revisit only on changed authorized tokenization/source or a reproducible actual assigned-token mismatch.",
+  "evidence": [
+    {"path": "pipeline/reports/token_postfix_audit_20261012_1319.json", "sha256": "1630b3c9de14f5e446fd684c4c01b6ea3feab2eae20233a301c740d2e52c9394"},
+    {"path": "scripts/token_postfix_audit_20261012_1319.py", "sha256": "03f1f04b493c1e79480831c37d53b365d659839cf895e97062ecd121b1210523"}
+  ]
+}

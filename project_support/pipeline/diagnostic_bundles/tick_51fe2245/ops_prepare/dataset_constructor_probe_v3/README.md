@@ -1,0 +1,9 @@
+# Constructor v3 — tiny AST guard correction, prepared only
+
+V2actualfa5a117073402596bab13c110e7ecb4f64d4127058ec10fab2356d442a38c0ff terminated before project carrier/uname launch: installed platform.from_subprocess omits encoding, while the harness indexed that keyword. This is a known harness overconstraint, not dependency/native-worker failure. System git/GPU identity prequeries were readonly terminal observations.
+
+Only behavioral delta: absent encoding is accepted as authentic default codec; explicit encoding remains restricted to utf8/utf-8. Exact uname-p/stderrDEVNULL/textTrue/caller-source/PATH/binary/stat/SHA checks and one-helper observation remain unchanged. Full installed platform function source is saved before keyword validation so errors preserve source evidence. Carrier bytes are identical to v2. Original Config.fromfile remains unchanged, its temporary/persistent writes remain denied, and Config adapter source is observed read-only. No platform monkeypatch, new compatibility behavior, network, arbitrary subprocess, sample/PTH, worker, operator assay, model/loss/GPU/training or root-cause claim.
+
+Reuses V1current-lease cache/source hashes only with unchanged stat identities; V1/V2frozen bytes and actuals retained. New v3directory and constructor_v3.intent/actual, no replay. DefaultNOP; exact distinct-peer source review required with owner/reviewer_thread_id/passedtrue/material_concerns[]/frozen_sha256/wrapper_sha256/body_sha256/carrier_sha256. Root run: current CODEX_THREAD_ID/Python-B/PYTHONDONTWRITEBYTECODE1/GIT_OPTIONAL_LOCKS0, run_constructor_once.py --execute-root --review ABS --review-sha256 SHA. Bounds60s/80s/88s, retainedJSON1MiB; uncertain helper/carrier/SSH retains PID without signals/retry. Full v2audit/fd/coverage/CPU/source constraints remain.
+
+AST and local hash checks only by author; no SSH or execution. Root cause UNKNOWN.

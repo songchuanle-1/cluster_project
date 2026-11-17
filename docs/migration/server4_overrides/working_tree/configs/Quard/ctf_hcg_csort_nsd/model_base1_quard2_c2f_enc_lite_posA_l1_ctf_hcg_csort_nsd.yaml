@@ -1,0 +1,148 @@
+work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+train:
+  seed: 1999
+  epochs: 50
+  interval: 1
+  pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+  save_epoch: 100
+  grad_clip: 0.1
+test:
+  seed: 1999
+  test_topk_per_scene: 100
+  test_score_thresh: 0.0
+  test_npoint_thresh: 100
+dataloader:
+  train:
+    batch_size: 2
+    num_workers: 4
+    persistent_workers: true
+  val:
+    batch_size: 1
+    num_workers: 2
+    persistent_workers: true
+  test:
+    batch_size: 1
+    num_workers: 1
+    persistent_workers: true
+data:
+  train:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: train
+    suffix: .pth
+    training: true
+    mode: 4
+    aug: true
+    with_elastic: true
+    use_xyz: true
+    voxel_cfg:
+      scale: 50
+      spatial_shape:
+      - 128
+      - 512
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 4
+  val:
+    type: scannetv2_sample_graph_edge
+    dataset: scanrefer
+    data_root: /home/songcl/data/data/
+    prefix: val
+    suffix: .pth
+    training: false
+    mode: 4
+    aug: false
+    with_elastic: false
+    use_xyz: true
+    voxel_cfg:
+      scale: 50
+      spatial_shape:
+      - 128
+      - 512
+      max_npoint: 2500000
+    max_des_len: 78
+    lang_num_max: 32
+model:
+  data_root: /home/songcl/data/data/
+  input_channel: 6
+  blocks: 5
+  block_reps: 2
+  media: 32
+  normalize_before: true
+  return_blocks: true
+  pool: mean
+  infer_mode: sem
+  fps_num: 256
+  task_type: res
+  sampling_module:
+    num_proposal: 128
+    pc_dim: 256
+    lang_dim: 256
+    d_model: 256
+  dec:
+    cluster_mode: ctf_hcg_csort
+    csort_weight: 0.01
+    num_layer: 6
+    d_model: 256
+    nhead: 8
+    hidden_dim: 1024
+    dropout: 0.0
+    activation_fn: gelu
+    iter_pred: true
+    contrastive_align_loss: true
+    num_proposal_fine: 512
+    cluster_layer_nums:
+    - 256
+    - 64
+    - 8
+    per_layer_topk_list:
+    - 32
+    - 16
+    - 8
+    cluster_att_num_layers: 1
+    cluster_att_init: 0.1
+  criterion:
+    loss_weight:
+    - 1.0
+    - 1.0
+    - 0.5
+    - 5.0
+    - 0.1
+    - 0.1
+    - 0.1
+    - 1.0
+    cost_weight:
+    - 1.0
+    - 1.0
+    - 0.1
+    loss_fun: focal
+    match_last_layer: true
+    layer_differ_weight: true
+  test_cfg:
+    topk_insts: 100
+    score_thr: 0.0
+    npoint_thr: 100
+  norm_eval: false
+  fix_module:
+  - text_encoder
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.0005
+  paramwise_cfg:
+    text_encoder:
+      lr_mult: 0.001
+    input_conv:
+      lr_mult: 0.01
+    unet:
+      lr_mult: 0.01
+    output_layer:
+      lr_mult: 0.01
+    dec:
+      lr_mult: 1.0
+lr_scheduler:
+  type: PolyLR
+  max_iters: 70
+  power: 4.0
+  constant_ending: 0.0

@@ -1,0 +1,12 @@
+{
+  "stage": "rejected",
+  "hypothesis_id": "multiinstance-union-supervision-mismatch",
+  "actual_test": "SHA-bound full native TRAIN annotation schema and frozen cohort cardinality audit, with four parser controls.",
+  "result": "36665/36665 TRAIN annotations and 128/128 frozen expressions have exactly one physical target; zero duplicate IDs and zero malformed/missing rows. Constructed plural control is detected.",
+  "gate_result": "The native plural-target premise is disconfirmed for this dataset. No implementation, backward, resource or admission gate attempted.",
+  "next_action": "Do not implement plural union supervision for unchanged singleton ScanRefer. Revisit only if authorized native data actually contains plural targets.",
+  "evidence": [
+    {"path": "pipeline/reports/target_cardinality_audit_20261012_0910.json", "sha256": "7412fab71e70be74ab386f81a84811cffed7e7f28ebb149bb9849d32cc8d901a"},
+    {"path": "scripts/target_cardinality_audit_20261012_0910.py"}
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "observed_at": "2026-10-20T16:29:19.237787+00:00",
+  "candidate_id": "hierarchy-reversible-sibling-token-transport",
+  "code_commit": "36b59daae6cdad2560024379eb5ed6acbcb20db2",
+  "scientific_admission": false,
+  "failure_scope": "implementation",
+  "blocker_kind": "numerical_control_failure",
+  "failed_gate": "point-mass-weighted fine pre-fusion mean invariance <=1e-6",
+  "tolerance": 1e-06,
+  "failures": [
+    {
+      "pair_index": 1,
+      "expression": 0,
+      "weighted_fine_mean_error": 1.0270338783868738e-06
+    }
+  ],
+  "denominators": {
+    "scenes": 8,
+    "expressions": 32,
+    "failed_expression_records": 1
+  },
+  "passed_components": {
+    "full_source_identity_row_inverse_disabled_parent_max": 0.0,
+    "gradient_tensors_finite": 642,
+    "transport_path_finite_nonzero": [
+      {
+        "input_finite": true,
+        "output_finite": true,
+        "input_abs_max": 5.6643511925358325e-05,
+        "output_abs_max": 6.088973896112293e-05
+      }
+    ],
+    "native_matched_identity_max": 0.0,
+    "strict_equal_mass_conjugacy_max": 2.384185791015625e-07
+  },
+  "preservation": "Earlier R2 tested-source PASS and completed revision_history remain immutable. Current committed-byte retest contradicts the original conservation gate, so no admission receipt, queue or training. No favorable-rerun selection.",
+  "decomposition": {
+    "summary": {
+      "scenes": 8,
+      "expressions": 32,
+      "groups": 2048,
+      "transport_calls": 32,
+      "max_abs_drift": 9.5367431640625e-07,
+      "components_at_same_maximum": {
+        "head": 2,
+        "channel_in_head": 18,
+        "signed_drift": -9.5367431640625e-07,
+        "signed_stationarity_application": -1.261365341065357e-07,
+        "signed_matmul_rounding": -8.275377822997143e-07
+      },
+      "reconstruction_error_max": 0.0,
+      "hold_unchanged": true,
+      "candidate_operator_precision": "FP32",
+      "decomposition_precision": "FP64 readout only"
+    },
+    "fixture": {
+      "path": "/data/songcl/Project/Cluster_project/pipeline/sibling_99819673_numeric_decomposition2/numeric_fixture.pt",
+      "sha256": "9c9ff0259a03fba8981ef2369b48b38ed62a682f78f7f57454bc084ccccbc53c",
+      "bytes": 8546995,
+      "contains_labels": false
+    },
+    "limits": "This is a fresh capture, not the original failed P/T/Tprime. FP64 reference matmul has its own rounding; do not call exact real arithmetic. Only per-group maxima and maximum-coordinate components persisted; complete per-channel arrays/P32/Tprime32 were not retained, a narrower archive than preregistration. Fresh drift9.5367e-7 does not clear prior1.0270e-6 failure."
+  },
+  "resources": {
+    "parameters_added": 0,
+    "standard_flops_g": 9.76313454,
+    "parent_standard_flops_g": 9.762532428,
+    "median_ms": 42.89188750408357,
+    "parent_median_ms": 34.51548799785087,
+    "median_ratio": 1.2426852405144688,
+    "p90_ms": 46.09344910568326,
+    "parent_p90_ms": 37.21741329791257,
+    "peak_allocated_bytes_each": 936763392,
+    "full_optimizer_peak": "UNKNOWN",
+    "original_no_cluster_baseline_resource_delta": "UNKNOWN; original config absent, no fabricated substitute"
+  },
+  "task_readout": "Same8TRAINscenes/32expressions: content FG worse than matched no-transport7/8scene; better than strict mismatch6/8scene. Actual inst/mask path active, trained efficacy and global novelty unknown. No mechanism-family falsification.",
+  "revision_boundary": "Default2implementation revisions consumed. No automatic R3 or precision/tolerance/FPS/seed/schedule change; numerical hold is not missing GPU permission or trained harm.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/committed_matched_controls_candidate_result.json",
+      "sha256": "dce8216960b70d5a602af17d11f70cbfa1a8261935731ee763a0cb2c226d7943"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/validation_committed_controls_candidate_result.json",
+      "sha256": "04fd1a83212885bd7fe1472810464871988e09ca2c02adde043ee5c6c3443884"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/validation_committed_resources_candidate_result.json",
+      "sha256": "6e7f4e945e157177bd690706025db3b6b9a4ca5e84297879a5f323b4d87169ec"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/numeric_decomposition2_decompose_candidate_result.json",
+      "sha256": "52de1d07d8e3eb624dc94095bf37ac08b9342c470c5476459647c1c78889b3e3"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/committed_bytes_retest_preregistration.json",
+      "sha256": "7a99734a33e88b848c6259ab383fc1f241c5fd839ce9c4e103fc39887e3f6ee5"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/local_commit_result.json",
+      "sha256": "bc8955870911f36569923bdfc4d2172da88cd4e4c638ae64ccfcc7942ab2c1e2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/final_release_after_decomposition.json",
+      "sha256": "62a28e8d2e86322b69a847329e1c60c41f07b5bc38b4f93c658f816707060ede"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "stage": "diagnosis",
+  "hypothesis_id": "model-caption-postfix-displaces-supervised-token-prefix",
+  "hypothesis": "Appending the native model postfix changes the token indices or character offsets that the original caption-only role maps supervise.",
+  "matched_control": "Full native TRAIN prefix IDs/offsets, frozen128 native assigned role-map indices; exact native postfix, identity and deliberately shifted/wrong-caption controls.",
+  "next_action": "Execute remote CPU full-prefix/native-role token identity comparison on unchanged TRAIN source/tokenizer; distinguish EOS replacement from real supervised drift.",
+  "evidence": [
+    {"path": "pipeline/designs/token_postfix_prereg_20261012_1319.md"}
+  ]
+}

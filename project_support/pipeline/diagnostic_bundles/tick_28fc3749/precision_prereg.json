@@ -1,0 +1,13 @@
+{
+  "preregistered_at": "2026-10-19T09:22:13.761084+00:00",
+  "question": "Does the permutation discrepancy persist when the SAME frozen float32 fixture/weights are promoted to float64?",
+  "change": "Cast the already generated model,points,queries and banks to float64 immediately before the SAME source forward. No new seed,weights,target,index,tolerance or model operation.",
+  "prediction": "If the discrepancy is reduction precision rather than indexing,identity and permutation contracts meet the original1e-6 threshold in float64.",
+  "original_float32_failed": {
+    "path": "pipeline/diagnostic_bundles/tick_28fc3749/native_scale_cpu_measured.json",
+    "sha256": "a122c24befce857f42aa0cf22266dd9a46cf50af11f02e9388872ba730da5106"
+  },
+  "tolerance": 1e-06,
+  "trained_task_evidence": false,
+  "interpretation": "Float64 success is numerical discrimination only;it does not overwrite or pass the original float32 gate or scientific diagnosis."
+}

@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T16:20:17.496335+00:00",
+  "reviewer_agent": "/root/mdc_review",
+  "status": "INDEPENDENT_STATIC_SOURCE_REVIEW_NO_DEFINITE_IMPLEMENTATION_BUG_NATIVE_UNEXECUTED",
+  "material_concerns": [],
+  "candidate_id": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "experiment_id": "M210-PSNC",
+  "code_commit": null,
+  "baseline_reference_HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "prepared_under_parent_token": "e2742b06404240e398267db352a2b91a",
+  "frozen_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare/preparation.json",
+    "sha256": "302432f1e2ba136576c4eb8a814a7ab3fb9596272304924b2a9db356074b49de"
+  },
+  "scope_review": {
+    "path": "pipeline/diagnostic_bundles/tick_e2742b06/spectral_scope_review.json",
+    "sha256": "c2a763c39240cfdaebcf5f05cf88a1e7460d770122744c52152b2e3415625b09"
+  },
+  "source_files": {
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/dec.py": "eb37666c96b196b9d30b25fdb97128e7959d4e4d31a35b491c83769b2f48bcf8",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/hier_postprocess.py": "ba03ff3a9f6c2709f5e66ad064acf5a93ba45cebdfc829b6fc98e8e318ef89d4",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/parent_spectral.py": "7e1ac1f9a62452c4057d7ae6436b7ecdc18b40b89688b718420e042c296f12c6",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+    "configs/Quard/ctf_hcg_csort_psnc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+  },
+  "scope": "Independent bounded review of external PSNC implementation and exact frozen hashes, original M95 method/constructor preservation, mathematical graph and integration. Not native execution, complete historical novelty clearance, efficacy, admission or source promotion.",
+  "independent_source_checks": {
+    "all16_prepared_file_hashes_match": true,
+    "all9_source_config_hashes_match": true,
+    "eight_source_AST_compile_without_import": true,
+    "five_other_sources_byte_identical_M95": true,
+    "original_YAML_byte_identical": true,
+    "all_existing_constructor_AST_exact": true,
+    "only_changed_original_methods": {
+      "hier_postprocess.py": [
+        "PointCloudPartitioner.forward",
+        "SharedClusterBank.get_cluster",
+        "C2F_ClusterAttn_CTF.forward"
+      ],
+      "dec.py": [
+        "Encoder_layer.forward"
+      ]
+    },
+    "cache_plumbing_removed_recovers_original_partition_bank_encoder_methods": true,
+    "raw_build_cluster_feats_exact_AST": true,
+    "entire_HCG_and_CSORT_classes_exact_AST": true,
+    "new_helper_has_no_registered_module_parameters_buffers_or_RNG_ops": true,
+    "f0_and_feature_graph_not_detached": true,
+    "sentinel_confined_to_private_work_tensor_and_removed_before_HCG": true,
+    "mixed_case_one_original_norm_FFN_call": true,
+    "no_mixed_case_original_norm_FFN_layout_call": true,
+    "helper_contains_no_runtime_feature_precision_override": true
+  },
+  "algorithm_review": {
+    "actual_formula": "For true-supported middle siblings under one original ids2 parent: X + Q^T(f(QX)-b)+b; f=original middle FFN∘LayerNorm, b=f(0).",
+    "DCT_orientation": "Rows=modes, columns=xyz/original-ID sorted siblings. AnalysisQ@X, synthesisQ.transpose(0,1) are dimensionally and algebraically correct.",
+    "support_and_parent_boundaries": "Support uses composed original ids1[ids0] point counts, not feature magnitude or mere parent occupancy. Original ids2 parents and batch boundaries isolate groups; indices scatter back to original IDs.",
+    "empty_and_padding": "Unsupported internal rows and batch tail retain their original per-row FFN outputs outside spectral groups. n0 creates no group. All-no-mixed case calls original[B,K,C] function directly. No nontrivial tensor edge cases have been executed.",
+    "singleton_scope": "n1 skips DCT and b subtraction/addition. In a batch that contains any n>1 group, singleton rows still share the expanded[B,K+1,C] FFN GEMM layout. Only when all groups have n<=1 is the old layout directly used; no FP32 bitwise guarantee.",
+    "bias_graph": "One private zero row per batch is processed in the same FFN call. Its output slice b retains gradients to original LN/FFN parameters. No detach, new bias parameter or separate branch FFN call.",
+    "unchanged_actual_mask_path_source": "Middle retains original cf+delta residual; fine/coarse FFNs unchanged. Exact original HCG/CSORT source and final encoder injection/mask methods remain, apart from detached geometry side-cache assignment. This is a source path claim, not an observed native causal gradient.",
+    "state_scope": "Only plain detached geometry/ID cache attributes added. No parameters/buffers/DCT cache by source structure; actual state_dict/parameter inventory not measured.",
+    "bounded_cost": "Dense basis only within original middle token bound64, not point-N². Actual tensor, kernel, sorting/synchronization, memory and fvcore resource costs NOT_RUN."
+  },
+  "independent_stdlib_formula_sanity": {
+    "observations": [
+      {
+        "n": 2,
+        "Python_float_QtQ_max_abs_error": 2.220446049250313e-16,
+        "affine_conjugation_max_abs_error": 2.220446049250313e-16,
+        "zero_response_error": 0.0
+      },
+      {
+        "n": 3,
+        "Python_float_QtQ_max_abs_error": 2.220446049250313e-16,
+        "affine_conjugation_max_abs_error": 5.551115123125783e-17,
+        "zero_response_error": 0.0
+      },
+      {
+        "n": 4,
+        "Python_float_QtQ_max_abs_error": 2.220446049250313e-16,
+        "affine_conjugation_max_abs_error": 2.220446049250313e-16,
+        "zero_response_error": 0.0
+      },
+      {
+        "n": 7,
+        "Python_float_QtQ_max_abs_error": 5.065392549852277e-16,
+        "affine_conjugation_max_abs_error": 2.220446049250313e-16,
+        "zero_response_error": 0.0
+      },
+      {
+        "n": 16,
+        "Python_float_QtQ_max_abs_error": 2.220446049250313e-15,
+        "affine_conjugation_max_abs_error": 1.1657341758564144e-15,
+        "zero_response_error": 0.0
+      },
+      {
+        "n": 64,
+        "Python_float_QtQ_max_abs_error": 5.662137425588298e-15,
+        "affine_conjugation_max_abs_error": 7.438494264988549e-15,
+        "zero_response_error": 0.0
+      }
+    ],
+    "scalar_tanh_toy_offdiagonal_derivative_abs_max": 0.09942803916249246,
+    "interpretation": "Python-float mathematical examples only, independently calculated without importing helper/torch. Affine/zero identities and generic nonlinear mixing are not FP32/native tolerance or actual-data/autograd evidence; no admission threshold is inferred."
+  },
+  "frozen_author_validation": {
+    "report": {
+      "path": "pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare/static_validation.json",
+      "sha256": "e398f98bf551d9c50ad0b71c3a88264d2edbf86a24290f29b22022eca6f149c6"
+    },
+    "recorded_static_checks": 23,
+    "recorded_stdlib_reference_tests": 17,
+    "scope": "Hash-bound author results reviewed; author suite not rerun by this reviewer. Independent AST/byte/compile/formula checks above separately performed.",
+    "preserved_initial_fixture_error": {
+      "path": "pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare/static_validation_attempt1.json",
+      "sha256": "3c0f203c30065a0ecf5481caa741cc532f0cb6f06824d5d312c5e784f885292a"
+    },
+    "initial_error_scope": "Static runner first used absent YAML decoder key; corrected to actual model.dec.dropout. Record says no model/YAML modification, not an implementation/native failure."
+  },
+  "preserved_current_project_boundary": {
+    "Cluster_HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "index_empty": true,
+    "original28_dirty_status_rows_unchanged": true,
+    "original7_M95_source_hashes_unchanged": true,
+    "existing_PSBR74f_waiting_noPID": true,
+    "HRC2780804_registered_running": true,
+    "external_prepared_source_not_committed_or_installed": true,
+    "no_admission_receipt_queue_native_worker_binding_or_lease_created_by_this_preparation": true,
+    "version_rule": "Keep source external and code_commit null; baseline74f is not a commit containing PSNC. Do not advance Cluster HEAD while PSBR74f still awaits exact canonical dispatch. Later promotion only when it does not break already admitted FIFO/version/runtime protection."
+  },
+  "unresolved_before_any_future_admission": [
+    "Actual exact native resolver/source/YAML/common initialization and two real TRAIN batches, finite loss/native backward/optimizer updates, actual spectral/sentinel/inverse/readback path and registered inventory remain NOT_RUN.",
+    "Real FP32 DCT/control rounding, no-cross-parent/identity/singleton/zero behavior and actual sibling interaction remain NOT_RUN; source or stdlib math cannot substitute. Do not invent or relax original tolerances.",
+    "Actual original resource pair and raw unsupported-operator accounting/latency/memory remain NOT_RUN; pure training memory, efficacy and robustness UNKNOWN.",
+    "Native worker/controller/current binding/lease are NOT_PREPARED. Future optional probes need isolated original grad/optimizer/RNG and restoration; this review creates no extra unstated gate.",
+    "Nonzero constant token fields and mean need not be preserved. Affine/equal-local-Jacobian degeneration can make interaction negligible. These are mechanism risks rather than demonstrated dataset effects."
+  ],
+  "admission_or_native_PASS": false,
+  "external_review_hash_cycle_avoided": true,
+  "executed": {
+    "torch_import": false,
+    "SSH": false,
+    "GPU": false,
+    "native_tensor_or_autograd_experiment": false,
+    "independent_stdlib_formula_math": true,
+    "model_source_execution": false,
+    "author_test_suite_repeat": false,
+    "shared_Cluster_ledger_memory_queue_frozenprep_or_lease_writes": false,
+    "new_tick_root_independent_review_only": true
+  }
+}

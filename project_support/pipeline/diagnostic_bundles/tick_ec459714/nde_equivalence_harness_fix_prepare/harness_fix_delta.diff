@@ -1,0 +1,27 @@
+--- original82b3/equivalence_diagnostic.py
++++ harness_fix/equivalence_diagnostic.py
+@@ -256,6 +256,15 @@
+     }
+ 
+ 
++def optimizer_carrier_for_core(torch, core):
++    """Expose the existing core as native dec group; other YAML groups are empty."""
++    carrier = torch.nn.Module()
++    for name in ('text_encoder', 'input_conv', 'unet', 'output_layer'):
++        carrier.add_module(name, torch.nn.Module())
++    carrier.add_module('dec', core)
++    return carrier
++
++
+ def main():
+     parser = argparse.ArgumentParser()
+     parser.add_argument('--lease', required=True)
+@@ -299,7 +308,7 @@
+         cfg = gorilla.Config.fromfile(str(STAGE / 'candidate.yaml'))
+         result.update(compare_revision1(
+             torch, numpy, original_type, revision_type, cfg.model.dec.d_model,
+-            lambda core: gorilla.build_optimizer(core, copy.deepcopy(cfg.optimizer))))
++            lambda core: gorilla.build_optimizer(optimizer_carrier_for_core(torch, core), copy.deepcopy(cfg.optimizer))))
+         torch.cuda.synchronize()
+         verify()
+         result.update(execution_completed=True, after=observe())

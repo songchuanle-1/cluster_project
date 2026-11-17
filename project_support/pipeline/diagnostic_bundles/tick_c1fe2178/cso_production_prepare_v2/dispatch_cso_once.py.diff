@@ -1,0 +1,20 @@
+--- frozen_v1/dispatch_cso_once.py
++++ fresh_v2/dispatch_cso_once.py
+@@ -45,7 +45,7 @@
+ 
+ from packet_runtime import guard as packet_guard, arguments, require_arguments, actual_production
+ from source_resolver import scoped, verify
+-EXEC = TICK / "cso_dispatch_execution"
++EXEC = TICK / "cso_dispatch_execution_v2"
+ CALLS = []
+ 
+ 
+@@ -115,7 +115,7 @@
+     raw = yaml.safe_load((ROOT / "SERVERS.yaml").read_text(encoding="utf8"))["servers"]["server-4"]
+     assert raw["remote_code_root"] == RUNTIME
+     assert sha(ROOT / "SERVERS.yaml") == read(HERE / "baseline.json")["SERVERS_sha256"]
+-    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178/conda_source.sh"
++    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178_v2/conda_source.sh"
+     assert raw["allowed_gpus"] == [0] and raw["max_tasks_per_gpu"] == 1
+     assert raw["allow_external_overlay"] is True and raw["task_memory_mb"] == 20000
+     assert raw["expected_hostname"] == "dl04-MS-7E06"

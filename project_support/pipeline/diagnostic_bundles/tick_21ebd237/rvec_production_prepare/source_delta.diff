@@ -1,0 +1,127 @@
+--- accepted_ee6/production_controller.py
++++ current21/production_controller.py
+@@ -19,13 +19,13 @@
+ from types import ModuleType
+ 
+ 
+-EXPECTED_OWNER = {'token': 'ee6f5eda28ef4b02a751c84d4c7df626', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T07:10:46.030397+00:00', 'deadline_at': '2026-11-09T08:10:46.030397+00:00', 'context_sha256': '46627417b6d7adcfc06ef708ebe894cc6f854a5af97bcefd5e35dbba4452f65c', 'pending_sha256': '5a94ff8d3aaf2c3f3180fe8c1ca3c2f2a50a73aaf42ecbc9acd5d1b5a177f249'}
+-OWNER = 'ee6f5eda28ef4b02a751c84d4c7df626'
++EXPECTED_OWNER = {'token': '21ebd23722904fa3ac93d7330cbb58c1', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T09:09:07.846322+00:00', 'deadline_at': '2026-11-09T10:09:07.846322+00:00', 'context_sha256': '587538df4e8ac9f4be489e76fb9afd7b28cf15b24030792164083a9bf06a7cae', 'pending_sha256': '1ab88e01bc67bc5c099be540c0c53035d4ddb99f9281800ad433be4e4c1b8561'}
++OWNER = '21ebd23722904fa3ac93d7330cbb58c1'
+ OWNER_THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+-OWNER_DEADLINE = '2026-11-09T08:10:46.030397+00:00'
++OWNER_DEADLINE = '2026-11-09T10:09:07.846322+00:00'
+ PROJECT = Path("/data/songcl/Project/Cluster_project")
+-PRODUCER = PROJECT / 'pipeline/runtime/rvec_path_prepare_ee6f5eda'
+-PRODUCTION = PROJECT / 'pipeline/runtime/rvec_path_prod_ee6f5eda'
++PRODUCER = PROJECT / 'pipeline/runtime/rvec_path_prepare_21ebd237'
++PRODUCTION = PROJECT / 'pipeline/runtime/rvec_path_prod_21ebd237'
+ RUNTIME = PROJECT / "Cluster_nsd_20261107"
+ COMMIT = 'd21477b0d85e6ddcef428ea98ddf6b86fcc38f7e'
+ CONFIG = 'configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml'
+--- accepted_ee6/remote_receiver.py.txt
++++ current21/remote_receiver.py.txt
+@@ -4,12 +4,12 @@
+ import base64,hashlib,json,os,socket,stat,subprocess,sys
+ assert socket.gethostname()=='dl04-MS-7E06' and os.getuid()==os.geteuid()==1001
+ packet=json.load(sys.stdin)
+-stage=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_ee6f5eda')
++stage=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_21ebd237')
+ assert packet['stage']==str(stage)
+ owner=packet['owner']
+-assert owner=={'token': 'ee6f5eda28ef4b02a751c84d4c7df626', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T07:10:46.030397+00:00', 'deadline_at': '2026-11-09T08:10:46.030397+00:00', 'context_sha256': '46627417b6d7adcfc06ef708ebe894cc6f854a5af97bcefd5e35dbba4452f65c', 'pending_sha256': '5a94ff8d3aaf2c3f3180fe8c1ca3c2f2a50a73aaf42ecbc9acd5d1b5a177f249'}
+-assert owner['token']=='ee6f5eda28ef4b02a751c84d4c7df626' and owner['thread_id']=='01a159c5-29ab-7a22-ba7f-e79174757253'
+-assert owner['deadline_at']=='2026-11-09T08:10:46.030397+00:00'
++assert owner=={'token': '21ebd23722904fa3ac93d7330cbb58c1', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T09:09:07.846322+00:00', 'deadline_at': '2026-11-09T10:09:07.846322+00:00', 'context_sha256': '587538df4e8ac9f4be489e76fb9afd7b28cf15b24030792164083a9bf06a7cae', 'pending_sha256': '1ab88e01bc67bc5c099be540c0c53035d4ddb99f9281800ad433be4e4c1b8561'}
++assert owner['token']=='21ebd23722904fa3ac93d7330cbb58c1' and owner['thread_id']=='01a159c5-29ab-7a22-ba7f-e79174757253'
++assert owner['deadline_at']=='2026-11-09T10:09:07.846322+00:00'
+ assert datetime.now(timezone.utc)<datetime.fromisoformat(owner['deadline_at'])
+ assert packet['training_launch_authorized'] is False
+ action=packet['action'];assert action in ('stage','collect','render')
+@@ -42,7 +42,7 @@
+ if action=='render':
+  regular(stage/'actual_observation.json')
+  assert sha(stage/'actual_observation.json')==request['actual_observation_sha256']
+- assert not Path('/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_ee6f5eda').exists()
++ assert not Path('/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237').exists()
+ else:assert not (stage/'actual_observation.json').exists()
+ with request_path.open('xb') as stream:stream.write(request_raw)
+ request_path.chmod(0o600)
+--- accepted_ee6/dispatch_rvec_once.py
++++ current21/dispatch_rvec_once.py
+@@ -14,8 +14,8 @@
+ HERE = Path(__file__).resolve().parent
+ TICK = HERE.parent
+ DRAFT_EXECUTION_DISABLED = False
+-EXPECTED_OWNER = {'token': 'ee6f5eda28ef4b02a751c84d4c7df626', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T07:10:46.030397+00:00', 'deadline_at': '2026-11-09T08:10:46.030397+00:00', 'context_sha256': '46627417b6d7adcfc06ef708ebe894cc6f854a5af97bcefd5e35dbba4452f65c', 'pending_sha256': '5a94ff8d3aaf2c3f3180fe8c1ca3c2f2a50a73aaf42ecbc9acd5d1b5a177f249'}
+-TOKEN = 'ee6f5eda28ef4b02a751c84d4c7df626'
++EXPECTED_OWNER = {'token': '21ebd23722904fa3ac93d7330cbb58c1', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T09:09:07.846322+00:00', 'deadline_at': '2026-11-09T10:09:07.846322+00:00', 'context_sha256': '587538df4e8ac9f4be489e76fb9afd7b28cf15b24030792164083a9bf06a7cae', 'pending_sha256': '1ab88e01bc67bc5c099be540c0c53035d4ddb99f9281800ad433be4e4c1b8561'}
++TOKEN = '21ebd23722904fa3ac93d7330cbb58c1'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ SOURCE = 'd21477b0d85e6ddcef428ea98ddf6b86fcc38f7e'
+ RUNTIME = "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+@@ -114,7 +114,7 @@
+     import yaml
+     raw = yaml.safe_load((ROOT / "SERVERS.yaml").read_text(encoding="utf8"))["servers"]["server-4"]
+     assert raw["remote_code_root"] == RUNTIME and raw["conda_source"] == production["shim"]
+-    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_ee6f5eda/conda_source.sh"
++    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/conda_source.sh"
+     assert raw["allowed_gpus"] == [0] and raw["max_tasks_per_gpu"] == 1
+     assert raw["allow_external_overlay"] is True and raw["task_memory_mb"] == 20000
+     assert raw["expected_hostname"] == "dl04-MS-7E06"
+--- accepted_ee6/switch_rvec_pointer.py
++++ current21/switch_rvec_pointer.py
+@@ -50,7 +50,7 @@
+                       "production_result_sha256": sha(args.production_result),
+                       "production_review_sha256": args.production_review_sha256,
+                       "only_conda_source_changed": True, "no_replay": True})
+-        temporary = ROOT / "SERVERS.yaml.rvec_ee6f5eda.tmp"
++        temporary = ROOT / "SERVERS.yaml.rvec_21ebd237.tmp"
+         assert not temporary.exists()
+         with temporary.open("xb") as stream:
+             stream.write(changed)
+--- accepted_ee6/packet_runtime.py
++++ current21/packet_runtime.py
+@@ -13,15 +13,15 @@
+ SOURCE = "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e"
+ RUNTIME = "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+ CONFIG = "configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml"
+-PRODUCER = "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_ee6f5eda"
+-PRODUCTION = "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_ee6f5eda"
++PRODUCER = "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_21ebd237"
++PRODUCTION = "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237"
+ OWNER = {
+-    "token": "ee6f5eda28ef4b02a751c84d4c7df626",
++    "token": "21ebd23722904fa3ac93d7330cbb58c1",
+     "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+-    "generated_at": "2026-11-09T07:10:46.030397+00:00",
+-    "deadline_at": "2026-11-09T08:10:46.030397+00:00",
+-    "context_sha256": "46627417b6d7adcfc06ef708ebe894cc6f854a5af97bcefd5e35dbba4452f65c",
+-    "pending_sha256": "5a94ff8d3aaf2c3f3180fe8c1ca3c2f2a50a73aaf42ecbc9acd5d1b5a177f249"
++    "generated_at": "2026-11-09T09:09:07.846322+00:00",
++    "deadline_at": "2026-11-09T10:09:07.846322+00:00",
++    "context_sha256": "587538df4e8ac9f4be489e76fb9afd7b28cf15b24030792164083a9bf06a7cae",
++    "pending_sha256": "1ab88e01bc67bc5c099be540c0c53035d4ddb99f9281800ad433be4e4c1b8561"
+ }
+ 
+ 
+@@ -67,7 +67,7 @@
+     assert proof["main_index_user28_r0nine_preserved"] is True and proof["lifecycle_unchanged"] is True
+     assert proof["new_sync_performed"] is False and proof["Git_mutations"] is False
+     assert proof["training_started"] is False and proof["GPU_compute"] is False and proof["signals_sent"] is False
+-    assert proof["old_558_stage_reconciled"] is True and proof["config_is_original_or_exact_canonical_preview"] is True
++    assert proof["old_ee6_stage_reconciled"] is True and proof["config_is_original_or_exact_canonical_preview"] is True
+     historical = proof["historical_sync"]
+     prior_sync = ROOT / "pipeline/diagnostic_bundles/tick_558ef1ee/rvec_deployment_execution/sync_result.json"
+     assert Path(historical["path"]).resolve() == prior_sync.resolve() and historical["sha256"] == sha(prior_sync)
+@@ -77,8 +77,8 @@
+     assert current["current_owner"] == OWNER and current["hostname"] == "dl04-MS-7E06" and current["uid"] == 1001
+     assert current["runtime_root"] == RUNTIME and current["runtime_HEAD"] == SOURCE
+     assert current["no_same_root_trainer"] is True and current["project_trainers"] == []
+-    assert current["old_558_stage_workers"] == [] and current["old_558_production_stage"]["exists"] is False
+-    assert current["old_558_marker_absent"] is True and current["old_intents_replayed"] is False
++    assert current["previous_stage_workers"] == [] and current["old_ee6_production_stage"]["exists"] is True
++    assert current["old_ee6_marker_absent"] is True and current["old_intents_replayed"] is False
+     assert current["GPU_compute"] is False and current["signals_sent"] is False and current["remote_files_written"] is False
+     assert current["gpu0_identity_only"] == "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+     expected_inodes = {"training": 92537152, "diagnostic": 92537153, "exclusive": 92537154}

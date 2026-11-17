@@ -1,0 +1,62 @@
+{
+  "probe": "n1_mask_score_litprobe",
+  "created": "2026-09-12T05:10:00+08:00",
+  "queries": {
+    "all:\"3D visual grounding\" AND all:\"mask-aware\" AND all:\"ranking\"": [],
+    "all:\"3D visual grounding\" AND all:\"mask scoring\"": [],
+    "all:\"proposal ranking\" AND all:\"mask quality\" AND all:\"instance segmentation\"": [],
+    "all:\"instance segmentation\" AND all:\"mask scoring\"": [
+      {
+        "title": "Mask Scoring R-CNN",
+        "arxiv_id": "1903.00241v1",
+        "published": "2019-03-01",
+        "summary": "Letting a deep network be aware of the quality of its own predictions is an interesting yet important problem. In the task of instance segmentation, the confidence of instance classification is used as mask quality score in most instance segmentation frameworks. However, the mask quality, quantified as the IoU between the instance mask and its ground truth, is usually not well correlated with classification score. In this paper, we study this problem and propose Mask Scoring R-CNN which contains a network block to learn the quality of the predicted instance masks. The proposed network block takes the instance feature and the corresponding predicted mask together to regress the mask IoU. The mask scoring strategy calibrates the misalignment between mask quality and mask score, and improves instance segmentation performance by prioritizing more accurate mask predictions during COCO AP eval"
+      },
+      {
+        "title": "Polite Teacher: Semi-Supervised Instance Segmentation with Mutual Learning and Pseudo-Label Thresholding",
+        "arxiv_id": "2211.03850v1",
+        "published": "2022-11-07",
+        "summary": "We present Polite Teacher, a simple yet effective method for the task of semi-supervised instance segmentation. The proposed architecture relies on the Teacher-Student mutual learning framework. To filter out noisy pseudo-labels, we use confidence thresholding for bounding boxes and mask scoring for masks. The approach has been tested with CenterMask, a single-stage anchor-free detector. Tested on the COCO 2017 val dataset, our architecture significantly (approx. +8 pp. in mask AP) outperforms the baseline at different supervision regimes. To the best of our knowledge, this is one of the first works tackling the problem of semi-supervised instance segmentation and the first one devoted to an anchor-free detector."
+      },
+      {
+        "title": "Pseudo-label Alignment for Semi-supervised Instance Segmentation",
+        "arxiv_id": "2308.05359v1",
+        "published": "2023-08-10",
+        "summary": "Pseudo-labeling is significant for semi-supervised instance segmentation, which generates instance masks and classes from unannotated images for subsequent training. However, in existing pipelines, pseudo-labels that contain valuable information may be directly filtered out due to mismatches in class and mask quality. To address this issue, we propose a novel framework, called pseudo-label aligning instance segmentation (PAIS), in this paper. In PAIS, we devise a dynamic aligning loss (DALoss) that adjusts the weights of semi-supervised loss terms with varying class and mask score pairs. Through extensive experiments conducted on the COCO and Cityscapes datasets, we demonstrate that PAIS is a promising framework for semi-supervised instance segmentation, particularly in cases where labeled data is severely limited. Notably, with just 1\\% labeled data, PAIS achieves 21.2 mAP (based on Mas"
+      },
+      {
+        "title": "Geometry-Aware Instance Segmentation with Disparity Maps",
+        "arxiv_id": "2006.07802v2",
+        "published": "2020-06-14",
+        "summary": "Most previous works of outdoor instance segmentation for images only use color information. We explore a novel direction of sensor fusion to exploit stereo cameras. Geometric information from disparities helps separate overlapping objects of the same or different classes. Moreover, geometric information penalizes region proposals with unlikely 3D shapes thus suppressing false positive detections. Mask regression is based on 2D, 2.5D, and 3D ROI using the pseudo-lidar and image-based representations. These mask predictions are fused by a mask scoring process. However, public datasets only adopt stereo systems with shorter baseline and focal legnth, which limit measuring ranges of stereo cameras. We collect and utilize High-Quality Driving Stereo (HQDS) dataset, using much longer baseline and focal length with higher resolution. Our performance attains state of the art. Please refer to our"
+      },
+      {
+        "title": "SegmentAnyTreeV2: Scaling Transformer-Based Tree Instance Segmentation Across Sensors, Platforms, and Forests",
+        "arxiv_id": "2606.08206v2",
+        "published": "2026-06-06",
+        "summary": "We present SegmentAnyTreeV2, a sensor- and platform-agnostic framework for semantic and instance segmentation of forest point clouds. The model combines a serialization-based Point Transformer v3 backbone with a lightweight semantic head and a tree-focused cross-attention mask decoder. Semantic predictions restrict instance decoding to tree-class voxels, while instance-aware query initialization, one-to-many seed supervision, and asymmetric mask scoring improve separation in dense and structurally complex stands. We further introduce FOR-instance v3, an expanded benchmark comprising 427 scenes and 26,496 annotated trees across diverse biomes, forest structures, and LiDAR platforms. On the FOR-instanceV2 test split, SegmentAnyTreeV2 achieves 90.5% precision, 80.2% recall, 85.0% F1, 90.7% coverage, and 87.6% semantic mIoU, outperforming previous learning-based methods in both instance dete"
+      },
+      {
+        "title": "LVIS Challenge Track Technical Report 1st Place Solution: Distribution Balanced and Boundary Refinement for Large Vocabulary Instance Segmentation",
+        "arxiv_id": "2111.02668v2",
+        "published": "2021-11-04",
+        "summary": "This report introduces the technical details of the team FuXi-Fresher for LVIS Challenge 2021. Our method focuses on the problem in following two aspects: the long-tail distribution and the segmentation quality of mask and boundary. Based on the advanced HTC instance segmentation algorithm, we connect transformer backbone(Swin-L) through composite connections inspired by CBNetv2 to enhance the baseline results. To alleviate the problem of long-tail distribution, we design a Distribution Balanced method which includes dataset balanced and loss function balaced modules. Further, we use a Mask and Boundary Refinement method composed with mask scoring and refine-mask algorithms to improve the segmentation quality. In addition, we are pleasantly surprised to find that early stopping combined with EMA method can achieve a great improvement. Finally, by using multi-scale testing and increasing "
+      },
+      {
+        "title": "BANet: Bidirectional Aggregation Network with Occlusion Handling for Panoptic Segmentation",
+        "arxiv_id": "2003.14031v1",
+        "published": "2020-03-31",
+        "summary": "Panoptic segmentation aims to perform instance segmentation for foreground instances and semantic segmentation for background stuff simultaneously. The typical top-down pipeline concentrates on two key issues: 1) how to effectively model the intrinsic interaction between semantic segmentation and instance segmentation, and 2) how to properly handle occlusion for panoptic segmentation. Intuitively, the complementarity between semantic segmentation and instance segmentation can be leveraged to improve the performance. Besides, we notice that using detection/mask scores is insufficient for resolving the occlusion problem. Motivated by these observations, we propose a novel deep panoptic segmentation scheme based on a bidirectional learning pipeline. Moreover, we introduce a plug-and-play occlusion handling algorithm to deal with the occlusion between different object instances. The experime"
+      }
+    ],
+    "all:\"3D instance segmentation\" AND all:\"score refinement\"": [],
+    "all:\"visual grounding\" AND all:\"mask-conditioned\"": [
+      {
+        "title": "GeoPix: Multi-Modal Large Language Model for Pixel-level Image Understanding in Remote Sensing",
+        "arxiv_id": "2501.06828v2",
+        "published": "2025-01-12",
+        "summary": "Multi-modal large language models (MLLMs) have achieved remarkable success in image- and region-level remote sensing (RS) image understanding tasks, such as image captioning, visual question answering, and visual grounding. However, existing RS MLLMs lack the pixel-level dialogue capability, which involves responding to user instructions with segmentation masks for specific instances. In this paper, we propose GeoPix, a RS MLLM that extends image understanding capabilities to the pixel level. This is achieved by equipping the MLLM with a mask predictor, which transforms visual features from the vision encoder into masks conditioned on the LLM's segmentation token embeddings. To facilitate the segmentation of multi-scale objects in RS imagery, a class-wise learnable memory module is integrated into the mask predictor to capture and store class-wise geo-context at the instance level across"
+      }
+    ]
+  }
+}

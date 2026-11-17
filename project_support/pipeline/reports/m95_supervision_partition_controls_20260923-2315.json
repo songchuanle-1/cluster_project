@@ -1,0 +1,66 @@
+{
+  "contract": "m95_supervision_partition_controls_v1",
+  "scope": "Fixed 256 TRAIN expressions; descriptive partition, not efficacy",
+  "groups": {
+    "deployed_success": {
+      "expressions": 200,
+      "scenes": 178,
+      "acceptable_queries": 7859,
+      "acceptable_native_positives": 1559,
+      "native_positive_equals_target_seed_set": 176,
+      "common_support": 194
+    },
+    "no_acceptable_query": {
+      "expressions": 16,
+      "scenes": 16,
+      "acceptable_queries": 0,
+      "acceptable_native_positives": 0,
+      "native_positive_equals_target_seed_set": 14,
+      "common_support": 16
+    },
+    "recoverable_positive_selector_repairs": {
+      "expressions": 27,
+      "scenes": 27,
+      "acceptable_queries": 327,
+      "acceptable_native_positives": 121,
+      "native_positive_equals_target_seed_set": 24,
+      "common_support": 25
+    },
+    "recoverable_positive_set_excludes_acceptable": {
+      "expressions": 6,
+      "scenes": 6,
+      "acceptable_queries": 70,
+      "acceptable_native_positives": 0,
+      "native_positive_equals_target_seed_set": 0,
+      "common_support": 1
+    },
+    "recoverable_within_positive_score_failure": {
+      "expressions": 7,
+      "scenes": 7,
+      "acceptable_queries": 90,
+      "acceptable_native_positives": 30,
+      "native_positive_equals_target_seed_set": 5,
+      "common_support": 7
+    }
+  },
+  "focus_expressions": 13,
+  "focus_scenes": 13,
+  "interpretation": [
+    "Exclusion rows have no acceptable native-positive query; native binary labels cannot reward an acceptable query.",
+    "Within-positive rows include acceptable positives, but a binary positive label alone does not order them against failed positives.",
+    "Target-seed set equality is not the any-instance objectness control; neither is a matched training intervention."
+  ],
+  "limitations": [
+    "Acceptable queries and failure partitions use outcome IoU on TRAIN; query counts are not independent observations.",
+    "No native matcher cause, query-state capture, matched backward, resource or validation result is supplied.",
+    "No distinct supervision mechanism or admission follows from these counts."
+  ],
+  "native_backward_executed": false,
+  "admission": false,
+  "evidence": [
+    {
+      "path": "pipeline\\reports\\m95_failure_partition_20260923-0318.json",
+      "sha256": "491492118b2f55d78c02bc023f8e1e9408bd359eb5ef2af8824faee6bff6b5ee"
+    }
+  ]
+}

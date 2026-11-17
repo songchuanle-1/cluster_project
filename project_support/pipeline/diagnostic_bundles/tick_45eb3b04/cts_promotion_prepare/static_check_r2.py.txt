@@ -1,0 +1,65 @@
+"""Static/source-only checks. No helper import, Git, SSH, subprocess, Torch or shared mutation."""
+from pathlib import Path
+import ast
+import hashlib
+import json
+from datetime import datetime,timezone
+P=Path(__file__).resolve().parent
+R=Path('D:/project/cluster_project')
+O=R/'pipeline/diagnostic_bundles/tick_336ca5d7/bfc_promotion_execute_v2'
+checks=[]
+def check(name,value):
+    assert value,name
+    checks.append(name)
+def assignments(t):
+    return {n.targets[0].id:ast.literal_eval(n.value) for n in t.body if isinstance(n,ast.Assign) and len(n.targets)==1 and isinstance(n.targets[0],ast.Name) and isinstance(n.value,(ast.Constant,ast.Dict,ast.List,ast.Tuple))}
+def function(t,name):return next(n for n in t.body if isinstance(n,ast.FunctionDef) and n.name==name)
+files={n:(P/n).read_text(encoding='utf-8') for n in ('promotion_common.py','fast_forward_tested_cts.py','admit_cts_queue.py','dispatch_cts.py')}
+trees={n:ast.parse(s) for n,s in files.items()}
+for n,s in files.items():compile(s,str(P/n),'exec');check(n+'_AST_compile',True)
+a=assignments(trees['promotion_common.py'])
+check('explicit_draft_disabled',a['DRAFT_EXECUTION_ENABLED'] is False)
+check('independent_pending_not_invented',a['INDEPENDENT_REVIEW_PATH'] is None and a['INDEPENDENT_REVIEW_SHA'] is None and a['INDEPENDENT_STATUS'] is None)
+check('tested4e8_parent48fc',a['TESTED']=='4e80006047d5cb3dcdfb9c1102e02c33f354a07d' and a['BASE']=='48fc302c3c02ffef0b241be3593c386b6b65a72e')
+check('currentCTSidentity',a['EXP']=='M214-CTS' and a['CID']=='hierarchy-parent-cyclic-triadic-state-composition' and a['CONFIG'].endswith('_cts.yaml'))
+check('owner_exact6',set(a['EXPECTED_OWNER'])=={'token','thread_id','generated_at','deadline_at','context_sha256','pending_sha256'} and a['EXPECTED_OWNER']['token']=='45eb3b045c6243518d56eade38d5cd17')
+check('actual_local_review_sha',hashlib.sha256((R/a['SEMANTIC_REVIEW_PATH']).read_bytes()).hexdigest()==a['SEMANTIC_REVIEW_SHA'])
+cs=files['promotion_common.py'];ff=files['fast_forward_tested_cts.py'];ad=files['admit_cts_queue.py'];ds=files['dispatch_cts.py']
+check('no_local_report_material_concerns_invented',"local.get('material_concerns')" not in cs)
+check('onceintent_exclusive_and_fsynced',"with path.open('x'" in ast.get_source_segment(cs,function(trees['promotion_common.py'],'begin_phase')) and 'os.fsync' in ast.get_source_segment(cs,function(trees['promotion_common.py'],'begin_phase')))
+check('all3phases_durable_intent',all("begin_phase('"+n+"'" in files[f] for n,f in [('ff','fast_forward_tested_cts.py'),('admit_queue','admit_cts_queue.py'),('dispatch','dispatch_cts.py')]))
+check('ff_only_no_reset_clean_stash',"'merge', '--ff-only', common.TESTED" in ff and "'merge.autoStash=false'" in ff and "'core.autocrlf=false'" in ff and not any(x in ff for x in ["'reset'","'clean'","'stash'"]))
+check('ff_exact9A_modes_and_blobs',"len(diff) == 9" in ff and "'100644'" in ff and "git_bytes('show'" in ff)
+check('ff_canonical_project_lock',"monitor.acquire_lock(str(common.ROOT))" in ff and 'finally:' in ff and 'lock.close()' in ff)
+settle=ast.get_source_segment(cs,function(trees['promotion_common.py'],'require_bec_runtime_settled'))
+check('BEC_terminalfailure_allowed_not_scientificgate',"type(e.get('returncode')) is int" in settle and 'execution_completed' not in settle and "returncode')==0" not in settle and 'explicit_root_declaration' in settle)
+check('actual_archives_fixed_no_revival',all(x in cs for x in ['b91b3ba11671451bb28f39dc3cc3f2c7','5d060afca23d43deb4ae63525c00ff3d',"'crashed'","'done_earlystop'","not rows"]))
+check('M206pause_preserved',"paused[0].get('resume_authorized') is False" in cs)
+check('only_actualCTSgpu0_dispatch',"SELECTED_GPU==0" in ds)
+calls=[n for n in ast.walk(trees['dispatch_cts.py']) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute) and n.func.attr=='_process_queue']
+check('canonical_dispatch_once',len(calls)==1)
+old=ast.parse((O/'dispatch_bfc.py').read_text(encoding='utf-8'));new=ast.parse(ds.replace('cts','bfc').replace('CTS','BFC'))
+check('strictSSH_same_original_function_AST',ast.dump(function(old,'strict_ssh'),include_attributes=False)==ast.dump(function(new,'strict_ssh'),include_attributes=False))
+check('holder3locks_until_Popenreturn',all(x in ds for x in ["for kind in ('training','diagnostic','exclusive')","fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)","subprocess.run(['/bin/bash','-lc',COMMAND]","for handle in handles:handle.close()","StrictHostKeyChecking=yes"]))
+check('uncertain_progress_blocks_replay',all(x in ds for x in ["'launch_requested','progress_pending'","'pending_progress'","Existing dispatch intent"]))
+check('admit_requires_actualmain4e8',"common.git('rev-parse','HEAD')==COMMIT" in ad)
+check('admit_canonical_admission_budget_queue',all(x in ad for x in ['closure.admission(ROOT,task)','closure.validate_foreground_dispatch_budget(ROOT,prospective,task)','monitor.save_queue(str(ROOT),prospective)','monitor.save_experiment(str(ROOT),experiment)']))
+check('budget_before_queuewrite',ad.index('closure.validate_foreground_dispatch_budget')<ad.index('monitor.save_queue'))
+check('standardsteps_useoptimizer_not_rawsteps',"'steps':smoke['optimizer_steps']" in ad)
+check('ordinary_training_task_no_diagnostic_exclusive_flag','requires_exclusive_ownership' not in ad)
+check('noBFCcoveragegates',not any(x in ad for x in ['actual_nonpower2_supported_parent_group_counts','actual_n_ge3_supported_parent_group_counts','four_quadrant']))
+check('sharedwork_atomic_fsynced',all(x in ad for x in ["temporary.open('x'",'os.fsync','os.replace(temporary,destination)']))
+raw=json.loads((P.parent/'cts_execution/smoke_candidate_execution.json').read_text(encoding='utf-8'))['result'];obs=json.loads((R/a['SEMANTIC_REVIEW_PATH']).read_text(encoding='utf-8'))['observations']
+check('currentrealraw_standardmapping_keys_present',all(k in raw for k in ['optimizer_steps','losses','native_data_loaded','backward_finite','intended_path_observed','actual_train_command','data_source','native_train_cli_reference','batches','pure_training_peak_memory']))
+check('currentrealCTSobservation_keys_present',all(k in obs for k in ['actual_three_distinct_real_input_row_counts','actual_multiround_supported_parent_group_counts','actual_dilated_round_call_counts','actual_aliased_negative_zero_rows','actual_map_call_counts','actual_required_weight_blocks','common_initialized_parameter_observations','actual_unsupported_internal_rows','actual_padding_rows','actual_supported_singleton_groups','offdiagonal_dependency_probe','raw_bank_digest_scope','resource_observations']))
+# Extract only pure metadata validator, no module import or I/O.
+ft=trees['promotion_common.py'];namespace={'UUIDS':a['UUIDS']};exec(compile(ast.Module(body=[function(ft,'require'),function(ft,'physical_gpu')],type_ignores=[]),'pure_physical_gpu','exec'),namespace)
+for x,y in [(0,0),(1,1),('0',0),('1',1)]:check('physicalGPU_accept_'+repr(x),namespace['physical_gpu'](x)==y)
+for x in (None,True,False,2,-1,'2','unknown'):
+    try:namespace['physical_gpu'](x)
+    except RuntimeError:check('physicalGPU_refuse_'+repr(x),True)
+    else:raise AssertionError('MalformedGPU accepted')
+result={'status':'STATIC_SOURCE_CHECKS_PASSED_DISABLED_DRAFT_NOT_EXECUTED','recorded_at':datetime.now(timezone.utc).isoformat(),'checks':checks,'check_count':len(checks),'passed':len(checks),'source_hashes':{n:hashlib.sha256((P/n).read_bytes()).hexdigest() for n in files},'helper_import_or_main_executed':False,'Git_SSH_GPU_Torch_subprocess_or_shared_write':False,'actual_native_repeated':False,'independent_review_binding':'PENDING_REQUIRED','admission_PASS_receipt_queue_created':False}
+output=P/'static_validation_r2.json'
+with output.open('x',encoding='utf-8') as stream:json.dump(result,stream,ensure_ascii=False,indent=2);stream.write('\n')
+print(json.dumps({'path':str(output),'check_count':len(checks),'status':result['status']}))

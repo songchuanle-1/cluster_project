@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-28T14:16:34.281235+00:00",
+  "status": "ORIGINAL_APF_TRAIN_CRASH_IN_COMMON_DATALOADER_INDEX_DTYPE_PATH_INDEPENDENTLY_LOCALIZED_TRIGGER_UNKNOWN",
+  "candidate_id": "hierarchy-ancestry-path-factor-composition",
+  "experiment_id": "M219-APF",
+  "code_commit": "d0e2f95712ed16446907706fbf6a65d34996a9ad",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "material_concerns": [
+    {
+      "kind": "native_training_crash",
+      "scope": "Original APF formal run incomplete at TRAIN2/50,301/4686. DataLoader worker1 scatter index dtype exception is explicit.",
+      "cause_scope": "Common committed dataset get_sp_label index boundary, before the failing batch reaches model forward; triggering sample/dtype/RNG and upstream reason UNKNOWN."
+    }
+  ],
+  "anchors": {
+    "failed_current_live_observer": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/apf_progress_observer/apf_training_progress_observation.json",
+      "sha256": "53dfc062dded089eacaedf650ec27e4c387800a526af15e713dc51381b612a2c"
+    },
+    "terminal_and_slot_observation": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/apf_end_and_slot_observation.json",
+      "sha256": "de5c2d412933e23bdcb954d7fdd39524b81a73ce04c4c7e38dfcb7e3bc6f7654"
+    },
+    "exact_full_log_evidence": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/apf_exact_terminal_archive/exact_log_evidence.json",
+      "sha256": "8f90c18e441d4ef3afb12da9a160589623a3cb005bcc9c09f40776a2eea493c9"
+    },
+    "exact_full_original_log": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/apf_exact_terminal_archive/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_apf_20261028_203911.log",
+      "sha256": "949ad215b5bbc53f07bbfa64613d3192d10694b6e786289405e623e2eda6d5ab"
+    },
+    "authoritative_committed_dataset_source": {
+      "path": "pipeline/isolated_versions/apf_8e092010/framework/dataset/scannetv2.py",
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"
+    },
+    "historical_test_manifest": {
+      "path": "pipeline/diagnostic_bundles/tick_8e092010/apf_execution/native_manifest.json",
+      "sha256": "e484ce9934a1dbb234500a355edad2b1054a82aa9f14feafd8e34d82fa3bdbab"
+    },
+    "preserved_admission_receipt": {
+      "path": "pipeline/admissions/M219-APF.json",
+      "sha256": "71d5ffd471dd4f88b7607375f8e0acca17118126560a6f2b7ac3466bb18d68fe"
+    },
+    "historical_actual_four_results_review": {
+      "path": "pipeline/diagnostic_bundles/tick_8e092010/apf_actual_independent_review.json",
+      "sha256": "36b9d1d24473eb08956fe560de938ba502d713edde23e22af4c6b9db92c21c2f"
+    }
+  },
+  "actual_terminal": {
+    "pid": 793277,
+    "last_native_TRAIN": [
+      2,
+      50,
+      301,
+      4686
+    ],
+    "explicit_early_stop": false,
+    "classification": "crashed",
+    "reason": "RuntimeError in DataLoader worker1: scatter(): Expected dtype int32/int64 for index",
+    "native_validation_values": [
+      0.27984941005706787
+    ],
+    "accuracy_scope": "One completed validation only; not final full-training efficacy or mechanism rejection.",
+    "original_PID_absent_before_after_full_log_copy": true,
+    "same_config_processes": [],
+    "source8_runtime_and_deployedYAML_unchanged": true
+  },
+  "failed_path": {
+    "stack": [
+      "tools/train.py:105 enumerate(dataloader)",
+      "torch DataLoader worker1 fetch dataset[idx]",
+      "framework/dataset/scannetv2.py:376 get_sp_label(superpoint,instance_label,semantic_label)",
+      "framework/dataset/scannetv2.py:341 torch_scatter.scatter_mean(ref_lbl.float(),superpoint,dim=-1)",
+      "torch_scatter.scatter_sum -> out.scatter_add_(dim,index,src)"
+    ],
+    "source_facts": [
+      "transform_train:219 creates unique and inverse IDs using np.unique(...,return_inverse=True).",
+      "__getitem__:373 uses torch.from_numpy(superpoint) without an explicit integer dtype conversion; semantic and instance labels on374/375 explicitly use .long().",
+      "get_sp_label:341 passes superpoint as scatter index; get_ref_mask:330 uses the same scatter-mean index role.",
+      "Exact isolated dataset source SHA matches historical native-manifest dataset source SHA; this is not a new APF factor/model edit."
+    ],
+    "established": "The actual scatter index dtype contract failed during common dataset label construction. This failing batch was not delivered into APF forward. Prior successful APF forwards and bounded TRAIN2 checks are preserved.",
+    "not_established": [
+      "Actual failing superpoint ndarray/tensor dtype, shape or values.",
+      "Failed scan ID, dataset index, worker sampler/prefetch index, augmentation inputs or RNG states.",
+      "Empty sample, original float annotation dtype, NumPy-version defect, CUDA error, APF factor numerical failure or whole-hypothesis failure."
+    ]
+  },
+  "minimal_repair_candidate_not_applied": {
+    "proposal": "At the common dataset boundary, explicitly construct the intended compact superpoint inverse IDs as torch.long (e.g. torch.from_numpy(superpoint).long()).",
+    "condition": "First verify actual inverse-ID semantics and same-environment CPU behavior; do not silently truncate arbitrary nonintegral or invalid IDs. No model/seed/data sample/criterion/profile threshold change proposed.",
+    "status": "UNIMPLEMENTED_UNTESTED; no repair or automatic restart authorized by this review."
+  },
+  "controlled_test_plan_not_executed": [
+    {
+      "step": 1,
+      "scope": "Same-environment CPU-only focused boundary observation",
+      "measure": "NumPy/PyTorch/torch_scatter versions; np.unique(return_inverse=True) output dtype/shape and torch.from_numpy dtype on a small fixed finite label example; integer32/integer64 scatter controls. No model/data/checkpoint needed for this compatibility microcheck.",
+      "limit": "Synthetic controls do not reproduce the unknown original failing sample."
+    },
+    {
+      "step": 2,
+      "scope": "Boundary repair equivalence on valid compact inverse IDs",
+      "measure": "Compare original and explicit-long get_sp_label/scatter outputs for valid integer-index controls including unequal memberships, single group and empty if supported; record intended behavior, reject nonintegral/invalid control rather than truncating it.",
+      "limit": "No new scientific gate or FP32 mean threshold; proves only tested loader dtype compatibility."
+    },
+    {
+      "step": 3,
+      "scope": "Failure-input identification before any proposed formal recovery",
+      "measure": "If a separately authorized diagnostic re-encounters the failure, capture exact scan/dataset index/worker identity, original NumPy and Tensor index dtype/shape and original augmentation/sampler state references before the failing call. Do not choose a replacement sample or infer the epoch2 prefetched item from the visible TRAIN cursor.",
+      "limit": "Without that evidence, retain original trigger UNKNOWN and do not claim exact reproduction or root-cause repair."
+    },
+    {
+      "step": 4,
+      "scope": "Concrete recovery review only after controlled evidence",
+      "measure": "Preserve original crashed log/request/receipt/metrics and two-step results. Propose a versioned common-loader fix with explicit scope and appropriate actual checks; any checkpoint recovery/cold start follows its own existing authorization boundary.",
+      "limit": "No automatic resume, cold start, dependency installation, global environment change or seed/sampler change."
+    }
+  ],
+  "current_resource_observation": {
+    "physical_gpu": 0,
+    "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "observed_at": "2026-10-28T14:12:13.143676+00:00",
+    "memory_used_mib": 41,
+    "utilization_percent": 0,
+    "contexts": [],
+    "three_locks_available": true,
+    "scope": "Root-generated read-only point-in-time idle observation, not a future lease or execution grant. GPU1 not queried."
+  },
+  "review_actions": "Only existing local proof/log and authoritative isolated source read/hash; private report written. No SSH/GPU/Torch/Git/entry/test/patch/shared mutation/checkpoint read.",
+  "new_action": true,
+  "user_decision": false
+}

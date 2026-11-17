@@ -1,0 +1,157 @@
+    if candidate:
+        sfc_module=importlib.import_module(qualified+'.synchronous_forest')
+        original_plan=sfc_module.build_synchronous_forest_plan;original_prepare=sfc_module.prepare_synchronous_forest_plans
+        original_rounds=sfc_module.build_synchronous_rounds;original_mean=sfc_module.mean_neighbor_states
+        original_stack=torch.stack;original_select=torch.Tensor.index_select;original_copy=torch.Tensor.index_copy
+        def queue_replace(owner,name,replacement,original):
+            installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def exchange_pre(owner,values):
+            normalized,ids=values;assert owner is att.synchronous_forest and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=sfc_coverage_preflight(members)
+            if not coverage['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FOREST'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: empty original core before watches; no replacement sample')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'round_calls':[],'mean_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Original plan/prepare/rounds/mean return objects, actual sharedcell/GELU and scoped actual stack/index_select/index_copy calls once. No original mean/cell/GELU/gather/scatter/model/criterion/backward replay.',
+                'diameter_or_multicomponent_or_FP32_Jacobian_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'sfc_context' not in state
+            state['sfc_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'builder_calls':0,'prepare_calls':0,'round_builder_calls':0,'initial_stack_calls':0,'original_rows':[],
+                'destinations':[[],[],[]],'positions':[[],[],[]],'round_index':0,'mean_count':0,'cell_count':0,'GELU_count':0,
+                'state_write_count':0,'final_level':0,'final_flat_outputs':[],'phase':'prepare'}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core input not differentiable before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,widths):
+            context=state['sfc_context'];batch=context['builder_calls'];context['builder_calls']+=1
+            assert (ids0,ids1,ids2)==context['members'][batch] and widths==context['widths']
+            output=original_plan(ids0,ids1,ids2,widths);record=sfc_plan_observation(output,(ids0,ids1,ids2));record['batch']=batch
+            context['record']['plans'].append(record);return output
+        def observed_prepare(levels,ids):
+            context=state['sfc_context'];assert context['phase']=='prepare' and ids is context['ids_ref'] and context['prepare_calls']==0
+            assert all(levels[l] is context['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);context['prepare_calls']=1;context['plans_ref']=output
+            assert context['builder_calls']==len(output)==int(levels[0].shape[0])
+            for batch,plan in enumerate(output):
+                for level,original_id in plan['node_keys']:
+                    context['positions'][level].append(len(context['original_rows']));context['destinations'][level].append(batch*context['widths'][level]+original_id)
+                    context['original_rows'].append((batch,level,original_id))
+            context['phase']='initial_stack';return output
+        def observed_stack(values,*args,**kwargs):
+            context=state.get('sfc_context')
+            if context is None:return original_stack(values,*args,**kwargs)
+            assert context['phase']=='initial_stack' and context['initial_stack_calls']==0 and len(values)==len(context['original_rows'])
+            for row,(batch,level,original_id) in zip(values,context['original_rows']):
+                assert fingerprint(torch,row)==fingerprint(torch,context['normalized'][level][batch,original_id])
+            output=original_stack(values,*args,**kwargs);context['initial_stack_calls']=1;context['current_state_ref']=output;context['phase']='rounds'
+            context['record']['primitive_calls'].append({'kind':'initial_stack','original_calls':1,'returned_original_object_unchanged':True,'rows':len(values)})
+            return output
+        def observed_rounds(plans):
+            context=state['sfc_context'];assert plans is context['plans_ref'] and context['phase']=='rounds' and context['round_builder_calls']==0
+            output=original_rounds(plans);sfc_rounds_observation(plans,output);context['round_builder_calls']=1;context['rounds']=output;context['phase']='own'
+            return output
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            context=state.get('sfc_context')
+            if context is None:return original_select(tensor,dim,index,*args,**kwargs)
+            assert dim==0 and tensor is context['current_state_ref'];phase=context['phase']
+            if phase=='own':
+                round_plan=context['rounds'][context['round_index']];assert index.detach().cpu().tolist()==round_plan['receivers']
+                output=original_select(tensor,dim,index,*args,**kwargs);context['own_ref']=output;context['phase']='mean_ready';kind='own_gather'
+            elif phase=='mean_active':
+                round_plan=context['rounds'][context['round_index']];assert index.detach().cpu().tolist()==round_plan['sources'] and context['neighbor_gather_count']==0
+                output=original_select(tensor,dim,index,*args,**kwargs);context['neighbor_gather_count']+=1;kind='neighbor_gather'
+            else:
+                assert phase=='final_scatter';level=context['final_level'];assert index.detach().cpu().tolist()==context['positions'][level]
+                output=original_select(tensor,dim,index,*args,**kwargs);context['final_source_ref']=output;context['phase']='final_copy';kind='final_gather'
+            context['record']['primitive_calls'].append({'kind':kind,'round':context['round_index'],'original_calls':1,'returned_original_object_unchanged':True})
+            return output
+        def observed_mean(old_state,round_plan):
+            context=state['sfc_context'];assert context['phase']=='mean_ready' and old_state is context['current_state_ref'] and round_plan is context['rounds'][context['round_index']]
+            context['phase']='mean_active';context['neighbor_gather_count']=0
+            output=original_mean(old_state,round_plan)
+            assert context['neighbor_gather_count']==1;context['mean_ref']=output;context['mean_count']+=1;context['phase']='cell'
+            record={'round':context['round_index'],'input_state_sha256':fingerprint(torch,old_state),'output':summary(output),
+                'output_sha256':fingerprint(torch,output),'counts':list(round_plan['counts']),'source_receivers':list(round_plan['source_receivers']),
+                'original_mean_calls':1,'returned_original_object_unchanged':True,'mean_replayed_by_observer':False,'all_original_neighbors_old_state':True}
+            assert record['output']['finite'];context['record']['mean_calls'].append(record);lite_watch(output,context['record']);return output
+        def cell_pre(owner,values):
+            context=state['sfc_context'];assert context['phase']=='cell';value=values[0];c=att.synchronous_forest.channels
+            round_plan=context['rounds'][context['round_index']]
+            assert list(value.shape)==[len(round_plan['receivers']),2*c]
+            assert fingerprint(torch,value[:,:c])==fingerprint(torch,context['own_ref']) and fingerprint(torch,value[:,c:])==fingerprint(torch,context['mean_ref'])
+            context['pending_round']={'round':context['round_index'],'receivers':list(round_plan['receivers']),
+                'neighbor_sources':list(round_plan['sources']),'neighbor_counts':list(round_plan['counts']),
+                'input':summary(value),'input_sha256':fingerprint(torch,value),'same_OLD_state_before_all_updates':True}
+            assert context['pending_round']['input']['finite'];lite_watch(value,context['record'])
+        def cell_post(owner,values,output):
+            context=state['sfc_context'];context['linear_ref']=output;context['cell_count']+=1;context['phase']='GELU'
+            context['pending_round']['linear_output']=summary(output);assert context['pending_round']['linear_output']['finite'];lite_watch(output,context['record'])
+        def activation_post(owner,values,output):
+            context=state['sfc_context'];assert context['phase']=='GELU' and values[0] is context['linear_ref']
+            context['GELU_ref']=output;context['GELU_count']+=1;context['phase']='state_write'
+            context['pending_round'].update(output=summary(output),output_sha256=fingerprint(torch,output),original_cell_calls=1,original_GELU_calls=1)
+            assert context['pending_round']['output']['finite'];lite_watch(output,context['record'])
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('sfc_context')
+            if context is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            assert dim==0
+            if context['phase']=='state_write':
+                round_plan=context['rounds'][context['round_index']]
+                assert tensor is context['current_state_ref'] and source is context['GELU_ref'] and index.detach().cpu().tolist()==round_plan['receivers']
+                output=original_copy(tensor,dim,index,source,*args,**kwargs)
+                context['current_state_ref']=output;context['state_write_count']+=1
+                context['pending_round'].update(original_state_index_copy_calls=1,functional_update_after_OLDstate_reads=True,actual_state_sha256=fingerprint(torch,output))
+                context['record']['round_calls'].append(context.pop('pending_round'));context['round_index']+=1
+                context['phase']='own' if context['round_index']<len(context['rounds']) else 'final_scatter'
+                kind='state_write'
+            else:
+                assert context['phase']=='final_copy';level=context['final_level']
+                assert index.detach().cpu().tolist()==context['destinations'][level] and source is context['final_source_ref']
+                assert bool((tensor==0).all())
+                output=original_copy(tensor,dim,index,source,*args,**kwargs);context['final_flat_outputs'].append(output)
+                context['final_level']+=1;context['phase']='final_scatter' if context['final_level']<3 else 'complete';kind='final_scatter'
+            context['record']['primitive_calls'].append({'kind':kind,'original_calls':1,'returned_original_object_unchanged':True})
+            return output
+        for name,replacement,original in [('build_synchronous_forest_plan',observed_plan,original_plan),('prepare_synchronous_forest_plans',observed_prepare,original_prepare),('build_synchronous_rounds',observed_rounds,original_rounds),('mean_neighbor_states',observed_mean,original_mean)]:queue_replace(sfc_module,name,replacement,original)
+        queue_replace(torch,'stack',observed_stack,original_stack);queue_replace(torch.Tensor,'index_select',observed_select,original_select);queue_replace(torch.Tensor,'index_copy',observed_copy,original_copy)
+        hooks.extend([att.synchronous_forest.cell.register_forward_pre_hook(cell_pre),att.synchronous_forest.cell.register_forward_hook(cell_post),att.synchronous_forest.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('sfc_context');record=context['record'];round_count=len(context['rounds'])
+            assert context['phase']=='complete' and len(output)==3 and context['prepare_calls']==context['round_builder_calls']==context['initial_stack_calls']==1
+            assert context['round_index']==context['mean_count']==context['cell_count']==context['GELU_count']==context['state_write_count']==round_count
+            for level,value in enumerate(output):
+                # Byte view of actual final operator captures, not a replayed scatter.
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,context['final_flat_outputs'][level].detach().reshape(-1))
+                if not value.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE core output before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),
+                actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),actual_nodes=len(context['original_rows']),
+                actual_true_edges=sum(p['edge_count'] for p in record['plans']),actual_rounds=round_count,
+                actual_neighbor_mean_calls=context['mean_count'],actual_cell_calls=context['cell_count'],actual_GELU_calls=context['GELU_count'],
+                actual_state_index_copy_calls=context['state_write_count'],actual_final_index_copy_calls=context['final_level'],
+                actual_original_builder_calls=context['builder_calls'],actual_three_LN_calls=list(state['norm_counts']),
+                actual_state_update_rows=sum(len(r['receivers']) for r in context['rounds']),
+                actual_finished_components_no_fake_updates=True,actual_all_neighbor_same_OLDstate=True,
+                final_hD_direct_delta_from_actual_index_copy_captures=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'components':[{'root':c['root_id'],'D':c['diameter'],'nodes':len(c['nodes'])} for c in p['components']],
+                    'empty_scene':not p['fine_ids'],'one_true_fine':len(p['fine_ids'])==1,'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['sfc_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.synchronous_forest.register_forward_pre_hook(exchange_pre),att.synchronous_forest.register_forward_hook(exchange_post)])

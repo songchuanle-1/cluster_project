@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T04:20:06.428987+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "5c46f46a17514a6f984ad08364f0c7cc",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T05:11:20.228657+00:00"
+  },
+  "status": "READ_ONLY_ARCHIVE_CONTRACT_REVIEW_NOT_EXECUTED",
+  "canonical_sources": {
+    "pipeline_monitor.py": {
+      "path": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\pipeline_monitor.py",
+      "sha256": "d1f34242d00056d419bb4fb59522e0f72ef9a094a28ce691f73419d093ffc7a2"
+    },
+    "closure.py": {
+      "path": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\closure.py",
+      "sha256": "472bd2f6d317f9d1b81a40c7d108e76d5e9560da4d4950114c148428f06b8576"
+    }
+  },
+  "historical_M205_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_008137b4/m205_terminal_archive.json",
+    "sha256": "c6318a87ab4886f1371ef386fd6c800b305e38eef0867e3f426aa07fffa2cc73"
+  },
+  "historical_wrapper_limit": "M205 record confirms canonical finalize_task with strict exact-log retrieval adapter and no monitor repoll/kill/threshold change. No saved standalone M205 archive wrapper source was found in its named tick bundle; the recipe below is inferred from current canonical functions, not claimed to be a recovered callable wrapper.",
+  "important_lines": {
+    "acquire_lock": "pipeline_monitor.py:237-250",
+    "finalize_task": "pipeline_monitor.py:1322-1369",
+    "replayable_archive_and_exact_identity": "pipeline_monitor.py:1236-1285",
+    "recover_archives": "pipeline_monitor.py:1288-1319",
+    "unsafe_log_match_fallback": "pipeline_monitor.py:544-579, especially577",
+    "automatic_deathwatch_path": "pipeline_monitor.py:1592-1643",
+    "candidate_stage_enum": "closure.py:23-24",
+    "blocked_disposition": "closure.py:910-919",
+    "training_requires_live_verified_queue": "closure.py:947-951",
+    "crashed_not_successful_training_credit": "closure.py:633-650"
+  },
+  "safe_root_recipe": [
+    "Independently retain the exact original HAP task/run identity and already verified terminal proof: M207-HAP, config, original PID979955 plus starttime/argv/cwd/log lineage, PID absent, same native log containing actual DataLoader traceback. Root supplied these live findings; this review does not re-probe them. GPU0 external PID128551 is occupancy evidence, not a process to terminate.",
+    "Acquire canonical monitor.acquire_lock(project_dir). If it returns None, defer without changing anything. While holding it, reload queue/experiment/running and assert exactly one unchanged M207 task/run identity and expected server4 GPU0 mapping. Do not invoke monitor_project or its loop merely to advance deathwatch.",
+    "Check pipeline/archive_pending/sha256(M207-HAP).json before new finalization. Existing pending archive must be recovered under the same lock with recover_archives(...,filter_server=server-4); do not overwrite it or create a second archive id. Recovery validates frozen experiment_before/after and queue identity and current placement permissions.",
+    "Retrieve only the exact original registered log, using pinned server identity. Store a complete local copy with exact basename/path and saved remote bytecount/SHA; require local SHA and full contents/lineage to match. Do not use find_latest_log, cfg-name glob selection or the first same-config local log.",
+    "Default pull_log has a broad fallback f.endswith(.log) and cfg_name in f at line577 and may return empty on retrieval failure. For this one root-owned call, use the historical strict-I/O-adapter pattern: temporarily bind monitor.pull_log to a function that requires all expected project/server/cfg/state/remote-log arguments, checks the preverified exact local path+hash, and returns only that path or raises. Restore the original function in finally. This is runtime I/O selection, not a canonical validator/source edit.",
+    "Call only monitor.finalize_task(project_dir, queue, server-4, verified_host, verified_user, exact_original_task, config_basename_without_yaml, crashed, best_from_successful_original_validation_or_None, honest_last_known_epoch_or_question_mark, 0, exact_original_remote_log, events). Best/epoch are partial-run metadata; never infer a completed epoch or checkpoint at the traceback position.",
+    "finalize_task writes a durable archive_pending journal before publishing terminal state/ledger/analysis and removing only M207 running/queue identity. It preserves this run admission/commit/launch proof. It neither checks deathwatch nor calls attempt_crash_fix, requeues, resumes or launches anything. An exception leaves the journal for exact replay; do not patch or delete it.",
+    "Confirm one crashed experiment/archive_id, ledger and exact local log, no pending archive, M207 absent from queue/running, unrelated M206 hold unchanged. Finally restore any temporary pull_log and close the lock. Removing project registry mapping does not mean physical GPU0 is idle; retain external occupancy blocking all future compute."
+  ],
+  "research_disposition": {
+    "training_crash_not_scientific_reject": "Experiment status crashed records a native runtime/DataLoader termination. It does not establish a mechanism efficacy failure, research rejected, completed training, model numerical-gate failure, or new implementation revision. Preserve previous source/admission/native/resource evidence with its historical meaning and append the exact runtime-failure proof separately.",
+    "HAP": "After canonical archive removes its queue entry, research HAP must not remain stage=training: closure947-951 requires exactly one launch_verified queue task. Suggested stage=blocked, resume_stage=training, training_status=crashed, a concrete runtime/recovery blocker, evidence, next_action, timezone-aware retry_after and explicit unblock_condition. First inspect DataLoader failure and latest full saved checkpoint/source; no automatic restart/config/seed/batch/schedule change or invented checkpoint completion.",
+    "M206": "Current research M206 stage=training also conflicts with closure947-951 because its real queue is user-paused waiting with launch_verified=false. Keep the queue/experiment paused hold and resume_authorized=false, no active PID and no running mapping. Suggested research stage=blocked/resume_stage=training with user-pause authorization blocker and evidence. Do not fabricate launch_verified=true or restore M206 to satisfy closure. Retry timer is not resume permission; GPU1 remains forbidden and GPU0 migration is not authorized.",
+    "blocked_required_fields": "closure910-919 requires blocker, retry_after (timezone aware), unblock_condition, plus generic next_action and hashed evidence. crashed is not a legal research stage; only an experiment terminal state.",
+    "resource_boundary": "No legal free slot is established by HAP registry cleanup: server4 allowed[0] remains occupied by the root-identified external process. Do not touch GPU1 or resume M206. An external-resource wait must cite real occupancy and original authorization, not claim scientific route exhaustion."
+  },
+  "caller_proof_boundary": "finalize_task itself trusts supplied state/PID/log metadata and does not acquire the lock. The root wrapper must establish exact run+terminal proof before calling. This review supplies no new live proof and performs no archival/state mutation.",
+  "execution": {
+    "monitor_repolls": 0,
+    "deathwatch_changes": 0,
+    "archive_or_mark_calls": 0,
+    "SSH_GPU_torch": false,
+    "model_queue_ledger_or_canonical_source_changes": false,
+    "M206_resume": false
+  },
+  "write_scope": "Only this new archive_contract_review.json."
+}

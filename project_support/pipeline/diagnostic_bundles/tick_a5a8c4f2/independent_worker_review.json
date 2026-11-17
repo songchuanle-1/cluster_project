@@ -1,0 +1,32 @@
+{
+  "reviewed_at": "2026-10-20T22:12:42.409405+00:00",
+  "reviewer": "/root/pce_audit",
+  "scope": "Read-only AST/source/hash review. No file mutation, torch/model execution, SSH, GPU, or native pass.",
+  "artifacts": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a5a8c4f2/hap_native_worker.py",
+      "sha256": "6370664a07b1e10d78e768eae81f03385ca758f1be0f99ae375ebda768d66dd3"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a5a8c4f2/hap_smoke_function.py",
+      "sha256": "435a7428d1b812c2f23c33057b88def72ffd222bf3ade55db77c3ddef65f3e33"
+    }
+  ],
+  "result": "No blocking static issue found; PREPARED_UNEXECUTED retained.",
+  "observations": [
+    "smoke AST matches fragment; HAP model source matches local commit f51823bbddf0f8095a9a5813bf1f8169e3d7edb0.",
+    "full_backward maps fine/middle/coarse input tensors and two outputs; each of three FFN weights is checked for finite nonzero gradients and actual per-level hash update, with centered bias zero permitted.",
+    "pinv spy forwards original args/kwargs, calls original exactly once, returns original Tensor and restores in finally. Resource function AST identical to previous CGCA and no spy installed in resource mode.",
+    "Original native loader and train.train with two batches, optimizer pre/post hooks and finite one-element loss are preserved."
+  ],
+  "pending_runtime_requirements": [
+    "No native_runtime.py staged here. Fresh current-lease native_runtime/manifest and exact HAP assets/source/YAML must be assembled and verified before any GPU operation. GPU identity/UUID/context/locks are not verified by this AST review.",
+    "Runtime NAME must use the original M95 base name and candidate_name must identify _hap; setup retains the original legacy _mdc-stripping fallback."
+  ],
+  "diagnostic_limits": [
+    "If actual pinv itself raises, current observer appends after return and does not retain that call G summary. Preserve the exception as numerical evidence without inventing a G observation.",
+    "Additional eigvalsh/matrix_rank diagnostic failure must be classified as observer/implementation failure, not automatic falsification of HAP. Actual internal pinv retained rank remains unobserved."
+  ],
+  "native_smoke_passed": false,
+  "admission_ready": false
+}

@@ -1,0 +1,39 @@
+{
+  "contract": "m95_entry_fps_static_audit_v1",
+  "observed_at": "2026-09-25T20:12:00+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "scope": "Read-only source audit; no native model forward, strict replay, or causal attribution.",
+  "prior_evidence": {
+    "path": "pipeline/reports/m95_entry_fps_drift_20260925-1912.json",
+    "sha256": "c76057d1fc3af968ea093fffca3fc189a94d1682cd4750a6bd4b29a1e9f8a1be"
+  },
+  "source_sha256": {
+    "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "Cluster/pointnet2/pointnet2_utils.py": "0d72921d19cd21e5321e0b7a6292712a83fe1667491fc698a9549177e9fe8b09",
+    "Cluster/pointnet2/_ext_src/src/sampling_gpu.cu": "cf602b8dd93a09a2d2cc27cca400a563250ac369d7a29cfa49cacc7f73e6b2ff",
+    "scripts/frozen_capture_contract_20260916.py": "cea431df835fb5ab0fe7acc88b5539c700cc3cd37a816ecdb9bf2fd1f843f788",
+    "scripts/native_manifest_capture_20260922.py": "c76eae8906bc8abe136acd4df8fe5eb4e78a6755508d80a318a9371c4658d821"
+  },
+  "source_findings": [
+    "The producer hashes the native dataset item before the model forward; the fingerprint does not cover scatter_mean output or the actual FPS kernel input.",
+    "M95 network.py:121-123 computes sp_coords_float by scatter_mean(coords_float, superpoints, dim=0), then network.py:237/243 passes per-scene coordinates into FurthestPointSampling.apply.",
+    "pointnet2_utils.py delegates to the extension. sampling_gpu.cu:88 initializes old=0 and selects by squared-distance minima and reduction; no explicit random draw appears in this kernel source.",
+    "Therefore a request to capture an FPS RNG state alone cannot resolve the observed 2/2/192 changed indices. Identical pre-forward fingerprints do not certify identical post-scatter float coordinates or the deployed extension binary.",
+    "Local and remote network.py, pointnet2_utils.py and CUDA source SHA256 values matched. The deployed extension binary path and build identity were not established; this audit does not assert that the loaded binary matches the source."
+  ],
+  "gpu_observation": {
+    "host": "server-6",
+    "physical_gpu": 7,
+    "utilization_percent": 0,
+    "memory_used_mib": 20079,
+    "memory_total_mib": 81559,
+    "foreign_pid": 396980,
+    "foreign_process_memory_mib": 20070,
+    "idle_guard": "utilization <10% and memory used <1024 MiB",
+    "eligible": false
+  },
+  "next_action": "On a safely idle authorized GPU7, verify code, conda/data, checkpoint fe5e4a5f, manifest 4ad801fe, frozen producer c76eae89 and loaded extension identity. Run the unchanged producer without --manifest-only as a separately bounded full_train_scan and the unchanged strict comparator. On matched TRAIN inputs, capture the exact pre-FPS sp_coords_float tensor, kernel input stride/dtype, extension binary identity and output for rows95/178/193, especially row193; compare historical rows83/174 under their own matched inputs. Do not modify the strict tolerances or infer an RNG cause.",
+  "strict_historical_identity_gate": "fail_28_of_65",
+  "admission": false,
+  "training_launched": false
+}

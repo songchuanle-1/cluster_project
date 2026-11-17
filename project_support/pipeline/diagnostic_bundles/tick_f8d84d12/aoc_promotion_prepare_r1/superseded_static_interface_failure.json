@@ -1,0 +1,17 @@
+{
+  "recorded_at": "2026-10-29T10:30:48.781213+00:00",
+  "status": "PREPARATION_STATIC_SCHEMA_INTERFACE_FAILURE_NOT_MODEL_OR_NATIVE_FAILURE",
+  "superseded_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_f8d84d12/aoc_promotion_prepare/preparation.json",
+    "sha256": "d3a34fccfedc91a770f7ade2e10c139f60ab17f30d5d550f9443e055d854e816"
+  },
+  "actual_frozen_worker": {
+    "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/worker.py",
+    "sha256": "afa2f72fbc3c9844b56a11ae2f9000f8d12bb1ae25a2b4cafe84529a55aa71f7"
+  },
+  "finding": "common_initialized_parameters['shaaoc'] would KeyError on legitimate frozen worker output, whose actual key is 'shapes'. Root/MDC detected before any promotion entry.",
+  "cause": "Blind lowercase pes->aoc namespace replacement also touched plural shapes.",
+  "repair_scope": "Only that dictionary schema literal corrected in new sibling; original package preserved unchanged.",
+  "model_or_implementation_revision_created": false,
+  "actual_native_executed_or_failed": false
+}

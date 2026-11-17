@@ -1,0 +1,18 @@
+{
+  "actions": [
+    "仅cluster_project；复用begin的2026-10-19 14:11:02上海时间design快照和0-3段事实表，未重复preflight。以下补充快照后变化，不把运行登记当作实时训练。",
+    "14:18两次只读检查确认原PID141278和精确CPA配置训练均不在；server4主机启动时间12:17:42晚于原启动09:29:58。连接已恢复；精确退出码、native_exit及主机重启原因未知，不归因为科学失败。",
+    "完成5轮原生VAL，best mIoU0.43399661779403687@epoch5（12:07:32）；第6轮stdout最后1587步，最后带时间日志12:16:58为1580/4686步。训练未完成，不能称提升或机制反证。历史champion0.5020、目标0.5100、差0.0080不变。",
+    "14:26-14:36仅CPU读取last/best并核对哈希，全部runtime源码/配置未变。last保存epoch5、best0.4339966178、早停0；模型1165张量、AdamW1926张量均有限，PolyLR(last_epoch5)存在。核对原生恢复入口会加载optimizer/scheduler；没有CUDA测试或实际续训。未保存RNG，第6轮未保存部分无法回接，不承诺逐步复现原轨迹。",
+    "仅拉取本实验原生日志并校验SHA256。在pipeline_monitor.acquire_lock内将M204生命周期改为stopped_unknown，保留原启动历史及部分指标，仅移除其队列项/运行映射并追加一条中断台账，其他队列项未变；不把对账时间冒充精确退出时间。",
+    "核对maximum_training_launches1及automatic_retry_or_restart=false，CPA候选转为续训human_authorization等待。四个到期辅助候选复核主线、目标及CPA专属授权后继续原范围冻结，不重测/推广/M201恢复，不造GPU短缺；复查18:39:42上海或更早真实wake/授权。",
+    "本轮实际产出：2次进程/日志探针、2项CPU检查点/恢复契约检查、1份精确日志归档、1次生命周期对账、4个范围复核、1份续训请求和终态分析。新增候选/结构修订/训练启动/重启/迁移/CUDA诊断均0；科学状态inconclusive，累计筛选数不是本轮成果或成功率。",
+    "收据用量窗口为begin14:10:59至收据生成，排除先前读取、迟到记录与最终答复；报告写入时最终token未知，以实际收据为准。缓存已含输入、推理已含输出，不重复相加，用量不是账单。此报告尚未finish，执行是否完成以实际校验及释放结果为准。"
+  ],
+  "decisions": [
+    "单次探索启动授权已执行；重启后的checkpoint resume是新的操作，不能扩大旧授权。所属会话只询问一次：是否授权从已核验last.pth恢复同一M204-CPA（server4GPU0、第6轮起、保留优化器/学习率状态、总50轮、固定配置、不调参）？",
+    "保留CPA diagnosis/semantic-controls未通过、revision1 inconclusive及全部负证据；主机中断不否定机制也不构造PASS。仍围绕真实进入mask预测的点云特征更新主线，不把显存作为唯一方向。",
+    "design_cycle按契约使用external_resource_blocked，但明确blocker_kind=human_authorization，实际为CPA续训许可和4个辅助范围许可，不是GPU短缺/路线穷尽/相位冻结/超时。储备预算0，不凑新变体填槽。",
+    "完整六段和七段记忆先留档，再canonical finish。无法校验则保留证据abort并核实释放。没有改目标、deadline、准入、后台、调度或其他项目；任何新授权GPU动作仍需实时身份/占用/独占租约检查。"
+  ]
+}

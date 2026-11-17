@@ -1,0 +1,750 @@
+                               This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                            Except for this watermark, it is identical to the accepted version;
+                                      the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+  EDA: Explicit Text-Decoupling and Dense Alignment for 3D Visual Grounding
+
+          Yanmin Wu1                 Xinhua Cheng1                  Renrui Zhang2,3                   Zesen Cheng1            Jian Zhang1∗
+                                     1
+                                Shenzhen Graduate School, Peking University, China
+                2
+                    The Chinese University of Hong Kong, China 3 Shanghai AI Laboratory, China
+                                   wuyanmin@stu.pku.edu.cn                            zhangjian.sz@pku.edu.cn
+
+
+
+
+     This is a tall gray trash can . It is under the       This is a black trash can. It is under a
+                                                                      bathroom counter.                         The trash can is white and plastic. It is
+      left side of the counter , to the left of the                                                           attached to the wall to the left of the toilet.
+                 door when you enter.                       (a) Regular 3D visual grounding
+
+
+
+
+  (b1)   object                           (b2)             object              (b3)                                   (b4)
+      The door is rectangular in             The white refrigerator is in          It is a brown wooden object,            This is a black object . It is
+    shape and has a small window             front of the kitchen stove . It       with a cloth seat and back. It        located next to a tall shelf and
+        on the upper portion.               is to the left side of the room            has multicolored flower             there is a fan in front of it .
+                                               as one enters the kitchen.         patterns on the seat, and back.
+                                                          (b) Grounding without object name
+
+Figure 1. Text-decoupled, dense aligned 3D visual grounding. Different colours in the text correspond to different decoupled components.
+(a) Regular 3D visual grounding: locating objects requires comprehensively considering multiple semantic cues such as appearance at-
+tributes, object names, and spatial relationships. (b) Grounding without object name: not mentioning object names, avoiding short-cuts
+and forcing the model to predict the target based on other attributes.
+
+                               Abstract                                               the dense matching between two modalities: position align-
+                                                                                      ment loss and semantic alignment loss. On top of that,
+   3D visual grounding aims to find the object within point                           we further introduce a new visual grounding task, locat-
+clouds mentioned by free-form natural language descrip-                               ing objects without object names, which can thoroughly
+tions with rich semantic cues. However, existing methods                              evaluate the model’s dense alignment capacity. Through
+either extract the sentence-level features coupling all words                         experiments, we achieve state-of-the-art performance on
+or focus more on object names, which would lose the word-                             two widely-adopted 3D visual grounding datasets, Scan-
+level information or neglect other attributes. To alleviate                           Refer and SR3D/NR3D, and obtain absolute leadership on
+these issues, we present EDA that Explicitly Decouples                                our newly-proposed task. The source code is available at
+the textual attributes in a sentence and conducts Dense                               https://github.com/yanmin-wu/EDA.
+Alignment between such fine-grained language and point
+cloud objects. Specifically, we first propose a text decou-                           1. Introduction
+pling module to produce textual features for every seman-
+tic component. Then, we design two losses to supervise                                   Multi-modal cues can highly benefit the 3D environ-
+                                                                                      ment perception of an agent, including 2D images, 3D point
+    ∗ Corresponding author. This work was supported in part by Shenzhen               clouds, and language. Recently, 3D visual grounding (3D
+Research Project under Grant JCYJ20220531093215035.                                   VG) [8,50], also known as 3D object referencing [3], has at-
+
+
+
+                                                                               19231
+tached much attention as an important 3D cross-modal task.            explicitly select the object with the highest similarity to the
+Its objective is to find the target object in point cloud scenes      decoupled text components (instead of the entire sentence),
+by analyzing the descriptive query language, which requires           avoiding ambiguity caused by irrelevant components. Ad-
+understanding both 3D visual and linguistic context.                  ditionally, to explore the limits of VG and examine the com-
+    Language utterances typically involve words describ-              prehensiveness and fine-graininess of visual-language per-
+ing appearance attributes, object categories, spatial rela-           ception of the model, we suggest a challenging new task:
+tionships and other characteristics, as shown by different            Grounding without object name (VG-w/o-ON), where
+colours in Fig. 1(a), requiring that the model integrate multi-       the name is replaced by “object” (see Fig. 1(b)), forcing
+ple cues to locate the mentioned object. Compared with 2D             the model to locate objects based on other attributes and
+Visual Grounding [18,19,67,71], the sparseness and incom-             relationships. This setting makes sense because utterances
+pleteness of point clouds, and the diversity of language de-          that do not mention object names are common expressions
+scriptions produced by 3D multi-view, make 3D VG more                 in daily life, and in addition to testing whether the model
+challenging. Existing works made significant progress from            takes shortcuts. Benefiting from our text decoupling oper-
+the following perspectives: improving point cloud features            ation and the supervision of dense aligned losses, all text
+extraction by sparse convolution [70] or 2D images assis-             components are aligned with visual features, making it pos-
+tance [68]; generating more discriminative object candi-              sible to locate objects independent of object names.
+dates through instance segmentation [33] or language mod-                 To sum up, the main contributions of this paper are as
+ulation [46]; identifying complex spatial relationships be-           follows: 1) We propose a text decoupling module to parse
+tween entities via graph convolution [23] or attention [6].           linguistic descriptions into multiple semantic components,
+    However, we observe two issues that remain unex-                  followed by suggesting two well-designed dense aligned
+plored. 1) Imbalance: The object name can exclude most                losses for supervising fine-grained visual-language feature
+candidates, and even in some cases, there is only one                 fusion and preventing imbalance and ambiguity learning.
+name-matched object, as the “door” and “refrigerator” in              2) The challenging new 3D VG task of grounding without
+Fig. 1(b1, b2). This shortcut may lead to an inductive bias           object names is proposed to comprehensively examine the
+in the model that pays more attention to object names while           model’s robust performance. 3) We achieve state-of-the-art
+weakening other properties such as appearance and relation-           performance on two datasets (ScanRefer and SR3D/NR3D)
+ships, resulting in imbalanced learning. 2) Ambiguity: Ut-            on the regular 3D VG task and absolute leadership on the
+terances frequently refer to multiple objects and attributes          new task evaluated by the same model without retraining.
+(such as “black object, tall shelf, fan” in Fig. 1(b4)), while
+the model’s objective is to identify only the main object,            2. Related Work
+leading to an ambiguous understanding of language de-
+scriptions. These insufficiencies of existing works stem              2.1. 3D Vision and Language
+from their characteristic of feature coupling and fusing im-              3D vision [52, 53, 75] and language are vital manners for
+plicitly. They input a sentence with different attribute words        humans to understand the environment, and they are also
+but output only one globally coupled sentence-level fea-              important research topics for the evolution of machines to
+ture that subsequently matches the visual features of can-            be like humans. Previously, the two fields evolved inde-
+didate objects. The coupled feature is ambiguous because              pendently. Due to the advance of multimodality [25, 26,
+some words may not describe the main object (green text               54, 56, 57, 72–74, 76], many promising works across 3D vi-
+in Fig. 1) but other auxiliary objects (red text in Fig. 1).          sion and language have been introduced recently. In 3D
+Alternatively, using the cross-modal attention of the Trans-          visual grounding [1, 8–10, 12], the speaker (like a human)
+former [21, 63] automatically and implicitly to fuse visual           describes an object in language. The listener (such a robot)
+and text features. However, this may encourage the model              needs to understand the language description and the 3D vi-
+to take shortcuts, such as focusing on object categories and          sual scene to grounding the target object. On the contrary,
+ignoring other attributes, as previously discussed.                   the 3D dense caption [9, 13, 14, 36, 65, 69] is analogous to
+    Instead, we propose a more intuitive decoupled and ex-            an inverse process in which the input is a 3D scene, and
+plicit strategy. First, we parse the input text to decouple           the output is textual descriptions of each object. Language-
+different semantic components, including the main object              modulated 3D detection or segmentation [7, 32, 34, 59, 78]
+word, pronoun, attributes, relations, and auxiliary object            enriches the diversity of text queries by matching visual-
+words. Then, performing dense alignment between point                 linguistic feature spaces rather than predicting the probabil-
+cloud objects and multiple related decoupled components               ity of a set number of categories. Furthermore, some studies
+achieves fine-grained feature matching, which avoids the              explore the application of 3D visual language in agents such
+inductive bias resulting from imbalanced learning of differ-          as robot perception [27, 61], vision-and-language naviga-
+ent textual components. As the final grounding result, we             tion (VLN) [15, 31, 55], and embodied question answering
+
+
+
+                                                                   19232
+(EQA) [4,22,30,45,47,62]. In this paper, we focus on point             (a)     It is a brown chair with                               brown
+                                                                             armrests and four legs . It is            (Attributes) armrests
+clouds-based 3D visual grounding, which is the fundamen-                     directly under a blackboard
+                                                                                                                                       legs
+tal technology for many embodied AI [24, 38, 48] tasks.                    is      chair       witharmrests    (Main obj.) chair
+                                                                          (ROOT)                        four
+2.2. 3D Visual Grounding                                                   It      a      brown and legs             under            It
+                                                                                       is (ROOT)   under   a   (Relationship)      (Pronoun)
+    The majority of current mainstream techniques are two-
+                                                                                It directly blackboard                 blackboard (Auxi. obj.)
+stage. In the first stage, obtain the features of the query            (b)                                     (c)
+language and candidate point cloud objects independently                         Dependency Trees                    Component Decoupling
+by a pre-trained language model [16, 20, 49] and a pre-
+                                                                     Figure 2. Text component decoupling: (a) The query text. (b)
+trained 3D detector [44, 51] or segmenter [11, 35, 64]. In           Dependency tree analysis. (c) Decoupled into five components.
+the second stage, the researchers focus on fusing the two
+modal features and then selecting the best-matched object.
+                                                                     text components and determines the target object name by
+1) The most straightforward solution is to concatenate the
+                                                                     grammatical analysis to avoid this restriction. 2) BUTD-
+two modal features and then consider it a binary classifica-
+                                                                     DETR (and MDETR and GLIP in the 2D task) only con-
+tion problem [8, 39], which provides limited performance
+                                                                     sider the sparse alignment of main object words or noun
+because the two features are not sufficiently fused. 2) Tak-
+                                                                     phrases to visual features. Conversely, we align all object-
+ing advantage of the Transformer’s attention mechanism,
+                                                                     related decoupled textual semantic components with visual
+which is naturally suitable for multi-module feature fusion,
+                                                                     features, which we refer to dense alignment, significantly
+He et al. [28] and Zhao et al. [77] achieve remarkable per-
+                                                                     enhancing the discriminability of multimodal features.
+formance by performing self-attention and cross-attention
+to features. 3) In contrast, other studies view feature fusion       3. Proposed Method
+as a matching problem rather than a classification. Yuan
+et al. [70] and Abdelreheem et al. [2], supervised by the               The framework is illustrated in Fig. 3. First, the input
+contrastive loss [29], compute the cosine similarity of vi-          text description is decoupled into multiple semantic com-
+sual features and textual features. Inspired by [43], Feng           ponents, and its affiliated text positions and features are
+et al. [23] parses the text to generate a text scene graph,          obtained (Sec. 3.1). Concurrently, the Transformer-based
+simultaneously builds a visual scene graph, and then per-            encoder extracts and modulates features from point clouds
+forms graph node matching. 4) Point clouds’ sparse, noisy,           and text, then decodes the visual features of candidate ob-
+incomplete, and lack of detail make learning objects’ se-            jects (Sec. 3.2). Finally, the dense aligned losses are derived
+mantic information challenging. Yang et al. [68] and Cai             between the decoupled text features and the decoded visual
+et al. [6] use 2D images to aid visual-textual feature fusion,       features (Sec. 3.3). The grounding result is the object with
+but at the cost of additional 2D-3D alignment and 2D fea-            visual features most similar to text features (Sec. 3.4).
+ture extraction.
+                                                                     3.1. Text Decoupling
+    However, the two-stage method has a substantial detec-
+tion bottleneck: objects overlooked in the first stage can-             The text features of the coupled strategy are ambiguous,
+not be matched in the second. In contrast, object detection          where features from multiple objects and attributes are cou-
+and feature extraction in the single-stage method is modu-           pled, such as “a brown wooden chair next to the black ta-
+lated by the query text, making it easier to identify the text-      ble.” Among them, easy-to-learn clues (such as the cate-
+concerned object. Liu et al. [41] suggest fusing visual and          gory “chair ” or the colour “brown”) may predominate,
+linguistic features at the bottom level and producing text-          weakening other attributes (such as material “wooden”);
+related visual heatmaps. Similarly, Luo et al. [46] present          words of other objects (such as the “black table”) may
+a single-stage approach that employs textual features to             cause interference. To produce more discriminative text
+guide visual keypoint selection and progressively localizes          features and fine-grained cross-modal feature fusion, we
+objects. BUTD-DETR [34] is also a single-stage capable               decouple the query text into different semantic components,
+framework. More importantly, inspired by the 2D image-               each independently aligned with visual features, avoiding
+language pre-train model (such MDETR [37], GLIP [40]),               the ambiguity caused by feature coupling.
+BUTD-DETR measures the similarity between each word                     Text Component Decoupling. Analyzing grammatical
+and object and then selects the features of the word that cor-       dependencies between words is a fundamental task in NLP.
+respond to the object’s name to match the candidate object.          We first use the off-the-shelf tool [60, 66] to parse the lan-
+However, there are two limitations: 1) Since multiple object         guage description grammatically to generate the grammat-
+names may be mentioned in a sentence, the ground truth an-           ical dependency trees, as shown in Fig. 2(b). Each sen-
+notation is needed to retrieve the target name, which limits         tence contains only one ROOT node, and each remaining
+its generalizability. Our text decoupling module separates           word has a corresponding parent node. Then according to
+
+
+
+                                                                  19233
+                                       (a) Decoupled Components                     (b) Decoupled Text Position                     (c) Decoupled Text Feature
+                             Text       Main chair                                   L_Main 000010000000000...                             t_Main
+                           Decouple     Attri. brown, armrests, legs                 L_Attri 000100100100000...                            t_Attri            1 64
+                                        Auxi. blackboard                             L_Auxi 00000000000...0001                             t_Auxi
+                                        Pron. It                                     L_Pron 000000000001000…                               t_Pron      t_other        ...
+                                        Rel. under                                   L_Rel 00000000000...0100                              t_Rel
+
+                                              (d)                                              25664    Position Text Label: L_Main + L_Modi + L_Pron + L_Rel
+                                                                            256288 MLP t             Alignment 1256 0 0 0 1 1 0 1 0 0 1 0 1 …... 0 1 0 0 
+                                                                                                                        L
+ it is a brown chair with
+ armrests and four legs . RoBERTa                   Language                                                  Object          main obj.
+   It is directly under a                            Encoder                  Prediction Head                 Label
+         blackboard                                                                                       L  256256         other objects
+                                                                                                              pred
+                                                                                 Box
+                                           256288
+                                                                               Pred.   MLP   MLP
+                                                                                                        (g)                   auxi. obj.
+                                              (e)                                          256288
+                                                                                                        Semantic Text Feature          √ Positive term × Neg. term
+                                                                                     Object             Alignment 25664                             ...               
+                         PointNet++                     Visual                      Decoder                             t
+                                                                                                            Object
+                                                       Encoder                                             Feature                √ √ √ √ √ √              × × × × ×
+                                                                         Top‐k
+                                                                                                             25664
+                                                                                                           o                      × × × × × ×              × × × × √
+                                                                               Query proposal
+                                            1024288                                                                              × × × × × ×              × × × √ ×
+                          3D Object                                       (f)  256288              (h)
+                          Detection                              Encoder           Decoder                                  Dense Aligned Loss
+                                       3D Box 132288
+
+Figure 3. The system framework. (a-c): Decouple the input text into several components to acquire the position label L and features t
+of the decoupled text. (d-e): Transformer-based encoders for cross-modal visual-text feature extraction. (f): Decode proposal features O′
+and linearly project them as object position labels Lpred and object features o, in addition to a box prediction head for regression of the
+bounding box. (g-h): Visual-text feature dense alignment. Note that the additional 3D object detection procedure is optional.
+
+
+the words’ part-of-speech and dependencies, we decouple                           predominate, but as a result of the Transformer’s attention
+the long text into five semantic components (see Fig. 2(c)):                      mechanism, it also implicitly contains the global sentence’s
+Main object - the target object mentioned in the utter-                           information. In other words, feature decoupling produces
+ance; Auxiliary object - the one used to assist in lo-                            individual features while keeping the global context.
+cating the main object; Attributes - objects’ appear-
+ance, shape, etc.; Pronoun - the word instead of the main                         3.2. Multimodal Feature Extraction
+object; Relationship - the spatial relation between the                               We employ BUTD-DETR’s encoder-decoder module for
+main object and the auxiliary object. Note that attributes                        feature extraction and intermodulation of cross-modal fea-
+affiliated with pronouns are equivalent to attached with the                      tures. We strongly recommend the reader to refer to Fig. 3.
+main object, thus connecting two sentences in an utterance.                           Input Modal Tokenlization. The input text and 3D
+    Text Position Decoupling. After decoupling each text                          point clouds are encoded by the pre-trained RoBERTa [42]
+component (Fig. 3(a)), we generate the position label (simi-                      and PointNet++ [53] and produce text tokens T ∈ Rl×d and
+lar to a mask) Lmain , Lattri , Lauxi , Lpron , Lrel ∈ R1×l for                   visual tokens V ∈ Rn×d . Additionally, the GroupFree [44]
+the component’s associated word (Fig. 3(b)). Where l=256                          detector is used to detect 3D boxes, which are subsequently
+is the maximum length of the text, each component’s word                          encoded as box tokens B ∈ Rb×d . Note that the GroupFree
+position is set to 1 and the rest to 0. The label will be used to                 is optional, the final predicted object of the network is from
+construct the position alignment loss and supervise the clas-                     the prediction head (see below), and the box token is just to
+sification of objects. The classification result, is not one of a                 assist in better regression of the target object.
+predetermined number of object categories but the position                            Encoder-Decoder. Self-attention and cross-attention are
+of the text with the highest semantic similarity.                                 performed in the encoder to update both visual and text
+    Text Feature Decoupling. The feature of each word                             features, obtaining cross-modal features V ′ , T ′ while keep-
+(token) is produced in the backbone of multimodal feature                         ing the dimensions. The top-k (k=256) visual features
+extraction (Fig. 3(d)). The text feature of the decoupled                         are selected, linearly projected as query proposal features
+component can be derived by dot-multiplying all words’                            O ∈ Rk×d , and updated as O′ in the decoder.
+features t with its position label L, as shown in Fig. 3(c).                          Prediction Head. 1) The decoded proposal features
+The decoupled text features and visual features will be in-                       O′ ∈ Rk×d are fed into an MLP and output the predicted
+dependently aligned under the supervision of the semantic                         position labels Lpred ∈ Rk×l , which are then utilized to
+alignment loss. Note that in the decoupled text features,                         calculate the position alignment loss with decoupled text
+the semantics of the corresponding components absolutely                          position labels L ∈ R1×l . 2) Additionally, the proposal fea-
+
+
+
+                                                                            19234
+tures are linearly projected as object features o ∈ Rk×64                                                                                                                                                                                                                                                                                                                                                                  where o and t are the object and text features after linear
+by another MLP, which are then utilized to compute the se-                                                                                                                                                                                                                                                                                                                                                                projection, and o⊤ t/τ is their similarity, as shown in Fig. 3
+mantic alignment loss with the similarly linearly projected                                                                                                                                                                                                                                                                                                                                                               (h). k and l are the number of objects and words. ti is
+text feature t ∈ Rl×64 . 3) Lastly, a box prediction head [44]                                                                                                                                                                                                                                                                                                                                                            the positive text feature of the ith candidate object. Taking
+regresses the bounding box of the object.                                                                                                                                                                                                                                                                                                                                                                                 the main object as an example, the positive text feature T+ i
+                                                                                                                                                                                                                                                                                                                                                                                                                          corresponding to it is:
+3.3. Dense Aligned Loss
+3.3.1                                             Dense Position Aligned Loss                                                                                                                                                                                                                                                                                                                                                                                                      \boldsymbol {t}_i \in \mathbf {T}_i^{+} = \left \{ \boldsymbol {t}_{main}, \boldsymbol {t}_{attri}, \boldsymbol {t}_{pron}, \boldsymbol {t}_{rel} \right \}, \label {eq:text_positive}                                                                                                                            (5)
+The objective of position alignment is to ensure that the
+                                                                                                                                                                                                                                                                                                                                                                                                                          and w+ is the weight of each positive term. tj is the feature
+distribution of language-modulated visual features closely                                                                                                                                                                                                                                                                                                                                                                of the ith text, but note that the negative similarity weight
+matches that of the query text description, as shown in                                                                                                                                                                                                                                                                                                                                                                   w− for auxiliary object term tauxi is 2, while the rest weight
+Fig. 3(g). This process is similar to standard object detec-                                                                                                                                                                                                                                                                                                                                                              1. The text loss of semantic alignment defined similarly:
+tion’s one-hot label prediction. However, rather than being
+limited by the number of categories, we predict the position
+of text that is similar to objects.                                                                                                                                                                                                                                                                                                                                                                                          \mathcal {L}_{sem\_t} = \sum _{i=1}^{l} \frac {w_{+}}{\left |\mathbf {O}_{i}^{+}\right |} \sum _{\boldsymbol {o}_i \in \mathbf {O}_{i}^{+}}-\log \left (\frac {\exp \left (\boldsymbol {t}_{i}^{\top } \boldsymbol {o}_{i} / \tau \right )}{\sum _{j=1}^{k} \exp \left (\boldsymbol {t}_{i}^{\top } \boldsymbol {o}_{j} / \tau \right )}\right ), \label {eq:loss_semantic_text} 
+   The constructed ground truth text distribution of the
+mentioned main object is obtained by element-wise sum-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 (6)
+ming the position labels of the associated decoupled text                                                                                                                                                                                                                                                                                                                                                                  where oi ∈ O+  i is the positive object feature of the ith text,
+components:                                                                                                                                                                                                                                                                                                                                                                                                               and oj is the feature of the jth object. The final semantic
+                                                                                                                                                                                                                                                                                                                                                                                                                          alignment loss is the mean of the two: Lsem = (Lsem o +
+            P_{main} = \lambda _1 L_{main} + \lambda _2 L_{attri} + \lambda _3 L_{pron} + \lambda _4 L_{rel}, \label {eq:P_text}  (1)                                                                                                                                                                                                                                                                                     Lsem t )/2.
+where λ is the weight of different parts (refer to the para-                                                                                                                                                                                                                                                                                                                                                                 Similarly, the semantic alignment of multiple text com-
+metric search in Supplementary Material.). Pauxi = Lauxi                                                                                                                                                                                                                                                                                                                                                                  ponents (Eq. (5)) with visual features also illustrates our in-
+represents the text distribution of the auxiliary object. The                                                                                                                                                                                                                                                                                                                                                             sight of “dense.” This is intuitive, such as “It is a brown
+remaining candidate objects’ text distribution is Poth , with                                                                                                                                                                                                                                                                                                                                                             chair with legs under a blackboard,” where the main ob-
+the final bit set to 1 (see ∅ in Fig. 3(g)). Therefore, all k                                                                                                                                                                                                                                                                                                                                                             ject’s visual features should be not only similar to “chair”
+candidate objects’ ground truth text distribution is Ptext =                                                                                                                                                                                                                                                                                                                                                              but also similar to “brown, legs” and distinct to “black-
+{Pmain , Pauxi , Poth } ∈ Rk×l .                                                                                                                                                                                                                                                                                                                                                                                          board” as possible.
+   The predicted visual distribution of k objects is produced                                                                                                                                                                                                                                                                                                                                                                The total loss for training also includes the box regres-
+by applying softmax to the output Lpred ∈ Rk×l of the                                                                                                                                                                                                                                                                                                                                                                     sion loss. Refer to Supplementary Material for details.
+prediction head:
+                                                                                                                 P_{obj} = Softmax(L_{pred}). \label {eq:P_obj}                                                                                                                                                                                                                                (2)                        3.4. Explicit Inference
+
+Their KL divergence is defined as the position-aligned loss:                                                                                                                                                                                                                                                                                                                                                                 Because of our text decoupling and dense alignment op-
+                                                                                                                                                                                                                                                                                                                                                                                                                          erations, object features fused multiple related text compo-
+                                                                                                                                                                                                                                                                                                                                                                                                                          nent features, allowing for the computation of the similarity
+                                                                                                                                                                                                                                                                                                                                                                                                                          between individual text components and candidate objects.
+                            \mathcal {L}_{pos} = \sum _{i=1}^{k}[P_{text}^{i} \log ({P_{text}^{i}}) - P_{text}^{i} \log (P_{obj}^{i}) ]. \label {eq:loss_possition}                                                                                                                                                                                                                            (3)
+                                                                                                                                                                                                                                                                                                                                                                                                                          For instance, Smain = Sof tmax(o⊤ tmain /τ ) indicates
+                                                                                                                                                                                                                                                                                                                                                                                                                          the similarity between objects o and the main text compo-
+   We highlight that “dense alignment” indicates that the                                                                                                                                                                                                                                                                                                                                                                 nent tmain . Therefore, the similarity of objects and related
+target object is aligned with the positions of multiple com-                                                                                                                                                                                                                                                                                                                                                              components can be explicitly combined to obtain the total
+ponents (Eq. (1)), significantly different from BUTD-DETR                                                                                                                                                                                                                                                                                                                                                                 score and select the candidate with the highest score:
+(and MDETR for 2D tasks), which only sparsely aligns with
+the object name’s position Lmain .
+                                                                                                                                                                                                                                                                                                                                                                                                                                           S_{all} = S_{main} + S_{attri} + S_{pron} + S_{rel} - S_{auxi}, \label {eq:score}                                                                                                                                                                                                                                                                         (7)
+
+3.3.2                                             Dense Semantic Aligned Loss                                                                                                                                                                                                                                                                                                                                             where the definition of Sattri , Spron , Srel , and Sauxi is sim-
+Semantic alignment aims to learn the similarity of visual-                                                                                                                                                                                                                                                                                                                                                                ilar to Smain . If providing supervision of auxiliary objects
+text multimodal features through contrastive learning. The                                                                                                                                                                                                                                                                                                                                                                during training, and the auxiliary object can be identified by
+object loss of semantic alignment is defined as follows:                                                                                                                                                                                                                                                                                                                                                                  solely computing the similarity between the object features
+                                                                                                                                                                                                                                                                                                                                                                                                                          and the auxiliary component’s text features: Sall = Sattri .
+  \mathcal {L}_{sem\_o}\! =\! \sum _{i=1}^{k} \frac {1}{\left |\mathbf {T}_{i}^{+}\right |} \!\sum _{\boldsymbol {t}_i \in \mathbf {T}_{i}^{+}}\!\!\!-\log \!\left (\!\frac {\exp \left (w_{+}\ast (\boldsymbol {o}_{i}^{\top } \boldsymbol {t}_{i} / \tau )\right )}{\sum _{j=1}^{l} \exp \left (w_{-}\ast (\boldsymbol {o}_{i}^{\top } \boldsymbol {t}_{j} / \tau )\right )}\!\right ), \label {eq:loss_semantic}       Being able to infer the object based on the part of the text is
+                                                                                                                                                                                                                                                                                                                                                                                                                          a significant sign that the network has learned well-aligned
+                                                                                                                                                                                                                                                                                                                                                                                                 (4)                      and fine-grained visual-text feature space.
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       19235
+4. Experiments                                                      v) The qualitative results are depicted in Fig. 4(a-c), which
+                                                                    reveals that our method with an excellent perception of ap-
+    First, we conduct comprehensive and fair comparisons            pearance attributes, spatial relationships, and even ordinal
+with SOTA methods in the Regular 3D Visual Grounding                numbers.
+setting in Sec. 4.1. Then, in Sec. 4.2, we introduce our
+                                                                       SR3D/NR3D. Table 2 shows the accuracy on the
+proposed new task, Grounding without Object Name, and
+                                                                    SR3D/NR3D dataset, where we achieve the best perfor-
+perform comparison and analysis. Implementation details,
+                                                                    mance of 68.1% and 52.1%. In SR3D, since the language
+additional experiments and more qualitative results are de-
+                                                                    descriptions are concise and the object is easy to identify,
+tailed in the supplementary material.
+                                                                    our method and [34, 46] reach an accuracy of over 60%.
+4.1. Regular 3D Visual Grounding                                    Conversely, in NR3D, descriptions are too detailed and
+                                                                    complex, causing additional challenges for text decoupling.
+4.1.1   Experiment settings                                         However, we still achieve SOTA accuracy with the 3D-only
+We keep the same settings as existing works, with ScanRe-           data, while other comparable methods [46,68] rely on addi-
+fer [8] and SR3D/NR3D [3] as datasets and Acc@0.25IoU               tional 2D images for training. Some methods [6, 8, 9] com-
+and Acc@0.5IoU as metrics. Based on the visual data                 pared in Table 1 are not discussed here because they are not
+of ScanNet [17], ScanRefer adds 51,583 manually an-                 evaluated on the SR3D/NR3D dataset. In addition, because
+notated text descriptions about objects. These complex              GT boxes of candidate objects are provided in this setting,
+and free-form descriptions involve object categories and at-        the single-stage methods are not applicable and discussed.
+tributes such as colour, shape, size, and spatial relation-
+ships. SR3D/NR3D is also proposed based on ScanNet,                 4.1.3   Ablation studies
+with SR3D including 83,572 simple machine-generated de-                Loss ablation. The ablation of the position-aligned loss
+scriptions and NR3D containing 41,503 descriptions simi-            and the semantic-aligned loss is shown in Table 3. The per-
+lar to ScanRefer’s human annotation. The difference is that         formance of the semantic-aligned loss is marginally better
+in the ScanRefer configuration, detecting and matching ob-          because its contrastive loss not only shortens the distance
+jects are required, while SR3D/NR3D is simpler. It supplies         between similar text-visual features but also enlarges the
+GT boxes for all candidate objects and only needs to clas-          distance between dis-matched features (such as tauxi is a
+sify the classes of the boxes and choose the target object.         negative term in Eq. (4)). Whereas position-aligned loss
+                                                                    only considers object-related components (as in Eq. (1)).
+4.1.2   Comparison to the state of the art
+                                                                    When both losses supervise together, the best accuracy is
+   ScanRefer. Table 1 reports the results on the ScanRe-            achieved, demonstrating that they can produce complemen-
+fer dataset. i) Our method achieves state-of-the-art perfor-        tary performance.
+mance by a substantial margin, with an overall improvement              Dense components ablation. To demonstrate our in-
+of 4.2% and 3.7% to 54.59% and 42.26%. ii) Some stud-               sight into dense alignment, we perform ablation analysis on
+ies [6, 8, 9, 46, 68, 77] proved that supplemented 2D images        the different decoupled text components, and the results are
+with detailed and dense semantics could learn better point          displayed in the “Regular VG” column in Table 4. Anal-
+cloud features. Surprisingly, we only use sparse 3D point           ysis: i) (a) is our baseline implementation of the sparse
+cloud features and even outperformed 2D assistance meth-            concept, using only the “Main object” component decou-
+ods. This superiority illustrates that our decoupling and           pled from the text. In contrast to BUTD-DETR, the text
+dense alignment strategies mine more efficient and mean-            decoupling module (Sec. 3.1) is used to obtain text labels
+ingful visual-text co-representations. iii) Another finding is      and features during training and inference instead of em-
+that the accuracy of most existing techniques is less than          ploying ground truth labels. ii) Dense-aligned sub-methods
+40% and 30% in the “multiple” setting because multiple              (b)-(h) outperform the sparse alignment (a) because of the
+means that the category of the target object mentioned in the       finer-grained visual-linguistic feature fusion. iii) (b)-(e) in-
+language is not unique, with more interference candidates           dicate that adding any other component on top of the “Main
+with the same category. However, we reached a remarkable            object” improves performance, demonstrating the validity
+49.13% and 37.64%. To identify similar objects, a finer-            of each text component. The “Attribute” component aids
+grained understanding of the text and vision is required in         in identifying characteristics such as colour, and shape, fre-
+this complex setting. iv) The last three rows in Table 1 com-       quently mentioned in language descriptions. Unexpectedly,
+pare single-stage methods, where our method’s single-stage          the “Pronoun” component such as “it, that, and which”
+implementation is without the object detection step (B in           have little meaning when used alone but also function in
+Fig. 3) in training and inference. The result illustrates that      our method, indicating that the pronoun learned contextual
+while not requiring an additional pre-trained 3D object de-         information from the sentence. The “Relationship” compo-
+tector, our approach also can achieve SOTA performance.             nent facilitates comprehension of spatial relationships be-
+
+
+
+                                                                 19236
+                                                                    Unique (∼19%)            Multiple (∼81%)                        Overall
+                Method                    Venue      Modality
+                                                                    0.25      0.5             0.25      0.5                 0.25               0.5
+                                                           3D       67.64         46.19       32.06       21.26            38.97             26.10
+            ScanRefer [8]              ECCV2020
+                                                         3D+2D      76.33         53.51       32.73       21.11            41.19             27.40
+            ReferIt3D [3]              ECCV2020            3D       53.8           37.5        21.0        12.8             26.4              16.9
+              TGNN [33]                AAAI2021            3D       68.61         56.80       29.84       23.18            37.37             29.70
+          InstanceRefer [70]           ICCV2021            3D       77.45         66.83       31.27       24.77            40.23             32.93
+               SAT [68]                ICCV2021          3D+2D      73.21         50.83       37.64       25.16            44.54             30.14
+           FFL-3DOG [23]               ICCV2021            3D       78.80         67.94       35.19       25.70            41.33             34.01
+                                                           3D       77.16         58.47       38.38       28.70            45.90             34.47
+       3DVG-Transformer [77]           ICCV2021
+                                                         3D+2D      81.93         60.64       39.30       28.42            47.57             34.67
+             3D-SPS [46]               CVPR2022          3D+2D      84.12         66.72       40.32       29.82            48.82             36.98
+                                                           3D       78.75         61.30       40.13       30.08            47.62             36.14
+              3DJCG [6]                CVPR2022
+                                                         3D+2D      83.47         64.34       41.39       30.82            49.56             37.33
+         BUTD-DETR [34] †              ECCV2022            3D       82.88         64.98       44.73       33.97            50.42             38.60
+            D3Net [9]                  ECCV2022          3D+2D        -           70.35         -         30.50               -              37.87
+              EDA                         -                3D       85.76         68.57       49.13       37.64          54.59 (+4.2%)     42.26 (+3.7%)
+    3D-SPS(single-stage) [46]          CVPR2022           3D        81.63         64.77       39.48       29.61             47.65             36.43
+  BUTD-DETR (single-stage) [34]‡       ECCV2022           3D        81.47         61.24       44.20       32.81             49.76             37.05
+      EDA (single-stage) §                -               3D        86.40         69.42       48.11       36.82             53.83             41.70
+Table 1. The 3D visual grounding results on ScanRefer, accuracy evaluated by IoU 0.25 and IoU 0.5. † The accuracy is reevaluated using
+our parsed text labels because the performance reported by BUTD-DETR used ground truth text labels and ignored some challenging
+samples (see supplementary materials for more details). § Our single-stage implementation without the assistance of the additional 3D
+object detection step (dotted arrows in Fig. 3). ‡ BUTD-DETR did not provide single-stage results and we retrained the model.
+
+       Method              Venue     Modality     SR3D NR3D                                +Lpos          +Lsem          Acc@0.25          Acc@0.5
+    ReferIt3D [3]         ECCV20        3D        39.8     35.6                   (a)         ✓                              51.2             39.6
+      TGNN [33]           AAAI21        3D        45.0     37.3                   (b)                       ✓                52.2             39.9
+  TransRefer3D [28]        MM21         3D        57.4     42.1                   (c)         ✓             ✓                54.6             42.3
+  InstanceRefer [70]      ICCV21        3D        48.0     38.8
+                                                                                        Table 3. Loss ablation on the ScanRefer dataset.
+ 3DVG-Transfor. [77]      ICCV21        3D        51.4     40.8
+   FFL-3DOG [23]          ICCV21        3D         -       41.7                            Dense components              Regular VG VG-w/o-ON
+                                                                                   Main    Attri. Pron.   Auxi.   Rel.   @0.25 @0.5 @0.25 @0.5
+       SAT [68]           ICCV21      3D+2D       57.9     49.2
+  3DReferTrans. [2]      WACV22         3D        47.0     39.0             (a)     ✓                                      51.5     38.8    21.8     16.7
+ LanguageRefer [58]       CoRL22        3D        56.0     43.9             (b)     ✓        ✓                             53.1     41.3    23.2     17.8
+     3D-SPS [46]          CVPR22      3D+2D       62.6     51.5             (c)     ✓              ✓                       52.9     40.8    23.7     18.6
+ BUTD-DETR † [34]         ECCV22        3D        65.6     49.1             (d)     ✓                      ✓               52.9     41.0    23.2     18.4
+                                                                            (e)     ✓                             ✓        52.8     40.7    25.7     19.6
+       LAR [5]           NeurIPS22      3D        59.6     48.9
+     EDA (Ours)              -          3D        68.1     52.1             (f)     ✓        ✓     ✓                       53.8     41.8    24.2     18.5
+                                                                            (g)     ✓        ✓     ✓       ✓               54.2     42.3    24.0     18.8
+Table 2. Performance on SR3D/NR3D datasets by Acc@0.25IoU                   (h)     ✓        ✓     ✓       ✓      ✓        54.6     42.3    26.5     21.2
+as the metric. The detailed results of EDA in four subsets are          Table 4. Ablation studies of different text components on Regular
+provided in the Supplementary Material. † Reevaluated by parsed         VG and VG-w/o-ON tasks. Evaluated on the ScanRefer dataset.
+text labels (see supp. for more details).
+
+tween objects. The component “Auxiliary object” is a neg-               4.2. Grounding without Object Name (VG-w/o-ON)
+ative term in the loss (Eq. (4)). During inference (Eq. (7)),           4.2.1           Experiment settings
+its similarity is subtracted in the hopes that the predicted
+main object is as dissimilar to it as possible. iv) (f)-(h) inte-       To evaluate the comprehensive reasoning ability of the
+grate different components to make performance gains and                model and avoid inductive biases about object names, we
+reach the peak when all are involved, demonstrating that the            propose a new and more challenging task: grounding
+functions of each component can be complementary, and                   objects without mentioning object names (VG-w/o-ON).
+there may be no overlap between the features of each one.               Specifically, we manually replace the object’s name with
+The result reveals that our method effectively decouples and            “object” in the ScanRefer validation set. For instance:
+matches fine-grained multimodal features.                               “This is a brown wooden chair” becomes “this is a brown
+
+
+
+                                                                     19237
+   GT
+Rendered
+ Scene
+
+
+
+
+ Ours
+
+
+
+
+ BUTD
+ ‐DETR
+
+
+             (a) this is a black leather       (b) wooden double           (c) there is a chair        (d) choose the first   (e) the object is in
+               loveseat. if you were       bookcase filled with books.       with it is back to       small circular object the corner next to the
+  Text          sitting in it, the long,    walking into the room it is      the wall. it is the       with a metal stand,     door, below the
+              short bookshelf would          in the right hand most         fourth chair from          on the right side. it whiteboard. it is gray,
+                   be on the right.        corner next to the window.            the left.              has no red stool.      tall, and narrow.
+        Figure 4. Qualitative results with ScanRefer texts. (a-c): Regular 3D visual grounding. (d-e): Grounding without object name.
+
+wooden object”. A total of 9253 samples were annotated                               Method
+                                                                                                                 Subsets                   Overall
+and discarded another 255 ambiguous samples. We di-                                                 Attri only   Rel only   Attri+Rel   @0.25   @0.5
+vide this language set into four subsets: only mentioning                        ScanRefer [8]       11.17       10.53       10.29      10.51    6.20
+object attributes (∼15%), only mentioning spatial relation-                        TGNN [33]         10.52       13.32       11.35      11.64    9.51
+ships (∼20%), mentioning both attributes and relationships                     InstanceRefer [70]    14.74       13.71       13.81      13.92   11.47
+(∼63%), and others (∼2%), as the first row in Table 5. Note                    BUTD-DETR [34]        12.30       12.11       11.86      11.99    8.95
+that, without retraining, we perform comparisons using                            EDA (Ours)         25.40       25.82       26.96      26.50   21.20
+our best model and comparative approaches’ best models                       Table 5. Performance of grounding without object name. The ac-
+trained for the regular VG task (Sec. 4.1).                                  curacy of subsets is measured by acc@0.25IoU, where the “other”
+                                                                             subset is not reported due to its small proportion.
+4.2.2     Result and analysis
+                                                                             “Relationship” component plays the most significant role
+Table 5 reports the experimental results. i) The performance                 because the spatial relationship with other objects may pro-
+of all methods on this challenging task is significantly lower               vide more obvious indications in this setting. v) Fig. 4(d-e)
+than that of regular VG (see Table. 1), indicating that object               shows qualitative examples. Even without knowing the tar-
+categories provide rich semantic information, which is also                  get’s name, our method can infer it by other cues, while
+conducive to classifying features. It’s accessible to produce                BUTD-DETR’s performance drops catastrophically.
+the category’s inductive bias, especially in the “unique” set-
+ting. ii) Our method achieves absolute lead with the over-                   5. Conclusion
+all performance of 26.5% and 21.2%, which is over 10%
+higher than other methods. This preponderance demon-                             We present EDA, an explicit, dense-aligned method for
+strates that our proposed text decoupling and dense align-                   3D Visual Grounding tasks. By decoupling text into mul-
+ment enable fine-grained visual-linguistic feature matching,                 tiple semantic components and densely aligning it with vi-
+where the model identifies the visual features most similar                  sual features under the supervision of position-aligned and
+to other text components (e.g. attributes, relations, etc.). iii)            semantic-aligned loss, we enable fine-grained visual-text
+Notably, in subset “Attri+Rel”, our method performs bet-                     feature fusion, avoiding the imbalance and ambiguity of ex-
+ter than in the other subsets because additional cues can be                 isting methods. Extensive experiments and ablation demon-
+exploited for fine-grained localization. However, the perfor-                strate the superiority of our method. In addition, we propose
+mance of the comparison approaches on this subset drops,                     a new challenging 3D VG subtask of grounding without the
+revealing that more clues make them suffer from ambiguity.                   object name to evaluate model robustness comprehensively.
+iv) Column “VG-w/o-ON” in Table 4 shows ablation stud-                       However, our limitations are the performance bottlenecks of
+ies of text components for this new task. The performance                    multiple modules, such as PointNet++, RoBERTa, and text
+increase offered by the additional components is more re-                    parsing modules. Especially when the text is lengthy, text
+markable than during the regular VG task. Among them, the                    decoupling may fail, resulting in performance degradation.
+
+
+
+                                                                          19238
+References                                                                [12] Shizhe Chen, Pierre-Louis Guhur, Makarand Tapaswi,
+                                                                               Cordelia Schmid, and Ivan Laptev. Language conditioned
+ [1] Ahmed Abdelreheem, Kyle Olszewski, Hsin-Ying Lee,                         spatial relation reasoning for 3d object grounding. In Pro-
+     Peter Wonka, and Panos Achlioptas. Scanents3d: Ex-                        ceedings of the Advances in Neural Information Processing
+     ploiting phrase-to-3d-object correspondences for improved                 Systems, 2022. 2
+     visio-linguistic models in 3d scenes.           arXiv preprint       [13] Sijin Chen, Hongyuan Zhu, Xin Chen, Yinjie Lei, Tao
+     arXiv:2212.06250, 2022. 2                                                 Chen, and Gang YU. End-to-end 3d dense captioning with
+ [2] Ahmed Abdelreheem, Ujjwal Upadhyay, Ivan Skorokhodov,                     vote2cap-detr. arXiv preprint arXiv:2301.02508, 2023. 2
+     Rawan Al Yahya, Jun Chen, and Mohamed Elhoseiny.                     [14] Zhenyu Chen, Ali Gholami, Matthias Nießner, and Angel X
+     3dreftransformer: Fine-grained object identification in real-             Chang. Scan2cap: Context-aware dense captioning in rgb-d
+     world scenes using natural language. In Proceedings of the                scans. In Proceedings of the IEEE/CVF Conference on Com-
+     IEEE/CVF Winter Conference on Applications of Computer                    puter Vision and Pattern Recognition, pages 3193–3203,
+     Vision, pages 3941–3950, 2022. 3, 7                                       2021. 2
+ [3] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed                [15] Wenhao Cheng, Xingping Dong, Salman Khan, and Jianbing
+     Elhoseiny, and Leonidas Guibas. Referit3d: Neural listeners               Shen. Learning disentanglement with decoupled labels for
+     for fine-grained 3d object identification in real-world scenes.           vision-language navigation. In Proceedings of the European
+     In Proceedings of the European Conference on Computer Vi-                 Conference on Computer Vision, pages 309–329. Springer,
+     sion, pages 422–440. Springer, 2020. 1, 6, 7                              2022. 2
+ [4] Daichi Azuma, Taiki Miyanishi, Shuhei Kurita, and Motoaki            [16] Junyoung Chung, Caglar Gulcehre, Kyunghyun Cho, and
+     Kawanabe. Scanqa: 3d question answering for spatial scene                 Yoshua Bengio. Empirical evaluation of gated recurrent neu-
+     understanding. In Proceedings of the IEEE/CVF Conference                  ral networks on sequence modeling. In Proceedings of the
+     on Computer Vision and Pattern Recognition, pages 19129–                  NIPS 2014 Workshop on Deep Learning, 2014. 3
+     19139, 2022. 3                                                       [17] Angela Dai, Angel X Chang, Manolis Savva, Maciej Hal-
+ [5] Eslam Mohamed BAKR, Yasmeen Youssef Alsaedy, and                          ber, Thomas Funkhouser, and Matthias Nießner. Scannet:
+     Mohamed Elhoseiny. Look around and refer: 2d synthetic                    Richly-annotated 3d reconstructions of indoor scenes. In
+     semantics knowledge distillation for 3d visual grounding.                 Proceedings of the IEEE conference on computer vision and
+     In Alice H. Oh, Alekh Agarwal, Danielle Belgrave, and                     pattern recognition, pages 5828–5839, 2017. 6
+     Kyunghyun Cho, editors, Proceedings of the Advances in               [18] Chaorui Deng, Qi Wu, Qingyao Wu, Fuyuan Hu, Fan
+     Neural Information Processing Systems, 2022. 7                            Lyu, and Mingkui Tan. Visual grounding via accumu-
+ [6] Daigang Cai, Lichen Zhao, Jing Zhang, Lu Sheng, and Dong                  lated attention. In Proceedings of the IEEE conference on
+     Xu. 3djcg: A unified framework for joint dense captioning                 computer vision and pattern recognition, pages 7746–7755,
+     and visual grounding on 3d point clouds. In Proceedings of                2018. 2
+     the IEEE/CVF Conference on Computer Vision and Pattern               [19] Jiajun Deng, Zhengyuan Yang, Tianlang Chen, Wengang
+     Recognition, pages 16464–16473, 2022. 2, 3, 6, 7                          Zhou, and Houqiang Li. Transvg: End-to-end visual ground-
+ [7] Anthony Chen, Kevin Zhang, Renrui Zhang, Zihan Wang,                      ing with transformers. In Proceedings of the IEEE/CVF
+     Yuheng Lu, Yandong Guo, and Shanghang Zhang. Pimae:                       International Conference on Computer Vision, pages 1769–
+     Point cloud and image interactive masked autoencoders for                 1779, 2021. 2
+     3d object detection. arXiv preprint arXiv:2303.08129, 2023.          [20] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina
+     2                                                                         Toutanova. BERT: pre-training of deep bidirectional trans-
+ [8] Dave Zhenyu Chen, Angel X Chang, and Matthias Nießner.                    formers for language understanding. In Proceedings of the
+     Scanrefer: 3d object localization in rgb-d scans using natural            2019 Conference of the North American Chapter of the As-
+     language. In Proceedings of the European Conference on                    sociation for Computational Linguistics: Human Language
+     Computer Vision, pages 202–221. Springer, 2020. 1, 2, 3, 6,               Technologies, pages 4171–4186, 2019. 3
+     7, 8                                                                 [21] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,
+ [9] Dave Zhenyu Chen, Qirui Wu, Matthias Nießner, and An-                     Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,
+     gel X Chang. D3net: A speaker-listener architecture for                   Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-
+     semi-supervised dense captioning and visual grounding in                  vain Gelly, Jakob Uszkoreit, and Neil Houlsby. An image
+     rgb-d scans. In Proceedings of the European Conference on                 is worth 16x16 words: Transformers for image recognition
+     Computer Vision. Springer, 2022. 2, 6, 7                                  at scale. In Proceedings of the International Conference on
+[10] Jiaming Chen, Weixin Luo, Xiaolin Wei, Lin Ma, and                        Learning Representations, 2021. 2
+     Wei Zhang. Ham: Hierarchical attention model with                    [22] Yasaman Etesam, Leon Kochiev, and Angel X Chang.
+     high performance for 3d visual grounding. arXiv preprint                  3dvqa: Visual question answering for 3d environments. In
+     arXiv:2210.12513, 2022. 2                                                 2022 19th Conference on Robots and Vision (CRV), pages
+[11] Shaoyu Chen, Jiemin Fang, Qian Zhang, Wenyu Liu, and                      233–240. IEEE, 2022. 3
+     Xinggang Wang. Hierarchical aggregation for 3d instance              [23] Mingtao Feng, Zhen Li, Qi Li, Liang Zhang, XiangDong
+     segmentation. In Proceedings of the IEEE/CVF Interna-                     Zhang, Guangming Zhu, Hui Zhang, Yaonan Wang, and Aj-
+     tional Conference on Computer Vision, pages 15467–15476,                  mal Mian. Free-form description guided 3d visual graph net-
+     2021. 3                                                                   work for object grounding in point cloud. In Proceedings
+
+
+
+
+                                                                       19239
+     of the IEEE/CVF International Conference on Computer Vi-            [36] Yang Jiao, Shaoxiang Chen, Zequn Jie, Jingjing Chen, Lin
+     sion, pages 3722–3731, 2021. 2, 3, 7                                     Ma, and Yu-Gang Jiang. More: Multi-order relation min-
+[24] Samir Yitzhak Gadre, Mitchell Wortsman, Gabriel Ilharco,                 ing for dense captioning in 3d scenes. arXiv preprint
+     Ludwig Schmidt, and Shuran Song. Clip on wheels: Zero-                   arXiv:2203.05203, 2022. 2
+     shot object navigation as object localization and exploration.      [37] Aishwarya Kamath, Mannat Singh, Yann LeCun, Gabriel
+     arXiv preprint arXiv:2203.10421, 2022. 3                                 Synnaeve, Ishan Misra, and Nicolas Carion.            Mdetr-
+[25] Ziyu Guo, Xianzhi Li, and Pheng Ann Heng. Joint-mae: 2d-                 modulated detection for end-to-end multi-modal understand-
+     3d joint masked autoencoders for 3d point cloud pre-training.            ing. In Proceedings of the IEEE/CVF International Confer-
+     arXiv preprint arXiv:2302.14007, 2023. 2                                 ence on Computer Vision, pages 1780–1790, 2021. 3
+[26] Ziyu Guo, Renrui Zhang, Longtian Qiu, Xianzheng Ma, Xu-             [38] Apoorv Khandelwal, Luca Weihs, Roozbeh Mottaghi, and
+     peng Miao, Xuming He, and Bin Cui. Calip: Zero-shot                      Aniruddha Kembhavi. Simple but effective: Clip embed-
+     enhancement of clip with parameter-free attention. arXiv                 dings for embodied ai. In Proceedings of the IEEE/CVF Con-
+     preprint arXiv:2209.14169, 2022. 2                                       ference on Computer Vision and Pattern Recognition, pages
+                                                                              14829–14838, 2022. 3
+[27] Huy Ha and Shuran Song. Semantic abstraction: Open-
+                                                                         [39] Sumit Kumar, Badri N Patro, and Vinay P Namboodiri. Auto
+     world 3d scene understanding from 2d vision-language mod-
+                                                                              qa: The question is not only what, but also where. In Pro-
+     els. In Proceedings of the 6th Annual Conference on Robot
+                                                                              ceedings of the IEEE/CVF Winter Conference on Applica-
+     Learning, 2022. 2
+                                                                              tions of Computer Vision, pages 272–281, 2022. 3
+[28] Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei
+                                                                         [40] Liunian Harold Li, Pengchuan Zhang, Haotian Zhang, Jian-
+     Huang, Aixi Zhang, and Si Liu. Transrefer3d: Entity-and-
+                                                                              wei Yang, Chunyuan Li, Yiwu Zhong, Lijuan Wang, Lu
+     relation aware transformer for fine-grained 3d visual ground-
+                                                                              Yuan, Lei Zhang, Jenq-Neng Hwang, et al. Grounded
+     ing. In Proceedings of the 29th ACM International Confer-
+                                                                              language-image pre-training.        In Proceedings of the
+     ence on Multimedia, pages 2344–2352, 2021. 3, 7
+                                                                              IEEE/CVF Conference on Computer Vision and Pattern
+[29] Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross                   Recognition, pages 10965–10975, 2022. 3
+     Girshick. Momentum contrast for unsupervised visual rep-
+                                                                         [41] Haolin Liu, Anran Lin, Xiaoguang Han, Lei Yang, Yizhou
+     resentation learning. In Proceedings of the IEEE/CVF con-
+                                                                              Yu, and Shuguang Cui. Refer-it-in-rgbd: A bottom-up ap-
+     ference on computer vision and pattern recognition, pages
+                                                                              proach for 3d visual grounding in rgbd images. In Proceed-
+     9729–9738, 2020. 3
+                                                                              ings of the IEEE/CVF Conference on Computer Vision and
+[30] Yining Hong, Chunru Lin, Yilun Du, Zhenfang Chen,                        Pattern Recognition, pages 6032–6041, 2021. 3
+     Joshua B Tenenbaum, and Chuang Gan. 3d concept learn-               [42] Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar
+     ing and reasoning from multi-view images. Proceedings of                 Joshi, Danqi Chen, Omer Levy, Mike Lewis, Luke Zettle-
+     the IEEE/CVF Conference on Computer Vision and Pattern                   moyer, and Veselin Stoyanov. Roberta: A robustly optimized
+     Recognition, 2023. 3                                                     bert pretraining approach. arXiv preprint arXiv:1907.11692,
+[31] Yicong Hong, Qi Wu, Yuankai Qi, Cristian Rodriguez-                      2019. 4
+     Opazo, and Stephen Gould. Vln bert: A recurrent vision-             [43] Yongfei Liu, Bo Wan, Xiaodan Zhu, and Xuming He. Learn-
+     and-language bert for navigation. In Proceedings of the                  ing cross-modal context graph for visual grounding. In Pro-
+     IEEE/CVF Conference on Computer Vision and Pattern                       ceedings of the AAAI Conference on Artificial Intelligence,
+     Recognition, pages 1643–1653, 2021. 2                                    volume 34, pages 11645–11652, 2020. 3
+[32] Peixiang Huang, Li Liu, Renrui Zhang, Song Zhang, Xinli             [44] Ze Liu, Zheng Zhang, Yue Cao, Han Hu, and Xin Tong.
+     Xu, Baichao Wang, and Guoyi Liu. Tig-bev: Multi-view bev                 Group-free 3d object detection via transformers. In Proceed-
+     3d object detection via target inner-geometry learning. arXiv            ings of the IEEE/CVF International Conference on Com-
+     preprint arXiv:2212.13979, 2022. 2                                       puter Vision, pages 2949–2958, 2021. 3, 4, 5
+[33] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and                  [45] Haonan Luo, Guosheng Lin, Yazhou Yao, Fayao Liu,
+     Tyng-Luh Liu. Text-guided graph neural networks for re-                  Zichuan Liu, and Zhenming Tang. Depth and video segmen-
+     ferring 3d instance segmentation. In Proceedings of the                  tation based visual attention for embodied question answer-
+     AAAI Conference on Artificial Intelligence, volume 35, pages             ing. IEEE Transactions on Pattern Analysis and Machine
+     1610–1618, 2021. 2, 7, 8                                                 Intelligence, 2022. 3
+[34] Ayush Jain, Nikolaos Gkanatsios, Ishita Mediratta, and Kate-        [46] Junyu Luo, Jiahui Fu, Xianghao Kong, Chen Gao, Haibing
+     rina Fragkiadaki. Bottom up top down detection transform-                Ren, Hao Shen, Huaxia Xia, and Si Liu. 3d-sps: Single-stage
+     ers for language grounding in images and point clouds. In                3d visual grounding via referred point progressive selection.
+     Proceedings of the European Conference on Computer Vi-                   In Proceedings of the IEEE/CVF Conference on Computer
+     sion, pages 417–433. Springer, 2022. 2, 3, 6, 7, 8                       Vision and Pattern Recognition, pages 16454–16463, 2022.
+[35] Li Jiang, Hengshuang Zhao, Shaoshuai Shi, Shu Liu, Chi-                  2, 3, 6, 7
+     Wing Fu, and Jiaya Jia. Pointgroup: Dual-set point                  [47] Xiaojian Ma, Silong Yong, Zilong Zheng, Qing Li, Yi-
+     grouping for 3d instance segmentation. In Proceedings of                 tao Liang, Song-Chun Zhu, and Siyuan Huang. Sqa3d:
+     the IEEE/CVF conference on computer vision and Pattern                   Situated question answering in 3d scenes. arXiv preprint
+     recognition, pages 4867–4876, 2020. 3                                    arXiv:2210.07474, 2022. 3
+
+
+
+
+                                                                      19240
+[48] Sudipta Paul, Amit K Roy-Chowdhury, and Anoop Cherian.                 precise scene graphs from textual descriptions for improved
+     Avlen: Audio-visual-language embodied navigation in 3d                 image retrieval. In Proceedings of the fourth workshop on
+     environments. arXiv preprint arXiv:2210.07940, 2022. 3                 vision and language, pages 70–80, 2015. 3
+[49] Jeffrey Pennington, Richard Socher, and Christopher D Man-        [61] Nur Muhammad Mahi Shafiullah, Chris Paxton, Lerrel
+     ning. Glove: Global vectors for word representation. In                Pinto, Soumith Chintala, and Arthur Szlam. Clip-fields:
+     Proceedings of the 2014 conference on empirical methods in             Weakly supervised semantic fields for robotic memory.
+     natural language processing (EMNLP), pages 1532–1543,                  arXiv preprint arXiv:2210.05663, 2022. 2
+     2014. 3                                                           [62] Sinan Tan, Mengmeng Ge, Di Guo, Huaping Liu, and
+[50] Mihir Prabhudesai, Hsiao-Yu Fish Tung, Syed Ashar Javed,               Fuchun Sun. Knowledge-based embodied question answer-
+     Maximilian Sieb, Adam W. Harley, and Katerina Fragki-                  ing. arXiv preprint arXiv:2109.07872, 2021. 3
+     adaki. Embodied language grounding with 3d visual feature         [63] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+     representations. In Proceedings of the IEEE/CVF Confer-                reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+     ence on Computer Vision and Pattern Recognition (CVPR),                Polosukhin. Attention is all you need. Advances in neural
+     June 2020. 1                                                           information processing systems, 30, 2017. 2
+[51] Charles R Qi, Or Litany, Kaiming He, and Leonidas J               [64] Thang Vu, Kookhoi Kim, Tung M Luu, Thanh Nguyen, and
+     Guibas. Deep hough voting for 3d object detection in point             Chang D Yoo. Softgroup for 3d instance segmentation on
+     clouds. In proceedings of the IEEE/CVF International Con-              point clouds. In Proceedings of the IEEE/CVF Conference
+     ference on Computer Vision, pages 9277–9286, 2019. 3                   on Computer Vision and Pattern Recognition, pages 2708–
+[52] Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J Guibas.               2717, 2022. 3
+     Pointnet: Deep learning on point sets for 3d classification       [65] Heng Wang, Chaoyi Zhang, Jianhui Yu, and Weidong Cai.
+     and segmentation. In Proceedings of the IEEE conference                Spatiality-guided transformer for 3d dense captioning on
+     on computer vision and pattern recognition, pages 652–660,             point clouds. arXiv preprint arXiv:2204.10688, 2022. 2
+     2017. 2                                                           [66] Hao Wu, Jiayuan Mao, Yufeng Zhang, Yuning Jiang, Lei
+[53] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J                  Li, Weiwei Sun, and Wei-Ying Ma. Unified visual-semantic
+     Guibas. Pointnet++: Deep hierarchical feature learning on              embeddings: Bridging vision and language with structured
+     point sets in a metric space. Advances in neural information           meaning representations. In Proceedings of the IEEE/CVF
+     processing systems, 30, 2017. 2, 4                                     Conference on Computer Vision and Pattern Recognition,
+[54] Yuankai Qi, Qi Wu, Peter Anderson, Xin Wang,                           pages 6609–6618, 2019. 3
+     William Yang Wang, Chunhua Shen, and Anton van den                [67] Li Yang, Yan Xu, Chunfeng Yuan, Wei Liu, Bing Li, and
+     Hengel. Reverie: Remote embodied visual referring ex-                  Weiming Hu. Improving visual grounding with visual-
+     pression in real indoor environments. In Proceedings of                linguistic verification and iterative reasoning. In Proceed-
+     the IEEE/CVF Conference on Computer Vision and Pattern                 ings of the IEEE/CVF Conference on Computer Vision and
+     Recognition, pages 9982–9991, 2020. 2                                  Pattern Recognition, pages 9499–9508, 2022. 2
+[55] Yanyuan Qiao, Yuankai Qi, Yicong Hong, Zheng Yu, Peng             [68] Zhengyuan Yang, Songyang Zhang, Liwei Wang, and Jiebo
+     Wang, and Qi Wu. Hop: History-and-order aware pre-                     Luo. Sat: 2d semantics assisted training for 3d visual
+     training for vision-and-language navigation. In Proceedings            grounding. In Proceedings of the IEEE/CVF International
+     of the IEEE/CVF Conference on Computer Vision and Pat-                 Conference on Computer Vision, pages 1856–1866, 2021. 2,
+     tern Recognition, pages 15418–15427, 2022. 2                           3, 6, 7
+[56] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya                [69] Zhihao Yuan, Xu Yan, Yinghong Liao, Yao Guo, Guan-
+     Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,                  bin Li, Shuguang Cui, and Zhen Li. X-trans2cap: Cross-
+     Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-               modal knowledge transfer using transformer for 3d dense
+     ing transferable visual models from natural language super-            captioning. In Proceedings of the IEEE/CVF Conference
+     vision. In Proceedings of the International Conference on              on Computer Vision and Pattern Recognition, pages 8563–
+     Machine Learning, pages 8748–8763. PMLR, 2021. 2                       8573, 2022. 2
+[57] Aditya Ramesh, Prafulla Dhariwal, Alex Nichol, Casey Chu,         [70] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang,
+     and Mark Chen. Hierarchical text-conditional image gen-                Sheng Wang, Zhen Li, and Shuguang Cui. Instancerefer:
+     eration with clip latents. arXiv preprint arXiv:2204.06125,            Cooperative holistic understanding for visual grounding on
+     2022. 2                                                                point clouds through instance multi-level contextual refer-
+[58] Junha Roh, Karthik Desingh, Ali Farhadi, and Dieter                    ring. In Proceedings of the IEEE/CVF International Confer-
+     Fox. Languagerefer: Spatial-language model for 3d vi-                  ence on Computer Vision, pages 1791–1800, 2021. 2, 3, 7,
+     sual grounding. In Proceedings of the Conference on Robot              8
+     Learning, pages 1046–1056. PMLR, 2022. 7                          [71] Haotian Zhang, Pengchuan Zhang, Xiaowei Hu, Yen-Chun
+[59] David Rozenberszki, Or Litany, and Angela Dai. Language-               Chen, Liunian Harold Li, Xiyang Dai, Lijuan Wang, Lu
+     grounded indoor 3d semantic segmentation in the wild. In               Yuan, Jenq-Neng Hwang, and Jianfeng Gao. GLIPv2:
+     Proceedings of the European Conference on Computer Vi-                 Unifying localization and vision-language understanding.
+     sion. Springer, 2022. 2                                                In Alice H. Oh, Alekh Agarwal, Danielle Belgrave, and
+[60] Sebastian Schuster, Ranjay Krishna, Angel Chang, Li Fei-               Kyunghyun Cho, editors, Proceedings of the Advances in
+     Fei, and Christopher D Manning. Generating semantically                Neural Information Processing Systems, 2022. 2
+
+
+
+
+                                                                    19241
+[72] Renrui Zhang, Ziyu Guo, Wei Zhang, Kunchang Li, Xu-
+     peng Miao, Bin Cui, Yu Qiao, Peng Gao, and Hongsheng
+     Li. Pointclip: Point cloud understanding by clip. In Pro-
+     ceedings of the IEEE/CVF Conference on Computer Vision
+     and Pattern Recognition, pages 8552–8562, 2022. 2
+[73] Renrui Zhang, Xiangfei Hu, Bohao Li, Siyuan Huang, Han-
+     qiu Deng, Hongsheng Li, Yu Qiao, and Peng Gao. Prompt,
+     generate, then cache: Cascade of foundation models makes
+     strong few-shot learners. arXiv preprint arXiv:2303.02151,
+     2023. 2
+[74] Renrui Zhang, Liuhui Wang, Yu Qiao, Peng Gao, and Hong-
+     sheng Li. Learning 3d representations from 2d pre-trained
+     models via image-to-point masked autoencoders. arXiv
+     preprint arXiv:2212.06785, 2022. 2
+[75] Renrui Zhang, Liuhui Wang, Yali Wang, Peng Gao, Hong-
+     sheng Li, and Jianbo Shi. Parameter is not all you need:
+     Starting from non-parametric networks for 3d point cloud
+     analysis. arXiv preprint arXiv:2303.08134, 2023. 2
+[76] Renrui Zhang, Ziyao Zeng, Ziyu Guo, and Yafeng Li. Can
+     language understand depth? In Proceedings of the 30th ACM
+     International Conference on Multimedia, pages 6868–6874,
+     2022. 2
+[77] Lichen Zhao, Daigang Cai, Lu Sheng, and Dong Xu. 3dvg-
+     transformer: Relation modeling for visual grounding on
+     point clouds. In Proceedings of the IEEE/CVF International
+     Conference on Computer Vision, pages 2928–2937, 2021. 3,
+     6, 7
+[78] Xiangyang Zhu, Renrui Zhang, Bowei He, Ziyao Zeng,
+     Shanghang Zhang, and Peng Gao. Pointclip v2: Adapting
+     clip for powerful 3d open-world learning. arXiv preprint
+     arXiv:2211.11682, 2022. 2
+
+
+
+
+                                                                  19242
+

@@ -1,0 +1,70 @@
+{
+  "contract": "m95_native_boundary_trace_audit_v1",
+  "observed_at": "2026-09-25T17:48:00+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "authorized_location": "server-6 GPU7",
+  "manifest_sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023",
+  "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+  "changed_capture": {
+    "remote_path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_boundary_trace_20260925_1707_c/capture.json",
+    "sha256": "91feb8142ba521ce585400a5411c190a6f3324875905fc086da52aa48da10fb9",
+    "rows": 256,
+    "producer_composite_sha256": "9bff96899babd60fa61a78836100ce4e4624e253d789c66689309bc065c45706",
+    "entrypoint_sha256": "87abfa865d92c0b0ab9d9a7da3c8fe67aa0b87a064e0402eff473bdbc4fbe22f",
+    "partition_probe_sha256": "1b0e82dd9b00c5b43694dc34c989029876244df6ed2075e56dcc051f4929e819",
+    "partition_boundary_completed": true,
+    "cluster_query_boundary_completed": true
+  },
+  "unchanged_subset_capture": {
+    "remote_path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_frozen_strict_20260925_1724/capture.json",
+    "sha256": "9a297dee98f524cb9e0000592e5c0752df4330ac02c14889d01c280cecf9e668",
+    "rows": 256,
+    "entrypoint_sha256": "c76eae8906bc8abe136acd4df8fe5eb4e78a6755508d80a318a9371c4658d821",
+    "capture_mode": "manifest_subset",
+    "strict_full_scan_comparator_executed": false
+  },
+  "matched_subset_comparison": {
+    "same_native_input_fingerprint": "256/256",
+    "same_selected_query": "256/256",
+    "same_selected_iou": "256/256",
+    "max_selected_score_delta": 0.000008285045623779297,
+    "level0_assignment_changed_rows": 4,
+    "level1_assignment_changed_rows": 3,
+    "level2_assignment_changed_rows": 1,
+    "rows_with_any_query_score_delta_above_1e-3": 1,
+    "max_any_query_score_delta": 0.9937560018879594,
+    "row83": {
+      "level0_assignment_changed_points": 0,
+      "point344_assignment": 124,
+      "point344_second_center": 183,
+      "point344_native_distance_margin": 0.46543627977371216,
+      "active_encoder_layer": 5,
+      "point_count": 1332,
+      "query_count": 128
+    },
+    "row174": {
+      "level0_assignment_changed_points": 0,
+      "point344_assignment": 8,
+      "point344_second_center": 216,
+      "point344_native_distance_margin": 0.10835331678390503,
+      "active_encoder_layer": 5,
+      "point_count": 860,
+      "query_count": 128
+    }
+  },
+  "historical_reference_comparison": {
+    "reference_capture_sha256": "f90286842d9d82d835652a29048100a10b6286ee5630e0d7c296363e95880025",
+    "native_input_fingerprints_differ_for_selected_rows": true,
+    "strict_identity_gate": "fail_28_of_65_prior_paired_rows",
+    "interpretation": "The subset trace cannot be compared causally to the historical full scan with different TRAIN input draws."
+  },
+  "diagnostic_failures_and_repairs": [
+    "Initial changed-producer run failed a float64 reconstruction check of native float32 cdist at batch 52. Scale-aware squared-distance tolerance passed six focused tests locally and remotely; native distance and assignment remain recorded.",
+    "Second run reached 256 emitted rows but lost the two traced manifest keys because the trace trimming loop shadowed the manifest key variable. Renaming the loop variable yielded a complete third run; 21 local capture/probe/trace tests passed.",
+    "An independent unchanged-producer subset repeat was accidentally started while GPU7 showed 19989 MiB external use; it was interrupted after four batches. No foreign process was touched."
+  ],
+  "current_blocker": "At 17:47 GPU7 was 0% utilized but 19997/81559 MiB used, with foreign PID396980 holding 19988 MiB. The <1GB idle guard fails.",
+  "next_action": "After GPU7 utilization <10% and memory <1GB with headroom, verify source/checkpoint/manifest hashes and run a separately bounded full-train-scan strict repeat with the unchanged producer, not a manifest subset. Compare to the original frozen analysis without tolerance relaxation. Then isolate matched input draws for rows83/174 and the one large nonselected-score outlier before attributing trace-hook effects. No model candidate until diagnosis, controls, native backward, resources, independence and goal constraints pass.",
+  "admission": false,
+  "training_launched": false
+}

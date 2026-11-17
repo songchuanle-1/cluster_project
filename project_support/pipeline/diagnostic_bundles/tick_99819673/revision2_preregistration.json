@@ -1,0 +1,24 @@
+{
+  "preregistered_at": "2026-10-20T16:09:05.879527+00:00",
+  "candidate_id": "hierarchy-reversible-sibling-token-transport",
+  "revision": 2,
+  "failure_scope": "implementation",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/validation_r1_controls_candidate_result.json",
+      "sha256": "c640ad95ad10b4f722f9ad2808a96ae42e262be2a234616cfaacb0b1a9300e51"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/validation_r1_controls_candidate_execution.json",
+      "sha256": "a8d92316efcb7f28913432ab22240e77c65a6605a8dc2bb6a41d617cfee8484b"
+    }
+  ],
+  "reason": "R1 removes all repeat/disabled-parent differences (exact0) but row reversal changes language1.907e-6 and inst2.861e-6. Language LIA source attention is BEFORE bank/transport, so deterministic bank alone cannot address its reduction order. Fusion global mean and ILA also use row order.",
+  "change": "Only active final Encoder_layer wrapper: stable xyz lexicographic ordering of valid SP rows, apply identical permutation to inst_feats, batch_mask, sp_pos and first-level bank membership; leave language/query/proposal/query_pos and every middle/coarse token ID/FPS tree untouched. Execute existing active encoder body on canonical rows, inverse-restore point output and restore original bank membership object in finally. No feature/coordinate values, model params, precision, threshold, attention or supervision change.",
+  "prediction": "Native full-source replay and transported SP row reversal enter the same complete active encoder row sequence; identity,row-inverse,disabled-original-parent feature controls<=1e-6 and native loss gradients remain finite/nonzero. Sorting itself is no efficacy mechanism or new candidate.",
+  "scope": "One local numerical ordering repair, final default revision2. Original R0/R1 failures preserved; no R3 without scoped authorization. No original FPS rerun/change, no seed/dtype/tolerance change.",
+  "ties": "Require unique valid xyz; if coincident centroids occur, fail rather than invent a favorable tie rule. Padding kept after valid rows and inverse-restored.",
+  "controls": "Retest complete actual native backward/source controls, independent source/config, resource pair on exact current code; then affected8scene content/strict controls before admission.",
+  "training": 0,
+  "commit": false
+}

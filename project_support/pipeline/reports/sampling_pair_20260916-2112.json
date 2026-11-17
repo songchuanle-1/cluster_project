@@ -1,0 +1,58 @@
+{
+  "scope": "Static pairing implementation and archived support audit only",
+  "tests_passed": 56,
+  "new_tests_passed": 6,
+  "archive_rows_valid_sampling": 16,
+  "archive_strict_rejection": "Missing exact native input identity",
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "remote_observation": {
+    "gpu": 7,
+    "used_mib": 62473,
+    "free_mib": 18607,
+    "utilization_percent": 100,
+    "pids": [
+      1134192,
+      3827570
+    ],
+    "epoch": 9,
+    "native_train_steps": [
+      857,
+      858
+    ],
+    "capture_launched": false
+  },
+  "blocker": {
+    "blocker": "GPU7 has PIRS PID1134192 and foreign PID3827570; two-process limit reached.",
+    "retry_after": "2026-09-16T22:07:00+08:00",
+    "unblock_condition": "Fewer than two GPU7 processes and sufficient measured free memory.",
+    "alternatives_attempted": "Implemented sampling pairing checks, ran56tests, audited archived FPS binding."
+  },
+  "evidence": [
+    {
+      "path": "scripts/sampling_pair_contract_20260916.py",
+      "sha256": "8c8842d2bcc8c36d7b502ae0e099f5bd0b6c2edcfc6714c259d9329509a5911c"
+    },
+    {
+      "path": "scripts/test_sampling_pair_contract_20260916.py",
+      "sha256": "daf5c7151e6a79a8ee9d07dbbdb4c67a52d8136aeaf142ffb1cba54d710962df"
+    },
+    {
+      "path": "scripts/persist_sampling_pair_20260916.py",
+      "sha256": "c56760566596022c04bf6cf27c54a22d1c8f48f1d507643c8905c04d55049336"
+    },
+    {
+      "path": "pipeline/decisions/20260916-211108_other.md",
+      "sha256": "15ca871e22b37754d66ebdbe178d8ed1110938a5a7c07617e0fe48f7c123e6e6"
+    },
+    {
+      "path": "pipeline/reports/native_support_capture_20260916-1517.json",
+      "sha256": "41d27702be33f6d8db27ff195359a52863149efd7649408a3b62a40cbd776de8"
+    }
+  ],
+  "limitations": [
+    "Recorded FPS equality is necessary, not proof of all RNG equality.",
+    "Learned query selection is not conditioned on; model source audit remains due.",
+    "No native semantic/control capture, terminal PIRS comparison or efficacy result."
+  ]
+}

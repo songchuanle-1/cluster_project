@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T12:15:58.879633+00:00",
+  "reviewer_agent": "/root/mdc_review",
+  "project": "cluster_project",
+  "scope": "Bounded deployment-binding audit only. Read local source, frozen metadata, Git blobs/status and canonical functions. No controller/source/state edits, checkout/reset/stash/commit/sync, SSH/GPU/native execution or interaction with running HAP.",
+  "foreground_snapshot": {
+    "token": "37695e94da4a485c8979d474d3f33b39",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-22T12:08:33.052148+00:00",
+    "deadline_at": "2026-10-22T13:08:33.052148+00:00",
+    "context_sha256": "6387f0793092bfeba5ac0758306ca36909d7547f3cb939ec413f3c6ef278e5d5",
+    "pending_sha256": "d45744caf1bc2bfcc0938977de6a443e152e79523eae762d3f1d29c05fd165a3"
+  },
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "current_candidate_code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+  "current_local_Cluster_HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "current_concrete_blocker": {
+    "kind": "fresh_dispatch_commit_mismatch",
+    "source": "pipeline_monitor.py:1849-1857",
+    "detail": "For a fresh task, canonical _process_queue first validates budget/admission and then requires git(find_local_code_dir(project),rev-parse,HEAD)==task.code_commit. Current HRC9e differs from current primary Cluster HEAD74f and would be refused before sync/launch. Merely making a 9e receipt does not resolve it.",
+    "current_old_binding_is_dispatch_ready": false
+  },
+  "canonical_sources": {
+    "pipeline_monitor.py": "d1f34242d00056d419bb4fb59522e0f72ef9a094a28ce691f73419d093ffc7a2",
+    "closure.py": "472bd2f6d317f9d1b81a40c7d108e76d5e9560da4d4950114c148428f06b8576",
+    "experiment_first.py": "0e12de351df809cf07c6fe0c490ceccee118732752b3cd3ff2539318e7163a47"
+  },
+  "actual_functions_reviewed": {
+    "local_code_dir": "pipeline_monitor.py:1160-1176 chooses this project primary Cluster repository, not a per-candidate worktree",
+    "fresh_dispatch": "pipeline_monitor.py:1849-1857 exact HEAD equality; resume branch is a different guarded contract, not a bypass for untrained HRC",
+    "receipt": "closure.py:223-288 requires receipt id/config/code_commit agree with task and current goal/gates/candidate stage; experiment_first.validate_smoke:45-68 requires smoke id/config/code_commit/goal match receipt and real TRAIN2 finite path evidence",
+    "sync": "closure.py:296-345 uses current local HEAD, verifies remote source, pushes an admitted ref and merges ff-only; it does not stash/reset/clean and must not run now against the active HAP checkout",
+    "runtime": "HRC native_runtime.py:29-34 hard-binds candidate commit9e; verify:59-81 separately verifies candidate/assets/diagnostic hashes and observed runtime_code_commit against actual remote HEAD",
+    "adapter": "HRC adapter.py:99-107,171-188,255-293,362 hard-binds frozen prep/template/COMMIT, active candidate, manifests/bindings and result identity; remote_ops.py:23-24,46-53,205 also binds9e"
+  },
+  "old_binding_components": {
+    "native_preparation_source_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "manifest_code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "runtime_CANDIDATE_COMMIT": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "adapter_COMMIT": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "remote_ops_COMMIT": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "worker_commit_binding": "Indirect: worker main reports MANIFEST.code_commit; it contains no standalone9e literal and can remain byte-identical in a newly versioned preparation. It is still unable to yield an honest74f result through the frozen9e runtime/template.",
+    "release_source_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "all_old_frozen_artifacts_preserved": true,
+    "input_artifact_sha256": {
+      "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/preparation.json": "4754db1a1c550c869596e0ca57cee99834239e8ed78e87ec65f68142f48c812a",
+      "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509",
+      "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4",
+      "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01",
+      "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/preparation.json": "1ab29434e5a1e4f0144fd38e22d83f1ae561813973ed0468e64f65aac6c9a568",
+      "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter_release.json": "f2b3cdfe7a63cacf65e0d38837c4df1211715a31320f4d808d569c855a9e6d83",
+      "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter.py": "0f0663ec37e8b58ea72e3be39a193bf5b2860bf7fdb2ed51bd611c123a6b63a9",
+      "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/remote_ops.py": "3b9147010d2580423930110807862391cf5814ab846b1770b934d784503416e8",
+      "pipeline/diagnostic_bundles/tick_16b87793/protected_worktree_before.json": "deb2f6e1093be710fbbae886b4008c187b2e6b63d63276bfb47706b36b4be142"
+    }
+  },
+  "source_equivalence_proof": {
+    "74f_direct_parent": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+    "only_git_tree_changes_9e_to74f": [
+      "A\tconfigs/Quard/ctf_hcg_csort_psbr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr.yaml",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/__init__.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/backbone.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/dec.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/hier_postprocess.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/loss.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/middle_recurrence.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/network.py",
+      "A\tframework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr/sample_model.py"
+    ],
+    "only_changes_are_nine_new_unrelated_PSBR_files": true,
+    "all_other_tracked_tree_content_including_shared_dependencies_unchanged_between_commits": true,
+    "HRC_exact_eight_sources_plus_native_YAML": [
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/__init__.py",
+        "sha256": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/backbone.py",
+        "sha256": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/dec.py",
+        "sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/hier_postprocess.py",
+        "sha256": "d6ae0a7136be5f1779d7c771f5bcbb32e1234c60abfc39393b4e81d8e5863e07",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/loss.py",
+        "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/network.py",
+        "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/refined_composition.py",
+        "sha256": "919e42b85e422792f933852265fc74bb1a0477b2fc9f97c5177d7683622bbb0d",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/sample_model.py",
+        "sha256": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      },
+      {
+        "path": "configs/Quard/ctf_hcg_csort_hrc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc.yaml",
+        "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+        "9e_blob_74f_blob_current_worktree_equal": true
+      }
+    ],
+    "targeted_common_dependencies_9e_blob_74f_blob_and_worktree_equal": {
+      "tools/train.py": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+      "framework/__init__.py": "08a6daec10d4fb5e2599c9fe90d54001f06520c7e2119e8a92e17cc628f2b662",
+      "framework/dataset/scannetv2.py": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+      "framework/dataset/__init__.py": "eb3f092f427ec70c62adfa5c7e4586335fbc925ea76d175ef33387f9fa4da33c"
+    },
+    "workingtree": {
+      "protected_reference": "pipeline/diagnostic_bundles/tick_16b87793/protected_worktree_before.json",
+      "protected_reference_sha256": "deb2f6e1093be710fbbae886b4008c187b2e6b63d63276bfb47706b36b4be142",
+      "all_28_original_dirty_untracked_path_status_and_hashes_unchanged": true,
+      "index_empty": true,
+      "local_code_dir_resolution_repositories": [
+        "Cluster"
+      ]
+    },
+    "boundaries": "Commit tree equality covers tracked paths other than the nine new PSBR files. Four directly relevant common local dependencies and all HRC9 current files were hash-compared; all28 known dirty/untracked bytes/status match the original protected baseline. This is not a fresh remote environment/data/third-party-package integrity check or native behavior test."
+  },
+  "minimum_feasible_forward_plan": [
+    {
+      "step": 1,
+      "action": "Retain stable ID M208-HRC and exact current HRC8-source/YAML hashes and original9e lineage. Treat74f as a new execution/version binding of the same realization, not a new model, scientific reopen or implementation revision. Do not modify the primary code tree just to create another commit."
+    },
+    {
+      "step": 2,
+      "action": "In NEW pipeline bundles outside the Cluster Git repository, make a fresh74f HRC native preparation: eight candidate source copies/YAML and worker body remain byte-identical; new manifest/preparation code/source_commit and runtime hard binding use74f; hash and preserve original9e references as history. Do not edit old frozen files or relabel old raw results."
+    },
+    {
+      "step": 3,
+      "action": "Make a NEW adapter/release/preparation linked to that new native bundle: only COMMIT/FROZEN/prep-template-release hashes and version/provenance binding literals change; preserve all owner/context/pending/deadline/resource/source/replay/identity guards. Independently compare algorithm/guard AST after scoped literal substitution and rerun the existing31 offline fixtures. Root then externally anchors exact new files and preserves old binding history before changing candidate active code_commit and refs to74f."
+    },
+    {
+      "step": 4,
+      "action": "Continue local preparation while HAP occupies GPU0; do not sync, checkout, reset, signal or alter its live remote source/process. After HAP is correctly terminal/archived and authorized GPU0 is genuinely available, use a fresh current owner/deadline/whitelist/UUID/idle/locks binding and execute actual HRC/M95 TRAIN and standard resource pairs under the new74f version."
+    },
+    {
+      "step": 5,
+      "action": "Record actual remote runtime HEAD independently from candidate version74f. Private staging permits the HRC candidate source to be loaded without changing the active runtime checkout; required runtime/assets/config/source checks still apply. Existing runtime_HEAD is not invented as74f. Never dispatch a fresh HRC task through the resume branch to bypass HEAD equality."
+    },
+    {
+      "step": 6,
+      "action": "Review new raw identity/loss/backward/gradient/control/input pairing and original profiling evidence; produce a real standard experiment-first smoke summary with id/config/code_commit74f/goal, TRAIN split, >=2 steps/finite losses/native data/backward/path and hashed evidence, plus actual required gate/resource summaries. Raw pair completion or offline tests are not this formatter or a PASS receipt."
+    },
+    {
+      "step": 7,
+      "action": "Create a new honest74f receipt/task only after those real gates pass, keeping current primary Cluster HEAD exactly74f through canonical dispatch. When safe for the formerly active HAP root and actual remote source passes verification, canonical safe_sync can fast-forward to admitted74f without a reset/checkout or touching local28dirty bytes; canonical launch/progress then applies. If localHEAD drifts or remote is dirty/diverged/in-use, stop and reconcile rather than weakening the guard or editing old results."
+    }
+  ],
+  "remaining_uncompleted_work": {
+    "new74f_packages": "Root has delegated preparation; unfinished new packages were not inspected by this audit. They require a later independent review.",
+    "new74f_native_TRAIN_resources": "NOT_RUN",
+    "paired_raw_result_semantic_validation_and_standard_formatter": "Still required; neither old nor forward adapter automatically generates a canonical standard summary/receipt/queue from raw outputs.",
+    "receipt_queue_sync_launch": "NOT_DONE; possible only after actual new74f evidence and current exact guards pass.",
+    "running_HAP_remote_or_process_changes": "PROHIBITED_NOW; no action taken.",
+    "old_HRC_raw_evidence_retagging": "PROHIBITED; no evidence was changed."
+  },
+  "conclusion": "Forward binding to current74f is a minimal viable way to remove the deterministic fresh-dispatch HEAD mismatch while preserving the HRC algorithm, primary checkout,28dirty files and running HAP. It is not already completed admission/deployment or a reason to waive exact version checks.",
+  "executed": {
+    "local_file_JSON_Git_blob_status_reads": true,
+    "controller_implementation_edit": false,
+    "model_or_YAML_edit": false,
+    "shared_ledger_or_candidate_update": false,
+    "old_artifact_write": false,
+    "Git_mutation": false,
+    "remote_SSH": false,
+    "torch_import_or_native_GPU": false,
+    "HAP_interaction": false
+  }
+}

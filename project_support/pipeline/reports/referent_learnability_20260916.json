@@ -1,0 +1,21 @@
+{
+  "summary": {
+    "queries": 15104,
+    "expressions": 118,
+    "scenes": 32,
+    "positive_query_rate": 0.2143802966101695,
+    "probe_top1": 0.11016949152542373,
+    "probe_mean_rank": 25.661016949152543,
+    "probe_selected_mask_hit_rate": 0.6186440677966102,
+    "indis_top1": 0.17796610169491525,
+    "indis_mean_rank": 15.677966101694915,
+    "indis_selected_mask_hit_rate": 0.7203389830508474,
+    "probe_positive_rate": 0.21179819915254236
+  },
+  "scope": "Fixed16 TRAIN batches, M95 eval forward, features frozen. The probe is an L2 logistic regression on the final query embedding (which the referent head reads) plus the query's own mask geometry (size and mask-centroid offset), label = the query's mask overlaps the referred instance above IoU.5. Five-fold cross-validation grouped by scene, so no scene appears in both train and test. This measures learnability of the object-level question from the head's own input; it is not the model, not a trained head, and not an admission. The geometry columns are available to a mask-conditioned readout but are NOT currently given to indis.",
+  "sources": {
+    "/data3/songcl/Project/Cluster_project/pipeline/referent_learnability_20260916.py": "7c79d4658ffb0baa59d02e9ddc8bc6ab811ffa7370109cd3657e288de3d57b53",
+    "/data3/songcl/Project/Cluster_project/Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/best.pth": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e"
+  }
+}

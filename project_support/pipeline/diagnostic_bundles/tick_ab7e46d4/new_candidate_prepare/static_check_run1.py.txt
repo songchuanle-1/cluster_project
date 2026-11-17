@@ -1,0 +1,158 @@
+"""Only stdlib: compile production sources, execute extracted production plan.
+
+No torch import or mirrored model implementation. Dependency sets are an
+independent topology oracle; they do not prove tensor gradients or resources.
+"""
+from pathlib import Path
+from datetime import datetime, timezone
+import ast
+import hashlib
+import json
+import math
+import sys
+
+HERE = Path(__file__).resolve().parent
+ROOT = Path('D:/project/cluster_project')
+NAME = 'model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort'
+MODEL = HERE/'staged_repository/framework/model/Quard_model'/(NAME+'_bfc')
+BASE = ROOT/'Cluster/framework/model/Quard_model'/NAME
+EXPECTED_FILES = {'__init__.py','backbone.py','dec.py','hier_postprocess.py','loss.py','middle_butterfly.py','network.py','sample_model.py'}
+CHECKS = []
+ASSERTIONS = 0
+
+def check(condition, name):
+    global ASSERTIONS
+    ASSERTIONS += 1
+    if not condition:
+        raise AssertionError(name)
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def node(tree, name, owner=None):
+    body = tree.body if owner is None else next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == owner).body
+    return next(n for n in body if isinstance(n, (ast.FunctionDef, ast.ClassDef)) and n.name == name)
+
+def ast_same(a, b):
+    return ast.dump(a, include_attributes=False) == ast.dump(b, include_attributes=False)
+
+def production_plan():
+    tree = ast.parse((MODEL/'middle_butterfly.py').read_text(encoding='utf-8'))
+    fun = node(tree, 'build_butterfly_plan')
+    env = {'math': math}
+    exec(compile(ast.Module(body=[fun], type_ignores=[]), str(MODEL/'middle_butterfly.py'), 'exec'), env)
+    return env['build_butterfly_plan'], tree
+
+def topology_oracle(build, centers, parents, active, cap, label):
+    plan = build(centers, parents, active, cap)
+    members = {i for i, yes in enumerate(active) if yes}
+    orders = [g['order'] for g in plan['groups']]
+    flat = [i for order in orders for i in order]
+    check(set(flat) == members and len(flat) == len(members), label+': original supported IDs exactly once')
+    rank = {token: r for g in plan['groups'] for r, token in enumerate(g['order'])}
+    deps = {i: {i} for i in members}
+    for group in plan['groups']:
+        ids = group['order']; p = group['parent']
+        check(all(parents[i] == p for i in ids), label+': original parent segmentation')
+        check(list(ids) == sorted(ids, key=lambda i: (*centers[i], i)), label+': stable geometry and original-ID tie order')
+        check(len(group['bits']) == (0 if len(ids)==1 else 2*math.ceil(math.log2(len(ids)))-1), label+': exact bounded V sweep depth')
+    for r, pairs in enumerate(plan['rounds']):
+        used = [i for p, bit, left, right in pairs for i in (left, right)]
+        check(len(used) == len(set(used)), label+': disjoint simultaneous matching')
+        old = {i: set(v) for i, v in deps.items()}
+        for parent, bit, left, right in pairs:
+            check(left in members and right in members and left != right, label+': no padding/unsupported/fake vertex')
+            check(parents[left] == parents[right] == parent, label+': no cross-parent edge')
+            check(rank[left] < rank[right] and (rank[left] ^ rank[right]) == 1 << bit, label+': exact rank XOR edge')
+            group = next(g for g in plan['groups'] if g['parent']==parent)
+            check(group['bits'][r] == bit, label+': correct per-parent round bit')
+            # Independent Boolean dependency semiring: both outputs consume OLD
+            # stage states, and unpaired rows retain their previous dependencies.
+            deps[left] = old[left] | old[right]
+            deps[right] = old[left] | old[right]
+    for token in members:
+        expected = {j for j in members if parents[j] == parents[token]}
+        check(deps[token] == expected, label+': final complete same-parent information reachability')
+    check(set(plan['singleton_ids']) == {g['order'][0] for g in plan['groups'] if len(g['order'])==1}, label+': exact singleton domain')
+    return plan
+
+def run():
+    check({p.name for p in MODEL.glob('*.py')} == EXPECTED_FILES, 'eight independent model sources')
+    trees = {}
+    for p in sorted(MODEL.glob('*.py')):
+        trees[p.name] = ast.parse(p.read_text(encoding='utf-8'))
+        compile(trees[p.name], str(p), 'exec')
+        CHECKS.append('AST+compile '+p.name)
+    for name in ['__init__.py','backbone.py','loss.py','network.py','sample_model.py']:
+        check((MODEL/name).read_bytes() == (BASE/name).read_bytes(), 'unchanged original bytes '+name)
+    original_yaml = ROOT/'Cluster/configs/Quard/ctf_hcg_csort'/(NAME+'.yaml')
+    yaml = HERE/'staged_repository/configs/Quard/ctf_hcg_csort_bfc'/(NAME+'_bfc.yaml')
+    check(yaml.read_bytes() == original_yaml.read_bytes(), 'native YAML all bytes unchanged')
+    baseline = ast.parse((BASE/'hier_postprocess.py').read_text(encoding='utf-8'))
+    candidate = trees['hier_postprocess.py']
+    for owner, fun in [('SharedClusterBank','build_cluster_feats'),('PointCloudPartitioner','partition_points'),('PointCloudPartitioner','get_cluster_center')]:
+        check(ast_same(node(baseline,fun,owner),node(candidate,fun,owner)), 'unchanged production '+owner+'.'+fun)
+    for owner in ['C2F_ClusterAttn_CTF_HCG','C2F_ClusterAttn_CTF_HCG_CSORT']:
+        check(ast_same(node(baseline,owner),node(candidate,owner)), 'whole original class AST unchanged '+owner)
+    bcr = ROOT/'Cluster/framework/model/Quard_model'/(NAME+'_bcr')
+    for n in ['hier_postprocess.py','dec.py']:
+        expected = (bcr/n).read_text(encoding='utf-8').replace('ParentBidirectionalComplementRecurrence','ParentButterflyTokenComposition').replace('middle_complement','middle_butterfly').replace('BCR','BFC')
+        check((MODEL/n).read_text(encoding='utf-8') == expected, 'only authorized reviewed geometry/support plumbing and operator namespace '+n)
+    forward = node(candidate,'forward','C2F_ClusterAttn_CTF')
+    text = ast.unparse(forward)
+    check('refined = cf + self.middle_butterfly' in text and 'self.cluster_ffn_norm[1](cf)' in text, 'preserve unique original cf skip and middle LayerNorm')
+    init = ast.unparse(node(candidate,'__init__','C2F_ClusterAttn_CTF'))
+    check('self.cluster_ffn[1] = nn.Identity()' in init and 'torch.random.fork_rng(devices=[])' in init, 'delete original middle parameters and preserve common CPU RNG trajectory')
+    build, helper = production_plan()
+    cls = node(helper,'ParentButterflyTokenComposition')
+    init = ast.unparse(node(helper,'__init__','ParentButterflyTokenComposition'))
+    check(init.count('nn.Linear(')==1 and 'nn.Linear(2 * channels, 2 * channels)' in init and 'nn.GELU()' in init, 'one shared 2C to2C original activation only')
+    f = ast.unparse(node(helper,'forward','ParentButterflyTokenComposition'))
+    check('pair_input = torch.cat((state.index_select(0, left), state.index_select(0, right)), dim=-1)' in f, 'both pair inputs gathered from one old stage')
+    check(f.index('mixed = self.activation(self.mix(pair_input))') < f.index('state = state.index_copy(0, left') < f.index('state = state.index_copy(0, right'), 'both outputs computed before functional stage writes')
+    check('features.detach' not in f and 'register_buffer' not in ast.unparse(cls), 'no feature detach or registered geometry buffer')
+    check('output = features.new_zeros((slots, self.channels))' in f and 'output.index_copy(0, index, state.index_select(0, index))' in f, 'output original-ID inverse scatter and zero unsupported/pad update')
+    for n in range(129):
+        centers = [(float((i*17)%131), float((i*13)%7), float(-i)) for i in range(n)]
+        topology_oracle(build, centers, [0]*n, [True]*n, 128, 'n='+str(n))
+    CHECKS.append('production plan all n0..128: disjointness/original IDs/reachability/rounds')
+    for n, bits in [(1,()),(2,(0,)),(3,(0,1,0)),(4,(0,1,0)),(5,(0,1,2,1,0)),(8,(0,1,2,1,0))]:
+        check(build([(i,0,0) for i in range(n)],[7]*n,[True]*n,128)['groups'][0]['bits']==bits, 'frozen bit sequence n'+str(n))
+    cases = [([],[],[]), ([(0,0,0)]*5,[4,0,4,0,4],[True,False,True,False,True]),
+             ([(i,0,0) for i in range(9)],[2,9,2,9,2,9,7,7,7],[True,True,False,True,True,False,False,True,True]),
+             ([(0,0,0)]*9,[0,1,0,1,0,1,0,1,0],[True]*9),
+             ([(i,0,0) for i in range(8)],[8]*8,[False]*8)]
+    for i,(centers,parents,active) in enumerate(cases):
+        topology_oracle(build,centers,parents,active,64,'holes-ties-parent-case'+str(i))
+    for n in [3,5,17,64,65,128]:
+        centers=[(i,i%3,-i) for i in range(n)];parents=[i%3 for i in range(n)];active=[i%5!=1 for i in range(n)]
+        original=build(centers,parents,active,128);permutation=list(reversed(range(n)))
+        permuted=build([centers[i] for i in permutation],[parents[i] for i in permutation],[active[i] for i in permutation],128)
+        restored=[tuple((p,bit,permutation[l],permutation[r]) for p,bit,l,r in pairs) for pairs in permuted['rounds']]
+        check(restored==list(original['rounds']), 'distinct-coordinate metadata permutation restores original-ID pair graph n'+str(n))
+    invalid = [([],[],[],True),([],[],[],-1),([(0,0,0)],[0],[],64),([], [0],[True],64),
+               ([(0,0,0)],[-1],[True],64),([(0,0,0)],[True],[True],64),([(0,0,0)],[0.0],[True],64),
+               ([(0,0,0)],[0],[1],64),([(math.nan,0,0)],[0],[True],64),([(0,math.inf,0)],[0],[True],64),
+               ([(0,0)],[0],[True],64),([(False,0,0)],[0],[True],64), ([(0,0,0)],[0],[True],0)]
+    for i,args in enumerate(invalid):
+        try:build(*args)
+        except (ValueError,TypeError):CHECKS.append('expected metadata refusal '+str(i))
+        else:raise AssertionError('Invalid metadata accepted '+str(i))
+    check(512*512+512==262656 and 2*(256*1024)+1024+256==525568, 'source-inferred exact parameter arithmetic')
+    check((2*((64-1).bit_length())-1)==11, 'native original K64 cap implies at most11 rounds')
+    return {'status':'STDLIB_STATIC_AND_PRODUCTION_PLAN_CHECKS_COMPLETED','assertions':ASSERTIONS,'exhaustive_supported_group_sizes':list(range(129)),
+            'expected_invalid_metadata_refusals':len(invalid),'additional_topology_cases':len(cases),'unique_geometry_permutation_restoration_cases':6,
+            'checks':CHECKS,'source_hashes':{p.name:sha(p) for p in sorted(MODEL.glob('*.py'))},'YAML_sha256':sha(yaml),
+            'native_torch_autograd_tensor_boundary_checks':'NOT_RUN','resources':'NOT_RUN','efficacy':'UNKNOWN','torch_imported':('torch' in sys.modules),
+            'scope':'Only actual production plan function executed under stdlib. Dependency-set oracle is not model tensor/autograd/native evidence. Helper n65..128 uses explicit test cap128; deployed module still receives original configured middle cap64.'}
+
+def main():
+    result=run();owner=json.loads((ROOT/'pipeline/headless/.foreground.lockdir/owner.json').read_text(encoding='utf-8'))
+    check(owner['token']=='ab7e46d4f6c64d99af3ae07d0f4e5e73' and owner['deadline_at']=='2026-10-25T05:06:01.065273+00:00' and datetime.now(timezone.utc)<datetime.fromisoformat(owner['deadline_at']), 'current delegated write guard')
+    check(sha(ROOT/'pipeline/headless/.tick_context.json')==owner['context_sha256'] and sha(ROOT/'pipeline/headless/.tick_context_state.next.json')==owner['pending_sha256'], 'current context/pending write guard')
+    result['recorded_at']=datetime.now(timezone.utc).isoformat()
+    with (HERE/'static_validation.json').open('x',encoding='utf-8') as stream:
+        json.dump(result,stream,ensure_ascii=False,indent=2,allow_nan=False);stream.write('\n')
+    print(json.dumps({'status':result['status'],'assertions':result['assertions'],'output_sha256':sha(HERE/'static_validation.json'),'torch_imported':result['torch_imported']}))
+
+if __name__=='__main__':main()

@@ -1,0 +1,18 @@
+{
+  "actions": [
+    "本轮快照2026-10-17 12:08:48（上海时间），design；旧86290288轮被后续心跳中断、已超过原deadline。核对无遗留helper后用原令牌abort，原诊断/预注册保留且租约释放已核实；这不把旧轮补记为完成。本轮仅begin一次。",
+    "续做原稳定ID m202-paired-native-evidence-producer，无新模型/结构修订。实现只读预测IoU导出器，13项CPU软件测试全部通过：乱序仍按完整split/scene/object/annotation对齐，重复/缺项/身份冲突/非有限/越界值被拒，JSON往返及原生float32均值保持；合成测试不证明真实模型收益。",
+    "静态源码审计确认M95与HDS的predict/predict_by_feat完全相同，原生ScanRefer/res无nt_label重标记；predict只支持单场景batch，诊断使用batch1，不改训练batch2。3文件静态编译通过，冻结M95 checkpoint与配置在server3用CPU重新核验哈希，实际Python3.8/Torch1.12、CUDA未初始化。原生等价性runner/manifest已准备，仍UNRUN；不是native backward或训练效果PASS。",
+    "12:16:06资源实测：server3物理GPU1正确UUID，非本轮管理的PID1453占18687MiB、利用率100%、空余5578MiB，三项目flock虽空闲却不代表GPU独占；12:16:13 server4物理GPU0为同一M202/PID1592337，三把原生命周期锁均持有。两授权槽均不可独占，无GPU计算、驱逐、reset、锁删除或重启。探针初次systemPython3.6不支持text参数的编排失败已保留，只改兼容API后通过，不算模型修订。",
+    "同一M202两次7秒间隔原生Train步数[['Train', '28', '50', '1582', '4686'], ['Train', '28', '50', '1601', '4686']]，确认增长，12个冻结源码/config/训练工具哈希相同，当前尾部无新异常。当前best=0.4946560263633728，累计20次VAL各9508表达；这是累计同一验证集观测，不是本轮20个独立实验。场景配对区间、噪声底限、最终效益及全程峰值仍未知。",
+    "四个到期辅助ID各按ID复核一次，保留原human scope hold/失败/unblock条件并有界四小时复查，无晋升或M201恢复。储备已有5/目标2，本轮不扩储备、不为填槽变更主线。",
+    "本轮实际产出：1个原诊断的可运行导出器、13项CPU测试结果、1份源码契约、冻结native输入与runner、双卡实时占用/同一训练连续性证据、4项scope复核及七段记忆/完整六段报告。新模型/修订/准入/训练启动/native GPU forward均0。收据用量仅begin至收据的本地窗口，早前读取/最终回复排除；最终用量暂未知，cache已在input内、reasoning已在output内，不重复相加，不当账单。",
+    "实际finish返回1：Blocked GPU candidate has a queue opening；校验仅看项目队列空位，未接受server3实时外部占用。收据INCOMPLETE、context未提交、当时租约仍保留。本轮不得称完成；失败输出及资源证据已留档，不重复相同finish，随后以本轮原令牌abort并核实释放。"
+  ],
+  "decisions": [
+    "科学状态：保持原M202训练与预注册评估/早停；best0.494656仅数值高于baseline0.4894、仍低于champion0.5020及target0.5100，不据此声称分层机制有效或被否定；原TypeError根因仍未知。",
+    "执行状态：原生导出等价性因两授权卡实际占用而blocked；按真实server3冻结manifest记录required_server，不把外部占用伪装为本项目队列任务、不改阻塞类型或校验器来凑PASS。当前queue-only闭环校验可能拒绝此真实资源阻塞；必须以实际finish为准，失败则保留证据并abort、核实释放。",
+    "不改goal、科学准入、两次修订上限、FLOPs特例、seed1999/epochs50/max_iters70、调度、其他项目或通知策略。空槽和到期不是放宽门槛的理由。",
+    "本轮执行结果为未完成，不是模型或13项CPU测试失败；原生等价性仍未执行。保留真实required_server=server-3/exclusive_gpu_slot，不把外部GPU任务登记为本项目任务，也不修改共享校验器或放宽科学准入。后续GPU空闲时续做同一诊断，冻结300秒runner至少预留360秒新租约时间。"
+  ]
+}

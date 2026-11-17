@@ -1,0 +1,3846 @@
+{
+  "contract": "m95_preregistered_identity_controls_v1",
+  "controls": {
+    "acceptable_query": {
+      "metric": "target_union_iou",
+      "operator": ">",
+      "threshold": 0.5
+    },
+    "class_matched_non_target": "score argmax over queries whose dominant-overlap physical instance is a declared same-class peer of the target; null and no fallback when the pool is empty",
+    "class_matched_selector": "score argmax over queries whose dominant-overlap physical instance has the target class; target and non-target instances are both allowed; null and no fallback when the pool is empty",
+    "deployed": "score argmax over all queries; lowest index wins ties",
+    "dominant_overlap": {
+      "instance": "argmax overlap count between the query mask and physical instance labels; lowest instance ID wins ties",
+      "minimum_overlap_points": 1,
+      "unknown_class": "exclude query from class-matched pools"
+    },
+    "score_matched_pair": {
+      "max_absolute_score_difference": 0.1,
+      "negative_pool": "class_matched_non_target query",
+      "positive_pool": "target_positive query",
+      "tie_break": "minimum absolute score difference, then SHA256 of contract and query pair, then positive index, then negative index",
+      "unavailable_policy": "row excluded from paired estimand; no fallback"
+    },
+    "target_objectness": "score argmax over queries whose FPS seed lies in the target instance union; null and no fallback when the pool is empty",
+    "target_positive": "score argmax over queries whose mask is a native training positive; null and no fallback when the pool is empty",
+    "unknown_semantics": "use the frozen manifest object_id-to-class map; sampled semantic label -100 never substitutes for native annotation class"
+  },
+  "generated_at": "2026-09-22T13:20:00+08:00",
+  "native_sources": {
+    "ScanRefer_train_new.json": {
+      "bytes": 19617196,
+      "path": "/data3/songcl/data/scanrefer/ScanRefer_train_new.json",
+      "sha256": "018754b90bcc27d5746bb50d6c35d6e7a35fd39519ac669e3fbe3fa6f425922d"
+    },
+    "scene_graphs_new_train.json": {
+      "bytes": 77743218,
+      "path": "/data3/songcl/data/scanrefer/scene_graphs_new_train.json",
+      "sha256": "e058fdd5bee5acd4fce7e78516d88b07581131e9fe83afd226cb835e80942e08"
+    }
+  },
+  "primary_estimand": {
+    "aggregation": "compute the paired mean within each scene, then average scene means",
+    "bootstrap": {
+      "draws": 10000,
+      "interval": 0.95,
+      "seed": 1999,
+      "unit": "scene"
+    },
+    "contrast": "target_positive minus score_matched_non_target",
+    "minimum_ci_lower": 0.0,
+    "minimum_complete_pairs": 64,
+    "minimum_independent_scenes": 64,
+    "minimum_point_estimate": 0.05,
+    "name": "scene_balanced_paired_target_iou_uplift",
+    "unit": "selected-query target-union IoU"
+  },
+  "rejection_criteria": [
+    "reject identity-specific causal support when complete pairs are below 64",
+    "reject identity-specific causal support when independent scenes are below 64",
+    "reject identity-specific causal support when the paired point estimate is below 0.05",
+    "reject identity-specific causal support when the scene bootstrap lower bound is not above zero",
+    "report secondary controls as descriptive when class_matched_selector or target_objectness is unavailable",
+    "never treat this diagnostic as admission, efficacy, population, novelty, or deployable evidence"
+  ],
+  "rows": [
+    {
+      "ann_id": 15,
+      "description_sha256": "8c092fbfebbc4fddefc38e019753f87a61a06fd647bd460fdfb61d706bc75474",
+      "description_tokens": 14,
+      "manifest_index": 0,
+      "same_class_peer_count": 6,
+      "same_class_peer_object_ids": [
+        "15",
+        "16",
+        "17",
+        "18",
+        "20",
+        "22"
+      ],
+      "scene_id": "scene0588_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "endtable",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 4,
+      "description_sha256": "a3b83fe43d42413c385fba72e5f22540ba214c889f7b337c1fda6fe3b713b942",
+      "description_tokens": 15,
+      "manifest_index": 1,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "23"
+      ],
+      "scene_id": "scene0646_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "monitor",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 56,
+      "description_sha256": "1fd7d3b78cc8a276a40b177ee8be811ce61e227371e65ed04e84ccdefcebe668",
+      "description_tokens": 16,
+      "manifest_index": 2,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "3"
+      ],
+      "scene_id": "scene0127_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "chair",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 32,
+      "description_sha256": "223d89eceecae5027dfde85cb50bee070dec48a7c925f5043ab48de0db828282",
+      "description_tokens": 17,
+      "manifest_index": 3,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "18"
+      ],
+      "scene_id": "scene0200_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "shelf",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 41,
+      "description_sha256": "17213257f14be05ff1ac7627b200c695c16438f9d1fb7e13ecafa41f21f6ddb9",
+      "description_tokens": 13,
+      "manifest_index": 4,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "0"
+      ],
+      "scene_id": "scene0129_00",
+      "scene_object_count": 11,
+      "stratum": "ambiguous",
+      "target_class": "table",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 40,
+      "description_sha256": "d0e469364e2e5c6684e962cca1ca1f70eb9661d90332dcea5f9ec5fa1c3d8b53",
+      "description_tokens": 22,
+      "manifest_index": 5,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "10",
+        "11",
+        "8"
+      ],
+      "scene_id": "scene0317_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "officechair",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "b1e02180fd6b9ed45b7af4917cf5d19b7a7bc86a455dda234b6e43487ab9cfdd",
+      "description_tokens": 14,
+      "manifest_index": 6,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "18"
+      ],
+      "scene_id": "scene0487_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "armchair",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 65,
+      "description_sha256": "87f4bec117e705d04315eb6f2318901b4ea4c7edd916006dc32ae27a85eec438",
+      "description_tokens": 18,
+      "manifest_index": 7,
+      "same_class_peer_count": 10,
+      "same_class_peer_object_ids": [
+        "1",
+        "18",
+        "2",
+        "21",
+        "22",
+        "23",
+        "24",
+        "3",
+        "5",
+        "6"
+      ],
+      "scene_id": "scene0163_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "chair",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 55,
+      "description_sha256": "260938e0702c0bfa037aad209ebe2fa0648ed16607b9b26b19aac37894b6a0db",
+      "description_tokens": 26,
+      "manifest_index": 8,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "12",
+        "28"
+      ],
+      "scene_id": "scene0141_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "desk",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "a373f358a1c53970e466b054e700e07634c9ef6e7fb45de8b8fac39e706b5e68",
+      "description_tokens": 32,
+      "manifest_index": 9,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "25"
+      ],
+      "scene_id": "scene0162_00",
+      "scene_object_count": 12,
+      "stratum": "ambiguous",
+      "target_class": "window",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 60,
+      "description_sha256": "93f623ec9e154bf749c32d7c76e060d970804a488e4d3879311e3a6eea5f4bbe",
+      "description_tokens": 27,
+      "manifest_index": 10,
+      "same_class_peer_count": 17,
+      "same_class_peer_object_ids": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "25",
+        "26",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      "scene_id": "scene0180_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "chair",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 54,
+      "description_sha256": "5fad4a6f121944ef98e64101587b504405eac7edd7306285d159a188a0f6121b",
+      "description_tokens": 36,
+      "manifest_index": 11,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "16"
+      ],
+      "scene_id": "scene0142_00",
+      "scene_object_count": 26,
+      "stratum": "ambiguous",
+      "target_class": "trashcan",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 47,
+      "description_sha256": "603db7823a67c4298f6658f0b62d57f7bc6574a239ce78102bd06e9dc30e8495",
+      "description_tokens": 11,
+      "manifest_index": 12,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "10"
+      ],
+      "scene_id": "scene0085_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "bed",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 82,
+      "description_sha256": "17e723a691842c865583706b44073280e1192d2c813f72221ca0531c06a255f3",
+      "description_tokens": 23,
+      "manifest_index": 13,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "32",
+        "33",
+        "34"
+      ],
+      "scene_id": "scene0104_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "rack",
+      "target_object_id": "31"
+    },
+    {
+      "ann_id": 47,
+      "description_sha256": "fbd1c1f40e5df76d6257632630dc71e00dd6427aa1264c718be60d64df50bb2b",
+      "description_tokens": 11,
+      "manifest_index": 14,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "36",
+        "37",
+        "39"
+      ],
+      "scene_id": "scene0404_00",
+      "scene_object_count": 15,
+      "stratum": "ambiguous",
+      "target_class": "storagebin",
+      "target_object_id": "40"
+    },
+    {
+      "ann_id": 92,
+      "description_sha256": "d09a87069a0bb78dcae6c938804f30d5f0e0d4a38166772cb2f21fd09cf8277a",
+      "description_tokens": 11,
+      "manifest_index": 15,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "1",
+        "2"
+      ],
+      "scene_id": "scene0138_00",
+      "scene_object_count": 30,
+      "stratum": "ambiguous",
+      "target_class": "computertower",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 95,
+      "description_sha256": "525587511c0c26a39898f5e3d7e974db4f078a28a7ece19aa6d3f9d89cdf195c",
+      "description_tokens": 34,
+      "manifest_index": 16,
+      "same_class_peer_count": 4,
+      "same_class_peer_object_ids": [
+        "16",
+        "17",
+        "23",
+        "24"
+      ],
+      "scene_id": "scene0582_00",
+      "scene_object_count": 27,
+      "stratum": "ambiguous",
+      "target_class": "monitor",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 46,
+      "description_sha256": "3f1f35ff8f1d5f7ccc933394f7f29226440d1afea4e5c64b586f03f82e50fdcc",
+      "description_tokens": 15,
+      "manifest_index": 17,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "0"
+      ],
+      "scene_id": "scene0555_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "cabinet",
+      "target_object_id": "28"
+    },
+    {
+      "ann_id": 72,
+      "description_sha256": "439332bd5b50f535987b3bac86a638d75b085334deea781a002dedf6a12042a5",
+      "description_tokens": 10,
+      "manifest_index": 18,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "5"
+      ],
+      "scene_id": "scene0540_00",
+      "scene_object_count": 20,
+      "stratum": "ambiguous",
+      "target_class": "kitchencabinets",
+      "target_object_id": "27"
+    },
+    {
+      "ann_id": 55,
+      "description_sha256": "39abc7e8d7fbc20ddf6cfa5ec4f4965239babbc735cdf6176ef4e219dc2bc1b4",
+      "description_tokens": 14,
+      "manifest_index": 19,
+      "same_class_peer_count": 9,
+      "same_class_peer_object_ids": [
+        "10",
+        "11",
+        "14",
+        "15",
+        "17",
+        "19",
+        "22",
+        "6",
+        "9"
+      ],
+      "scene_id": "scene0245_00",
+      "scene_object_count": 13,
+      "stratum": "ambiguous",
+      "target_class": "chair",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 27,
+      "description_sha256": "08610e898eb56e9d1a69bd3cc342ce47b722f8bff8c59f3c77dd882029206f3e",
+      "description_tokens": 12,
+      "manifest_index": 20,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "3",
+        "4"
+      ],
+      "scene_id": "scene0513_00",
+      "scene_object_count": 11,
+      "stratum": "ambiguous",
+      "target_class": "table",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 15,
+      "description_sha256": "f49a4a9735fc8351035b00e98f9324a41101af4a61f3015b4e45910f270a6360",
+      "description_tokens": 17,
+      "manifest_index": 21,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "6",
+        "7",
+        "8"
+      ],
+      "scene_id": "scene0061_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "pillow",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 58,
+      "description_sha256": "4280faffbec69c22558aee4815676eef1972b00bf218647c524db60a0e0ea117",
+      "description_tokens": 32,
+      "manifest_index": 22,
+      "same_class_peer_count": 5,
+      "same_class_peer_object_ids": [
+        "10",
+        "11",
+        "12",
+        "17",
+        "18"
+      ],
+      "scene_id": "scene0006_00",
+      "scene_object_count": 29,
+      "stratum": "ambiguous",
+      "target_class": "pillow",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 24,
+      "description_sha256": "b48b841e44b1091b7172092fd6b2011736ea7ed521ddde9ab37300cbb03463c4",
+      "description_tokens": 22,
+      "manifest_index": 23,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "9"
+      ],
+      "scene_id": "scene0350_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "soapdispenser",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 70,
+      "description_sha256": "885805d2f737ddd29325d4773d1dd3e03e51dab9b511c9c335e1c0b978456e2c",
+      "description_tokens": 14,
+      "manifest_index": 24,
+      "same_class_peer_count": 5,
+      "same_class_peer_object_ids": [
+        "0",
+        "1",
+        "11",
+        "2",
+        "23"
+      ],
+      "scene_id": "scene0436_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "trashcan",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "0dce548b8444073ff68d170438bf53097a96aaf24a6c694786806274d351c3b4",
+      "description_tokens": 16,
+      "manifest_index": 25,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "11"
+      ],
+      "scene_id": "scene0118_00",
+      "scene_object_count": 8,
+      "stratum": "ambiguous",
+      "target_class": "coffeetable",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "eccce1f761ce56005abc97d38186307c74a6c93258f144a62d29a93f9d8ec924",
+      "description_tokens": 14,
+      "manifest_index": 26,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "14"
+      ],
+      "scene_id": "scene0537_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "lamp",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 90,
+      "description_sha256": "b82f5c3e8a42d66525a875c48e7d3f64c129fa6b27f395b1e3dbd6b6e59345cf",
+      "description_tokens": 16,
+      "manifest_index": 27,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "57"
+      ],
+      "scene_id": "scene0517_00",
+      "scene_object_count": 36,
+      "stratum": "ambiguous",
+      "target_class": "pillow",
+      "target_object_id": "54"
+    },
+    {
+      "ann_id": 74,
+      "description_sha256": "482ef9cba0f3eacc01ecd6a58951d63188c28e92afaf5d5489d90cf0164e386c",
+      "description_tokens": 11,
+      "manifest_index": 28,
+      "same_class_peer_count": 6,
+      "same_class_peer_object_ids": [
+        "22",
+        "23",
+        "24",
+        "26",
+        "28",
+        "29"
+      ],
+      "scene_id": "scene0475_00",
+      "scene_object_count": 28,
+      "stratum": "ambiguous",
+      "target_class": "table",
+      "target_object_id": "25"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "f2b845de0ecdcaadb187247cc70d044549a3ee3e6c0c6aaee40427540baeb20d",
+      "description_tokens": 21,
+      "manifest_index": 29,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "9"
+      ],
+      "scene_id": "scene0617_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "cabinet",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 42,
+      "description_sha256": "c6c128b6b2bd5d106c8889451defdbe33e63051aadc25c39269c18c9713ac5d6",
+      "description_tokens": 17,
+      "manifest_index": 30,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "3",
+        "4",
+        "6"
+      ],
+      "scene_id": "scene0634_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "table",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 36,
+      "description_sha256": "fa8c26f60be1634ba611bad1f06279403de58fa013d50e3020ce62381660017c",
+      "description_tokens": 11,
+      "manifest_index": 31,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "2"
+      ],
+      "scene_id": "scene0478_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "machine",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 60,
+      "description_sha256": "fd5dbac284bbabc01742186b4d097db7583faeae29e4bcedc60308626fee45e4",
+      "description_tokens": 25,
+      "manifest_index": 32,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "12",
+        "2"
+      ],
+      "scene_id": "scene0184_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "door",
+      "target_object_id": "30"
+    },
+    {
+      "ann_id": 139,
+      "description_sha256": "c5ad3f52d3e5c8ee193c1d297f6a25de8b2c430f1a038a8329e87a0ff19a9b80",
+      "description_tokens": 13,
+      "manifest_index": 33,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "19"
+      ],
+      "scene_id": "scene0477_00",
+      "scene_object_count": 35,
+      "stratum": "ambiguous",
+      "target_class": "door",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "3a21f49205b43845b4714702275d09f8e727e8159a46db839d16448c74fe7f90",
+      "description_tokens": 20,
+      "manifest_index": 34,
+      "same_class_peer_count": 8,
+      "same_class_peer_object_ids": [
+        "0",
+        "10",
+        "13",
+        "16",
+        "18",
+        "2",
+        "21",
+        "3"
+      ],
+      "scene_id": "scene0290_00",
+      "scene_object_count": 9,
+      "stratum": "ambiguous",
+      "target_class": "door",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 133,
+      "description_sha256": "b0073e659dd67d47d55cdeefa5d04dc9cc90891d033ef4ae8e0cc77c1557f7e8",
+      "description_tokens": 22,
+      "manifest_index": 35,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "63",
+        "64"
+      ],
+      "scene_id": "scene0054_00",
+      "scene_object_count": 53,
+      "stratum": "ambiguous",
+      "target_class": "bookshelf",
+      "target_object_id": "65"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "6a7d906f1c69b159ac499532b46b4f0c6f31cb5c604731a23cfe10ae48ceca8a",
+      "description_tokens": 27,
+      "manifest_index": 36,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "6"
+      ],
+      "scene_id": "scene0112_00",
+      "scene_object_count": 7,
+      "stratum": "ambiguous",
+      "target_class": "toiletpaper",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "a39cdfae376ee6d8c25f6fd9c682c48f14093f210c99f3ac821d38b1fe3f776d",
+      "description_tokens": 11,
+      "manifest_index": 37,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "28"
+      ],
+      "scene_id": "scene0486_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "refrigerator",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 86,
+      "description_sha256": "a65c4c8b4af7b3c85a62ef033effbfd269be163a0d7bd4767ca7be3b0f66cb5c",
+      "description_tokens": 17,
+      "manifest_index": 38,
+      "same_class_peer_count": 7,
+      "same_class_peer_object_ids": [
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "29",
+        "30"
+      ],
+      "scene_id": "scene0340_00",
+      "scene_object_count": 23,
+      "stratum": "ambiguous",
+      "target_class": "pillow",
+      "target_object_id": "25"
+    },
+    {
+      "ann_id": 89,
+      "description_sha256": "c223b357c7b6e0ce4570f948a802b85e763653bd97e8e062990ba54e6607e42e",
+      "description_tokens": 21,
+      "manifest_index": 39,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "19"
+      ],
+      "scene_id": "scene0425_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "dresser",
+      "target_object_id": "30"
+    },
+    {
+      "ann_id": 29,
+      "description_sha256": "e768eaf87c9993ab6228a3922d11163d93ce6e4c09d6c7c699d014c8558f00df",
+      "description_tokens": 11,
+      "manifest_index": 40,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "34",
+        "35"
+      ],
+      "scene_id": "scene0499_00",
+      "scene_object_count": 26,
+      "stratum": "ambiguous",
+      "target_class": "window",
+      "target_object_id": "36"
+    },
+    {
+      "ann_id": 44,
+      "description_sha256": "e791a83fa46e6ecb9064e6f36c1400e55a917bf51593fc3be8cfdc053f1881a8",
+      "description_tokens": 9,
+      "manifest_index": 41,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "18",
+        "19"
+      ],
+      "scene_id": "scene0554_00",
+      "scene_object_count": 15,
+      "stratum": "ambiguous",
+      "target_class": "door",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 12,
+      "description_sha256": "83c2af1f5a2c8c5a9e7601e66324bbb62b397d0a4aed68d0b04c5bc706e59001",
+      "description_tokens": 20,
+      "manifest_index": 42,
+      "same_class_peer_count": 12,
+      "same_class_peer_object_ids": [
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "29",
+        "30"
+      ],
+      "scene_id": "scene0289_00",
+      "scene_object_count": 20,
+      "stratum": "ambiguous",
+      "target_class": "officechair",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 59,
+      "description_sha256": "18049862e55d98ce57bdf27ae94e2b4df9ea62977b029e654e9259cdd23db2c5",
+      "description_tokens": 24,
+      "manifest_index": 43,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "2"
+      ],
+      "scene_id": "scene0635_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "filecabinet",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 14,
+      "description_sha256": "eefe4cb72e3c2634299859edc87b24b24c5ca7d62b92b9630d03af25fc38fbdc",
+      "description_tokens": 11,
+      "manifest_index": 44,
+      "same_class_peer_count": 5,
+      "same_class_peer_object_ids": [
+        "30",
+        "34",
+        "57",
+        "58",
+        "7"
+      ],
+      "scene_id": "scene0421_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "container",
+      "target_object_id": "59"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "c85ee177cae4ffe2b958ff443b5b28e0c69cfbdaa97853f19f9c6abd96a317c1",
+      "description_tokens": 9,
+      "manifest_index": 45,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "5"
+      ],
+      "scene_id": "scene0585_00",
+      "scene_object_count": 20,
+      "stratum": "ambiguous",
+      "target_class": "shelf",
+      "target_object_id": "27"
+    },
+    {
+      "ann_id": 50,
+      "description_sha256": "9eec1543ac0f67aee58de240f7ad4d6b1e9c8cb7ecfd882a70e2a600fea3758c",
+      "description_tokens": 13,
+      "manifest_index": 46,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "11"
+      ],
+      "scene_id": "scene0352_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "shelf",
+      "target_object_id": "30"
+    },
+    {
+      "ann_id": 14,
+      "description_sha256": "79e34c2171aec52d8ee51a456b21e22e7a307e8d12b63780625a94ff79e62411",
+      "description_tokens": 22,
+      "manifest_index": 47,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "2",
+        "3"
+      ],
+      "scene_id": "scene0668_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "ottoman",
+      "target_object_id": "33"
+    },
+    {
+      "ann_id": 140,
+      "description_sha256": "252dc4b31cad2df83028e58445622b9b48cec67ac83a4fc7f4086cdae3e39377",
+      "description_tokens": 12,
+      "manifest_index": 48,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "2",
+        "3"
+      ],
+      "scene_id": "scene0505_00",
+      "scene_object_count": 37,
+      "stratum": "ambiguous",
+      "target_class": "window",
+      "target_object_id": "26"
+    },
+    {
+      "ann_id": 43,
+      "description_sha256": "10aeee470d17d721a9aab21495061776105ace9f5e7a1ec5c7957a63d91c4796",
+      "description_tokens": 22,
+      "manifest_index": 49,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "2",
+        "3"
+      ],
+      "scene_id": "scene0680_00",
+      "scene_object_count": 11,
+      "stratum": "ambiguous",
+      "target_class": "officechair",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "d833cc1d3aa1a38f136a344839ea90c13abf2de012c3ecd7fdb9130668f2175d",
+      "description_tokens": 20,
+      "manifest_index": 50,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "15",
+        "17"
+      ],
+      "scene_id": "scene0028_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "footstool",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 33,
+      "description_sha256": "42f2d339562d2beac5c440a4be21876dfe4a67ac7d425ef27490ac2fb54bba70",
+      "description_tokens": 14,
+      "manifest_index": 51,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "3"
+      ],
+      "scene_id": "scene0068_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "trashcan",
+      "target_object_id": "43"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "76fcd77d5b879f77ad496720b49a5c61fb4767c5c91b5b5b34e2725a32ae3b90",
+      "description_tokens": 24,
+      "manifest_index": 52,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "35"
+      ],
+      "scene_id": "scene0315_00",
+      "scene_object_count": 29,
+      "stratum": "ambiguous",
+      "target_class": "foldedchair",
+      "target_object_id": "36"
+    },
+    {
+      "ann_id": 16,
+      "description_sha256": "35eb600ba388a121b9d84f9f6c0c3b875ab68deef7c939edb6e0220c23f75706",
+      "description_tokens": 12,
+      "manifest_index": 53,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "6"
+      ],
+      "scene_id": "scene0381_00",
+      "scene_object_count": 8,
+      "stratum": "ambiguous",
+      "target_class": "ottoman",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 48,
+      "description_sha256": "e1efb4b7e63ddeae8062cc2f5f221a9d7c6cb6693b1c91c4aba2e400e7cbc10b",
+      "description_tokens": 11,
+      "manifest_index": 54,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "33",
+        "8"
+      ],
+      "scene_id": "scene0102_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "window",
+      "target_object_id": "31"
+    },
+    {
+      "ann_id": 88,
+      "description_sha256": "8e42c672caee1fdbe3666e7b3589f11e736f5aff99242b60bd4735bcb9ed1fad",
+      "description_tokens": 15,
+      "manifest_index": 55,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "0",
+        "4",
+        "51"
+      ],
+      "scene_id": "scene0592_00",
+      "scene_object_count": 37,
+      "stratum": "ambiguous",
+      "target_class": "monitor",
+      "target_object_id": "53"
+    },
+    {
+      "ann_id": 97,
+      "description_sha256": "bd7dddc71892df64a951499f7974506c9aee223b2ebaf1d236fc6dc699ed2841",
+      "description_tokens": 13,
+      "manifest_index": 56,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "41"
+      ],
+      "scene_id": "scene0331_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "bed",
+      "target_object_id": "42"
+    },
+    {
+      "ann_id": 5,
+      "description_sha256": "9b7d96443fa5461af43c953dfd70a0a33df0812454727d522fb8e11670202153",
+      "description_tokens": 14,
+      "manifest_index": 57,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "1",
+        "2"
+      ],
+      "scene_id": "scene0373_00",
+      "scene_object_count": 6,
+      "stratum": "ambiguous",
+      "target_class": "officechair",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 12,
+      "description_sha256": "f959d951dbec65203376dcc12edc83284bb81942cfc0491da39666fc52a3b1c8",
+      "description_tokens": 16,
+      "manifest_index": 58,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "17",
+        "2"
+      ],
+      "scene_id": "scene0509_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "towel",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 61,
+      "description_sha256": "d266de03b904ef166806288a054794d1069217add104018916569961bc61ab48",
+      "description_tokens": 21,
+      "manifest_index": 59,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "28"
+      ],
+      "scene_id": "scene0254_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "trashcan",
+      "target_object_id": "29"
+    },
+    {
+      "ann_id": 59,
+      "description_sha256": "411d364a2f9a9226090829b65ace1cea74e7920e8d58eb7d2fa4160d765d5a5b",
+      "description_tokens": 13,
+      "manifest_index": 60,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "25",
+        "32",
+        "33"
+      ],
+      "scene_id": "scene0395_00",
+      "scene_object_count": 23,
+      "stratum": "ambiguous",
+      "target_class": "monitor",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 12,
+      "description_sha256": "d0161e3e20b405393b58c4d377092552cc64d314eacd3947da8d88b27cd57da2",
+      "description_tokens": 14,
+      "manifest_index": 61,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "4",
+        "6",
+        "7"
+      ],
+      "scene_id": "scene0579_00",
+      "scene_object_count": 9,
+      "stratum": "ambiguous",
+      "target_class": "sink",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 40,
+      "description_sha256": "5deae704d5bff9523f2222bb23690a3f2e706db39548a0d20201eacb12c1f268",
+      "description_tokens": 12,
+      "manifest_index": 62,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "11",
+        "12",
+        "13"
+      ],
+      "scene_id": "scene0033_00",
+      "scene_object_count": 13,
+      "stratum": "ambiguous",
+      "target_class": "coffeetable",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 104,
+      "description_sha256": "a3ac9b6bad781d4acc3ff9faedc4f189a1273abc9b7812578783d0339bc680df",
+      "description_tokens": 22,
+      "manifest_index": 63,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "3",
+        "49"
+      ],
+      "scene_id": "scene0547_00",
+      "scene_object_count": 29,
+      "stratum": "ambiguous",
+      "target_class": "shelf",
+      "target_object_id": "32"
+    },
+    {
+      "ann_id": 93,
+      "description_sha256": "4ba3fc7ef3efe47be1e48f8ccc669c0bea541232528c5fed945c145f5ad51206",
+      "description_tokens": 12,
+      "manifest_index": 64,
+      "same_class_peer_count": 5,
+      "same_class_peer_object_ids": [
+        "10",
+        "12",
+        "13",
+        "31",
+        "32"
+      ],
+      "scene_id": "scene0186_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "cabinet",
+      "target_object_id": "47"
+    },
+    {
+      "ann_id": 50,
+      "description_sha256": "1b6896fa92f304850c2b5f60e48b4eeb681650f8d806285e62de711875d86a3e",
+      "description_tokens": 10,
+      "manifest_index": 65,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "12"
+      ],
+      "scene_id": "scene0542_00",
+      "scene_object_count": 13,
+      "stratum": "ambiguous",
+      "target_class": "kitchencounter",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 37,
+      "description_sha256": "5abaadb8000f1b6dee472261a06066eb3dfebde26226383b489496050d41cc18",
+      "description_tokens": 16,
+      "manifest_index": 66,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "20",
+        "21"
+      ],
+      "scene_id": "scene0597_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "counter",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "88d570e06db313e3c98b7f21beb4caccce8a2516018f5bae589418cbfa753420",
+      "description_tokens": 18,
+      "manifest_index": 67,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "18"
+      ],
+      "scene_id": "scene0541_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "dresser",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "1469746253b260ac7fe1c6840ff2b98eefaeb061225a2e5ddc2fab387808ce62",
+      "description_tokens": 15,
+      "manifest_index": 68,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "8",
+        "9"
+      ],
+      "scene_id": "scene0167_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "sofachair",
+      "target_object_id": "12"
+    },
+    {
+      "ann_id": 10,
+      "description_sha256": "38fc9c45c615d47e1fc11d20edf3219f5c75e4ebaabc5a43d0ac88a825c02557",
+      "description_tokens": 13,
+      "manifest_index": 69,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "2",
+        "3"
+      ],
+      "scene_id": "scene0312_00",
+      "scene_object_count": 9,
+      "stratum": "ambiguous",
+      "target_class": "couch",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 35,
+      "description_sha256": "7121db40c9a2a8204041dc018c608dad64b5fd0319ad79125f21c2e1e87f3f4f",
+      "description_tokens": 15,
+      "manifest_index": 70,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "20"
+      ],
+      "scene_id": "scene0181_00",
+      "scene_object_count": 23,
+      "stratum": "ambiguous",
+      "target_class": "kitchencabinet",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 46,
+      "description_sha256": "0ed0bcbd2af1fdfdf07bac297e088e5f9ef38f72ede8146d6eea8d784ef43a0d",
+      "description_tokens": 19,
+      "manifest_index": 71,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "2"
+      ],
+      "scene_id": "scene0433_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "oven",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "a485c4ee471e94e4c42f96a1f6a554a622b51d1c5df679e0260b43dd6d5d8377",
+      "description_tokens": 11,
+      "manifest_index": 72,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "0"
+      ],
+      "scene_id": "scene0090_00",
+      "scene_object_count": 5,
+      "stratum": "ambiguous",
+      "target_class": "urinal",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "7d69a5e1f35e43bbc3969e40e659d7147a13055d7c221fbe70bdcddc3fa57731",
+      "description_tokens": 17,
+      "manifest_index": 73,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "6"
+      ],
+      "scene_id": "scene0363_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "armchair",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 6,
+      "description_sha256": "e11015b97326de6f3a72a6ee7459267673b90068b0f2b455eb847afc0a817691",
+      "description_tokens": 15,
+      "manifest_index": 74,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "23"
+      ],
+      "scene_id": "scene0468_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "recyclingbin",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 71,
+      "description_sha256": "57576fc8d8b831edbdc24d88b14c10e162e4dd613d87c59c1b7cec42b3b3de56",
+      "description_tokens": 20,
+      "manifest_index": 75,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "8",
+        "9"
+      ],
+      "scene_id": "scene0489_00",
+      "scene_object_count": 17,
+      "stratum": "ambiguous",
+      "target_class": "desk",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 88,
+      "description_sha256": "c493ee4efeaf3b13b272db2d6097b37420befb36423c26c26521646bd4d0073a",
+      "description_tokens": 21,
+      "manifest_index": 76,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "7",
+        "8"
+      ],
+      "scene_id": "scene0698_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "cabinet",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 13,
+      "description_sha256": "6acaf2a204b535b5fef6945231231367145fbdd1db4b274883f88ac94d0a0a2c",
+      "description_tokens": 10,
+      "manifest_index": 77,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "19"
+      ],
+      "scene_id": "scene0397_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "nightstand",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 58,
+      "description_sha256": "1de8e89e0fda3e69f0191968c6b05ff9fadc29b2e23f575f871f29e9cfa79988",
+      "description_tokens": 18,
+      "manifest_index": 78,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "10",
+        "12",
+        "8"
+      ],
+      "scene_id": "scene0368_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "sofachair",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 65,
+      "description_sha256": "d4f88eea4e0257976d35a1a99831724cc113ebf60fc19a5789853cac967dbb09",
+      "description_tokens": 18,
+      "manifest_index": 79,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "0",
+        "33",
+        "35"
+      ],
+      "scene_id": "scene0448_00",
+      "scene_object_count": 15,
+      "stratum": "ambiguous",
+      "target_class": "toiletpaper",
+      "target_object_id": "34"
+    },
+    {
+      "ann_id": 80,
+      "description_sha256": "0df0ac29dcc9e9c1a8b04213537e4a2769859d25f96e3d43d909b59e4a8f8aab",
+      "description_tokens": 18,
+      "manifest_index": 80,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "21",
+        "25"
+      ],
+      "scene_id": "scene0279_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "lamp",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "d6a471e823d091e4716a01e07ea790e4cb42cbd6b7e95e68bee1db40e3761398",
+      "description_tokens": 19,
+      "manifest_index": 81,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "29",
+        "42",
+        "6"
+      ],
+      "scene_id": "scene0168_00",
+      "scene_object_count": 26,
+      "stratum": "ambiguous",
+      "target_class": "computertower",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 58,
+      "description_sha256": "f4dbb16dd3b9ad083f397b8097834a5220a4b23d7e2ee58374a0ebe9622b119d",
+      "description_tokens": 13,
+      "manifest_index": 82,
+      "same_class_peer_count": 6,
+      "same_class_peer_object_ids": [
+        "14",
+        "23",
+        "24",
+        "25",
+        "27",
+        "28"
+      ],
+      "scene_id": "scene0467_00",
+      "scene_object_count": 23,
+      "stratum": "ambiguous",
+      "target_class": "picture",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "78c93e12e0d201e440e08e05bc45b672efaa57f4589936f53cea3e2438b1a952",
+      "description_tokens": 16,
+      "manifest_index": 83,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "15",
+        "17"
+      ],
+      "scene_id": "scene0281_00",
+      "scene_object_count": 15,
+      "stratum": "ambiguous",
+      "target_class": "couch",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "e37522a91c2e97fac5c3cb9a67050fda5cdf09e9ed70771b97163c696229c1f4",
+      "description_tokens": 13,
+      "manifest_index": 84,
+      "same_class_peer_count": 6,
+      "same_class_peer_object_ids": [
+        "10",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "scene_id": "scene0437_00",
+      "scene_object_count": 9,
+      "stratum": "ambiguous",
+      "target_class": "armchair",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 11,
+      "description_sha256": "2f1b93b66bc734f712a4792eacb56033ef7a61b1f35ff0937bbd562c4a612225",
+      "description_tokens": 17,
+      "manifest_index": 85,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "10",
+        "9"
+      ],
+      "scene_id": "scene0195_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "towel",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 50,
+      "description_sha256": "53f89ef6d7c9ad342fb5116118a5d4a6712dfaf39144b863489adc90d65ace82",
+      "description_tokens": 10,
+      "manifest_index": 86,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "13",
+        "65"
+      ],
+      "scene_id": "scene0419_00",
+      "scene_object_count": 41,
+      "stratum": "ambiguous",
+      "target_class": "kitchencabinets",
+      "target_object_id": "53"
+    },
+    {
+      "ann_id": 22,
+      "description_sha256": "2293fd344c10adb56cafa0c31ca83db37fc277cecfcce4f80c31678f12046d42",
+      "description_tokens": 17,
+      "manifest_index": 87,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "14"
+      ],
+      "scene_id": "scene0273_00",
+      "scene_object_count": 12,
+      "stratum": "ambiguous",
+      "target_class": "armchair",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 17,
+      "description_sha256": "61fbf2d3c90fb3fa0a9a34a36b2b8bfbb6922ba4dec58486b49747bf2a8a05d2",
+      "description_tokens": 16,
+      "manifest_index": 88,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "19",
+        "4",
+        "5"
+      ],
+      "scene_id": "scene0375_00",
+      "scene_object_count": 12,
+      "stratum": "ambiguous",
+      "target_class": "towel",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "20efe932cc1d492916e1dc42453c2342dcefcc21971aab7c55ab7bc8386d5c60",
+      "description_tokens": 17,
+      "manifest_index": 89,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "0"
+      ],
+      "scene_id": "scene0325_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "printer",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 22,
+      "description_sha256": "11d5f7c4e3e289a5f44786655332a83b7af3a2f1ac0e725ebb3e27a3b1c23cd7",
+      "description_tokens": 17,
+      "manifest_index": 90,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "1"
+      ],
+      "scene_id": "scene0365_00",
+      "scene_object_count": 9,
+      "stratum": "ambiguous",
+      "target_class": "bathroomstalldoor",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 65,
+      "description_sha256": "7629a9b9dc077b30ea84e942a19fb8f92990b2f74921e69359814c13e1998fab",
+      "description_tokens": 19,
+      "manifest_index": 91,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "46"
+      ],
+      "scene_id": "scene0296_00",
+      "scene_object_count": 24,
+      "stratum": "ambiguous",
+      "target_class": "ottoman",
+      "target_object_id": "43"
+    },
+    {
+      "ann_id": 6,
+      "description_sha256": "5298a1b9b1dc33e2c5fcdc60a3cdb0ec9d394bd68eebd27d8b8f854c61b012ab",
+      "description_tokens": 33,
+      "manifest_index": 92,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "11"
+      ],
+      "scene_id": "scene0226_00",
+      "scene_object_count": 11,
+      "stratum": "ambiguous",
+      "target_class": "coffeetable",
+      "target_object_id": "12"
+    },
+    {
+      "ann_id": 8,
+      "description_sha256": "2eb678af65794223360be91298ae08f98e91c023e7dab8cf56f86de64c27c4fa",
+      "description_tokens": 25,
+      "manifest_index": 93,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "8"
+      ],
+      "scene_id": "scene0230_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "desk",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "74710af69ad957c8090101d065fa6863b21ad7a1794f91af0af73cf1becf2a65",
+      "description_tokens": 25,
+      "manifest_index": 94,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "12",
+        "15",
+        "8"
+      ],
+      "scene_id": "scene0523_00",
+      "scene_object_count": 13,
+      "stratum": "ambiguous",
+      "target_class": "towel",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 47,
+      "description_sha256": "363d3f00a91152a55a90d659d899da6787ba5e1276e5ee1ea5e8df869898c40c",
+      "description_tokens": 18,
+      "manifest_index": 95,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "3"
+      ],
+      "scene_id": "scene0311_00",
+      "scene_object_count": 12,
+      "stratum": "ambiguous",
+      "target_class": "copier",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 59,
+      "description_sha256": "bc9c188da9caa1f267fa349f3bdea642c7308b58e3344982dd1662a7465bdc42",
+      "description_tokens": 10,
+      "manifest_index": 96,
+      "same_class_peer_count": 6,
+      "same_class_peer_object_ids": [
+        "11",
+        "12",
+        "13",
+        "29",
+        "30",
+        "31"
+      ],
+      "scene_id": "scene0522_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "basket",
+      "target_object_id": "32"
+    },
+    {
+      "ann_id": 79,
+      "description_sha256": "93a3faa8ddc3d8879ea3e2e8db68c37831e5ebfa21edeb88ec484a516448c174",
+      "description_tokens": 19,
+      "manifest_index": 97,
+      "same_class_peer_count": 4,
+      "same_class_peer_object_ids": [
+        "19",
+        "21",
+        "22",
+        "23"
+      ],
+      "scene_id": "scene0452_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "picture",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "d0f5ff297601e1844e4b13f2785b3404aef15089484980c7fa42e6562db9f40f",
+      "description_tokens": 19,
+      "manifest_index": 98,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "1"
+      ],
+      "scene_id": "scene0367_00",
+      "scene_object_count": 12,
+      "stratum": "ambiguous",
+      "target_class": "couch",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 86,
+      "description_sha256": "f23fafc96cc23a6edfb62d5b2562ad76fd821506a4aed11fa7479d18fcc14be5",
+      "description_tokens": 10,
+      "manifest_index": 99,
+      "same_class_peer_count": 4,
+      "same_class_peer_object_ids": [
+        "4",
+        "57",
+        "58",
+        "59"
+      ],
+      "scene_id": "scene0336_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "picture",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 15,
+      "description_sha256": "127679be92b9275078bf457192685cde783b95c587257928fc2c2df091515e0d",
+      "description_tokens": 22,
+      "manifest_index": 100,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "16",
+        "17",
+        "5"
+      ],
+      "scene_id": "scene0330_00",
+      "scene_object_count": 15,
+      "stratum": "ambiguous",
+      "target_class": "coffeetable",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 4,
+      "description_sha256": "17125c50011a5606c002d6fed41228b82ce798ab5b9f4f4eee0892d41dfcfc52",
+      "description_tokens": 19,
+      "manifest_index": 101,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "12",
+        "15"
+      ],
+      "scene_id": "scene0201_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "kitchencabinets",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "505338512a9e20615485121d152f094b19778f8e82bb7ce17c115a5944dd3513",
+      "description_tokens": 27,
+      "manifest_index": 102,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "10"
+      ],
+      "scene_id": "scene0109_00",
+      "scene_object_count": 8,
+      "stratum": "ambiguous",
+      "target_class": "bucket",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 68,
+      "description_sha256": "590ed1195d4fd801285b50cd809bf0faca0cedb3e0b02430a91dd5dc7013b75c",
+      "description_tokens": 8,
+      "manifest_index": 103,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "25"
+      ],
+      "scene_id": "scene0556_00",
+      "scene_object_count": 22,
+      "stratum": "ambiguous",
+      "target_class": "recyclingbin",
+      "target_object_id": "38"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "66bc9a852ff6d10b536e1f3da3278e07cc31b8c4b40803c86831a1e63d8a0685",
+      "description_tokens": 14,
+      "manifest_index": 104,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "7"
+      ],
+      "scene_id": "scene0463_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "radiator",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 33,
+      "description_sha256": "fc942d719fb7cc6ede3a57c97a757cabe5f67b7602fcee2e89547a121acf1b11",
+      "description_tokens": 15,
+      "manifest_index": 105,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "13"
+      ],
+      "scene_id": "scene0464_00",
+      "scene_object_count": 25,
+      "stratum": "ambiguous",
+      "target_class": "computertower",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 8,
+      "description_sha256": "e5d372d3e5f6f67abfbcf0106c7c63e974ff661db96f2e6d6a117ecf6d008990",
+      "description_tokens": 13,
+      "manifest_index": 106,
+      "same_class_peer_count": 2,
+      "same_class_peer_object_ids": [
+        "4",
+        "5"
+      ],
+      "scene_id": "scene0238_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "desk",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 53,
+      "description_sha256": "0627c328f8ee29470dc3dd917e4f0f5e6a7e93b8681056172bed86074438cd47",
+      "description_tokens": 23,
+      "manifest_index": 107,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "17"
+      ],
+      "scene_id": "scene0239_00",
+      "scene_object_count": 13,
+      "stratum": "ambiguous",
+      "target_class": "ottoman",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 69,
+      "description_sha256": "97e633c81aefe6bafe8e0b190dedf71f57f63e32d2ca66338e2363a80676fcbd",
+      "description_tokens": 29,
+      "manifest_index": 108,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "38"
+      ],
+      "scene_id": "scene0539_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "toiletpaper",
+      "target_object_id": "37"
+    },
+    {
+      "ann_id": 64,
+      "description_sha256": "f478eb5f14dfae4301b801f34e5a6df9f8f5fc5c50122539cb8eb72054c5f536",
+      "description_tokens": 9,
+      "manifest_index": 109,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "14"
+      ],
+      "scene_id": "scene0178_00",
+      "scene_object_count": 19,
+      "stratum": "ambiguous",
+      "target_class": "bed",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "4e61c265438ea76e787b184b756bd69d96c172c4084e1a62b817e582b77bfaa6",
+      "description_tokens": 15,
+      "manifest_index": 110,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "9"
+      ],
+      "scene_id": "scene0612_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "trashbin",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 10,
+      "description_sha256": "4873768928522ff98dfbbb2c6afaf440a4198198e0e98590100371c5f0a37399",
+      "description_tokens": 13,
+      "manifest_index": 111,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "5"
+      ],
+      "scene_id": "scene0147_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "dresser",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 119,
+      "description_sha256": "2bff5be8f9dc18b82522624df7b8b8358cac1187469266dbc1bf12bd9537e7a8",
+      "description_tokens": 12,
+      "manifest_index": 112,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "1"
+      ],
+      "scene_id": "scene0642_00",
+      "scene_object_count": 26,
+      "stratum": "ambiguous",
+      "target_class": "bed",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 22,
+      "description_sha256": "38c06a1d9d5165258f14139d269510b80de36f325af4b26d0864c34260dd1ddc",
+      "description_tokens": 19,
+      "manifest_index": 113,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "57",
+        "75",
+        "76"
+      ],
+      "scene_id": "scene0040_00",
+      "scene_object_count": 26,
+      "stratum": "ambiguous",
+      "target_class": "filecabinet",
+      "target_object_id": "58"
+    },
+    {
+      "ann_id": 46,
+      "description_sha256": "b2c3459d6a28c17192dfe9888904d96cb64ad4cc3283a10ba0d518bc995c472d",
+      "description_tokens": 18,
+      "manifest_index": 114,
+      "same_class_peer_count": 3,
+      "same_class_peer_object_ids": [
+        "11",
+        "12",
+        "13"
+      ],
+      "scene_id": "scene0492_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "bathroomstalldoor",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 4,
+      "description_sha256": "b306f94dd12d4733c1848653f4cb276f2b93b654fcccd4cb50e2bbfa0fdf42af",
+      "description_tokens": 21,
+      "manifest_index": 115,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "4"
+      ],
+      "scene_id": "scene0205_00",
+      "scene_object_count": 6,
+      "stratum": "ambiguous",
+      "target_class": "cabinets",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 75,
+      "description_sha256": "285907e8ef3e50d6175c7aaf9f1a589be84b147e7238db6fe0688a3ccacc1f3e",
+      "description_tokens": 20,
+      "manifest_index": 116,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "8"
+      ],
+      "scene_id": "scene0218_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "couch",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 52,
+      "description_sha256": "4d679c67b85323406d8b1a7af6f3c65cf71cda65828788f910f41be17e5c9397",
+      "description_tokens": 28,
+      "manifest_index": 117,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "5"
+      ],
+      "scene_id": "scene0379_00",
+      "scene_object_count": 22,
+      "stratum": "ambiguous",
+      "target_class": "filecabinet",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 16,
+      "description_sha256": "31fa30f0c3c7fcb2831b3f8eb0bf9e2809f781cfebe430bf5fd5f614c7805dd2",
+      "description_tokens": 24,
+      "manifest_index": 118,
+      "same_class_peer_count": 5,
+      "same_class_peer_object_ids": [
+        "33",
+        "34",
+        "38",
+        "4",
+        "5"
+      ],
+      "scene_id": "scene0016_00",
+      "scene_object_count": 16,
+      "stratum": "ambiguous",
+      "target_class": "storagecontainer",
+      "target_object_id": "35"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "4689c21ff447a89a205ffc6d81b0815fcbbed06d613f43d3ff3b5c6c73c331b9",
+      "description_tokens": 10,
+      "manifest_index": 119,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "13"
+      ],
+      "scene_id": "scene0516_00",
+      "scene_object_count": 21,
+      "stratum": "ambiguous",
+      "target_class": "bag",
+      "target_object_id": "27"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "5063fbfd197a783095d2cbbe08e4af19beaf1d24f41e1b7b00d04bae70c5a348",
+      "description_tokens": 11,
+      "manifest_index": 120,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "13"
+      ],
+      "scene_id": "scene0706_00",
+      "scene_object_count": 14,
+      "stratum": "ambiguous",
+      "target_class": "picture",
+      "target_object_id": "12"
+    },
+    {
+      "ann_id": 34,
+      "description_sha256": "e87cb7308fddaf2e7823bccef164adfb60259c70498cffa9584f61933a5d88d4",
+      "description_tokens": 16,
+      "manifest_index": 121,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "59"
+      ],
+      "scene_id": "scene0497_00",
+      "scene_object_count": 42,
+      "stratum": "ambiguous",
+      "target_class": "kitchencabinets",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 70,
+      "description_sha256": "8ef7fed7bcd23ce17b314089cf89c4fe653cb0ad1169f8a3ab105a437c0eb7f8",
+      "description_tokens": 9,
+      "manifest_index": 122,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "33"
+      ],
+      "scene_id": "scene0101_00",
+      "scene_object_count": 35,
+      "stratum": "ambiguous",
+      "target_class": "stool",
+      "target_object_id": "34"
+    },
+    {
+      "ann_id": 54,
+      "description_sha256": "8faf4c08d5ff8f47266cc2a32b0027fac11e9949cfd952cb0b5d03b59c60df91",
+      "description_tokens": 12,
+      "manifest_index": 123,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "12"
+      ],
+      "scene_id": "scene0654_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "stool",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 11,
+      "description_sha256": "416c58cdcad7f9c2455bea2542e67e842852b6b662a35bbece090696e55fe29f",
+      "description_tokens": 13,
+      "manifest_index": 124,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "4"
+      ],
+      "scene_id": "scene0408_00",
+      "scene_object_count": 4,
+      "stratum": "ambiguous",
+      "target_class": "bookshelf",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 34,
+      "description_sha256": "21309eb0b0574fbe50dcb6aa3a17b4f8049e4fb92756c4fb37ef96e5d7a6a7d3",
+      "description_tokens": 30,
+      "manifest_index": 125,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "12"
+      ],
+      "scene_id": "scene0510_00",
+      "scene_object_count": 18,
+      "stratum": "ambiguous",
+      "target_class": "sink",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 43,
+      "description_sha256": "d59318bca2390ee8dec8a02803bb1e94be1e59431a550add57a935c1af22ddc6",
+      "description_tokens": 16,
+      "manifest_index": 126,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "6"
+      ],
+      "scene_id": "scene0143_00",
+      "scene_object_count": 10,
+      "stratum": "ambiguous",
+      "target_class": "curtain",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 66,
+      "description_sha256": "69943763557a6fcb6caa2a024a7e79159c0c739235c6c901f08e1600c7e21f3a",
+      "description_tokens": 13,
+      "manifest_index": 127,
+      "same_class_peer_count": 1,
+      "same_class_peer_object_ids": [
+        "16"
+      ],
+      "scene_id": "scene0137_00",
+      "scene_object_count": 24,
+      "stratum": "ambiguous",
+      "target_class": "lamp",
+      "target_object_id": "24"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "52d77c4523ea275efd71a6d3c4e37564b2bc6fe8d80fa6eafbc3182c17356f5a",
+      "description_tokens": 14,
+      "manifest_index": 128,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0111_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "trashcan",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "faaba3ebb8f3dac7392a9c35d022f545056014292d02992a1748bb1bbf2e0156",
+      "description_tokens": 21,
+      "manifest_index": 129,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0492_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "toilet",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 6,
+      "description_sha256": "a378e5a4bff5f89450f13f623945a92c1dc42df9397979321c1ce5f86267089d",
+      "description_tokens": 14,
+      "manifest_index": 130,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0079_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "machine",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 161,
+      "description_sha256": "e7c46470bb2e953c046aa8b12c8de0c151191be7a58355aa780bc24e6469c176",
+      "description_tokens": 21,
+      "manifest_index": 131,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0419_00",
+      "scene_object_count": 41,
+      "stratum": "class_unique",
+      "target_class": "tv",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 120,
+      "description_sha256": "e31f32dfdea9482b3beb905b2993fa7fa0aec577bb002155d30a2d8fe509476e",
+      "description_tokens": 10,
+      "manifest_index": 132,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0590_00",
+      "scene_object_count": 31,
+      "stratum": "class_unique",
+      "target_class": "lamp",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 62,
+      "description_sha256": "486c4bcdf696f154e65ae4ef1512f775575212513fd424a8265e10297dba32d7",
+      "description_tokens": 19,
+      "manifest_index": 133,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0433_00",
+      "scene_object_count": 17,
+      "stratum": "class_unique",
+      "target_class": "diningtable",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 36,
+      "description_sha256": "d66231254754a5cdcc3ab2e39ba72e569b674eb5c58dd40416443c0f729eebf4",
+      "description_tokens": 13,
+      "manifest_index": 134,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0323_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "refrigerator",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 81,
+      "description_sha256": "fd4509ab966fb61f331eeeff13bff5e1d74c10f8b98096112c9055e814b6b551",
+      "description_tokens": 17,
+      "manifest_index": 135,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0479_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "picture",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 27,
+      "description_sha256": "c47d572c5f25b874c2a1efe234e1151925a8f27aeb5ae184340bc688a0b3209b",
+      "description_tokens": 12,
+      "manifest_index": 136,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0286_00",
+      "scene_object_count": 20,
+      "stratum": "class_unique",
+      "target_class": "chair",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 70,
+      "description_sha256": "faa71ecc01fdf120d6907b71e271117783c63f7f39c5b099009fdf8c73ac2b30",
+      "description_tokens": 16,
+      "manifest_index": 137,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0448_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "sink",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "0c8d5218f7c1fcb728a0683a44d3977064acc8e2002ffa4d94af78faa6686938",
+      "description_tokens": 23,
+      "manifest_index": 138,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0515_00",
+      "scene_object_count": 40,
+      "stratum": "class_unique",
+      "target_class": "kitchencounter",
+      "target_object_id": "38"
+    },
+    {
+      "ann_id": 11,
+      "description_sha256": "705eb6d300d3cd070bb08729488064894fa4045b65b95dc3f37204ec0dfc66b8",
+      "description_tokens": 28,
+      "manifest_index": 139,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0639_00",
+      "scene_object_count": 6,
+      "stratum": "class_unique",
+      "target_class": "bathroomcabinet",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 11,
+      "description_sha256": "d9a49a2d5af9fcf5de51567a89136cfa70afa80e464cc6c8472c3ed2d3360538",
+      "description_tokens": 35,
+      "manifest_index": 140,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0117_00",
+      "scene_object_count": 17,
+      "stratum": "class_unique",
+      "target_class": "kitchencounter",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 28,
+      "description_sha256": "5aaf153456a8f2302fbdf644dbb06a56bcd578e86affadfa89ca1c9295db058e",
+      "description_tokens": 10,
+      "manifest_index": 141,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0507_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "sofabed",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 116,
+      "description_sha256": "4321b6aaaee3a172fd6ac585385d0981669159a82982a840e27a61fda50e60e4",
+      "description_tokens": 14,
+      "manifest_index": 142,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0106_00",
+      "scene_object_count": 30,
+      "stratum": "class_unique",
+      "target_class": "door",
+      "target_object_id": "37"
+    },
+    {
+      "ann_id": 28,
+      "description_sha256": "ffd7e7b4591adbb8fa8ae6be5303b860325365ac7e054ea06be4eaafc3f91597",
+      "description_tokens": 26,
+      "manifest_index": 143,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0325_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "recyclingbin",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 40,
+      "description_sha256": "66b2cbad9ec710d1d701cede22a9a4fa77d580c450f70c0785a3e671b2b651de",
+      "description_tokens": 19,
+      "manifest_index": 144,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0372_00",
+      "scene_object_count": 20,
+      "stratum": "class_unique",
+      "target_class": "whiteboard",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 44,
+      "description_sha256": "9cdd2ffe42daf52bd95b50c295368372b157260abdaf34e7c5ca4d24110bd470",
+      "description_tokens": 16,
+      "manifest_index": 145,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0291_00",
+      "scene_object_count": 21,
+      "stratum": "class_unique",
+      "target_class": "table",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 50,
+      "description_sha256": "1359deb6c1d78ff1077079031fa60466aedfd69b9eb6d4a53da55eb562b8c89e",
+      "description_tokens": 20,
+      "manifest_index": 146,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0391_00",
+      "scene_object_count": 19,
+      "stratum": "class_unique",
+      "target_class": "table",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "e5c5f5f2a297a16e928896225e4d7c313aa1fa28060344b48a11e524cb512a3d",
+      "description_tokens": 38,
+      "manifest_index": 147,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0054_00",
+      "scene_object_count": 53,
+      "stratum": "class_unique",
+      "target_class": "stool",
+      "target_object_id": "40"
+    },
+    {
+      "ann_id": 39,
+      "description_sha256": "c347e02a56d4b321d6b39814dfece31a76c5b9383069cc8f0c2a290203002fd0",
+      "description_tokens": 24,
+      "manifest_index": 148,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0048_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "sink",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 28,
+      "description_sha256": "e05484e74d4f33dd7374cac0d5370456b647e65d0b6cd21aa318de0ae12f97c0",
+      "description_tokens": 20,
+      "manifest_index": 149,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0364_00",
+      "scene_object_count": 8,
+      "stratum": "class_unique",
+      "target_class": "bed",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 86,
+      "description_sha256": "818b8d55c98c396a9b0be6cc42950b78f26d045841be1a1664bb321a75a52ea6",
+      "description_tokens": 18,
+      "manifest_index": 150,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0345_00",
+      "scene_object_count": 21,
+      "stratum": "class_unique",
+      "target_class": "trashcan",
+      "target_object_id": "29"
+    },
+    {
+      "ann_id": 86,
+      "description_sha256": "24af82cdad497e2b52dd95797350fcb1ca9d993a294bd15b21a9d1af028c1526",
+      "description_tokens": 20,
+      "manifest_index": 151,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0627_00",
+      "scene_object_count": 26,
+      "stratum": "class_unique",
+      "target_class": "counter",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 57,
+      "description_sha256": "70f0c3e5e61338bb0b288794730d2c4cf440c395fe06e22127264b6899de0c32",
+      "description_tokens": 20,
+      "manifest_index": 152,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0509_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "door",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "dc8f7983c3734686e010eca81bf78c2d71f115518299ce38b159ef25e3825e5a",
+      "description_tokens": 12,
+      "manifest_index": 153,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0386_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "whiteboard",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 17,
+      "description_sha256": "66a037c43caacd0f13b33253653d777c92580220324f15c8c96f6b66abeab9c2",
+      "description_tokens": 19,
+      "manifest_index": 154,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0121_00",
+      "scene_object_count": 6,
+      "stratum": "class_unique",
+      "target_class": "dresser",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 29,
+      "description_sha256": "b439da52a314e4409f86cb0fa802204b37a3786f08d0d7e2c26dd766a45d1805",
+      "description_tokens": 11,
+      "manifest_index": 155,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0078_00",
+      "scene_object_count": 6,
+      "stratum": "class_unique",
+      "target_class": "bed",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 23,
+      "description_sha256": "18557dc8e023ae4525402112be9149d74f56fd615f4329dd1966d08ec9c231b8",
+      "description_tokens": 20,
+      "manifest_index": 156,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0274_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "recyclingbin",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 32,
+      "description_sha256": "ad483ad674152d2db6af85f617d72b643d26e0927750cdfc85f7d05ff2078cbc",
+      "description_tokens": 14,
+      "manifest_index": 157,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0523_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "bathtub",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 32,
+      "description_sha256": "066517c089b35c7a711637a7779b68168caf8c4efd2062d7a764fbfe4cff0226",
+      "description_tokens": 19,
+      "manifest_index": 158,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0293_00",
+      "scene_object_count": 7,
+      "stratum": "class_unique",
+      "target_class": "filecabinet",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 4,
+      "description_sha256": "15c0f3ec232da69ab8ce3c47557daeb5a294ebf9c5874eba5e5d081ec4efc6e1",
+      "description_tokens": 13,
+      "manifest_index": 159,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0680_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "tv",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "49c886401e1a8c2381922a20a35b9315b2cb3408a7f9ce55054017f24bdb580b",
+      "description_tokens": 43,
+      "manifest_index": 160,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0398_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "radiator",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 27,
+      "description_sha256": "6e78c6800844137d7464104727c4027aaf01ddae67b13833ffb166764b04c95e",
+      "description_tokens": 14,
+      "manifest_index": 161,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0163_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "whiteboard",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 71,
+      "description_sha256": "f21c3a5604aba5886c3ebef4712745f4aca7d8c56d42b2e3a239d7b2e8b26628",
+      "description_tokens": 14,
+      "manifest_index": 162,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0296_00",
+      "scene_object_count": 24,
+      "stratum": "class_unique",
+      "target_class": "chair",
+      "target_object_id": "30"
+    },
+    {
+      "ann_id": 102,
+      "description_sha256": "ad63d15f28b6dbd0e8e23f29520d3e4e60f3bb7a450db5a2f4420610a33db173",
+      "description_tokens": 12,
+      "manifest_index": 163,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0614_00",
+      "scene_object_count": 28,
+      "stratum": "class_unique",
+      "target_class": "bookshelf",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 10,
+      "description_sha256": "5c3f1b7908ce481a89bdbe2536e9e814cac120d4f13d97765d662b2f2b65048d",
+      "description_tokens": 16,
+      "manifest_index": 164,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0547_00",
+      "scene_object_count": 29,
+      "stratum": "class_unique",
+      "target_class": "minifridge",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "35444af439c9011485b05cbe38d77cd3709b7f93d30f874e647cb3ee36068794",
+      "description_tokens": 29,
+      "manifest_index": 165,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0457_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "dresser",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 48,
+      "description_sha256": "0d0bce2a2304205e9b22f23586c8861f1e21e9f8e6160c830947e8cccfb35186",
+      "description_tokens": 20,
+      "manifest_index": 166,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0301_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "ottoman",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 39,
+      "description_sha256": "359b2d9aa7fca4be9e88d556fad123cd9227233e1f3e8bcd04dee8a58571822f",
+      "description_tokens": 13,
+      "manifest_index": 167,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0506_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "desk",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "31807a6ed630cb6b42a85be41dd56dd3059e91aaa170d2881822bea38d9c36dc",
+      "description_tokens": 15,
+      "manifest_index": 168,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0339_00",
+      "scene_object_count": 5,
+      "stratum": "class_unique",
+      "target_class": "ottoman",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 1,
+      "description_sha256": "dbce4999bfcc133e607df176c7185a8d6341ada75dfae84d33174df249d4b06e",
+      "description_tokens": 8,
+      "manifest_index": 169,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0548_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "chair",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 31,
+      "description_sha256": "af12ca59a6a88e1e9c6e1e6b17e6ed08e2424884cebd210cfd8063c2cb258d65",
+      "description_tokens": 13,
+      "manifest_index": 170,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0470_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "window",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "fc69aae46e1d08f2339d87b1907e47303dc15def9935e425242ccfe9be513408",
+      "description_tokens": 24,
+      "manifest_index": 171,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0281_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "seat",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "117a4451ec40fd7c4c462f121eef250563074e9b80358ea516c9e38f704f9e61",
+      "description_tokens": 19,
+      "manifest_index": 172,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0584_00",
+      "scene_object_count": 20,
+      "stratum": "class_unique",
+      "target_class": "whiteboard",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 35,
+      "description_sha256": "850a2273d57eb84f9bf3f7a3ace7d76089d6a338a30378a969eb06b1b7635de6",
+      "description_tokens": 21,
+      "manifest_index": 173,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0640_00",
+      "scene_object_count": 25,
+      "stratum": "class_unique",
+      "target_class": "kitchencounter",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "cd24d707b44c792fa63bcaba75ea6392522c24a2693996cb0cf9cdee8e9777ab",
+      "description_tokens": 18,
+      "manifest_index": 174,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0650_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "sink",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "6ae7537f9c98dc9a917d5f6201c38298cdddc11661f925dadd5f51f1d5dba438",
+      "description_tokens": 15,
+      "manifest_index": 175,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0035_00",
+      "scene_object_count": 8,
+      "stratum": "class_unique",
+      "target_class": "door",
+      "target_object_id": "16"
+    },
+    {
+      "ann_id": 48,
+      "description_sha256": "904fa4da63a582f9786ccb94ef8c64ee5371fa48b2d888fa9052d08d896dc98a",
+      "description_tokens": 18,
+      "manifest_index": 176,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0200_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "bed",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 42,
+      "description_sha256": "a0311c07cd4eced204155bf62436a99d5de9c3e24ad862654b152518b5a4507a",
+      "description_tokens": 13,
+      "manifest_index": 177,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0265_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "sink",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 38,
+      "description_sha256": "9acef6f9864e2f3f68bc8da3c655df977e1d579f6890cd995732cad3ced03456",
+      "description_tokens": 12,
+      "manifest_index": 178,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0124_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "shower",
+      "target_object_id": "24"
+    },
+    {
+      "ann_id": 27,
+      "description_sha256": "2535d3a521fd2e0ef34f19a2f96514e90014a3860208f19391432d8a01c6e91b",
+      "description_tokens": 12,
+      "manifest_index": 179,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0129_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "statue",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "0b9ad67d532157b85aff419f43f31e239b1166086d446cf65217c039d491160a",
+      "description_tokens": 17,
+      "manifest_index": 180,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0516_00",
+      "scene_object_count": 21,
+      "stratum": "class_unique",
+      "target_class": "bin",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 15,
+      "description_sha256": "c2c621aee7cde9e8859051a19b68e3f76b86798b1965170859bbbcc4cdf85eee",
+      "description_tokens": 17,
+      "manifest_index": 181,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0654_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "shelf",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 35,
+      "description_sha256": "ead3936f9095537bf23f0e2050475f55a58a00a4548b8fab63f8b23287794a67",
+      "description_tokens": 12,
+      "manifest_index": 182,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0240_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "box",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 22,
+      "description_sha256": "871b35c4e632f6b1235a6daea9786975e3845ed437b2c9ee7a3f248af12f4967",
+      "description_tokens": 11,
+      "manifest_index": 183,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0197_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "watercooler",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 102,
+      "description_sha256": "89ce98b72c6fda2bee9c52a1f3e36fdd190fa429997c06c0d3f04852936e4a7d",
+      "description_tokens": 9,
+      "manifest_index": 184,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0465_00",
+      "scene_object_count": 24,
+      "stratum": "class_unique",
+      "target_class": "shelf",
+      "target_object_id": "10"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "eaec48492000f4002b358b4e7f8d43e47f06bc3ca57df62d83b0e70b00278f45",
+      "description_tokens": 29,
+      "manifest_index": 185,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0288_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "recyclingbin",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 5,
+      "description_sha256": "79ac5a84552f4f7a2228b0cfc40178ab7a690945bbe88fd41401cb828326c2e4",
+      "description_tokens": 19,
+      "manifest_index": 186,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0022_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "door",
+      "target_object_id": "33"
+    },
+    {
+      "ann_id": 133,
+      "description_sha256": "876dd163bcec450dde695d3168d9cb79a1e0072222adf9260640a327cd3738c9",
+      "description_tokens": 17,
+      "manifest_index": 187,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0469_00",
+      "scene_object_count": 29,
+      "stratum": "class_unique",
+      "target_class": "radiator",
+      "target_object_id": "32"
+    },
+    {
+      "ann_id": 30,
+      "description_sha256": "ce9e7c23e38bd04505a47ca8b6bf8be637b48f69f5b23dd7f56f4b73b29ae596",
+      "description_tokens": 16,
+      "manifest_index": 188,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0404_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "shelf",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 54,
+      "description_sha256": "aae12d1e66bbd2e6888d00730f9a30bfa410c0e9c0b32703ebbe54019e85ef73",
+      "description_tokens": 11,
+      "manifest_index": 189,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0691_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "table",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 21,
+      "description_sha256": "c157f4f8ea15f7ff24b8eed4555d0a9cc167457cf2be0c00953dd7be77987df9",
+      "description_tokens": 28,
+      "manifest_index": 190,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0205_00",
+      "scene_object_count": 6,
+      "stratum": "class_unique",
+      "target_class": "papercutter",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 28,
+      "description_sha256": "8018790018384090f68b55806573ab3fcda7023267bec9990a7724b3d5453195",
+      "description_tokens": 24,
+      "manifest_index": 191,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0206_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "keyboard",
+      "target_object_id": "26"
+    },
+    {
+      "ann_id": 60,
+      "description_sha256": "9e9bb23da53ed8b348a3de0560de33c1bb3fef5f94233668e824ca5ceccfaba8",
+      "description_tokens": 18,
+      "manifest_index": 192,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0429_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "shelf",
+      "target_object_id": "15"
+    },
+    {
+      "ann_id": 19,
+      "description_sha256": "d80270d3f5331f80760cf94663e228d32be7f8511aa243e1082e6e360e65b741",
+      "description_tokens": 20,
+      "manifest_index": 193,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0672_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "tvstand",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 21,
+      "description_sha256": "b6fee9c4a0911392d92c14384e04b77ccba1acf052f5fcd0b0e472b2ffa073fc",
+      "description_tokens": 22,
+      "manifest_index": 194,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0415_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "toiletpaper",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 53,
+      "description_sha256": "cf9777bbd14c9e398cc09afb1fa8f334080bc5c7000018413f9388c9eec793b8",
+      "description_tokens": 19,
+      "manifest_index": 195,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0555_00",
+      "scene_object_count": 21,
+      "stratum": "class_unique",
+      "target_class": "breakfastbar",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "3baae931ba7587c377e60420429494628d0faf339b899b14aa9c734fbc960404",
+      "description_tokens": 12,
+      "manifest_index": 196,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0014_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "toilet",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 9,
+      "description_sha256": "7b3f4beb1a4dcd17722c5823a946883624a609fc8e04db94c6bd237deb1b50f3",
+      "description_tokens": 19,
+      "manifest_index": 197,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0519_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "bathroomstalldoor",
+      "target_object_id": "1"
+    },
+    {
+      "ann_id": 15,
+      "description_sha256": "e7fc54029dabe64e5eaea6b581fdac9f67a742051ccf03c2d36bd75088f15519",
+      "description_tokens": 31,
+      "manifest_index": 198,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0136_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "papercutter",
+      "target_object_id": "33"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "03229708fde60e1765030abba05cd0bf04f9b902a39cba8d700b1649b98455bd",
+      "description_tokens": 13,
+      "manifest_index": 199,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0379_00",
+      "scene_object_count": 22,
+      "stratum": "class_unique",
+      "target_class": "table",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 49,
+      "description_sha256": "43cc811254f1712f12e12f610634e8e7e6582ba652e681980293bcfb8bee3506",
+      "description_tokens": 13,
+      "manifest_index": 200,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0407_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "cabinet",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 116,
+      "description_sha256": "1724d4603366c59c1438e7cd65858b82f76d62c3d882cac0b697b4dfd4713c97",
+      "description_tokens": 10,
+      "manifest_index": 201,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0331_00",
+      "scene_object_count": 25,
+      "stratum": "class_unique",
+      "target_class": "radiator",
+      "target_object_id": "23"
+    },
+    {
+      "ann_id": 74,
+      "description_sha256": "975f9b0cf222fa5d8ffcff28a9427cbdf9e4d981958d08671441ecf777d623f1",
+      "description_tokens": 18,
+      "manifest_index": 202,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0615_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "lamp",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 1,
+      "description_sha256": "2063422b04a37f9cc1f6c8b59539748f6674fc6ccf334c07f629a22e7668b51d",
+      "description_tokens": 20,
+      "manifest_index": 203,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0659_00",
+      "scene_object_count": 4,
+      "stratum": "class_unique",
+      "target_class": "towel",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 36,
+      "description_sha256": "2cf94d05d930f4fb456d8476b8ae276cd9eb012c1630b3bd553cde7497363cbf",
+      "description_tokens": 25,
+      "manifest_index": 204,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0504_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "bed",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 38,
+      "description_sha256": "230aecf92f16ab2c8515593fe20ece17bdeac39d624aa44548b9a4272891a881",
+      "description_tokens": 9,
+      "manifest_index": 205,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0539_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "towel",
+      "target_object_id": "24"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "d6c017cd7e0d121144cf40c023ec1f940896c72ecc904d6281a50ea40f443395",
+      "description_tokens": 19,
+      "manifest_index": 206,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0365_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "cabinet",
+      "target_object_id": "23"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "be884d584ce746fc970d140ca215d67c26c1baebabf165da1075d8ac9ed9af8e",
+      "description_tokens": 9,
+      "manifest_index": 207,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0350_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "bench",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "75c7d9df97dae27aea2b3be54479bebe3e5091297f75279bc86b69c9e51747d1",
+      "description_tokens": 20,
+      "manifest_index": 208,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0145_00",
+      "scene_object_count": 12,
+      "stratum": "class_unique",
+      "target_class": "couch",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 59,
+      "description_sha256": "ec7d8bb6d855f1c5c2d58f7b3319828f9fbf22a058b095e606bf8325da0f4262",
+      "description_tokens": 14,
+      "manifest_index": 209,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0209_00",
+      "scene_object_count": 18,
+      "stratum": "class_unique",
+      "target_class": "suitcase",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 16,
+      "description_sha256": "c5f39a3e714dc29e1d4adb4e95f5b3994f19099770ecc6291b43770715bc3e53",
+      "description_tokens": 13,
+      "manifest_index": 210,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0204_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "cabinet",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "bd65cdc3614247885c6858a5d9a053a53bb027f21c511e1a61d14888cc5e4fdd",
+      "description_tokens": 19,
+      "manifest_index": 211,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0214_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "toiletpaper",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 14,
+      "description_sha256": "d453187753fd3e76bd67adbeefed52e66d626cabdb2dbe0fe53475b700997e07",
+      "description_tokens": 12,
+      "manifest_index": 212,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0385_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "couch",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 24,
+      "description_sha256": "4767641ff8c9fde7bab2190f58312df5f1b3d55804895effbb5fde94fcdc284c",
+      "description_tokens": 19,
+      "manifest_index": 213,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0321_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "recyclingbin",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 2,
+      "description_sha256": "c6b603639de6d0fe86398630cff7ba84e139a745efd8cc6c548488fd23c23f67",
+      "description_tokens": 10,
+      "manifest_index": 214,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0557_00",
+      "scene_object_count": 12,
+      "stratum": "class_unique",
+      "target_class": "suitcase",
+      "target_object_id": "21"
+    },
+    {
+      "ann_id": 20,
+      "description_sha256": "1233ab200817a8dbdf5a6f3a03440b56840c2812009377a4b6cd515cf6352290",
+      "description_tokens": 13,
+      "manifest_index": 215,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0449_00",
+      "scene_object_count": 12,
+      "stratum": "class_unique",
+      "target_class": "showercurtain",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 15,
+      "description_sha256": "34517af3b44b2a6d6d1ab7ff0c864d9f6e21f70f73c1018517f2a8ceeef2ab2f",
+      "description_tokens": 22,
+      "manifest_index": 216,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0250_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "handtowel",
+      "target_object_id": "54"
+    },
+    {
+      "ann_id": 67,
+      "description_sha256": "766a60d5c06c80d8fc6c95895727f23cf7c622177b9aa928b5c2f0352913cac2",
+      "description_tokens": 39,
+      "manifest_index": 217,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0335_00",
+      "scene_object_count": 24,
+      "stratum": "class_unique",
+      "target_class": "stove",
+      "target_object_id": "19"
+    },
+    {
+      "ann_id": 55,
+      "description_sha256": "dcb4c9796e4e30705d6f376eb4bd1a33c3edecec90151f69146924fb4132fea3",
+      "description_tokens": 14,
+      "manifest_index": 218,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0309_00",
+      "scene_object_count": 22,
+      "stratum": "class_unique",
+      "target_class": "counter",
+      "target_object_id": "18"
+    },
+    {
+      "ann_id": 10,
+      "description_sha256": "a49bbbb6c656e0a0cb955440ca07c701af9bf269bc0fa1afad178c4b31ba1297",
+      "description_tokens": 33,
+      "manifest_index": 219,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0612_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "window",
+      "target_object_id": "28"
+    },
+    {
+      "ann_id": 50,
+      "description_sha256": "e4659233046bcf1fbe2bab8f36f7acfa36f5ba400919aaffd24d203f5c076f28",
+      "description_tokens": 10,
+      "manifest_index": 220,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0060_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "papercutter",
+      "target_object_id": "11"
+    },
+    {
+      "ann_id": 28,
+      "description_sha256": "91df8ad4f12f28e1802b1e7ae7c45485c0d2ad3c1785ecec0de604d83cdd79eb",
+      "description_tokens": 18,
+      "manifest_index": 221,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0577_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "pillow",
+      "target_object_id": "17"
+    },
+    {
+      "ann_id": 101,
+      "description_sha256": "e009298b512841d552027c73e96ece2f5bd297fb7a434ec211456b15256a9ba5",
+      "description_tokens": 13,
+      "manifest_index": 222,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0270_00",
+      "scene_object_count": 23,
+      "stratum": "class_unique",
+      "target_class": "picture",
+      "target_object_id": "42"
+    },
+    {
+      "ann_id": 7,
+      "description_sha256": "b7d6be5cc81a2cc28ae66e66eb55f67de44731e517d69ee71333e397440e67d0",
+      "description_tokens": 16,
+      "manifest_index": 223,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0080_00",
+      "scene_object_count": 8,
+      "stratum": "class_unique",
+      "target_class": "trashcan",
+      "target_object_id": "24"
+    },
+    {
+      "ann_id": 89,
+      "description_sha256": "416ac7724d68399a4115a3cb5fcf84c38f14e6c919562d17aae6dbfab5039ef3",
+      "description_tokens": 15,
+      "manifest_index": 224,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0677_00",
+      "scene_object_count": 19,
+      "stratum": "class_unique",
+      "target_class": "sofachair",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 44,
+      "description_sha256": "101ebdd6f00c0f89ca089de4eb850d9596ccfa4182a624b061c15341ac779d09",
+      "description_tokens": 13,
+      "manifest_index": 225,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0089_00",
+      "scene_object_count": 11,
+      "stratum": "class_unique",
+      "target_class": "monitor",
+      "target_object_id": "8"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "38bc7443b5b4cc3ac0477d94d0d58c8146752ae764b230fade644adbfe68cad2",
+      "description_tokens": 24,
+      "manifest_index": 226,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0223_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "desk",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 41,
+      "description_sha256": "123580047cd006300d97af3c2422b67ffeea8356aedc4212745e03d17d1f1317",
+      "description_tokens": 13,
+      "manifest_index": 227,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0397_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "chair",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 69,
+      "description_sha256": "a656bb8ccc2edec7e635aa5c92e8f4bcf84b6d2051a7910d9935eeba9f0d99e6",
+      "description_tokens": 12,
+      "manifest_index": 228,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0486_00",
+      "scene_object_count": 16,
+      "stratum": "class_unique",
+      "target_class": "kitchencounter",
+      "target_object_id": "6"
+    },
+    {
+      "ann_id": 5,
+      "description_sha256": "584377e44f8d1919caf30fc4233d69edc8b5d58987f63e3fc5aeac39ed12001b",
+      "description_tokens": 18,
+      "manifest_index": 229,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0285_00",
+      "scene_object_count": 15,
+      "stratum": "class_unique",
+      "target_class": "cart",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 0,
+      "description_sha256": "00f3ca3f630a52ce8574fb0172085a47952ffbb85e76db22efa64b7cc40058d6",
+      "description_tokens": 20,
+      "manifest_index": 230,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0219_00",
+      "scene_object_count": 2,
+      "stratum": "class_unique",
+      "target_class": "pillow",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 36,
+      "description_sha256": "b3ebcb9c4e96a50c339a24db5810307216b0258c3449a1a8e3b3338b02ff79ca",
+      "description_tokens": 12,
+      "manifest_index": 231,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0083_00",
+      "scene_object_count": 8,
+      "stratum": "class_unique",
+      "target_class": "mirror",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 25,
+      "description_sha256": "8779f8cc4320747838105aa7566e4a3610efa6edd204af20225da5d5bfd5e48a",
+      "description_tokens": 23,
+      "manifest_index": 232,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0053_00",
+      "scene_object_count": 7,
+      "stratum": "class_unique",
+      "target_class": "endtable",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 23,
+      "description_sha256": "2175d31fdd90e2d44cac1aa6b66eb50bc4a6b06977de803c1c125945b83ce5de",
+      "description_tokens": 11,
+      "manifest_index": 233,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0517_00",
+      "scene_object_count": 36,
+      "stratum": "class_unique",
+      "target_class": "bag",
+      "target_object_id": "44"
+    },
+    {
+      "ann_id": 23,
+      "description_sha256": "e077ea8f8e9fc7c979895df9c6016c22157975ab1122755331bcb6efc21fe52e",
+      "description_tokens": 9,
+      "manifest_index": 234,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0620_00",
+      "scene_object_count": 9,
+      "stratum": "class_unique",
+      "target_class": "window",
+      "target_object_id": "13"
+    },
+    {
+      "ann_id": 55,
+      "description_sha256": "168a31dc8102fdc66cdb228297af192337b87583e8b51a2cdd94728f944dc55f",
+      "description_tokens": 12,
+      "manifest_index": 235,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0383_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "trashcan",
+      "target_object_id": "23"
+    },
+    {
+      "ann_id": 25,
+      "description_sha256": "40a9bde675f2081cd8487c9242879decd45971c666a810da6ea6734866f6a885",
+      "description_tokens": 12,
+      "manifest_index": 236,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0126_00",
+      "scene_object_count": 20,
+      "stratum": "class_unique",
+      "target_class": "keyboard",
+      "target_object_id": "14"
+    },
+    {
+      "ann_id": 14,
+      "description_sha256": "06b30058032eca9666c65f7ec7bcf3aad639bbe5a7410cf3f9e84e1dec5703cc",
+      "description_tokens": 11,
+      "manifest_index": 237,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0135_00",
+      "scene_object_count": 8,
+      "stratum": "class_unique",
+      "target_class": "toilet",
+      "target_object_id": "5"
+    },
+    {
+      "ann_id": 122,
+      "description_sha256": "2084f81d3322d1b9fa15e64e4fc13f96a8916f29432d01db859d6a18b170eb71",
+      "description_tokens": 17,
+      "manifest_index": 238,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0582_00",
+      "scene_object_count": 27,
+      "stratum": "class_unique",
+      "target_class": "couch",
+      "target_object_id": "0"
+    },
+    {
+      "ann_id": 36,
+      "description_sha256": "4e0911376e2a83429a30fb32eb77266764bb92ff982bd32efd24d7a30fb9ff7a",
+      "description_tokens": 27,
+      "manifest_index": 239,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0261_00",
+      "scene_object_count": 19,
+      "stratum": "class_unique",
+      "target_class": "minifridge",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 92,
+      "description_sha256": "0d78dfd55a73e9b784fa9ad758c96849f49e839b9db5fcd31cee5dfef38df99a",
+      "description_tokens": 35,
+      "manifest_index": 240,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0336_00",
+      "scene_object_count": 25,
+      "stratum": "class_unique",
+      "target_class": "monitor",
+      "target_object_id": "20"
+    },
+    {
+      "ann_id": 24,
+      "description_sha256": "2a9b42f320477203a07ade655cf163f36e66467501c40c45e72458b48d8139c3",
+      "description_tokens": 21,
+      "manifest_index": 241,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0464_00",
+      "scene_object_count": 25,
+      "stratum": "class_unique",
+      "target_class": "picture",
+      "target_object_id": "40"
+    },
+    {
+      "ann_id": 55,
+      "description_sha256": "f0a1125228cf9af596cd2251d155bc7ccba4d793fa91f3f83363cab9bf571b6b",
+      "description_tokens": 14,
+      "manifest_index": 242,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0137_00",
+      "scene_object_count": 24,
+      "stratum": "class_unique",
+      "target_class": "tvstand",
+      "target_object_id": "9"
+    },
+    {
+      "ann_id": 95,
+      "description_sha256": "cdc353ddcc1f5a8aa367760069223a73050c9fee6956c768c4b84d7358b5655b",
+      "description_tokens": 14,
+      "manifest_index": 243,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0233_00",
+      "scene_object_count": 23,
+      "stratum": "class_unique",
+      "target_class": "fan",
+      "target_object_id": "39"
+    },
+    {
+      "ann_id": 20,
+      "description_sha256": "36dee4d2c07f4b8fcf55e9aeb19967d3dfdc500ad4bd4a7e1eaf0fcbcadf7ec2",
+      "description_tokens": 20,
+      "manifest_index": 244,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0220_00",
+      "scene_object_count": 23,
+      "stratum": "class_unique",
+      "target_class": "kitchencabinets",
+      "target_object_id": "12"
+    },
+    {
+      "ann_id": 20,
+      "description_sha256": "b8bdb71fd07afff589eb1c893622d923ce7f3d3ecc4b3b07564a9e642f5a565a",
+      "description_tokens": 30,
+      "manifest_index": 245,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0049_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "coffeetable",
+      "target_object_id": "2"
+    },
+    {
+      "ann_id": 136,
+      "description_sha256": "882de6b81c80427ae716304b39b46ab794a9ba9e6e1cdb89712d2c9b39f23b18",
+      "description_tokens": 18,
+      "manifest_index": 246,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0603_00",
+      "scene_object_count": 36,
+      "stratum": "class_unique",
+      "target_class": "computertower",
+      "target_object_id": "45"
+    },
+    {
+      "ann_id": 56,
+      "description_sha256": "639ee0c667d1a253c8d8b4411a4101a52362edddf683a5df868224bbb3038c9a",
+      "description_tokens": 22,
+      "manifest_index": 247,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0076_00",
+      "scene_object_count": 17,
+      "stratum": "class_unique",
+      "target_class": "papertoweldispenser",
+      "target_object_id": "23"
+    },
+    {
+      "ann_id": 20,
+      "description_sha256": "d03237b5c65f4d9ac8d94eea6d8ed63a23c8d1c9d0221e14319a504136a182d9",
+      "description_tokens": 26,
+      "manifest_index": 248,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0097_00",
+      "scene_object_count": 13,
+      "stratum": "class_unique",
+      "target_class": "cabinet",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 87,
+      "description_sha256": "aa3ee1a92a417a2442e07c7130941bc625b027647736971681c7d89e496ae0c1",
+      "description_tokens": 19,
+      "manifest_index": 249,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0451_00",
+      "scene_object_count": 24,
+      "stratum": "class_unique",
+      "target_class": "radiator",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 26,
+      "description_sha256": "613fc75282e9927264a884d2c085ee88bb81913cf529a1485677d3e98fbbae91",
+      "description_tokens": 11,
+      "manifest_index": 250,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0167_00",
+      "scene_object_count": 19,
+      "stratum": "class_unique",
+      "target_class": "tv",
+      "target_object_id": "22"
+    },
+    {
+      "ann_id": 16,
+      "description_sha256": "7cb9d27ac3de854874173c22cfda0e8537fcb3d22172c610fd73c6c53f6e0c7b",
+      "description_tokens": 27,
+      "manifest_index": 251,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0384_00",
+      "scene_object_count": 10,
+      "stratum": "class_unique",
+      "target_class": "plasticcontainer",
+      "target_object_id": "45"
+    },
+    {
+      "ann_id": 4,
+      "description_sha256": "fe483d725a6ed6dcd3b01f351c05268f174251633ef6b3a30684fa9817f02a71",
+      "description_tokens": 10,
+      "manifest_index": 252,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0596_00",
+      "scene_object_count": 3,
+      "stratum": "class_unique",
+      "target_class": "seat",
+      "target_object_id": "4"
+    },
+    {
+      "ann_id": 33,
+      "description_sha256": "194bf99b0554245ded0faead848249deafcc5dcc238d48e3498896a693e94f4c",
+      "description_tokens": 14,
+      "manifest_index": 253,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0085_00",
+      "scene_object_count": 17,
+      "stratum": "class_unique",
+      "target_class": "telephone",
+      "target_object_id": "7"
+    },
+    {
+      "ann_id": 16,
+      "description_sha256": "836749f8d82ac8ddf6c6037682335776556cac4ea0604e47dfba4b72fcb2118e",
+      "description_tokens": 20,
+      "manifest_index": 254,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0026_00",
+      "scene_object_count": 14,
+      "stratum": "class_unique",
+      "target_class": "bathroomcabinet",
+      "target_object_id": "3"
+    },
+    {
+      "ann_id": 18,
+      "description_sha256": "82f0d17e170db8891965877696338aa0eb508b8ce3396cf8ad5e6f8134f3afd9",
+      "description_tokens": 38,
+      "manifest_index": 255,
+      "same_class_peer_count": 0,
+      "same_class_peer_object_ids": [],
+      "scene_id": "scene0340_00",
+      "scene_object_count": 23,
+      "stratum": "class_unique",
+      "target_class": "laptop",
+      "target_object_id": "38"
+    }
+  ],
+  "schema_version": 1,
+  "selection": {
+    "expression_order": "SHA256(salt|scene_id|ann_id), then scene_id, then ann_id",
+    "expressions_per_stratum": 128,
+    "max_expressions_per_class_per_stratum": 4,
+    "max_expressions_per_scene_per_stratum": 1,
+    "outcome_independent": true,
+    "salt": "m95_identity_controls_v1",
+    "seed": 1999,
+    "strata": {
+      "ambiguous": "target has at least one same-class non-target object_id in the scene",
+      "class_unique": "target is the only object_id with that ScanRefer object_name in the scene"
+    }
+  },
+  "summary": {
+    "eligible_ambiguous": 21656,
+    "eligible_class_unique": 15009,
+    "selected_ambiguous": 128,
+    "selected_class_unique": 128,
+    "selected_classes": 85,
+    "selected_expressions": 256,
+    "selected_scenes": 220,
+    "source_expressions": 36665
+  }
+}

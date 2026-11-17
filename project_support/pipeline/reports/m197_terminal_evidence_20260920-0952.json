@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "project": "cluster_project",
+  "experiment_id": "M197-PIRS",
+  "observed_at": "2026-09-20T09:52:26+08:00",
+  "terminal_state": "stopped_unknown",
+  "server": "server-6",
+  "gpu": 7,
+  "process_confirmation": {
+    "expected_pid": 1134192,
+    "missing_observations": 3,
+    "deathwatch_threshold": 3,
+    "remaining_training_processes": 0
+  },
+  "last_log_progress": {
+    "remote_log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs_20260916_122540.log",
+    "remote_log_mtime_utc": "2026-09-20T01:33:12.003044459Z",
+    "epoch": 27,
+    "step": 3241,
+    "steps_per_epoch": 4686,
+    "completion_marker_found": false,
+    "traceback_found": false,
+    "oom_found": false
+  },
+  "metrics": {
+    "ledger_final_best_miou": 0.492,
+    "observed_preterminal_peak_miou": 0.4924,
+    "baseline_miou": 0.4894491136074066,
+    "champion_miou": 0.5024607181549072
+  },
+  "remote_checkpoints": [
+    {
+      "kind": "best",
+      "path": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs/20260916_042843/best.pth",
+      "mtime_utc": "2026-09-19T11:19:09.029822731Z",
+      "bytes": 936269892
+    },
+    {
+      "kind": "last",
+      "path": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs/20260916_042843/last.pth",
+      "mtime_utc": "2026-09-19T23:13:18.382844340Z",
+      "bytes": 936269892
+    }
+  ],
+  "allocation": {
+    "server-4": {
+      "allowed_gpus": [0, 1],
+      "max_tasks_per_gpu": 1,
+      "dispatch_enabled": true,
+      "ssh_port_22": "refused"
+    },
+    "server-6": {
+      "allowed_gpus": [7],
+      "dispatch_enabled": false
+    }
+  },
+  "disposition": {
+    "restart_on_server-6": "forbidden",
+    "checkpoint_preservation": "required",
+    "resume_on_server-4": "blocked until SSH, GPU occupancy, code root, conda environment, dataset paths, checkpoint transfer and path adaptation are verified",
+    "foreign_processes_touched": false
+  }
+}

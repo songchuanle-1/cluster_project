@@ -1,0 +1,11 @@
+--- original9b/bipartite_edges.py
++++ revision1/bipartite_edges.py
+@@ -123,7 +123,7 @@
+         mask = torch.zeros(coarse.shape[:2], dtype=torch.bool, device=coarse.device)
+         for b, plan in enumerate(plans):
+             ids = torch.tensor(plan['coarse_ids'], dtype=torch.long, device=coarse.device)
+-            mask[b] = mask[b].index_fill(0, ids, True)
++            mask[b] = mask[b].index_fill(0, ids, 1)
+         # No new unsupported bias token may participate in the down-going graph.
+         coarse_delta = coarse_delta.masked_fill(~mask.unsqueeze(-1), 0)
+         refined_coarse = coarse + coarse_delta  # The one original coarse cf skip.

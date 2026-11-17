@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "scope": "Capacity-only retry plus CPU-side frozen pipeline validation; no model forward, capture, training, queue mutation, or efficacy claim",
+  "timestamp": "2026-09-19T04:42:00+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T04:42:46+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_live_progress": {
+    "observed_at": "2026-09-19T04:42:46+08:00",
+    "source": "unique M197 log tail with carriage returns normalized",
+    "epoch": 20,
+    "total_epochs": 50,
+    "step": 2799,
+    "total_steps": 4686,
+    "best_miou": 0.486,
+    "best_validation_epoch": 19,
+    "no_improve": 0,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T04:42:46+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. The frozen registry, object-capture adapter, and native-expression producer are implemented, but native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T05:25:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "attempted_alternatives": [
+    "Waited until the recorded retry time before rechecking capacity.",
+    "Queried the live GPU7 process table and memory without touching any process.",
+    "Normalized and inspected the unique M197 log tail to verify native step progress.",
+    "Ran all 30 frozen producer, object-rank capture, and evaluator tests this tick.",
+    "Kept native capture unlaunched because the two-process cap remained closed."
+  ],
+  "native_capture_launched": false,
+  "cpu_validation": {
+    "status": "passed_this_tick",
+    "command": "python -m unittest test_referent_native_expression_producer_20260919 test_referent_object_rank_capture_20260919 test_referent_target_rank_evaluator_20260919",
+    "tests_passed": 30,
+    "tests_failed": 0,
+    "suites": [
+      {
+        "path": "scripts/test_referent_native_expression_producer_20260919.py",
+        "sha256": "ab7bced707570737594000a2f8748bff8103d1549f508e30a8a7dfca194ce73d"
+      },
+      {
+        "path": "scripts/test_referent_object_rank_capture_20260919.py",
+        "sha256": "e38d7623e67c49d01926ad2ac6d88bb78b99ddee858572e6017e6d7b6cdfe05b"
+      },
+      {
+        "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+        "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f"
+      }
+    ]
+  }
+}

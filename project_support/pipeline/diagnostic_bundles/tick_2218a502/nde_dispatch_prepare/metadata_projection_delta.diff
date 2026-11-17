@@ -1,0 +1,22 @@
+--- 801d/metadata_projection_delta.diff
++++ 2218/metadata_projection_delta.diff
+@@ -14,8 +14,8 @@
+ HERE = Path(__file__).resolve().parent
+ TICK = HERE.parent
+ DRAFT_EXECUTION_DISABLED = True
+-EXPECTED_OWNER = {'token': '801d029aa45243ee841454512bcf0b84', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-08T14:23:40.346565+00:00', 'deadline_at': '2026-11-08T15:23:40.346565+00:00', 'context_sha256': 'b9ef46219c253d45bcfeb260172550ea36ccff49567e7bb26b45b498b633ea69', 'pending_sha256': '80d5927f103adce942e5c0ca08f4a8fd8001c25cf087823650c205dca8ada131'}
+-TOKEN = '801d029aa45243ee841454512bcf0b84'
++EXPECTED_OWNER = {'token': '2218a50249ea45588e5138890a7f4160', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-08T15:32:25.884685+00:00', 'deadline_at': '2026-11-08T16:32:25.884685+00:00', 'context_sha256': 'b168aa4faa7cfc1d40895a3f2b99a3df67b31a4d635e91ba0f76653e5db5c1e8', 'pending_sha256': '562c3d37dc43a6c9dc205de189e87ee42d46c367cd63bb06f50a0784f858ddf3'}
++TOKEN = '2218a50249ea45588e5138890a7f4160'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ SOURCE = '0747f6acec1c61018ec99acf2efa5329c9b3523c'
+ RUNTIME = "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+@@ -120,7 +120,7 @@
+     import yaml
+     raw = yaml.safe_load((ROOT / "SERVERS.yaml").read_text(encoding="utf8"))["servers"]["server-4"]
+     assert raw["remote_code_root"] == RUNTIME and raw["conda_source"] == production["shim"]
+-    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/nde_path_prod_801d029a/conda_source.sh"
++    assert production["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/nde_path_prod_2218a502/conda_source.sh"
+     assert raw["allowed_gpus"] == [0] and raw["max_tasks_per_gpu"] == 1
+     assert raw["allow_external_overlay"] is True and raw["task_memory_mb"] == 20000
+     assert raw["expected_hostname"] == "dl04-MS-7E06"

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-09T00:06:27.703706+00:00",
+  "owner": {
+    "token": "8c4864e1a36e4f3883b3d301cfc39069",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T23:07:37.192344+00:00",
+    "deadline_at": "2026-11-09T00:07:37.192344+00:00",
+    "context_sha256": "1355b39f8a8e1e3014fc9a88c859829961fe5440fb90d5c44bead5b2ff6b0643",
+    "pending_sha256": "899db4c29a4d1a8412badfd2344695d0e357c1adfd050a2e78f3850c48a30ed2"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "passed": true,
+  "review_scope": "TERMINAL_ACTUAL_EVIDENCE_INTEGRITY_AND_FAILURE_CLASSIFICATION_ONLY_NOT_NATIVE_GATE_PASS",
+  "actual_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_8c4864e1/rvec_native_execution/run_smoke_candidate_actual.json",
+    "sha256": "8a4f651007a0f50f956f5bdbfd7f522a91aa4941afb12f1cc8f251c5a0de3ad0"
+  },
+  "FROZEN_sha256": "43058e2ab1e54c0b0b27a1eda9d76dfb8c129bd6f6a86138f1c9da18b250112d",
+  "reviewed_worker_sha256": "f02e5d137fabb5fedd22ee2ce81c001b3d54ce5e82ff99fad3c087a36c60585f",
+  "reviewed_runtime_sha256": "47bb858499659de5a997d049ace59adaae4bdf2e4013290fd34564e287b2895f",
+  "source_commit": "0f8cc0f978b38c24e159d3a2d37344f59cc9a0be",
+  "source_binding_sha256": "e67ced0684ec9ba764bb349b6e6f2971a9380e0c9624769b48ab6168cc84754e",
+  "request_intent_manifest_source_binding_hashes_independently_match": true,
+  "transport_certainty": "terminal",
+  "ssh_bootstrap_returncode": 0,
+  "actual_worker_returncode": 1,
+  "actual_worker_pid": 1296275,
+  "native_smoke_passed": false,
+  "execution_completed": false,
+  "failure_classification": "OPERATIONAL_ENVIRONMENT_IMPORT_FAILURE_IMPLEMENTATION_INCONCLUSIVE",
+  "observed_failure": {
+    "error_type": "ImportError",
+    "module": "pointnet2._ext",
+    "extension": "_ext.cpython-310-x86_64-linux-gnu.so",
+    "underlying_loader_error": "undefined symbol: _ZNK3c1010TensorImpl15incref_pyobjectEv",
+    "import_chain": "candidate hierarchy imports unchanged runtime pointnet2_utils; failure during setup candidate module import before model construction/common initialization/TRAIN",
+    "environment_ABI_incompatibility": "consistent with unresolved compiled-extension/PyTorch symbol; exact environmental cause not established"
+  },
+  "actual_counts": {
+    "optimizer_steps": 0,
+    "native_loss_forwards": 0,
+    "native_criterion_backwards": 0,
+    "native_predict_calls": 0,
+    "new_training": 0
+  },
+  "gate_status": {
+    "common_initialization": "UNMEASURED_NOT_REACHED",
+    "original_native_TRAIN2": "NOT_RUN",
+    "five_parameter_original_loss_gradients_and_updates": "NOT_RUN",
+    "graph_HCG_ILA_mask_observers": "NOT_RUN",
+    "resource_comparison": "NOT_RUN",
+    "scientific_admission": "NOT_GRANTED"
+  },
+  "failure_metadata": {
+    "status": "ACTUAL_FAILURE_CAPTURED",
+    "pid": 1296275,
+    "actual_frame_count": 9,
+    "frame_limit": 16,
+    "actual_worker_and_imported_source_hashes_captured": true
+  },
+  "actual_preflight": {
+    "observed_at": "2026-11-08T23:58:08.385817+00:00",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "free_memory_mib": 28013,
+    "minimum20000MiB_met": true,
+    "external_contexts": [
+      {
+        "pid": 1184577,
+        "used_memory_mib": "4492"
+      }
+    ],
+    "utilization_percent": 15,
+    "authorized_overlay": true,
+    "exclusive_measurement_claimed": false,
+    "before_lock_count": 0,
+    "before_lock_count_scope": "pre-acquisition observation returned by guarded acquire; not a post-acquisition or post-release measurement",
+    "postflight_locks_process_and_foreign_context_status": "PENDING_ROOT_READ_ONLY_OBSERVER"
+  },
+  "source_flag_interpretation": "native_model_and_yaml_unchanged=false is the initial completion flag left unset when setup import failed; it does not establish a source mutation. Actual captured worker/imported candidate source hashes match the reviewed packet.",
+  "mechanism_efficacy_or_scientific_negative_result": false,
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "scientific_admission": false,
+  "no_rerun_retry_repair_model_revision_or_alternative_environment_authorized_by_review": true,
+  "Torch_SSH_GPU_execution_by_reviewer": false,
+  "shared_state_source_index_queue_ledger_mutations_by_reviewer": false,
+  "material_concerns": []
+}

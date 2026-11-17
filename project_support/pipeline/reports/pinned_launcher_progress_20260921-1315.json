@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-21T13:18:20.036136+08:00",
+  "snapshot_generated_at": "2026-09-21T05:07:06.443580+00:00",
+  "resumed_due_ids": [
+    "referent-supervision-axis",
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/preidentity_handoff_progress_20260921-1215.json",
+      "sha256": "613498b03c2058e063a3361cd17b93caa2d00c987b1e449017a023fa45e25a21"
+    },
+    {
+      "path": "pipeline/decisions/20260921-131609_other.md",
+      "sha256": "2ebb75e44c7a022173e903f0db5d0b4a5b159b27d51ba1f523a766c90e9ca7cd"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "4d645fb5c39f5dbd9e1a9d7773a86f1267e2d6637c22f1cf96ed8317d8ab1f38"
+    },
+    {
+      "path": "SERVERS.yaml",
+      "sha256": "4df853316bde84adef2adaf1f7dad63b0be8c57af011297d8154f5588893085c"
+    },
+    {
+      "path": "scripts/pinned_diagnostic_imports_20260920.py",
+      "sha256": "bf264ad5a5b72ca0f483f2a576aca123835275433cd98e8372d552d0e91d7186"
+    },
+    {
+      "path": "scripts/preidentity_handoff_20260921.py",
+      "sha256": "5760ca38593fffb843d9a7fdeb87d2c26002cc9fedd6e9f44f663bf38dc8979b"
+    },
+    {
+      "path": "scripts/pinned_bootstrap_launcher_20260921.py",
+      "sha256": "4d6be3e71b0ab2832efb952d526a7e18a823038705673e967efd7fa5494f647a"
+    },
+    {
+      "path": "scripts/test_pinned_bootstrap_launcher_20260921.py",
+      "sha256": "7ef2fc628e3d3fcdf7290dd64a2b0f228e047372edfa87c4f98a85507b2c61d0"
+    },
+    {
+      "path": "scripts/bounded_collation_process_20260921.py",
+      "sha256": "99df935d9dd4c5d5b1e3e2842687b5c675ee78ac77e2b15db078e162ccfd6998"
+    },
+    {
+      "path": "scripts/persist_pinned_launcher_tick_20260921.py",
+      "sha256": "20e4f9182c84f828b0b0ac3525483f0b150d95007e61b66188ee792f02dfee08"
+    }
+  ],
+  "connectivity": {
+    "server": "server-4",
+    "attempts": 1,
+    "returncode": 255,
+    "command": "ssh -o BatchMode=yes -o ConnectTimeout=8 -o ConnectionAttempts=1 songcl@192.168.1.137 hostname",
+    "stderr": "ssh: connect to host 192.168.1.137 port 22: Connection refused",
+    "evidence_basis": "Observed exec_command this tick; no scripted retry",
+    "runtime_verified": false,
+    "gpu_occupancy_verified": false
+  },
+  "completed_work": [
+    "Added a fresh-bundle producer with an exact canonical source manifest.",
+    "The isolated child runs a hash-pinned launcher file as __main__ under -I -B -S.",
+    "Manifest, handoff, context, executable and driver entrypoint pins are rechecked.",
+    "The child loads PinnedDiagnosticImports from bytes, constructs PreIdentityHandoff and invokes a pinned driver.",
+    "Whole-child execution has wall-time and combined-output bounds with no retry.",
+    "One write-once JSON result is parent-verified for hash, contract and positive claims.",
+    "Thirteen focused launcher tests and the bounded regression passed synthetically.",
+    "No model/native execution, queue mutation, checkpoint transfer, resources or admission."
+  ],
+  "validation": {
+    "tests_run": 684,
+    "tests_passed": 680,
+    "new_tests": 13,
+    "modules": [
+      "test_pinned_bootstrap_launcher_20260921",
+      "test_preidentity_handoff_20260921",
+      "test_preidentity_torch_imports_20260921",
+      "test_import_phase_audit_20260921",
+      "test_logical_gpu_identity_20260921",
+      "test_gpu_inventory_20260921",
+      "test_gpu_runtime_validation_20260921",
+      "test_model_execution_inventory_20260921",
+      "test_relocated_geometry_driver_20260921",
+      "test_relocated_saved_replay_20260921",
+      "test_prepared_collation_execution_20260921",
+      "test_saved_dependency_inventory_20260921",
+      "test_prepare_collation_handoff_20260921",
+      "test_bounded_collation_process_20260921",
+      "test_host_collation_receipts_20260920",
+      "test_scratch_collation_launch_20260920",
+      "test_native_factory_bridge_20260920",
+      "test_relocated_native_factory_20260920",
+      "test_relocated_factory_core_20260920",
+      "test_same_child_collation_20260920",
+      "test_scratch_cpu_boundary_20260920",
+      "test_cpu_diagnostic_bootstrap_20260920",
+      "test_pinned_diagnostic_imports_20260920",
+      "test_native_saved_batch_validation_20260920",
+      "test_relocated_saved_collation_20260920",
+      "test_saved_physical_location_20260920",
+      "test_saved_replay_migration_20260920",
+      "test_recover_cpu_progress_20260920",
+      "test_probe_next_saved_replay_20260920",
+      "test_probe_next_physical_20260920",
+      "test_native_saved_geometry_driver_20260920",
+      "test_saved_geometry_replay_20260920",
+      "test_probe_saved_collation_20260920",
+      "test_probe_physical_items_20260920",
+      "test_stage_registry_diagnostic_20260920",
+      "test_remote_registry_inventory_20260920",
+      "test_registry_runner_cli_20260920",
+      "test_native_registry_geometry_runner_20260920",
+      "test_referent_registry_binding_20260919",
+      "test_referent_geometry_registry_20260919",
+      "test_geometry_torch_static_20260919",
+      "test_native_geometry_runtime_20260919",
+      "test_referent_geometry_capture_20260919",
+      "test_referent_geometry_control_20260919",
+      "test_referent_native_expression_producer_20260919",
+      "test_referent_object_rank_capture_20260919",
+      "test_referent_target_rank_evaluator_20260919",
+      "test_native_endpoint_capture_20260916",
+      "test_frozen_capture_contract_20260916"
+    ],
+    "skipped": [
+      {
+        "test": "test_descendant_pipe_is_closed_after_leader_exit (test_bounded_collation_process_20260921.ProcessTests.test_descendant_pipe_is_closed_after_leader_exit)",
+        "reason": "Linux process-group cleanup needs Linux"
+      },
+      {
+        "test": "test_symlink_source_rejected (test_pinned_diagnostic_imports_20260920.PinnedImportsTest.test_symlink_source_rejected)",
+        "reason": "Symlink creation unavailable: [WinError 1314] \u5ba2\u6237\u7aef\u6ca1\u6709\u6240\u9700\u7684\u7279\u6743\u3002: 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpkrkws94j\\\\real.py' -> 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpkrkws94j\\\\bundle\\\\_synthetic_pinned_producer.py'"
+      },
+      {
+        "test": "test_exception_removes_real_module_hook (test_geometry_torch_static_20260919.SyntheticTorchTest.test_exception_removes_real_module_hook)",
+        "reason": "Torch not installed locally"
+      },
+      {
+        "test": "test_strided_float_labels_real_module_hooks (test_geometry_torch_static_20260919.SyntheticTorchTest.test_strided_float_labels_real_module_hooks)",
+        "reason": "Torch not installed locally"
+      }
+    ],
+    "output": "..............................................................................................................................................................................................................s..................................................................................................................................................................s..................................................................................................................................................................................................ss......................................................................................................................\n----------------------------------------------------------------------\nRan 684 tests in 37.952s\n\nOK (skipped=4)\n",
+    "native_data_loaded": false
+  },
+  "physical_bindings_verified": 9,
+  "physical_bindings_missing": 22,
+  "registry_denominator": 31,
+  "model_geometry_captures": 0,
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "native_backward_verified": false,
+  "resources_verified": false,
+  "admission": false,
+  "training_launch": false,
+  "checkpoint_transfer": false,
+  "queue_changed": false,
+  "queue_sha256": "1fb0bf22702581457204f05b95b1bf30c9e682534d605c34aaeb8ae7ff5a8746",
+  "blocker": "One scheduled server-4 SSH retry refused port22. No remote command ran; runtime, GPU occupancy, installed dependency bytes/ABI, assets and Linux isolation remain unverified. Synthetic launcher tests are not native validation.",
+  "next_action": "Continue the existing diagnostic, no new review or variant. Implement and test a pinned production driver plus external execution validator that supplies real held-slot and execution checks to PreIdentityHandoff, using synthetic children until the authorized host is verified. On that host, inventory installed dependency/bootstrap roots and extension shared-library provenance without asserting ABI from hashes. Retry server-4 once at/after 2026-09-21T14:07:00+08:00. With verified host, held GPU0/1 slot, dependency/assets/isolation and3 artifacts/6 data hashes, collate saved3040/3893 and exact replay, then export 3921/4278 retaining31. Never regenerate recovered groups or run legacy server-6/GPU7 CLI.",
+  "retry_after": "2026-09-21T14:07:00+08:00",
+  "pending_questions_24h": [],
+  "limitations": [
+    "The launcher proves pinned source bytes and isolated startup, not sandbox enforcement.",
+    "Executable hashing and spawning remain separate operations; fd-based exec is not implemented.",
+    "Installed dependency and extension shared-library provenance/ABI remain unverified.",
+    "Only a synthetic driver is tested; the production held-slot and execution validator is absent.",
+    "Whole-child CPU and private scratch limits are not supplied by bounded_process.",
+    "No actual GPU identity, native forward/backward/resources/efficacy or admission evidence.",
+    "Shared M95 implementation does not recover M197."
+  ]
+}

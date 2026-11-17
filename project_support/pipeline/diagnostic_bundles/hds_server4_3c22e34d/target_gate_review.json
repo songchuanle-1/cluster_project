@@ -1,0 +1,90 @@
+{
+  "recorded_at": "2026-10-16T09:34:35.083809+00:00",
+  "candidate_id": "m95-hierarchical-mask-feature-path-audit",
+  "same_experiment": "M202-HDS",
+  "same_code_commit": "1400e0c3e580410e40e9b19634d321f0dc5e01b1",
+  "same_revision_count": 2,
+  "matched_train_memory": [
+    {
+      "pair": [
+        0,
+        60
+      ],
+      "baseline_peak": 6396853760,
+      "candidate_peak": 4492709888,
+      "increase": -0.29766881398895695
+    },
+    {
+      "pair": [
+        101,
+        124
+      ],
+      "baseline_peak": 4131358720,
+      "candidate_peak": 2821511680,
+      "increase": -0.31704994138102827
+    }
+  ],
+  "matched_inference_memory_increase": 0.0,
+  "matched_inference": [
+    {
+      "batch_size": 1,
+      "warmup": 20,
+      "repeat": 100,
+      "scan_ids": [
+        "scene0011_00"
+      ],
+      "ann_ids": [
+        0
+      ],
+      "median_ms": 34.44672599994192,
+      "p90_ms": 35.663311300140776,
+      "peak_allocated_bytes": 946197504,
+      "peak_reserved_bytes": 6826229760
+    },
+    {
+      "batch_size": 1,
+      "warmup": 20,
+      "repeat": 100,
+      "scan_ids": [
+        "scene0011_00"
+      ],
+      "ann_ids": [
+        0
+      ],
+      "median_ms": 34.41518349995931,
+      "p90_ms": 35.50757769990014,
+      "peak_allocated_bytes": 946197504,
+      "peak_reserved_bytes": 4808769536
+    }
+  ],
+  "native_loss_backward_two_pairs_each": true,
+  "point_path_tensors_each": 24,
+  "transport": {
+    "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/transport_result.json",
+    "sha256": "9ce020d3ab62e03a32e98274b4872c783ff908480d8e3d03aaf36fd9b2f22e8e"
+  },
+  "source_oom": {
+    "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/server3_failure.json",
+    "sha256": "d0e8f7869e984fac4f4d6f2c3e5b8add81e1181ebbcc09e04fedfd993abc1198"
+  },
+  "target_assets": {
+    "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/pretrain_integrity.json",
+    "sha256": "a9d1ccdf8b0dd97325b271b9965cf18f58141331f6a5135c9559fe0e2bca46a3"
+  },
+  "native_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/baseline_result.json",
+      "sha256": "dc54b0a0d4356aee98810f856b8fe156f535b40267c54a6ce549ca6c3f626e82"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/candidate_result.json",
+      "sha256": "75086ee3deafe822dc6d041063c3cef8dd6b10772a340e95377a48e4a255ccd6"
+    }
+  ],
+  "limitations": "Small frozen cohort only. Whole-training memory/benefit unknown. Source full-training OOM preserved, no source optimizer state or exact failed batch replay. FLOPs original source-bound exception unchanged; no new model or scientific claim.",
+  "target_prefix_arithmetic_equivalence": {
+    "path": "pipeline/diagnostic_bundles/hds_server4_3c22e34d/prefix_result.json",
+    "sha256": "69fd61bd98a747dd0db02f77fdcf74a8d1e6eb85d76faea85822ada2fd271ded"
+  },
+  "prefix_original_tolerance": 1e-06
+}

@@ -1,0 +1,12 @@
+{
+  "actions": [
+    "本轮 01:08:48 快照为 design；承接稳定 m95-sample-context-support 诊断，运行冻结全 TRAIN 的图谱短语角色与物理目标联结测试。102 条物理非目标 curtain 表达中 36 条含图谱 target-node 短语跨度，其中 7 条的物理目标不是 curtain（3 个场景）；65 条仅有 other Object 角色。此为源数据一致性反证，不能外推为模型收益。",
+    "预先冻结的 11 条原生捕获暴露表达中，10 条短语为 other Object，1 条未绑定；原生 M95 outcome 和同输入 placebo 尚缺。预注册、脚本、结果与哈希已纳入同一候选，且记录 route_change 决策；未改模型、队列或门槛。",
+    "01:10 实时探测 server-6 GPU7：显存 13199 MiB、利用率 98%，外部 PID 709354 占用约 13184 MiB；无独占空卡，不启动原生捕获。当前仅可在 GPU 空闲及独占租约后续做冻结 31 表达/2 场景原生捕获；本轮科学准入 0，训练启动 0。",
+    "01:18 试行 finish 返回 CLOSURE_INCOMPLETE: Capacity gap remains with executable research: m95-sample-context-support；真实截止 02:08:48 尚远，不能声称 tick_deadline_near。无另一个可证伪且有信息增益的非 GPU 测试或合法提前结案理由，本轮将明确 abort；本轮执行状态 INCOMPLETE。"
+  ],
+  "decisions": [
+    "图谱 target-node 角色不能独自绑定物理 curtain 参照目标，纯多词词典修补不是 Phase 1 独立结构机制；m95-sample-context-support 继续 diagnosis，六项准入门槛未通过。",
+    "原生捕获存在真实外部 GPU 占用；不将双槽逻辑容量误作独占卡空闲，不动外部任务。若 postflight 因活动诊断与容量缺口拒绝提前结案，则诚实 abort 并保留证据待下一轮。"
+  ]
+}

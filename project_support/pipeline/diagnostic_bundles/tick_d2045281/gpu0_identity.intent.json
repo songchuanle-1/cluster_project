@@ -1,0 +1,15 @@
+{
+  "owner": {
+    "token": "d2045281654540099e808219dde8ec19",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T17:07:55.365991+00:00",
+    "deadline_at": "2026-11-09T18:07:55.365991+00:00",
+    "context_sha256": "1ba527509b4304ad2e886d05570d1bb38406ed36c3020e0d3dd4c2e381943e7c",
+    "pending_sha256": "7e630cdf6d8101453dc4a85dc6b90da5d190dba37c6f2c0ee934d03f8f036795"
+  },
+  "recorded_at": "2026-11-09T17:13:07.279817+00:00",
+  "body_sha256": "4a780117a3f71ec5341c1f5a80ce9aed7eb3a71344c14f8e1bd805c1c4973957",
+  "body": "import json,os,socket,subprocess,time\nfrom datetime import datetime,timezone\nfrom pathlib import Path\npayload=json.load(__import__(\"sys\").stdin);owner=payload[\"owner\"]\nassert owner[\"token\"]==\"d2045281654540099e808219dde8ec19\" and datetime.now(timezone.utc)<datetime.fromisoformat(owner[\"deadline_at\"])\nassert socket.gethostname()==\"dl04-MS-7E06\" and os.getuid()==os.geteuid()==1001\nout=os.memfd_create(\"gpu0_identity\",os.MFD_CLOEXEC);err=os.memfd_create(\"gpu0_identity_err\",os.MFD_CLOEXEC)\np=subprocess.Popen([\"/usr/bin/nvidia-smi\",\"-i\",\"0\",\"--query-gpu=index,uuid,memory.free\",\"--format=csv,noheader,nounits\"],stdin=subprocess.DEVNULL,stdout=out,stderr=err)\nstart=(Path(\"/proc\")/str(p.pid)/\"stat\").read_text().rsplit(\")\",1)[1].split()[19];stop=time.monotonic()+5\nwhile p.poll() is None and time.monotonic()<stop:time.sleep(.02)\nrc=p.poll();raw=os.pread(out,1024,0).decode(\"utf-8\",\"replace\")\nr={\"owner\":owner,\"observed_at\":datetime.now(timezone.utc).isoformat(),\"hostname\":socket.gethostname(),\"uid\":os.getuid(),\"pid\":p.pid,\"start_ticks\":start,\"certainty\":\"terminal\" if rc is not None else \"uncertain\",\"returncode\":rc,\"stdout\":raw,\"stderr\":os.pread(err,1024,0).decode(\"utf-8\",\"replace\"),\"physical_device_requested\":0,\"CUDA_context_or_training_started\":False,\"signals_sent\":False,\"GPU_resource_gate_or_budget_pass_claimed\":False}\nif rc==0:\n fields=[x.strip() for x in raw.strip().split(\",\")];assert len(fields)==3 and fields[0]==\"0\" and fields[1]==\"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\";r.update(uuid=fields[1],free_memory_mib=int(fields[2]),identity_matched=True)\nprint(json.dumps(r))\n",
+  "kind": "CURRENT_READONLY_GPU0_IDENTITY_FOR_CPU_BINDING",
+  "no_replay": true
+}

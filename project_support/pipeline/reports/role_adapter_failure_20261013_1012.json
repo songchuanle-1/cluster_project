@@ -1,0 +1,14 @@
+{
+  "tick_token": "b8cafe0430134d2aab09fb6f207794a0",
+  "recorded_at_local": "2026-10-13T10:18:50.9651880+08:00",
+  "cpu_smoke_exit": 1,
+  "failing_assertion": "assert delta[precedence] == 0 if case != precedence else delta[precedence] > 0",
+  "source_evidence": {
+    "original_loss_sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "observation": "The previous AST control restores tmask[positive_map.any(1)] after the final EOS inds-1 assignment. Unmatched queries make both EOS columns positive, so the edit also changes the original EOS weight0.1 to1.0."
+  },
+  "evidence": [
+    {"path": "scripts/role_gradient_native_20261013_1012_v1_failed.py", "sha256": "4caf93ea0e0ceeac7fd7ea4ef5faea12c565a56c2b7be536daf187e829ef2d04"}
+  ],
+  "scope": "Adapter/control-attribution failure, not a rejection of the13actual MAIN/secondary overlaps. Prior precedence gradient/loss effects are confounded until separated from EOS. No original model change."
+}

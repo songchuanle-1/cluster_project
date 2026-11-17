@@ -1,0 +1,66 @@
+{
+  "recorded_at": "2026-11-07T03:30:54.822945+00:00",
+  "owner_provenance_only": {
+    "token": "f74f3603193a426097a8dc288fd05fde",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T03:08:55.256706+00:00",
+    "deadline_at": "2026-11-07T04:08:55.256706+00:00",
+    "context_sha256": "936753f928fb1a7c6400844ae2157b5379e3df7c2b4c510b6ddc8ecec3b361d0",
+    "pending_sha256": "94021c1be1944131acb86d0901f32b91ab8a844a7783af73062946ebf3b966c4"
+  },
+  "disposition": "CONFIRMED_PRE_EXECUTION_RESOURCE_REFUSAL_NO_BINDING_OR_STAGE",
+  "prepare_capture": {
+    "path": "pipeline/diagnostic_bundles/tick_f74f3603/nsd_prepare_capture.json",
+    "sha256": "3cce02b96d3a4686aa20866a129ca89f0f4be09b66ade0f25c3b1a83dbe22422"
+  },
+  "prepare_stderr": {
+    "path": "pipeline/diagnostic_bundles/tick_f74f3603/nsd_prepare_stderr.txt",
+    "sha256": "a28cbcb99337973fc0f245c1faaa25f84af112b0533ca7f3ab00ed4a84e2ae2f"
+  },
+  "root_prepare_intent_retained": {
+    "path": "pipeline/diagnostic_bundles/tick_f74f3603/nsd_root_prepare_intent.json",
+    "sha256": "c3f44df453f4410f6a39a59527f3540f75f3249859fcbe0f1b7604a01d050e3e"
+  },
+  "fresh_original_adapter_probe": {
+    "path": "pipeline/diagnostic_bundles/tick_f74f3603/nsd_probe_after_refusal_capture.json",
+    "sha256": "6fcbc08da8ff9ac52a72c6c9d280ce432349c1cb792ee539cb6723119db25c9b"
+  },
+  "probe_observed_at": "2026-11-07T03:29:27.825716+00:00",
+  "actual_free_mib": 524,
+  "original_budget_mib": 20000,
+  "external_contexts_preserved": [
+    {
+      "pid": 2841028,
+      "used_memory_mib": "31976"
+    }
+  ],
+  "original_three_locks": {
+    "training": "available",
+    "diagnostic": "available",
+    "exclusive": "available"
+  },
+  "no_local_execution_directory": true,
+  "no_stage_or_run_intent": true,
+  "remote_readonly_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c 'from pathlib import Path;import socket,json;assert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"';p=Path('\"'\"'/data/songcl/Project/Cluster_project/pipeline/nsd_f74f3603_gpu0'\"'\"');print(json.dumps({'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'stage'\"'\"':str(p),'\"'\"'stage_exists'\"'\"':p.exists(),'\"'\"'read_only'\"'\"':True}))'"
+  ],
+  "remote_observation": {
+    "hostname": "dl04-MS-7E06",
+    "stage": "/data/songcl/Project/Cluster_project/pipeline/nsd_f74f3603_gpu0",
+    "stage_exists": false,
+    "read_only": true
+  },
+  "unknown_launch": false,
+  "native_or_GPU_diagnostic_executed": false,
+  "blind_replay_performed": false,
+  "intent_removed_or_rewritten": false,
+  "next_action": "Wait actual free>=20000 and fresh reviewed currentowner attempt; preserve this refused root intent and never replay it blindly."
+}

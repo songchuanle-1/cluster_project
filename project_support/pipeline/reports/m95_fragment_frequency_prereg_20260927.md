@@ -1,0 +1,3 @@
+# Fragmentation versus query-support frequency
+
+Stable ID `m95-sample-context-support`. On SHA-bound frozen TRAIN reports, compare the four no-adequate-mask rows with strictly positive all-query extra target recall to the other 12 limited rows. Join by manifest index, scene and annotation. Report target-minus-same-category query-support frequency and false-positive burden of the union, without selecting another threshold. This tests whether fragmented rows have distinct frequency weakness or merely an unusably broad union. Target and semantic identity are retrospective labels only. No trainable mechanism or admission follows.

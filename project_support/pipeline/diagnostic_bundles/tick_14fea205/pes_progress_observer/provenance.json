@@ -1,0 +1,43 @@
+{
+  "origin": {
+    "path": "pipeline/diagnostic_bundles/tick_14fea205/dce_progress_observer/observe_dce.py",
+    "sha256": "cba0e2ee8d4a680239904ae4bcbe321b39ee8f6f56168bbf0e6f804d1beda229"
+  },
+  "native_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare/preparation.json",
+    "sha256": "f2fc8cc9f6c090aaf3db532571239ce1e69dba73f199078644512473ef77cdff"
+  },
+  "literal_metadata_changes": [
+    [
+      "Future exact original DCE process/log/source readback",
+      "Future exact original PES process/log/source readback"
+    ],
+    [
+      "COMMIT='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391'",
+      "COMMIT='9c42fdc4e9168acec18980d782ee9c163e043bb7'"
+    ],
+    [
+      "DEFAULT_DISABLED_NO_OBSERVATION",
+      "DEFAULT_NO_OPERATION"
+    ],
+    [
+      "pipeline/experiments/M220-DCE.json",
+      "pipeline/experiments/M221-PES.json"
+    ],
+    [
+      "pipeline/diagnostic_bundles/tick_01d9102a/dce_native_prepare/preparation.json",
+      "pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare/preparation.json"
+    ],
+    [
+      "dce_training_progress_observation.json",
+      "pes_training_progress_observation.json"
+    ]
+  ],
+  "one_nonmetadata_contract_change": "Add strict log-size and lexicographic native TRAIN(epoch,step) increase after the original two3s samples and stable process identity. The old DCE observer returned samples without asserting growth; root requested a formal native-growth proof. No model/scientific gate or extra query added.",
+  "exact_diff": "--- DCE/origin\n+++ PES/observe_pes.py\n@@ -1,4 +1,4 @@\n-\"\"\"Future exact original DCE process/log/source readback; no signal or GPU computation.\"\"\"\n+\"\"\"Future exact original PES process/log/source readback; no signal or GPU computation.\"\"\"\n from pathlib import Path\n from datetime import datetime,timezone\n import argparse,hashlib,json,shlex,subprocess,sys\n@@ -7,13 +7,13 @@\n HERE=Path(__file__).resolve().parent\n REMOTE_ROOT='/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'\n PID=None;EXPECTED_LOG=None;EXPECTED_START_TICKS=None\n-COMMIT='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391'\n+COMMIT='9c42fdc4e9168acec18980d782ee9c163e043bb7'\n def main():\n  ap=argparse.ArgumentParser();ap.add_argument('--execute-root',action='store_true');ap.add_argument('--pid',type=int,default=PID);ap.add_argument('--log',default=EXPECTED_LOG);ap.add_argument('--start-ticks',default=EXPECTED_START_TICKS);args=ap.parse_args()\n- if not args.execute_root:print('DEFAULT_DISABLED_NO_OBSERVATION');return\n+ if not args.execute_root:print('DEFAULT_NO_OPERATION');return\n  assert type(args.pid) is int and args.pid>0 and isinstance(args.log,str) and args.log.startswith('/data/songcl/Project/Cluster_project/') and isinstance(args.start_ticks,str) and args.start_ticks.isdigit(),'Real canonical original PID/log/start bindings required; None refuses before transport.'\n- guard();exp=json.loads((ROOT/'pipeline/experiments/M220-DCE.json').read_text('utf8'));assert exp['pid']==args.pid and exp['code_commit']==COMMIT and exp['status']=='running' and exp['log']==args.log\n- original=json.loads((ROOT/'pipeline/diagnostic_bundles/tick_01d9102a/dce_native_prepare/preparation.json').read_text('utf8'));assert original['code_commit']==COMMIT and len(original['source_files'])==9\n+ guard();exp=json.loads((ROOT/'pipeline/experiments/M221-PES.json').read_text('utf8'));assert exp['pid']==args.pid and exp['code_commit']==COMMIT and exp['status']=='running' and exp['log']==args.log\n+ original=json.loads((ROOT/'pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare/preparation.json').read_text('utf8'));assert original['code_commit']==COMMIT and len(original['source_files'])==9\n  payload={'pid':args.pid,'start_ticks':args.start_ticks,'root':REMOTE_ROOT,'commit':COMMIT,'log':exp['log'],'config':exp['config'],'name':Path(exp['config']).stem,'hashes':original['source_files']}\n  script='''import socket,os,json,subprocess,hashlib,time,re\n from pathlib import Path\n@@ -42,6 +42,7 @@\n  assert not any(e in txt for e in ['Traceback','CUDA out of memory','RuntimeError'])\n  return {'observed_at':datetime.now(timezone.utc).isoformat(),'log_size':size,'tail_sha256':hashlib.sha256(data).hexdigest(),'last_native_step':steps[-1] if steps else None,'max_native_step':max(steps) if steps else None,'tail_exception_seen':False}\n a=sample();time.sleep(3);b=sample();after=identity();assert before==after\n+assert b['log_size']>a['log_size'] and a['max_native_step'] is not None and b['max_native_step'] is not None and tuple(b['max_native_step'])>tuple(a['max_native_step']), 'Original native TRAIN step did not strictly grow in the two actual samples'\n fd=[]\n for f in (proc/'fd').iterdir():\n  try:\n@@ -65,7 +66,7 @@\n   if not values:best=None;missed=None\n   record['precise_native_validation']={'values':values,'best':best,'no_improve':missed,'scope':'Exact live original logger mIoU lines only; no checkpoint read, current training incomplete.'}\n  guard()\n- with (HERE/'dce_training_progress_observation.json').open('x',encoding='utf8') as f:json.dump(record,f,ensure_ascii=False,indent=2);f.write('\\n')\n+ with (HERE/'pes_training_progress_observation.json').open('x',encoding='utf8') as f:json.dump(record,f,ensure_ascii=False,indent=2);f.write('\\n')\n  assert run.returncode==0,record['stderr']\n- print(json.dumps({'samples':record['observation']['samples'],'precise_native_validation':record['precise_native_validation'],'source_runtime_original_preserved':True,'sha256':sha(HERE/'dce_training_progress_observation.json')},ensure_ascii=False))\n+ print(json.dumps({'samples':record['observation']['samples'],'precise_native_validation':record['precise_native_validation'],'source_runtime_original_preserved':True,'sha256':sha(HERE/'pes_training_progress_observation.json')},ensure_ascii=False))\n if __name__=='__main__':main()\n",
+  "body_equivalence_scope": "Identical source after the listed metadata substitutions plus one required growth assertion; original commands/query count/strictSSH/source9/logger/three-second sampling unchanged.",
+  "expected_candidate_id": "hierarchy-palindromic-euler-state-composition",
+  "expected_code_commit": "9c42fdc4e9168acec18980d782ee9c163e043bb7",
+  "PID_log_startticks": "Required future actual root CLI inputs; no prefilled launch identity",
+  "native_or_training_success": "NOT_OBSERVED"
+}

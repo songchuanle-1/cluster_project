@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T10:12:20.267023+00:00",
+  "status": "CTS_FROZEN_SOURCE_PROTOCOL_TO_NATIVE_OBSERVER_MAPPING_ONLY_NOT_IMPLEMENTATION_OR_NATIVE_PASS",
+  "candidate_id": "hierarchy-parent-cyclic-triadic-state-composition",
+  "experiment_id": "M214-CTS",
+  "source_commit": null,
+  "future_version_parent": null,
+  "prepared_under_parent_provenance": {
+    "token": "4694ba96c2da476291160b2883ce3c7a",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-25T10:05:49.042137+00:00",
+    "deadline_at": "2026-10-25T11:05:49.042137+00:00",
+    "context_sha256": "ee404a521b1005dea78ab19662a0679085f49088aa39ef9287a09676ab8339c9",
+    "pending_sha256": "279e20c59a6c7e7c31716ef8fe6337e25ff265350e7ac6e01d040f1cfa28538c"
+  },
+  "preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/new_candidate_prepare/preparation.json",
+    "sha256": "bfab01a31a0fc7a0d679156d5e0e6fcfa987e56e5f3bb1bdf6bded9e2208f76e"
+  },
+  "native_protocol": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/new_candidate_prepare/native_protocol.md",
+    "sha256": "70363d43bdac998d346cf06c817389267cb69682242430dca8819dd29b0fefdc"
+  },
+  "reference_BFC_worker": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/bfc_native_prepare/worker.py",
+    "sha256": "8839251920577921493b0b663df123c330b850b08779c9841d1d98bbe26e813e"
+  },
+  "reference_BFC_runtime": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/bfc_native_prepare/native_runtime.py",
+    "sha256": "13203cf2aa39fd91738296523f41327806e850e192dd419551f6e06148dd03aa"
+  },
+  "actual_author_CTS_native_implementation_review": "PENDING_AUTHOR_FREEZE_AND_ROOT_REQUEST; WIP source is not reviewed or signed by this mapping",
+  "material_concerns": [],
+  "minimum_API_and_identity_mapping": {
+    "module": "middle_triad.ParentCyclicTriadicStateComposition; CTF.self.middle_triad.mix and .activation",
+    "arguments": "Four original positional values: features[B,middle_slots,C], detached original positions list, original ids2 parents list, original true supported mask list.",
+    "identity": "M214-CTS / _cts / source preparationbfab. Original YAML a18f and original M95 baseline remain unchanged. Actual candidate commit and parent are null/deferred; never relabel11a or48fc as CTS version.",
+    "common_initialization_exclusions": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.middle_triad."
+    ],
+    "common_scope": "Retain original middle LayerNorm. Record actual common named-parameter names/count/hash after original native pretrain and before loader, then compare both actual targets. Full buffers/RNG/common state equality is not inferred."
+  },
+  "topology_and_actual_call_mapping": {
+    "production_metadata": "Capture the original build_triadic_plan return once without modifying it. Each row is(parent,offset,own_originalID,positive_ID_or_None,negative_ID_or_None). Original support is bincount(ids1[ids0],minlength=ids2.numel())>0; original center lexxyz+ID order and true prefix/padding must match frozen geometry.",
+    "calls_per_native_forward": "For each batch item, one shared mix/GELU call per nonempty global round merged across independent parent groups; then one additional merged singleton call if any. Not one call per parent or per receiver. Original builder calls equal actual feature batch dimension.",
+    "same_old_stage": "Before any writeback, actual mix input[rows,3C] must match three columns own/positive/negative gathered from the same old observer working snapshot. Receiver own IDs are unique within a round; donor IDs may be shared across different receiver rows.",
+    "deduplicated_sources": "Within each receiver, real source IDs are distinct in fixed own,+,- priority. A None source is a private zero work field. It must never index realID0 or repeat another donor. Distinctness is by original ID, not numerical inequality/nonzero feature values.",
+    "actual_original_output": "Original Linear output and original GELU output[rows,C] must be captured by hooks, once each. Rebuild the observer working reference using only detached original GELU outputs and one synchronous functional own-ID scatter. Do not call Linear/GELU again or add an auxiliary forward/backward.",
+    "carry": "Parent groups with fewer rounds, singleton IDs and any active ID outside the current receiver set retain their prior stage until their own operation. Output inverse-scatter only true active original IDs; unsupported and padding delta0. Verify exact references and original bank shape.",
+    "n1_n0": "Singleton uses original shared map/GELU[x,0,0] once after rounds. n0 invokes none. Zero/padding/singleton/alias paths remain coverage observations, not mandatory resampling goals."
+  },
+  "actual_coverage_and_gradient_contract": {
+    "core_per_original_TRAIN_batch": [
+      "At least one actually consumed receiver row with three distinct real source IDs",
+      "At least one multiround supported parent group",
+      "An actual consumed round r>=1, with original mix/GELU/writeback observations"
+    ],
+    "coverage_independence": "The three-real-source row and later r>=1 round may be different rounds/groups. For example n6 d1 has three sources while d3 is a legal negative-slot alias. Do not require a later round also have three distinct IDs.",
+    "removed_BFC_only_gates": [
+      "No nonpower-of-two requirement",
+      "No disjoint pair/two-half output requirement",
+      "No four-quadrant matrix requirement",
+      "No same-call simultaneous nonzero-gradient requirement",
+      "No complement/self-exclusive/conservation/invertibility claim"
+    ],
+    "required_parameter_blocks": [
+      {
+        "name": "own_input",
+        "slice": "mix.weight[:, :C]"
+      },
+      {
+        "name": "positive_input",
+        "slice": "mix.weight[:, C:2*C]"
+      },
+      {
+        "name": "negative_input",
+        "slice": "mix.weight[:, 2*C:3*C]"
+      }
+    ],
+    "each_optimizer_step": "All three actual CxC column blocks need finite nonzero original-native-loss gradients and different actual pre/post optimizer slice fingerprints. Full W/module change or weight decay alone is insufficient. Record original native clipped/optimizer flow unchanged.",
+    "zero_legality": "Bias gradient and individual call/row/output gradient values may be zero if their actual records are finite. Core coverage means actual invocation/consumption, not a new per-call nonzero threshold. Only the three aggregate W input blocks are the required new-weight gradient/update gates.",
+    "missing_coverage": "INCONCLUSIVE on the original fixed TRAIN inputs, not whole-mechanism rejection; no new sample/seed/precision/readout/threshold. Classify empty/constant requires_gradFalse output before trying register_hook, and avoid masking absent coverage as a generic observer autograd failure.",
+    "dynamic_inventory": "Candidate old middle FFN has0 parameters, new mix196864 at C256; FFN0/2 each525568. No registered geometry buffers. Record actual full model/tensor counts; do not invent a paired total from source inference."
+  },
+  "native_original_path_and_controls": {
+    "setup": "Preserve actual native YAML resolver _cts.network.Network, original seed1999/backbone pretrain and no full trained M95 checkpoint. Only approved private work_dir/dist default path adaptation. Actual original TRAIN loader batch_size2/workers4/persistent/drop_last stays native.",
+    "two_batches": "Exactly two original native train.train batches, two finite losses, one original criterion backward and optimizer step each, actual step completion/remaining FFN changes and all observed gradients finite; no auxiliary autograd.grad/backward or sample replacement.",
+    "call_counts": "Across the two native forwards, candidate FFN0,2 four calls; champion FFN0,1,2 six. Two CTS observation records vs champion0. Two raw-bank records/HCG readbacks/inst-to-mask path records and four original CSORT scale-pair calls; final source/ID/childmap hashes remain unchanged.",
+    "point_path": "Original raw-cf skip + actual CTS delta must be the exact original middle HCG input; original fine/coarse FFNs, raw CSORT inputs, composed-ID HCG point message and single inst_feats update reach post-ILA/final mask native loss.",
+    "control_pairing": "Full actual two-batch fingerprints/scan IDs/annotation IDs, seed/pretrain/data/loader and common initialized named parameters must match both targets. Different full parameter sets and cross-target intermediate digests are not new equality gates.",
+    "failure_scope": "Observer errors or missing local gradient/update evidence cannot be silently ignored or turned into native PASS. Restore all wrappers/hooks in finally, preserve truthful partial result/error and let root classify implementation/inconclusive outcomes without claiming scientific rejection."
+  },
+  "resource_function_unchanged_contract": {
+    "reference_function": "worker.py resources",
+    "reference_whole_AST_sha256": "28185afffac5b63f5d71ac9cdb1d1481b73e1aceace1a07ae78944499ed552e0",
+    "requirement": "Copy the entire function AST unchanged from worker883925. Resource mode installs no CTS smoke observer, no extra model replay/probe and no candidate-only counting handler.",
+    "protocol": "Original handler hashes/full unsupported dictionary; bs1/lang_num_max1/warmup20/repeat100;100 actual finite timings, median/P90, allocated/reserved, actual parameter/FLOPs and matched input/init/data across targets. Original counted<=10G and existing+15% conditional retention only; no new latency gate.",
+    "native_predict_calls": "Original resource function executes121 predict calls and0 optimizer/loss backwards; record actual counts, not defaults.",
+    "limitations": "Observer/snapshot/topology smoke peak is not pure TRAIN. Unsupported CPU/Python/index/synchronization work, pure TRAIN peak and efficacy remain UNKNOWN unless actually measured. A source linear bound is not resource PASS."
+  },
+  "disabled_runtime_and_version_mapping": {
+    "early_refusal": "While source version/parent are unknown, retain DRAFT_EXECUTION_DISABLED=True and missing actual commit/parent. Own explicit refusal must precede fcntl, manifest access, NVML, Torch/model import and CUDA. Null fields must not satisfy equality guards and self-authorize.",
+    "version": "The frozen sourcebfab base_reference11a is deliberately not the future parent. Bind a real future source commit/parent/nine blobs/source proof in a separately reviewed version-bound package; do not inherit BFC48fc or BFC parent11a as CTS facts.",
+    "identity_safety": "Update exact CTS CID/M214/name/config/helper and future stage consistently; leave all execution token/deadline/context/pending/selected-GPU/runtime-HEAD fields null in the disabled template. Historical preparation owner/source references are not an active grant or lease.",
+    "runtime_guards": "Retain exact fresh current owner/context/pending/original deadline, pinned hostname, assets/source/version hashes, selected UUID/authorized whitelist and two idle observations around three selected-device flocks before Torch. Release only handles actually acquired; no query/use of a different protected card.",
+    "logical_cuda": "After future selected physical0or1 UUID visibility, the worker still uses logical CUDA0. Do not change .cuda()/per_process_memory_fraction(...,0) to physical device indices.",
+    "reference_generic_guard_AST_sha256": {
+      "sha": "ac417e583c84442c580cda546e5da431d9614e9a9e4fb32ebc730a2f9587970a",
+      "verify": "1acaa5544722c594807b3288ab5411e18a8adae3080432ae103aa6cb66adc400",
+      "observe": "c2c120f13acaa66cc12176eaaa0857b803c1bdf3cd1b9c48f93667d21d2d7d06",
+      "acquire": "c750c86e55b5acb27fb73a20b1126669143b3ddbc1bb7c08fdb985b9c9177120",
+      "release": "58b97f1a3f17266f10cd13654fedfa0909a01f47994322283a19cd5145e69b57",
+      "fingerprint": "fb94a3f9d4aa5abeeec6c944185bc59f6b2a69aa1d127e42c046aaa30dd1e2ae",
+      "save": "4a038512ca241bc0acc8d6b7848e34fe3d06a3d40f33c319409fc091805a022f"
+    },
+    "parent_specific_note": "BFC verify_source_version hardcodes its actual parent11a; CTS parent must remain unbound/deferred until real version proof rather than blindly copying that assertion as a CTS fact."
+  },
+  "review_boundaries": [
+    "This is a mapping from unchanged frozen source/protocol and existing BFC runtime/worker; author CTS WIP/final code has not been independently audited by this report.",
+    "No topology suite/literature/old hold review was repeated. Prior actual CTS stdlib topology report remains separate; no Torch/autograd/FP32/native/resource/accuracy or hardware availability was tested.",
+    "No source/model/old frozen package/public ledger/queue/receipt/Git/SSH/GPU mutation or operation occurred. Only this new private review JSON is written."
+  ],
+  "future_native_implementation_review": "PENDING_AUTHOR_FREEZE_AND_ROOT_REQUEST",
+  "native_resources_transport_Git_or_tests": "NOT_RUN",
+  "standard_PASS_receipt_queue_written": false
+}

@@ -1,0 +1,532 @@
+                                                 3DWG: 3D Weakly Supervised Visual Grounding via Category and
+                                                                 Instance-Level Alignment
+                                                 Xiaoqi Li1 , Jiaming Liu1 , Nuowei Han1 , Liang Heng1 , Yandong Guo2 , Hao Dong1 , Yang Liu3∗
+
+
+                                           Abstract— The 3D weakly-supervised visual grounding task                  are inherently sparse and often lack sufficient semantic in-
+                                        aims to localize oriented 3D boxes in point clouds based on                  formation. This limitation is particularly pronounced in fine-
+                                        natural language descriptions without requiring annotations to               grained indoor environments, where minimal semantic cues
+                                        guide model learning. This setting presents two primary chal-
+                                        lenges: category-level ambiguity and instance-level complexity.              make it difficult to distinguish between similar categories.
+arXiv:2505.01809v1 [cs.CV] 3 May 2025
+
+
+
+
+                                        Category-level ambiguity arises from representing objects of                 For instance, differentiating an “end table” from a “table”
+                                        fine-grained categories in a highly sparse point cloud format,               is challenging due to their highly similar appearances and
+                                        making category distinction challenging. Instance-level com-                 shapes. Regarding instance-level complexity, as depicted in
+                                        plexity stems from multiple instances of the same category                   Fig. 1(c), 3D indoor scenes often contain multiple instances
+                                        coexisting in a scene, leading to distractions during grounding.
+                                        To address these challenges, we propose a novel weakly-                      of the same category with nearly identical appearances. For
+                                        supervised grounding approach that explicitly differentiates                 example, a scene may include three identical toilet paper
+                                        between categories and instances. In the category-level branch,              rolls, making it difficult to precisely distinguish and identify
+                                        we utilize extensive category knowledge from a pre-trained ex-               each individual instance.
+                                        ternal detector to align object proposal features with sentence-                To address these challenges, we propose a unified frame-
+                                        level category features, thereby enhancing category awareness.
+                                        In the instance-level branch, we utilize spatial relationship                work that tackles weakly supervised grounding at both the
+                                        descriptions from language queries to refine object proposal                 category and instance levels. In the category-level branch,
+                                        features, ensuring clear differentiation among objects. These                our goal is to enhance the model’s ability to distinguish
+                                        designs enable our model to accurately identify target-category              categories, ensuring that the selected objects belong to the
+                                        objects while distinguishing instances within the same category.             intended target category. To achieve this, we first leverage
+                                        Compared to previous methods, our approach achieves state-of-
+                                        the-art performance on three widely used benchmarks: Nr3D,                   category knowledge from a powerful pre-trained model to
+                                        Sr3D, and ScanRef.                                                           guide the alignment of object proposal features with the
+                                                                                                                     target category described in the sentence, ensuring precise
+                                                               I. INTRODUCTION                                       category-level matching. Furthermore, to mitigate category
+                                                                                                                     ambiguity caused by sparse point clouds and complex indoor
+                                           The 3D visual grounding task aims to localize oriented 3D                 environments, we introduce an explicit learning mechanism
+                                        boxes in a 3D scene based on natural language descriptions                   to differentiate easily confused categories. Specifically, we
+                                        [1], [2], [3], [4], [5], [6], [7], [8], [9], [10]. This task has             replace the target category phrase in the language query
+                                        significant application potential in autonomous agents [11],                 with similar but distinct categories, encouraging the model
+                                        [12], [13], [14] and embodied AI [15], [16], [17], [18],                     to bring object feature representations closer to positive lan-
+                                        [19], [20], [21] and has achieved remarkable progress in                     guage queries while pushing them away from negative ones.
+                                        recent years. However, the fully-supervised setting requires                 In instance-level branch, we aim to tackle the challenge
+                                        extensive manual annotations, leading to high labor costs and                of distinguishing multiple instances of the same category
+                                        limiting scalability and practical deployment in real-world                  by leveraging their unique 3D spatial relationships, thereby
+                                        applications. As a result, weakly supervised grounding has                   enhancing the model’s ability to differentiate instances. First,
+                                        gained increasing attention [22]. In this setting, only the                  we align the features of all objects and phrases, then refine
+                                        point cloud scene and its corresponding sentence descriptions                object selection by identifying the object with the highest
+                                        are available during training, with no additional annotations                similarity score to the corresponding noun phrase in the
+                                        provided.                                                                    query. Next, we classify the spatial relationship of the se-
+                                           The primary challenges of 3D weakly supervised ground-                    lected object based on the spatial descriptions provided in the
+                                        ing stem from its limitations at both the category and instance              query. By incorporating spatial relationship reasoning, our
+                                        levels. We begin with category-level ambiguity. As illus-                    approach effectively differentiates instances within the same
+                                        trated in Fig.1(a), 3D indoor scenes contain a diverse range of              category, enabling precise localization and identification of
+                                        objects spanning multiple categories[23], [24], such as “arm-                the queried object.
+                                        chair,” making accurate category identification challenging,                    During the training phase, our framework simultaneously
+                                        especially when visually similar categories, such as “chair,”                learns to align cross-modal feature representations at both the
+                                        coexist. Furthermore, as shown in Fig. 1(b), 3D point clouds                 category and instance levels, without annotation supervision.
+                                                                                                                     In the inference phase, it selects the instance based on the
+                                          1 School of CS, Peking University; 2 AI2Robotic; 3 Wangxuan Institute of   similarity score and confidence score by matching visual
+                                        Computer Technology, Peking University; ∗ corresponding author               and language feature. To evaluate our method, we conduct
+   (a) “find the armchair that is next to the table,                                              (c) “Choose the toilet paper on the wall,
+                                         Similarity score
+                                                                  (b) “end table” v.s. “table”
+   which is also facing the window.”                        Sum
+                                                                                                  closest to the sinks.”
+Fig. 1: Challenges in 3D weakly visual grounding. (a) and (b) show the category ambiguity. (c) demonstrates instance
+complexity. The green box and red boxes denote target instance and distracting instances respectively.
+
+extensive experiments on three widely used benchmarks, score. Next, it refines the initial selection to determine the
+                                                   “coffee table”v.s. “table”                 “Choose the toilet paper on the
+i.e., Nr3D, Sr3D [24], and ScanRef [23]. Our approach final object from among these k candidates by evaluating
+                                                                                                 wall, closest to the sinks.”
+outperforms existing weakly supervised grounding methods, each object’s similarity with a concealed language query.
+demonstrating superior effectiveness in 3D visual grounding. The concealed language query masks noun phrases and
+                                                                 adjectives, intending to promote the model’s comprehension
+                   II. RELATED WORK                              of the query.
+A. 3D Supervised Visual Grounding                                   However, the initial phase encounters significant chal-
+   3D visual grounding aims to identify the specific instance    lenges    in filtering out objects belonging to the target category.
+referred to in a given query within a 3D scene, repre-           Specifically,     matching numerous sparse point cloud objects
+sented as RGB-XYZ point clouds. Two pioneering works,            from    fine-grained      categories with the target category phrase
+ReferIt3D [24] and ScanRef [23], introduce benchmark             is  highly     challenging.      In contrast, our approach extracts
+datasets and baseline methods for 3D visual grounding. Both      target   category    knowledge      from a powerful pre-trained model
+studies select 3D scans from the ScanNet [25] dataset and        and   leverages    it  to  guide   the  matching process. This ensures
+enrich them with language query pairs and corresponding          a  reliable    alignment      between      object proposal features and
+annotations. Furthermore, an increasing number of stud-          the  sentence’s     target   category,   enhancing   category awareness.
+ies [3], [2], [26], [27], [28], [29], [30], [31], [32], [33],    Furthermore,       DCFVG         aligns    the  features   of the selected
+[34], [35], [36], [37], [38], [39], [40], [41] have improved     object     candidates     with    the  language     query,  where critical
+3D visual grounding performance by introducing two-stage         noun     phrases     and    adjectives    are   concealed    to promote a
+grounding frameworks. Specifically, SAT [1] leverages 2D         deeper     understanding       of  the  query.    However,    this approach
+information to enhance 3D grounding. More recently, 3D-          has  a  key   limitation:    the  initial  selection of  object   candidates
+SPS [42] proposes a single-stage grounding method that           may    already    contain     errors   and   fail to align  with   the noun
+selects key points and progressively refines the object distinc- phrase    in the  query,    leading   to  error  accumulation    in instance
+                       3
+tion. Additionally, D -LQ [36] models intrinsic geometric        differentiation.      In   contrast,   our   method    aligns   each  object
+features and explicitly generates fine-grained object queries    and   phrase    individually    and   incorporates    spatial  relationships
+for 3D visual grounding.                                         from the language description to distinguish the correspond-
+   However, 3D scene captures large context space of nu- ing object, enabling the model to accurately differentiate
+merous objects, which are each annotated in the form of between potential instances.
+three dimension box. These fully supervised methods require                                         III. METHOD
+laborious manual annotation of 3D box annotations, target
+box coordinate, and target category, thus limiting their scal-                A. Model Architecture
+ability and practicability. Therefore, in this paper, we aim                     In the weakly-supervised setting, given a 3D point cloud
+to propose a novel framework for weakly supervised 3D                         scene S of N points , the goal is to locate target object that
+grounding by aligning cross-modality feature representation                   is described in the language query Q. There are no bounding
+in both category and instance levels.                                         box annotations but only scene and language query pairs in
+                                                                              the training stage.
+B. 3D Weakly Supervised Visual Grounding                                         Visual encoder. As shown in Fig. 2(i), given a 3D point
+   The task of 3D weakly visual grounding is to figure out                    cloud scene S with N points, where each point has 3D
+specific instances only given the scene and language query                    coordinates and F -dimensional auxiliary features (e.g., RGB,
+pair. In a prior study DCFVG [22], an approach is devised to                  normal vectors), we use a pre-trained detector to generate ob-
+tackle the challenge of 3D weakly-supervised grounding, in-                   ject candidate proposals. We then retain the top m proposals
+volving a two-step procedure. First, it compares the similarity               that exceed a predefined confidence threshold, which contrain
+between the features of objects and the features of the target                proposals of target category and other categories. Next, a
+category and selects k candidates with highest similarity                     visual encoder extracts proposal embeddings fpo ∈ Rm×D ,
+                                       Visual                                                                                              a. Category-level
+
+
+
+
+                                                 Visual Feature
+                                      Encoder                       Proposal embedding                                                         Matching
+                                                                     of target category       b. NEG Category
+                                                                                                 Recognition            Category-level
+
+
+                                                                    Proposal embedding
+                                                                     of other categories
+                                      Fushion
+
+                                                                                                d. Instance Rel-                             c. Instance-
+
+
+
+
+                                                 Language Feature
+                                                                     Negative sentence          ation Matching
+         “This nightstand is                                            embedding                                                          level Matching
+         closest to the desk."                                                                    ''nightstand''
+                                                                                                                        Instance-level
+        “This cabinet is closest       Text                           Paired sentence
+                                      Encoder                           embedding
+        to the desk." (NEG)                                                                         ''closest''
+                     (NEG)
+                                                                    Phrase embedding                 ''desk''
+                             (i) Model Architecture                                                               (ii) Feature Alignment
+
+Fig. 2: Illustration of our overall framework. After obtaining features of both modalities through encoder and fusion
+modules, we adopt category-level and instance-level branched to realize category and instance identification. Both branches
+contribute jointly in inference under decision logic.
+where D is the embedding dimension. Text encoder. Given                                    categories. We observe that the target category phrase is
+a query Q with up to n words, we first convert words                                       most commonly found in the subject token of the language
+into tokens and then use a pre-trained BERT model [43]                                     query. To extract this phrase, we use Spacy [45] and Scene
+to generate token embeddings. The [CLS] token captures                                     Graph Parser [44] to analyze the language query and identify
+sentence-level category knowledge. During training, we fine-                               the target category phrase pd . As illustrated in Fig. 1c,
+tune the BERT text encoder. Fusion module. We use a                                        the word “nightstand” is identified as the extracted target
+stack of transformer layers to fuse embeddings from both                                   category. Among all the category likelihoods in Ps , we
+modalities. The fused outputs include Proposal embedding                                   retain only the likelihood corresponding to the target category
+                                                                                                                                              ′
+Fpo ∈ Rm×D and Paired sentence embedding Fse ∈ R1×D ,                                      as a supervision signal. We denote this as Sse        ∈ Rm×1 ,
+which encodes the category semantics of the language query.                                which represents the probability of each proposal belonging
+For phrase embeddings, we first extract all noun phrases                                   to the target category pd . Additionally, we compute the
+and their attributes using Scene Graph Parser [44]. From the                               similarity scores between the sentence embedding Fse and
+language query, we extract up to n′ noun phrases and obtain                                the proposal embeddings Fpo using the cosine similarity
+                              ′
+phrase embedding Fphr ∈ Rn ×D .                                                            function. The sentence embedding Fse extracted from the
+                                                                                           [CLS] token, encodes the target category features from the
+B. Feature Alignment                                                                       language query. Finally, we use the category likelihood Sse′
+   As shown in Fig. 2(ii), we introduce strategies to align the                            as a supervision signal to guide the similarity score Sse in
+extracted features at both the category and instance levels.                               cross-modality learning, optimized under the loss function
+   1) Category-level Branch: Indoor 3D scenes contain var-                                 Lse . This ensures that the target category representations
+ious fine-grained categories that are sparsely represented and                             from both modalities (language and vision) are pulled closer,
+can be easily confused, making it challenging to accurately                                allowing the grounding model to be target category aware
+distinguish. To address this issue, in the category-level                                  and improving its ability to correctly identify objects of the
+branch, our goal is to enable the model distinguish different                              intended category.
+categories and become aware of the target category, ensuring                                  b. Negative Category Recognition. Sparse point cloud
+to ground on object of correct category.                                                   object is of fine-grained category and usually lacks sufficient
+   a. Category-level Matching. In this module, we focus                                    semantic information, which will cause confusion in category
+on aligning the category-level semantic information of the                                 distinction. This motivates us to explicitly differentiate cross-
+language query sentence with the category semantics of the                                 modality representation of easy-confused categories.
+object visual proposal embeddings. The goal is to ensure                                      Specifically, we generate k negative language queries by
+a reliable alignment and promote consistency between the                                   replacing the target category phrase with other easy-confused
+feature representation of the sentence query and the object                                noun phrases. We then calculate the cosine distance of target
+proposals that belong to target category, thus becoming target                             category phrase with other candidate noun phrases (all from
+category aware.                                                                            the dataset) and adopt the top-k similar phrases. Same as
+   Specifically, we map proposal embeddings Fpo ∈ Rm×D                                     the process of extracting positive sentence embedding, we
+to category likelihoods Ps ∈ Rm×c using a classifier with                                  obtain the negative sentence embedding Fse      N EG
+                                                                                                                                                  ∈ Rk×D ,
+an MLP structure, where c represents the total number of                                   which represents the negative category semantic knowledge
+of the query. We evaluate the similarity scores between
+both positive and negative sentence embeddings and proposal            h(Qi , Sj ) =
+                                                                                                         exp(S(Qi , Sj )/τ )
+                                                                                                            P                                 (3)
+embeddings by computing the cosine distance. Since direct                              exp(S(Qi , Sj )/τ ) + S ′ ∈S−S exp(S(Qi , Sj ′ )/τ )
+                                                                                                               j      j
+
+query-proposal supervision is unavailable, we instead mea-               d. Instance Relation Matching. Since 3D scene is of
+sure the similarity between the query and the scene, which            three-dimensional space, there are rich spatial relationships
+can be supervised by the input pair. For a given query, we            between objects. Besides two-dimensional spatial relation-
+sum the top three highest query-proposal similarity scores to         ships (such as left, right, up, down), there are also many
+represent the query’s compatibility with the scene. Thus, we          three-dimensional spatial relationships (such as front and
+obtain the compatibility scores of k negative queries and one         back). This phenomenon promotes us to adopt 3D spatial
+                                                (Q    ,S)
+positive query with the scene, denoted as SP Nneg         ∈ Rk        relations in order to enrich instance spatial contextual infor-
+        (Qpos ,S)
+and SP N          ∈ R1 , respectively. These scores are then          mation and realize instance identification.
+optimized using the InfoNCE loss [46], formulated as LP N ,              Specifically, to extract spatial relation description in lan-
+which encourages the object proposal representations to               guage query, we first build a relation library that consists
+be closer to positive sentence embeddings while pushing               of prevalent spatial relationships. We then judge whether
+them away from negative sentence embeddings. Through                  there is relation phrase in language query that belongs to
+training with our framework, the feature distribution of easily       the relation library and lies between two noun phrases. If so,
+confused categories after the visual encoder exhibits disen-          we will adopt it as the relation ground truth for these two
+tanglement, demonstrating the effectiveness of our approach           noun phrases. Taking the input of Fig. 2 as an example,
+in differentiating categories.                                        spatial relation “closest” is the relation ground truth for
+   2) Instance-level Branch: In the indoor 3D scene, it is the        “nightstand” and “desk”. After establishing the ground-truth,
+common case that multiple instances of the same category              we measure the similarity of two phrases embedding with all
+and same appearance lie in one scene simultaneously, requir-          proposal embeddings and extract the most relevant proposal
+                                                                                     i         j
+ing more efforts of differentiating in instance-level. Mean-          embedding Fpo     and Fpo   by calculating cosine distance. We
+                                                                                                    i         j
+while, we observe that instance can be specified from their           then fuse the features of Fpo    and Fpo   to predict the spatial
+contextual relation, especially in 3D scenario of abundant            relationship of this two objects. It is then supervised by
+spatial relation information. This phenomenon promotes us             spatial relationship ground truth under classification cross-
+to introduce the instance-level branch which compensates for          entropy loss Lrel. , enabling the differentiation of instances
+instance uncertainty by leveraging their spatial relation.            through spatial context reasoning.
+   c. Instance-level Matching. Its goal is to realize a               C. Training Objectives and Inference
+comprehensive instance-level alignment which can further
+                                                                         The two parallel category-level and instance-level
+facilitate specifying the target instance from distracting in-
+                                                                      branches are trained simultaneously and the overall loss L
+stances. We first compute the similarity score s(x,y) between
+                                                                      is: L = λ1 ∗ Lse. + λ2 ∗ LP N. + λ3 ∗ Lphr. + λ4 ∗ Lrel. , where
+n′ phrases and m proposals by calculating their cosine
+                                    ′                                 λ1 , λ2 , λ3 , and λ4 are hyper-parameters to balance each
+distances, where x ∈ {1, 2, ..., n } and y ∈ {1, 2, ..., m}.
+                                                                      part. During inference, the category-level branch calculates
+Since no fine-grained phrase-proposal supervision exists, we
+                                                                      the cosine distance between all proposal embeddings and a
+instead utilize query-scene pairs for supervision. Specifically,
+                                                                      sentence embedding denoted as pc ∈ Rm×1 . On the other
+for each scene-query pair S = {S1 , ..., Sb } and Q =
+                                                                      hand, the instance-level branch computes the cosine distance
+{Q1 , ..., Qb } in a mini-batch of size b, we measure all
+                                                                      for each possible proposal-phrase pair, resulting in a matrix
+phrase-proposal similarity scores s(x,y) within the pair. As                        ′
+                                                                      sf ∈ Rm×n . Among these pair-wise similarities, we identify
+shown in Eq. 1, for a given noun phrase, we select the
+                                                                      the highest similarity score for each proposal, represented
+maximum similarity score among all proposals. We then
+                                                                      as pf ∈ Rm×1 . To make a final prediction, we compare
+sum the maximum similarity scores of all phrases within
+                                                                      the maximum similarity score obtained from each branch
+the language query to represent the overall query-scene
+                                                                      and choose the branch with the higher maximum score. This
+similarity S(Qi , Sj ). As shown in Eq. 2, this similarity score
+                                                                      selection reflects the branch’s confidence in its prediction.
+is then optimized using the InfoNCE loss Lphr , where p = 1
+if Qi and Sj are paired, and p = 0 otherwise. Here, τ is the                               IV. EXPERIMENT
+temperature scaling factor, and h(Qi , Sj ) is defined in Eq. 3.      A. Implementation Details
+This approach encourages closer alignment between paired
+                                                                         Dataset. We conduct experiments on three benchmarks
+phrase-proposal representations while pushing apart unpaired
+                                                                      Nr3D, Sr3D [24], and ScanRef [23]. Natural Reference
+instances, improving differentiation among instances.
+                                                                      Nr3D contains 707 unique indoor scenes with 41503 natural
+                                                                      language queries, where multiple distracting instances ex-
+                              ′
+                             n
+                             X                                        isted. Sr3D contains 83572 queries automatically generated
+             S(Qi , Sj ) =         M axy∈{1,2,..,m} (s(x,y) )   (1)
+                             x=1                                      based on a “target”-“spatial relationship”-“anchor object”
+                                                                      template. ScanRef augments the 800 3D indoor scenes in
+                                                                      the ScanNet [25] dataset with 51583 language queries. They
+            Lphr. (Qi , Sj ) = −ESj ∈S [p ∗ log(h(Qi , Sj ))]   (2)   all follow the official ScanNet [25] train-test splits.
+TABLE I: Comparisons with baselines. We compare our method with 3D-supervised, 2D weakly supervised, and 3D
+weakly supervised grounding methods. The highest score among all method types is underlined, while the highest score
+within the 3D weakly supervised setting is highlighted in bold.
+                                                     Sr3D                Nr3D             ScanRefer
+                               Method        Acc@.25 Acc@.50 Acc Acc@.25 Acc@.50 Acc Acc@.25 Acc@.50
+        Group 1: 3D        ScanRefer[23]         -       -      -     -      -     -     -       22.4
+    Supervised Grounding ReferIt3DNet[24]      27.7      -    37.2  24.0     -    35.6 26.4      16.9
+                              SAT[47]          44.5    30.1     -     -      -     -     -         -
+                          InstanceRefer[2]     31.5      -      -   29.9     -     -   40.2      32.9
+                          BUTD-DETR[48]        52.1      -      -   43.3     -     -   52.2      39.8
+    Group 2: 2D Weakly        A2G[49]          2.41    3.15   9.67  3.29   4.01  12.38 3.49      4.28
+    Supervised Grounding   Contr. Dist.[31]    3.46    5.70  11.28  3.82   6.07  15.26 5.22      7.67
+                         Contr. Learning[26]   3.51    4.76  12.92  4.13   6.13  15.63 5.61      7.23
+    Group 3: 3D Weakly      DCFVG[22]         22.45   17.62     -  22.45  17.62    -   27.37     21.96
+    Supervised Grounding        Ours          29.23   19.16   36.5 23.68  15.30   33.8 35.55     26.07
+
+   Evaluation metrics. We use the top-1 accuracy metric,          with a pretrained detector, the 2D approaches exhibit poor
+which measures the percentage of times we can find the            performance, highlighting the need for methods specifically
+target box with an IoU higher than the threshold 0.25 and         designed for 3D weakly supervised grounding.
+0.5 IoU, denoted as Acc@.25 and Acc@.50 according to                 Comparisons with 3D weakly-supervised approaches.
+[23]. In addition, following [24], when assuming the access       In Table I Group 3, we compare with a 3D weakly-supervised
+to ground truth objects as the 3D proposals, we can convert       method using the same visual backbone and pretrained
+the grounding task into a classification problem [24]. The        dataset to ensure a fair comparison. Our method surpasses
+models then are evaluated by the accuracy Acc, i.e., whether      DCFVG[22] by a significant margin, demonstrating its ef-
+it correctly selects the referred object among all proposals.     fectiveness. In the first stage, DCFVG uses a self-supervised
+   Training details. For a fair comparison, text encoder          method for matching, potentially leading to misalignment
+and fusion module all follow baseline SAT [1], while off-         issues. In contrast, we utilize target category knowledge
+the-shelf visual encoder GroupFree [50] follows baseline          from a powerful off-the-shelf model, which ensures a relative
+BUTD-DETR [48] since SAT does not provide detector.               reliable matching. Moreover, DCFVG selects the top-k pro-
+Specifically, we employ a text transformer with 3 layers and      posals based on the matching process and aligns the features
+a fusion transformer with 4 layers. The text transformer is       of these selected object candidates with the language query.
+initialized using the first three layers of BERT base [51],       However, if the initially selected objects are incorrect, it can
+while the fusion transformer is trained from scratch. We set      lead to error accumulation, further compromising the model’s
+the embedding dimension D to 768 across all transformer           accuracy. Conversely, we align the feature of each object
+layers. For language processing, we follow the maximum            with each phrase and incorporate spatial relation descriptions
+sentence length setting from ReferIt3D [24] and extract up        of noun phrases to distinguish objects, helping the model
+to 16 noun phrases from each language query using Scene           recognize different instances.
+Graph Parser [44]. Additionally, we generate 25 negative
+queries corresponding to each query. In the overall objective     C. Ablation Study and Analysis
+function, the weighting factors are set as follows: λ1 = 0.4,        Effectiveness of each module. As shown in Tab. II, we
+λ2 = 0.005, λ3 = 0.005, and λ4 = 0.6.                             demonstrate the effectiveness of each module in our design.
+                                                                  Starting from the first row (c1 only), we adopt category-
+B. Compare with Baselines
+                                                                  level matching to ensure target category identification, thus
+   Comparisons with 3D supervised approaches. Tab. I              achieving relatively satisfying performance. When applying
+Group 1 presents results across three benchmarks, comparing       c2 negative category recognition, we achieve a performance
+our method with fully supervised 3D visual grounding ap-          improvement since we boost category sensitivity by distin-
+proaches that utilize annotations for 3D objects in the scene,    guishing target category and easy-confused categories, thus
+the referred target object, and the target category. Our method   avoiding target on negative categories. Moreover, applying i1
+is under weakly-supervised training, with only language           instance-level matching can further improve grounding abil-
+query and point cloud scene pairs. The weakly-supervised          ity since it formulates comprehensive instance-level discern-
+approach achieves competitive results compared with typical       ment to extract the target instance from multiple instances
+fully-supervised methods, demonstrating the benefit of the        of the same category. Finally, adding i2 instance relation
+our training strategy.                                            matching boosts the performance by adopting contextual
+   Comparisons with 2D weakly-supervised approaches.              relation constraints to differentiate each instance.
+In Table I Group 2, we assess the effectiveness of a 2D              Discussion on external detector. We aim to verify that
+weakly-supervised approach on three commonly used 3D              the superior performance of our method is not obtained
+grounding benchmarks. To ensure a fair comparison, we             through the use of an external detector but rather origi-
+replace the 2D visual encoder with an off-the-shelf pretrained    nates from our designed algorithm. Specifically, we utilize
+3D encoder, GroupFree[50], which is identical to ours. Even       the accuracy metric (Acc) to conduct the evaluation. This
+             Query: The picture is on the angled          Query: This is the rightmost bottle    Query: This backpack is alongside a
+             wall near the bright window                  in the shower                          'square' green chair.
+
+
+
+
+             Query: The door closet to the set of         Query: The pillow closet to the door   Query: The bottom cabinet that houes
+             double doors on the wall                                                            the sink
+                                                    (a)                                                           (b)
+                  category branch prediction              instance branch prediction             target                 distractions
+
+Fig. 3: Visualization. We present the predicted results at both category and instance levels, demonstrating their effectiveness
+TABLE II: Ablation study. We show the effectiveness of
+each designed component.                                            Visualizations. In Fig. 3, we visualize the inference results
+                        Sr3D        Nr3D      ScanRefer          of the category-level branch and instance-level branch to
+      c1 c2 i1 i2 @.25 @.50 @.25 @.50 @.25 @.50                  examine the effectiveness of each branch. In Fig.3 (a),
+      ! - - - 22.1 15.2 18.8 11.3 30.9 21.7                      we show cases where the category-level branch achieves
+      ! ! - - 25.8 16.1 22.2 14.0 34.1 24.3                      more accurate predictions than the instance-level branch.
+      ! ! ! - 27.6 18.9 22.9 14.4 35.7 25.7                      For example, in the top-left example of Fig.3, the instance-
+      ! ! ! ! 29.2 19.2 23.7 15.3 35.6 26.1                      level branch, without considering category-level semantic
+                                                                 information, mistakenly identifies “window” as the target
+                                                                 object, even though it does not belong to the correct category
+is because under Acc measurement, we are provided by
+                                                                 “picture”. In contrast, the category-level branch successfully
+the precise location of each proposal, and only need to
+                                                                 recognizes the correct category and accurately locates the
+distinguish the target object from them. In this way, the
+                                                                 desired instance, highlighting the importance of category-
+experimental results are independent of the external detector
+                                                                 level differentiation. Meanwhile, as shown in Fig.3 (b),
+and can reflect the ability of proposed method. Comparing
+                                                                 when multiple distracting instances (objects of the same
+the performance of the fully supervised baseline method
+                                                                 category) exist, the instance-level branch is more effective
+ReferIt3D with our weakly supervised method on Sr3D
+                                                                 at distinguishing the target object from similar-looking dis-
+and Nr3D datasets, ReferIt3D[24] achieves accuracy scores
+                                                                 tractors, while the category-level branch is more prone to
+of 37.2 and 35.6, while our weakly supervised approach
+                                                                 confusion. For example, in the top-right example of Fig.3,
+achieves scores of 36.5 and 33.8, respectively. These slight
+                                                                 both branches identify “backpack”, but only the instance-
+variations highlight the robustness of our training strategy
+                                                                 level branch correctly selects the target instance, whereas the
+in effectively aligning cross-modality feature representations
+                                                                 category-level branch is misled by other similar objects of the
+and accurately identifying the queried object.
+                                                                 same category, leading to incorrect grounding. From these
+   Discussion on extracted target category. We aim to observations, we conclude that both branches have their own
+verify that the potential inaccuracies in the extracted target strengths, and by effectively integrating them, we achieve a
+category, obtained through the Scene Graph Parser [44] and reliable 3D weakly-supervised visual grounding.
+Spacy [45] in Sec. III-B.1, do not affect the final grounding
+performance. By comparing the extracted target category                    V. CONCLUSION AND LIMITATION
+with the target category provided in the dataset, we found          We propose a weakly-supervised 3D visual grounding
+that the extracted target category achieves an accuracy of approach that effectively differentiates fine-grained cate-
+93%. Furthermore, we compare our grounding approach with gories and distinguishes instances within the same category.
+the one where the target category ground truth is used, Our method achieves competitive performance across three
+while keeping all other factors constant. In this evaluation, benchmark datasets. However, a limitation of our approach
+our method achieves an accuracy of 23.68 on Nr3D, while is the reliance on a robust object detector that can effectively
+altering to ground truth category achieves 23.82, measured recognize a wide variety of object classes, which may restrict
+with Acc@.25. Since the accuracy of the extracted target its generalization to unseen categories. Nevertheless, with the
+category does not strictly limit the performance of weakly continuous advancement of object detection techniques, we
+supervised grounding, the model can tolerate a certain degree believe that in the future, object detectors will be able to
+of inaccuracy in the extracted target category.                  achieve stable performance in an open-world setting.
+                         ACKNOWLEDGE                                            [18] J. Liu, M. Liu, Z. Wang, L. Lee, K. Zhou, P. An, S. Yang,
+                                                                                     R. Zhang, Y. Guo, and S. Zhang, “Robomamba: Multimodal state
+  This work was supported by the grants from the National                            space model for efficient robot reasoning and manipulation,” arXiv
+Natural Science Foundation of China 62372014 and Beijing                             preprint arXiv:2406.04339, 2024.
+Natural Science Foundation 4252040.                                             [19] Y. Jia, J. Liu, S. Chen, C. Gu, Z. Wang, L. Luo, L. Lee, P. Wang,
+                                                                                     Z. Wang, R. Zhang et al., “Lift3d foundation policy: Lifting 2d large-
+                                                                                     scale pretrained models for robust 3d robotic manipulation,” arXiv
+                             R EFERENCES                                             preprint arXiv:2411.18623, 2024.
+ [1] Z. Yang, S. Zhang, L. Wang, and J. Luo, “Sat: 2d semantics assisted        [20] C. Xiong, C. Shen, X. Li, K. Zhou, J. Liu, R. Wang, and H. Dong,
+     training for 3d visual grounding,” in Proceedings of the IEEE/CVF               “Aic mllm: Autonomous interactive correction mllm for robust robotic
+     International Conference on Computer Vision, 2021, pp. 1856–1866.               manipulation,” arXiv preprint arXiv:2406.11548, 2024.
+ [2] Z. Yuan, X. Yan, Y. Liao, R. Zhang, S. Wang, Z. Li, and S. Cui, “In-       [21] S. Huang, I. Ponomarenko, Z. Jiang, X. Li, X. Hu, P. Gao, H. Li,
+     stancerefer: Cooperative holistic understanding for visual grounding            and H. Dong, “Manipvqa: Injecting robotic affordance and physically
+     on point clouds through instance multi-level contextual referring,” in          grounded information into multi-modal large language models,” in
+     Proceedings of the IEEE/CVF International Conference on Computer                2024 IEEE/RSJ International Conference on Intelligent Robots and
+     Vision, 2021, pp. 1791–1800.                                                    Systems (IROS). IEEE, 2024, pp. 7580–7587.
+ [3] D. He, Y. Zhao, J. Luo, T. Hui, S. Huang, A. Zhang, and S. Liu,            [22] Z. Wang, H. Huang, Y. Zhao, L. Li, X. Cheng, Y. Zhu, A. Yin,
+     “Transrefer3d: Entity-and-relation aware transformer for fine-grained           and Z. Zhao, “Distilling coarse-to-fine semantic matching knowl-
+     3d visual grounding,” in Proceedings of the 29th ACM International              edge for weakly supervised 3d visual grounding,” arXiv preprint
+     Conference on Multimedia, 2021, pp. 2344–2352.                                  arXiv:2307.09267, 2023.
+ [4] S. Huang, Y. Chen, J. Jia, and L. Wang, “Multi-view transformer for        [23] D. Z. Chen, A. X. Chang, and M. Nießner, “Scanrefer: 3d object
+     3d visual grounding,” in Proceedings of the IEEE/CVF Conference on              localization in rgb-d scans using natural language,” in European
+     Computer Vision and Pattern Recognition, 2022, pp. 15 524–15 533.               Conference on Computer Vision. Springer, 2020, pp. 202–221.
+ [5] J. Roh, K. Desingh, A. Farhadi, and D. Fox, “Languagerefer: Spatial-       [24] P. Achlioptas, A. Abdelreheem, F. Xia, M. Elhoseiny, and L. Guibas,
+     language model for 3d visual grounding,” in Conference on Robot                 “Referit3d: Neural listeners for fine-grained 3d object identification
+     Learning. PMLR, 2022, pp. 1046–1056.                                            in real-world scenes,” in European Conference on Computer Vision.
+ [6] Z. Guo, Y. Tang, R. Zhang, D. Wang, Z. Wang, B. Zhao, and                       Springer, 2020, pp. 422–440.
+     X. Li, “Viewrefer: Grasp the multi-view knowledge for 3d visual            [25] A. Dai, A. X. Chang, M. Savva, M. Halber, T. Funkhouser, and
+     grounding,” in Proceedings of the IEEE/CVF International Conference             M. Nießner, “Scannet: Richly-annotated 3d reconstructions of indoor
+     on Computer Vision, 2023, pp. 15 372–15 383.                                    scenes,” in Proceedings of the IEEE conference on computer vision
+ [7] L. Zhao, D. Cai, L. Sheng, and D. Xu, “3dvg-transformer: Relation               and pattern recognition, 2017, pp. 5828–5839.
+     modeling for visual grounding on point clouds,” in Proceedings of the      [26] L. Wang, J. Huang, Y. Li, K. Xu, Z. Yang, and D. Yu, “Improving
+     IEEE/CVF International Conference on Computer Vision, 2021, pp.                 weakly supervised visual grounding by contrastive knowledge distil-
+     2928–2937.                                                                      lation,” in Proceedings of the IEEE/CVF Conference on Computer
+ [8] J. Yang, X. Chen, S. Qian, N. Madaan, M. Iyengar, D. F. Fouhey,                 Vision and Pattern Recognition, 2021, pp. 14 090–14 100.
+     and J. Chai, “Llm-grounder: Open-vocabulary 3d visual grounding            [27] K. Chen, J. Gao, and R. Nevatia, “Knowledge aided consistency for
+     with large language model as an agent,” in 2024 IEEE International              weakly supervised phrase grounding,” in Proceedings of the IEEE
+     Conference on Robotics and Automation (ICRA). IEEE, 2024, pp.                   Conference on Computer Vision and Pattern Recognition, 2018, pp.
+     7694–7701.                                                                      4042–4050.
+ [9] S. Yang, J. Liu, R. Zhang, M. Pan, Z. Guo, X. Li, Z. Chen, P. Gao,         [28] R. A. Yeh, M. N. Do, and A. G. Schwing, “Unsupervised textual
+     H. Li, Y. Guo et al., “Lidar-llm: Exploring the potential of large              grounding: Linking words to image concepts,” in Proceedings of the
+     language models for 3d lidar understanding,” in Proceedings of the              IEEE Conference on Computer Vision and Pattern Recognition, 2018,
+     AAAI Conference on Artificial Intelligence, vol. 39, no. 9, 2025, pp.           pp. 6125–6134.
+     9247–9255.                                                                 [29] R. Yeh, J. Xiong, W.-M. Hwu, M. Do, and A. Schwing, “Interpretable
+[10] M. Pan, J. Liu, R. Zhang, P. Huang, X. Li, H. Xie, B. Wang, L. Liu, and         and globally optimal prediction for textual grounding using image con-
+     S. Zhang, “Renderocc: Vision-centric 3d occupancy prediction with               cepts,” Advances in Neural Information Processing Systems, vol. 30,
+     2d rendering supervision,” in 2024 IEEE International Conference on             2017.
+     Robotics and Automation (ICRA). IEEE, 2024, pp. 12 404–12 411.
+                                                                                [30] Y. Liu, B. Wan, L. Ma, and X. He, “Relation-aware instance refine-
+[11] P. Maes, “Modeling adaptive autonomous agents,” Artificial life, vol. 1,
+                                                                                     ment for weakly supervised visual grounding,” in Proceedings of the
+     no. 1 2, pp. 135–162, 1993.
+                                                                                     IEEE/CVF Conference on Computer Vision and Pattern Recognition,
+[12] J. Liu, R. Zhang, X. Li, X. Chi, Z. Chen, M. Lu, Y. Guo, and S. Zhang,
+                                                                                     2021, pp. 5612–5621.
+     “Bevuda: Multi-geometric space alignments for domain adaptive bev
+     3d object detection,” in 2024 IEEE International Conference on             [31] T. Gupta, A. Vahdat, G. Chechik, X. Yang, J. Kautz, and D. Hoiem,
+     Robotics and Automation (ICRA). IEEE, 2024, pp. 9487–9494.                      “Contrastive learning for weakly supervised phrase grounding,” in
+[13] J. Liu, S. Yang, P. Jia, R. Zhang, M. Lu, Y. Guo, W. Xue, and                   European Conference on Computer Vision. Springer, 2020, pp. 752–
+     S. Zhang, “Vida: Homeostatic visual domain adapter for continual                768.
+     test time adaptation,” arXiv preprint arXiv:2306.04344, 2023.              [32] A. U. Khan, H. Kuehne, C. Gan, N. D. V. Lobo, and M. Shah, “Weakly
+[14] J. Liu, R. Xu, S. Yang, R. Zhang, Q. Zhang, Z. Chen, Y. Guo, and                supervised grounding for vqa in vision-language transformers,” in
+     S. Zhang, “Continual-mae: Adaptive distribution masked autoencoders             European Conference on Computer Vision. Springer, 2022, pp. 652–
+     for continual test-time adaptation,” in Proceedings of the IEEE/CVF             670.
+     Conference on Computer Vision and Pattern Recognition, 2024, pp.           [33] Z. Wang, H. Huang, Y. Zhao, L. Li, X. Cheng, Y. Zhu, A. Yin, and
+     28 653–28 663.                                                                  Z. Zhao, “3drp-net: 3d relative position-aware network for 3d visual
+[15] Y. Long, X. Li, W. Cai, and H. Dong, “Discuss before moving:                    grounding,” arXiv preprint arXiv:2307.13363, 2023.
+     Visual language navigation via multi-expert discussions,” in 2024          [34] T. Zhang, S. He, T. Dai, Z. Wang, B. Chen, and S.-T. Xia, “Vision-
+     IEEE International Conference on Robotics and Automation (ICRA).                language pre-training with object contrastive learning for 3d scene
+     IEEE, 2024, pp. 17 380–17 387.                                                  understanding,” in Proceedings of the AAAI Conference on Artificial
+[16] H. Wang, A. G. H. Chen, X. Li, M. Wu, and H. Dong, “Find what you               Intelligence, vol. 38, no. 7, 2024, pp. 7296–7304.
+     want: Learning demand-conditioned object attribute space for demand-       [35] Z. Yuan, J. Ren, C.-M. Feng, H. Zhao, S. Cui, and Z. Li, “Visual
+     driven navigation,” Advances in Neural Information Processing Sys-              programming for zero-shot open-vocabulary 3d visual grounding,” in
+     tems, vol. 36, pp. 16 353–16 366, 2023.                                         Proceedings of the IEEE/CVF Conference on Computer Vision and
+[17] X. Li, M. Zhang, Y. Geng, H. Geng, Y. Long, Y. Shen, R. Zhang,                  Pattern Recognition, 2024, pp. 20 623–20 633.
+     J. Liu, and H. Dong, “Manipllm: Embodied multimodal large language         [36] Y. Wang, Y. Li, and S. Wang, “Gˆ 3-lq: Marrying hyperbolic alignment
+     model for object-centric robotic manipulation,” in Proceedings of the           with explicit semantic-geometric modeling for 3d visual grounding,”
+     IEEE/CVF Conference on Computer Vision and Pattern Recognition,                 in Proceedings of the IEEE/CVF Conference on Computer Vision and
+     2024, pp. 18 061–18 070.                                                        Pattern Recognition, 2024, pp. 13 917–13 926.
+[37] Z. Qian, Y. Ma, Z. Lin, J. Ji, X. Zheng, X. Sun, and R. Ji, “Multi-
+     branch collaborative learning network for 3d visual grounding,” in
+     European Conference on Computer Vision. Springer, 2024, pp. 381–
+     398.
+[38] Y. Zhang, H. Luo, and Y. Lei, “Towards clip-driven language-free 3d
+     visual grounding via 2d-3d relational enhancement and consistency,”
+     in Proceedings of the IEEE/CVF Conference on Computer Vision and
+     Pattern Recognition, 2024, pp. 13 063–13 072.
+[39] C. Xu, Y. Han, R. Xu, L. Hui, J. Xie, and J. Yang, “Multi-attribute
+     interactions matter for 3d visual grounding,” in Proceedings of the
+     IEEE/CVF Conference on Computer Vision and Pattern Recognition,
+     2024, pp. 17 253–17 262.
+[40] X. Shi, Z. Wu, and S. Lee, “Aware visual grounding in 3d scenes,”
+     in Proceedings of the IEEE/CVF Conference on Computer Vision and
+     Pattern Recognition, 2024, pp. 14 056–14 065.
+[41] H. Zhang, C.-A. Yang, and R. A. Yeh, “Multi-object 3d grounding
+     with dynamic modules and language-informed spatial attention,” arXiv
+     preprint arXiv:2410.22306, 2024.
+[42] J. Luo, J. Fu, X. Kong, C. Gao, H. Ren, H. Shen, H. Xia, and
+     S. Liu, “3d-sps: Single-stage 3d visual grounding via referred point
+     progressive selection,” in Proceedings of the IEEE/CVF Conference on
+     Computer Vision and Pattern Recognition, 2022, pp. 16 454–16 463.
+[43] J. D. M.-W. C. Kenton and L. K. Toutanova, “Bert: Pre-training of deep
+     bidirectional transformers for language understanding,” in Proceedings
+     of naacL-HLT, vol. 1, 2019, p. 2.
+[44] R. Zellers, M. Yatskar, S. Thomson, and Y. Choi, “Neural motifs:
+     Scene graph parsing with global context,” in Proceedings of the IEEE
+     conference on computer vision and pattern recognition, 2018, pp.
+     5831–5840.
+[45] M. Honnibal and M. Johnson, “An improved non-monotonic transition
+     system for dependency parsing,” in Proceedings of the 2015 confer-
+     ence on empirical methods in natural language processing, 2015, pp.
+     1373–1378.
+[46] X. Chen, H. Fan, R. Girshick, and K. He, “Improved baselines with
+     momentum contrastive learning,” arXiv preprint arXiv:2003.04297,
+     2020.
+[47] P.-H. Huang, H.-H. Lee, H.-T. Chen, and T.-L. Liu, “Text-guided
+     graph neural networks for referring 3d instance segmentation,” in
+     Proceedings of the AAAI Conference on Artificial Intelligence, vol. 35,
+     no. 2, 2021, pp. 1610–1618.
+[48] A. Jain, N. Gkanatsios, I. Mediratta, and K. Fragkiadaki, “Looking
+     outside the box to ground language in 3d scenes,” arXiv preprint
+     arXiv:2112.08879, 2021.
+[49] S. Datta, K. Sikka, A. Roy, K. Ahuja, D. Parikh, and A. Divakaran,
+     “Align2ground: Weakly supervised phrase grounding guided by image-
+     caption alignment,” in Proceedings of the IEEE/CVF International
+     Conference on Computer Vision (ICCV), October 2019.
+[50] Z. Liu, Z. Zhang, Y. Cao, H. Hu, and X. Tong, “Group-free 3d
+     object detection via transformers,” in Proceedings of the IEEE/CVF
+     International Conference on Computer Vision, 2021, pp. 2949–2958.
+[51] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, “Bert: Pre-training
+     of deep bidirectional transformers for language understanding,” arXiv
+     preprint arXiv:1810.04805, 2018.
+

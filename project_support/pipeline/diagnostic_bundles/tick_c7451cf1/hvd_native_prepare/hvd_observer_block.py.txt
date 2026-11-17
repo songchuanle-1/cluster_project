@@ -1,0 +1,157 @@
+    if candidate:
+        core=att.variance_decomposition;graph=importlib.import_module(qualified+'.variance_decomposition')
+        original_plan=graph.build_support_plan;original_components=graph.moment_components
+        original_group_mean=graph._group_mean;original_pack=graph.pack_moment_rows
+        original_cat=torch.cat;original_split=torch.Tensor.split;original_copy=torch.Tensor.index_copy
+        def queue_replace(owner,name,replacement,original):installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            points,point_mask,normalized,ids=values
+            assert owner is core and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[batch].detach().cpu().tolist() for level in ids) for batch in range(int(points.shape[0]))]
+            record={'forward':state['forward_index'],'point_input':summary(points),'point_padding':summary(point_mask),
+                'normalized_inputs':[summary(value) for value in normalized],'normalized_bank_sha256':fingerprint(torch,normalized),
+                'scene_observations':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual true-support builder, original moment_components and its eight original group means, actual five returned moment tensors, original pack, actual packed shared factor Linear/GELU/Linear, original split and three original-ID index_copy outputs. All wrappers call originals once and return original objects. No statistic/map/feature/model/criterion/backward replay.',
+                'extra_FP32_Jacobian_minimum_effect_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'hvd_context' not in state
+            state['hvd_context']={'record':record,'members':members,'normalized':normalized,'ids_ref':ids,
+                'widths':[int(value.shape[1]) for value in normalized],'scene_contexts':[],'current_scene':None}
+            state['hvd_input_points_ref']=points;state['hvd_point_mask_ref']=point_mask
+            for level,value in enumerate(normalized):watch(value,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,valid_count,widths):
+            c=state['hvd_context'];batch=len(c['scene_contexts'])
+            assert (ids0,ids1,ids2)==c['members'][batch] and widths==c['widths'] and valid_count==len(ids0)
+            output=original_plan(ids0,ids1,ids2,valid_count,widths)
+            observed=hvd_plan_observation(output,(ids0,ids1,ids2),valid_count,widths)
+            observed.update(batch=batch,actual_original_builder_calls=1,actual_stats_calls=0,actual_group_mean_calls=0,
+                actual_pack_calls=0,actual_factor_concat_calls=0,actual_factor_calls=0,actual_linear_calls=0,
+                actual_GELU_calls=0,actual_split_calls=0,actual_final_index_copy_calls=0,
+                stats_observations=[],group_mean_observations=[],pack_observations=[],factor_observations=[],restoration_observations=[])
+            c['record']['scene_observations'].append(observed)
+            scene={'record':observed,'plan':output,'counts':[len(nodes) for nodes in output['nodes']],
+                'stats_active':False,'pack_active':False,'factor_active':False,'restoration_level':0}
+            c['scene_contexts'].append(scene);c['current_scene']=scene
+            return output
+        def observed_group_mean(values,labels,count):
+            c=state.get('hvd_context');scene=c.get('current_scene') if c else None
+            output=original_group_mean(values,labels,count)
+            if scene is not None and scene['stats_active']:
+                record=scene['record'];record['actual_group_mean_calls']+=1
+                info={'ordinal':record['actual_group_mean_calls'],'input':summary(values),'labels':labels.detach().cpu().tolist(),
+                    'declared_groups':int(count),'output':summary(output),'original_calls':1,'returned_original_object_unchanged':True}
+                assert info['input']['finite'] and info['output']['finite'];record['group_mean_observations'].append(info);lite_watch(output,c['record'])
+            return output
+        def observed_components(points,p0,p1,p2,fine_count,middle_count,coarse_count):
+            c=state['hvd_context'];scene=c['current_scene'];plan=scene['plan']
+            assert [fine_count,middle_count,coarse_count]==scene['counts'] and points.shape[0]==scene['record']['point_count']
+            assert [value.detach().cpu().tolist() for value in (p0,p1,p2)]==[plan[key] for key in ('point_to_fine','fine_to_middle','middle_to_coarse')]
+            scene['stats_active']=True
+            try:output=original_components(points,p0,p1,p2,fine_count,middle_count,coarse_count)
+            finally:scene['stats_active']=False
+            assert len(output)==5 and scene['record']['actual_group_mean_calls']==8
+            scene.update(stats_refs=output,p1=p1,p2=p2)
+            record=scene['record'];record['actual_stats_calls']+=1
+            info={'point_input':summary(points),'point_input_sha256':fingerprint(torch,points),'actual_mapping_sha256':fingerprint(torch,[p0,p1,p2]),
+                'moment_names':['fine_variance','middle_within','middle_between','coarse_within','coarse_between'],
+                'outputs':[summary(value) for value in output],'output_sha256':fingerprint(torch,output),
+                'original_calls':1,'returned_original_tuple_unchanged':True,'moment_arithmetic_replayed':False,
+                'statistic_nonzero_or_minimum_effect_gate':False}
+            assert info['point_input']['finite'] and all(value['finite'] for value in info['outputs'])
+            record['stats_observations'].append(info)
+            for value in output:lite_watch(value,c['record'])
+            return output
+        def observed_pack(normalized,stats,p1,p2):
+            c=state['hvd_context'];scene=c['current_scene']
+            assert stats is scene['stats_refs'] and p1 is scene['p1'] and p2 is scene['p2']
+            scene['pack_active']=True
+            try:output=original_pack(normalized,stats,p1,p2)
+            finally:scene['pack_active']=False
+            assert len(output)==3
+            scene['packed_refs']=output;record=scene['record'];record['actual_pack_calls']+=1
+            info={'semantic_inputs':[summary(value) for value in normalized],'moment_inputs_are_actual_returned_objects':True,
+                'outputs':[summary(value) for value in output],'output_sha256':fingerprint(torch,output),
+                'original_calls':1,'returned_original_list_unchanged':True,'packing_replayed':False}
+            assert all(value['finite'] for value in info['semantic_inputs']+info['outputs'])
+            assert [list(value.shape) for value in output]==[[count,4*core.channels] for count in scene['counts']]
+            record['pack_observations'].append(info)
+            for value in output:lite_watch(value,c['record'])
+            return output
+        def observed_cat(values,*args,**kwargs):
+            c=state.get('hvd_context');scene=c.get('current_scene') if c else None
+            output=original_cat(values,*args,**kwargs)
+            if scene is not None and 'packed_refs' in scene and not scene['pack_active'] and not scene['factor_active']:
+                dim=kwargs.get('dim',args[0] if args else 0)
+                assert dim==0 and len(values)==3 and all(value is scene['packed_refs'][level] for level,value in enumerate(values))
+                scene['factor_input_ref']=output;scene['record']['actual_factor_concat_calls']+=1
+            return output
+        def factor_pre(owner,values):
+            c=state['hvd_context'];scene=c['current_scene']
+            assert owner is core.factor and values[0] is scene['factor_input_ref']
+            scene['factor_active']=True;scene['record']['actual_factor_calls']+=1
+        def linear_post(which):
+            def call(owner,values,output):
+                c=state['hvd_context'];scene=c['current_scene'];record=scene['record']
+                if which==0:assert values[0] is scene['factor_input_ref'];scene['first_linear_ref']=output
+                else:assert values[0] is scene['activation_ref'];scene['second_linear_ref']=output
+                info={'kind':'first_linear' if which==0 else 'second_linear','input':summary(values[0]),'output':summary(output),'original_calls':1}
+                assert info['input']['finite'] and info['output']['finite'];record['actual_linear_calls']+=1
+                record['factor_observations'].append(info);lite_watch(output,c['record'])
+            return call
+        def activation_post(owner,values,output):
+            c=state['hvd_context'];scene=c['current_scene'];assert values[0] is scene['first_linear_ref']
+            scene['activation_ref']=output;scene['record']['actual_GELU_calls']+=1
+            info={'kind':'original_GELU','input':summary(values[0]),'output':summary(output),'original_calls':1}
+            assert info['input']['finite'] and info['output']['finite'];scene['record']['factor_observations'].append(info);lite_watch(output,c['record'])
+        def factor_post(owner,values,output):
+            c=state['hvd_context'];scene=c['current_scene'];assert output is scene['second_linear_ref']
+            scene['factor_output_ref']=output;scene['factor_active']=False
+        def observed_split(tensor,sections,*args,**kwargs):
+            c=state.get('hvd_context');scene=c.get('current_scene') if c else None
+            output=original_split(tensor,sections,*args,**kwargs)
+            if scene is not None and tensor is scene.get('factor_output_ref'):
+                assert list(sections)==scene['counts'] and kwargs.get('dim',args[0] if args else 0)==0 and len(output)==3
+                scene['split_refs']=output;scene['record']['actual_split_calls']+=1
+            return output
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            c=state.get('hvd_context');scene=c.get('current_scene') if c else None
+            output=original_copy(tensor,dim,index,source,*args,**kwargs)
+            if scene is not None and 'split_refs' in scene:
+                level=scene['restoration_level'];assert level<3 and dim==0
+                assert index.detach().cpu().tolist()==scene['plan']['nodes'][level] and source is scene['split_refs'][level]
+                assert list(tensor.shape)==[c['widths'][level],core.channels] and bool((tensor==0).all())
+                info={'level':level,'original_node_ids':list(scene['plan']['nodes'][level]),'output':summary(output),
+                    'source_is_actual_factor_split':True,'zero_initialized_destination':True,'original_calls':1,'returned_original_object_unchanged':True}
+                assert info['output']['finite'];scene['record']['restoration_observations'].append(info)
+                scene['restoration_level']+=1;scene['record']['actual_final_index_copy_calls']+=1
+            return output
+        for name,replacement,original in [('build_support_plan',observed_plan,original_plan),('moment_components',observed_components,original_components),('_group_mean',observed_group_mean,original_group_mean),('pack_moment_rows',observed_pack,original_pack)]:queue_replace(graph,name,replacement,original)
+        for owner,name,replacement,original in [(torch,'cat',observed_cat,original_cat),(torch.Tensor,'split',observed_split,original_split),(torch.Tensor,'index_copy',observed_copy,original_copy)]:queue_replace(owner,name,replacement,original)
+        hooks.extend([core.factor.register_forward_pre_hook(factor_pre),core.factor.register_forward_hook(factor_post),
+            core.factor[0].register_forward_hook(linear_post(0)),core.factor[1].register_forward_hook(activation_post),core.factor[2].register_forward_hook(linear_post(1))])
+        def exchange_post(owner,values,output):
+            c=state.pop('hvd_context');record=c['record'];assert len(c['scene_contexts'])==len(c['members'])
+            active=[scene for scene in c['scene_contexts'] if scene['counts'][0]]
+            for scene in active:
+                item=scene['record'];assert item['actual_stats_calls']==item['actual_pack_calls']==item['actual_factor_concat_calls']==item['actual_factor_calls']==item['actual_GELU_calls']==item['actual_split_calls']==1
+                assert item['actual_group_mean_calls']==8 and item['actual_linear_calls']==2 and item['actual_final_index_copy_calls']==3
+            for level,value in enumerate(output):
+                assert list(value.shape)==list(c['normalized'][level].shape);watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(value) for value in output],actual_true_fine_paths=sum(scene['counts'][0] for scene in active),
+                actual_supported_scene_count=len(active),actual_stats_calls=len(active),actual_group_mean_calls=8*len(active),
+                actual_pack_calls=len(active),actual_factor_calls=len(active),actual_linear_calls=2*len(active),actual_GELU_calls=len(active),
+                actual_final_index_copy_calls=3*len(active),actual_three_LN_calls=list(state['norm_counts']),
+                statistics_and_packing_from_actual_production_calls=True,no_feature_or_statistic_replay=True)
+            state['hvd_delta_snapshots']=[value.detach().clone() for value in output];exchange_calls.append(record)
+        hooks.extend([core.register_forward_pre_hook(exchange_pre),core.register_forward_hook(exchange_post)])

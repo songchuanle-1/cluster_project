@@ -1,0 +1,145 @@
+{
+  "id": "M197-PIRS",
+  "config": "configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml",
+  "code_commit": "cffb305aa157f5d381866e929eb28b8a3fc6cc22",
+  "goal_sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b",
+  "created": "2026-09-16T12:20:00+08:00",
+  "mechanism": "PIRS - Provenance-Invariant Referent Supervision. The referent target of a query becomes the quality of the hypothesis that query itself induces, t_i = IoU(sigmoid(mask_i), referred_instance_mask), computed for EVERY query, detached, with no seed-derived term. Architecture, query set, matcher, mask losses, score loss and contrastive term are unchanged, so no parameter is added and the forward graph is unchanged.",
+  "decision": {
+    "path": "pipeline/decisions/20260916-121948_next_batch.md",
+    "sha256": "ed6b61baf48c6f1f3eda908796c111d5662249267c35bca4c1bee86ff9659256"
+  },
+  "gates": {
+    "diagnosis": {
+      "passed": true,
+      "note": "The defect is measured, not assumed: 783 of 824 native referent positives are already mask-OK while 2455 queries whose masks cover the referred instance are labelled no-object; the head scores .848 for seed+/mask- and .130 for seed-/mask+; 27.3% of expressions select an unacceptable query although an acceptable one exists; 118/123 have at least one acceptable query and the best acceptable rank is median 1.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/referent_support_contingency_20260916.json",
+          "sha256": "c65692f486d7f37225dfe87cf08993ede4052993d67050e318d29a336c476a3d"
+        },
+        {
+          "path": "pipeline/reports/acceptable_mask_rank_20260916.json",
+          "sha256": "42b93cbbf74c01d52ba180057dfcb79f1bd93b7e23909ccfc6659ff3d99a8748"
+        },
+        {
+          "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+          "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639"
+        }
+      ]
+    },
+    "derivation": {
+      "passed": true,
+      "note": "Forward/loss derivation, gradient and degeneration cases, complexity, matched controls and pre-registered rejection criteria are stated in review1150 sections 6-7 and design1150 sections 3.1-3.4. Falsifiable predictions P1-P3 are fixed before training. Phase 1.6 smell check passed on all three criteria: new compute-graph dependence in the loss, no free hyperparameter introduced (g is fixed to identity), and cannot be described as adding one operator.",
+      "evidence": [
+        {
+          "path": "pipeline/reviews/motivation_review_20260916-1150.md",
+          "sha256": "8b09fa61e87919113b296998dfd7487e801fdbac992a1057f21f3cac2b0b46c3"
+        },
+        {
+          "path": "pipeline/designs/exp_design_20260916-1150.md",
+          "sha256": "e3b9ec3df8eeaf481109ffc86097f80bcd004385cfc63996c844dca63f109d1a"
+        }
+      ]
+    },
+    "literature": {
+      "passed": true,
+      "note": "RefMask3D (2407.18244v1, ACM MM 2024) re-read from the archived original PDF: Hungarian matching with cls+BCE+dice cost, then Lmatch = l_cls L_cls + l_bce L_bce + l_dice L_dice on the matched object, plus contrastive. One-to-one matching changes WHICH query is positive and leaves every other query, including the 2455 mask-OK duplicates, supervised as no-object, so it does not remove the measured contradiction. DETR-style set prediction, IoU/quality-aware 2D classification, set/cardinality losses and mask-aware contrastive alignment are each distinguished in design1150 section 3.3.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/refmask3d_original_20260916.pdf",
+          "sha256": "2c06ac9537e1cd300f3d6c976aef5e25d3bf69d357d13082ce552dd821f8f235"
+        },
+        {
+          "path": "pipeline/reports/refmask3d_plain_20260916.txt",
+          "sha256": "6fc4c5db88b209de8476decc9491b5c61e0b9692acaa6ba46b78e89ac222f295"
+        }
+      ]
+    },
+    "controls": {
+      "passed": true,
+      "note": "Three controls bound the mechanism. (1) The matched control is the frozen M95 configuration itself (same protocol, 69.1% TRAIN selection success). (2) The objectness-only control is exactly null (69.1% -> 69.1%), so a mechanism that merely prefers queries whose seed lies inside some object cannot claim this gain; PIRS supplies referent identity, not objectness. (3) The nonlinear scene-grouped readout control tops out at 59-65% against the 87.0% oracle restriction, foreclosing readout-only explanations.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+          "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639"
+        },
+        {
+          "path": "pipeline/reports/query_feature_decodability_20260916.json",
+          "sha256": "991e60afb1c507b40cd365b6cf0ad4bd49ce4c0bb506f9ead9f321ee3f109e19"
+        }
+      ]
+    },
+    "native_backward": {
+      "passed": true,
+      "note": "Forward+backward on 3 real TRAIN batches, server6 GPU7, seed1999. The config basename resolves to the PIRS package; the reference checkpoint loads strict with 0 missing and 0 unexpected keys, confirming no parameter was added. Loss finite on every batch; 642 parameters receive gradient, 205 remain frozen (text encoder), 0 parameters have non-finite gradient. The referent-only path (all other entries of the criterion loss_weight zeroed) produces finite non-zero L1 gradient on every indi_embedding parameter across all six decoder layers, so the new supervision demonstrably drives the referent head.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/pirs_native_backward_20260916.json",
+          "sha256": "a3a893f364fadfa6e46484aaea4e88c40ba65215bc911912742d114d6d0ee007"
+        },
+        {
+          "path": "scripts/pirs_native_backward_20260916.py",
+          "sha256": "51375de862fda38a2571d274c06fdc416b2c3d6b548e2b5445c5fcb90305bc5d"
+        }
+      ]
+    },
+    "resources": {
+      "passed": true,
+      "note": "Measured one config per process with the historical instrument (fvcore FlopCountAnalysis plus bs=1 warmup20/repeat100 and peak allocated memory), because every variant package registers 'Criterion' into the same gorilla registry and two variants cannot be imported in one process. Parent: params 157484090, 10.20585054 G, peak 917.3671875 MiB. PIRS: identical to the last bit on all three, delta exactly 0. Latency differed 75.83 -> 88.05 ms median between two separate processes; for a bitwise-identical forward graph that is run-to-run noise and is recorded as such, not as a mechanism cost. Honest limitation: under this instrument the absolute value for the PARENT is 10.21 G, above the 10.0 G clause, while the historical audit recorded 9.762532428 G for the same parent, so this instrument is not the historical counter; per the constraint an instrument that would fail the champion cannot be used to reject a candidate, and the compliant readings are the paired delta of 0 plus the historical counter. Limitation: this check does not separately re-audit the full BCCA cost, since PIRS reproduces the M95 architecture exactly. No BCCA-style attribution is made for this candidate.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/pirs_resources_parent_20260916.json",
+          "sha256": "27a911b7af9536cd76004b48670ca3b849f449bbec206a633bcd2ba99cb5d877"
+        },
+        {
+          "path": "pipeline/reports/pirs_resources_pirs_20260916.json",
+          "sha256": "aa9838d2f66a13bec3ed30d5002380f46f9a5e75188f605b89a98112d2c5feba"
+        },
+        {
+          "path": "scripts/pirs_resources_20260916.py",
+          "sha256": "a7073dd8e563f4150b98b3317667168e63eab9fd4281b595b102d7500d5707a1"
+        }
+      ]
+    },
+    "independence": {
+      "passed": true,
+      "note": "Phase 3a checks: the model package physically exists with 7 files; no cross-variant import of Quard_model.<other> and no import of model_base1 anywhere in it; the config basename is globally unique (no duplicate basename across the config tree); resolve_network(config) was asserted at runtime to return the PIRS package's own Network class, so the config cannot silently fall back to another variant.",
+      "evidence": [
+        {
+          "path": "pipeline/reports/pirs_native_backward_20260916.json",
+          "sha256": "a3a893f364fadfa6e46484aaea4e88c40ba65215bc911912742d114d6d0ee007"
+        }
+      ]
+    },
+    "constraints": {
+      "passed": true,
+      "note": "Checked against goal.json after the user's scope decision B. Phase 1 no-tuning: honoured, no sweep, no schedule change, epochs 50 and max_iters 70 unchanged, seed 1999 unchanged, g fixed to identity with no free value. Bans: none of the 11 applies - no gate, no language routing, no attnpool/qcond/agg/multi, no pruning, no nomask expansion, no repeated 3/4/6-layer injection, no large Q/K/V/O projection, no parameter sweep, and the variant is not 'a single added operator' because nothing is added. The 2026-09-10 validation boundary: overall metric plus the pre-defined strata and scene-level uncertainty are required at analysis time and the predictions are pre-registered. No new dataset or annotation. Resource clause: paired delta 0. Scope decision constraint 15: the axis is open, and this candidate is not presented as RefMask3D/DETR - the whole-mechanism difference is stated in the literature gate.",
+      "evidence": [
+        {
+          "path": "pipeline/goal.json",
+          "sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b"
+        },
+        {
+          "path": "pipeline/decisions/20260916-114532_manual.md",
+          "sha256": "4a2aa5faf65161cd57ad3e929894b239ebf543d1b46ae3aee9013fe0006e4988"
+        }
+      ]
+    }
+  },
+  "goal_sha256_history": [
+    {
+      "sha256": "9ca0ceab49311eca448dd5e9efdd02a62f72de7b93ac214728e4dc0027218700",
+      "note": "state at admission: 15 constraints (scope decision B opened the referent-supervision axis), 11 bans"
+    },
+    {
+      "sha256": "9ca0ceab49311eca448dd5e9efdd02a62f72de7b93ac214728e4dc0027218700",
+      "note": "current: 16 constraints; the added constraint 16 is the 2026-09-16 allocation change (server-6 GPU7 only, capacity 2 instead of 4). It tightens the host whitelist and does not widen any scientific gate."
+    },
+    {
+      "sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b",
+      "note": "current: 18 constraints; the 2026-09-21 allocation change restores server-6 GPU7 (max_tasks_per_gpu=2, capacity 2) and removes server-4 from the project whitelist. M197 remains stopped_unknown and is not restarted by this administrative change; all scientific gates and evidence remain unchanged."
+    }
+  ],
+  "goal_change_note": "Re-verified after the 2026-09-21 allocation edit: new training and native diagnostics now target server-6 GPU7 with max_tasks_per_gpu=2, design capacity 2; server-4 is removed from the whitelist. This administrative host change does not relax Phase1 no-tuning, FLOPs, memory, validation boundaries, scene-uncertainty, banned[], or any admission gate. M197 remains stopped_unknown and any resume still requires the full safe-resume admission chain. The mechanism, commit, config, code and all scientific evidence are unchanged."
+}

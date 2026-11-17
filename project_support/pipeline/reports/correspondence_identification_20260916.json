@@ -1,0 +1,294 @@
+{
+  "scope": "Static reanalysis of archived fixed TRAIN captures; no native forward, optimizer, inference GT or efficacy evidence.",
+  "checks_passed": 20,
+  "derivation": {
+    "objective": "L=-log(sum_{i in C} p_i), p=softmax(z)",
+    "gradient": "dL/dz_j=p_j-1[j in C]*p_j/sum_{i in C}p_i",
+    "null_space": "For |C|=k>1 and interior probabilities, any perturbation supported on C with sum zero preserves L exactly; k-1 probability directions are unobserved.",
+    "empty": "C empty gives infinite loss, not a negative/background label.",
+    "singleton": "Algebra reduces to CE, but exact-name uniqueness does not establish parser correctness or intended physical referent.",
+    "consequence": "Neither graph-distinct mention tokens nor paired modalities remove this objective ambiguity unless they provide a validated instance-specific constraint. This is an objective-specific limitation, not impossibility of learning."
+  },
+  "groups": {
+    "all": {
+      "mentions": 222,
+      "expressions": 118,
+      "scenes": 32,
+      "empty": 75,
+      "singleton": 79,
+      "multiple": 68,
+      "target_containing": 27,
+      "within_set_probability_degrees_unidentified": 237
+    },
+    "success": {
+      "mentions": 150,
+      "expressions": 83,
+      "scenes": 31,
+      "empty": 56,
+      "singleton": 56,
+      "multiple": 38,
+      "target_containing": 15,
+      "within_set_probability_degrees_unidentified": 143
+    },
+    "confident_wrong": {
+      "mentions": 61,
+      "expressions": 30,
+      "scenes": 16,
+      "empty": 17,
+      "singleton": 17,
+      "multiple": 27,
+      "target_containing": 10,
+      "within_set_probability_degrees_unidentified": 86
+    }
+  },
+  "graph_joins": [
+    {
+      "key": [
+        "scene0642_00",
+        44,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 1,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0481_00",
+        81,
+        1
+      ],
+      "matched": true,
+      "candidate_count": 16,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0288_00",
+        31,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 2,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0327_00",
+        59,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 4,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0289_00",
+        64,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 14,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0220_00",
+        20,
+        3
+      ],
+      "matched": true,
+      "candidate_count": 1,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0220_00",
+        23,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 5,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0421_00",
+        75,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 1,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0319_00",
+        34,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 4,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": true
+    },
+    {
+      "key": [
+        "scene0319_00",
+        35,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 4,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": true
+    },
+    {
+      "key": [
+        "scene0192_00",
+        7,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 1,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0039_00",
+        17,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 0,
+      "target_in_candidates": false,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0110_00",
+        5,
+        3
+      ],
+      "matched": true,
+      "candidate_count": 0,
+      "target_in_candidates": false,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0110_00",
+        7,
+        1
+      ],
+      "matched": true,
+      "candidate_count": 2,
+      "target_in_candidates": false,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0420_00",
+        98,
+        1
+      ],
+      "matched": true,
+      "candidate_count": 4,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0416_00",
+        74,
+        1
+      ],
+      "matched": true,
+      "candidate_count": 8,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0452_00",
+        59,
+        2
+      ],
+      "matched": true,
+      "candidate_count": 5,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0452_00",
+        59,
+        3
+      ],
+      "matched": true,
+      "candidate_count": 5,
+      "target_in_candidates": true,
+      "isolated": false,
+      "missing_endpoint": false
+    },
+    {
+      "key": [
+        "scene0209_00",
+        15,
+        1
+      ],
+      "matched": true,
+      "candidate_count": 2,
+      "target_in_candidates": true,
+      "isolated": true,
+      "missing_endpoint": false
+    }
+  ],
+  "limitations": [
+    "Exact-name sets use existing raw TRAIN annotation for diagnosis only.",
+    "No claim that the actual model optimizes this hypothetical objective.",
+    "Repeated mention/scene counts are not independent observations.",
+    "No complete mechanism or novelty claim; no new standalone candidate."
+  ],
+  "sources": [
+    {
+      "path": "pipeline/reports/mention_instance_support_20260916.json",
+      "sha256": "eb4d6fc5ca5dd6c22ff02f38299bfe213ddaa74351c71198332d728a595a75c2"
+    },
+    {
+      "path": "pipeline/reports/mention_graph_observability_20260916.json",
+      "sha256": "8331c06945583722f9cf3c666bb4649e05b9a926ddd71ee921f3f5e93ac239b2"
+    },
+    {
+      "path": "scripts/correspondence_identification_20260916.py",
+      "sha256": "11a2a3276703158d609a4d6c55c2c10626425f660609d9682155ffe6454444e6"
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+"""Persist a quiet actual resource check, with no new scientific PASS or queue work."""
+from pathlib import Path
+from datetime import datetime,timezone,timedelta
+import copy,hashlib,json,os,sys
+from anchor_bfc_packet import guard
+ROOT=Path('D:/project/cluster_project');HERE=Path(__file__).resolve().parent
+SKILL=Path('C:/Users/chuanle song/.codex/skills/songcl_research_pipeline')
+TOKEN='b5dc39b4780a44c6855520bc22692b65';CTS='hierarchy-parent-cyclic-triadic-state-composition'
+def read(p):return json.loads(Path(p).read_text('utf8'))
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def ref(p):return {'path':Path(p).relative_to(ROOT).as_posix(),'sha256':sha(p)}
+def save(p,x):
+    temporary=p.with_name(p.name+'.'+TOKEN+'.tmp')
+    with temporary.open('x',encoding='utf8') as f:
+        if isinstance(x,str):f.write(x)
+        else:json.dump(x,f,ensure_ascii=False,indent=2,allow_nan=False);f.write('\n')
+        f.flush();os.fsync(f.fileno())
+    os.replace(temporary,p)
+def add(c,paths):
+    for p in paths:
+        item=ref(p)
+        if item not in c.setdefault('evidence',[]):c['evidence'].append(item)
+def main():
+    owner=guard()
+    assert not any((HERE/n).exists() for n in ['persist_intent.json','final_tick_persisted.json','codex_memory_before_finalization.md'])
+    snapshot=read(ROOT/'pipeline/headless/.tick_model_view.json')
+    assert snapshot['experiment_first']['enabled'] and snapshot['research']['creation_budget']==snapshot['research']['reserve_budget']==0
+    assert snapshot['queue']['running_count']==2 and snapshot['queue']['ready_waiting_count']==0 and snapshot['changes']['new_terminal_ids']==[]
+    observation_path=HERE/'active_runs_progress_observation.json';observation=read(observation_path)
+    local_path=HERE/'cts_actual_local_guard_integration.json';local=read(local_path)
+    assert sha(observation_path)=='94db2bf8bcab2c3870d7a9d5fb91c32056da93ce4006685e8261304ede22ac62'
+    assert sha(local_path)=='5543eb11dd7ae41d92799784f737564ee97a4d2433f2360bf0e6a1ee3a0df0ee'
+    assert all(x['native_TRAIN_growth'] for x in observation['summary'])
+    assert local['actual_transport_calls']==0 and local['active_binding_manifest_lease_or_execution_directory_created'] is False
+    assert local['native_execution']==local['resources']=='NOT_RUN' and local['current_owner_token']==TOKEN
+    review_path=HERE/'progress_and_readiness_review.json';review=read(review_path)
+    assert review['material_concerns']==[]
+    held_path=HERE/'held_boundary_check.json';held=read(held_path)
+    assert held['material_concerns']==[] and held['new_action'] is False and held['user_decision'] is False
+    assert not (HERE/'cts_execution').exists() and not (HERE/'bec_execution').exists()
+    sys.path.insert(0,str(SKILL));import pipeline_monitor as monitor
+    lock=monitor.acquire_lock(str(ROOT));assert lock is not None
+    try:
+        guard();before=read(HERE/'protected_assets_before.json')
+        assert all(sha(ROOT/'pipeline'/n)==h for n,h in before['protected_ledgers'].items())
+        work=read(ROOT/'pipeline/research_work.json');old=copy.deepcopy(work)
+        assert len(work['candidates'])==len(before['candidate_digests'])==141
+        c=next(c for c in work['candidates'] if c['id']==CTS)
+        assert c['stage']=='validation' and c['code_commit']=='4e80006047d5cb3dcdfb9c1102e02c33f354a07d' and c['native_execution_code_commit'] is None
+        assert c['execution_adapter'].get('actual_current_local_guard')!=ref(local_path)
+        c['execution_adapter']['actual_current_local_guard']=ref(local_path)
+        c['execution_adapter']['latest_readonly_resource_review']=ref(review_path)
+        c['native_status']='NOT_RUN_CURRENT_ALLOWED_CARDS_BUSY_WITH_ORIGINAL_BFC_AND_BCR'
+        c.setdefault('resource_wait_history',[]).append(copy.deepcopy(c.get('resource_wait',{})))
+        c['resource_wait']={'allowed_server':'server-4','allowed_physical_gpus':[0,1],
+            'observed_at':observation['observations'][-1]['observed_at'],
+            'observed_tasks':{'0':{'id':'M213-BFC','pid':219369,'start_ticks':'56265957'},'1':{'id':'M212-BCR','pid':1215422,'start_ticks':'51717921'}},
+            'evidence':[ref(observation_path),ref(local_path)],
+            'scope':'Actual original native TRAIN growth, exact UUID/unique NVML contexts, current registered-busy refusal. Resource check is blocked; this grants no native lease/idle assurance and does not park the prepared reserve or change its scientific gates.'}
+        add(c,[observation_path,local_path,review_path])
+        for eid in ['M213-BFC','M212-BCR']:
+            running=next(x for x in work['candidates'] if x.get('experiment_id')==eid)
+            add(running,[observation_path,review_path])
+            running['latest_runtime_observation']={'evidence':ref(observation_path),'independent_review':ref(review_path),
+                'shared_runtime_commit':'48fc302c3c02ffef0b241be3593c386b6b65a72e','admitted_source_unchanged':running['code_commit'],
+                'scope':'Read-only original process/source/log/UUID and actual TRAIN growth, no restart/migration/operation on jobs.'}
+        work['tick_attempt']={'tick_started_at':owner['generated_at'],'candidate_id':CTS,'kind':'resource_check','result':'blocked',
+            'command':"python -B -X utf8 'D:/project/cluster_project/pipeline/diagnostic_bundles/tick_b5dc39b4/check_cts_actual_guard.py'",
+            'observation':'Existing reviewed CTS catalog passes current owner/context/deadline/source/whitelist guards, but both selected cards refuse as registered running before transport. Separate actual read-only NVML/process/source/log observations confirm original BFC0/BCR1 and increasing native TRAIN steps. No idle slot, native data/backward/resource run, active artifacts or admission/queue/launch created. Existing prepared tools unchanged; no new research conclusion.',
+            'evidence':[ref(local_path),ref(observation_path),ref(review_path)]}
+        work['updated_at']=datetime.now(timezone.utc).isoformat()
+        permitted={CTS,'hierarchy-parent-butterfly-token-composition','hierarchy-parent-bidirectional-complement-recurrence'}
+        assert [x for x in work['candidates'] if x['id'] not in permitted]==[x for x in old['candidates'] if x['id'] not in permitted]
+        guard();assert all(sha(ROOT/'pipeline'/n)==h for n,h in before['protected_ledgers'].items())
+        with (HERE/'persist_intent.json').open('x',encoding='utf8') as f:
+            json.dump({'token':TOKEN,'helper_sha256':sha(Path(__file__)),'research_work_before_sha256':sha(ROOT/'pipeline/research_work.json'),
+                'scope':'Once-only quiet resource observation bookkeeping; existing journal or current evidence requires readonly reconciliation, never replay.'},f,indent=2)
+            f.write('\n');f.flush();os.fsync(f.fileno())
+        save(ROOT/'pipeline/research_work.json',work)
+        memory_path=ROOT/'pipeline/codex_memory.md';memory=memory_path.read_text('utf8')
+        with (HERE/'codex_memory_before_finalization.md').open('xb') as f:f.write(memory_path.read_bytes())
+        lines=memory.splitlines();i=next(i for i,line in enumerate(lines) if line.startswith('- 最新接管'))
+        lines[i]=f'- 最新接管{TOKEN}；实际owner/target01a159c5-29ab-7a22-ba7f-e79174757253一致；generated{owner["generated_at"]}/原deadline{owner["deadline_at"]}不延长。前f86d FINALIZED/released且lock/pending消失后begin；本轮report/finish以实际receipt为准，不预签。'
+        stamp=datetime.fromisoformat(observation['observations'][-1]['observed_at']).astimezone(timezone(timedelta(hours=8))).isoformat()
+        i=next(i for i,line in enumerate(lines) if line.startswith('- 采集'))
+        lines[i]=f'- 采集{stamp}上海：BFC原PID219369/start56265957 GPU0 Train10/50 1086→1093/4686；BCR原PID1215422/start51717921 GPU1 Train21/50 3551→3556/4686。两原TRAIN增长/8源/YAML77e/唯一argv-cwd-fd1/UUID/唯一NVMLcontext核实，proof94db2bf8…/本轮独审留档；当前best等实时指标未测，不用cursor或缓存代签。'
+        i=next(i for i,line in enumerate(lines) if line.startswith('- 本轮旧9 parked不due'))
+        lines[i]='- 本轮旧9到期，仅声明candidate内容/证据path-hash签名及授权目录元数据有界复核；未改候选/读655正文/旧grant正文/checkpoint body。新动作/用户决定均false，原scope/失败/修订上限/M206pause保持，复查不是新授权。'
+        memory='\n'.join(lines)+'\n'
+        memory=memory.replace('- 本轮f86d CTS只读','- 前f86d CTS只读').replace('- 本轮f86d BEC禁用','- 前f86d BEC禁用')
+        memory=memory.split('\n## Last Tick')[0]+f'''
+## Last Tick
+- 本轮b5dc snapshot2running/0ready、reserve2/creation0，due11含CTS/BEC及旧9，无新terminal/operationalissue。begin已查进展/尝试派发既有合格队列，M206paused不计ready。
+- 本轮只读BFC10:1086→1093、BCR21:3551→3556均增长、原PID/start/argv/log/源8/YAML77e/UUID和两唯一GPUcontext保持。当前catalog fresh CTSguard5543eb11…通过当前owner/context/原deadline但两registered卡均beforetransport busy拒绝，0native/transport/active；真实resource_check=blocked，不是机制失败。
+- CTS源4e8/原51cbc工具/checker82da+审5d36，BEC原2d06+disabled322c/审ecf0均沿用，不重跑已过软件检查、不造重复工具或额外模型候选。旧9声明元数据到期复核无新许可/变化，不重开旧路或恢复M206。
+- 0新候选/0实现修订/0准入/0queue/0启动/0新训练终态，141IDs集合、公共HEAD48fc/index空/28保护status+bytes/10运行归档账保持；仅CTS资源观察与两原在训观察指针更新。当前无新的研究结论/用户可处理项，按通知策略DONT_NOTIFY。
+- 资源自然空槽后继续现有CTS原M95对照TRAIN2/资源；BEC保留版本兼容整理待执行项，不称缺用户授权。完整七段memory/真实blocked tick_attempt/Chinese notes及六段report，canonical finish核实际FINALIZED/released和lock/pending消失；未发生前不预签，释放后不回写。
+'''
+        assert memory.count('\n## ')==7 and len(memory.splitlines())<120
+        save(memory_path,memory)
+        notes={'actions':[
+            '本轮actual owner一致，前f86d已FINALIZED/released且lock/pending消失后begin；snapshot2running/0ready、reserve2/creation0，due11含CTS/BEC和旧9，无新terminal或连接/源/派发故障。M206paused不是ready，未另跑monitor。',
+            '有界只读真观察：BFC GPU0 Train10 1086→1093，BCR GPU1 Train21 3551→3556，原PID/start/argv/cwd/log/8源/YAML77e/UUID与各唯一NVMLcontext保持；publicruntime48fc/BCR科学11a分开。当前best等实时指标未采，不用cursor或缓存代签。',
+            '既有CTS受审catalog通过本轮fresh实际owner/context/原deadline/source/whitelist检查；两registered卡prepare0/1均beforetransport拒绝，14非法入口和deadline拒绝。0process/network/Torch/active，原生与资源未执行；resource_check blocked按原样留证。',
+            'CTS原4e8/51cbc与前f86d checker82da/5d36，BEC原2d06与disabled322c/ecf0沿用，本轮无新工具/实现、无新机制结论；未重跑已过软件tests，未为了填额度新增模型或把静态准备写成native PASS。',
+            '到期旧9仅声明元数据、证据path-hash签名与授权目录listing核验，未读655正文/旧grant正文/checkpoint body；无新授权或需用户处理项，不改旧scope/负结果/修订预算/M206暂停。',
+            '0新候选/0修订/0准入/0queue/0启动/0新训练终态；保持两原运行、公共48fc/index空/28保护status+bytes、10运行归档账、141IDs/goal/资源/禁项/data/seed/schedule/YAML/调度。'],
+            'decisions':[]}
+        save(HERE/'report_notes.json',notes)
+        guard();assert all(sha(ROOT/'pipeline'/n)==h for n,h in before['protected_ledgers'].items())
+        save(HERE/'final_tick_persisted.json',{'token':TOKEN,'new_candidates':0,'new_admissions':0,'new_launches':0,'new_terminal_experiments':0,
+            'resource_check':'BLOCKED_BOTH_PROTECTED_ORIGINAL_JOBS_BUSY','native':'NOT_RUN','current_progress':ref(observation_path),
+            'current_CTS_guard':ref(local_path),'held_metadata_check':ref(held_path),'memory_lines':len(memory.splitlines()),'notification':'DONT_NOTIFY','postflight':'NOT_YET_CALLED'})
+        print(json.dumps({'status':'QUIET_REAL_RESOURCE_CHECK_PERSISTED','resource_check':'blocked','new_research_conclusion':False,'memory_lines':len(memory.splitlines())}))
+    finally:lock.close()
+if __name__=='__main__':main()

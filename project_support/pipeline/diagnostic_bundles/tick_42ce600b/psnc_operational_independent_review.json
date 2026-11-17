@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-10-22T20:22:51.469547+00:00",
+  "reviewer": "/root/mdc_review",
+  "scope": "PSNC/M210 new operational packet; independent offline fixtures and bounded source/identity/guard review only",
+  "verdict": "OFFLINE_OPERATIONAL_PREPARATION_REVIEW_PASSED_NATIVE_NOT_RUN",
+  "material_concerns": [],
+  "preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/preparation.json",
+    "sha256": "551011dcdaeb361abd8676ac0bf771e62712d2d55578b18723ba0043843733e0"
+  },
+  "source_commit": "43dce016c1a1713c2a5dab7061810dc2efde8954",
+  "single_parent_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "primary_HEAD_observed": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "source_version_checks": {
+    "exactly9_added_paths": true,
+    "all9_git_blobs_equal_frozen_staged_source_bytes": true,
+    "worker69e2_entire_file_unchanged": true,
+    "resource_function_AST_equal_reviewed_PSBR": true
+  },
+  "hash_maps": {
+    "psnc_operational_prepare/preparation.json": {
+      "entry_count": 28,
+      "mismatches": []
+    },
+    "psnc_operational_prepare/native/preparation.json": {
+      "entry_count": 14,
+      "mismatches": []
+    },
+    "psnc_operational_prepare/native/manifest_template.json": {
+      "entry_count": 12,
+      "mismatches": []
+    }
+  },
+  "reviewed_sources": {
+    "adapter.py": "95d6788db45eb014cfc6bb354bac346874f8db6bc1d6536e06e500249ea4f682",
+    "remote_ops.py": "46c2843636baf06ce6b8bac43e47828277aaa3c6363e875a46b59a7aba09247a",
+    "release_template.json": "a4000485b1cffdff7cb623ed2840a4d6b3c531baac5ed1b4a6a04cb04b48c749",
+    "native/preparation.json": "eebd34a6d2123cc8728d5e2dd6ebc8d055473e5bbf8da1fd33f909ae4e1c77d6",
+    "native/manifest_template.json": "d55848c32d8e95a3d4d34dc1a339050fb9f8b2d96b2bc74fe18c3a138bb63bd4",
+    "native/native_runtime.py": "2ce27fd74be2fe5bb046d2df61b94820ed871fc711e0591d60825217348f26e7",
+    "native/worker.py": "69e2f096475fb31d533d0c701a15cf9c08dc7e5d9e85d6ba58d953af50eafcdd",
+    "native/source_version_binding.json": "544d5d85e1bca26bf06cbcd171e9cfada53412d8425a5ff5819cfd7505d6b40c",
+    "README.md": "422f045128f40759b0d9f0f778f8ad3f86428622b639951675e41085af8ec8e3"
+  },
+  "independent_actual_offline_run": {
+    "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/independent_offline_run_v1.json",
+    "sha256": "70bebcef5c0b3beda267dac324fd662ac38f5df327fec815c97bf4e1ca9f9401",
+    "cases": 40,
+    "failures": 0,
+    "errors": 0,
+    "source_unchanged_during_run": true,
+    "network_or_process_events": 0,
+    "torch_imported": false,
+    "native": "NOT_RUN",
+    "scope": "31 prior fixture intents ported; successful GPU selection changed to0; 9 new GPU/account/external-release boundary cases"
+  },
+  "new_cases": [
+    "GPU1 refused even when capability allowlist contains0/1",
+    "wrong SSH user refused by current guard",
+    "direct transport wrong user/host refused before subprocess",
+    "missing real static release refused before transport/lease",
+    "wrong external preparation SHA refused",
+    "wrong external release SHA refused",
+    "release/template mismatch refused despite self-consistent release anchor",
+    "complete temporary real external release/preparation anchor accepted by _release_details only",
+    "remote GPU1 binding/probe refused before inventory/process"
+  ],
+  "additional_creator_results": {
+    "path": "pipeline/diagnostic_bundles/tick_42ce600b/psnc_operational_prepare/packet_static_validation.json",
+    "sha256": "d20927d0ea40c25e1ed0aa2ffba7de8342573d507ba096a69995b746156738c1",
+    "cases": 11,
+    "reported_pass": true,
+    "independently_rerun": false,
+    "scope": "Creator actual result read and source/hash-bound; independent checks above separately verify core relevant invariants"
+  },
+  "AST_unchanged_safety_functions": {
+    "adapter": [
+      "Adapter._local_idle",
+      "Adapter._check_probe",
+      "Adapter._read_reconcile",
+      "Adapter._no_replay",
+      "Adapter.stage",
+      "Adapter._perform",
+      "Adapter._previous_complete",
+      "Adapter.run",
+      "Adapter.pair",
+      "Adapter.status",
+      "Adapter.reconcile"
+    ],
+    "remote": [
+      "check",
+      "sha",
+      "write",
+      "read",
+      "identity",
+      "require_fresh",
+      "require_idle",
+      "native_verify",
+      "stage_operation",
+      "process_info",
+      "exact_workers",
+      "run_operation",
+      "command_matches",
+      "reconcile_operation",
+      "dispatch"
+    ],
+    "runtime": [
+      "require_promoted_version",
+      "sha",
+      "observe",
+      "acquire",
+      "release",
+      "fingerprint",
+      "save"
+    ]
+  },
+  "reviewed_changes": [
+    "PSNC CID/M210/source43/config/package/stage namespace/frozen packet metadata",
+    "physical GPU0-only guards in adapter/binding/remote/runtime",
+    "pinned songcl@192.168.1.115 at guard/binding/transport plus expected hostname assertion on every SSH script",
+    "whole-package external current candidate preparation/release path and hash anchoring before transport",
+    "40hex promoted source requirement and source_version_binding verify prefix",
+    "run_pair is only an alias to unchanged pair"
+  ],
+  "guard_findings": [
+    "Current foreground mode/environment/thread/owner/context+pending/goal/deadline remain required; unchanged original deadline is never extended by this packet",
+    "Mutation separately requires current policy/grant/candidate/config/version/eligible stage/no scoped holds and snapshot/live whitelist consistency",
+    "Physical GPU0/UUID fixed; original running/claiming/launch-uncertain occupancy preserves slot, ordinary waiting/dependency hold does not reserve a card",
+    "Busy/short-deadline/missing-anchor paths do not create manifest/lease; three locks and two native idle observations precede torch setup",
+    "Existing request/uncertain result never triggers blind replay; exact mode/target/request/stage/PID/start_ticks/argv/result identities are retained for read-only reconciliation",
+    "Cross-tick read-only status/reconcile does not renew old lease; mutation requires exact current original6owner fields"
+  ],
+  "protected_old_preparation_hashes": {
+    "pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare/preparation.json": "302432f1e2ba136576c4eb8a814a7ab3fb9596272304924b2a9db356074b49de",
+    "pipeline/diagnostic_bundles/tick_d6b400e3/psnc_native_prepare/preparation.json": "4c573d8ef12c817336f03af573a192a0d866d289c37d1f888dad2351053ebeef"
+  },
+  "artifact_state_at_review": {
+    "production_adapter_release_exists": false,
+    "current_tick_psnc_execution_directory_exists": false,
+    "remaining_temp_fixture_directories": [],
+    "child_created_production_binding_or_lease": false,
+    "source_or_shared_ledger_writes_by_reviewer": false
+  },
+  "migration_history_note": "independent_test_port.json is the earlier NOT_RUN_YET literal migration snapshot. Current pass evidence is independent_offline_run_v1.json with current source hashes; no earlier failure is overwritten.",
+  "limitations": [
+    "Offline mocks and static AST/hash review do not prove native kernel/gradient/FP32 DCT accuracy, memory, timing, loss or task efficacy",
+    "Native TRAIN2/resource four-run chain, real GPU idleness/locks and pairing remain NOT_RUN in this operational preparation",
+    "The independent run did not use actual production guard/transport; current-root NoTransport guard integration is a separate owning-root step",
+    "Only primary HEAD was rechecked here; protection of primary index/28 dirty files and active HRC/PSBR/M206 ledgers is separately reviewed by root/pce",
+    "No new release, active manifest/binding/lease, remote stage, standard PASS, receipt, queue entry or admission was created by this review"
+  ],
+  "next_action": "Owning root may materialize only exact static release template and save external candidate SHA anchors, then check actual local guard with NoTransport. Preserve HRC/PSBR FIFO; future real native checks require a fresh owned token/context/deadline and truly idle authorized physical GPU0."
+}

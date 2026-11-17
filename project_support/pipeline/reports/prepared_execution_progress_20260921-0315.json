@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-21T03:14:41.265562+08:00",
+  "snapshot_generated_at": "2026-09-20T19:07:07.727714+00:00",
+  "resumed_due_ids": [
+    "referent-supervision-axis",
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/dependency_inventory_progress_20260921-0215.json",
+      "sha256": "6ce187169ef62da609a27161faf09fea3adf90ad34f110b67c56f946d8d89e47"
+    },
+    {
+      "path": "pipeline/reports/saved_replay_migration_20260920-1015.json",
+      "sha256": "e9439c2ddd0f2913970a66353ca4e089014491ed5de66f3041f2fbc8143a4531"
+    },
+    {
+      "path": "pipeline/decisions/20260921-031411_other.md",
+      "sha256": "dd520bc9aed024d9efac7a0d28ceccb07093f531ba05bbccb4b6c5401681c6d4"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "4d645fb5c39f5dbd9e1a9d7773a86f1267e2d6637c22f1cf96ed8317d8ab1f38"
+    },
+    {
+      "path": "SERVERS.yaml",
+      "sha256": "4df853316bde84adef2adaf1f7dad63b0be8c57af011297d8154f5588893085c"
+    },
+    {
+      "path": "scripts/prepared_collation_execution_20260921.py",
+      "sha256": "616268a07d6ed97c4bb44af377ca1ea9fe7ce258e871a01657bf5bb765ae8d0c"
+    },
+    {
+      "path": "scripts/test_prepared_collation_execution_20260921.py",
+      "sha256": "dc936eb097d0fa7045f2ce8f1f30870844ef6704cd1c91beb13a8a5ff4c60d06"
+    },
+    {
+      "path": "scripts/persist_prepared_execution_tick_20260921.py",
+      "sha256": "3ff2b0e40d24268b5daa0a0b58e255762f5422b706932acf79c8d00718fec298"
+    },
+    {
+      "path": "scripts/prepare_collation_handoff_20260921.py",
+      "sha256": "65d16b534699e58fdb81ee5a0b80ce62e2a86cc5255735dc6592e614d6575856"
+    },
+    {
+      "path": "scripts/bounded_collation_process_20260921.py",
+      "sha256": "99df935d9dd4c5d5b1e3e2842687b5c675ee78ac77e2b15db078e162ccfd6998"
+    },
+    {
+      "path": "scripts/scratch_collation_launch_20260920.py",
+      "sha256": "521730473cd4728f16b3af86a395e5a2e6d103981c7b4727eb3744c1773d2270"
+    }
+  ],
+  "connectivity": {
+    "server": "server-4",
+    "attempts": 1,
+    "returncode": 1,
+    "stderr": "ssh: connect to host 192.168.1.137 port 22: Connection refused",
+    "command": "ssh -o BatchMode=yes -o ConnectTimeout=8 -o ConnectionAttempts=1 songcl@192.168.1.137 \"hostname; id -un; nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu --format=csv,noheader; test -d /data/songcl/Project/Cluster_project/Cluster && test -d /home/songcl/data/data && test -d /data/songcl/Project/Cluster_project/Cluster_checkpoints && test -f /home/dl04/anaconda3/etc/profile.d/conda.sh\"",
+    "evidence_basis": "Observed exec_command this tick; no scripted retry",
+    "runtime_verified": false,
+    "gpu_occupancy_verified": false
+  },
+  "validation": {
+    "tests_run": 520,
+    "tests_passed": 516,
+    "skipped": [
+      {
+        "test": "test_descendant_pipe_is_closed_after_leader_exit (test_bounded_collation_process_20260921.ProcessTests.test_descendant_pipe_is_closed_after_leader_exit)",
+        "reason": "Linux process-group cleanup needs Linux"
+      },
+      {
+        "test": "test_symlink_source_rejected (test_pinned_diagnostic_imports_20260920.PinnedImportsTest.test_symlink_source_rejected)",
+        "reason": "Symlink creation unavailable: [WinError 1314] \u5ba2\u6237\u7aef\u6ca1\u6709\u6240\u9700\u7684\u7279\u6743\u3002: 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpdy3cpbkr\\\\real.py' -> 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpdy3cpbkr\\\\bundle\\\\_synthetic_pinned_producer.py'"
+      },
+      {
+        "test": "test_exception_removes_real_module_hook (test_geometry_torch_static_20260919.SyntheticTorchTest.test_exception_removes_real_module_hook)",
+        "reason": "Torch not installed locally"
+      },
+      {
+        "test": "test_strided_float_labels_real_module_hooks (test_geometry_torch_static_20260919.SyntheticTorchTest.test_strided_float_labels_real_module_hooks)",
+        "reason": "Torch not installed locally"
+      }
+    ],
+    "modules": [
+      "test_prepared_collation_execution_20260921",
+      "test_saved_dependency_inventory_20260921",
+      "test_prepare_collation_handoff_20260921",
+      "test_bounded_collation_process_20260921",
+      "test_host_collation_receipts_20260920",
+      "test_scratch_collation_launch_20260920",
+      "test_native_factory_bridge_20260920",
+      "test_relocated_native_factory_20260920",
+      "test_relocated_factory_core_20260920",
+      "test_same_child_collation_20260920",
+      "test_scratch_cpu_boundary_20260920",
+      "test_cpu_diagnostic_bootstrap_20260920",
+      "test_pinned_diagnostic_imports_20260920",
+      "test_native_saved_batch_validation_20260920",
+      "test_relocated_saved_collation_20260920",
+      "test_saved_physical_location_20260920",
+      "test_saved_replay_migration_20260920",
+      "test_recover_cpu_progress_20260920",
+      "test_probe_next_saved_replay_20260920",
+      "test_probe_next_physical_20260920",
+      "test_native_saved_geometry_driver_20260920",
+      "test_saved_geometry_replay_20260920",
+      "test_probe_saved_collation_20260920",
+      "test_probe_physical_items_20260920",
+      "test_stage_registry_diagnostic_20260920",
+      "test_remote_registry_inventory_20260920",
+      "test_registry_runner_cli_20260920",
+      "test_native_registry_geometry_runner_20260920",
+      "test_referent_registry_binding_20260919",
+      "test_referent_geometry_registry_20260919",
+      "test_geometry_torch_static_20260919",
+      "test_native_geometry_runtime_20260919",
+      "test_referent_geometry_capture_20260919",
+      "test_referent_geometry_control_20260919",
+      "test_referent_native_expression_producer_20260919",
+      "test_referent_object_rank_capture_20260919",
+      "test_referent_target_rank_evaluator_20260919",
+      "test_native_endpoint_capture_20260916",
+      "test_frozen_capture_contract_20260916"
+    ],
+    "new_tests": 16,
+    "output": "..........................................s..................................................................................................................................................................s..................................................................................................................................................................................................ss......................................................................................................................\n----------------------------------------------------------------------\nRan 520 tests in 21.713s\n\nOK (skipped=4)\n",
+    "initial_failure": "Windows short temporary path rejected by boundary; fixture now resolves path, production checks unchanged; 16 focused tests rerun passed.",
+    "native_data_loaded": false,
+    "bubblewrap_execution": false,
+    "linux_process_group_test_executed": false
+  },
+  "completed_work": [
+    "Single internal adapter connects exact prepared command/run to complete_handoff.",
+    "Independent binding/digest/indices frozen before validators and child execution.",
+    "Before-prepare and before-launch external validator hooks; copied contracts.",
+    "Host pins rechecked after final validator; no retries, fallback or native CLI.",
+    "Invalid budgets, expectations, flags, pin drift and failures reject without launch.",
+    "Actual stdlib child verified against synthetic on-disk artifacts; mismatched binding rejects.",
+    "Sixteen new tests plus bounded regression; original migration evidence rehashed."
+  ],
+  "registry_denominator": 31,
+  "physical_bindings_verified": 9,
+  "physical_bindings_missing": 22,
+  "model_geometry_captures": 0,
+  "production_execution_validator_implemented": false,
+  "external_dependency_attestation": false,
+  "destination_bytes_verified": false,
+  "native_cli_completed": false,
+  "native_cpu_execution": false,
+  "native_gpu_execution": false,
+  "checkpoint_transfer": false,
+  "training_tree_sync": false,
+  "training_launch": false,
+  "admission": false,
+  "scientific_validation_complete": false,
+  "queue_changed": false,
+  "queue_sha256": "1fb0bf22702581457204f05b95b1bf30c9e682534d605c34aaeb8ae7ff5a8746",
+  "blocker": "One scheduled server-4 SSH attempt refused port22. Runtime/GPU/data/checkpoints/native dependencies and Linux enforcement remain unverified. Internal handoff integration is not an execution validator, dependency attestation or checkpoint recovery.",
+  "next_action": "Continue the existing saved diagnostic, not a new mechanism. The internal prepare_and_complete adapter is synthetically tested; no production execution validator or native CLI exists. Next implement/test a separate location-aware prepare_replay consuming exact saved collation receipts/batches and independent original full31 binding, preserving original producer/provenance and no resampling. Retry server-4 once at/after 2026-09-21T04:07:00+08:00. On verified access check runtime/code/data/work paths and GPU0/1 occupancy; measure actual dependencies, extension ABI/shared libraries, tokenizer assets and nonempty TRAIN listing. Verify3 saved artifacts/6 data hashes and Linux group cleanup/bwrap enforcement. A real external execution validator must recheck those gates before using the adapter. Then collate 3040/3893, prepare saved replay, export3921/4278 retaining31. Local static/synthetic only; never regenerate recovered groups or run unchanged server-6 driver.",
+  "retry_after": "2026-09-21T04:07:00+08:00",
+  "pending_questions_24h": [],
+  "limitations": [
+    "A validator callback invocation cannot prove deployment validation; no real validator supplied.",
+    "Host preparation mocked in adapter tests; independently covered by existing synthetic tests.",
+    "Real subprocess/receipt verification uses only synthetic bytes, not native tensors.",
+    "No Linux sandbox, native dependency compatibility, runtime or physical endpoint measured.",
+    "Hashes establish identity, not scientific validity; scientific admission unchanged.",
+    "M197 checkpoint recovery remains independently blocked; shared adapter is not M197 progress."
+  ]
+}

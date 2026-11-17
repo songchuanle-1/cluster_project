@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T12:30:42.602154+00:00",
+  "reviewer_agent": "/root/mdc_review",
+  "status": "FINAL_LOCAL_METADATA_AND_REAL_GUARD_RECORD_REVIEW_PASS_NATIVE_NOT_RUN",
+  "material_concerns": [],
+  "scope": "Read-only bounded final current-state and two actual-root-script/record review; no test rerun, script invocation, SSH/GPU/torch, shared-state mutation or HAP interaction.",
+  "owner_token": "37695e94da4a485c8979d474d3f33b39",
+  "active_HRC": {
+    "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "stage": "blocked",
+    "resume_stage": "validation",
+    "blocker_kind": "exclusive_gpu_slot",
+    "scientific_admission": false,
+    "current_external_refs_hash_verified": true,
+    "verified_active_and_historical_ref_count": 32,
+    "version_binding_history_count": 1,
+    "old9e_full_worker_and_adapter_sections_equal_saved_pre_activation_candidate": true,
+    "all_original_evidence_refs_preserved": true,
+    "model_revision_or_old_result_relabel": false,
+    "native_status": "NOT_RUN_waiting_authorized_idle_gpu",
+    "resource_status": "NOT_RUN_waiting_authorized_idle_gpu"
+  },
+  "actual_root_records": {
+    "activation": {
+      "path": "pipeline/diagnostic_bundles/tick_37695e94/hrc_forward_binding_activation.json",
+      "sha256": "f7fd4ffb7350c2254d86dc402750e5acbdc394182a79292e7c1ba775a3392552"
+    },
+    "guard_integration": {
+      "path": "pipeline/diagnostic_bundles/tick_37695e94/hrc_forward_actual_guard_integration.json",
+      "sha256": "ddf0d25004a2c22868418df3234e2975cb65cd10cb12fe62eef5e0031384e881"
+    },
+    "scripts": {
+      "activate_hrc_forward_binding.py": "9e8f4659862d9dd9fd07bc55e1842ce95a9ed36c2cde045c486cc5871023aedf",
+      "check_hrc_forward_actual_guards.py": "e3b1239f3286146fb6b6c2a82b1b8c7e55ed03a0a64807c1be1db47b3548ec97"
+    },
+    "script_identity_review": "Activation validates actual os.environ/owner/thread/deadline/context/pending and original current HRC9e, holds canonical pipeline lock, verifies independently supplied review SHA and frozen new anchors before publishing metadata. Guard script reads actual current candidate/root/owner and instantiates the unchanged real Adapter with default root/env/clock; no fixture root or release stub is substituted. DisabledTransport raises on every call; both prepare branches refuse locally and assert calls==0 plus no execution directory. Reviewer did not re-execute either script.",
+    "root_recorded_local_guard": "PASS_LOCAL_ONLY",
+    "GPU0_prepare": "refused registered running task",
+    "GPU1_prepare": "refused currently unauthorized",
+    "remote_transport_calls": 0,
+    "active_execution_directory_exists": false,
+    "native_manifest_lease_stage_results_created": false
+  },
+  "protected_runtime_state": {
+    "root_activation_and_guard_hash_equality_assertions_all_true": true,
+    "current_live_file_sha256": {
+      "queue.json": "f1be18d86292fa2ff70ab45a7683adb45f503e30d51db87162b286493798747f",
+      "running.json": "e6ee27351edcb890b5cd2fd72f1c0400b11ffc1b22a1ddd007bad4a8d315b424",
+      "experiments/M207-HAP.json": "d9b40f647d6de1eee2e1e4e131c91688cd66c9bfe1a1a6677b39694449c11a23",
+      "experiments/M206-CGCA.json": "9921211c288f9df842ecaf8a13d160825fd34809816a2c0550a41f9cacb9dc89"
+    },
+    "source_write_path_review": "Activation writes saved HRC-before snapshot, research_work and its result only; guard writes its own result only. Protected queue/running/HAP/M206 experiment files are hash-checked before/after by those actual scripts, and their record booleans all agree. This audit checks source/records/current hashes; it does not replay root execution or claim another before/after run.",
+    "HAP_current_local_registry": {
+      "id": "M207-HAP",
+      "pid": 1063355,
+      "gpu": "0",
+      "status": "running"
+    },
+    "M206_current_local_registry": {
+      "id": "M206-CGCA",
+      "status": "waiting",
+      "training_status": "paused_by_user",
+      "resume_authorized": false,
+      "dispatch_hold_present": true
+    },
+    "running_mapping": {
+      "server-6": {},
+      "server-4": {
+        "0": "M207-HAP"
+      }
+    },
+    "M206_research_changes_scope": "Activation explicitly compares all M206 fields except evidence, authorization-boundary timestamp and retry; no new resume authority. No queue/experiment M206 changes."
+  },
+  "memory_contract": {
+    "line_count": 59,
+    "section_count": 7,
+    "within120_line_limit": true
+  },
+  "next_action": "Root may append this new bounded review reference and finish the original token. HRC remains prepared/blocked pending a real authorized GPU0 opening; new native/resource/pairing and canonical summaries/receipt/dispatch remain unexecuted. Preserve running HAP, paused M206 and GPU1 exclusion.",
+  "native_or_scientific_PASS": false,
+  "executed": {
+    "read_only_local_files": true,
+    "test_or_root_script_rerun": false,
+    "shared_ledger_memory_queue_model_writes": false,
+    "SSH_GPU_torch": false,
+    "active_binding_or_lease": false
+  }
+}

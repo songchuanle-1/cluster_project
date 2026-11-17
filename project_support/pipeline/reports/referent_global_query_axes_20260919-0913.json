@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T09:12:28.952389+08:00",
+  "scope": "CPU-only synthetic integration evidence for the frozen M95 referent native pipeline; no model forward, native score, queue mutation, training launch, or efficacy claim",
+  "checks": [
+    {
+      "name": "native_projection",
+      "passed": true,
+      "expressions": 2
+    },
+    {
+      "name": "rank_evaluator_compatibility",
+      "passed": true,
+      "referent_target_rank": 2,
+      "objectness_target_rank": 1
+    },
+    {
+      "name": "coverage_gate",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "name": "query_cost_provenance",
+      "passed": true,
+      "selection_verification": {
+        "verified_expressions": 2,
+        "verified_object_axes": 12,
+        "global_query_axes_verified": true,
+        "selected_cost_equals_native_score": true,
+        "selected_query_is_minimum": true,
+        "deterministic_tie_break_verified": true,
+        "failures": 0
+      }
+    }
+  ],
+  "observed": {
+    "referent_target_rank": 2,
+    "objectness_target_rank": 1,
+    "coverage_summary": {
+      "complete_expressions": 2,
+      "complete_scenes": 2,
+      "rejected_expressions": 0,
+      "exact_coverage_match_expressions": 2,
+      "exact_coverage_match_rate": 1.0,
+      "mean_abs_candidate_coverage_delta": 0.0,
+      "max_abs_candidate_coverage_delta": 0,
+      "support_exact_match_expressions": 2,
+      "support_exact_match_rate": 1.0,
+      "dual_exact_match_expressions": 2,
+      "dual_exact_match_rate": 1.0,
+      "mean_abs_candidate_support_delta": 0.0,
+      "max_abs_candidate_support_delta": 0,
+      "mean_score_coverage_spearman": null,
+      "score_coverage_spearman_observations": 0,
+      "min_selected_query_cost_margin": null,
+      "singleton_query_pool_axes": 12
+    },
+    "selection_verification": {
+      "verified_expressions": 2,
+      "verified_object_axes": 12,
+      "global_query_axes_verified": true,
+      "selected_cost_equals_native_score": true,
+      "selected_query_is_minimum": true,
+      "deterministic_tie_break_verified": true,
+      "failures": 0
+    }
+  },
+  "source_hashes": [
+    {
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "sha256": "7db6fd4c7daee6be498b47ccd65f17fb6b24807af9c843a4f3a5ff7da0f8d8ac"
+    },
+    {
+      "path": "scripts/referent_object_rank_capture_20260919.py",
+      "sha256": "01546034eca2e208dacbf7187def34ed4c62c110a4c1975df39ab4e374982ba5"
+    },
+    {
+      "path": "scripts/referent_target_rank_evaluator_20260919.py",
+      "sha256": "32987438d71db5017a87b25d9c36da1268354aeebf7ed2fa303999e3caac2076"
+    },
+    {
+      "path": "scripts/referent_query_coverage_control_20260919.py",
+      "sha256": "38ca6b07075e40adbc1334b933f7a1f9a30055266d6a7562253d2629635e5715"
+    }
+  ],
+  "limitations": [
+    "The fixture validates contract composition, not native model behavior.",
+    "Synthetic scores and query costs do not estimate target mIoU.",
+    "Native candidate coverage and score separation remain unknown."
+  ]
+}

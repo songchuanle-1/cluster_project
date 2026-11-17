@@ -1,0 +1,49 @@
+--- frozen_v1/production_controller.py
++++ fresh_v2/production_controller.py
+@@ -24,8 +24,8 @@
+ OWNER_THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ OWNER_DEADLINE = '2026-11-14T02:52:47.538159+00:00'
+ PROJECT = Path("/data/songcl/Project/Cluster_project")
+-PRODUCER = PROJECT / 'pipeline/runtime/cso_path_prepare_c1fe2178'
+-PRODUCTION = PROJECT / 'pipeline/runtime/cso_path_prod_c1fe2178'
++PRODUCER = PROJECT / 'pipeline/runtime/cso_path_prepare_c1fe2178_v2'
++PRODUCTION = PROJECT / 'pipeline/runtime/cso_path_prod_c1fe2178_v2'
+ RUNTIME = PROJECT / "Cluster_nsd_20261107"
+ COMMIT = '5413102c57b526035f3920b5e7a81f3b58ad764d'
+ CONFIG = 'configs/Quard/ctf_hcg_csort_cso/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cso.yaml'
+@@ -116,6 +116,21 @@
+                 "-C", str(RUNTIME), *args], env=GIT_ENV)
+ 
+ 
++def git_blob(relative):
++    """Return exact immutable Git blob bytes, preserving CRLF and every source byte."""
++    process = subprocess.Popen(
++        ["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
++         "-C", str(RUNTIME), "cat-file", "blob", COMMIT + ":" + relative],
++        env=GIT_ENV, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
++    try:
++        stdout, stderr = process.communicate(timeout=15)
++    except subprocess.TimeoutExpired:
++        raise RuntimeError("Uncertain raw Git child; preserve PID " + str(process.pid))
++    if process.returncode:
++        raise RuntimeError("Raw Git blob read failed: " + repr(stderr[-1500:]))
++    return stdout
++
++
+ def observe(request):
+     guard(request)
+     assert RUNTIME.is_dir() and RUNTIME.resolve() == RUNTIME
+@@ -129,11 +144,11 @@
+         assert hashes[relative] == expected
+     train = RUNTIME / "tools/train.py"
+     regular(train)
+-    tracked_train = git("show", COMMIT + ":tools/train.py").encode("utf-8")
++    tracked_train = git_blob("tools/train.py")
+     assert train.read_bytes() == tracked_train
+     config = RUNTIME / CONFIG
+     regular(config)
+-    original = git("show", COMMIT + ":" + CONFIG).encode("utf-8")
++    original = git_blob(CONFIG)
+     assert digest(original) == "908bc08a4d78dcc2723588abb7a6e3adeb169a79e788ce74ee5afbd78c991081"
+     # Compute exactly canonical safe_launch's deterministic adaptation without
+     # writing YAML. The same original conda PyYAML serializes the same object.

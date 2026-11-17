@@ -1,0 +1,59 @@
+{
+  "recorded_at": "2026-10-30T08:10:50.611201+00:00",
+  "reference_operational_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_928313fd/sfc_operational_prepare/preparation.json",
+    "sha256": "5e37f1207f7e07a6e3fcc9a9128ac56098eea1bdf9dbecb5591f60f9199da884"
+  },
+  "reference_module_hashes": {
+    "adapter.py": "7253f131dd3f8e5d104e800d49dfa1907df8aa9ec0ffb3d76535a7efe2c9d9cf",
+    "remote_ops.py": "37d7b75d853b601b177668b34349ae24dc3570402c914c2cdcadb1931db1418d"
+  },
+  "ordered_literal_changes": [
+    {
+      "before": "RESOURCE_AUTHORIZATION = {'path':'pipeline/authorizations/server4_gpu0_only_20261026.json','sha256':'94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09'}",
+      "after": "RESOURCE_AUTHORIZATION = {'path': 'pipeline/authorizations/server4_gpu1_20261030.json', 'sha256': '6529ecf4cb9bc39c698650e3116df67870a2f82e76c046296c8a1e74aa0d68c2'}\nSERVERS_POLICY_SHA256 = '19b3753d13a8253263c6525f19a739795b816be141e21a9f9b3aaccddf4f8265'\nPOLICY_GPU_UUIDS = {0:'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c',1:'GPU-7f82edb9-f620-8045-caea-a75232265cd1'}"
+    },
+    {
+      "before": "'Current explicit GPU0-only authorization changed'",
+      "after": "'Current explicit retained-GPU0 plus GPU1 resource authorization changed'"
+    },
+    {
+      "before": "        server=yaml.safe_load((self.root/'SERVERS.yaml').read_text(encoding='utf-8'))['servers']['server-4']",
+      "after": "        require(sha(self.root/'SERVERS.yaml')==SERVERS_POLICY_SHA256,'Current exact SERVERS resource policy changed')\n        server=yaml.safe_load((self.root/'SERVERS.yaml').read_text(encoding='utf-8'))['servers']['server-4']"
+    },
+    {
+      "before": "all(type(g) is int and g in GPU_UUIDS for g in allowed)",
+      "after": "all(type(g) is int and g in POLICY_GPU_UUIDS for g in allowed)"
+    },
+    {
+      "before": "'GPU whitelist is unknown or outside this GPU0-only packet'",
+      "after": "'GPU whitelist is unknown or outside the current exact resource policy'"
+    },
+    {
+      "before": "require(allowed==[0],'This SFC packet supports only current GPU0 authorization')",
+      "after": "require(allowed==[0,1],'This SFC policy copy requires exact current [0,1] authorization; selected capability remains GPU0 only')"
+    },
+    {
+      "before": "all(uuids.get(str(g))==GPU_UUIDS[g] for g in allowed)",
+      "after": "all(uuids.get(str(g))==POLICY_GPU_UUIDS[g] for g in allowed)"
+    }
+  ],
+  "actual_changed_function_ASTs": [
+    "Adapter.guard"
+  ],
+  "all_other_adapter_function_ASTs_exact": true,
+  "remote_ops_byte_identical": true,
+  "native_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_928313fd/sfc_native_prepare/preparation.json",
+    "sha256": "173e5f02eaabfa02c37ad71646f9f136d9655a771aa3baf9b4382c6b3a90da77"
+  },
+  "native_worker": {
+    "path": "pipeline/diagnostic_bundles/tick_928313fd/sfc_native_prepare/worker.py",
+    "sha256": "edbe486295bc95edb80b332a649e9d6166c427f272a385bd56442ed7be4158b8"
+  },
+  "unchanged_native_manifest_template": {
+    "path": "pipeline/diagnostic_bundles/tick_928313fd/sfc_native_prepare/manifest_template.json",
+    "sha256": "154f7ade2cc67741d02c0eb2e9b79701244c56c2f5462efa57c171dc6c0d7de9"
+  },
+  "scope": "Resource policy compatibility only. Original GPU0 selected-capability predicates/remote PHYSICAL_GPU0, source9/native173e/worker/protocol/data/science/three-lock/RPC/owner/deadline/parentreceipt/replay code unchanged. New global whitelist uses separate POLICY map0,1. No active directory/lease/productionrelease/native run."
+}

@@ -1,0 +1,37 @@
+{
+  "observed_at": "2026-10-17T06:29:20.131071+00:00",
+  "failure": "Fresh import of second model in SAME process collides on gorilla losses registry Criterion; no candidate forward executed.",
+  "first_condition_preserved": {
+    "path": "/data/songcl/Project/Cluster_project/pipeline/evidence_producer_21500d1a/reference_m95_epoch16.json",
+    "sha256": "208411f3838abcbd79b669203dcafe92bda25dac482eac3c9fb3088784000447",
+    "native_float32_miou": 0.5024607181549072,
+    "unique_scenes": 141,
+    "expressions": 9508,
+    "native_forwards": 363,
+    "elapsed_seconds": 207.75935782300076
+  },
+  "failed_execution_artifact": "paired_execution_attempt.json",
+  "repair": "Fresh process for unrun candidate only. Do not clear/force shared registry or change model source.",
+  "transport_only_changes": [
+    {
+      "old": "STAGE / \"paired_manifest.json\"",
+      "new": "STAGE / \"paired_manifest_isolated.json\""
+    },
+    {
+      "old": "for condition in (\"reference_m95_epoch16\", \"candidate_hds_epoch19\"):",
+      "new": "for condition in (\"candidate_hds_epoch19\",):"
+    },
+    {
+      "old": "    val_config = None\n",
+      "new": "    val_config = copy.deepcopy(gorilla.Config.fromfile(str(ROOT / manifest[\"conditions\"][\"reference_m95_epoch16\"][\"config\"])).data.val)\n    val_config.data_root = \"/home/songcl/data/data/\"\n"
+    },
+    {
+      "old": "STAGE / \"paired_capture_index.json\"",
+      "new": "STAGE / \"paired_candidate_capture_index.json\""
+    }
+  ],
+  "original_script_sha256": "8d94007b56d4abaa5074ecf91c2c0ea2ce44d99dbf0dd738157b47cc38902a09",
+  "isolated_script_sha256": "5dd4249e136c0490353edab991fa9c5867a3215e666942be9929e897a1408c48",
+  "weights_config_seed_data_controls_unchanged": true,
+  "model_revision": false
+}

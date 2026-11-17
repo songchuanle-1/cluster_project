@@ -1,0 +1,1552 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T04:19:26.215578+00:00",
+  "reviewer": "mdc_review",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "status": "ACTUAL_STDLIB_PRODUCTION_TOPOLOGY_FORWARD_LIST_STUB_AND_STATIC_INTEGRATION_VALIDATED_NATIVE_NOT_RUN",
+  "material_concerns": [],
+  "preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/new_candidate_prepare/preparation.json",
+    "sha256": "8512a69de3d5fcdd32523bbf966833485f3e17329235881de7aa0bd5adbe4501"
+  },
+  "code_commit": null,
+  "base_reference_commit": "11a811618179ab1ddc0cee299194667413b7fdb9",
+  "staged_source_hashes": {
+    "staged_repository/configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/dec.py": "f14f67558d2997b18147e1596c1ac6e50659f23cfe8371bd85fed11f311ce8d5",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/hier_postprocess.py": "00d3bc92783641fac31e51fb1e16b5fba61d6eb7829c29b9900606a9d4f8e6a5",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/middle_butterfly.py": "9752c75f04ec20d711e732a3896e1fae2121426c2b37e580b28d983a3b759946",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+  },
+  "source_files": {
+    "configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/dec.py": "f14f67558d2997b18147e1596c1ac6e50659f23cfe8371bd85fed11f311ce8d5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/hier_postprocess.py": "00d3bc92783641fac31e51fb1e16b5fba61d6eb7829c29b9900606a9d4f8e6a5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/middle_butterfly.py": "9752c75f04ec20d711e732a3896e1fae2121426c2b37e580b28d983a3b759946",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+  },
+  "executable_proof": {
+    "audit_script": {
+      "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/independent_review/review_bfc_source.py",
+      "sha256": "697f64618fa48b387fd37a710d8286755741ad3dcce1dcc20e1373d6d13ad063"
+    },
+    "actual_python_argv": [
+      "C:\\song_data\\app\\miniconda\\root\\python.exe",
+      "-B",
+      "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_ab7e46d4\\independent_review\\review_bfc_source.py",
+      "--preparation-sha",
+      "8512a69de3d5fcdd32523bbf966833485f3e17329235881de7aa0bd5adbe4501"
+    ],
+    "actual_functions_extracted": [
+      "build_butterfly_plan",
+      "ParentButterflyTokenComposition.forward"
+    ],
+    "source": {
+      "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/new_candidate_prepare/staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/middle_butterfly.py",
+      "sha256": "9752c75f04ec20d711e732a3896e1fae2121426c2b37e580b28d983a3b759946"
+    },
+    "model_torch_imported": false,
+    "framework_Tensor_or_native_execution": false,
+    "actual_invocation_complete": true,
+    "actual_stdout_verdict": "Printed only after all assertions and report write completed; caller process rc0 independently observable."
+  },
+  "actual_stdlib_cases": {
+    "every_valid_n": {
+      "range": [
+        0,
+        128
+      ],
+      "cases": 129,
+      "coverage": [
+        {
+          "n": 0,
+          "n_supported": 0,
+          "parent_groups": 0,
+          "rounds": 0,
+          "pair_rows": 0,
+          "singleton_rows": 0,
+          "slots": 3
+        },
+        {
+          "n": 1,
+          "n_supported": 1,
+          "parent_groups": 1,
+          "rounds": 0,
+          "pair_rows": 0,
+          "singleton_rows": 1,
+          "slots": 4
+        },
+        {
+          "n": 2,
+          "n_supported": 2,
+          "parent_groups": 1,
+          "rounds": 1,
+          "pair_rows": 1,
+          "singleton_rows": 0,
+          "slots": 5
+        },
+        {
+          "n": 3,
+          "n_supported": 3,
+          "parent_groups": 1,
+          "rounds": 3,
+          "pair_rows": 3,
+          "singleton_rows": 0,
+          "slots": 6
+        },
+        {
+          "n": 4,
+          "n_supported": 4,
+          "parent_groups": 1,
+          "rounds": 3,
+          "pair_rows": 6,
+          "singleton_rows": 0,
+          "slots": 7
+        },
+        {
+          "n": 5,
+          "n_supported": 5,
+          "parent_groups": 1,
+          "rounds": 5,
+          "pair_rows": 9,
+          "singleton_rows": 0,
+          "slots": 8
+        },
+        {
+          "n": 6,
+          "n_supported": 6,
+          "parent_groups": 1,
+          "rounds": 5,
+          "pair_rows": 12,
+          "singleton_rows": 0,
+          "slots": 9
+        },
+        {
+          "n": 7,
+          "n_supported": 7,
+          "parent_groups": 1,
+          "rounds": 5,
+          "pair_rows": 15,
+          "singleton_rows": 0,
+          "slots": 10
+        },
+        {
+          "n": 8,
+          "n_supported": 8,
+          "parent_groups": 1,
+          "rounds": 5,
+          "pair_rows": 20,
+          "singleton_rows": 0,
+          "slots": 11
+        },
+        {
+          "n": 9,
+          "n_supported": 9,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 25,
+          "singleton_rows": 0,
+          "slots": 12
+        },
+        {
+          "n": 10,
+          "n_supported": 10,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 28,
+          "singleton_rows": 0,
+          "slots": 13
+        },
+        {
+          "n": 11,
+          "n_supported": 11,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 31,
+          "singleton_rows": 0,
+          "slots": 14
+        },
+        {
+          "n": 12,
+          "n_supported": 12,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 36,
+          "singleton_rows": 0,
+          "slots": 15
+        },
+        {
+          "n": 13,
+          "n_supported": 13,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 39,
+          "singleton_rows": 0,
+          "slots": 16
+        },
+        {
+          "n": 14,
+          "n_supported": 14,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 44,
+          "singleton_rows": 0,
+          "slots": 17
+        },
+        {
+          "n": 15,
+          "n_supported": 15,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 49,
+          "singleton_rows": 0,
+          "slots": 18
+        },
+        {
+          "n": 16,
+          "n_supported": 16,
+          "parent_groups": 1,
+          "rounds": 7,
+          "pair_rows": 56,
+          "singleton_rows": 0,
+          "slots": 19
+        },
+        {
+          "n": 17,
+          "n_supported": 17,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 65,
+          "singleton_rows": 0,
+          "slots": 20
+        },
+        {
+          "n": 18,
+          "n_supported": 18,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 68,
+          "singleton_rows": 0,
+          "slots": 21
+        },
+        {
+          "n": 19,
+          "n_supported": 19,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 71,
+          "singleton_rows": 0,
+          "slots": 22
+        },
+        {
+          "n": 20,
+          "n_supported": 20,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 76,
+          "singleton_rows": 0,
+          "slots": 23
+        },
+        {
+          "n": 21,
+          "n_supported": 21,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 79,
+          "singleton_rows": 0,
+          "slots": 24
+        },
+        {
+          "n": 22,
+          "n_supported": 22,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 84,
+          "singleton_rows": 0,
+          "slots": 25
+        },
+        {
+          "n": 23,
+          "n_supported": 23,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 89,
+          "singleton_rows": 0,
+          "slots": 26
+        },
+        {
+          "n": 24,
+          "n_supported": 24,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 96,
+          "singleton_rows": 0,
+          "slots": 27
+        },
+        {
+          "n": 25,
+          "n_supported": 25,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 99,
+          "singleton_rows": 0,
+          "slots": 28
+        },
+        {
+          "n": 26,
+          "n_supported": 26,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 104,
+          "singleton_rows": 0,
+          "slots": 29
+        },
+        {
+          "n": 27,
+          "n_supported": 27,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 109,
+          "singleton_rows": 0,
+          "slots": 30
+        },
+        {
+          "n": 28,
+          "n_supported": 28,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 116,
+          "singleton_rows": 0,
+          "slots": 31
+        },
+        {
+          "n": 29,
+          "n_supported": 29,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 121,
+          "singleton_rows": 0,
+          "slots": 32
+        },
+        {
+          "n": 30,
+          "n_supported": 30,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 128,
+          "singleton_rows": 0,
+          "slots": 33
+        },
+        {
+          "n": 31,
+          "n_supported": 31,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 135,
+          "singleton_rows": 0,
+          "slots": 34
+        },
+        {
+          "n": 32,
+          "n_supported": 32,
+          "parent_groups": 1,
+          "rounds": 9,
+          "pair_rows": 144,
+          "singleton_rows": 0,
+          "slots": 35
+        },
+        {
+          "n": 33,
+          "n_supported": 33,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 161,
+          "singleton_rows": 0,
+          "slots": 36
+        },
+        {
+          "n": 34,
+          "n_supported": 34,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 164,
+          "singleton_rows": 0,
+          "slots": 37
+        },
+        {
+          "n": 35,
+          "n_supported": 35,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 167,
+          "singleton_rows": 0,
+          "slots": 38
+        },
+        {
+          "n": 36,
+          "n_supported": 36,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 172,
+          "singleton_rows": 0,
+          "slots": 39
+        },
+        {
+          "n": 37,
+          "n_supported": 37,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 175,
+          "singleton_rows": 0,
+          "slots": 40
+        },
+        {
+          "n": 38,
+          "n_supported": 38,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 180,
+          "singleton_rows": 0,
+          "slots": 41
+        },
+        {
+          "n": 39,
+          "n_supported": 39,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 185,
+          "singleton_rows": 0,
+          "slots": 42
+        },
+        {
+          "n": 40,
+          "n_supported": 40,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 192,
+          "singleton_rows": 0,
+          "slots": 43
+        },
+        {
+          "n": 41,
+          "n_supported": 41,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 195,
+          "singleton_rows": 0,
+          "slots": 44
+        },
+        {
+          "n": 42,
+          "n_supported": 42,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 200,
+          "singleton_rows": 0,
+          "slots": 45
+        },
+        {
+          "n": 43,
+          "n_supported": 43,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 205,
+          "singleton_rows": 0,
+          "slots": 46
+        },
+        {
+          "n": 44,
+          "n_supported": 44,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 212,
+          "singleton_rows": 0,
+          "slots": 47
+        },
+        {
+          "n": 45,
+          "n_supported": 45,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 217,
+          "singleton_rows": 0,
+          "slots": 48
+        },
+        {
+          "n": 46,
+          "n_supported": 46,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 224,
+          "singleton_rows": 0,
+          "slots": 49
+        },
+        {
+          "n": 47,
+          "n_supported": 47,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 231,
+          "singleton_rows": 0,
+          "slots": 50
+        },
+        {
+          "n": 48,
+          "n_supported": 48,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 240,
+          "singleton_rows": 0,
+          "slots": 51
+        },
+        {
+          "n": 49,
+          "n_supported": 49,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 243,
+          "singleton_rows": 0,
+          "slots": 52
+        },
+        {
+          "n": 50,
+          "n_supported": 50,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 248,
+          "singleton_rows": 0,
+          "slots": 53
+        },
+        {
+          "n": 51,
+          "n_supported": 51,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 253,
+          "singleton_rows": 0,
+          "slots": 54
+        },
+        {
+          "n": 52,
+          "n_supported": 52,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 260,
+          "singleton_rows": 0,
+          "slots": 55
+        },
+        {
+          "n": 53,
+          "n_supported": 53,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 265,
+          "singleton_rows": 0,
+          "slots": 56
+        },
+        {
+          "n": 54,
+          "n_supported": 54,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 272,
+          "singleton_rows": 0,
+          "slots": 57
+        },
+        {
+          "n": 55,
+          "n_supported": 55,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 279,
+          "singleton_rows": 0,
+          "slots": 58
+        },
+        {
+          "n": 56,
+          "n_supported": 56,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 288,
+          "singleton_rows": 0,
+          "slots": 59
+        },
+        {
+          "n": 57,
+          "n_supported": 57,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 293,
+          "singleton_rows": 0,
+          "slots": 60
+        },
+        {
+          "n": 58,
+          "n_supported": 58,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 300,
+          "singleton_rows": 0,
+          "slots": 61
+        },
+        {
+          "n": 59,
+          "n_supported": 59,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 307,
+          "singleton_rows": 0,
+          "slots": 62
+        },
+        {
+          "n": 60,
+          "n_supported": 60,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 316,
+          "singleton_rows": 0,
+          "slots": 63
+        },
+        {
+          "n": 61,
+          "n_supported": 61,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 323,
+          "singleton_rows": 0,
+          "slots": 64
+        },
+        {
+          "n": 62,
+          "n_supported": 62,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 332,
+          "singleton_rows": 0,
+          "slots": 65
+        },
+        {
+          "n": 63,
+          "n_supported": 63,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 341,
+          "singleton_rows": 0,
+          "slots": 66
+        },
+        {
+          "n": 64,
+          "n_supported": 64,
+          "parent_groups": 1,
+          "rounds": 11,
+          "pair_rows": 352,
+          "singleton_rows": 0,
+          "slots": 67
+        },
+        {
+          "n": 65,
+          "n_supported": 65,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 385,
+          "singleton_rows": 0,
+          "slots": 68
+        },
+        {
+          "n": 66,
+          "n_supported": 66,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 388,
+          "singleton_rows": 0,
+          "slots": 69
+        },
+        {
+          "n": 67,
+          "n_supported": 67,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 391,
+          "singleton_rows": 0,
+          "slots": 70
+        },
+        {
+          "n": 68,
+          "n_supported": 68,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 396,
+          "singleton_rows": 0,
+          "slots": 71
+        },
+        {
+          "n": 69,
+          "n_supported": 69,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 399,
+          "singleton_rows": 0,
+          "slots": 72
+        },
+        {
+          "n": 70,
+          "n_supported": 70,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 404,
+          "singleton_rows": 0,
+          "slots": 73
+        },
+        {
+          "n": 71,
+          "n_supported": 71,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 409,
+          "singleton_rows": 0,
+          "slots": 74
+        },
+        {
+          "n": 72,
+          "n_supported": 72,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 416,
+          "singleton_rows": 0,
+          "slots": 75
+        },
+        {
+          "n": 73,
+          "n_supported": 73,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 419,
+          "singleton_rows": 0,
+          "slots": 76
+        },
+        {
+          "n": 74,
+          "n_supported": 74,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 424,
+          "singleton_rows": 0,
+          "slots": 77
+        },
+        {
+          "n": 75,
+          "n_supported": 75,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 429,
+          "singleton_rows": 0,
+          "slots": 78
+        },
+        {
+          "n": 76,
+          "n_supported": 76,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 436,
+          "singleton_rows": 0,
+          "slots": 79
+        },
+        {
+          "n": 77,
+          "n_supported": 77,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 441,
+          "singleton_rows": 0,
+          "slots": 80
+        },
+        {
+          "n": 78,
+          "n_supported": 78,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 448,
+          "singleton_rows": 0,
+          "slots": 81
+        },
+        {
+          "n": 79,
+          "n_supported": 79,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 455,
+          "singleton_rows": 0,
+          "slots": 82
+        },
+        {
+          "n": 80,
+          "n_supported": 80,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 464,
+          "singleton_rows": 0,
+          "slots": 83
+        },
+        {
+          "n": 81,
+          "n_supported": 81,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 467,
+          "singleton_rows": 0,
+          "slots": 84
+        },
+        {
+          "n": 82,
+          "n_supported": 82,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 472,
+          "singleton_rows": 0,
+          "slots": 85
+        },
+        {
+          "n": 83,
+          "n_supported": 83,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 477,
+          "singleton_rows": 0,
+          "slots": 86
+        },
+        {
+          "n": 84,
+          "n_supported": 84,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 484,
+          "singleton_rows": 0,
+          "slots": 87
+        },
+        {
+          "n": 85,
+          "n_supported": 85,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 489,
+          "singleton_rows": 0,
+          "slots": 88
+        },
+        {
+          "n": 86,
+          "n_supported": 86,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 496,
+          "singleton_rows": 0,
+          "slots": 89
+        },
+        {
+          "n": 87,
+          "n_supported": 87,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 503,
+          "singleton_rows": 0,
+          "slots": 90
+        },
+        {
+          "n": 88,
+          "n_supported": 88,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 512,
+          "singleton_rows": 0,
+          "slots": 91
+        },
+        {
+          "n": 89,
+          "n_supported": 89,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 517,
+          "singleton_rows": 0,
+          "slots": 92
+        },
+        {
+          "n": 90,
+          "n_supported": 90,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 524,
+          "singleton_rows": 0,
+          "slots": 93
+        },
+        {
+          "n": 91,
+          "n_supported": 91,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 531,
+          "singleton_rows": 0,
+          "slots": 94
+        },
+        {
+          "n": 92,
+          "n_supported": 92,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 540,
+          "singleton_rows": 0,
+          "slots": 95
+        },
+        {
+          "n": 93,
+          "n_supported": 93,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 547,
+          "singleton_rows": 0,
+          "slots": 96
+        },
+        {
+          "n": 94,
+          "n_supported": 94,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 556,
+          "singleton_rows": 0,
+          "slots": 97
+        },
+        {
+          "n": 95,
+          "n_supported": 95,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 565,
+          "singleton_rows": 0,
+          "slots": 98
+        },
+        {
+          "n": 96,
+          "n_supported": 96,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 576,
+          "singleton_rows": 0,
+          "slots": 99
+        },
+        {
+          "n": 97,
+          "n_supported": 97,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 579,
+          "singleton_rows": 0,
+          "slots": 100
+        },
+        {
+          "n": 98,
+          "n_supported": 98,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 584,
+          "singleton_rows": 0,
+          "slots": 101
+        },
+        {
+          "n": 99,
+          "n_supported": 99,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 589,
+          "singleton_rows": 0,
+          "slots": 102
+        },
+        {
+          "n": 100,
+          "n_supported": 100,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 596,
+          "singleton_rows": 0,
+          "slots": 103
+        },
+        {
+          "n": 101,
+          "n_supported": 101,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 601,
+          "singleton_rows": 0,
+          "slots": 104
+        },
+        {
+          "n": 102,
+          "n_supported": 102,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 608,
+          "singleton_rows": 0,
+          "slots": 105
+        },
+        {
+          "n": 103,
+          "n_supported": 103,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 615,
+          "singleton_rows": 0,
+          "slots": 106
+        },
+        {
+          "n": 104,
+          "n_supported": 104,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 624,
+          "singleton_rows": 0,
+          "slots": 107
+        },
+        {
+          "n": 105,
+          "n_supported": 105,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 629,
+          "singleton_rows": 0,
+          "slots": 108
+        },
+        {
+          "n": 106,
+          "n_supported": 106,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 636,
+          "singleton_rows": 0,
+          "slots": 109
+        },
+        {
+          "n": 107,
+          "n_supported": 107,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 643,
+          "singleton_rows": 0,
+          "slots": 110
+        },
+        {
+          "n": 108,
+          "n_supported": 108,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 652,
+          "singleton_rows": 0,
+          "slots": 111
+        },
+        {
+          "n": 109,
+          "n_supported": 109,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 659,
+          "singleton_rows": 0,
+          "slots": 112
+        },
+        {
+          "n": 110,
+          "n_supported": 110,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 668,
+          "singleton_rows": 0,
+          "slots": 113
+        },
+        {
+          "n": 111,
+          "n_supported": 111,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 677,
+          "singleton_rows": 0,
+          "slots": 114
+        },
+        {
+          "n": 112,
+          "n_supported": 112,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 688,
+          "singleton_rows": 0,
+          "slots": 115
+        },
+        {
+          "n": 113,
+          "n_supported": 113,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 693,
+          "singleton_rows": 0,
+          "slots": 116
+        },
+        {
+          "n": 114,
+          "n_supported": 114,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 700,
+          "singleton_rows": 0,
+          "slots": 117
+        },
+        {
+          "n": 115,
+          "n_supported": 115,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 707,
+          "singleton_rows": 0,
+          "slots": 118
+        },
+        {
+          "n": 116,
+          "n_supported": 116,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 716,
+          "singleton_rows": 0,
+          "slots": 119
+        },
+        {
+          "n": 117,
+          "n_supported": 117,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 723,
+          "singleton_rows": 0,
+          "slots": 120
+        },
+        {
+          "n": 118,
+          "n_supported": 118,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 732,
+          "singleton_rows": 0,
+          "slots": 121
+        },
+        {
+          "n": 119,
+          "n_supported": 119,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 741,
+          "singleton_rows": 0,
+          "slots": 122
+        },
+        {
+          "n": 120,
+          "n_supported": 120,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 752,
+          "singleton_rows": 0,
+          "slots": 123
+        },
+        {
+          "n": 121,
+          "n_supported": 121,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 759,
+          "singleton_rows": 0,
+          "slots": 124
+        },
+        {
+          "n": 122,
+          "n_supported": 122,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 768,
+          "singleton_rows": 0,
+          "slots": 125
+        },
+        {
+          "n": 123,
+          "n_supported": 123,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 777,
+          "singleton_rows": 0,
+          "slots": 126
+        },
+        {
+          "n": 124,
+          "n_supported": 124,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 788,
+          "singleton_rows": 0,
+          "slots": 127
+        },
+        {
+          "n": 125,
+          "n_supported": 125,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 797,
+          "singleton_rows": 0,
+          "slots": 128
+        },
+        {
+          "n": 126,
+          "n_supported": 126,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 808,
+          "singleton_rows": 0,
+          "slots": 129
+        },
+        {
+          "n": 127,
+          "n_supported": 127,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 819,
+          "singleton_rows": 0,
+          "slots": 130
+        },
+        {
+          "n": 128,
+          "n_supported": 128,
+          "parent_groups": 1,
+          "rounds": 13,
+          "pair_rows": 832,
+          "singleton_rows": 0,
+          "slots": 131
+        }
+      ]
+    },
+    "meaningful_special_cases": [
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 1,
+        "n_supported": 1,
+        "parent_groups": 1,
+        "rounds": 0,
+        "pair_rows": 0,
+        "singleton_rows": 1,
+        "slots": 3
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 2,
+        "n_supported": 2,
+        "parent_groups": 1,
+        "rounds": 1,
+        "pair_rows": 1,
+        "singleton_rows": 0,
+        "slots": 4
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 3,
+        "n_supported": 3,
+        "parent_groups": 1,
+        "rounds": 3,
+        "pair_rows": 3,
+        "singleton_rows": 0,
+        "slots": 5
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 5,
+        "n_supported": 5,
+        "parent_groups": 1,
+        "rounds": 5,
+        "pair_rows": 9,
+        "singleton_rows": 0,
+        "slots": 7
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 6,
+        "n_supported": 6,
+        "parent_groups": 1,
+        "rounds": 5,
+        "pair_rows": 12,
+        "singleton_rows": 0,
+        "slots": 8
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 7,
+        "n_supported": 7,
+        "parent_groups": 1,
+        "rounds": 5,
+        "pair_rows": 15,
+        "singleton_rows": 0,
+        "slots": 9
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 9,
+        "n_supported": 9,
+        "parent_groups": 1,
+        "rounds": 7,
+        "pair_rows": 25,
+        "singleton_rows": 0,
+        "slots": 11
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 13,
+        "n_supported": 13,
+        "parent_groups": 1,
+        "rounds": 7,
+        "pair_rows": 39,
+        "singleton_rows": 0,
+        "slots": 15
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 31,
+        "n_supported": 31,
+        "parent_groups": 1,
+        "rounds": 9,
+        "pair_rows": 135,
+        "singleton_rows": 0,
+        "slots": 33
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 64,
+        "n_supported": 64,
+        "parent_groups": 1,
+        "rounds": 11,
+        "pair_rows": 352,
+        "singleton_rows": 0,
+        "slots": 66
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 65,
+        "n_supported": 65,
+        "parent_groups": 1,
+        "rounds": 13,
+        "pair_rows": 385,
+        "singleton_rows": 0,
+        "slots": 67
+      },
+      {
+        "case": "all_duplicate_coordinates_ID_tie",
+        "n": 128,
+        "n_supported": 128,
+        "parent_groups": 1,
+        "rounds": 13,
+        "pair_rows": 832,
+        "singleton_rows": 0,
+        "slots": 130
+      },
+      {
+        "case": "multiple_parent_gaps_true_support_holes_and_padding",
+        "n_supported": 17,
+        "parent_groups": 3,
+        "rounds": 5,
+        "pair_rows": 33,
+        "singleton_rows": 0,
+        "slots": 29
+      },
+      {
+        "case": "all_unsupported_internal_and_batch_padding",
+        "n_supported": 0,
+        "parent_groups": 0,
+        "rounds": 0,
+        "pair_rows": 0,
+        "singleton_rows": 0,
+        "slots": 29
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 0,
+        "n_supported": 0,
+        "parent_groups": 0,
+        "rounds": 0,
+        "pair_rows": 0,
+        "singleton_rows": 0,
+        "slots": 2
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 1,
+        "n_supported": 1,
+        "parent_groups": 1,
+        "rounds": 0,
+        "pair_rows": 0,
+        "singleton_rows": 1,
+        "slots": 3
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 2,
+        "n_supported": 2,
+        "parent_groups": 1,
+        "rounds": 1,
+        "pair_rows": 1,
+        "singleton_rows": 0,
+        "slots": 4
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 3,
+        "n_supported": 3,
+        "parent_groups": 1,
+        "rounds": 3,
+        "pair_rows": 3,
+        "singleton_rows": 0,
+        "slots": 5
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 5,
+        "n_supported": 5,
+        "parent_groups": 1,
+        "rounds": 5,
+        "pair_rows": 9,
+        "singleton_rows": 0,
+        "slots": 7
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 8,
+        "n_supported": 8,
+        "parent_groups": 1,
+        "rounds": 5,
+        "pair_rows": 20,
+        "singleton_rows": 0,
+        "slots": 10
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 13,
+        "n_supported": 13,
+        "parent_groups": 1,
+        "rounds": 7,
+        "pair_rows": 39,
+        "singleton_rows": 0,
+        "slots": 15
+      },
+      {
+        "case": "zero_map_degenerate_delta0_original_outer_skip_compatible",
+        "n": 64,
+        "n_supported": 64,
+        "parent_groups": 1,
+        "rounds": 11,
+        "pair_rows": 352,
+        "singleton_rows": 0,
+        "slots": 66
+      }
+    ],
+    "multi_batch_cases": 1,
+    "empty_batch_cases": 1,
+    "invalid_plan_cases_refused": [
+      "maxbool",
+      "maxnegative",
+      "maxfloat",
+      "maxprefix",
+      "coords_short",
+      "support_short",
+      "coord_dim2",
+      "coord_dim4",
+      "coord_nan",
+      "coord_inf",
+      "coord_bool",
+      "coord_string",
+      "parent_negative",
+      "parent_float",
+      "parent_bool",
+      "support_int"
+    ],
+    "comparison": "Actual extracted production pure function and exact forward body with only scalar/list-value functional index-select/copy stubs. Compared to independent block-partition matching and simultaneous plain-list two-output toy-map oracle, not copied XOR construction. No actual GELU, parameter math, CUDA/Tensor/autograd behavior inferred.",
+    "per_round_row_ownership": "All pairs disjoint; both outputs consume same old-stage states; unmatched rows retain old state. Not strict-own-exclusive context.",
+    "potential_reachability": "Each supported final node graph reaches all original same-parent supported IDs and no other parent/unsupported/padding IDs; not proof of nonzero learned weights, injectivity, entropy or task usefulness.",
+    "bound": "n65..128 tests general helper contract with explicit max>=n; current native middleK64 does not instantiate these sizes. Native tensor edgecase coverage is UNKNOWN."
+  },
+  "integration_review": {
+    "original5copied_sources_exact": true,
+    "originalYAML_exact": true,
+    "original_raw_partition_bank_CSORT_HCG_AST_preserved": true,
+    "middle_original_skip_retained": true,
+    "new_module_registered": "one shared nn.Linear(2C,2C) + original nn.GELU",
+    "original_middle_FFN_removed": "nn.Identity after original3FFN/3LN constructor sequence",
+    "common_RNG": "Local fork_rng CPU constructor design only; actual full common parameters/buffers/loader/CUDA RNG pairing NOT_RUN; random-sequence reuse correlation not ruled out.",
+    "grad_graph": "Source features remain undetached and paired outputs use functional index_copy. List stubs do not prove Tensor/autograd/nonzero gradient behavior.",
+    "single_inst_path_preserved": true,
+    "parameter_inference": {
+      "new_operator": 262656,
+      "old_middle_FFN": 525568,
+      "delta": -262912,
+      "expected_total_model": 157221178,
+      "expected_named_tensors": 845,
+      "actual_inventory": "NOT_RUN"
+    }
+  },
+  "future_native_protocol": {
+    "status": "NOT_RUN",
+    "fixed_originalTRAIN2_required": true,
+    "actual_nonpower2_n3_multistage_required": true,
+    "four_W_quadrant_finite_nonzero_original_loss_gradients_and_slice_updates_required": true,
+    "missing_coverage": "INCONCLUSIVE_NO_RESAMPLE_OR_AUXILIARY_BACKWARD",
+    "same_resource_protocol_and_common_batch_pairing_required": true,
+    "FLOPs_latency_VRAM_efficacy": "UNKNOWN"
+  },
+  "independent_logical_checks_passed": 36,
+  "check_labels": [
+    "frozen preparation external SHA exact",
+    "all16 frozen preparation map paths/hash exact",
+    "exact8 model sources plus one nativeYAML",
+    "actual production plan and extracted forward list-surrogate executed for every n0..128",
+    "every n independently checks block-partition pair oracle/disjoint old-state matching/full final parent reachability/originalID scatter",
+    "actual helper/forward meaningful duplicate-ID-tie/multi-parent/support/padding/empty/singleton/zero-map cases executed",
+    "actual extracted forward multi-batch independent geometry/support state reset and original-ID inverse outputs match independent oracle",
+    "actual extracted forward zero-batch branch Python control flow executed with list stub",
+    "actual production function rejects16 distinct invalid scalar contract cases",
+    "original copied __init__.py byte exact",
+    "original copied backbone.py byte exact",
+    "original copied loss.py byte exact",
+    "original copied network.py byte exact",
+    "original copied sample_model.py byte exact",
+    "original nativeYAML byte exact; only filename/package resolver changes",
+    "original complete C2F_ClusterAttn_Lite AST exact",
+    "original complete C2F_ClusterAttn_CTF_HCG AST exact",
+    "original complete C2F_ClusterAttn_CTF_HCG_CSORT AST exact",
+    "original PointCloudPartitioner.partition_points AST exact",
+    "original PointCloudPartitioner.cluster_layer AST exact",
+    "original SharedClusterBank.build_cluster_feats AST exact",
+    "original complete3FFN/3LN constructor statement sequence precedes BFC addition unchanged",
+    "registered middle replacement/original cfskip/local CPU RNG fork design control present",
+    "exact original middle coordinate cache/current parent identity/true point support composition",
+    "one shared2C→2C/GELU and all paired outputs computed before functional two-sided writes; features not detached",
+    "helper registers only one Linear and GELU, no extra readout/gate/residual/parameters",
+    "original decoder ThreeLayerMLP AST exact",
+    "original decoder CrossAttentionLayer AST exact",
+    "original decoder SelfAttentionLayer AST exact",
+    "original decoder FFN AST exact",
+    "original decoder MLP AST exact",
+    "original decoder Decoder_layer AST exact",
+    "original decoder DEC AST exact",
+    "original Encoder constructor including RNG consumers unchanged",
+    "one current-bank cache transfer and original single inst feature update path",
+    "no torch/model/module import, framework Tensor or native/GPU execution in audit"
+  ],
+  "limits": [
+    "This proof is source/static/stdlib control flow only, not native Tensor/device/FP32/GELU/autograd/registered inventory or resource/accuracy PASS.",
+    "Zero-map degeneration used a list surrogate, not actual learned operator; no synthetic native claim.",
+    "No literature novelty or whole-history equivalence proof; nearest-route scope stays in frozen research_boundary_and_protocol.json.",
+    "No current GPU/process/queue/ledger/Git/source mutation performed; protected BTC0/BCR1/M206 pause remain outside this audit."
+  ],
+  "next_action": "Root may bind this reviewed frozen9 for ordinary isolated local versioning while preserving public primary11a/index28/protected runs. Actual native pair/resources and canonical admission remain separate future gates."
+}

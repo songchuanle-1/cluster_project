@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "audit_id": "same-target-description-consistency-source-audit-20260917-1207",
+  "generated_at": "2026-09-17T12:17:42+08:00",
+  "candidate": {
+    "id": "same-target-description-consistency",
+    "status": "rejected-before-design",
+    "question": "Can same-target descriptions from ScanRefer define a distinct structural supervision mechanism that repairs description-dependent referent failures?",
+    "proposed_supervision_unit": "The set of training descriptions that annotate the same physical target instance.",
+    "proposed_causal_effect": "Reduce description-specific winner disagreement by making referent predictions or query assignments invariant across alternate descriptions of the same target."
+  },
+  "diagnostic_evidence": {
+    "report": {
+      "path": "pipeline/reports/same_target_summary_20260916_metadata_corrected.json",
+      "sha256": "656a6a8058b989ea241a359535da4ef38fd59eb9ea05da20343e04da00f6b76e"
+    },
+    "support_report": {
+      "path": "pipeline/reports/same_target_support_summary_20260916.json",
+      "sha256": "d7ab0521c4c9d93d0c25f668c67f172d834204a236fb9d482f9bb31a957c11e5"
+    },
+    "sample": {
+      "expressions": 128,
+      "scenes": 32,
+      "paired_groups": 64,
+      "observable_pairs": 60,
+      "different_winner_pairs": 9,
+      "success_disagreements": 8,
+      "disagreements_both_covered": 8
+    },
+    "observation": "Description-dependent winner changes exist: 8 selected same-target pairs have opposite success outcomes, and both descriptions cover the target in all 8 disagreements.",
+    "limitations": "The 32 scenes and two objects per scene were deterministically selected by ID rather than sampled for population prevalence; physical instance equality is not an interchangeable-language guarantee. This is feasibility evidence, not a causal training result."
+  },
+  "primary_source_findings": [
+    {
+      "source": {
+        "path": "pipeline/reports/trackref3d_2605.26576v1_20260917.html",
+        "sha256": "724ec9cdd4e584cfbc90f233354d391bfe7d4243231be03bae26f6282d97cb07",
+        "arxiv_id": "2605.26576",
+        "version": "v1",
+        "title": "TrackRef3D: Multi-View Consistent Track-then-Label for Open-World Referring Segmentation in 3D Gaussian Splatting"
+      },
+      "mechanism": "The tracking stage establishes one identity for an object trajectory; all category and referring descriptions attached to that trajectory are then treated as positive descriptions in a multi-positive contrastive objective.",
+      "direct_overlap": "The same-target/multiple-description set is already the explicit positive supervision unit. TrackRef3D states that the same object should retain one semantic identity across its trajectory and treats all descriptions associated with a track as positive pairs.",
+      "disposition": "This is a direct prior-art hit for the proposed causal unit. Renaming an agreement, variance, or contrastive loss does not create a distinct core mechanism."
+    },
+    {
+      "source": {
+        "path": "pipeline/reports/viewrefer_2303.16894v4_20260917.html",
+        "sha256": "b321426f8df691512addc830d79f277e582c04e934ee1ae224ad45672cae54b0",
+        "arxiv_id": "2303.16894",
+        "version": "v4",
+        "title": "ViewRefer: Grasp the Multi-view Knowledge for 3D Visual Grounding with GPT and Prototype Guidance"
+      },
+      "mechanism": "A single grounding text is expanded into multiple geometry-consistent descriptions; the expanded descriptions are encoded and jointly used by a multi-view fusion model.",
+      "direct_overlap": "Generated alternate descriptions of the same target are already a standard training input and are explicitly designed to provide geometry-consistent multi-view language supervision.",
+      "disposition": "This does not independently prove every possible agreement objective is prior art, but it removes 'multiple descriptions for one target' as a new supervision unit."
+    },
+    {
+      "source": {
+        "path": "pipeline/reports/mdin_2407.20664v2_20260917.html",
+        "sha256": "f1955246fef3bdb7fc32f37d2f49ce3c355a3eccdb7f191e8bcd8f564499faa5",
+        "arxiv_id": "2407.20664",
+        "version": "v2",
+        "title": "3D-GRES: Generalized 3D Referring Expression Segmentation"
+      },
+      "mechanism": "Multi-object decoupling optimization anchors query features and ground-truth superpoint features to the referring text and adds query-text alignment losses to preserve semantic consistency while separating instances.",
+      "direct_overlap": "The source establishes semantic-consistency losses over the relation between referring language and object/query features, although its supervision unit is multiple target instances rather than alternate descriptions of one target.",
+      "disposition": "Relevant adjacent prior art; not the sole rejection basis."
+    },
+    {
+      "source": {
+        "path": "pipeline/reports/3drest_2504.12599v1_20260917.html",
+        "sha256": "0b7f52ffcc624658179e749ceb3de7c6e1d568667ad7c4b6c2eb4b14964f36ff",
+        "arxiv_id": "2504.12599",
+        "version": "v1",
+        "title": "3DResT: A Strong Baseline for Semi-Supervised 3D Referring Expression Segmentation"
+      },
+      "mechanism": "Teacher-student consistency-based sampling selects high-quality pseudo-labels and quality-driven dynamic weighting retains lower-quality pseudo-labels.",
+      "direct_overlap": "Consistency-based supervision is established in 3D-RES, but this is adjacent rather than direct evidence for same-target alternate-description agreement.",
+      "disposition": "Relevant prior art; not the sole rejection basis."
+    }
+  ],
+  "gate_result": {
+    "error_evidence": "pass-for-feasibility",
+    "distinct_causal_unit": "fail",
+    "primary_source_novelty": "fail",
+    "decision": "Reject the same-target-description-consistency candidate before motivation_review or exp_design. Admit no successor under agreement, invariance, variance, multi-positive, or consistency naming.",
+    "reason": "The only defensible causal unit found is the set of alternate descriptions attached to one target identity. TrackRef3D already uses that exact unit as positive supervision, while ViewRefer already builds training descriptions around geometry-consistent alternate descriptions. The measured 8-pair disagreement is useful diagnostic evidence but does not make a prior-art supervision unit novel."
+  },
+  "next_action": "Leave the open design slot empty, preserve these hashed sources, and monitor M197-PIRS to terminal. A future candidate must change a causal mechanism outside the same-target alternate-description supervision family and must pass the full motivation_review -> exp_design -> implementation -> tests -> admission -> safe sync chain.",
+  "scope": "Original-source audit and static gate review only. No model implementation, training launch, queue mutation, admission receipt, native capture, or code sync was performed for this candidate."
+}

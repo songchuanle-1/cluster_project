@@ -1,0 +1,135 @@
+    if candidate:
+        fcb_module=importlib.import_module(qualified+'.fine_coarse_bipartite')
+        original_plan=fcb_module.build_fine_coarse_plan;original_mean=fcb_module.equal_message_means
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def exchange_pre(owner,values):
+            normalized,ids=values
+            assert owner is att.fine_coarse_bipartite and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=fcb_coverage_preflight(members)
+            if not coverage['true_fine_coarse_pair_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FINE_COARSE_PAIR'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: no true pair before watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'map_calls':[],'mean_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual pair-map/GELU q -> sameq fine/coarse marginals -> actual fine_delta parent mean -> middle-map/GELU. Every original map/activation/mean called once, original mean result object returned, capture-only references; no operator/model/criterion replay or extra backward.',
+                'FP32_marginal_or_Jacobian_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'fcb_context' not in state
+            state['fcb_context']={'record':record,'normalized':normalized,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'builder_calls':0,'ids':[[],[],[]],'pair_fine':[],'pair_coarse':[],'fine_parents':[],
+                'fine_counts':[],'coarse_counts':[],'middle_counts':[],'phase':'pair_map','map_count':0,
+                'pair_map_count':0,'middle_map_count':0,'GELU_count':0,'mean_count':0,'mean_outputs':[],'mean_snapshots':[]}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core input not differentiable before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,widths):
+            context=state['fcb_context'];batch=context['builder_calls'];context['builder_calls']+=1
+            assert (ids0,ids1,ids2)==context['members'][batch] and widths==context['widths']
+            output=original_plan(ids0,ids1,ids2,widths);record=fcb_plan_observation(output,(ids0,ids1,ids2));record['batch']=batch
+            context['record']['plans'].append(record);fo,mo,co=(len(values) for values in context['ids'])
+            for level,key in enumerate(('fine_ids','middle_ids','coarse_ids')):context['ids'][level].extend(batch*widths[level]+i for i in output[key])
+            context['pair_fine'].extend(fo+i for i in output['pair_fine_positions']);context['pair_coarse'].extend(co+i for i in output['pair_coarse_positions'])
+            context['fine_parents'].extend(mo+i for i in output['fine_parent_positions'])
+            context['fine_counts'].extend(output['fine_pair_counts']);context['coarse_counts'].extend(output['coarse_pair_counts']);context['middle_counts'].extend(output['middle_fine_counts'])
+            return output
+        setattr(fcb_module,'build_fine_coarse_plan',observed_plan);global_replacements.append((fcb_module,'build_fine_coarse_plan',original_plan))
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def map_pre(kind):
+            def call(owner,values):
+                context=state['fcb_context'];value=values[0];c=att.fine_coarse_bipartite.channels
+                assert context['phase']==kind+'_map' and context[kind+'_map_count']==0 and context['builder_calls']==int(context['normalized'][0].shape[0])
+                if kind=='pair':
+                    z=[]
+                    for level in (0,2):
+                        index=torch.tensor(context['ids'][level],device=value.device,dtype=torch.long)
+                        z.append(context['normalized'][level].detach().reshape(-1,c).index_select(0,index))
+                    fi=torch.tensor(context['pair_fine'],device=value.device,dtype=torch.long);ci=torch.tensor(context['pair_coarse'],device=value.device,dtype=torch.long)
+                    expected=torch.cat([z[0].index_select(0,fi),z[1].index_select(0,ci)],dim=-1)
+                else:
+                    index=torch.tensor(context['ids'][1],device=value.device,dtype=torch.long)
+                    middle=context['normalized'][1].detach().reshape(-1,c).index_select(0,index)
+                    expected=torch.cat([middle,context['mean_snapshots'][2]],dim=-1)
+                assert fingerprint(torch,value)==fingerprint(torch,expected)
+                record={'kind':kind,'input':summary(value),'input_sha256':fingerprint(torch,value),
+                    'actual_rows':int(value.shape[0]),'input_matches_original_ID_or_actual_mean_captures':True,'original_linear_calls':1}
+                assert record['input']['finite'];lite_watch(value,context['record']);context['pending_record']=record
+            return call
+        def map_post(kind):
+            def call(owner,values,output):
+                context=state['fcb_context'];record=context['pending_record'];assert record['kind']==kind
+                record.update(linear_output=summary(output),linear_output_sha256=fingerprint(torch,output));assert record['linear_output']['finite']
+                lite_watch(output,context['record']);context['linear_ref']=output;context['pending_kind']=kind
+                context[kind+'_map_count']+=1;context['map_count']+=1;context['phase']='GELU'
+            return call
+        def activation_post(owner,values,output):
+            context=state['fcb_context'];kind=context['pending_kind']
+            assert context['phase']=='GELU' and values[0] is context['linear_ref']
+            record=context['pending_record'];record.update(output=summary(output),output_sha256=fingerprint(torch,output),original_GELU_calls=1)
+            assert record['output']['finite'];lite_watch(output,context['record']);context['record']['map_calls'].append(record)
+            if kind=='pair':context['q_ref']=output;context['q_snapshot']=output.detach().clone();context['phase']='fine_mean'
+            else:context['middle_snapshot']=output.detach().clone();context['phase']='complete'
+            context['GELU_count']+=1
+        def observed_mean(messages,positions,counts):
+            context=state['fcb_context'];which=context['mean_count'];assert which in (0,1,2)
+            phases=('fine_mean','coarse_mean','middle_mean');assert context['phase']==phases[which]
+            position_key=('pair_fine','pair_coarse','fine_parents')[which];count_key=('fine_counts','coarse_counts','middle_counts')[which]
+            assert positions==context[position_key] and counts==context[count_key]
+            assert messages is (context['q_ref'] if which<2 else context['mean_outputs'][0])
+            record={'kind':('fine_marginal','coarse_marginal','original_fine_parent')[which],
+                'input':summary(messages),'input_sha256':fingerprint(torch,messages),'parent_positions':list(positions),'counts':list(counts),
+                'input_is_actual_q_object' :which<2,'input_is_actual_fine_delta_object':which==2,
+                'original_mean_function_calls':1,'returned_original_object_unchanged':True,'mean_replayed_by_observer':False,
+                'pointcount_weights_or_learned_weights':False}
+            lite_watch(messages,context['record']);output=original_mean(messages,positions,counts)
+            record.update(output=summary(output),output_sha256=fingerprint(torch,output));assert record['output']['finite']
+            lite_watch(output,context['record']);context['mean_outputs'].append(output);context['mean_snapshots'].append(output.detach().clone())
+            context['record']['mean_calls'].append(record);context['mean_count']+=1
+            context['phase']=('coarse_mean','middle_mean','middle_map')[which]
+            return output
+        setattr(fcb_module,'equal_message_means',observed_mean);global_replacements.append((fcb_module,'equal_message_means',original_mean))
+        hooks.extend([att.fine_coarse_bipartite.pair_map.register_forward_pre_hook(map_pre('pair')),
+            att.fine_coarse_bipartite.pair_map.register_forward_hook(map_post('pair')),
+            att.fine_coarse_bipartite.middle_map.register_forward_pre_hook(map_pre('middle')),
+            att.fine_coarse_bipartite.middle_map.register_forward_hook(map_post('middle')),
+            att.fine_coarse_bipartite.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('fcb_context');record=context['record']
+            assert context['phase']=='complete' and len(output)==3 and context['map_count']==context['GELU_count']==2 and context['mean_count']==3
+            assert context['pair_map_count']==context['middle_map_count']==1 and context['builder_calls']==int(output[0].shape[0])
+            c=att.fine_coarse_bipartite.channels;sources=[context['mean_snapshots'][0],context['middle_snapshot'],context['mean_snapshots'][1]]
+            for level in range(3):
+                value=output[level];index=torch.tensor(context['ids'][level],device=value.device,dtype=torch.long)
+                reference=value.new_zeros((value.shape[0]*value.shape[1],c)).index_copy(0,index,sources[level]).reshape(value.shape)
+                assert fingerprint(torch,value)==fingerprint(torch,reference)
+                if not value.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core output not differentiable before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            actual_pairs=sum(p['pair_count'] for p in record['plans']);assert actual_pairs>0
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),actual_true_pairs=actual_pairs,
+                actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),actual_pair_map_calls=context['pair_map_count'],
+                actual_middle_map_calls=context['middle_map_count'],actual_map_calls=context['map_count'],actual_GELU_calls=context['GELU_count'],
+                actual_private_mean_calls=context['mean_count'],actual_map_rows={v['kind']:v['actual_rows'] for v in record['map_calls']},
+                actual_original_builder_calls=context['builder_calls'],actual_three_LN_calls=list(state['norm_counts']),
+                actual_same_q_two_marginals=True,actual_middle_context_from_original_fine_parent_mean=True,
+                final_deltas_from_actual_captures_exact=True,unsupported_padding_deltas_zero=True,
+                numeric_marginal_or_Jacobian_gate='NOT_IMPLEMENTED_NOT_REQUIRED',
+                actual_optional_boundary_counts=[{'batch':p['batch'],'pairs':p['pair_count'],'fine':len(p['fine_ids']),
+                    'roots':len(p['coarse_ids']),'nonancestor_pairs':p['observed_nonancestor_pairs'],'empty_scene':not p['fine_ids'],
+                    'singleton_fine':len(p['fine_ids'])==1,'singleton_root':len(p['coarse_ids'])==1,
+                    'middle_fine_counts':p['middle_fine_counts'],'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['fcb_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.fine_coarse_bipartite.register_forward_pre_hook(exchange_pre),att.fine_coarse_bipartite.register_forward_hook(exchange_post)])

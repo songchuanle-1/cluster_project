@@ -1,0 +1,25 @@
+{
+  "owner": {
+    "token": "12e364dc14cd4e1195532c7fd295b834",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T11:09:29.664423+00:00",
+    "deadline_at": "2026-11-06T12:09:29.664423+00:00",
+    "context_sha256": "bf1e90947d091f4e8fe53f8876d130ac0d5493d8ff0a82e1547eb900459588a1",
+    "pending_sha256": "6877a9553b1a86ab70fe0e29c1442ff1e70b52c875adc38549034c975f87f162"
+  },
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "stdin_program": "import socket;assert socket.gethostname()=='dl04-MS-7E06'\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport json,os,hashlib,re,subprocess\npid=2829477;p=Path('/proc')/str(pid);out={'observed_at':datetime.now(timezone.utc).isoformat(),'pid':pid,'exists':p.exists()}\nroot='/data/songcl/Project/Cluster_project/Cluster_hvd_20261106';log=Path(root+'/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log')\nif p.exists():\n raw=p.joinpath('stat').read_text();s=raw[raw.rfind(')')+2:].split();argv=[x.decode() for x in p.joinpath('cmdline').read_bytes().split(b'\\0') if x];cwd=os.readlink(p/'cwd');stdout=os.readlink(p/'fd/1');uid=p.stat().st_uid\n out.update(starttime=s[19],state=s[0],argv=argv,cwd=cwd,stdout=stdout,uid=uid)\n assert cwd==root and str(log)==stdout and uid==1001 and argv[1:]==['tools/train.py','configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml','--gpu_ids','0','--num_gpus','1']\n links=[]\n for f in p.joinpath('fd').iterdir():\n  try:v=os.readlink(f)\n  except OSError:continue\n  if 'cluster_project_gpu0_' in v:links.append({'fd':f.name,'path':v})\n out['cooperative_FDs']=links\nwith log.open('rb') as f:\n size=f.seek(0,2);f.seek(max(0,size-65536));tail=f.read(65536)\ntxt=tail.decode('utf-8','replace');steps=[list(map(int,x)) for x in re.findall(r'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/(\\d+)',txt)]\nlocks=[];table=Path('/proc/locks').read_text().splitlines()\nfor kind in ['training','diagnostic','exclusive']:\n f=Path('/tmp/cluster_project_gpu0_'+kind+'.lock');st=f.stat();key='%02x:%02x:%d'%(os.major(st.st_dev),os.minor(st.st_dev),st.st_ino);locks.append({'kind':kind,'path':str(f),'entries':[x for x in table if len(x.split())>5 and x.split()[5]==key]})\nhead=subprocess.check_output(['git','-C',root,'rev-parse','HEAD'],text=True).strip();assert head=='d20eb221eff6584b67d4e9b5673559d0e1cb735b'\ninv=subprocess.check_output(['nvidia-smi','-i','0','--query-gpu=index,uuid,memory.used,memory.total','--format=csv,noheader,nounits'],text=True).strip();assert inv.split(',')[1].strip()=='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c';apps=subprocess.check_output(['nvidia-smi','-i','0','--query-compute-apps=pid,used_memory','--format=csv,noheader,nounits'],text=True).strip()\nout.update(log=str(log),log_bytes=size,tail_bytes=len(tail),tail_sha256=hashlib.sha256(tail).hexdigest(),native_progress=sorted(set(tuple(x) for x in steps))[-5:],fatal_markers=[s for s in ['Traceback','CUDA out of memory','RuntimeError'] if s in txt],source_commit=head,current_locks=locks,GPU0=inv,contexts=apps,read_only=True)\nprint(json.dumps(out))\n",
+  "returncode": 0,
+  "stdout": "{\"observed_at\": \"2026-11-06T11:56:37.142188+00:00\", \"pid\": 2829477, \"exists\": true, \"starttime\": \"158248846\", \"state\": \"R\", \"argv\": [\"python\", \"tools/train.py\", \"configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml\", \"--gpu_ids\", \"0\", \"--num_gpus\", \"1\"], \"cwd\": \"/data/songcl/Project/Cluster_project/Cluster_hvd_20261106\", \"stdout\": \"/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log\", \"uid\": 1001, \"cooperative_FDs\": [], \"log\": \"/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log\", \"log_bytes\": 223218, \"tail_bytes\": 65536, \"tail_sha256\": \"fa8757afd7f9bc2d1409b2953eb10c326255b14c16473e7a66efb889c4b028ac\", \"native_progress\": [[1, 675, 4686], [1, 676, 4686], [1, 677, 4686], [1, 678, 4686], [1, 679, 4686]], \"fatal_markers\": [], \"source_commit\": \"d20eb221eff6584b67d4e9b5673559d0e1cb735b\", \"current_locks\": [{\"kind\": \"training\", \"path\": \"/tmp/cluster_project_gpu0_training.lock\", \"entries\": []}, {\"kind\": \"diagnostic\", \"path\": \"/tmp/cluster_project_gpu0_diagnostic.lock\", \"entries\": []}, {\"kind\": \"exclusive\", \"path\": \"/tmp/cluster_project_gpu0_exclusive.lock\", \"entries\": []}], \"GPU0\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 13854, 32607\", \"contexts\": \"2829477, 13746\", \"read_only\": true}\n",
+  "stderr": ""
+}

@@ -1,0 +1,1115 @@
+                                                                                                                                                                                                                                                                    1
+
+                                       Learning Point-Language Hierarchical Alignment
+                                                       for 3D Visual Grounding
+
+                                                         Jiaming Chen, Weixin Luo, Ran Song, Xiaolin Wei, Lin Ma§, and Wei Zhang§
+
+                                       A red armchair. In front of it is a                                         A white pillow. It is above a bed.
+                                       white cabinet.
+
+arXiv:2210.12513v4 [cs.CV] 9 Jun 2023  The printer is on a white table. It                                         There is a bed in a corner. It is to
+                                       is to the left of the bed.                                                  the left of a desk and chair.
+
+                                       This is a white door. It is to the                                          A white lamp. It is above a
+                                       right of a dresser.                                                         brown table.
+
+                                       The dresser is to the left of the                                           There is a chair to the right of a
+                                       entrance door. The dresser is                                               bed. It is between the bed and
+                                       white and rectangular.                                                      another chair.
+
+                                       Fig. 1: Demonstration of the proposed HAM framework on the ScanRefer benchmark. This example demonstrates
+                                       HAM's ability to comprehend spatial relationships through free-form language and accurately localize targets in
+                                       irregular point clouds.
+
+                                       Abstract--3D visual grounding localizes target objects on point clouds using natural language. While recent studies have made
+                                       substantial progress by using Transformers to align visual and linguistic information, most of them tend to use coarse-grained attention
+                                       mechanisms, which may limit their ability to comprehend lengthy and intricate language, as well as complex spatial relationships. This
+                                       paper presents a novel hierarchical alignment model (HAM) that learns multi-granularity visual and linguistic representations in an
+                                       end-to-end manner. We extract key points and proposal points to model 3D contexts and instances, and propose point-language
+                                       alignment with context modulation (PLACM) mechanism, which learns to gradually align word-level and sentence-level linguistic
+                                       embeddings with visual representations, while the modulation with the visual context captures latent informative relationships. To
+                                       further capture both global and local relationships, we propose a spatially multi-granular modeling scheme that applies PLACM to both
+                                       global and local fields. Experimental results demonstrate the superiority of HAM, with visualized results showing that it can dynamically
+                                       model fine-grained visual and linguistic representations. HAM outperforms existing methods by a significant margin and achieves
+                                       state-of-the-art performance on two publicly available datasets, and won the championship in ECCV 2022 ScanRefer challenge. Code
+                                       is available at https://github.com/PPjmchen/HAM.
+
+                                       Index Terms--Visual Grounding, Point Clouds, Transformer, Vision-Language
+
+                                                                                                       
+
+                                       1 INTRODUCTION
+
+                                           3D object localization on point clouds using natural lan-               Fig. 2, first, 3D visual grounding requires a profound un-
+                                       guage, namely 3D visual grounding, has been a prevailing                    derstanding of the intricate spatial relationships between 3D
+                                       research topic in multimodal 3D understanding [1], [2], [3],                objects. For example, the highlighted blue phrase "above the
+                                       [4] since the pioneers ScanRefer [1] and ReferIt3D [3] built                sink" and "to its right with a towel in the handle". Second,
+                                       on subsets of ScanNet [5]. Compared to the well-researched                  3D visual grounding requires a comprehension of complex
+                                       field of 2D visual grounding in images [6], [7], [8], 3D visual             language queries, which may include such specifics as the
+                                       grounding poses two significant challenges. As shown in                     observer's perspective, as highlighted in green phrase "when
+                                                                                                                   you are facing the kitchen sink". Additionally, issues such as
+                                       J. Chen and W. Luo are the co-first authors. L. Ma and W. Zhang are the     sensor noise, occlusion, missing data of point clouds, visual
+                                       corresponding authors.                                                      ambiguity resulting from numerous similar furniture, and
+                                                                                                                   other factors make it more challenging to develop accurate
+                                       · J. Chen, R. Song and W. Zhang are with the School of Control Science and  and robust algorithms for 3D visual grounding than for its
+                                            Engineering, Shandong University, China. E-mail: ppjmchen@gmail.com,   2D counterpart.
+                                            davidzhang@sdu.edu.cn.
+                                                                                                                       To tackle the two challenges, several state-of-the-art ap-
+                                       · W. Luo, X. Wei, and L. Ma are with Meituan, China. E-mail: for-
+                                            est.linma@gmail.com.
+                                                                                       2
+
+Query: A set of kitchen cabinets  Query: These brown cabinets can be seen                  We evaluate the proposed HAM framework on two
+                                  when you are facing the kitchen sink. There is       publicly available datasets [1], [3], and show that it per-
+                                  a shorter brown cabinet above the sink and a         forms excellently in target identification and localization.
+                                  larger one to its right with a towel in the handle.  Furthermore, our approach won the championship in the
+                                                                                       ECCV 2022 ScanRefer Challenge 1. We also provide ex-
+(a) 2D Visual Grounding Example   (b) 3D Visual Grounding Example                      tensive ablation experiments to show the effectiveness of
+                                                                                       the proposed modules and present various visualization
+Fig. 2: Visualization of 2D and 3D visual grounding exam-                              results that illustrate the discriminative visual and linguistic
+ples. While 2D visual grounding is typically performed on                              representations learned by our approach.
+images, 3D visual grounding is more challenging, requiring
+a deeper understanding of the intricate spatial relationships,                             The main contributions of our work are summarized as
+as well as the accompanying lengthy and complex language.                              follows:
+
+proaches [9], [10], [11], [12], [13], [14], [15], [16], [16], [17],                        · We design a hierarchical alignment model (HAM)
+[18], [19] have been proposed, leveraging 3D point clouds                                       for 3D visual grounding. It contains a point-language
+abstraction networks [20], 3D object detectors [21], [22], [23],                                alignment with context modulation (PLACM) mech-
+and powerful transformer networks [24] for multimodal                                           anism, which learns hierarchical alignment and ex-
+alignment. However, these methods often suffer common                                           tracts informative representations on both vision
+issues. First, these approaches often perform multimodal                                        and language. A spatially multi-granular modeling
+learning with coarse granularity for both language and                                          (SMGM) strategy is conducted to extend PLACM to
+point clouds, resulting in an insufficient understanding of                                     multi-granular spatial fields.
+lengthy and intricate language. Second, such methods tend
+to overlook the spatial context, which may lead to an incom-                               · We systematically analyze and incorporate three cu-
+plete grasp of complex spatial relationships. This limitation                                   mulative prompt engineering strategies, which en-
+can hinder the model's ability to fully comprehend the                                          hance the performance and robustness of HAM and
+contextual information within a scene. Addressing this issue                                    accelerate the training process.
+is essential for enhancing the model's performance of visual
+grounding in 3D environments.                                                              · Comprehensive experiments on two public datasets
+                                                                                                demonstrate the improvement of the proposed
+    This paper proposes an end-to-end hierarchical align-                                       HAM. Moreover, our approach won the champi-
+ment model (HAM) with multi-granularity representation                                          onship in ECCV 2022 ScanRefer Challenge.
+learning to address the aforementioned issues. We use learn-
+able point abstraction to gradually down-sample raw point                                  We organize the rest of the manuscript as below. In
+clouds into a set of key points and further select a smaller set                       Section 2, we list related work, including 2D/3D visual
+of proposal points to model 3D contexts and instances. The                             grounding, 3D object detection, etc. Section 3 introduces our
+core of our method is the point-language alignment with                                proposed HAM and demonstrates each module in detail.
+context modulation (PLACM) mechanism, which builds                                     In Section 4, experiments on two publicly available datasets
+upon the popular query-key-value attention [24]. This mod-                             with extensive ablation studies are carried out to validate
+ule uses proposals as queries and combines context rep-                                the effectiveness of HAM. We summarize this paper in
+resentations with language embeddings at both word and                                 Section 5.
+sentence levels to conduct hierarchical, multi-granularity
+attention. To capture both global and local relationships,                             2 RELATED WORK
+we further propose a spatially multi-granular modeling
+(SMGM) scheme that applies PLACM to both global and                                    Computer vision and natural language processing, two
+local fields. We pre-formulate the proposal points and key                             crucial sub-fields of AI, have made remarkable progress
+points via space partition and group them regionally to                                recently. Linking two modalities to realize multimodal ar-
+obtain spatially multi-granular representations.                                       tificial intelligence is becoming a new research trend and
+                                                                                       a broad range of related tasks has been extended. Most of
+    Given the success of prompt engineering in NLP and                                 the vision-language tasks can be divided into several main
+other multimodal domains [6], [25], [26], [27], we hypoth-                             research fields, e.g.vision-language understanding [28], [29],
+esize that such techniques are valuable tools for 3D visual                            [30], [31], [32], generation [32], [33], [34], [35], [36], vision-
+grounding models, which rely heavily on natural language                               language and robotics [37], [38]. This work focuses on the
+to identify and locate objects in point clouds. In this work,                          emerging and challenging 3D visual grounding task, and
+we extensively investigate existing prompt engineering                                 we further introduce the related work in detail.
+techniques, which involve various strategies for modifying
+and reorganizing input text, and systematically incorporate                            2.1 Visual Grounding on 2D Images
+them into our HAM framework to provide a diverse train-
+ing set and enhance the efficiency and effectiveness of the                            Visual grounding was first proposed on 2D images, which
+training.                                                                              aims at localizing the target object in an image based on
+                                                                                       a given sentence query [39], [40], [41], [42]. Most existing
+                                                                                       approaches adopt two-stage [8], [43], [44] and one-stage
+                                                                                       frameworks [45], [46], [47], which are widely used in the ob-
+                                                                                       ject detection. Recently, a set of methods [6], [48] have made
+
+                                                                                          1. https://kaldir.vc.in.tum.de/scanrefer benchmark
+                                                                3
+
+great progress in multimodal understanding tasks, bene-             Overall, we found that existing methods on 3D vi-
+fiting from the powerful transformer network and large-         sual grounding usually perform visual-linguistic alignment
+scale pre-training. While it is tempting to leverage existing   upon a coarse granularity and overlook the spatial con-
+frameworks from 2D visual grounding, it is important to         text, which inspired this work to design a hierarchical,
+acknowledge that 3D visual grounding presents distinct          coarse-to-fine, and multi-granularity point-language align-
+challenges, such as irregularity, noise, and missing data in    ment framework.
+point clouds, as well as complex spatial relationships in 3D
+space. Consequently, developing tailored approaches that        2.3 3D Object Detection
+tackle these specific challenges is essential to make progress
+in 3D visual grounding.                                         Since we work on end-to-end 3D visual grounding requiring
+                                                                accurate detection, we then revisit the related work on 3D
+2.2 Visual Grounding on 3D Point Clouds                         object detection. To apply CNNs to 3D object detection, early
+                                                                works project the point clouds to the bird's view [50], [51],
+Visual grounding on 3D point clouds [1], [3] aims at lo-        [52] or frontal views [53], [54]. Voxel-based methods [55],
+calizing the corresponding 3D bounding box of a target          [56] conduct voxelization on point clouds and utilize 3D
+object given query sentences and unorganized point clouds.      and 2D CNNs sequentially as used in 2D object detection.
+Two public benchmark datasets ScanRefer [1] and ReferIt3D       Recently, a bulk of point-based methods [21], [22], [57],
+[3] are proposed. Both of them adopt the ScanNet [5], an        [58] put more effort into tackling this task directly on raw
+indoor scene 3D point clouds dataset, and augment it with       point clouds. Most of them group the points into object
+language annotations. More specifically, ScanRefer follows      candidates by using box proposals [57], [58] or voting [21],
+the grounding-by-detection paradigm of 2D visual ground-        and then extract object features from groups of points for the
+ing that only raw 3D point clouds and the query sentence        following detection. Group-Free [22] drops grounding used
+are given. Alternatively, ReferIt3D formulates the 3D vi-       in voting [21] and uses K-Closest Point Sampling instead
+sual grounding as a fine-grained identification problem,        for proposal generation. At the same time, it applies a
+which assumes the object ground truth boxes are known           transformer to carry out the correlation between proposals
+during both training and inference. Besides, Rel3D [2] is       and key points, which serves as the foundation of this paper.
+constructed, which focuses on grounding spatial relations
+between objects but not localization. SUNRefer [4] is intro-        More recently, RepSurf-U [59] presents the representative
+duced for visual grounding on RGBD images. In this work,        surfaces, a representation of point clouds to explicitly extract
+we work on the visual grounding on 3D point clouds only.        the local structure. It provides a lightweight plug-and-play
+                                                                backbone module for downstream tasks containing object
+    To tackle this task, most of the existing methods [1],      detection. Group-Free [22] equipped with RepSurf-U out-
+[3], [9], [10], [11], [12], [18] follow the two-stage frame-    performs prior methods. FCAF3D [60], a recently proposed
+work. In the first stage, 3D object proposals are directly      fully convolutional anchor-free framework for object detec-
+generated from the ground-truth [3] or extracted by a 3D        tion in 3D indoor scenes. Different from voting-based and
+object detector [21]. In the second stage, the proposals and    transformer-based methods, it provides an effective and
+language features are aligned for semantic matching. Recent     scalable design to manipulate the voxel representation of
+work [12], [16], [18], [49] adopts the popular transformer      point clouds with sparse convolutions. FCAF3D achieves
+framework to model the relationship between proposals and       the state-of-the-art 3D object detection results on three in-
+language powered by the attention mechanism [24]. Some          door large-scale 3D point clouds benchmark datasets [5],
+methods [9], [10], [11] utilize the graph neural network to     [61], [62]. In this paper, we adopt a point-based detection
+aggregate information. For instance, TGNN and InstanceRe-       framework, but we believe that voxel-based design is also a
+fer [9], [10] treat the proposals as nodes and use language     strong baseline, which we leave to future work.
+to enhance them. FFL-3DOG [11] characterizes both the
+proposals and language in two independent graphs and            2.4 Vision-Language Transformer
+fuses them in another graph. Recently, 3DJCG [13] proposes
+a unified framework to jointly fit both the 3D captioning       Transformer-based networks demonstrate extraordinary ca-
+task and 3D grounding task, which consists of shared            pability in computer vision [63], [64], [65] and natural lan-
+task-agnostic modules and task-specific modules. Similarly,     guage processing [24], [66], [67] and further bridge the gap
+D3Net [19] introduces a unified network that can Detect,        between them in the multimodality field [31], [35], [36], [48],
+Describe and Discriminate for both dense captioning and         [68], which also motivates us to utilize a transformer-based
+visual grounding in point clouds. 3D-SPS [14] proposes a        framework for our work. Some works [48], [68] conduct
+3D single-stage referred point progressive selection method     large-scale pre-training using a vision-language transformer.
+for progressively selecting key points with the guidance of     For example, CLIP [48] introduces a transformer-based con-
+language and directly locating the target in a single-stage     trastive language-image pre-training method for efficiently
+framework. [17] proposes a multi-view transformer for 3D        learning visual concepts from natural language supervi-
+visual grounding, which takes the additional multi-view         sion. Then TCL [68] proposes triple contrastive learning for
+features as inputs and designs the network for learning a       vision-language representation pre-training. Besides regular
+more robust multimodal representation. BUTD-DETR [15]           cross-modal alignment (CMA), TCL introduces an intra-
+proposes the Bottom Up Top Down DEtection TRansformers          modal contrastive (IMC) objective to provide complemen-
+for visual grounding using language guidance and object-        tary benefits in representation learning. All the network
+ness guidance in both 2D and 3D.                                modules, including the vision encoder, text encoder, and
+                                                                fusion encoder, are transformer-based designs. Pre-training
+                                                                                                                      4
+
+Point Clouds                  Key Points                  Proposal Points       Proposal Points Weighted by Words
+
+              PointNet++                       Proposal
+                                              Generation
+                                                                                ...
+
+                              Global Context
+                                                         PLACM
+
+       Query Text : A white   Word-Level                   Context Modulation
+     mattress bed with white  Embedding                   Word-Level Alignment
+    bed frame made of wood.
+     The bed is in between a         a                     Context Modulation
+                                  white
+        window and a desk.
+                              mattress        Sentence-Level Alignment
+        Prompt Engineering
+                                      bed     PLACM                                                 MLP
+         Language Encoder                          Context Modulation           Proposal Points Weighted by Sentence
+                                   ...
+Space Partition                                  Word-Level Alignment
+                                     desk
+                                                   Context Modulation
+                              Sentence-Level  Sentence-Level Alignment
+                                Embedding
+                                      SLE
+
+                              Local Context
+
+Fig. 3: Workflow of the proposed hierarchical alignment model (HAM). The initial pre-processing and encoding of raw
+point clouds and query texts yield key points, proposal points, associated point features, proposal bounding boxes, as well
+as word-level and sentence-level embeddings. Two branches are developed for spatially multi-granular modeling (SMGM):
+one implementing point-language alignment with context modulation (PLACM) on the global field, and the other applying
+PLACM on local regions generated by space partitioning. The outputs of both branches are merged and passed through
+MLP layers to predict the final matching scores.
+
+with two objectives, i.e., image-text matching and masked       on both global and local fields in parallel. The outputs from
+language modeling, TCL achieves state-of-the-art perfor-        both branches are merged to predict the final matching
+mance on various downstream vision-language tasks such          score. Grounding can then be achieved by selecting the
+as image-text retrieval and visual question answering.          highest matching score. We also propose an adaptation
+                                                                strategy for adapting the HAM to identification paradigm
+3 OUR APPROACH                                                  on two datasets [1], [3] with different evaluation metrics.
+                                                                The overall framework is illustrated in Fig. 3.
+Provided with a point cloud P with supplementary visual
+features such as colors, normals, or multi-view features, and       In the following, we introduce the point cloud pre-
+a query Q, the aim of 3D visual grounding is to establish       processing and feature encoding in Section 3.1. The lan-
+a mapping M that links P and Q to the target object o,          guage embedding and the prompt engineering are intro-
+i.e., M(P, Q)  o. Essentially, this process requires a com-     duced in Section 3.2. Then, the PLACM mechanism is intro-
+prehensive understanding of the intricate 3D environment        duced in Section 3.3. In Section 3.4, we proposed the design
+through the integration of visual and linguistic information.   of SMGM scheme. The loss function and the adaptation
+                                                                strategy to the identification paradigm are introduced in
+    In this paper, we design a hierarchical alignment model     Sections 3.5 and 3.6, respectively.
+(HAM) to address this problem. We extract a sequence of
+key points and proposal points with corresponding fea-          3.1 Point Cloud Encoding
+tures and proposal bounding boxes from raw point clouds.
+For the query texts, we perform prompt engineering to           3.1.1 Key Points and Proposal Points Extraction
+obtain diverse training samples, and a language encoder
+is utilized to generate both word-level and sentence-level      Following previous methods [1], [10], [11], [12], [18], we
+embeddings. To achieve a comprehensive multimodal in-           employ PointNet++ [20] as the backbone network for point
+teraction, we introduce the point-language alignment with       abstraction. Specifically, PointNet++ down-samples L raw
+context modulation (PLACM) mechanism, which modulates           points P  RL×(3+x), which includes 3D coordinates and
+proposal points using key points and promotes gradual           x-dimensional supplementary visual features, to N key
+alignment with two levels of language embeddings. We fur-       points, denoted as PK = {PK(i)}iN=1. Such key points
+ther propose the spatially multi-granular modeling (SMGM)
+scheme, which contains two branches to perform PLACM
+                                                                                              5
+
+Query Sentences of One Scene                           Prompt Engineering                     query at both word and sentence levels. Such representa-
+                                                                                              tions serve as input tokens for the PLACM module.
+ There is a bed in a corner. It is to the left of a           There is a bed in a corner. It
+ desk and chair.                                              is to the left of a desk and        Specifically, to extract the initial word embeddings, we
+                                                              [MASK]. The dresser is to       utilize a pre-trained GloVe [70] model for a given query
+ There is a chair to the right of a bed. It is to the         the left of the [MASK] door.    text. We employ a vanilla GRU [71] to extract the word-level
+ left of another chair.                                       The dresser is white and        embedding FW  RT ×C for each word token, where T de-
+                                                              rectangular.                    notes the maximum length of the input text. Subsequently,
+                      .......                                                                 the sentence-level embedding FS  R1×C is generated as
+                                                            One-to-Many Grounding             the last-step feature of the GRU. We opt for simple language
+ A red armchair. In front of it is a white cabinet.                                           embeddings instead of advanced text encoding techniques
+                                                                                              such as RoBERTa [67] in the default network setting to
+ This is a nightstand made of wood. The night                                                 ensure fair comparisons and ease the end-to-end training
+ stand is near the bed.                                                                       in this work.
+
+ The dresser is to the left of the entrance door.                                             3.2.2 Prompt Engineering
+ The dresser is white and rectangular.
+                                                                                              To improve language modeling, we conduct a comprehen-
+ The chair is against the brown table on the                                                  sive analysis of existing prompt engineering techniques
+ left hand side of the room. It is the chair                                                  and systematically integrate them into our framework. We
+ closest to the back.                                                                         introduce the three cumulative strategies:
+
+Fig. 4: Three cumulative prompt engineering strategies: (1)                                       Word Masking. Randomly masking a portion of words
+word masking, (2) intra-sentence ensemble, and (3) inter-                                     from the raw text is a prevalent augmentation strategy
+sentence ensemble.                                                                            employed in self-supervised language pre-training models,
+                                                                                              such as [25], [67], [72], and previous multimodal transformer
+sparsely represent the point cloud while capturing signif-                                    frameworks like [12], [73], [74]. This approach contributes
+icant contextual information. Their corresponding features                                    to more diverse training examples, leading to a more robust
+are denoted as FK = {FK(i)}iN=1.                                                              linguistic representation. In our work, we randomly mask
+                                                                                              up to 20% of words in the query sentence.
+    We further utilize the learnable k-closest points sampling
+(KPS) [22] on PK and FK to select a subset of M proposal                                          Intra-Sentence Ensemble. To generate more complex
+points PQ = {PQ(j)}M j=1 and the corresponding features                                       and diverse linguistic input, we utilize an intra-sentence
+FQ = {FQ(j)}jM=1, which represent the proposal objects in the                                 ensemble strategy. Inspired by MDETR [6], we sample
+point cloud. Here both FK and FQ have the same dimension                                      multiple original queries associated with the scene and
+C, i.e., FK  RN×C and FQ  RM×C . Drawing inspiration                                          subsequently fuse them to create an ensembled sentence.
+from the state-of-the-art Group-Free [22] approach in 3D                                      This ensembled sentence refers to multiple objects within
+object detection tasks [5], [61], we employ multi-head cross-                                 a single scene. Such an intra-sentence ensemble encourages
+attention modules to enhance proposal points by correlating                                   the model to better handle complex queries and multi-object
+them with key points. All layers are fully supervised using                                   grounding tasks.
+the 3D object detection task on ScanNet, and we select the
+regressed bounding boxes at the final layer as the boxes for                                      Inter-Sentence Ensemble. To further enhance training
+the proposal points.                                                                          efficiency, recent methods [12], [19] extended the original
+                                                                                              paradigm of grounding a single sentence by grouping mul-
+3.1.2 Concentration Sampling                                                                  tiple raw sentences within a single training sample. We
+                                                                                              incorporate this strategy into the prompt engineering and
+Existing methods for point sampling in regular PointNet++,                                    name it the inter-sentence ensemble, which distinguishes it
+such as distance-FPS (D-FPS) based on 3D coordinates and                                      from the above intra-sentence ensemble since it results in
+feature-FPS (F-FPS), taking into account the 3D coordinate                                    inference with multiple individual sentences.
+features extracted by multiple linear layers, have limitations
+in sampling diversity and recall of interested points. The                                        As illustrated in Fig. 4, the integration of cumula-
+fusion sampling (FS) employed in [69], which simply takes                                     tive prompt engineering strategies transforms the original
+50% D-FPS samples and 50% F-FPS samples, can lead to                                          sparse training sample into a one-to-many grounding man-
+overlapping points and a decrease in sampling diversity.                                      ner. This results in a diverse training set, enhancing the ef-
+                                                                                              ficiency and effectiveness of the training process, ultimately
+    To address these issues, we propose a simple yet ef-                                      leading to more robust linguistic representations.
+fective down-sampling strategy. We name it concentration
+sampling (CS). To prevent overlapping points, we use a                                        3.3 PLACM: Point-Language Alignment with Context
+point-id queue to remove duplicates and evenly add points                                     Modulation
+from D-FPS and F-FPS. Experimental results show that
+our proposed strategy outperforms existing down-sampling
+methods in terms of sampling diversity and recall of inter-
+ested points, as shown in Section 4.5.
+
+3.2 Language Encoding                                                                             To integrate visual and linguistic features within an
+                                                                                              alignment space, we propose the mechanism of point-
+3.2.1 Multi-granularity Language Embedding                                                    language alignment with context modulation (PLACM) to
+Our hierarchical framework incorporates multi-granularity                                     obtain informative language-aligned visual representations.
+representations by embedding the natural language input
+                                                                                                  The PLACM is constructed with the standard multi-
+                                                                                              head self-attention (MHSA) and multi-head cross-attention
+                                                                                                                                                             6
+
+Context Modulation & Word-Level Alignment              Context Modulation & Sentence-Level Alignment       latent informative relationships within the visual context. As
+                   FFN                                                           FFN                       shown in Fig. 3, we emphasize the proposal points weighted
+                                                                                                           by both word-level and sentence-level embeddings, which
+Add & Norm                                 Word-Level    Add & Norm                                        clearly exhibits the effectiveness of PLACM. Additional vi-
+                                           Embedding                                                       sualization results and analysis are presented in Section 4.5.
+                                                          Multi-Head                 Sentence-Level
+   Multi-Head                              ...         Cross-Attention                  Embedding
+Cross-Attention
+                             K&V                              Q            K&V
+       Q
+                                                                                                           3.4 Spatially Multi-Granular Modeling with PLACM
+Add & Norm                                                  Add & Norm
+                                                  ...                            ...
+                                                             Multi-Head
+  Multi-Head                               Key Points      Self-Attention  Key Points                          The PLACM module offers exceptional flexibility, en-
+Self-Attention                              Features                        Features                       abling it to accept pre-formulated proposals along with the
+                                                                                                           context representations and the corresponding query text.
+                                                           Q  K&V                                          This characteristic facilitates the pre-grouping of proposal
+                                                                                                           points and key points, introduced in Section 3.1, according
+Q                       K&V                                                                                to their spatial locations. As a result, to achieve a more
+                                                                                                           comprehensive understanding of the scene and enhances
+Proposal Points         Key Points                                                                         the model's ability to ground objects across varying spatial
+     Features            Features                                                                          scales, we design the spatially multi-granular modeling
+                                                                                                           (SMGM) based on the PLACM module.
+                   ...                ...
+                                                                                                               First, PLACM can be directly applied to the global field
+Fig. 5: Flowchart of the mechanism of point-language align-                                                by incorporating the complete proposal points features FQ
+ment with context modulation (PLACM).                                                                      and key points features FK :
+
+(MHCA) mechanisms [24]. Here we formally define the                                                        FQ  FQ|K,W,S                                      (6)
+MHSA and the MHCA as follows:
+
+        MHSA(X) = (fquery(X)fkey(X)T )fvalue(X) (1)
+    MHCA(X, Y ) = (fquery(X)fkey(Y )T )fvalue(Y ) (2)
+
+where  is the softmax function. fquery, fkey, and fvalue                                                       The recent Swin-Transformer [75] incorporates window-
+represent the mapping functions of the query, key, and                                                     attention, introducing locality to the standard vision Trans-
+value, respectively.                                                                                       former [76]. This approach highlights that 3D visual ground-
+                                                                                                           ing narratives naturally consist of multiple local descrip-
+    Assuming that we have obtained a collection of proposal                                                tions, in addition to a few global ones, to localize the target
+points and key points, along with their respective features                                                object progressively. For instance, the phrase "There is a
+Fq and key points features Fk, as well as the word-level                                                   brown cabinet in the kitchen. It is on top of the refrigera-
+embedding FW and sentence-level embedding FS from the                                                      tor" necessitates that the model first localizes the "kitchen"
+query text, the goal of the PLACM mechanism is to fuse                                                     within the entire scene, and then localizes the "brown cab-
+and align such multimodal features effectively. This leads                                                 inet" within the local space, using the "refrigerator" as a
+to a unified representation that enhances the understanding                                                reference. Consequently, we also conduct the PLACM on
+and processing of both visual and linguistic information.                                                  the local field.
+
+    As shown in Fig. 5, Fk and FW are concatenated on the                                                      As shown in Fig. 3, we partition the entire scene into
+sequence dimension to form Fk,W . Similarly, Fk is concate-                                                several cubic regions evenly, similar to Rubik's Cube. It
+nated as to FS obtain Fk,S. To incorporate both vision and                                                 yields a resolution of r × r × r. The proposal points and
+linguistic information at the word level, we apply context                                                 key points within the same region are grouped together and
+modulation and language alignment on proposal points                                                       fed into the PLACM, expressed as:
+based on MHSA and MHCA. Fq is first passed through
+an MHSA layer for initial self-encoding, and then through                                                  FQr  FQr|Kr,W,S                                   (7)
+an MHCA layer to perform context modulation and word-
+level alignment together with Fk,W . Then, it is fed into a                                                where Qr and Kr represent the proposal points and key
+feed-forward network (FFN), including two fully-connected                                                  points within the same region, respectively.
+layers. The context modulation and word-level alignment is
+formulated as below:                                                                                           Subsequently, FQ represents the global proposal features
+                                                                                                           while FQr denotes a local one. These language-modulated
+Fq|k,W = FFN(MHCA(MHSA(Fq), Fk,W ))                                                                   (3)  proposal representation features are simply added to predict
+                                                                                                           matching scores. The matching module, based on a straight-
+    Similarly, we conduct context modulation and sentence-                                                 forward MLP network, estimates the logits for each proposal
+level alignment on Fq|k,W,S, formulated as:                                                                bounding box. The bounding box with the highest score is
+                                                                                                           selected as the final grounding box.
+
+Fq|k,W,S = FFN(MHCA(MHSA(Fq|k,W ), Fk,S)) (4)
+
+    The processing of the PLACM module can be expressed                                                    3.5 Loss Function
+as a mapping:
+                                                                                                           We follow the previous work [1], [11], [18] with multi-task
+                                           Fq  Fq|k,W,S .                                             (5)  training, including 3D object detection, 3D visual grounding
+                                                                                                           and language auxiliary task. Detection plays a critical role in
+    We believe that this alignment mechanism enables the                                                   the semantic representation of proposals. At the same time,
+hierarchical capture of the relationships between each pro-                                                we believe that this positive-intensive task will significantly
+posal point and individual words as well as the entire sen-                                                benefit the grounding task with a severe imbalance between
+tence, while the involvement of key points further provides                                                positives and negatives.
+                                                                 7
+
+    Detection Loss. For the detection task, we adopt the             We believe that this adaptation strategy is highly com-
+same setting with VoteNet [21] and GroupFree [22], where         patible with the grounding-by-detection training paradigm.
+the objectness prediction, box classification, center offset     Unlike the approaches [3], [10], [15], [17], [77] of directly us-
+prediction, size classification, and size offset prediction are  ing ground truth to produce offline proposals, our approach
+carried out for each proposal. Here we denote the object         preserves the learnable proposal generation throughout the
+detection loss as LD.                                            grounding. Furthermore, it ensures the substantial utiliza-
+                                                                 tion of contextual information from the detection phase
+    Matching Loss. For the visual grounding, we follow           during the point-language alignment.
+ScanRefer [1] to predict the matching scores {y^i}iM=1 of M
+proposal points. We set the label yi to one only if the box has  4 EXPERIMENTS
+the highest interaction-over-union (IoU) with the ground-
+truth box, and others are set to zeros. The ground-truth label   4.1 Implementation Details
+is a one-hot encoding, so we apply softmax on matching
+scores. The cross-entropy loss is utilized as the matching       For the point cloud encoding, the number of the backbone
+loss function, formulated as:                                    input points L is set to 50,000. The number of the key points
+                                                                 N is set to 1,024, and the number of the proposal points M
+   M                                                             is set to 512. All of the feature dimension C is set to 288.
+                                                                 The number of the multi-head cross-attention layers in the
+LM = - yilog(y^i)          (8)                                   proposal generation module is set to 12. In Section 4.4, we
+                                                                 also provide and discuss a lighter-weight point cloud back-
+   i=1                                                           bone in the ablation studies. For the proposal aggregation,
+                                                                 the maximum instance number G is set to 88. For the intra-
+    Language to object classification loss. The language         sentence ensemble, we randomly sample 1 to 6 sentences
+description contains the target word, so an auxiliary task of    corresponding to one scene for fusing into the composited
+language-to-object classification can be trained along with      sentence. And for the inter-sentence ensemble, we attach
+the visual grounding to classify the sentence-level feature      eight sentences (randomly sampled from the composited
+FT to object classes, following ScanRefer [1]. Such classifi-    and original sentences) to one scene for dense grounding.
+cation regularizes the language model, supervised by the         The maximum sentence length T is set to 200.
+cross-entropy loss denoted as LC .
+                                                                     For the positional embedding of all the self-attention
+    Total Loss. The total loss LT is a weighted sum of           and cross-attention layers, following Group-Free [22], the
+the detection loss, matching loss, and language-to-object        3D coordinates of the key points are mapped to a positional
+classification loss, denoted as:                                 embedding of the dimension C via a fully-connected layer
+                                                                 and then added to the corresponding features. Similarly, the
+LT = wi  Li, i  {D, M, C}  (9)                                   central location and size of the proposal bounding boxes are
+                                                                 mapped and added to the proposal points features. For the
+i                                                                word-level embedding and sentence-level embedding, we
+                                                                 utilize the regular sine-cosine functions as position embed-
+where the wD, wM , and wC are hyper-parameters to indi-          ding.
+cate the importance of each task.
+                                                                     For the SMGM, we provide an efficient implementation
+3.6 Adaptation to Identification Paradigm                        based on mask attention. Notably, we retain the attention
+                                                                 weights of the points in the same region only, while others
+The aforementioned framework is designed for the                 are masked out by filling with infinity before the Softmax
+grounding-by-detection paradigm as the benchmark                 operation in the cross-attention layer. Such masked attention
+method ScanRefer [1] defined. However, another bench-            can be seamlessly aggregated into PLACM module with
+mark dataset ReferIt3D [3] introduces the problem of 3D          high parallelism easily. The default space partition resolu-
+visual grounding as an identification task, which provides       tion r is set to 4.
+the object ground truth boxes as known input for both the
+training and testing stage. Previous works [3], [10], [15],          Besides, we adopt the AdamW optimizer [78] and set the
+[17], [77] usually group the point clouds of each provided       initial learning rate to 2 × 10-4 for the attention layers and
+instance at the beginning. However, such pre-processing          1 × 10-2 for others. The loss weights wD, wM , and wC are
+fails to explore more contexts for point representation at the   10, 0.1, and 0.1. We train the network by 200 epochs, with a
+early stage.                                                     batch size of 4. Codes are implemented by Pytorch and run
+                                                                 on 8 Tesla-V100 GPUs.
+    Instead, we provide a simple but effective proposal
+aggregation mechanism for adapting to the identification         4.2 Dataset and Evaluation Metric
+setting. For the inputs with extra instance annotation, we
+retain the raw point clouds as inputs and the detection          ScanRefer [1] and ReferIt3D [3] are two benchmark datasets
+module. For all the proposal points at the last layer in the     released recently for visual grounding on point clouds,
+detection module, we group the proposal points by their in-      which are both conducted on the ScanNet [5] dataset but
+stance annotations and adopt max-pooling for aggregating         take different evaluation metrics.
+the instance-level features. After that, M proposal points
+features are aggregated to G instance features, where G is           ScanRefer. It follows the grounding-by-detection
+the number of instances in the corresponding scene. For the      paradigm as the 2D visual grounding on images that
+subsequent PLACM, we use the instances features instead          only raw point clouds and query sentences are given. The
+of the original proposal points features for finishing the
+modality fusion and prediction.
+                                                                                                                                                                                                   8
+
+TABLE 1: Comparison with state-of-the-art methods on the ScanRefer [1] benchmark dataset.
+
+Method                 Venue       Data   Acc@0.25  Unique                      Multiple           Overall
+                                                            Acc@0.5     Acc@0.25 Acc@0.5  Acc@0.25 Acc@0.5
+ScanRefer [1]          ECCV2020     3D      67.64
+TGNN [9]               AAAI2021     2D      68.61       Validation Set  32.06  21.26      38.97  26.10
+InstanceRefer [10]     ICCV2021     3D      77.45             46.19     29.84  23.18      37.37  29.70
+FFL-3DOG [11]          ICCV2021     3D                        56.80     31.27  24.77      40.23  32.93
+3DVG-Transformer [12]  ICCV2021     3D         -              66.83            25.70             34.01
+3DJCG [13]             CVPR2022     3D      77.16             67.94       -    28.70        -    34.47
+3D-SPS [14]            CVPR2022     3D      78.75             58.47     38.38  30.08      45.90  36.14
+BUTD-DETR [15]         ECCV2022     3D      81.63             61.30     40.13  29.61      47.62  36.43
+ScanRefer [1]          ECCV2020  2D + 3D                      64.77     39.48             47.65  39.8
+SAT [18]               ICCV2021  2D + 3D       -                 -               -        52.2
+3DVG-Transformer [12]  ICCV2021  2D + 3D    76.33             53.51       -               41.19  27.40
+Multi-View Trans [17]  CVPR2022  2D + 3D    73.21             50.83            21.11      44.54  30.14
+3D-SPS [14]            CVPR2022  2D + 3D    81.93             60.64     32.73  25.16      47.57  34.67
+3DJCG [13]             CVPR2022  2D + 3D    77.67             66.45     37.64  28.42      40.80  33.26
+D3Net [19]             ECCV2022  2D + 3D    84.12             66.72     39.30  25.26      48.82  36.98
+HAM                                 3D      83.47             64.34     31.92  29.82      49.56  37.33
+                       AAAI2021                               70.35     40.32  30.82             37.87
+TGNN [9]               ICCV2021     3D         -                        41.39  30.05        -
+InstanceRefer [10]     ECCV2022     3D      79.24             67.86                       48.79  40.60
+BUTD-DETR [15]         ECCV2020     3D              Online Benchmark      -    34.03
+ScanRefer [1]          ICCV2021  2D + 3D    68.34
+3DVG-Transformer [12]  CVPR2022  2D + 3D    77.82             58.94     41.46
+3DJCG [13]             ECCV2022  2D + 3D    78.48             66.69
+D3Net [19]                       2D + 3D    68.59             54.99     33.12  25.26      41.02  32.81
+HAM                                 3D      77.33             43.53     34.57  26.88      44.27  35.80
+                                            76.75             57.87     39.34  24.80      48.11  31.57
+                                                              60.59     34.88  20.97      42.44  26.03
+                                               -              68.43     43.70  31.02      51.24  37.04
+                                            77.99                       43.89  31.17      51.26  37.76
+                                                              63.73            30.74             39.19
+                                                                          -    33.24        -    40.07
+                                                                        41.48             49.67
+
+ScanRefer dataset [1] augments the 3D instance-level in-        which is fully introduced in Section 3.6, and we follow the
+door dataset ScanNet [5] with 51,583 human-written free-        evaluation metric Accuracy proposed by the ReferIt3D [3] to
+form descriptions of 11,046 objects in 3D scans. It splits      evaluate our method. We also provide Acc@IoU=0.5 results
+the training/validation/testing set with 36,655, 9,508, and     on ReferIt3D by removing the proposal aggregation follow-
+5,410 samples, respectively. We follow the evaluation metric    ing D3Net [19]. Since there is no "Unique" case in ReferIt3D,
+Acc@IoU=0.25 and Acc@IoU=0.5 proposed by ScanRefer to           we report results on "Multiple" and "Overall" subsets as
+evaluate all the methods. Specifically, they measure the per-   D3Net does.
+centage of the positively predicted bounding boxes whose
+IoUs with the ground-truth bounding boxes are higher            4.3 Performance Comparisons with the State-of-the-art
+than 0.25 and 0.5, respectively. Additionally, scenes with      Methods
+a sole target object without similar duplicates are labeled
+as "Unique" and others as "Multiple" alternatively. Both        Quantative Results. In Table 1 and Table 2, we compare our
+"Unique" and "Multiple" are unified as "Overall". We re-        HAM with the state-of-the-art methods [1], [9], [10], [11],
+port all these evaluation metrics on the validation set and     [12], [13], [14], [15], [16], [16], [17], [18], [19] on both Scan-
+online testing set.                                             Refer [1] and ReferIt3D [3] Nr3D/Sr3D benchmark datasets.
+                                                                For a fair comparison, we report the results according to
+    ReferIt3D. It contains two sub-datasets, where a sub-       the modalities used as input data. Here "3D" means only
+dataset is with natural-language reference annotations          the raw attributes such as coordinates, color, and normal
+(Nr3D), and another sub-dataset is with synthetic reference     vectors of the raw point clouds are used. "2D + 3D" means
+annotations (Sr3D). Nr3D contains 41,503 samples collected      using the 2D multi-view features as extra inputs.
+by ReferItGame [39], an online reference labeling game on
+3D scenes. Sr3D contains 83,572 samples collected by an             Table 1 demonstrates the quantitative results on both
+automatic template-based generator. Different from Scan-        the validation set and the online benchmark of the ScanRe-
+Refer, ReferId3D casts visual grounding to a identification     fer [1]. Here HAM only takes the "3D" inputs with efficient
+task and assumes the object ground truth boxes of objects       end-to-end training, and it outperforms all the state-of-the-
+is known during training and inference. During the evalu-       art methods on the validation set and online benchmark. It
+ation, ReferIt3D only needs to calculate the identification     is also the champion on the ECCV 2022 ScanRefer Challenge
+accuracy. Similar to ScanRefer, Nr3D and Sr3D also are          with the highest overall Acc@0.5. For the most challenging
+further split into different subsets by the sample attributes,  metric "Multiple" that expects the grounder to locate the
+where the "easy" and "hard" subsets are defined the same        target among multiple objects with the same category, HAM
+as "Unique" and "Multiple" in ScanRefer, and the "view-         ranks first among all the methods in the validation set
+dep" and "view-indep" subsets are defined by whether            for both "Acc@0.25" and "Acc@0.5", and it also ranks first
+the referring queries are dependent or independent on the       in the online benchmark for "Multiple Acc@0.5", which
+camera view. We propose a proposal aggregation strategy         shows its remarkable capacity for 3D visual grounding in
+for adapting our grounding-by-detection framework to such       complex environments. In addition, without any extra 2D
+identification paradigm with the given instance annotations,    multi-view features and pre-training for the object-detector
+                                                                                                                                                                                                  9
+
+TABLE 2: Comparison with state-of-the-art methods on the ReferIt3D [3] benchmark dataset.
+
+Subset Method                        Venue     Pre-training Text Encoder Data Easy Hard View-dep. View-indep. Overall
+
+ReferIt3D [3]                ECCV2020                   RNN [79]   3D 43.6 27.9 32.5       37.1  35.6
+
+TGNN [9]                     AAAI2021                   BERT [66]  3D 44.2 30.6 35.8       38.0  37.3
+
+InstanceRefer [10]           ICCV2021                   GRU [71]   3D 46.0 31.8 34.5       41.9  38.8
+
+3DVG-Transformer [12] ICCV2021                          GRU [71]   3D 48.5 34.8 34.8       43.7  40.8
+
+Nr3D FFL-3DOG [11]              ICCV2021                GRU [71]   3D 48.2 35.0 37.1       44.7  41.7
+          TransRefer3D [49]  ACM MM2021                 GRU [71]   3D 48.5 36.0 36.5
+                                                                                           44.9  42.1
+
+LanguageRefer [16]           CoRL2021                   DistilBert [72] 3D 51.0 36.6 41.7  45.0  43.9
+
+SAT [18]                     ICCV2021                   BERT [66] 2D + 3D 56.3 42.4 46.9   50.4  49.2
+
+Multi-View Trans [17] CVPR2022                          BERT [66] 2D + 3D 61.3 49.1 54.3   55.4  55.1
+
+3D-SPS [14]                  CVPR2022                   CLIP [48] 2D + 3D 58.1 45.1 48.0   53.2  51.5
+
+BUTD-DETR [15]               ECCV2022                   RoBERTa [67] 3D 60.7 48.4 46.0     58.0  54.6
+
+HAM                                                     GRU [71]   3D 54.3 41.9 41.5       51.4  48.2
+
+HAM+BUTD-DETR                                           RoBERTa [67] 3D 64.7 49.7 49.0     60.5  57.2
+
+ReferIt3D [3]                ECCV2020                   RNN [79]   3D 44.7 31.5 39.2       40.8  40.8
+
+TGNN [9]                     AAAI2021                   BERT [66]  3D 48.5 36.9 45.8       45.0  45.0
+
+InstanceRefer [10]           ICCV2021                   GRU [71]   3D 51.1 40.5 45.4       48.1  48.0
+
+3DVG-Transformer [12] ICCV2021                          GRU [71]   3D 54.2 44.9 44.6       51.7  51.4
+
+Sr3D LanguageRefer [16]      CoRL2021                   DistilBert [72] 3D 58.9 49.3 49.2  56.3  56.0
+
+TransRefer3D [49]            ACM MM2021                 GRU [71]   3D 60.5 50.2 49.9       57.7  57.4
+
+SAT [18]                     ICCV2021                   BERT [66] 2D + 3D 61.2 50.0 49.2   58.3  57.9
+
+Multi-View Trans [17] CVPR2022                          BERT [66] 2D + 3D 66.9 58.8 58.4   64.7  64.5
+
+3D-SPS [14]                  CVPR2022                   CLIP [48] 2D + 3D 56.2 65.4 49.2   63.2  62.6
+
+BUTD-DETR [15]               ECCV2022                   RoBERTa [67] 3D 68.6 63.2 53.0     67.6  67.0
+
+HAM                                                     GRU [71]   3D 65.9 54.6 52.5       63.0  62.5
+
+HAM+BUTD-DETR                                           RoBERTa [67] 3D 71.3 63.6 54.1     69.6  69.0
+
+TABLE 3: Comparison with state-of-the-art methods on the        and SMGM upon such encoders in these experiments.
+ReferIt3D Nr3D subset by Acc@0.25 and Acc@0.5. All the          We recommend readers to refer to BUTD-DETR for more
+results of other methods are provided by the D3Net [19].        technical details. The experimental results listed in Table 2
+                                                                demonstrate that our method outperforms the state-of-the-
+Methods                      Unique  Multiple  Overall          art methods in both the Nr3D and Sr3D subsets. For ex-
+                                     Acc@0.5                    ample, "HAM+BUTD-DETR" remarkably surpasses Multi-
+ScanRefer [1]                    -              12.17           View Trans by 2.1% on Nr3D and outperforms BUTD-DETR
+3DVG-Transformer [12]            -     12.17    14.22           by 2.0% on Sr3D.
+D3Net [19]                       -     14.22    25.23
+HAM                              -     25.23    27.11               We also report Acc@0.5 on the ReferIt3D in Table 3.
+                                       27.11                    Surprisingly, HAM achieves the best performance again by
+                                                                a significant margin compared to D3Net, ranking second on
+utilized in a bulk of works [10], [15], [19], our method still  the more challenging ScanRefer. In summary, we claim that
+has a promising result on "Unique Acc@0.5" compared to          HAM deeply fuses the grounding and detection compared
+D3Net [19].                                                     to any previous work that treats detection as a plug-in.
+                                                                Qualitative Results. We visualize several success cases and
+    Table 2 lists the comparative results on the ReferIt3D [3]  failure cases of our proposed method as shown in Fig. 6.
+Nr3D and Sr3D datasets. Even without leveraging a pre-          For comparison, we also visualize the predictions of 3DVG-
+training backbone network, object detector, or advanced text    Transformer [12] simultaneously. The results from the first
+encoder, HAM outperforms all competing methods under            row to the third rows show that HAM well understands
+identical settings. Moreover, HAM delivers results com-         texts of various lengths, from short to long, thanks to the
+parable to state-of-the-art techniques. For instance, HAM       proposed word-level and sentence-level embeddings. Most
+achieves 48.2% accuracy versus SAT's 49.2% on Nr3D and          of the successful cases correctly understand clues from
+62.5% versus 3D-SPS's 62.6% on Sr3D. Such results highlight     reference objects in texts, for example, "by a table" in Fig. 6
+the effective integration of localization and identification    (a), "closer to the statue" in Fig. 6 (c), and more complex
+within our framework.                                           cases such as "on the right hand side of the table and third
+                                                                from the front" in Fig. 6 (k). For the "Multiple" samples,
+    Additionally, to further validate HAM's capability with     which require grounding the target among multiple objects
+more advanced text encoders and pre-training, we incor-         with the same class, such as Fig. 6 (c)(e)(f)(i)(k), HAM
+porate the text encoding and the proposal encoding meth-        demonstrates much more excellent discrimination ability,
+ods used in BUTD-DETR [15], denoted as "HAM+BUTD-               compared to 3DVG-Transformer.
+DETR". Specifically, following BUTD-DETR, all the ground
+truth boxes are extracted offline and mapped to visual              For the failure cases, we summarize three main reasons.
+tokens for enhancing proposals in the encoder, where            The first is the mismatch between the text and the scene.
+the point cloud backbone network and the text encoder           For example, in Fig. 6 (d), it is difficult to distinguish
+RoBERTa [67] are pre-trained. And we implement PLACM
+                                                                                                                                                                                                                   10
+
+(a) This is a white shelf. It is by a table.  (b) This is a polka dotted chair. It sets along the wall. (c) This is a green chair. It is closer to the statue.  (d) The table has pieces of literature atop it.
+                                                                                                                                                                It is to the immediate right of another table.
+
+(e) The armchair is beige. It is to the       (f) A chair sits pulled under a table. It's the third      (g) This is a wooden shelf. It is on top of the        (h) The chair is the northeastern-most one next
+left of the window.                           chair from the left.                                       desk that is on the opposite wall from the bed.        to the table. The chair is gray and has four legs
+
+(i) Brown chair is directly behind another brown (j) The file cabinet is under a curved desk in the      (k) The chair is around the table in the middle         (l) Black object used for sitting with flat, wooden
+                                                                                                         of the room. It is on the right hand side of the        object used for holding objects attached. object
+chair. There is a table in front of the brown chair middle of the room. The file cabinet is shaped like  table and third from the front.                         is located in front row on left end.
+
+with another chair across from that table.    a rectangular prism and has a brownish color.                                        Successful Cases             Failure Cases
+
+Groud Truth  HAM 3DVG-Transformer
+
+                                              Fig. 6: The visualization results of the proposed method.
+
+two tables in the raw point cloud, even for humans. And                                                  TABLE 4: The ablations on each proposed component.
+HAM mistakenly identifies two closely spaced tables as one.
+The second is the ambiguity from the perspective-related                                                 Network Setting                                                  Acc@0.25 Acc@0.5
+description. As shown in Fig. 6 (h), the word "northeastern-
+most" is ambiguous when the perspective is not clear, and                                                LB + PL-Concat                                                   38.87 31.69
+HAM predicts the chair on the opposite side of the ground
+truth box. The third is the incomplete point clouds due to                                               LB + PLACM                                                       43.76 34.01
+scanning and reconstruction. As shown in Fig. 6 (I), the
+points of the target object are incomplete, and it further                                               LB + PLACM + Inter-SE                                            45.30 36.47
+causes the inaccurate localization of HAM. We believe that
+alleviating language ambiguity and conducting point cloud                                                LB + PLACM + Inter-SE + Intra-SE                                 47.18 38.45
+completion can significantly contribute to this challenging
+task, where we leave it in the future.                                                                   DB + PLACM + Inter-SE + Intra-SE                                 47.50 40.22
+
+4.4 Ablation Studies                                                                                     LB + PLACM + SMGM + Inter-SE                                     46.42 38.15
+
+In this section, we first conduct an ablation study on Scan-                                             LB + PLACM + SMGM + Inter-SE + Intra-SE 47.65 38.86
+Refer [1] to verify the effectiveness of each component in the
+proposed HAM. We then carefully ablate the setting of each                                               DB + PLACM + SMGM + Inter-SE + Intra-SE 48.79 40.60
+key component on ScanRefer.
+Ablation study on each proposed component. We conduct                                                    TABLE 5: The ablations on down-sampling strategies (under
+ablation experiments to evaluate each proposed component,                                                "LB + PLACM" setting).
+as detailed in Table 4. To ease the ablation, we adopt a
+lighter-weight point cloud backbone (LB) instead of the                                                  Sampling Strategy                                      Acc@0.25  Acc@0.5
+default backbone (DB), which consists l = 6 (12 by defaults)                                                     D-FPS                                            43.72     32.92
+decoder layers and M = 256 (512 by defaults) proposal                                                            F-FPS                                            43.24     33.46
+points. Additionally, all experiments equip the word mask-                                                         FS                                             42.76     32.40
+ing and the concentration sampling strategies.                                                                     CS                                             43.76     34.01
+
+    We first conduct a baseline setting called "PL-Concat",                                              with two prompt engineering techniques: inter-sentence en-
+which expanded on ScanRefer [1], by replacing its point                                                  semble (Inter-SE) and intra-sentence ensemble (Intra-SE), to
+cloud and language encodings with the same ones used                                                     comprehensively and gradually evaluate their effectiveness.
+in HAM and concatenating point-language features in the
+same manner as ScanRefer, to ensure a fair comparison. To                                                    From the experimental results, we find that incremen-
+demonstrate the effectiveness of our PLACM, we directly                                                  tally stacking each of the proposed modules or strategies of
+compared it with PL-Concat. Next, we conduct ablation ex-                                                the whole framework brings performance gains gradually
+periments on the PLACM and SMGM, which are equipped                                                      on both the Acc@0.25 and the Acc@0.5.
+
+                                                                                                         The Concentration Sampling Strategy. To explore the ef-
+                                                                                                         fective and efficient sampling strategy for the raw input
+                                                                                                         point clouds with additional features such as colors and nor-
+                                                                                                         mal vectors, we compare our concentration sampling (CS)
+                                                                                                         strategy with the regular distance-FPS (D-FPS), feature-FPS
+                                                                                                         (F-FPS) and the fusion sampling (FS) [69] on the baseline
+                                                                                                         model. The corresponding results are shown under "LB +
+                                                                                                         PLACM" setting in Table 4.
+
+                                                                                                             As shown in Table 5, taking the colors and normal
+TABLE 6: The ablations on language augmentation (under                                                                                                                     11
+"LB + PLACM + Inter-SE + Intra-SE" setting).
+                                                                  TABLE 8: The ablations on different feature inputs (under
+                                                                  "DB + PLACM + SMGM + Inter-SE + Intra-SE" setting).
+
+#Sentences for Inter-SM #Sentences for Intra-SM Acc@0.25 Acc@0.5  Feature(s)                        Acc@0.25  Acc@0.5
+                                                                  xyz                                 47.36     38.91
+32                    1         42.76 32.40                       xyz + rgb                           47.75     39.91
+                                                                  xyz + normals                       47.50     39.46
+16                    1         45.39 35.58                       xyz + multi-view                    47.77     37.69
+                                                                  xyz + rgb + normals                 48.79     40.60
+8                     1         45.30 36.47                       xyz + rgb + normals + multi-view    46.43     36.25
+
+1                     1         41.20 32.24
+
+8                     [1, 3]    46.63 38.10
+
+8                     [1, 6]    47.18 38.45
+
+TABLE 7: The ablations on different partition resolutions for TABLE 9: The ablations on different adapting strategies on
+SMGM (under "LB + PLACM + SMGM + Inter-SE" setting). Nr3D dataset (under "LB+PLACM" setting).
+
+Partition Resolution  Acc@0.25  Acc@0.5                           Adapting Strategy  Acc@0.25       Acc@0.5  Overall Acc
+  without SMGM          45.30     36.47                           Center Distance      37.63          27.11      37.90
+       3×3×3            47.08     37.87                           IoU                  37.63          27.11      38.34
+       4×4×4            46.42     38.15                           Mean-pooling            -              -       42.40
+       5×5×5            46.15     36.35                           Max-pooling             -              -       43.62
+
+vectors of the points into account of the down-sampling,          "LB + PLACM + SMGM + Inter-SE" network setting in
+the F-FPS gains 0.5% improvement on the Acc@0.5, which            Table 4. The experimental results are shown in Table 7. We
+means that such additional attribute inputs help filter out       find that compared with the baseline without introducing
+more discriminative and meaningful points. However, when          SMGM, both 3×3×3 and 4×4×4 resolutions achieve better
+utilizing the fusion sampling, the performance drops signif-      performance. However, when adopting the higher partition
+icantly. We believe that a large amount of overlap (around        resolution 5 × 5 × 5, the performance is worse. We assume
+20%) between the two sampling strategies causes the short-        that though SMGM introduces constrained local attention,
+age of high-quality points for the backbone network and the       the number of key points and proposal points in a local
+proposal generation. In our concentration sampling setting,       region will decrease as the resolution increases. Thus, we
+the points filtered out by the D-FPS and F-FPS are even           use the resolution 4 × 4 × 4 for the default setting in HAM.
+without overlapping. Such a simple yet effective strategy
+achieves the best performance than other down-sampling            Different Point Cloud Features. To explore the impact of
+strategies on both Acc@0.25 and Acc@0.5.                          different point cloud features (i.e. colors, normals, and multi-
+                                                                  view features) on the performance of our model, we conduct
+The Strategies of Prompt Engineering. To further explore          an ablation study on ScanRefer [1], where we train and
+the suitable settings for prompt engineering, we conduct          evaluate the model using different combinations of such
+a series of experiments for both inter-sentence and intra-        features. We use the multi-view features extracted from
+sentence ensembles. To ease the validation, we adopt the          ENet [80] in line with ScanRefer. To ease the validation,
+"LB + PLACM + Inter-SE + Intra-SE" network setting in             we adopt the "DB + PLACM + SMGM + Inter-SE + Intra-
+Table 4.                                                          SE" network setting in Table 4. Table 8 shows the results.
+                                                                  Using only the coordinates as input results in an Acc@0.5
+    For the inter-sentence ensemble, which attaches multiple      of 38.91, which surpasses the performance of the majority
+sentences to a single point cloud scene, ablations for the        of state-of-the-art methods. Adding colors or normals to the
+number of sentences for attaching are conducted. As shown         coordinates can yield slight improvements in accuracy. The
+in Table 6, without the intra-sentence ensemble, the "8           combination of coordinates, colors, and normals results in
+Sentences for Inter-SM" setting performs better than more         the best performance. However, the addition of multi-view
+or fewer sentences. A potential reason is that our framework      features leads to a decrease in performance, suggesting that
+is trained under the end-to-end grounding-by-detection            multi-view features may not contribute significantly to our
+paradigm. Thus the inter-sentence ensemble needs to make          model. We hypothesize that introducing high-dimensional
+a trade-off between visual grounding and object detection.        multi-view features adds complexity to the model and may
+When more sentences are associated with a single scene in         lead to overfitting. Furthermore, utilizing multi-view fea-
+one training sample batch, the grounding becomes more             tures that rely on a pre-trained extractor is inconsistent with
+intensive. In summary, a proper number of sentences for the       our motivation for an end-to-end framework. Hence, we did
+inter-sentence ensemble is important for those grounding-         not include it in our default setting.
+by-detection methods including HAM.
+                                                                  Different Strategies for Adapting to Identification
+    For the intra-sentence ensemble, it provides another          Paradigm. We conduct a bulk of experiments on adapt-
+enhancement of the raw sentences. We provide two options          ing our grounding-by-detection HAM framework to the
+in Table 6, where [1, 3] and [1, 6] mean that we augment          identification paradigm for the ReferIt3D [3] dataset, which
+the sentences by a random number from 1 to 3 or from 1            provides the prior object ground truth boxes for all objects.
+to 6, respectively. The result shows that combining more          To ease the validation, we adopt the "LB + PLACM" net-
+sentences into a single sentence brings more performance          work setting in Table 4. The detection branch taking the
+gain.                                                             raw point clouds as inputs is retained for providing high-
+The Partition Setting of the SMGM. We further conduct             quality key points features for the following point-language
+a series of experiments for exploring the proper partition        attention. A simple yet effective strategy is to assign the
+setting of the SMGM. To ease the validation, we adopt the
+               Model Accuracy vs. Number of Parameters                 Distance-FPS                                                               12
+                                                                       Fusion Sampling              Feature-FPS
+         41    HAM
+                                                                                                    Concentration Sampling
+         40                          BUTD-DETR
+
+Acc@0.5  39                                                3D-SPS
+
+         38 D3Net
+
+         37
+
+         36
+
+         35 3DVG-Transformer
+
+         34 1020 50  Num1b0e0r of Parameters (M) 200
+
+Fig. 7: Model Accuracy vs. Number of Parameters.
+
+                   Model Accuracy vs. Inference Time                   key points sampled by D-FPS  key points sampled by F-FPS
+
+         41          HAM                                               key points sampled by both D-FPS and F-FPS
+
+         40          BUTD-DETR                                         Fig. 9: The visualization of different point sampling strate-
+                                                                       gies. Sampling the same number of points, concentration
+         39                                                            sampling not only ensures the coverage of the entire space
+                                                                       but also extracts a sufficient number of high-quality fore-
+Acc@0.5  38                                                D3Net       ground points.
+
+         37          3D-SPS
+
+         36
+
+         35        3DVG-Transformer                                    weighted key points in the global filed weighted key points in the local field
+
+                                                                                                                                                                                                                                                                             1
+
+         34 0  100 Infere2n0ce0 Time (ms 3/ 0sa0mple) 400         500
+
+         Fig. 8: Model Accuracy vs. Inference Time.
+
+predicted bounding box to the object ground truth box with                                                                                                                                                                                                                                         0
+a minimal center distance. Another similar solution is to
+use the object ground truth boxes that have the maximum                Fig. 10: The visualization of the weighted key points in the
+intersection over union (IoU) with the predicted box as                two branches of SMGM. The key points are highlighted
+a result. These two strategies only use the object ground              by the normalized attention weights upon the raw point
+truth boxes in the prediction stage without changing any               clouds.
+network structure and intermediate features. As shown in
+Table 9, these two simple strategies achieve comparable                4.5 Visualization
+performance with some state-of-the-art methods such as
+TGNN [9] and InstanceRefer [10].                                       Visualization of different point sampling strategies. We
+                                                                       visualize the raw point clouds and the 1024 key points
+    In addition, we try to aggregate all the proposal points           filtered out by different sampling strategies as shown in
+within each object ground truth box by mean-pooling or                 Fig. 9. Sampling 1024 key points from the raw point clouds,
+max-pooling on features, as aforementioned in Section 3.6.             the D-FPS shows an obvious uniform distribution in the
+Then the proposal-level features are converted into instance-          whole space because it only considers the coordinates of
+level features. We observe a significant performance im-               the points. For the F-FPS, it shows a clear aggregation to
+provement in Table 9, compared to the assignment strategies            foreground objects, since it takes the point attributes such as
+with center distance and IoU. We claim that the aggregation            colors and normal vectors into account. Fusion sampling al-
+from multiple meaningful proposal features acts as a voting            leviates such unbalance by fusing these two strategies, but it
+mechanism.                                                             also introduces repeated sampling points, which account for
+                                                                       nearly 20% of the total sampling points. Our concentration
+Efficiency comparison. To further validate the efficiency              sampling shows that it further extracts a sufficient number
+of HAM, we conducted experiments on ScanRefer [1] to                   of high-quality foreground points by redundancy removal.
+evaluate the inference time with reference to the number               Also, we only take the additional attributes of the points, i.e.,
+of parameters. As shown in Figs. 7 and 8, the number                   colors and normal vectors, as raw features without learning
+of parameters and the inference speed of HAM are at a                  for F-FPS, which is highly efficient.
+moderate level compared to other methods. However, HAM                 Visualization of the weighted key points in SMGM. As
+achieves the highest Acc@0.5, indicating that it has achieved          aforementioned in Section 3.4, two branches are designed
+a promising balance between efficiency and performance.                for achieving both global and local aggregating in the cross-
+We shall also explore more efficient models in the future              attention mechanism [24], where the proposal points act
+work.                                                                  as query and the key points and language act as key and
+Ground Truth / Prediction  weighted by word `window'  weighted by word `desk'   weighted by word `bed'                                                13
+
+                                                                                                                weighted by full sentence
+
+Query Text: A white mattress bed with white bed frame made of wood. The bed is in between a window and a desk.                                                  1
+
+Ground Truth / Prediction  weighted by word `blue'    weighted by word `chair'  weighted by word `door'         weighted by full sentence
+                                                                                                                                                                0
+
+        Query Text: It is a blue chair. The blue chair is the second right chair of the table to the right of the door.
+
+Fig. 11: The visualization of the proposal points, which are attended and weighted by language representation in PLACM.
+The proposal points are highlighted by the normalized attention weights upon the raw point clouds.
+
+value. We visualize the key points weighted by one selected     get object. These visualizations demonstrate that HAM can
+proposal point of both fields in Fig. 10, where the selected    dynamically model discriminative linguistic representation
+proposal point is highlighted as a red ball. We find that       for visual grounding of varying complexity.
+most of the activated key points are located on the fore-
+ground objects of the whole space in the global field. Such a   5 CONCLUSION
+mechanism encourages the proposal points to accumulate
+global contexts in space. However, it naturally neglects        In this paper, we investigate the fundamental problems for
+some local points inside the red box. On the contrary, for      3D visual grounding and present an end-to-end model,
+the local field, we partition the space into multiple local     namely hierarchical alignment model (HAM). We propose
+regions and enforce the proposal points to attend to the key    a novel mechanism for point-language alignment with con-
+points in the same region. It effectively complements local     text modulation (PLACM) to hierarchically and gradually
+information and enables the model to accumulate global          align point clouds and language representations. We also in-
+and local contexts.                                             troduce a spatially multi-granular modeling (SMGM) design
+                                                                to learn comprehensive spatial relationships. Additionally,
+Visualization of the proposal points weighted by multi-         we systematically analyze and incorporate three cumulative
+granularity language representation. Remind that the pro-       prompt engineering strategies into HAM to enhance its
+posed PLACM performs visual-linguistic interaction on           robustness and efficiency. Impressively, HAM ranked first
+both word-level and sentence-level granularities. To demon-     in the ECCV 2022 ScanRefer challenge, which significantly
+strate the effectiveness of such a mechanism, we visualize      outperformed the competing methods on both validation
+the proposal points, which are attended by such multi-          and testing sets. In the experiments, we present extensive
+granularity language representation as shown in Fig. 11.        ablation studies and various visualization to explain how
+We can see that the normalized weights of proposal points       the proposed modules work. We hope that such a simple
+show obvious regional distribution under different lan-         yet effective model can inspire the research of language on
+guage modulations. The first interesting observation is that    3D scenes.
+the proposal points which are more relevant to the word
+or the sentence will be assigned a lower attention weight.      REFERENCES
+We assume that such an assignment casts the proposal
+points into a more discriminative representation space. We      [1] D. Z. Chen, A. X. Chang, and M. Nießner, "Scanrefer: 3d object
+also visualize the weights by different words shown on                localization in rgb-d scans using natural language," in European
+the second column to the fourth column. One can see                   Conference on Computer Vision. Springer, 2020, pp. 202­221. 1, 2,
+that not all the words will highlight their corresponding             3, 4, 6, 7, 8, 9, 10, 11, 12
+proposal points, for example, "desk" in the first row. We
+believe using partial words such as "window" is enough to       [2] A. Goyal, K. Yang, D. Yang, and J. Deng, "Rel3d: A minimally
+locate the "bed". For the example in the second row, the              contrastive benchmark for grounding spatial relations in 3d,"
+target object belongs to the challenging "Multiple" subset.           Advances in Neural Information Processing Systems, vol. 33, pp.
+The words "blue", "chair", "door" are all activated, and it           10 514­10 525, 2020. 1, 3
+finally grounds the correct "chair" in the scene. And the full
+sentence always activates the proposal points near the tar-     [3] P. Achlioptas, A. Abdelreheem, F. Xia, M. Elhoseiny, and L. Guibas,
+                                                                      "Referit3d: Neural listeners for fine-grained 3d object identifica-
+                                                                      tion in real-world scenes," in European Conference on Computer
+                                                                      Vision. Springer, 2020, pp. 422­440. 1, 2, 3, 4, 7, 8, 9, 11
+                                                                               14
+
+[4] H. Liu, A. Lin, X. Han, L. Yang, Y. Yu, and S. Cui, "Refer-it-in-rgbd:     [23] A. Kirillov, K. He, R. Girshick, C. Rother, and P. Dolla´r, "Panoptic
+      A bottom-up approach for 3d visual grounding in rgbd images,"                  segmentation," in Proceedings of the IEEE/CVF Conference on Com-
+      in Proceedings of the IEEE/CVF Conference on Computer Vision and               puter Vision and Pattern Recognition, 2019, pp. 9404­9413. 2
+      Pattern Recognition, 2021, pp. 6032­6041. 1, 3
+                                                                               [24] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N.
+[5] A. Dai, A. X. Chang, M. Savva, M. Halber, T. Funkhouser, and                     Gomez, L. Kaiser, and I. Polosukhin, "Attention is all you need,"
+      M. Nießner, "Scannet: Richly-annotated 3d reconstructions of in-               Advances in neural information processing systems, vol. 30, 2017. 2, 3,
+      door scenes," in Proceedings of the IEEE conference on computer vision         6, 12
+      and pattern recognition, 2017, pp. 5828­5839. 1, 3, 5, 7, 8
+                                                                               [25] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "Bert: Pre-
+[6] A. Kamath, M. Singh, Y. LeCun, G. Synnaeve, I. Misra, and                        training of deep bidirectional transformers for language under-
+      N. Carion, "Mdetr-modulated detection for end-to-end multi-                    standing," arXiv preprint arXiv:1810.04805, 2018. 2, 5
+      modal understanding," in Proceedings of the IEEE/CVF International
+      Conference on Computer Vision, 2021, pp. 1780­1790. 1, 2, 5              [26] T. Brown, B. Mann, N. Ryder, M. Subbiah, J. D. Kaplan, P. Dhari-
+                                                                                     wal, A. Neelakantan, P. Shyam, G. Sastry, A. Askell et al., "Lan-
+[7] J. Deng, Z. Yang, T. Chen, W. Zhou, and H. Li, "Transvg: End-                    guage models are few-shot learners," Advances in neural informa-
+      to-end visual grounding with transformers," in Proceedings of the              tion processing systems, vol. 33, pp. 1877­1901, 2020. 2
+      IEEE/CVF International Conference on Computer Vision, 2021, pp.
+      1769­1779. 1                                                             [27] M. Li, L. Chen, Y. Duan, Z. Hu, J. Feng, J. Zhou, and J. Lu, "Bridge-
+                                                                                     prompt: Towards ordinal action understanding in instructional
+[8] B. A. Plummer, K. Shih, Y. Li, K. Xu, S. Lazebnik, S. Sclaroff,                  videos," in Proceedings of the IEEE/CVF Conference on Computer
+      and K. Saenko, "Revisiting image-language networks for open-                   Vision and Pattern Recognition, 2022, pp. 19 880­19 889. 2
+      ended phrase detection," IEEE Transactions on Pattern Analysis and
+      Machine Intelligence, 2020. 1, 2                                         [28] S. Antol, A. Agrawal, J. Lu, M. Mitchell, D. Batra, C. L. Zitnick,
+                                                                                     and D. Parikh, "Vqa: Visual question answering," in Proceedings of
+[9] P.-H. Huang, H.-H. Lee, H.-T. Chen, and T.-L. Liu, "Text-guided                  the IEEE international conference on computer vision, 2015, pp. 2425­
+      graph neural networks for referring 3d instance segmentation," in              2433. 2
+      Proceedings of the AAAI Conference on Artificial Intelligence, vol. 35,
+      2021, pp. 1610­1618. 2, 3, 8, 9, 12                                      [29] Y. Goyal, T. Khot, D. Summers-Stay, D. Batra, and D. Parikh, "Mak-
+                                                                                     ing the v in vqa matter: Elevating the role of image understanding
+[10] Z. Yuan, X. Yan, Y. Liao, R. Zhang, S. Wang, Z. Li, and S. Cui, "In-            in visual question answering," in Proceedings of the IEEE conference
+      stancerefer: Cooperative holistic understanding for visual ground-             on computer vision and pattern recognition, 2017, pp. 6904­6913. 2
+      ing on point clouds through instance multi-level contextual re-
+      ferring," in Proceedings of the IEEE/CVF International Conference on     [30] A. Das, S. Kottur, K. Gupta, A. Singh, D. Yadav, J. M. Moura,
+      Computer Vision, 2021, pp. 1791­1800. 2, 3, 4, 7, 8, 9, 12                     D. Parikh, and D. Batra, "Visual dialog," in Proceedings of the IEEE
+                                                                                     conference on computer vision and pattern recognition, 2017, pp. 326­
+[11] M. Feng, Z. Li, Q. Li, L. Zhang, X. Zhang, G. Zhu, H. Zhang,                    335. 2
+      Y. Wang, and A. Mian, "Free-form description guided 3d visual
+      graph network for object grounding in point cloud," in Proceedings       [31] J. Chen, W. Luo, W. Zhang, and L. Ma, "Explore inter-contrast
+      of the IEEE/CVF International Conference on Computer Vision, 2021,             between videos via composition for weakly supervised temporal
+      pp. 3722­3731. 2, 3, 4, 6, 8, 9                                                sentence grounding," Proceedings of the AAAI Conference on Artifi-
+                                                                                     cial Intelligence, vol. 36, no. 1, pp. 267­275, Jun. 2022. 2, 3
+[12] L. Zhao, D. Cai, L. Sheng, and D. Xu, "3dvg-transformer: Relation
+      modeling for visual grounding on point clouds," in Proceedings of        [32] W. Zhang, B. Wang, L. Ma, and W. Liu, "Reconstruct and represent
+      the IEEE/CVF International Conference on Computer Vision, 2021, pp.            video contents for captioning via reinforcement learning," IEEE
+      2928­2937. 2, 3, 4, 5, 8, 9                                                    transactions on pattern analysis and machine intelligence, vol. 42,
+                                                                                     no. 12, pp. 3088­3101, 2019. 2
+[13] D. Cai, L. Zhao, J. Zhang, L. Sheng, and D. Xu, "3djcg: A unified
+      framework for joint dense captioning and visual grounding on             [33] P. Young, A. Lai, M. Hodosh, and J. Hockenmaier, "From image
+      3d point clouds," in Proceedings of the IEEE/CVF Conference on                 descriptions to visual denotations: New similarity metrics for
+      Computer Vision and Pattern Recognition, 2022, pp. 16 464­16 473.              semantic inference over event descriptions," Transactions of the
+      2, 3, 8                                                                        Association for Computational Linguistics, vol. 2, pp. 67­78, 2014. 2
+
+[14] J. Luo, J. Fu, X. Kong, C. Gao, H. Ren, H. Shen, H. Xia, and              [34] Z. Chen, A. Gholami, M. Nießner, and A. X. Chang, "Scan2cap:
+      S. Liu, "3d-sps: Single-stage 3d visual grounding via referred point           Context-aware dense captioning in rgb-d scans," in Proceedings of
+      progressive selection," in Proceedings of the IEEE/CVF Conference on           the IEEE/CVF Conference on Computer Vision and Pattern Recognition,
+      Computer Vision and Pattern Recognition, 2022, pp. 16 454­16 463. 2,           2021, pp. 3193­3203. 2
+      3, 8, 9
+                                                                               [35] A. Ramesh, M. Pavlov, G. Goh, S. Gray, C. Voss, A. Radford,
+[15] A. Jain, N. Gkanatsios, I. Mediratta, and K. Fragkiadaki, "Bottom               M. Chen, and I. Sutskever, "Zero-shot text-to-image generation,"
+      up top down detection transformers for language grounding in                   in International Conference on Machine Learning. PMLR, 2021, pp.
+      images and point clouds," in European Conference on Computer                   8821­8831. 2, 3
+      Vision (ECCV), 2022. 2, 3, 7, 8, 9
+                                                                               [36] R. Rombach, A. Blattmann, D. Lorenz, P. Esser, and B. Ommer,
+[16] J. Roh, K. Desingh, A. Farhadi, and D. Fox, "Languagerefer:                     "High-resolution image synthesis with latent diffusion models,"
+      Spatial-language model for 3d visual grounding," in Conference                 2021. 2, 3
+      on Robot Learning. PMLR, 2022, pp. 1046­1056. 2, 3, 8, 9
+                                                                               [37] Y. Qi, Z. Pan, S. Zhang, A. v. d. Hengel, and Q. Wu, "Object-and-
+[17] S. Huang, Y. Chen, J. Jia, and L. Wang, "Multi-view transformer                 action aware model for visual language navigation," in European
+      for 3d visual grounding," in Proceedings of the IEEE/CVF Conference            Conference on Computer Vision. Springer, 2020, pp. 303­317. 2
+      on Computer Vision and Pattern Recognition, 2022, pp. 15 524­15 533.
+      2, 3, 7, 8, 9                                                            [38] A. Das, S. Datta, G. Gkioxari, S. Lee, D. Parikh, and D. Batra, "Em-
+                                                                                     bodied question answering," in Proceedings of the IEEE Conference
+[18] Z. Yang, S. Zhang, L. Wang, and J. Luo, "Sat: 2d semantics assisted             on Computer Vision and Pattern Recognition, 2018, pp. 1­10. 2
+      training for 3d visual grounding," in Proceedings of the IEEE/CVF
+      International Conference on Computer Vision, 2021, pp. 1856­1866. 2,     [39] S. Kazemzadeh, V. Ordonez, M. Matten, and T. Berg, "Referitgame:
+      3, 4, 6, 8, 9                                                                  Referring to objects in photographs of natural scenes," in Proceed-
+                                                                                     ings of the 2014 conference on empirical methods in natural language
+[19] D. Z. Chen, Q. Wu, M. Nießner, and A. X. Chang, "D3net: A                       processing (EMNLP), 2014, pp. 787­798. 2, 8
+      speaker-listener architecture for semi-supervised dense captioning
+      and visual grounding in rgb-d scans," 2021. 2, 3, 5, 8, 9                [40] B. A. Plummer, L. Wang, C. M. Cervantes, J. C. Caicedo, J. Hock-
+                                                                                     enmaier, and S. Lazebnik, "Flickr30k entities: Collecting region-to-
+[20] C. R. Qi, L. Yi, H. Su, and L. J. Guibas, "Pointnet++: Deep hierar-             phrase correspondences for richer image-to-sentence models," in
+      chical feature learning on point sets in a metric space," Advances             Proceedings of the IEEE international conference on computer vision,
+      in neural information processing systems, vol. 30, 2017. 2, 4                  2015, pp. 2641­2649. 2
+
+[21] C. R. Qi, O. Litany, K. He, and L. J. Guibas, "Deep hough voting for      [41] J. Mao, J. Huang, A. Toshev, O. Camburu, A. L. Yuille, and
+      3d object detection in point clouds," in proceedings of the IEEE/CVF           K. Murphy, "Generation and comprehension of unambiguous ob-
+      International Conference on Computer Vision, 2019, pp. 9277­9286. 2,           ject descriptions," in Proceedings of the IEEE conference on computer
+      3, 7                                                                           vision and pattern recognition, 2016, pp. 11­20. 2
+
+[22] Z. Liu, Z. Zhang, Y. Cao, H. Hu, and X. Tong, "Group-free 3d              [42] L. Yu, P. Poirson, S. Yang, A. C. Berg, and T. L. Berg, "Modeling
+      object detection via transformers," in Proceedings of the IEEE/CVF             context in referring expressions," in European Conference on Com-
+      International Conference on Computer Vision, 2021, pp. 2949­2958. 2,           puter Vision. Springer, 2016, pp. 69­85. 2
+      3, 5, 7
+                                                                               [43] L. Yu, Z. Lin, X. Shen, J. Yang, X. Lu, M. Bansal, and T. L. Berg,
+                                                                                     "Mattnet: Modular attention network for referring expression
+                                                                              15
+
+      comprehension," in Proceedings of the IEEE Conference on Computer       [64] S. Cao, W. Luo, B. Wang, W. Zhang, and L. Ma, "A circular
+      Vision and Pattern Recognition, 2018, pp. 1307­1315. 2                        window-based cascade transformer for online action detection,"
+                                                                                    arXiv preprint arXiv:2208.14209, 2022. 3
+[44] P. Wang, Q. Wu, J. Cao, C. Shen, L. Gao, and A. v. d. Hengel,
+      "Neighbourhood watch: Referring expression comprehension via            [65] Y. Qian, W. Luo, D. Lian, X. Tang, P. Zhao, and S. Gao, "Svip:
+      language-guided graph attention networks," in Proceedings of the              Sequence verification for procedures in videos," in Proceedings of
+      IEEE/CVF Conference on Computer Vision and Pattern Recognition,               the IEEE/CVF Conference on Computer Vision and Pattern Recognition,
+      2019, pp. 1960­1968. 2                                                        2022, pp. 19 890­19 902. 3
+
+[45] Z. Yang, B. Gong, L. Wang, W. Huang, D. Yu, and J. Luo, "A               [66] J. Devlin, M.-W. Chang, K. Lee, and K. Toutanova, "Bert: Pre-
+      fast and accurate one-stage approach to visual grounding," in                 training of deep bidirectional transformers for language under-
+      Proceedings of the IEEE/CVF International Conference on Computer              standing," arXiv preprint arXiv:1810.04805, 2018. 3, 9
+      Vision, 2019, pp. 4683­4693. 2
+                                                                              [67] Y. Liu, M. Ott, N. Goyal, J. Du, M. Joshi, D. Chen, O. Levy,
+[46] Z. Yang, T. Chen, L. Wang, and J. Luo, "Improving one-stage vi-                M. Lewis, L. Zettlemoyer, and V. Stoyanov, "Roberta: A ro-
+      sual grounding by recursive sub-query construction," in European              bustly optimized bert pretraining approach," arXiv preprint
+      Conference on Computer Vision. Springer, 2020, pp. 387­404. 2                 arXiv:1907.11692, 2019. 3, 5, 9
+
+[47] B. Huang, D. Lian, W. Luo, and S. Gao, "Look before you leap:            [68] J. Yang, J. Duan, S. Tran, Y. Xu, S. Chanda, L. Chen, B. Zeng,
+      Learning landmark features for one-stage visual grounding," in                T. Chilimbi, and J. Huang, "Vision-language pre-training with
+      Proceedings of the IEEE/CVF Conference on Computer Vision and                 triple contrastive learning," in Proceedings of the IEEE/CVF Con-
+      Pattern Recognition, 2021, pp. 16 888­16 897. 2                               ference on Computer Vision and Pattern Recognition, 2022, pp. 15 671­
+                                                                                    15 680. 3
+[48] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh, S. Agar-
+      wal, G. Sastry, A. Askell, P. Mishkin, J. Clark et al., "Learning       [69] Z. Yang, Y. Sun, S. Liu, and J. Jia, "3dssd: Point-based 3d single
+      transferable visual models from natural language supervision,"                stage object detector," in Proceedings of the IEEE/CVF conference on
+      in International Conference on Machine Learning. PMLR, 2021, pp.              computer vision and pattern recognition, 2020, pp. 11 040­11 048. 5,
+      8748­8763. 2, 3, 9                                                            10
+
+[49] D. He, Y. Zhao, J. Luo, T. Hui, S. Huang, A. Zhang, and S. Liu,          [70] J. Pennington, R. Socher, and C. D. Manning, "Glove: Global vec-
+      "Transrefer3d: Entity-and-relation aware transformer for fine-                tors for word representation," in Proceedings of the 2014 conference
+      grained 3d visual grounding," in Proceedings of the 29th ACM                  on empirical methods in natural language processing (EMNLP), 2014,
+      International Conference on Multimedia, 2021, pp. 2344­2352. 3, 9             pp. 1532­1543. 5
+
+[50] J. Ku, M. Mozifian, J. Lee, A. Harakeh, and S. L. Waslander, "Joint      [71] J. Chung, C. Gulcehre, K. Cho, and Y. Bengio, "Empirical evalua-
+      3d proposal generation and object detection from view aggrega-                tion of gated recurrent neural networks on sequence modeling,"
+      tion," in 2018 IEEE/RSJ International Conference on Intelligent Robots        arXiv preprint arXiv:1412.3555, 2014. 5, 9
+      and Systems (IROS). IEEE, 2018, pp. 1­8. 3
+                                                                              [72] V. Sanh, L. Debut, J. Chaumond, and T. Wolf, "Distilbert, a distilled
+[51] M. Liang, B. Yang, S. Wang, and R. Urtasun, "Deep continuous                   version of bert: smaller, faster, cheaper and lighter," arXiv preprint
+      fusion for multi-sensor 3d object detection," in Proceedings of the           arXiv:1910.01108, 2019. 5, 9
+      European conference on computer vision (ECCV), 2018, pp. 641­656. 3
+                                                                              [73] J. Chen, W. Luo, W. Zhang, and L. Ma, "Explore inter-contrast
+[52] B. Yang, W. Luo, and R. Urtasun, "Pixor: Real-time 3d object                   between videos via composition for weakly supervised temporal
+      detection from point clouds," in Proceedings of the IEEE conference           sentence grounding," in Proceedings of the AAAI Conference on
+      on Computer Vision and Pattern Recognition, 2018, pp. 7652­7660. 3            Artificial Intelligence, vol. 36, no. 1, 2022, pp. 267­275. 5
+
+[53] X. Chen, H. Ma, J. Wan, B. Li, and T. Xia, "Multi-view 3d object         [74] W. Kim, B. Son, and I. Kim, "Vilt: Vision-and-language transformer
+      detection network for autonomous driving," in Proceedings of the              without convolution or region supervision," in International Con-
+      IEEE conference on Computer Vision and Pattern Recognition, 2017,             ference on Machine Learning. PMLR, 2021, pp. 5583­5594. 5
+      pp. 1907­1915. 3
+                                                                              [75] Z. Liu, Y. Lin, Y. Cao, H. Hu, Y. Wei, Z. Zhang, S. Lin, and B. Guo,
+[54] B. Xu and Z. Chen, "Multi-level fusion based 3d object detection               "Swin transformer: Hierarchical vision transformer using shifted
+      from monocular images," in Proceedings of the IEEE conference on              windows," in Proceedings of the IEEE/CVF International Conference
+      computer vision and pattern recognition, 2018, pp. 2345­2353. 3               on Computer Vision, 2021, pp. 10 012­10 022. 6
+
+[55] S. Song and J. Xiao, "Deep sliding shapes for amodal 3d object           [76] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai,
+      detection in rgb-d images," in Proceedings of the IEEE conference on          T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold, S. Gelly,
+      computer vision and pattern recognition, 2016, pp. 808­816. 3                 J. Uszkoreit, and N. Houlsby, "An image is worth 16x16 words:
+                                                                                    Transformers for image recognition at scale," 2021. 6
+[56] Y. Zhou and O. Tuzel, "Voxelnet: End-to-end learning for point
+      cloud based 3d object detection," in Proceedings of the IEEE confer-    [77] A. Jain, N. Gkanatsios, I. Mediratta, and K. Fragkiadaki, "Looking
+      ence on computer vision and pattern recognition, 2018, pp. 4490­4499.         outside the box to ground language in 3d scenes," arXiv preprint
+      3                                                                             arXiv:2112.08879, 2021. 7
+
+[57] C. R. Qi, W. Liu, C. Wu, H. Su, and L. J. Guibas, "Frustum pointnets     [78] I. Loshchilov and F. Hutter, "Decoupled weight decay regulariza-
+      for 3d object detection from rgb-d data," in Proceedings of the IEEE          tion," arXiv preprint arXiv:1711.05101, 2017. 7
+      conference on computer vision and pattern recognition, 2018, pp. 918­
+      927. 3                                                                  [79] S. Hochreiter and J. Schmidhuber, "Long short-term memory,"
+                                                                                    Neural computation, vol. 9, no. 8, pp. 1735­1780, 1997. 9
+[58] S. Shi, X. Wang, and H. Li, "Pointrcnn: 3d object proposal gen-
+      eration and detection from point cloud," in Proceedings of the          [80] A. Paszke, A. Chaurasia, S. Kim, and E. Culurciello, "Enet: A deep
+      IEEE/CVF conference on computer vision and pattern recognition, 2019,         neural network architecture for real-time semantic segmentation,"
+      pp. 770­779. 3                                                                arXiv preprint arXiv:1606.02147, 2016. 11
+
+[59] H. Ran, J. Liu, and C. Wang, "Surface representation for point
+      clouds," in Proceedings of the IEEE/CVF Conference on Computer
+      Vision and Pattern Recognition, 2022, pp. 18 942­18 952. 3
+
+[60] D. Rukhovich, A. Vorontsova, and A. Konushin, "Fcaf3d: Fully
+      convolutional anchor-free 3d object detection," arXiv preprint
+      arXiv:2112.00322, 2021. 3
+
+[61] S. Song, S. P. Lichtenberg, and J. Xiao, "Sun rgb-d: A rgb-d
+      scene understanding benchmark suite," in Proceedings of the IEEE
+      conference on computer vision and pattern recognition, 2015, pp. 567­
+      576. 3, 5
+
+[62] I. Armeni, O. Sener, A. R. Zamir, H. Jiang, I. Brilakis, M. Fis-
+      cher, and S. Savarese, "3d semantic parsing of large-scale indoor
+      spaces," in Proceedings of the IEEE conference on computer vision and
+      pattern recognition, 2016, pp. 1534­1543. 3
+
+[63] D. Lian, D. Zhou, J. Feng, and X. Wang, "Scaling & shifting your
+      features: A new baseline for efficient model tuning," in Advances
+      in Neural Information Processing Systems (NeurIPS), 2022. 3
+

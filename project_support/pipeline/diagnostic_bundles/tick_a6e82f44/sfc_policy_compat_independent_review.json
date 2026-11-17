@@ -1,0 +1,98 @@
+{
+  "status": "STATIC_SFC_RESOURCE_POLICY_COMPATIBILITY_REVIEWED_NOT_NATIVE_PASS",
+  "recorded_at": "2026-10-30T08:16:04.858704+00:00",
+  "candidate_id": "hierarchy-synchronous-full-neighbor-composition",
+  "experiment_id": "M224-SFC",
+  "code_commit": "c9be548699cd66bf68badff9ae6198a03eafa142",
+  "source_parent_commit": "d4d062ef075abfe7cde93d4b4347ce146572762f",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "owner": {
+    "token": "a6e82f44da954be096beeaef0a3755bc",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-30T08:07:36.868186+00:00",
+    "deadline_at": "2026-10-30T09:07:36.868186+00:00",
+    "context_sha256": "92328cba570e995a45b3f9f1f2afea593c76b3bd397f39fb70fb143a8400d723",
+    "pending_sha256": "d09ab844ae1689008acf65b670499c2a2fe7ea0a4799e269df48b19739312ac2"
+  },
+  "material_concerns": [],
+  "anchors": {
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/preparation.json",
+      "sha256": "3c76c1eb7329df2f6206eaafc4ca376b012d934ef8b99c712a709c1a02a0a058"
+    },
+    "operational_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/preparation.json",
+      "sha256": "3c76c1eb7329df2f6206eaafc4ca376b012d934ef8b99c712a709c1a02a0a058"
+    },
+    "native_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_928313fd/sfc_native_prepare/preparation.json",
+      "sha256": "173e5f02eaabfa02c37ad71646f9f136d9655a771aa3baf9b4382c6b3a90da77"
+    },
+    "adapter": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/adapter.py",
+      "sha256": "ca476b67cce67f95cc1f8df0110c08aae850366222d95c5ab2be3b071c60fd6d"
+    },
+    "remote_ops": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/remote_ops.py",
+      "sha256": "37d7b75d853b601b177668b34349ae24dc3570402c914c2cdcadb1931db1418d"
+    },
+    "release_template": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/release_template.json",
+      "sha256": "0ce3af61e961f32ed20f5781e5ae7b7e8bc8c4de4cb29d53e304d70c704394e2"
+    },
+    "fresh_baseline": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/protected_assets_before.json",
+      "sha256": "3786f6f47becf9bcfb9e7a14326835ee4cb72abae970975533dcb3279852e92f"
+    },
+    "current_anchor": {
+      "path": "pipeline/diagnostic_bundles/tick_a6e82f44/anchor.py",
+      "sha256": "7927967d8a393d8f9ace5388328ba7562ac0f50c1093641f68cc1f42682f2861"
+    },
+    "resource_authorization": {
+      "path": "pipeline/authorizations/server4_gpu1_20261030.json",
+      "sha256": "6529ecf4cb9bc39c698650e3116df67870a2f82e76c046296c8a1e74aa0d68c2"
+    },
+    "SERVERS": {
+      "path": "SERVERS.yaml",
+      "sha256": "19b3753d13a8253263c6525f19a739795b816be141e21a9f9b3aaccddf4f8265"
+    },
+    "parent_technical_receipt": {
+      "path": "pipeline/admissions/M223-FCB.json",
+      "sha256": "189f8d89fcaec6a2079e74a2af6bd378c2df184ef68798d0cace260d8433d9b6"
+    }
+  },
+  "actual_review": {
+    "prepared_map_count": 12,
+    "prepared_map_all_hashes_equal": true,
+    "original_native_map_count": 25,
+    "original_native_model_worker_runtime_and_resource_bytes_unchanged": true,
+    "only_changed_existing_adapter_functions": [
+      "Adapter._local_idle",
+      "Adapter.guard"
+    ],
+    "other_adapter_function_AST_identical": true,
+    "remote_ops_byte_identical": true,
+    "new_globals": "RESOURCE_AUTHORIZATION replacement plus exact SERVERS_POLICY_SHA256 and POLICY_GPU_UUIDS; original capability GPU_UUIDS remains {0}.",
+    "guard_difference": "Pins new resource authorization and exact current SERVERS, validates live[0,1] UUID policy while selected/probe/prepare capability still permits only physical0; owner/deadline/context/authorization, frozen/release and mutation-only parent technical receipt/primaryd4 checks remain.",
+    "queue_difference": "_local_idle recognizes int0/1 and exact string0/1 as legitimate live-policy queue assignments, rejects bool/unknown/outside whitelist and any selected0 reserved task. It does not create a GPU1 native capability.",
+    "manifest_lease_contract": "Original prepare/binding bodies unchanged. Actual live allowed_gpus[0,1] is valid for the unchanged native runtime GPU_UUIDS0+1; PHYSICAL_GPU is still hard-restricted to0. No need for a new subset field or relaxed guard.",
+    "formal_GPU1_training": "Outside this native adapter capability; a separately reviewed, genuinely authorized formal dispatch may select1 without relabeling native0 results.",
+    "parent_condition": "Genuine FCB technical receipt plus actual primary/runtime d4; no FCB training-completion or efficacy prerequisite. FCB stopped_unknown history/receipt remains unchanged.",
+    "static_release": "Template is a hash catalogue, not a lease/compute grant. No production copy, active binding or actual raw was created by this review.",
+    "baseline": "Fresh current owner, main d4,30lifecycle files,28user files,index2cdd retained as read-only evidence.",
+    "scientific_schema": "Original SFC actual R dynamic counts, all OLD-state/finished-component/hD path, shapes and whole shared-cell original-loss aggregate/update contract unchanged; no perrow/round/column/bias positivity or D4 coverage gate."
+  },
+  "limitations": {
+    "native_TRAIN2": "NOT_RUN",
+    "resources": "NOT_RUN",
+    "formal_training": "NOT_RUN",
+    "efficacy": "UNKNOWN",
+    "collector_and_Torch_behavior": "Not executed by this review; author19 software checks remain software only.",
+    "prior_reviewer_note_correction": "Earlier provisional claim that native GPU_UUIDS contained only0 was checked against the actual frozen runtime and withdrawn; the map contains0+1 and physical selection alone is restricted0."
+  },
+  "scope": {
+    "local_read_and_private_review_only": true,
+    "entry_guard_Adapter_native_Torch_tests_remote_GPU_Git_pipeline_or_shared_mutation_executed": false,
+    "new_scientific_gates": false
+  }
+}

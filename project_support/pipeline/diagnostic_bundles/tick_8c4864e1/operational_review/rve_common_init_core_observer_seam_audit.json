@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T23:26:37.781521+00:00",
+  "owner": {
+    "token": "8c4864e1a36e4f3883b3d301cfc39069",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T23:07:37.192344+00:00",
+    "deadline_at": "2026-11-09T00:07:37.192344+00:00",
+    "context_sha256": "1355b39f8a8e1e3014fc9a88c859829961fe5440fb90d5c44bead5b2ff6b0643",
+    "pending_sha256": "899db4c29a4d1a8412badfd2344695d0e357c1adfd050a2e78f3850c48a30ed2"
+  },
+  "reviewer_agent": "/root/fresh_peer",
+  "scope": "STATIC_COMMON_INITIALIZATION_AND_WHOLE_CORE_OBSERVER_SEAM_AUDIT_ONLY; not a native-worker execution/source approval.",
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "reviewed_sources": {
+    "operator": {
+      "path": "pipeline/diagnostic_bundles/tick_10a3f8b7/rvec_prepare/source/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/receiver_vector_exchange.py",
+      "sha256": "3b2ed3dc9f99d62a0a9108d3154792752e06a85a8c493b47317be9ec264099d3"
+    },
+    "decoder": {
+      "path": "pipeline/diagnostic_bundles/tick_10a3f8b7/rvec_prepare/source/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/dec.py",
+      "sha256": "42e5e737bbf3bbe5a689b02f2143c42b8ccc38046ab89d4d720abc1d7dfce44c"
+    },
+    "network": {
+      "path": "pipeline/diagnostic_bundles/tick_10a3f8b7/rvec_prepare/source/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/network.py",
+      "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d"
+    },
+    "hierarchy": {
+      "path": "pipeline/diagnostic_bundles/tick_10a3f8b7/rvec_prepare/source/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py",
+      "sha256": "dcee33e0f3e6b5cd4118ce8a06e008995b07e35d37ed29b28d813be4231318be"
+    },
+    "prior_NDE_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_native_active/worker.py",
+      "sha256": "b37fe5cf29ce04b8110752c7321d34b8d1a26218a6d8e02940b5773d9e4d5f72"
+    }
+  },
+  "common_initialization_contract": {
+    "exclude_exact_prefixes_on_both_arms": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn_norm.0.",
+      "dec.cluster_att.fine_exchange."
+    ],
+    "retain": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.cluster_ffn.2.",
+      "dec.cluster_att.cluster_ffn_norm.1.",
+      "dec.cluster_att.cluster_ffn_norm.2."
+    ],
+    "measurement": "After actual native backbone pretrain and before either TRAIN loader/step, record sorted full common parameter names, every shape, dtype, tensor count/numel and canonical byte hash. Compare both actual maps and values exactly; missing/extra/mismatch is not PASS.",
+    "expected_count_derived_only": 841,
+    "old_NDE_count835_is_not_RVE_gate": true,
+    "RNG_risk": "RVE FineLeafReceiverVectorExchange.reset_parameters uses global nn.init.uniform_. DEC constructs cluster_att before encoder_layers/decoder_layers; the new draws can shift later shared parameters despite identical seed1999. Measure the mismatch. Any explicit matched-common initialization must be a preregistered, source-reviewed harness control preserving native source, new-core initialization, optimizer mapping, data RNG and both actual before-TRAIN hashes; do not silently seed-shift or omit affected tensors."
+  },
+  "core_observer_contract": {
+    "actual_instance": "model.dec.cluster_att.fine_exchange",
+    "actual_class": "FineLeafReceiverVectorExchange from exact RVE candidate source",
+    "named_parameters_exact": [
+      "wr",
+      "wd",
+      "w2",
+      "b1",
+      "b2"
+    ],
+    "shapes": {
+      "wr": [
+        8,
+        32,
+        32
+      ],
+      "wd": [
+        8,
+        32,
+        32
+      ],
+      "w2": [
+        8,
+        32,
+        32
+      ],
+      "b1": [
+        8,
+        32
+      ],
+      "b2": [
+        8,
+        32
+      ]
+    },
+    "total_numel": 25088,
+    "filter": "Use exact full dict(module.named_parameters()). Assert exact five-name set/shapes/identity/native optimizer membership; never endswith(weight) or endswith(bias).",
+    "each_original_loss_step": "Capture all five gradients after original native backward and before native optimizer step; require notNone and finite. Capture per-parameter source-bound value hashes before/after native optimizer.step and require actual updates for each five parameter tensor under the preregistered gate. Aggregate module or empty weight hash cannot substitute.",
+    "path": "Observe exactly the existing last-layer RVE point readback and native inst_feats-to-mask path on the original two natural TRAIN batches; no auxiliary native forward, donor-cut run, toy loss, carrier model or replacement batch.",
+    "coverage": "If actual batches exercise no learned ordinary RVE rows or any required parameter has no finite gradient/update, preserve raw evidence and mark coverage/implementation gate inconclusive/failed; do not invent a pass, swap samples or relax five-parameter gate."
+  },
+  "preserved_native_protocol": [
+    "Original TRAIN2 loader seed/data/augmentation/batch2 workers4 persistent/drop_last, original loss/backward/AdamW/schedule/precision/backbone pretrain and single inst_feats delivery.",
+    "All four newly authorized native/resource arms require fresh RVE-specific owner/source/runtime/producer binding, actual memory>=20k, projectmax1 and all three original cooperative lock inodes. Foreign contexts need not be empty.",
+    "Existing10a CPU proof stays under historical owner10a; no relabel, repeat, or native-readiness claim."
+  ],
+  "actual_native_measurement_by_reviewer": false,
+  "Torch_SSH_GPU_execution_by_reviewer": false,
+  "shared_mutations_by_reviewer": false
+}

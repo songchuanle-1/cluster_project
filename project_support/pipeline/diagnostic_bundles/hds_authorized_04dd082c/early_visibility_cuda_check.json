@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-10-16T05:59:11.569358+00:00",
+  "pid": 17894,
+  "expected_gpu1_verified": true,
+  "own_contexts": [
+    "17894, GPU-340de111-e7e4-ed2d-15c9-8ab6a253e4a0, 805"
+  ],
+  "torch": "1.12.0+cu113",
+  "gorilla_visibility_source": "def set_cuda_visible_devices(gpu_ids=None,\n                             num_gpu=1,\n                             mode=\"memory\",\n                             memory_need=11000):\n    r\"\"\"Set cuda visible devices automatically\n\n    Args:\n        gpu_ids (str | list, optional): specified gpus. Defaults to None.\n        mode (str, optional): memory-free or process-free. Defaults to \"memory\".\n        memory_need (int, optional): The memory you need, used if mode=='memory'.\n        num_gpu (int, optional):\n            the num of gpus you want to use. Defaults to 1.\n            (useless if `gpu_ids` is not None)\n    \"\"\"\n    if gpu_ids is not None:  # specified gpus\n        if not isinstance(gpu_ids, list):\n            gpu_ids = [gpu_ids]\n    elif gpu_ids is None and num_gpu >= 1:  # not specify gpus\n        gpu_ids = supervise_gpu(num_gpu, mode, memory_need)\n    else:\n        raise ValueError(f\"`num_gpu` is invalid: {num_gpu}, it must '>=1'\")\n\n    # just for single machine multi gpu setting, the ngpus_per_node is\n    # all gpus in this machine\n    gpu_ids = \",\".join(convert_list_str(gpu_ids))\n    print(f\"set CUDA_VISIBLE_DEVICES as {gpu_ids}\")\n    # return  gpu_ids\n    os.environ[\"CUDA_DEVICE_ORDER\"] = \"PCI_BUS_ID\"\n    os.environ[\"CUDA_VISIBLE_DEVICES\"] = gpu_ids\n",
+  "flocks": 3
+}

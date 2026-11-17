@@ -1,0 +1,21 @@
+{
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "experiment_id": "M206-CGCA",
+  "registered_at": "2026-10-20T21:08:58.034237+00:00",
+  "profile": "experiment_first",
+  "hypothesis": "Coarse scene tokens can define context-dependent channel relationships while each fine token retains its own spatially local values. A coarse-derived grouped channel operator may improve fine semantic interpretation before original HCG readback; efficacy unknown until native training.",
+  "formula": "For each inherited head h: Z_h=LayerNorm_C(T_coarse).reshape(Kc,H,D)[:,h,:]; A_h=softmax(Z_h.T @ Z_h / sqrt(Kc), dim=-1); fine_h_new=fine_h @ A_h.T. Middle/coarse unchanged, no new residual/gate/projection or parameter; original FFNs/CSORT/HCG/last inst_feats injection retained.",
+  "matched_control": "Original M95 unchanged same ScanRefer train/validation, seed1999, epochs50/maxiters70, optimizer/native YAML. Resource same actual val expression bs1 warmup20 repeat100 original fvcore handlers. No accuracy selection from smoke.",
+  "structural_scope": "New coarse-to-fine channel affinity information graph, with offdiagonal channel mixing; not mere normalization/scaling, token pooling, point-neighbor transport or large QKV.8heads/d32 inherited, no sweep.",
+  "known_risks": [
+    "Channel mixing can erase fine discriminative channel content.",
+    "Coarse scene correlations can favor large objects or scene bias.",
+    "No rotation/robustness/task gain is established by two-step smoke."
+  ],
+  "authorization": {
+    "path": "pipeline/authorizations/experiment_first_20261021.json",
+    "sha256": "2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8"
+  },
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "resources": "server4 GPU1 only for new smoke while M205 runs GPU0; no sharing or touching M205 context/locks."
+}

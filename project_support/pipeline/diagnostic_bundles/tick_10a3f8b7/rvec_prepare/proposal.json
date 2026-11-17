@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T21:41:04.154023+00:00",
+  "owner": {
+    "token": "10a3f8b7d1bc4c5083b9b476c4d6fb94",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T21:09:22.656483+00:00",
+    "deadline_at": "2026-11-08T22:09:22.656483+00:00",
+    "context_sha256": "96ccdaba46f448a2c295d1407b3e782b9f9d1052825fe18b2e4f967a458d3d71",
+    "pending_sha256": "a5a8fe814217e681000a6efca7eaeca7999792c27b10345892113ebb4f31ef9f"
+  },
+  "producer_agent": "/root/actual_chain_fast",
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "status": "ROOT_SELECTED_PROVISIONAL_ISOLATED_SOURCE_ONLY_PEER_REVIEW_AND_ACTUAL_TESTS_PENDING",
+  "source_parent_commit": "0747f6acec1c61018ec99acf2efa5329c9b3523c",
+  "FLE_integration_commit": "587cccfbe2bc9867ece4b67d0785d8a5f5dc3e01",
+  "hypothesis": "A joint receiver-relative-donor nonlinear vector message before fine-neighbor averaging may produce useful per-recipient mask features beyond selecting donor values. This is a distinct testable function class, not a confirmed task bottleneck or new information claim.",
+  "formula": "Per inherited head: m_ij = W2 GELU(Wr xi + Wd (xj-xi) + b1) + b2; mean exactly allowed neighbors. Actual exact-cutoff rows use unchanged raw whole-leaf mean.",
+  "optimized_formula": "Precompute (Wr-Wd)xi and Wd xj; add b1 and apply GELU on every edge BEFORE allowed mean; apply W2 and b2 AFTER mean by linearity. Same five parameters in reference and optimized paths. Float output/gradient equivalence is not yet measured.",
+  "own_only_control": "Cut ALL donor paths: ordinary rows W2 GELU(Wr xi+b1)+b2; inherited tied fallback rows raw xi. Require exactly zero off-diagonal input gradients; actual fallback remains raw leaf mean.",
+  "structural_scope": {
+    "new_operator": "receiver_vector_exchange.py",
+    "inherited_support": "FLE build_graph AST exact; K32/H8/C256 and raw fallback mean unchanged",
+    "integration": "FLE fine FFN/norm removal and per-recipient fine-message insertion; original middle/coarse FFNs, raw banks, CSORT, fusion, point projection/norm, single final inst_feats update retained",
+    "new_headwise_parameters": 25088,
+    "derived_delta_vs_M95_fine_FFN_norm": -500992,
+    "activation": "Exact GELU as actual inherited YAML activation_fn:gelu",
+    "config_changes": [
+      "Identity/path",
+      "cluster_mode fle_csort -> rvec_csort"
+    ],
+    "other_numeric_config_changes": false
+  },
+  "difference_from_existing": {
+    "FLE": "Positive scalar dot/softmax donor-value weighting replaced by nonlinear joint receiver-relative-donor C-vector transformation; support preserved. Historical trained negative result preserved.",
+    "CRE_BEC_DCE": "Native fine-leaf receiver-donor edges and separate receiver outputs, not coarse-root or hierarchy-token edge composition.",
+    "NDE_HVD_PSC_NSD": "No marginal per-point embedding-to-token mean, fixed moment/scatter descriptor or Dirichlet feature energy. Actual receiver-conditioned pair nonlinearity precedes neighborhood mean.",
+    "held_routes": "No held candidate resumed or revised."
+  },
+  "CPU_test_needs": [
+    "Reference/optimized output AND all input/parameter gradient agreement under unchanged frozen tolerances",
+    "Own-only off-diagonal input gradients exactly zero including tied rows; own weights/self path retained",
+    "Actual off-diagonal receiver-donor path finite and nonzero on a declared fixture",
+    "K32 helper/source and graph exact, ordinary/padded/one-node/multi-leaf and raw-fallback values/gradients",
+    "All native two-step/common-init/full-core and paired resources remain independently required"
+  ],
+  "historical_evidence": {
+    "FLE_frozen_manifest": {
+      "path": "pipeline/diagnostic_bundles/tick_0571f421/manifest.json",
+      "sha256": "effdb7f9a59f4e277ae117a87bd2497346b1fd5957b8e3aea001c091be1ed2e0"
+    },
+    "FLE_negative_trained_result": {
+      "path": "pipeline/diagnostic_bundles/tick_ceb5e6c1/fullval/paired_analysis_result.json",
+      "sha256": "e59be7a8f7c5db8b8e4a5b8393a3008b735fe172c7496ff6f9e9e38c2879f582"
+    },
+    "FLE_target_mixing_diagnosis": {
+      "path": "pipeline/diagnostic_bundles/tick_0d3bdd38/final_analysis.json",
+      "sha256": "13d514f49521e6e0dc7b86f4697ebea40052e00a51bd3735f2e3e2695cce8a70"
+    },
+    "FLE_query_point_replication": {
+      "path": "pipeline/diagnostic_bundles/tick_6a3484ad/qf_analysis.json",
+      "sha256": "a0b694a39c8f1cc20b96175ebe074dc14fdae785678beeb6c468b4f67c3f61dc"
+    },
+    "original_cutoff_tie_failure": {
+      "path": "pipeline/diagnostic_bundles/tick_99e0a813/tie_stress_result.json",
+      "sha256": "6fe1c577913d8f199a04087c3356b18d47d5a45d26a89b9c5da9d323d9fbe977"
+    },
+    "FLE_revision1_preregistration": {
+      "path": "pipeline/diagnostic_bundles/tick_99e0a813/operator_revision1_prereg.md",
+      "sha256": "ebba23c7ccbdd5ce4e8c68c85fd7b92bbcd41a93805b66743dc1180b4afd68ac"
+    },
+    "FLE_revision1_controls": {
+      "path": "pipeline/diagnostic_bundles/tick_99e0a813/operator_revision1_controls.json",
+      "sha256": "1c4bfffdaab5f65fb1838737c5f71fba57c7f24930b55677217ce57933f782d6"
+    },
+    "later_exact_distance_failure_scope": {
+      "path": "pipeline/diagnostic_bundles/tick_79a22121/exact_distance_result.json",
+      "sha256": "424f3441f56aed5ed71ba4318fa1f3d64ddf1f1419b542be148257010fd17b1a"
+    },
+    "later_fallback_continuity_failure_scope": {
+      "path": "pipeline/diagnostic_bundles/tick_0518f166/continuity_result.json",
+      "sha256": "90c97295b3f7db4cebda585c6faf86535f5189e7727acf2b40270063dbddde5e"
+    }
+  },
+  "stdlib_static_check": {
+    "command": [
+      "python",
+      "-B",
+      "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_10a3f8b7\\rvec_prepare\\static_check.py"
+    ],
+    "passed": true,
+    "checks_passed": 24,
+    "scope": "Source compilation/AST/hash/config and exact rational affine identities; no Torch/model import or numerical tensor/autograd result."
+  },
+  "root_registration_performed": false,
+  "candidate_ledger_updated": false,
+  "Cluster_source_index_commit_or_environment_changed": false,
+  "actual_CPU_operator_test": "NOT_RUN_BY_AUTHOR",
+  "native_backward": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "scientific_admission": "NOT_GRANTED",
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "SSH_GPU": false,
+  "independent_review": "PENDING_NOT_SELF_APPROVED"
+}

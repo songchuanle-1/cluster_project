@@ -1,0 +1,162 @@
+        def observed_getitem(tensor,key):
+            output=original_getitem(tensor,key);c=state.get('psc_context')
+            if c is None:return output
+            role=next((role for role,ref in [('points',c['points_ref']),('positions',c['positions_ref']),('mask',c['mask_ref'])] if tensor is ref),None)
+            if role is None:
+                role=next(('normalized'+str(level) for level,ref in enumerate(c['normalized']) if tensor is ref),None)
+            if role is not None and type(key) is int:
+                c['row_refs'].append((output,role,key))
+            else:
+                row=next(((role,batch) for ref,role,batch in c['row_refs'] if tensor is ref),None)
+                selector=next((batch for ref,batch in c['selector_refs'] if key is ref),None)
+                if row is not None and row[0] in ('points','positions') and selector is not None:
+                    role,batch=row;assert batch==selector
+                    chosen=c['selected'].setdefault(batch,{})
+                    assert role not in chosen
+                    chosen[role]=output;chosen[role+'_selector_ref']=key
+            return output
+        def observed_invert(tensor):
+            output=original_invert(tensor);c=state.get('psc_context')
+            if c is not None:
+                row=next(((role,batch) for ref,role,batch in c['row_refs'] if tensor is ref),None)
+                if row is not None and row[0]=='mask':c['selector_refs'].append((output,row[1]))
+            return output
+        def observed_to(tensor,*args,**kwargs):
+            output=original_to(tensor,*args,**kwargs);c=state.get('psc_context')
+            if c is not None:
+                for batch,chosen in c['selected'].items():
+                    if tensor is chosen.get('positions') and 'converted_positions' not in chosen:
+                        assert kwargs.get('dtype')==chosen['points'].dtype and not args
+                        assert output.dtype==chosen['points'].dtype
+                        chosen['converted_positions']=output;chosen['native_dtype_cast_original_calls']=1
+            return output
+        def observed_group_mean(values,labels,count):
+            c=state.get('psc_context');scene=c.get('current_scene') if c else None
+            output=original_group_mean(values,labels,count)
+            if scene is not None and scene['stats_active']:
+                ordinal=len(scene['mean_refs'])+1
+                inputs={1:scene['points_ref'],2:scene['positions_ref'],4:scene['mean_refs'][0][1] if ordinal>=4 else None,
+                    5:scene['mean_refs'][1][1] if ordinal>=5 else None,6:scene['mean_refs'][2][1] if ordinal>=6 else None,
+                    8:scene['mean_refs'][3][1] if ordinal>=8 else None,9:scene['mean_refs'][4][1] if ordinal>=9 else None,
+                    10:scene.get('within_between_total_ref')}
+                level=0 if ordinal<=3 else 1 if ordinal<=7 else 2
+                assert labels is scene['mapping_refs'][level] and count==scene['counts'][level]
+                if ordinal in (3,7,11):
+                    assert scene.get('cross_active') and list(values.shape)==[scene['cross_population'],3*core.channels]
+                else:assert values is inputs[ordinal]
+                scene['mean_refs'].append((values,output,labels,count))
+                record=scene['record'];record['actual_group_mean_calls']+=1
+                info={'ordinal':ordinal,'input':summary(values),'labels':labels.detach().cpu().tolist(),
+                    'declared_groups':int(count),'output':summary(output),'original_calls':1,'returned_original_object_unchanged':True}
+                assert info['input']['finite'] and info['output']['finite'];record['group_mean_observations'].append(info);lite_watch(output,c['record'])
+            return output
+        def observed_cross(positions,points,position_center,feature_center,labels,count):
+            c=state['psc_context'];scene=c['current_scene'];ordinal=scene['record']['actual_centered_cross_calls']
+            expected=[(scene['positions_ref'],scene['points_ref'],1,0,0),
+                (scene['mean_refs'][1][1],scene['mean_refs'][0][1],4,3,1) if ordinal>=1 else None,
+                (scene['mean_refs'][4][1],scene['mean_refs'][3][1],8,7,2) if ordinal>=2 else None][ordinal]
+            x,f,xi,fi,level=expected
+            assert positions is x and points is f and position_center is scene['mean_refs'][xi][1] and feature_center is scene['mean_refs'][fi][1]
+            assert labels is scene['mapping_refs'][level] and count==scene['counts'][level]
+            scene['cross_active']=True;scene['cross_population']=points.shape[0]
+            try:output=original_cross(positions,points,position_center,feature_center,labels,count)
+            finally:scene['cross_active']=False
+            assert output is scene['mean_refs'][-1][1] and list(output.shape)==[count,3*core.channels]
+            scene['record']['actual_centered_cross_calls']+=1
+            info={'level':level,'positions':summary(positions),'features':summary(points),
+                'position_center':summary(position_center),'feature_center':summary(feature_center),
+                'output':summary(output),'output_sha256':fingerprint(torch,output),
+                'original_calls':1,'signed_outer_product_width':3*core.channels,'arithmetic_replayed':False}
+            assert all(info[key]['finite'] for key in ('positions','features','position_center','feature_center','output'))
+            scene['record']['centered_cross_observations'].append(info);lite_watch(output,c['record']);return output
+        def observed_add(tensor,other):
+            output=original_add(tensor,other);c=state.get('psc_context');scene=c.get('current_scene') if c else None
+            if scene is not None and scene['stats_active'] and len(scene['mean_refs'])==7:
+                if tensor is scene['mean_refs'][5][1] and other is scene['mean_refs'][6][1]:
+                    assert 'within_between_total_ref' not in scene
+                    scene['within_between_total_ref']=output;scene['record']['actual_within_between_add_calls']+=1
+            return output
+        def observed_components(points,positions,p0,p1,p2,fine_count,middle_count,coarse_count):
+            c=state['psc_context'];scene=c['current_scene'];plan=scene['plan'];chosen=c['selected'][scene['batch']]
+            assert points is chosen['points'] and positions is chosen['converted_positions'] and chosen['native_dtype_cast_original_calls']==1
+            assert [fine_count,middle_count,coarse_count]==scene['counts'] and points.shape[0]==scene['record']['point_count']
+            assert positions.shape[0]==points.shape[0] and positions.shape[-1]==3
+            assert [value.detach().cpu().tolist() for value in (p0,p1,p2)]==[plan[key] for key in ('point_to_fine','fine_to_middle','middle_to_coarse')]
+            scene.update(points_ref=points,positions_ref=positions,mapping_refs=(p0,p1,p2),stats_active=True)
+            try:output=original_components(points,positions,p0,p1,p2,fine_count,middle_count,coarse_count)
+            finally:scene['stats_active']=False
+            assert len(output)==5 and scene['record']['actual_group_mean_calls']==11 and scene['record']['actual_centered_cross_calls']==3 and scene['record']['actual_within_between_add_calls']==1
+            assert all(value is scene['mean_refs'][index][1] for value,index in zip(output,(2,5,6,9,10)))
+            assert [list(value.shape) for value in output]==[[fine_count,3*core.channels],[middle_count,3*core.channels],[middle_count,3*core.channels],[coarse_count,3*core.channels],[coarse_count,3*core.channels]]
+            scene.update(stats_refs=output,p1=p1,p2=p2)
+            record=scene['record'];record['actual_stats_calls']+=1
+            info={'point_input':summary(points),'point_input_sha256':fingerprint(torch,points),
+                'native_coordinate_input':summary(positions),'native_coordinate_sha256':fingerprint(torch,positions),
+                'actual_native_mask_selection_observed':True,'native_coordinate_dtype_cast_observed':True,
+                'actual_mapping_sha256':fingerprint(torch,[p0,p1,p2]),
+                'moment_names':['fine_cross_scatter','middle_within','middle_between','coarse_within','coarse_between'],
+                'outputs':[summary(value) for value in output],'output_sha256':fingerprint(torch,output),
+                'equal_supported_child_center_and_covariance_objects_verified':True,
+                'coarse_within_input_is_actual_middle_within_plus_between':True,
+                'original_calls':1,'returned_original_tuple_unchanged':True,'moment_arithmetic_replayed':False,
+                'statistic_nonzero_or_minimum_effect_gate':False}
+            assert info['point_input']['finite'] and info['native_coordinate_input']['finite'] and all(value['finite'] for value in info['outputs'])
+            record['stats_observations'].append(info)
+            for value in output:lite_watch(value,c['record'])
+            return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            output=original_select(tensor,dim,index,*args,**kwargs);c=state.get('psc_context');scene=c.get('current_scene') if c else None
+            if scene is not None and scene['pack_active']:
+                ordinal=len(scene['pack_select_refs']);stats=scene['stats_refs']
+                expected=[(stats[4],scene['p2']),(stats[2],scene['p1']),
+                    (scene['pack_select_refs'][0],scene['p1']) if ordinal>=2 else None][ordinal]
+                assert tensor is expected[0] and dim==0 and index is expected[1]
+                scene['pack_select_refs'].append(output)
+            elif scene is not None and 'stats_refs' in scene:
+                row=next(((role,batch) for ref,role,batch in c['row_refs'] if tensor is ref and role.startswith('normalized')),None)
+                if row is not None:
+                    role,batch=row;level=int(role[-1]);assert batch==scene['batch'] and dim==0
+                    assert index.detach().cpu().tolist()==scene['plan']['nodes'][level]
+                    assert level not in scene['selected_normalized_refs'];scene['selected_normalized_refs'][level]=output
+            return output
+        def observed_zeros_like(tensor,*args,**kwargs):
+            output=original_zeros_like(tensor,*args,**kwargs);c=state.get('psc_context');scene=c.get('current_scene') if c else None
+            if scene is not None and scene['pack_active']:
+                assert tensor is scene['stats_refs'][4] and 'coarse_zero_ref' not in scene
+                scene['coarse_zero_ref']=output
+            return output
+        def observed_pack(normalized,stats,p1,p2):
+            c=state['psc_context'];scene=c['current_scene']
+            assert stats is scene['stats_refs'] and p1 is scene['p1'] and p2 is scene['p2']
+            assert len(normalized)==3 and all(normalized[level] is scene['selected_normalized_refs'][level] for level in range(3))
+            scene['pack_normalized_refs']=normalized;scene['pack_active']=True
+            try:output=original_pack(normalized,stats,p1,p2)
+            finally:scene['pack_active']=False
+            assert len(output)==3 and len(scene['pack_select_refs'])==3 and len(scene['pack_cat_refs'])==3
+            assert all(value is scene['pack_cat_refs'][level] for level,value in enumerate(output))
+            scene['packed_refs']=output;record=scene['record'];record['actual_pack_calls']+=1
+            info={'semantic_inputs':[summary(value) for value in normalized],'moment_inputs_are_actual_returned_objects':True,
+                'outputs':[summary(value) for value in output],'output_sha256':fingerprint(torch,output),
+                'packing_blocks_C_3C_3C_3C':True,'actual_ancestor_index_select_calls':3,
+                'original_calls':1,'returned_original_list_unchanged':True,'packing_replayed':False}
+            assert all(value['finite'] for value in info['semantic_inputs']+info['outputs'])
+            assert [list(value.shape) for value in output]==[[count,10*core.channels] for count in scene['counts']]
+            record['pack_observations'].append(info)
+            for value in output:lite_watch(value,c['record'])
+            return output
+        def observed_cat(values,*args,**kwargs):
+            c=state.get('psc_context');scene=c.get('current_scene') if c else None
+            output=original_cat(values,*args,**kwargs)
+            if scene is not None and scene['pack_active']:
+                level=len(scene['pack_cat_refs']);stats=scene['stats_refs'];semantic=scene['pack_normalized_refs'];selects=scene['pack_select_refs']
+                if level==0:expected=(semantic[0],stats[0],selects[1],selects[2])
+                elif level==1:expected=(semantic[1],stats[1],stats[2],selects[0])
+                else:assert level==2;expected=(semantic[2],stats[3],stats[4],scene['coarse_zero_ref'])
+                assert kwargs.get('dim',args[0] if args else 0)==-1 and len(values)==4 and all(value is ref for value,ref in zip(values,expected))
+                assert [value.shape[-1] for value in values]==[core.channels,3*core.channels,3*core.channels,3*core.channels]
+                scene['pack_cat_refs'].append(output)
+            elif scene is not None and 'packed_refs' in scene and not scene['factor_active']:
+                dim=kwargs.get('dim',args[0] if args else 0)
+                assert dim==0 and len(values)==3 and all(value is scene['packed_refs'][level] for level,value in enumerate(values))
+                scene['factor_input_ref']=output;scene['record']['actual_factor_concat_calls']+=1
+            return output

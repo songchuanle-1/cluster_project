@@ -1,0 +1,31 @@
+--- frozen_v1/packet_runtime.py
++++ fresh_v2/packet_runtime.py
+@@ -14,8 +14,8 @@
+ PARENT = "b1e639b3ceb14bb5c65d9f81a084d41c834b951c"
+ RUNTIME = "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+ CONFIG = "configs/Quard/ctf_hcg_csort_cso/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cso.yaml"
+-PRODUCER = "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prepare_c1fe2178"
+-PRODUCTION = "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178"
++PRODUCER = "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prepare_c1fe2178_v2"
++PRODUCTION = "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178_v2"
+ VERIFICATION = TICK / "cso_deployment_execution/sync.actual.json"
+ OWNER = {
+     "token": "c1fe217800894083b65baac45f79aa83",
+@@ -121,7 +121,7 @@
+     assert review_path.is_relative_to(TICK) and sha(review_path) == args.review_sha256
+     peer = read(review_path)
+     assert peer["owner"] == OWNER and peer["passed"] is True and peer["material_concerns"] == []
+-    assert peer["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops")
++    assert peer["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops", "/root/cso_readiness")
+     assert peer["FROZEN_sha256"] == sha(HERE / "FROZEN.json")
+     assert peer["source_commit"] == SOURCE and peer["admission_sha256"] == args.admission_sha256
+     for key, name in (("controller_sha256", "production_controller.py"), ("transport_sha256", "run_setup_once.py"),
+@@ -140,7 +140,7 @@
+     assert sha(review_path) == review_sha
+     result, peer = read(result_path), read(review_path)
+     assert peer["owner"] == OWNER and peer["passed"] is True and peer["material_concerns"] == []
+-    assert peer["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops")
++    assert peer["reviewer_thread_id"] not in (OWNER["thread_id"], "/root", "/root/fresh_ops", "/root/sinc_prod", "/root/cso_native_ops", "/root/cso_readiness")
+     assert peer["production_result_sha256"] == sha(result_path)
+     assert result["owner"] == OWNER and result["kind"] == "PRODUCTION_PATH_INSTALLED_NO_TRAINER_LAUNCHED"
+     binding = result["binding"]

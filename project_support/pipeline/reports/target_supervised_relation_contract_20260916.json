@@ -1,0 +1,40 @@
+{
+  "scope": "Synthetic static reference likelihood; no native data, model, optimizer, novelty or scientific-admission evidence.",
+  "equations": {
+    "joint": "p(i,j)=softmax_over_pairs(u_i+a_j+R_ij)",
+    "output": "q_i=sum_j p(i,j)",
+    "objective": "L=-log q_target",
+    "relation_gradient": "p(i,j)-1[i=target]*p(j|target)",
+    "anchor_gradient": "p(j)-p(j|target)",
+    "cost": "O(Q*K) scalar relation scores; no superpoint NxN attention"
+  },
+  "checks": [
+    "Nine target-supervised partials agree with finite differences.",
+    "No anchor labels are needed for a nonzero anchor-logit gradient.",
+    "Without interaction, anchor probabilities cancel out of target likelihood.",
+    "Additively separable relation scores also give zero anchor gradient.",
+    "Joint anchor permutation preserves the target likelihood.",
+    "Anchor unary/relation gauge prevents unique internal parameter identification.",
+    "A nonseparable relation change can change supervised target probability."
+  ],
+  "checks_passed": 7,
+  "finite_difference_max_error": 8.163941744854242e-12,
+  "example": {
+    "loss": 0.38902798585551734,
+    "target_marginal": [
+      0.6777153033060124,
+      0.32228469669398757
+    ],
+    "anchor_gradient": [
+      -0.12872212238865022,
+      0.13340708017088437,
+      -0.0046849577822342114
+    ]
+  },
+  "conclusion": "Lack of direct auxiliary-anchor labels is not a universal no-learning theorem. Nonzero gradient is not correct-anchor identification or causal efficacy. Generic target-supervised latent relations are prior art and not a proposed new variant.",
+  "sources": {
+    "scripts\\target_supervised_relation_contract_20260916.py": "f87590092ee8a585dbc81d28ecf13a1d3cc14b411f9614b2788182823f47fe9a",
+    "pipeline\\reports\\ns3d_original_20260916.html": "1b5a5868a4b352cbe059374ecab244981633052d83fdd071211b11d3638018e6",
+    "pipeline\\reports\\correspondence_identification_20260916.json": "43ecd2904cc671f59e338e921af869365309a8dd05081926d4d999653d5f4999"
+  }
+}

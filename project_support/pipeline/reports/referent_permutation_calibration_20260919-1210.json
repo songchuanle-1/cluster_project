@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only Monte Carlo calibration of the frozen within-expression same-class target-permutation control; no model forward, native capture, training, queue mutation, or efficacy claim",
+  "settings": {
+    "simulations": 300,
+    "permutation_draws": 999,
+    "alpha": 0.05,
+    "scenes_per_simulation": 8,
+    "expressions_per_scene": [
+      1,
+      4
+    ],
+    "objects_per_expression": [
+      2,
+      5
+    ],
+    "signal_rule": "target referent confidence is set 0.20 above the strongest competing object before projection to native cost",
+    "primary_referent_endpoints": [
+      "referent_top1",
+      "referent_normalized_excess"
+    ]
+  },
+  "calibration_criteria": {
+    "familywise_null_upper_ci95_at_most": 0.1,
+    "referent_endpoint_power_at_least": 0.8,
+    "objectness_top1_false_positive_rate_at_most": 0.1
+  },
+  "cohort": {
+    "expressions": 5977,
+    "scenes": 2400,
+    "pool_size_min": 2,
+    "pool_size_max": 5,
+    "pool_size_mean": 3.5069432825832356
+  },
+  "null": {
+    "summary": {
+      "paired_normalized_excess_difference": {
+        "rejections": 4,
+        "simulations": 300,
+        "rejection_rate": 0.013333333333333334,
+        "rejection_rate_ci95": {
+          "low": 0.005196961739358857,
+          "high": 0.03377553025253262
+        }
+      },
+      "referent_normalized_excess": {
+        "rejections": 2,
+        "simulations": 300,
+        "rejection_rate": 0.006666666666666667,
+        "rejection_rate_ci95": {
+          "low": 0.0018301483579117855,
+          "high": 0.023977583250306973
+        }
+      },
+      "objectness_top1": {
+        "rejections": 1,
+        "simulations": 300,
+        "rejection_rate": 0.0033333333333333335,
+        "rejection_rate_ci95": {
+          "low": 0.0005886577218511581,
+          "high": 0.018636693694531237
+        }
+      },
+      "paired_top1_lift": {
+        "rejections": 4,
+        "simulations": 300,
+        "rejection_rate": 0.013333333333333334,
+        "rejection_rate_ci95": {
+          "low": 0.005196961739358857,
+          "high": 0.03377553025253262
+        }
+      },
+      "referent_top1": {
+        "rejections": 2,
+        "simulations": 300,
+        "rejection_rate": 0.006666666666666667,
+        "rejection_rate_ci95": {
+          "low": 0.0018301483579117855,
+          "high": 0.023977583250306973
+        }
+      },
+      "objectness_normalized_excess": {
+        "rejections": 2,
+        "simulations": 300,
+        "rejection_rate": 0.006666666666666667,
+        "rejection_rate_ci95": {
+          "low": 0.0018301483579117855,
+          "high": 0.023977583250306973
+        }
+      },
+      "holm_familywise_any": {
+        "rejections": 0,
+        "simulations": 300,
+        "rejection_rate": 0.0,
+        "rejection_rate_ci95": {
+          "low": 8.673617379884035e-19,
+          "high": 0.012642971224546034
+        }
+      }
+    },
+    "interpretation": "The Holm family-wise rejection rate tests calibration of the six-endpoint diagnostic family under exchangeable labels."
+  },
+  "planted_signal": {
+    "summary": {
+      "paired_normalized_excess_difference": {
+        "rejections": 299,
+        "simulations": 300,
+        "rejection_rate": 0.9966666666666667,
+        "rejection_rate_ci95": {
+          "low": 0.9813633063054688,
+          "high": 0.9994113422781488
+        }
+      },
+      "paired_top1_lift": {
+        "rejections": 300,
+        "simulations": 300,
+        "rejection_rate": 1.0,
+        "rejection_rate_ci95": {
+          "low": 0.9873570287754538,
+          "high": 0.9999999999999998
+        }
+      },
+      "referent_normalized_excess": {
+        "rejections": 300,
+        "simulations": 300,
+        "rejection_rate": 1.0,
+        "rejection_rate_ci95": {
+          "low": 0.9873570287754538,
+          "high": 0.9999999999999998
+        }
+      },
+      "referent_top1": {
+        "rejections": 300,
+        "simulations": 300,
+        "rejection_rate": 1.0,
+        "rejection_rate_ci95": {
+          "low": 0.9873570287754538,
+          "high": 0.9999999999999998
+        }
+      },
+      "objectness_top1": {
+        "rejections": 6,
+        "simulations": 300,
+        "rejection_rate": 0.02,
+        "rejection_rate_ci95": {
+          "low": 0.009197631557703617,
+          "high": 0.042939620817860576
+        }
+      },
+      "objectness_normalized_excess": {
+        "rejections": 5,
+        "simulations": 300,
+        "rejection_rate": 0.016666666666666666,
+        "rejection_rate_ci95": {
+          "low": 0.00713947735063333,
+          "high": 0.0384153948330945
+        }
+      },
+      "holm_familywise_any": {
+        "rejections": 4,
+        "simulations": 300,
+        "rejection_rate": 0.013333333333333334,
+        "rejection_rate_ci95": {
+          "low": 0.005196961739358857,
+          "high": 0.03377553025253262
+        }
+      }
+    },
+    "interpretation": "Referent endpoints should reject while random objectness remains near the nominal false-positive rate."
+  },
+  "decision": {
+    "status": "passed",
+    "referent_power_passed": true,
+    "objectness_false_positive_passed": true,
+    "familywise_null_upper_ci95": 0.012642971224546034,
+    "consequence": "Permutation p-values may be reported as calibrated diagnostics on native rank-eligible rows."
+  },
+  "limitations": [
+    "Simulated independent object scores preserve label exchangeability but do not reproduce native score dependence or geometry.",
+    "The planted signal validates directional power, not the native effect size or biological/visual plausibility.",
+    "Calibration is conditional on singleton query pools and no score ties; native query coverage remains handled by the separate gate.",
+    "A passing simulation does not establish native specificity or target mIoU improvement."
+  ],
+  "source_hashes": [
+    {
+      "path": "scripts/referent_permutation_calibration_20260919.py",
+      "sha256": "f6e4c00dfba83b9d7b4261865fc60197e9f4cdaf77ed77e3c6ac5e802c58c85c"
+    },
+    {
+      "path": "scripts/referent_within_scene_permutation_20260919.py",
+      "sha256": "1060c66e16014dc82b566d663eec6cb8be5ef93750640761dd992e724559f30b"
+    },
+    {
+      "path": "scripts/referent_object_rank_capture_20260919.py",
+      "sha256": "01546034eca2e208dacbf7187def34ed4c62c110a4c1975df39ab4e374982ba5"
+    },
+    {
+      "path": "scripts/referent_target_rank_evaluator_20260919.py",
+      "sha256": "32987438d71db5017a87b25d9c36da1268354aeebf7ed2fa303999e3caac2076"
+    }
+  ]
+}

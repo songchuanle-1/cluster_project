@@ -1,0 +1,197 @@
+"""Root-only stdlib supervisor: <=55s soft wall; no child termination or retry."""
+from datetime import datetime, timezone
+from pathlib import Path
+import hashlib
+import json
+import os
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {'token': 'd2045281654540099e808219dde8ec19', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T17:07:55.365991+00:00', 'deadline_at': '2026-11-09T18:07:55.365991+00:00', 'context_sha256': '1ba527509b4304ad2e886d05570d1bb38406ed36c3020e0d3dd4c2e381943e7c', 'pending_sha256': '7e630cdf6d8101453dc4a85dc6b90da5d190dba37c6f2c0ee934d03f8f036795'}
+ROOT = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+PYTHON = Path("/home/songcl/.conda/envs/project_cluster/bin/python")
+CELL_SHA256 = "9cd86057ba14ab5f3b7fcd4efc4cc3d7532ba53d5afc77042ce387114eaec93d"
+CASES = ("unique", "balanced", "mixed", "asymmetric")
+FILES = {
+    "framework/lib/pointgroup_ops/pointgroup_ops.py": "33df62f4cea0b5a99e8e6346840b6ccdcf3703affa97fd26b613f7feef79a473",
+    "framework/lib/pointgroup_ops/src/voxelize/voxelize.cpp": "b9f3c936fe33de97f6d3e3e2411b49df8cca587756725a646f50bf2a3a523300",
+    "framework/lib/pointgroup_ops/src/pointgroup_ops_api.cpp": "8e9e0621b85061f1240a37f16fe599df2d489df4fadd55d291dc5429a59644a8",
+    "framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so": "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033",
+}
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+
+def hash_file(path):
+    assert path.resolve() == path
+    info = os.lstat(path)
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001 and info.st_size <= 32 * 1024 * 1024
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for value in iter(lambda: stream.read(65536), b""):
+            digest.update(value)
+    after = os.lstat(path)
+    assert (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) == (
+        after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+    return digest.hexdigest()
+
+
+def identity(pid):
+    try:
+        return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return None
+
+
+def tail(fd, maximum):
+    size = os.fstat(fd).st_size
+    return os.pread(fd, min(size, maximum), max(0, size - maximum)).decode("utf-8", "replace")
+
+
+def observe(argv, environment, payload, seconds, global_stop, label, pass_fds=()):
+    pin()
+    out = os.memfd_create("rve_native_stdout", os.MFD_CLOEXEC)
+    err = os.memfd_create("rve_native_stderr", os.MFD_CLOEXEC)
+    process = subprocess.Popen(argv, cwd=str(ROOT), env=environment,
+                               stdin=subprocess.PIPE, stdout=out, stderr=err, pass_fds=pass_fds)
+    PROCESSES.append(process)
+    start = identity(process.pid)
+    if payload is not None:
+        encoded = json.dumps(payload).encode()
+        assert len(encoded) <= 16384
+        process.stdin.write(encoded)
+    process.stdin.close()
+    until = min(global_stop, time.monotonic() + seconds)
+    while process.poll() is None and time.monotonic() < until:
+        time.sleep(0.02)
+    returncode = process.poll()
+    stdout = tail(out, 65536)
+    records = []
+    for line in stdout.splitlines():
+        try:
+            records.append(json.loads(line))
+        except ValueError:
+            pass
+    result = {"label": label, "pid": process.pid, "start_ticks": start,
+              "certainty": "terminal" if returncode is not None else "uncertain",
+              "returncode": returncode, "stdout_bytes": os.fstat(out).st_size,
+              "stderr_bytes": os.fstat(err).st_size,
+              "records": records[-32:], "faulthandler_stderr_tail": tail(err, 3072),
+              "stderr_truncated": os.fstat(err).st_size > 3072, "signals_sent": False}
+    if returncode is None:
+        result["reason"] = "SOFT_TIMEOUT_PRESERVE_PID_NO_RETRY"
+        result["output_FDs_if_process_remains"] = [f"/proc/{process.pid}/fd/1", f"/proc/{process.pid}/fd/2"]
+    else:
+        os.close(out)
+        os.close(err)
+    return result, stdout
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NO_IMPORT_NATIVE_OR_PROCESS_LAUNCH"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    assert (datetime.fromisoformat(OWNER["deadline_at"]) - datetime.now(timezone.utc)).total_seconds() > 100
+    assert ROOT.resolve() == ROOT
+    source = payload["cell_source"]
+    assert hashlib.sha256(source.encode()).hexdigest() == CELL_SHA256
+    contracts = payload["contracts"]
+    assert tuple(contracts) == CASES
+    baselines = payload["fresh_baselines"]
+    assert tuple(baselines) == CASES
+    for name in CASES:
+        assert baselines[name]["input_contract"] == contracts[name]
+        assert baselines[name]["native_calls"] == 8 and baselines[name]["cuda_initialized"] is False
+    assert sys.version_info[:2] == (3, 12) and hasattr(os, "memfd_create")
+    env = dict(os.environ)
+    env.update(CUDA_VISIBLE_DEVICES="", TOKENIZERS_PARALLELISM="false", PYTHONDONTWRITEBYTECODE="1",
+               GIT_OPTIONAL_LOCKS="0", GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null",
+               GIT_CONFIG_SYSTEM="/dev/null")
+    stop = time.monotonic() + 55
+    git, stdout = observe(["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+                           "-C", str(ROOT), "rev-parse", "HEAD"], env, None, 3, stop, "git_before")
+    if git["certainty"] != "terminal" or git["returncode"] != 0:
+        print(json.dumps({"owner": OWNER, "status": "PREIMPORT_GIT_UNCERTAIN_OR_FAILED_NO_NATIVE_LAUNCH",
+                          "git_observation": git, "root_cause": "UNKNOWN",
+                          "historical_worker_crash_reproduced": False, "signals_sent": False}))
+        return
+    assert stdout.strip() == "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e"
+    actual_files = {name: hash_file(ROOT / name) for name in FILES}
+    assert actual_files == FILES
+    assert str(PYTHON.resolve()) == "/home/songcl/.conda/envs/project_cluster/bin/python3.10"
+    python_sha = hash_file(PYTHON.resolve())
+    assert python_sha == "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5"
+    locks = []
+    for kind, inode in (("training", 92537152), ("diagnostic", 92537153), ("exclusive", 92537154)):
+        path = Path("/tmp/cluster_project_gpu0_" + kind + ".lock")
+        info = os.lstat(path)
+        assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001 and (
+            info.st_dev, info.st_ino) == (66308, inode)
+        locks.append({"kind": kind, "dev": info.st_dev, "ino": info.st_ino, "stat_only": True})
+    # Allocate anonymous captures in system Python, then inherit them through exec.
+    # The project interpreter lacks os.memfd_create; it only duplicates these FDs.
+    capture_pairs = {name: [os.memfd_create("rve_fork_v2_" + name + "_" + kind, os.MFD_CLOEXEC)
+                            for kind in ("stdout", "stderr")] for name in CASES}
+    pass_fds = tuple(fd for name in CASES for fd in capture_pairs[name])
+    assert len(pass_fds) == len(set(pass_fds)) == 8
+    fork, _ = observe([str(PYTHON), "-B", "-c", source], env,
+                      {"role": "fork_matrix_fd_v2", "contracts": contracts, "capture_pairs": capture_pairs,
+                       "stop_monotonic": min(stop, time.monotonic() + 45)},
+                      45, stop, "fork_CPU_carrier_fd_v2", pass_fds=pass_fds)
+    fork_records = next((row["cells"] for row in fork.get("records", [])
+                         if row.get("stage") == "fork_matrix_result"), [])
+    comparisons = []
+    for name in CASES:
+        second_cell = next((row for row in fork_records if row.get("case") == name), {})
+        second = next((row["result"] for row in second_cell.get("stage_events", [])
+                       if row.get("stage") == "cell_result"), None)
+        first = baselines[name]
+        if second:
+            comparisons.append({"case": name, "identical_input_sha256": contracts[name]["input_sha256"],
+                                "new_fork_native_calls": second["native_calls"],
+                                "historical_fresh_native_calls_reused": first["native_calls"],
+                                "input_contract_equal": second["input_contract"] == first["input_contract"] == contracts[name],
+                                "output_digest_equal": first["valid_output_digest"] == second["valid_output_digest"]})
+    if fork["certainty"] == "terminal":
+        for descriptor in pass_fds:
+            os.close(descriptor)
+    pin()
+    unchanged = all(hash_file(ROOT / name) == expected for name, expected in FILES.items())
+    complete = (len(comparisons) == 4 and all(row["output_digest_equal"] and row["input_contract_equal"]
+                and row["new_fork_native_calls"] == 8 for row in comparisons)
+                and fork["certainty"] == "terminal" and fork["returncode"] == 0
+                and len(fork_records) == 4 and all(row["certainty"] == "terminal" and row["returncode"] == 0
+                                                 for row in fork_records))
+    result = {"owner": OWNER, "recorded_at": datetime.now(timezone.utc).isoformat(),
+              "kind": "NEW_FORK_ONLY_CPU_POINTGROUP_CONTEXT_FD_V2",
+              "remote_supervisor_pid": os.getpid(), "supervisor_start_ticks": identity(os.getpid()),
+              "hostname": socket.gethostname(), "uid": os.getuid(),
+              "source_commit": stdout.strip(), "source_and_binary_hashes": actual_files,
+              "python_realpath": str(PYTHON.resolve()), "python_sha256": python_sha,
+              "original_lock_identity_stat_only": locks, "fork_carrier": fork,
+              "fresh_actual_sha256_reused": "d8a5b0d97479b20d31c58015a1cbd58023187294b8299436108be68f5f0186bc",
+              "fresh_calls_executed_in_this_packet": 0, "historical_fresh_calls_reused": 32,
+              "fd_transfer": {"method": "system_memfd_Popen_pass_fds_carrier_os_dup", "pairs": capture_pairs},
+              "comparisons": comparisons, "fork_only_complete_with_equal_historical_fresh_outputs": complete,
+              "source_and_binary_unchanged_after": unchanged, "maximum_soft_wall_seconds": 55,
+              "root_cause": "UNKNOWN", "historical_worker_crash_reproduced": False,
+              "scientific_gate_retest_or_training_restart": False,
+              "physical_GPU_or_CUDA_context_claimed": False, "signals_sent": False,
+              "scope_limit": "CPU-imported fork only; compares new fork cells with immutable earlier fresh cells. Excludes CUDA-parent, actual failed data, augmentation, tokenizer state and original persistent-worker history. Original fault remains UNKNOWN."}
+    encoded = json.dumps(result, ensure_ascii=True)
+    assert len(encoded.encode()) <= 98304
+    print(encoded)
+
+
+if __name__ == "__main__":
+    main()

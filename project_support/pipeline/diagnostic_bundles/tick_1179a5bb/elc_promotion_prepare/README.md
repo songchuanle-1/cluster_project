@@ -1,0 +1,7 @@
+ELC future promotion consumers, disabled
+
+Five helpers: elc_evidence.py, summarize_elc_actual.py, fast_forward_tested_elc.py, admit_elc_queue.py, dispatch_elc_once.py. DRAFTTrue, three actual raw/review/peer references null, four CLI default no action. Future genuine four ELC terminal arms plus exact independent semantic peer must precede root-reviewed activation/current owner binding, then summary -> exact9 local ff -> canonical ordinary FIFO admission -> one canonical GPU0 dispatch and real step growth.
+
+Actual source18e is one childSFCc9. Current0314 cannot jump27A; original operational parent gate requires genuine M224-SFC technical receipt/standingauth/goal/experiment_first/original smoke+4gate artifact+decision hashes and actual local/remote c9, without training completion/effect condition. Fresh actual GPU0, source/assets/UUID/three locks and original owner/deadline still required. Other candidates, all terminal histories/receipts and M206 pause remain protected.
+
+Producer-specific ELC core initializes edge state once; R dynamic neighbor mean/cell/state writes; GELU R+1; one incident-edge mean and three final scatters. Only whole initialize+cell aggregate original-loss trainability/update is a positive gate; maps/edges/rounds/four columns/bias zero legal. No SFC node hD/PES/AOC/FCB schema or fixed-depth/FP32 coverage gate. Checks are source/AST/compile only; no entry/import/API/Git/SSH/Torch/GPU/native/resources/PASS/receipt/queue/launch/shared action occurred. Original source/native/op remain unchanged.

@@ -1,0 +1,7 @@
+SFC conditional operational capability
+
+Exact source c9be548699cd66bf68badff9ae6198a03eafa142 is one child of FCB d4d062ef075abfe7cde93d4b4347ce146572762f. Current primary/runtime0314 and original source963dc NULL/reference0314 are preserved. Mutation guard requires a genuine M223-FCB experiment-first technical receipt with current goal/standing authorization, existing smoke/four-gate artifacts and decision hashes, plus actual primary d4; remote mutation still verifies runtime d4. FCB training completion and accuracy are not prerequisites.
+
+The formalFalse capability still requires root external catalogue/release and fresh real owner/lease/manifest. Ten native template execution fields remain null. Only physicalGPU0, pinned host/UUID/current whitelist, original owner/deadline/1020s run window, three locks/double idle, assets, durable requests and no replay remain. Read-only probe/status/reconcile retain original observation semantics across unmet parent promotion; an observation does not imply readiness.
+
+Only two sources, release metadata and bounded AST/metadata proof are prepared. Exact STRING-token substitutions preserve identifier/schema keys, including shapes. All 33 adapter and 18 remote functions match the original after declared literal metadata mapping. Original None/True WIP bytes are retained. No import/entry/SSH/Git/Torch/GPU/native/resources or shared/queue operation was performed. Root may materialize adapter_release.json only after external independent review; none exists here.

@@ -1,0 +1,53 @@
+{
+  "candidate": "referent-exclusivity-supervision",
+  "decision": "rejected_before_design",
+  "scope": "Static design and primary-source audit only; no implementation, native backward, resource measurement, admission, queue mutation, sync, or launch.",
+  "proposed_mechanism": [
+    "Keep the two-way query referent logits and inference path unchanged.",
+    "Replace the PIRS scalar own-mask-IoU target with a detached identity-exclusivity target: q_positive * (1 - q_hardest_nonreferenced).",
+    "The intent is to assign high confidence only to hypotheses that overlap the referred object and avoid same-scene non-referred object masks."
+  ],
+  "rejection_reasons": [
+    {
+      "gate": "route_identity",
+      "finding": "The proposal is a direct successor of the running PIRS mask-quality score target. The durable work record explicitly says not to create a PIRS-successor, renamed quality-score variant, or retuned target family."
+    },
+    {
+      "gate": "closed_direction",
+      "finding": "The target is a hard-negative referent-ranking objective. Decision-aligned referent supervision was already rejected before design, including listwise, softmax-ranking, top-1, and renamed variants."
+    },
+    {
+      "gate": "literature",
+      "finding": "ConcreteNet already uses contrastive verbo-visual supervision to separate repeated same-class instances by pulling the referred instance and sentence together while contrasting remaining instances. The 2024 fine-grained-loss work already supervises each instance's spatial offset to the ground-truth referred object and states that cross-modal contrast improves instance separation. Changing the distance to mask overlap and placing it in the existing referent logits does not establish a new causal supervision unit."
+    },
+    {
+      "gate": "scientific_marginality",
+      "finding": "The only new operation is a parameter-free multiplication or margin between known quantities inside an already prior-art score target. It does not add a new information path, new interaction between previously unconnected entities, or a distinct causal unit."
+    }
+  ],
+  "sources": [
+    {
+      "path": "pipeline/reports/concretenet_2309.04561v3_20260917.html",
+      "url": "https://arxiv.org/html/2309.04561v3",
+      "sha256": "755b4d8e1db892bbb66e4980fda3b20c24cee8d44f5f3f6e92074fcdfca009f8"
+    },
+    {
+      "path": "pipeline/reports/finegrained_spatial_verbal_2411.03405v1_20260917.html",
+      "url": "https://arxiv.org/html/2411.03405v1",
+      "sha256": "ff88d4ee7e07b979ad0a78b3c8f590dfd33eaa2e0d6244c180f7301ed760daf2"
+    },
+    {
+      "path": "pipeline/decisions/20260917-081555_route_change.md",
+      "sha256": "58fcc93a11f5452ce5585a3007a63c8de876a27690f495d91bf9193bba83bb36"
+    },
+    {
+      "path": "pipeline/decisions/20260916-101506_route_change.md",
+      "sha256": "6669017d657627b712cbd5ec826e7e1053f55ba198557101fb0ecc92d3adccc6"
+    },
+    {
+      "path": "pipeline/reports/3d_res_original_source_audit_20260917-0614.json",
+      "sha256": "27a024c08b5d56b8f746a49a2f6a0c2471a2a430ccd99d5b9635704f1e16eb85"
+    }
+  ],
+  "result": "No admissible candidate remains in this batch. Keep the single open design slot empty rather than enqueueing a renamed PIRS/hard-negative-ranking successor."
+}

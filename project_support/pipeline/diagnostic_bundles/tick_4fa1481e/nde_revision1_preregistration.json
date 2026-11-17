@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "candidate_id": "hierarchy-native-distribution-embedding-composition",
+  "experiment_id": "M233-NDE",
+  "revision": 1,
+  "failure_scope": "implementation",
+  "owner": {
+    "token": "4fa1481eb5e14bd1a0637720635b6410",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T01:13:04.022567+00:00",
+    "deadline_at": "2026-11-08T02:13:04.022567+00:00",
+    "context_sha256": "42c2500fe791101c49d2362c2f065aaa9503d51b47eb45a010e4fc757f4b8f10",
+    "pending_sha256": "2904930b5f9780b193cf4ee7a3c94b1bfc1cfaa87aca083b7d670e9aabedd0ba"
+  },
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "original_source_commit": "46adb90573118902d0a7c7723ce8817a085f38b9",
+  "source_parent_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+  "reason": "Original complete candidate resource measured10.036472908G>10G. Repeated parent first-affine contribution wastes multiply-accumulates. This is implementation resource failure, not mechanism falsification.",
+  "change": "At all three shared analysis levels only, factor first original affine W[x,zparent]+b into Wx*x+b + gather(Wz*zparent); preserve original parameter objects/shapes/state_dict/random initialization, childwise GELU/secondLinear before each private mean, synthesis/raw bank/HCG/writeback/YAML/data/seed/loss/optimizer/precision.",
+  "prediction": "Identical state/input/upstream gives matching all scale outputs, point and normalized input gradients, original parameter gradients and one optimizer update within frozen dtype-aware torch.testing.assert_close DEFAULT tolerances. fvcore must count both F.linear halves: first-affine2*m*C*C becomes(m+k)*C*C. Original full10G resource may pass/fail only actual measurement decides.",
+  "optimization_scope_frozen": "all three analysis first affines only; synthesis unchanged",
+  "controls": [
+    "Repeated parents, padded/unsupported/empty support and original state_dict initialization; same runtime existing dtype/default precision, no newFP32.",
+    "Freeze torch.testing.assert_close DEFAULT dtype tolerances now; report actual errors; no tolerance/numerical adjustment after seeing results.",
+    "Actual affected original natural TRAIN2/common835/loss finite backward/wholecore and real weight/module update with independently reviewed observer.",
+    "Original resources() AST/handler hashes unchanged; candidate/champion full paired bs1/warmup20/repeat100/median/P90/peak, original10G and conditional15% thresholds."
+  ],
+  "preregistered_at": "2026-11-08T01:23:19.236310+00:00",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_71e15360/nde_execution/resources_candidate_execution.json",
+      "sha256": "891089ca63368d5491648efa2faf4f40b908848e3edea0adea5c9e73c4585034"
+    }
+  ],
+  "result": "pending",
+  "evidence": [],
+  "policy_review": {
+    "path": "pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_policy_review.json",
+    "sha256": "4847ef7ad797f4a6669ae749f2129e101e3f2211d801e2d3c8309977c4bfdd85"
+  },
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "admission": false
+}

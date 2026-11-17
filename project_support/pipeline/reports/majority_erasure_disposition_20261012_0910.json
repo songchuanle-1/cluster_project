@@ -1,0 +1,13 @@
+{
+  "stage": "rejected",
+  "hypothesis_id": "majority-quantization-erases-present-referent",
+  "actual_test": "Exact native get_ref_mask on all unchanged TRAIN physical targets, plus frozen32/128 original augmented dataset masks in two seed-reset CPU passes.",
+  "result": "562 scenes/7875 physical targets/36665 annotations all represented in raw native masks; zero absent targets, missing geometry or complete majority erasure. Frozen128 original augmented masks all represented in both exact repeats; native tie-erasure positive control succeeds.",
+  "gate_result": "Complete native majority-erasure premise disconfirmed on full raw TRAIN and fixed augmented cohort. This does not exclude partial boundary errors or arbitrary stochastic crop effects; no new mechanism/backward/resources/admission claim.",
+  "next_action": "Do not create an empty-target supervision replacement for these observed populations. Revisit only on an actual native complete-erasure case or changed authorized data/transform evidence, not on an unrun generic variant.",
+  "evidence": [
+    {"path": "pipeline/reports/majority_erasure_population_20261012_0910.json", "sha256": "d4a74161cfda39dc45dbb79dbc6629bed8cf97a1cffce8cc8a9e6cc2a61ff54d"},
+    {"path": "pipeline/reports/majority_erasure_original_config_20261012_0910.yaml"},
+    {"path": "scripts/majority_erasure_population_20261012_0910.py"}
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "status": "PROPOSAL_ONLY_AWAIT_ROOT_SELECTION_NOT_REGISTERED",
+  "proposed_stable_id": "hierarchy-parent-segmented-bidirectional-token-state",
+  "short_name": "PSBR (parent-segmented bidirectional recurrence), provisional",
+  "experiment_id": null,
+  "token": "8fafa3d4ebcb48e7ba3436e084f6ee9f",
+  "owning_thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+  "actual_preparing_agent_thread_id": "01a15a3d-3c65-78b3-9ac7-57d0423dcc6e",
+  "generated_at": "2026-10-22T02:12:05.347438+00:00",
+  "deadline_at": "2026-10-22T03:12:05.347438+00:00",
+  "prepared_at": "2026-10-22T02:17:41.721082+00:00",
+  "context_sha256": "572e5c822cb9576e3d81892d8e2d90e95c58e2727f838e85f4bab99f613b81eb",
+  "pending_sha256": "8d12b59babd88f103f475764d77c1c9ef6d7862d829b546c35660f136c848526",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "authority": "Root-delegated bounded read-only design plus this new proposal artifact only; no implementation or candidate registration.",
+  "hypothesis": "Within one existing coarse parent, a middle token may benefit from nonlinear accumulated sibling evidence rather than an independent FFN or one-hop directional spatial stencil. A bidirectional recurrent state makes every occupied sibling in its deterministic geometry chain reachable before original HCG readback. Efficacy and task deficit remain unmeasured.",
+  "control": "Original M95, unchanged native YAML/pretrain/seed1999/epochs50/max_iters70/optimizer/data/validation/resource protocol. No seed or activation_fn config sweep.",
+  "forward": {
+    "inputs": "Original raw middle bank mu1[B,K1max,C], original ids0/ids1/ids2, detached middle geometric centers. Fine/coarse raw banks and original maps remain unchanged.",
+    "validity": "A middle slot is real iff it is reached by original ids1[ids0] for at least one actual point. Exclude only non-supported slots/padding from recurrent state transport; valid geometric center zero is not padding. Raw bank aggregation/CSORT values and IDs are untouched; this is deterministic support validity, not learned weighting/routing.",
+    "groups": "For each batch and existing coarse parent p, collect supported middle indices j with ids2[j]=p. Order by detached center (x,y,z), breaking exact center ties by original token ID. No radius/topk/quantization/bin-width parameter.",
+    "formula": [
+      "z_i = original_LN1(mu1[pi_p(i)])",
+      "u_i = W_x z_i + b_x  (precomputed once and reused in both directions)",
+      "s_forward_0 = 0; s_forward_i = tanh(u_i + W_h s_forward_(i-1))",
+      "s_backward_(n+1) = 0; s_backward_i = tanh(u_i + W_h s_backward_(i+1))",
+      "h1[pi_p(i)] = W_o concat(s_forward_i, s_backward_i) + b_o",
+      "h1 unsupported/padded rows = 0",
+      "h0 = original M95 fine residual FFN(mu0); h2 = original M95 coarse residual FFN(mu2)",
+      "original HCG(h0,h1,h2) -> original message_norm -> original single last-layer inst_feats update -> original ILA/mask path"
+    ],
+    "parameters": "Wx:C→C with bias; Wh:C→C without bias; Wo:2C→C with bias. Share Wx/Wh across directions; state resets at every parent and every batch. Follow existing model initialization path, with no new scalar/decay/init search.",
+    "replacement": "Replace the ENTIRE original middle residual-FFN block, not an added branch. Do not leave its old parameters dead in the model. Keep existing pre-LN1 and all original fine/coarse FFN, HCG gate/projection, CSORT and single point update. No new residual skip or gate.",
+    "activation_scope": "tanh defines the bounded recurrent state update of a new module. Native YAML activation_fn=gelu stays unchanged; this is not a GELU/tanh numerical activation variant or a parameter sweep.",
+    "new_dependency": "For two distinct supported middle tokens i,j in one coarse-parent chain, d h1_i / d mu1_j is generically nonzero through one or more Wh/tanh state transitions. Original M95 is exactly zero on this direct token-refinement path. Cross-parent recurrence dependency is exactly zero; no point-level N² graph is created."
+  },
+  "matched_checks": [
+    "Native same two TRAIN batches/initialization versus M95, original train.train loss/backward/optimizer. New Wx/Wh/Wo must receive finite native gradients and actually update; at least one real nonsingleton parent group is needed to exercise Wh.",
+    "Record every parent group, stable order/inverse mapping, supported/empty/padded slots, state reset boundaries and fine/coarse/raw-CSORT/HCG identities. Geometric coordinates stay detached; state feature paths stay differentiable.",
+    "Mechanism-matched diagnostic only: reset previous/next state to zero at every token while keeping the same Wx/Wo and inputs; this cuts only cross-token history edges. Not a queued hyperparameter trial or posthoc selected control.",
+    "Probe direct off-diagonal middle-token Jacobian within one actual parent and zero across parents, isolated from native .grad/optimizer/RNG exactly as prior diagnostic discipline. Do not swap readout or seed to manufacture nonzero results.",
+    "Ordering audit on actual captured values: inverse-permutation recovery, group/batch isolation, singleton behavior, duplicate-center tie behavior. No claim of full rotation or tie-permutation invariance.",
+    "Future fresh paired original fvcore bs1/lang1/warm20/repeat100 resources; preserve historical handlers and disclose unsupported recurrent/tanh elementwise ops. Finite smoke or static MAC arithmetic is not admission."
+  ],
+  "estimated_cost": {
+    "C": 256,
+    "middle_tokens_nominal_per_batch_row": 64,
+    "new_middle_parameters": 262656,
+    "old_middle_ffn_parameters": 525568,
+    "parameter_delta": -262912,
+    "new_dense_MACs_nominal": 20971520,
+    "old_middle_ffn_dense_MACs_nominal": 33554432,
+    "scope": "Analytic MAC/parameter estimate only, assuming original middle FFN is removed, Wx precomputed/shared and explicit Linear state steps (no opaque fused RNN profiler shortcut). Caching/sorting/elementwise/serial overhead not included. Total native FLOPs<=10G, latency and peak memory UNKNOWN until same-protocol real measurements.",
+    "asymptotic": "O(Kmiddle*C²) dense work plus per-parent O(Kmiddle log Kmiddle) detached sorting, O(Kmiddle*C) retained states; no pairwise Npoint² attention and no Q/K/V/O attention projections."
+  },
+  "bounded_history": {
+    "source_hashes": {
+      "M95": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/hier_postprocess.py",
+        "sha256": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f"
+      },
+      "C2C": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_c2c/hier_postprocess.py",
+        "sha256": "1bb58e7d058639c52f0b4effa447dd5938c5be6a6f752015f738ca11674b6350"
+      },
+      "MDC": {
+        "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mdc/middle_conv.py",
+        "sha256": "c3ee77ae92c424e6cc132460af235e9d07673af7940ab79a10165660cdf49f0a"
+      }
+    },
+    "index_scope": "Only recent research_work identity/hypothesis index, experiments.csv/config names, canonical queue config names and immediate model-package names searched for recurrent/RNN/LSTM/SSM/Mamba/state/scan tokens; no exact recurrent/SSM/RNN package/config hit. Closest actual sources read were M39-C2C and M205-MDC plus already-known M95 CTF. This is not exhaustive history or literature clearance.",
+    "M39_C2C": "hier_postprocess.py:488-529 uses Q/K/V/out, dense token softmax attention and residual+LN independently per scale; trained historical best .4865. Proposed state recurrence has no attention weights/QKV/residual and is segmented by existing coarse IDs, not that old graph.",
+    "M205_MDC": "middle_conv.py:7-49 performs self+six nearest geometric directional depthwise terms then pointwise GELU, no recurrence; source explicitly permits cross-coarse edges. Proposed nonlinear shared state propagation has variable-length chain paths inside each coarse parent, no fixed six-sector donor stencil. Thus it is not changing MDC neighbor count/kernel size or retraining its negative result (.4872).",
+    "HRC": "HRC composes refined fine FFN→fixed mean→middle FFN→mean→coarse FFN. Proposal keeps independent raw-bank fine/coarse refinements and adds sibling state dependence only at middle; no fine-refined input to parent or second coarse computation.",
+    "HAP": "No affine fitting/prolongation, parent feature intercept or pinv. Geometry selects a fixed ordering only; no child moment/projection operator.",
+    "CGCA": "No coarse-feature Gram, softmax channel matrix or conditioning of fine-channel mixing; Wx/Wh/Wo are shared learned state parameters, and coarse IDs supply segmentation only.",
+    "REAG_and_holds": "No extra point readback/update or reaggregation between two point updates. RSTR/PCE/FLE/HDS/CPA and all rejected/banned IDs stay untouched and are not reopened.",
+    "additional_targeted_review": "pce_audit bounded check of variants_base1.md:801 attnpool and :866 lite_agg found learned content-adaptive raw-point aggregation, not post-rawbank sibling recurrence. This does not clear all literature/history; old holds remain."
+  },
+  "constraints": {
+    "new_gate": false,
+    "language_routing": false,
+    "new_residual_branch": false,
+    "point_N_squared": false,
+    "QKV_attention": false,
+    "distribution_scaling_only": false,
+    "repeat_layer_injection": false,
+    "model_or_yaml_modified": false,
+    "explanation": "A full nonlinear variable-length state computation replaces one token FFN and adds genuine off-diagonal token dependencies. It is not a <5K scalar/Linear/normalization tweak, extra residual branch or config-only activation/scale change. Existing original HCG gate is retained rather than deleted.",
+    "native_YAML_numeric_values": "unchanged",
+    "seed": 1999,
+    "epochs": 50,
+    "max_iters": 70,
+    "total_FLOPs_limit_G": 10.0,
+    "memory_requirement": "Preserve existing +15% peak memory / required efficacy contract; no budget relaxation."
+  },
+  "risks": [
+    "Geometry-chain order introduces axis/order bias; bidirectionality does not create rotation invariance. Exact center ties depend on token ID, so full relabeling invariance at ties is not established.",
+    "Serial small GEMMs may be slow despite fewer analytic MACs/parameters; GPU latency can dominate. This needs native paired timing, not a FLOP claim.",
+    "tanh state can saturate; recurrent products can lose or amplify gradients. A finite two-step check would not prove 50-epoch stability or benefit.",
+    "Within-parent segmentation cannot exchange middle information across coarse parents; the chosen receptive field may miss task-relevant relations.",
+    "Replacing the middle identity residual may discard useful self detail. The matched state-reset diagnostic is needed to separate history transport from a changed self transform.",
+    "No currently verified task-error deficit motivates this exact state graph; benefit remains a testable structural hypothesis, not a causal diagnosis or novelty claim.",
+    "A new parameterized module consumes initialization RNG; identical seed alone does not prove candidate/control native batches match. A future worker must capture and verify actual original-loader fingerprints and disclose any mismatch rather than changing seed/YAML or assuming pairing. No such worker or pairing has been executed."
+  ],
+  "recommendation": "One technically distinguishable proposal worth root selection review; do not register merely for quota. If root judges recurrent middle mixing still within the stopped MDC/C2C family rather than an independent graph, keep this proposal unregistered and report the unresolved graph-class boundary. No implementation begins before root selection.",
+  "literature_novelty_claim": false,
+  "native_smoke": "NOT_RUN",
+  "resource_profile": "NOT_RUN",
+  "efficacy": "UNKNOWN",
+  "ssh_executed": false,
+  "torch_imported": false,
+  "gpu_executed": false,
+  "active_lease_created": false,
+  "candidate_registered": false,
+  "minimal_future_implementation": [
+    "Independent model copy and native-YAML copy only after root selection; new recurrent module replaces middle FFN and reuses current middle-centroid API without touching existing packages.",
+    "CPU AST/compile/source+YAML independence checks only locally; future native operator/state/Jacobian/optimizer/resource observers require fresh authorized idle GPU and exclusive current lease.",
+    "Do not repurpose HRC frozen worker/manifest/adapter by relabeling its candidate ID or hashes; a new selected candidate needs its own exact checked assets/protocol adaptation."
+  ],
+  "proposal_updated_at": "2026-10-22T02:19:22.747967+00:00",
+  "implementation_contract": {
+    "centroid_exact_origin": "In an independent variant only, retain the existing PointCloudPartitioner.forward local per_layer_coords[2] tensors after its unchanged FPS/aggregate loop completes; detach them as self.middle_positions side cache before returning the same (per_layer_cluster_ids, child_cluster_maps). per_layer_coords[0] is actual sp_pos slice, [1] fine means, [2] middle means, [3] coarse means. No new FPS, distance assignment, pooling rule, geometric value or childmap change.",
+    "cache_refresh": "Reset/cache geometry for every partitioner call; SharedClusterBank.get_cluster obtains the same original ids/maps and references the current partitioner middle_positions. A failed/stale/shape-mismatched cache must error rather than reuse a previous batch. Cache is not a persistent learned/recurrent state.",
+    "exact_shapes": "For batch b: middle_positions[b].shape == (cluster_ids_list[2][b].numel(),3); that length is Kmid_b=max(ids1_b)+1 and includes internal ID gaps. The raw middle bank has padded width max_b Kmid_b. ids2 maps ORIGINAL middle IDs directly to coarse parent IDs. Never use child_cluster_maps as that mapping and never renumber compacted IDs.",
+    "support_formula": "point_to_mid_b = ids1_b[ids0_b]; middle_valid_b = bincount(point_to_mid_b,minlength=Kmid_b)>0. This excludes a middle slot with no actual point support even if it received only empty fine slots. It does not infer occupancy from feature nonzero or centroid nonzero and does not modify the raw mean banks/CSORT.",
+    "empty_and_padding": "Internal unsupported middle ID slots are excluded from forward/backward state chains and receive zero new-middle output; true supported center=(0,0,0) remains valid. Batch tail padding is also excluded and output zero. Middle raw pooling and all original IDs stay unchanged. Thus no empty FFN bias is fabricated into sibling history; this is the newly proposed operator domain, not a change to original rawbank pooling.",
+    "groups_and_inverse": "Within each b and each original coarse ID p, use original middle IDs j satisfying middle_valid_b[j] and ids2_b[j]==p; sort detached actual middle centers by (x,y,z,j), reset both states to exact zero for that group, compute recurrence, scatter each result back to ORIGINAL j. Empty groups do nothing; singleton uses two zero-boundary self states. Never carry state between groups, batches or forwards.",
+    "unchanged_forward_signature": "Keep C2F_ClusterAttn forward positional API unchanged. As MDC plumbing does, Encoder_layer.forward copies current bank.middle_positions and bank.middle_valid onto the shared cluster_att immediately before the original cluster_att call. Only its middle branch reads these attributes; no new language/query or coordinate forward argument is added.",
+    "middle_module_inventory": "After original CTF constructor, replace cluster_ffn[1] with parameter-free nn.Identity (or construct only 0/2 directly while preserving their keys) and register ONE middle_recurrence module. The old 525568 middle FFN parameters must be absent from named_parameters/state_dict, not retained unused. cluster_ffn[0], cluster_ffn[2] and all three original cluster_ffn_norm remain as before.",
+    "exact_middle_call": "refined_mid = middle_recurrence(cluster_ffn_norm[1](raw_mid), middle_positions, cluster_ids_list[2], middle_valid); do NOT add raw_mid or an FFN residual afterward. Fine/coarse retain raw_l + original FFNl(LNl(raw_l)).",
+    "weight_sharing": "Wx and Wh are each registered once and are the same parameter objects for forward/backward scans. Wx input affine is computed once per occupied token and reused. One fixed concat-then-Wo output; no separate per-direction gates/normalizers/decays/scales or learned mixture.",
+    "unchanged_readback": "Rawbanks/CSORT input tensors, original HCG level_gate and point projection, original message normalization and exactly one original final encoder inst_feats update remain. The existing HCG/sigmoid point-update gates are retained; no new gate or repeated injection is introduced."
+  }
+}

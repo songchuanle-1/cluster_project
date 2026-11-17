@@ -1,0 +1,27 @@
+{
+  "token": "45eb3b045c6243518d56eade38d5cd17",
+  "candidate_id": "hierarchy-cross-level-bipartite-edge-composition",
+  "original_code_commit": "9b6782f44ca7f2c8ac35baea01dfd070314b5701",
+  "preregistration": {
+    "revision": 1,
+    "failure_scope": "implementation",
+    "reason": "Original true two-step TRAIN smoke succeeded, but original fvcore/PyTorch JIT resource trace fails on bool scalar argument to aten::index_fill; no measured budget failure or mechanism falsification.",
+    "change": "First reproduce exact bool index_fill tracer failure on same server CPU and compare bool mask eager outputs against integer-one scalar. Only if exact semantics match and tracer accepts it, change BEC bipartite_edges.py coarse support-mask index_fill scalar True to integer1; no graph routing, weights, masks, seed, data, YAML, profiler handlers or thresholds change. Save new isolated compatible source/version/tool copy; never patch frozen9b/2d/322c.",
+    "prediction": "Matched CPU dtype/shape/mask outputs remain exactly equal while original tracer error disappears. Then on the new exact version rerun original fixed M95/BEC two TRAIN batches and original resource pair on an actually idle allowed GPU; require same original native/gradient/common/source/resource gates. If not reproduced or compatibility differs, mark inconclusive/failed; no resampling, threshold relaxation or automatic second revision.",
+    "failure_evidence": [
+      {
+        "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_execution/resources_candidate_execution.json",
+        "sha256": "f8fac959a9b040838710d9a7199ea5a9e552bc364904e6d0b182feb77811c4f5"
+      },
+      {
+        "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_actual_four_result_review.json",
+        "sha256": "3e5809538692ad50fa5fbf0614a1c05d223fc8f8aebe9f581f60263a11e5d869"
+      }
+    ],
+    "preregistered_at": "2026-10-26T05:16:16.347940+00:00",
+    "result": "pending",
+    "evidence": []
+  },
+  "source_changed": false,
+  "native_result_relabelled": false
+}

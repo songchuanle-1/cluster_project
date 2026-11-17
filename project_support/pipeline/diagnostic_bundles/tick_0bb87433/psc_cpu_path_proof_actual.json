@@ -1,0 +1,445 @@
+{
+  "recorded_at": "2026-11-06T15:55:24.399904+00:00",
+  "owner": {
+    "token": "0bb874337dde412e98bbbaac369f3370",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T15:05:46.633721+00:00",
+    "deadline_at": "2026-11-06T16:05:46.633721+00:00",
+    "context_sha256": "e23733a2b2bace02c86253baecfba6cdd70f568460871f183fd88a200a04df46",
+    "pending_sha256": "3319194dccd61b99a2c36cf5cd605b3c25d526c9aeefd95efb084a5dcd672a62"
+  },
+  "review_sha256": "b2b40402ca7c2f71ea9a78b35e11b7c09afd33742261c93ade47907dcae9ebbf",
+  "request_sha256": "0e9aecce2753c62046bd9693c147962829224e4db7efc357b57233e5683382b4",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "env -u CUDA_VISIBLE_DEVICES PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport socket,json,sys,base64,hashlib,subprocess,os\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"' and os.getuid()==1001\npacket=json.load(sys.stdin);stage=Path(packet['\"'\"'stage'\"'\"'])\nassert stage==Path('\"'\"'/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433'\"'\"')\nraw=base64.b64decode(packet['\"'\"'request_bytes'\"'\"']);assert hashlib.sha256(raw).hexdigest()==packet['\"'\"'request_sha256'\"'\"']\nrequest=json.loads(raw);assert request['\"'\"'production_activation_authorized'\"'\"'] is False\nassert datetime.now(timezone.utc)<datetime.fromisoformat(request['\"'\"'owner'\"'\"']['\"'\"'deadline_at'\"'\"'])\nassert not stage.exists(),'\"'\"'Existing proof stage must reconcile; never replay'\"'\"'\nfor name,encoded in packet['\"'\"'files'\"'\"'].items():\n assert name in ('\"'\"'cpu_proof_runner.py'\"'\"','\"'\"'entry_factory.py'\"'\"','\"'\"'lock_core.py'\"'\"')\n assert hashlib.sha256(base64.b64decode(encoded)).hexdigest()==request['\"'\"'files'\"'\"'][name]\nstage.parent.mkdir(parents=True,exist_ok=True);stage.mkdir(mode=0o700)\nfor name,encoded in packet['\"'\"'files'\"'\"'].items():\n with (stage/name).open('\"'\"'xb'\"'\"') as f:f.write(base64.b64decode(encoded))\nwith (stage/'\"'\"'proof_request.json'\"'\"').open('\"'\"'xb'\"'\"') as f:f.write(raw)\nenvironment=dict(os.environ,PYTHONDONTWRITEBYTECODE='\"'\"'1'\"'\"');environment.pop('\"'\"'CUDA_VISIBLE_DEVICES'\"'\"',None)\ncommand=['\"'\"'/usr/bin/python3'\"'\"','\"'\"'-I'\"'\"','\"'\"'-B'\"'\"',str(stage/'\"'\"'cpu_proof_runner.py'\"'\"'),'\"'\"'--request'\"'\"',str(stage/'\"'\"'proof_request.json'\"'\"'),'\"'\"'--request-sha256'\"'\"',packet['\"'\"'request_sha256'\"'\"']]\nwith (stage/'\"'\"'runner_stdout.log'\"'\"').open('\"'\"'xb'\"'\"') as out,(stage/'\"'\"'runner_stderr.log'\"'\"').open('\"'\"'xb'\"'\"') as err:\n completed=subprocess.run(command,env=environment,stdout=out,stderr=err,timeout=160)\nresult=None\nif (stage/'\"'\"'cpu_proof_result.json'\"'\"').exists():result=json.loads((stage/'\"'\"'cpu_proof_result.json'\"'\"').read_text())\nprint(json.dumps({'\"'\"'stage'\"'\"':str(stage),'\"'\"'returncode'\"'\"':completed.returncode,'\"'\"'result'\"'\"':result,\n '\"'\"'stdout_tail'\"'\"':(stage/'\"'\"'runner_stdout.log'\"'\"').read_text(errors='\"'\"'replace'\"'\"')[-4000:],\n '\"'\"'stderr_tail'\"'\"':(stage/'\"'\"'runner_stderr.log'\"'\"').read_text(errors='\"'\"'replace'\"'\"')[-2000:],\n '\"'\"'production_activation'\"'\"':False,'\"'\"'GPU_used'\"'\"':False,'\"'\"'replayed'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433",
+    "returncode": 0,
+    "result": {
+      "byte_identical_core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+      "entry_artifacts": [
+        {
+          "binding_sha256": "663db60e678a543af31b9fa2aba31944dec7a5430a9c3291a058cbc5e3398030",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/accepted/bin/python",
+          "entry_sha256": "545b7eaff49187c689b19f2817eac9b4664beeb8d3b4b14d80e7e3cfcaa8b722",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/accepted/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/accepted"
+        },
+        {
+          "binding_sha256": "effdc1bbe158be9d2737196a9f7af8c9aa786fa8efc47935549bb8d72b2f6c57",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/contender/bin/python",
+          "entry_sha256": "a5b605e93735346e15eb15f7d6919669722a0c85f90f0afcf91567e21c70a163",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/contender/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/contender"
+        },
+        {
+          "binding_sha256": "1e87140a955db09c6244e990aabf3f09e7762fb042d42a5e8ec3755fce3974a2",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-GPU1/bin/python",
+          "entry_sha256": "ff542eafa0be1b6572029ba8c48230c61312231961ae472b591b44bf54b63ae8",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-GPU1/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-GPU1"
+        },
+        {
+          "binding_sha256": "65e22788a30d40458d3f70464975ecf4a4aa74c2c89e3d210a0cfa184dd88096",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config/bin/python",
+          "entry_sha256": "c75d59bec0b76e203120c465f689b15e02625eaf624bc39c8c53d554c579d4c1",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config"
+        },
+        {
+          "binding_sha256": "92c933efd1676a046c032599a4b9690faf988984cc536dc368c1173c4428852b",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-duplicate_GPU/bin/python",
+          "entry_sha256": "07b16c8ed597c76a8399fd9f35d4c75f1c330aa34fefb3be1f50e7ed12507484",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-duplicate_GPU/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-duplicate_GPU"
+        },
+        {
+          "binding_sha256": "6557f2b3708c5a54e160fba522ea77cf35c3b509336ef3479563110b96553e85",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-resume/bin/python",
+          "entry_sha256": "a5eda1add61cb5ed997798f08d77cb19a5cb0032e3fd76a9e11540f29d607297",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-resume/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-resume"
+        },
+        {
+          "binding_sha256": "9ce961bf7234f7f73f12dbcb1fe9169c12a3a16641057dd52a5b12f83108beec",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-python_B/bin/python",
+          "entry_sha256": "a77a809fcae00293d081d410563aee1b8bb08453737622eeb718516488030994",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-python_B/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-python_B"
+        },
+        {
+          "binding_sha256": "b70b0b8108140b6a39d0a857cf7222465836c5bb84ca15250159f12e5ae7d0f1",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-clustered_python_module/bin/python",
+          "entry_sha256": "cd3e245233e81f0f4da314844afc95ca21c78cfa73a9e5038bb8499e47bb47e7",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-clustered_python_module/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-clustered_python_module"
+        },
+        {
+          "binding_sha256": "04024bc4b785a525558a3723fc35675557e6b20269b668b94b9c6cdcf5f6e6fb",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-absolute_train/bin/python",
+          "entry_sha256": "ec709a82cba6246485980934b6087171efcd56c169291f67a3b25743969569ab",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-absolute_train/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-absolute_train"
+        },
+        {
+          "binding_sha256": "6e493f1ecc7931ae5da3e67ae78c0f6c65874a240d978b213439a2398bdf8b4d",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_source/bin/python",
+          "entry_sha256": "0739ba490414aa84e17ddca94fc3fed74761f6eec40535c2caaf4ea2bd71dcb0",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_source/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_source"
+        },
+        {
+          "binding_sha256": "5ddc3d4a0142d0dde22294e461076ad3163290bfe272b23b89c6345762968f74",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config_hash/bin/python",
+          "entry_sha256": "d6f6fff5a88a8f32a3aa33583803b35c4c0dbbe274e7261312799f24fb374e02",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config_hash/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_config_hash"
+        },
+        {
+          "binding_sha256": "fa0e1de45848d10aa5d02b11b57287e4690f4184089533f70439b0c7c81ae5bb",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_UID/bin/python",
+          "entry_sha256": "55ca3ab0d5be47d4334f754f48c7be7a78dca15b9b3e541727915d18b5ff9886",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_UID/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_UID"
+        },
+        {
+          "binding_sha256": "3b1a8221930b6953999629eda75aa5a7ca073adddaf8a4e24d7740f5696fc28c",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-0/bin/python",
+          "entry_sha256": "a625bb615dc734b4d0351dc0ccfc8afefe9b041cc55226c5cbdec9333b93d9f8",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-0/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-0"
+        },
+        {
+          "binding_sha256": "805af818731462176a8f7855cd3fe5ad726e1526c2e51aa0c69f365434726530",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-1/bin/python",
+          "entry_sha256": "50dc46d38b6232ee16942e18c954dfbbf05a9d51edc23e6c696a8692d43f1892",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-1/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-1"
+        },
+        {
+          "binding_sha256": "c79ea3c7044aa690cc172b40734a8b1a2de406b0d16e5024d48b3b5fcf2ea2e9",
+          "core_sha256": "c0857d0b79da396da73c4dbefd60a81ce35f9fb3839b76441328a22183e988b3",
+          "entry": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-2/bin/python",
+          "entry_sha256": "cf052dd3e2a7715702bec1e2822a464f3d82b59ced6de2a3e84a39930727c05a",
+          "kind": "cpu-proof",
+          "shim": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-2/conda_source.sh",
+          "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/partial-contention-2"
+        }
+      ],
+      "events": [
+        {
+          "check": "actual_conda_activate_then_real_PATH_executable",
+          "observation": {
+            "pid": 3761697,
+            "rc": 0,
+            "stderr": "",
+            "stdout": "file\n/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/accepted/bin/python\n"
+          },
+          "passed": true
+        },
+        {
+          "check": "actual_direct_Popen_exec_FDs_three_kernel_FLOCK_contention_natural_release",
+          "competing_direct_Popen": {
+            "pid": 3761777,
+            "rc": 75,
+            "stderr": "",
+            "stdout": ""
+          },
+          "independent_contention": [
+            {
+              "errno": 11,
+              "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-training.lock"
+            },
+            {
+              "errno": 11,
+              "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-diagnostic.lock"
+            },
+            {
+              "errno": 11,
+              "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-exclusive.lock"
+            }
+          ],
+          "kernel_records": [
+            "16: FLOCK  ADVISORY  WRITE 3761771 08:00:11338461 0 EOF",
+            "17: FLOCK  ADVISORY  WRITE 3761771 08:00:11338460 0 EOF",
+            "18: FLOCK  ADVISORY  WRITE 3761771 08:00:11338459 0 EOF"
+          ],
+          "launcher": {
+            "PATH": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/accepted/bin:/home/songcl/.conda/envs/project_cluster/bin:/home/dl04/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+            "outer_pid": 3761741,
+            "pid": 3761771,
+            "python_executable": "/home/songcl/.conda/envs/project_cluster/bin/python"
+          },
+          "natural_exit": {
+            "pid": 3761741,
+            "rc": 0,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true,
+          "sentinel": {
+            "CPU_only_no_model_GPU": true,
+            "argv": [
+              "tools/train.py",
+              "configs/Quard/ctf_hcg_csort_psc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc.yaml",
+              "--gpu_ids",
+              "0",
+              "--num_gpus",
+              "1"
+            ],
+            "cwd": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture",
+            "executable": "/home/songcl/.conda/envs/project_cluster/bin/python",
+            "held": [
+              {
+                "cloexec": false,
+                "dev": 2048,
+                "fd": 3,
+                "ino": 11338459,
+                "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-training.lock"
+              },
+              {
+                "cloexec": false,
+                "dev": 2048,
+                "fd": 4,
+                "ino": 11338460,
+                "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-diagnostic.lock"
+              },
+              {
+                "cloexec": false,
+                "dev": 2048,
+                "fd": 5,
+                "ino": 11338461,
+                "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-exclusive.lock"
+              }
+            ],
+            "pid": 3761771,
+            "ppid": 3761741,
+            "uid": 1001
+          }
+        },
+        {
+          "check": "consumed_entry_refuses_after_locks_naturally_free",
+          "observation": {
+            "pid": 3761932,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "GPU1_refused_before_sentinel",
+          "observation": {
+            "pid": 3762027,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "wrong_config_refused_before_sentinel",
+          "observation": {
+            "pid": 3762078,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "duplicate_GPU_refused_before_sentinel",
+          "observation": {
+            "pid": 3762114,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "resume_refused_before_sentinel",
+          "observation": {
+            "pid": 3762247,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "python_B_refused_before_sentinel",
+          "observation": {
+            "pid": 3762296,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "clustered_python_module_refused_before_sentinel",
+          "observation": {
+            "pid": 3762393,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "absolute_train_refused_before_sentinel",
+          "observation": {
+            "pid": 3762438,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "wrong_source_refused_before_sentinel",
+          "observation": {
+            "pid": 3762473,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "wrong_config_hash_refused_before_sentinel",
+          "observation": {
+            "pid": 3762622,
+            "rc": 126,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "wrong_UID_refused_before_sentinel",
+          "observation": {
+            "pid": 3762670,
+            "rc": 1,
+            "stderr": "Traceback (most recent call last):\n  File \"/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_UID/bin/python\", line 15, in <module>\n    assert Path(__file__).resolve()==Path(ENTRY) and os.getuid()==os.geteuid()==UID\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "lock_0_busy_partial_acquisitions_released",
+          "observation": {
+            "pid": 3762761,
+            "rc": 75,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "lock_1_busy_partial_acquisitions_released",
+          "observation": {
+            "pid": 3762808,
+            "rc": 75,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "check": "lock_2_busy_partial_acquisitions_released",
+          "observation": {
+            "pid": 3762842,
+            "rc": 75,
+            "stderr": "",
+            "stdout": ""
+          },
+          "passed": true
+        },
+        {
+          "c_observation": {
+            "pid": 3762986,
+            "rc": 0,
+            "stderr": "",
+            "stdout": "{\"argv\": [\"a b\", \"*\", \"$literal\", \"\"], \"python\": \"/home/songcl/.conda/envs/project_cluster/bin/python\"}\n"
+          },
+          "check": "original_conda_Python_c_and_stdin_exact_argv_passthrough",
+          "passed": true,
+          "stdin_observation": {
+            "pid": 3763034,
+            "rc": 0,
+            "stderr": "",
+            "stdout": "{\"argv\": [\"a b\", \"*\", \"$literal\", \"\"], \"python\": \"/home/songcl/.conda/envs/project_cluster/bin/python\"}\n"
+          }
+        }
+      ],
+      "fixture_source_commit": "11f30a55475d766ea6616332d1d4ce1c62144483",
+      "hostname": "dl04-MS-7E06",
+      "independent_review": "PENDING_ROOT_PEER_REVIEW",
+      "kind": "CPU_PROOF_ONLY",
+      "model_GPU_training_signals_or_production_activation": false,
+      "owner": {
+        "context_sha256": "e23733a2b2bace02c86253baecfba6cdd70f568460871f183fd88a200a04df46",
+        "deadline_at": "2026-11-06T16:05:46.633721+00:00",
+        "generated_at": "2026-11-06T15:05:46.633721+00:00",
+        "pending_sha256": "3319194dccd61b99a2c36cf5cd605b3c25d526c9aeefd95efb084a5dcd672a62",
+        "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+        "token": "0bb874337dde412e98bbbaac369f3370"
+      },
+      "passed": true,
+      "production_runtime_head": "NOT_CHECKED_NOT_DEPLOYED_BY_THIS_PROOF",
+      "production_source_runtime_or_locks_used": false,
+      "proof_fixture_does_not_validate_real_PSC_source": true,
+      "recorded_at": "2026-11-06T15:55:24.433457+00:00",
+      "request_sha256": "0e9aecce2753c62046bd9693c147962829224e4db7efc357b57233e5683382b4",
+      "schema_version": 1,
+      "stage": "/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433",
+      "uid": 1001
+    },
+    "stdout_tail": "_project/pipeline/runtime/psc_path_cpu_0bb87433/fixture/proof-exclusive.lock\"}], \"pid\": 3761771, \"ppid\": 3761741, \"uid\": 1001}}, {\"check\": \"consumed_entry_refuses_after_locks_naturally_free\", \"observation\": {\"pid\": 3761932, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"GPU1_refused_before_sentinel\", \"observation\": {\"pid\": 3762027, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"wrong_config_refused_before_sentinel\", \"observation\": {\"pid\": 3762078, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"duplicate_GPU_refused_before_sentinel\", \"observation\": {\"pid\": 3762114, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"resume_refused_before_sentinel\", \"observation\": {\"pid\": 3762247, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"python_B_refused_before_sentinel\", \"observation\": {\"pid\": 3762296, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"clustered_python_module_refused_before_sentinel\", \"observation\": {\"pid\": 3762393, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"absolute_train_refused_before_sentinel\", \"observation\": {\"pid\": 3762438, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"wrong_source_refused_before_sentinel\", \"observation\": {\"pid\": 3762473, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"wrong_config_hash_refused_before_sentinel\", \"observation\": {\"pid\": 3762622, \"rc\": 126, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"wrong_UID_refused_before_sentinel\", \"observation\": {\"pid\": 3762670, \"rc\": 1, \"stderr\": \"Traceback (most recent call last):\\n  File \\\"/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433/reject-wrong_UID/bin/python\\\", line 15, in <module>\\n    assert Path(__file__).resolve()==Path(ENTRY) and os.getuid()==os.geteuid()==UID\\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\nAssertionError\\n\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"lock_0_busy_partial_acquisitions_released\", \"observation\": {\"pid\": 3762761, \"rc\": 75, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"lock_1_busy_partial_acquisitions_released\", \"observation\": {\"pid\": 3762808, \"rc\": 75, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"check\": \"lock_2_busy_partial_acquisitions_released\", \"observation\": {\"pid\": 3762842, \"rc\": 75, \"stderr\": \"\", \"stdout\": \"\"}, \"passed\": true}, {\"c_observation\": {\"pid\": 3762986, \"rc\": 0, \"stderr\": \"\", \"stdout\": \"{\\\"argv\\\": [\\\"a b\\\", \\\"*\\\", \\\"$literal\\\", \\\"\\\"], \\\"python\\\": \\\"/home/songcl/.conda/envs/project_cluster/bin/python\\\"}\\n\"}, \"check\": \"original_conda_Python_c_and_stdin_exact_argv_passthrough\", \"passed\": true, \"stdin_observation\": {\"pid\": 3763034, \"rc\": 0, \"stderr\": \"\", \"stdout\": \"{\\\"argv\\\": [\\\"a b\\\", \\\"*\\\", \\\"$literal\\\", \\\"\\\"], \\\"python\\\": \\\"/home/songcl/.conda/envs/project_cluster/bin/python\\\"}\\n\"}}], \"fixture_source_commit\": \"11f30a55475d766ea6616332d1d4ce1c62144483\", \"hostname\": \"dl04-MS-7E06\", \"independent_review\": \"PENDING_ROOT_PEER_REVIEW\", \"kind\": \"CPU_PROOF_ONLY\", \"model_GPU_training_signals_or_production_activation\": false, \"owner\": {\"context_sha256\": \"e23733a2b2bace02c86253baecfba6cdd70f568460871f183fd88a200a04df46\", \"deadline_at\": \"2026-11-06T16:05:46.633721+00:00\", \"generated_at\": \"2026-11-06T15:05:46.633721+00:00\", \"pending_sha256\": \"3319194dccd61b99a2c36cf5cd605b3c25d526c9aeefd95efb084a5dcd672a62\", \"thread_id\": \"01a159c5-29ab-7a22-ba7f-e79174757253\", \"token\": \"0bb874337dde412e98bbbaac369f3370\"}, \"passed\": true, \"production_runtime_head\": \"NOT_CHECKED_NOT_DEPLOYED_BY_THIS_PROOF\", \"production_source_runtime_or_locks_used\": false, \"proof_fixture_does_not_validate_real_PSC_source\": true, \"recorded_at\": \"2026-11-06T15:55:24.433457+00:00\", \"request_sha256\": \"0e9aecce2753c62046bd9693c147962829224e4db7efc357b57233e5683382b4\", \"schema_version\": 1, \"stage\": \"/data/songcl/Project/Cluster_project/pipeline/runtime/psc_path_cpu_0bb87433\", \"uid\": 1001}\n",
+    "stderr_tail": "",
+    "production_activation": false,
+    "GPU_used": false,
+    "replayed": false
+  }
+}

@@ -1,0 +1,78 @@
+--- ec459714/nde_result_active/normalize_nde_actual_results.py
++++ 801d029a/nde_result_provenance_prepare/normalize_nde_actual_results.py
+@@ -16,30 +16,31 @@
+ HERE = Path(__file__).resolve().parent
+ OUTPUT = HERE / ("results_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ"))
+ OWNER_KEYS = ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")
+-TICK = ROOT / 'pipeline/diagnostic_bundles/tick_ec459714'
++TICK = ROOT / 'pipeline/diagnostic_bundles/tick_801d029a'
+ EXECUTION = TICK / "nde_execution"
+ BASE_NATIVE = Path('D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_4fa1481e\\nde_revision_native_prepare')
+ NATIVE = None  # Actual reviewed execution copy is passed explicitly by root.
+ PROTOCOL = ROOT / "pipeline/diagnostic_bundles/tick_2e51495f/reserve_candidate/native_protocol.md"
+ PROOF = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision1_source/source_version.json'
+ SOURCE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_source_independent_review.json'
+-TOKEN = 'ec4597142e314aa7a0478bac13e26402'
++TOKEN = '801d029aa45243ee841454512bcf0b84'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ CID = "hierarchy-native-distribution-embedding-composition"
+ SOURCE = '0747f6acec1c61018ec99acf2efa5329c9b3523c'
+ PARENT = "f6257de79148581334ee495e6e2d60ccb525457c"
+ GOAL = "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+ PAIRS = (("smoke", "champion"), ("smoke", "candidate"), ("resources", "champion"), ("resources", "candidate"))
+-DRAFT_NORMALIZATION_DISABLED = False
++DRAFT_NORMALIZATION_DISABLED = True
+ EXPECTED_WORKER_SHA256 = 'b37fe5cf29ce04b8110752c7321d34b8d1a26218a6d8e02940b5773d9e4d5f72'
+ EXPECTED_RUNTIME_SHA256 = '348024f11e6a106788840c1359ad8c65363914d1f1882cfe4a5f8d319d5ea1a4'
+ HISTORICAL_PROVENANCE = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_result_prepare/historical_champion_smoke_provenance.json'
+ HISTORICAL_PROVENANCE_SHA256 = 'cbad63e6da551b6024572c47d0df6b6c147af5aaad890d8eb05dd14eea58d170'
+ REUSE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_historical_champion_smoke_reuse_review.json'
+ REUSE_REVIEW_SHA256 = '1c2913321b0bf0b9681043104096cad0100939f8fc1acc5ca52dd9b67a9ad756'
+-EXPECTED_NATIVE = Path('D:/project/cluster_project/pipeline/diagnostic_bundles/tick_ec459714/nde_resource_native_active')
+-EXPECTED_OPERATIONAL_REFS = {'FROZEN.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/FROZEN.json', 'sha256': 'a61641c54b159fd83803b53d448fd23280b88396bd2597dc8a4c3bf7c8e5f15f'}, 'adapter.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/adapter.py', 'sha256': '4f6a1bd617692a8ca5def3b54782875b0bc35491689db25e1f25d3b91ea191b4'}, 'remote_ops.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/remote_ops.py', 'sha256': 'db82eab9dd05fd90e30194119b0e1df559ed11a4178a2015923b11e16a48779e'}, 'run_nde_operation.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/run_nde_operation.py', 'sha256': '1a43c01799c9b6fba00fb9a9e31ed6824c0034237399f8733e4aa16c3b7dab9f'}, 'current_binding.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/current_binding.json', 'sha256': '90ea51a3314b9cec87b3e34880ef1aa17c62f824ec34ea9ec75ddbc552a3c363'}, 'release_template.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/release_template.json', 'sha256': '2e43519f802f2c85dda767da2c9b11e242995c12d3caefdfce561e101a03ac62'}, 'preparation.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/preparation.json', 'sha256': '0399b30e69ff7884546f29e20a0ea95261e1261e40fa5519a7eb5e5978f209d0'}, 'software_validation.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/software_validation.json', 'sha256': 'e5d43a8a2ba1e23f4b477a1c32a0bf74a3eda532a464f45cd77dbf440fc881ec'}}
+-HISTORICAL_ARM_PROVENANCE = {('smoke', 'candidate'): {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_result_provenance_prepare/historical_candidate_smoke_provenance.json', 'sha256': 'a3984ce2f6c1950c7fe0d886071f6ba1a796e871fa2116afccbf4557426af7c4'}, ('resources', 'champion'): {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_result_provenance_prepare/historical_champion_resource_provenance.json', 'sha256': '0f6027615f5b744f9ee6e988bb3d26ab22a15bf55b4c548ce34d92934fa6d796'}}
++EXPECTED_NATIVE = Path('D:/project/cluster_project/pipeline/diagnostic_bundles/tick_801d029a/nde_resource_native_active')
++EXPECTED_OPERATIONAL_REFS = {'FROZEN.json': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/FROZEN.json', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'adapter.py': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/adapter.py', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'remote_ops.py': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/remote_ops.py', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'run_nde_operation.py': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/run_nde_operation.py', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'current_binding.json': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/current_binding.json', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'release_template.json': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/release_template.json', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'preparation.json': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/preparation.json', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}, 'software_validation.json': {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_resource_operational_active/software_validation.json', 'sha256': None, 'status': 'PENDING_ROOT_FRESH_EQ_CHAIN_OR_RESULT_NOT_ATTESTED'}}
++HISTORICAL_ARM_PROVENANCE = {('smoke', 'candidate'): {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_result_provenance_prepare/historical_candidate_smoke_provenance.json', 'sha256': 'a3984ce2f6c1950c7fe0d886071f6ba1a796e871fa2116afccbf4557426af7c4'}, ('resources', 'champion'): {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_result_provenance_prepare/historical_champion_resource_provenance.json', 'sha256': '0f6027615f5b744f9ee6e988bb3d26ab22a15bf55b4c548ce34d92934fa6d796'}, ('resources', 'candidate'): {'path': 'pipeline/diagnostic_bundles/tick_801d029a/nde_result_provenance_prepare/historical_candidate_resource_provenance.json', 'sha256': '4c1cff976afcccbff26b01662c8e0f27d4422ca57fa74ab860eb3183b9e65a13'}}
++EXPECTED_EQ_ENTRY_SHA256 = 'ed2c1bb56d5a27040ae6557c061bbeb64d5e9c0c76646bc25caa09584e00febc'
+ CHECKS = []
+ 
+ 
+@@ -183,8 +184,8 @@
+                   and smoke_review.get('wholecore_original_loss_gradient_and_actual_weight_module_updated') is True
+                   and smoke_review.get('raw_remote_result_sha256') == provenance['raw_result_sha256'])
+         else:
+-            check('historical_champion_resource_only_actual_review',
+-                  (mode, target) == ('resources', 'champion')
++            check('historical_resource_only_actual_review_' + label,
++                  mode == 'resources' and target in ('champion', 'candidate')
+                   and review.get('passed') is True
+                   and review.get('scope') == provenance['review_acceptance']['scope'])
+         directory = ROOT / provenance['execution_dir']
+@@ -216,7 +217,14 @@
+               and old_manifest['candidate_config_sha256'] == manifest['candidate_config_sha256']
+               and sha(native / 'candidate.yaml') == sha(NATIVE / 'candidate.yaml')
+               and sha(native / 'worker.py') == EXPECTED_WORKER_SHA256
+-              and sha(native / 'native_runtime.py') == EXPECTED_RUNTIME_SHA256)
++              and sha(native / 'native_runtime.py') == EXPECTED_RUNTIME_SHA256
++              and len(old_manifest['diagnostic_files']) == len(manifest['diagnostic_files']) == 14
++              and {k: v for k, v in old_manifest['diagnostic_files'].items()
++                   if k != 'equivalence_diagnostic.py'} == {
++                   k: v for k, v in manifest['diagnostic_files'].items()
++                   if k != 'equivalence_diagnostic.py'}
++              and manifest['diagnostic_files']['equivalence_diagnostic.py'] == EXPECTED_EQ_ENTRY_SHA256
++              and sha(NATIVE / 'equivalence_diagnostic.py') == EXPECTED_EQ_ENTRY_SHA256)
+         return {'manifest': old_manifest, 'binding': old_binding, 'lease': old_lease,
+                 'owner': old_owner, 'native': native, 'source': provenance['source_commit'],
+                 'execution': directory, 'evidence_paths': evidence_paths}
+@@ -602,8 +610,8 @@
+     evidence += [ref(PROOF), ref(SOURCE_REVIEW), ref(PROTOCOL), ref(NATIVE / "worker.py"), ref(NATIVE / "native_runtime.py")]
+     per_arm_provenance = {mode + '_' + target: {
+         'source_commit': arm['source'], 'owner': arm['owner'],
+-        'historical_reuse': (mode,target)!=('resources','candidate'),
+-        'current_owner_execution_claimed': (mode,target)==('resources','candidate'),
++        'historical_reuse': True,
++        'current_owner_execution_claimed': False,
+         'execution': ref(arm_path(mode,target,'execution')),
+         'request': ref(arm_path(mode,target,'request')),
+         'worker': ref(arm['native']/'worker.py'), 'runtime': ref(arm['native']/'native_runtime.py'),

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "root": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b",
+  "name": "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort",
+  "assets": {
+    "observed_at": "2026-10-17T16:33:16.644163+00:00",
+    "source_hashes": {
+      "backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "hier_postprocess.py": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f",
+      "loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+      "network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62"
+    },
+    "config_path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml",
+    "config_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "operator_path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_fle_r1/fine_exchange.py",
+    "operator_sha256": "cd700b675ce765786c7babca339ba9dc75eabffb85f63b71a91701be495da676",
+    "annotation_path": "/home/songcl/data/data/scanrefer/ScanRefer_train_new.json",
+    "annotation_sha256": "018754b90bcc27d5746bb50d6c35d6e7a35fd39519ac669e3fbe3fa6f425922d",
+    "dataset_source_sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "checkpoint": "/data/songcl/Project/Cluster_project/pipeline/hds_server4_3c22e34d/frozen_m95.pth",
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "selection": "ExistingavailableM95epoch16,notverifiedhistoricalchampion",
+    "writers_before_and_after": [],
+    "cuda_calls": 0,
+    "training_checkpoint_unchanged": true
+  },
+  "expected_epoch": 16,
+  "tolerance": 1e-06,
+  "candidate_id": "hierarchy-native-superpoint-relabeling-audit",
+  "stage": "/data/songcl/Project/Cluster_project/pipeline/relabel_geometry_ae419db5",
+  "geometry_sha256": "c0de1e5535a4b9a690fea3e4def091db8e6c8d14aaf1a0ac102ebb25db0589db",
+  "backend_binding": {
+    "wrapper_path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/pointnet2_utils.py",
+    "wrapper_sha256": "0d72921d19cd21e5321e0b7a6292712a83fe1667491fc698a9549177e9fe8b09",
+    "binary_path": "/home/songcl/.local/lib/python3.10/site-packages/pointnet2/_ext.cpython-310-x86_64-linux-gnu.so",
+    "binary_sha256": "ef0daa5ccf7fe471a5d73528762f209ba6d2dd89a6c3b50c6371eb9e0edebcfe",
+    "native_sources": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/_ext_src/src/sampling_gpu.cu",
+        "sha256": "cf602b8dd93a09a2d2cc27cca400a563250ac369d7a29cfa49cacc7f73e6b2ff",
+        "source_excerpt": "73:// Ouput idxs (b, m)\n74:template <unsigned int block_size>\n75:__global__ void furthest_point_sampling_kernel(\n76:    int b, int n, int m, const float *__restrict__ dataset,\n77:    float *__restrict__ temp, int *__restrict__ idxs) {\n78:  if (m <= 0) return;\n88:  const int stride = block_size;\n89:\n90:  int old = 0;\n91:  if (threadIdx.x == 0) idxs[0] = old;\n92:\n93:  __syncthreads();\n94:  for (int j = 1; j < m; j++) {\n178:}\n179:\n180:void furthest_point_sampling_kernel_wrapper(int b, int n, int m,\n181:                                            const float *dataset, float *temp,\n182:                                            int *idxs) {\n183:  unsigned int n_threads = opt_n_threads(n);\n187:  switch (n_threads) {\n188:    case 512:\n189:      furthest_point_sampling_kernel<512>\n190:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n191:      break;\n192:    case 256:\n193:      furthest_point_sampling_kernel<256>\n194:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n195:      break;\n196:    case 128:\n197:      furthest_point_sampling_kernel<128>\n198:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n199:      break;\n200:    case 64:\n201:      furthest_point_sampling_kernel<64>\n202:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n203:      break;\n204:    case 32:\n205:      furthest_point_sampling_kernel<32>\n206:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n207:      break;\n208:    case 16:\n209:      furthest_point_sampling_kernel<16>\n210:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n211:      break;\n212:    case 8:\n213:      furthest_point_sampling_kernel<8>\n214:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n215:      break;\n216:    case 4:\n217:      furthest_point_sampling_kernel<4>\n218:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n219:      break;\n220:    case 2:\n221:      furthest_point_sampling_kernel<2>\n222:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n223:      break;\n224:    case 1:\n225:      furthest_point_sampling_kernel<1>\n226:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n227:      break;\n228:    default:\n229:      furthest_point_sampling_kernel<512>\n230:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n231:  }\n232:",
+        "literal_old_zero_present": true
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/_ext_src/src/sampling.cpp",
+        "sha256": "2be47b25dc64f60f4fb75dc15d6eccd07f4c8fc4cfd962419501d9116926da65",
+        "source_excerpt": "14:                                       float *grad_points);\n15:\n16:void furthest_point_sampling_kernel_wrapper(int b, int n, int m,\n17:                                            const float *dataset, float *temp,\n18:                                            int *idxs);\n19:\n68:  return output;\n69:}\n70:at::Tensor furthest_point_sampling(at::Tensor points, const int nsamples) {\n71:  CHECK_CONTIGUOUS(points);\n72:  CHECK_IS_FLOAT(points);\n73:\n81:\n82:  if (points.device().is_cuda()) {\n83:    furthest_point_sampling_kernel_wrapper(\n84:        points.size(0), points.size(1), nsamples, points.data_ptr<float>(),\n85:        tmp.data_ptr<float>(), output.data_ptr<int>());\n86:  } else {",
+        "literal_old_zero_present": false
+      }
+    ],
+    "cuda_initialized": false,
+    "source_binary_correspondence_proved": false,
+    "scope": "Freeze actual native import binding and provided source;compiled behavior still requires actual GPU execution."
+  },
+  "protocol": {
+    "path": "pipeline/diagnostic_bundles/tick_ae419db5/relabeling_protocol.json",
+    "sha256": "6a1582f31f668fbff951ca411a8065f75627ac52b5f475a94ed7695a7cf64659"
+  },
+  "physical_gpu": 1,
+  "gpu_uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+  "scientific_admission": false,
+  "diagnostic_files": {
+    "native_runtime.py": "49bf92e9a08d2dabea82f2bef463d06ca155acf6cd95effe4424d2ecd479c3de",
+    "native_geometry_probe.py": "5860dd2234af28c82d8908211f14cf86e77fac6d37f43d2243e3116ad1106fa0"
+  }
+}

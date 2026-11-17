@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T13:08:24+08:00",
+  "purpose": "Retry due blocked native-capture stages without launching a candidate.",
+  "server": "server-6",
+  "gpu": 7,
+  "gpu_memory_total_mib": 81559,
+  "gpu_memory_used_mib": 62483,
+  "gpu_memory_free_mib": 18597,
+  "process_count_on_gpu": 2,
+  "processes": [
+    {
+      "pid": 1134192,
+      "name": "python",
+      "used_memory_mib": 19956,
+      "classification": "M197-PIRS"
+    },
+    {
+      "pid": 3827570,
+      "name": "/home/jiaoh/conda_envs/das_env/bin/python",
+      "used_memory_mib": 42488,
+      "classification": "foreign"
+    }
+  ],
+  "m197_preflight": {
+    "epoch": "22/50",
+    "best_miou": 0.4910,
+    "no_improve": "1/10",
+    "recent_miou": [
+      0.4845,
+      0.4833,
+      0.4859,
+      0.4910,
+      0.4902
+    ]
+  },
+  "decision": "Keep all seven due native-capture stages blocked; do not launch, mutate the queue, or bypass the frozen-capture gate.",
+  "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+  "retry_after": "2026-09-19T14:07:00+08:00"
+}

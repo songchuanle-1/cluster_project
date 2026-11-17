@@ -1,0 +1,157 @@
+{
+  "owner_provenance_only": {
+    "token": "2e51495f07244023946fc53eec6e6d98",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T13:10:54.197134+00:00",
+    "deadline_at": "2026-11-06T14:10:54.197134+00:00",
+    "context_sha256": "b09910d7067a099bb52dcffa6c1ffcaf948d7a71fa0961291a168a9880790eb3",
+    "pending_sha256": "94177d04d9a80689a79b13682825d5c1aa945477354b0f5479166fe2b7cf9fce"
+  },
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport json,os,socket,re,subprocess\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\nroot=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_hvd_20261106'\"'\"')\nlog=root/'\"'\"'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log'\"'\"'\np=Path('\"'\"'/proc/2829477'\"'\"')\nproc={'\"'\"'exists'\"'\"':p.exists()}\nif p.exists():\n t=(p/'\"'\"'stat'\"'\"').read_text();proc['\"'\"'starttime'\"'\"']=t[t.rfind('\"'\"')'\"'\"')+2:].split()[19]\nst=log.stat()\nwith log.open('\"'\"'rb'\"'\"') as f:\n f.seek(max(0,st.st_size-2097152));raw=f.read(2097152)\ntext=raw.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"')\nclean=re.sub(r'\"'\"'\\x1b\\[[0-9;]*[a-zA-Z]'\"'\"','\"'\"''\"'\"',text)\nphases=re.findall(r'\"'\"'(Train|Val)\\[(\\d+)/(\\d+)\\][^\\r\\n]{0,240}?(\\d+)/(\\d+)'\"'\"',clean)\nlines=[line for line in clean.replace('\"'\"'\\r'\"'\"','\"'\"'\\n'\"'\"').splitlines() if line.strip()]\nmarkers=[line[-700:] for line in lines if any(x in line for x in ('\"'\"'Traceback (most recent call last)'\"'\"','\"'\"'RuntimeError:'\"'\"','\"'\"'Error:'\"'\"','\"'\"'Killed'\"'\"','\"'\"'killed'\"'\"','\"'\"'out of memory'\"'\"','\"'\"'Early stopping'\"'\"','\"'\"'mIOU:'\"'\"','\"'\"'mIoU :'\"'\"'))][-18:]\nstage=Path('\"'\"'/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m230_20c15273'\"'\"')\nstate=json.loads((stage/'\"'\"'state.json'\"'\"').read_text())\nguardproc=Path('\"'\"'/proc'\"'\"')/str(state['\"'\"'guardian_pid'\"'\"'])\nguardian={'\"'\"'exists'\"'\"':guardproc.exists(),'\"'\"'state'\"'\"':state}\nif guardproc.exists():\n t=(guardproc/'\"'\"'stat'\"'\"').read_text();guardian['\"'\"'actual_starttime'\"'\"']=t[t.rfind('\"'\"')'\"'\"')+2:].split()[19]\ntable=Path('\"'\"'/proc/locks'\"'\"').read_text().splitlines();locks=[]\nfor kind in ('\"'\"'training'\"'\"','\"'\"'diagnostic'\"'\"','\"'\"'exclusive'\"'\"'):\n path=Path('\"'\"'/tmp/cluster_project_gpu0_'\"'\"'+kind+'\"'\"'.lock'\"'\"');info=path.stat()\n key='\"'\"'%02x:%02x:%d'\"'\"'%(os.major(info.st_dev),os.minor(info.st_dev),info.st_ino)\n rows=[line for line in table if len(line.split())>5 and line.split()[5]==key]\n locks.append({'\"'\"'kind'\"'\"':kind,'\"'\"'inode'\"'\"':info.st_ino,'\"'\"'kernel_entries'\"'\"':rows})\nwork=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd'\"'\"')\ncheckpoints=[]\nif work.exists():\n for directory in sorted(work.iterdir()):\n  if directory.is_dir():\n   files=[]\n   for name in ('\"'\"'best.pth'\"'\"','\"'\"'last.pth'\"'\"'):\n    path=directory/name\n    if path.exists():\n     s=path.stat();files.append({'\"'\"'path'\"'\"':str(path),'\"'\"'bytes'\"'\"':s.st_size,'\"'\"'mtime_ns'\"'\"':s.st_mtime_ns})\n   checkpoints.append({'\"'\"'directory'\"'\"':str(directory),'\"'\"'files'\"'\"':files})\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),\n '\"'\"'trainer'\"'\"':proc,'\"'\"'runtime_source'\"'\"':subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'-C'\"'\"',str(root),'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip(),\n '\"'\"'log'\"'\"':str(log),'\"'\"'log_size'\"'\"':st.st_size,'\"'\"'log_mtime_ns'\"'\"':st.st_mtime_ns,'\"'\"'bytes_read'\"'\"':len(raw),\n '\"'\"'last_phase'\"'\"':phases[-1] if phases else None,'\"'\"'markers'\"'\"':markers,'\"'\"'bounded_final_lines'\"'\"':lines[-18:],\n '\"'\"'guardian'\"'\"':guardian,'\"'\"'locks'\"'\"':locks,'\"'\"'checkpoints'\"'\"':checkpoints[-2:],\n '\"'\"'read_only'\"'\"':True,'\"'\"'signals_sent'\"'\"':False,'\"'\"'new_training_launches'\"'\"':0}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-06T13:53:46.218585+00:00",
+    "hostname": "dl04-MS-7E06",
+    "trainer": {
+      "exists": false
+    },
+    "runtime_source": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "log": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log",
+    "log_size": 5693809,
+    "log_mtime_ns": 1793972985082287986,
+    "bytes_read": 2097152,
+    "last_phase": [
+      "Train",
+      "5",
+      "50",
+      "1449",
+      "4686"
+    ],
+    "markers": [
+      "mIOU: 0.411. Acc_50: 0.448. Acc_25: 0.528",
+      "spmIOU: 0.380. spAcc_50: 0.410. spAcc_25: 0.514",
+      "mIOU: 0.426. Acc_50: 0.468. Acc_25: 0.540",
+      "spmIOU: 0.395. spAcc_50: 0.433. spAcc_25: 0.532",
+      "Train[5/50]:  31%|██████▏             | 1449/4686 [07:48<17:58,  3.00it/s, lr=7.9e-05, eta=19:14:27, iter_time=0.32]Traceback (most recent call last):",
+      "TypeError: argument of type 'MultiheadAttention' is not iterable"
+    ],
+    "bounded_final_lines": [
+      "    parameters = list(parameters)",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2673, in parameters",
+      "    for _name, param in self.named_parameters(recurse=recurse):",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2706, in named_parameters",
+      "    yield from gen",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2641, in _named_members",
+      "    for module_prefix, module in modules:",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2863, in named_modules",
+      "    yield from module.named_modules(",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2863, in named_modules",
+      "    yield from module.named_modules(",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2863, in named_modules",
+      "    yield from module.named_modules(",
+      "  [Previous line repeated 3 more times]",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 2855, in named_modules",
+      "    if self not in memo:",
+      "TypeError: argument of type 'MultiheadAttention' is not iterable",
+      "Train[5/50]:  31%|██████▏             | 1449/4686 [08:19<18:36,  2.90it/s, lr=7.9e-05, eta=19:14:27, iter_time=0.32]"
+    ],
+    "guardian": {
+      "exists": false,
+      "state": {
+        "status": "RELEASED",
+        "recorded_at": "2026-11-06T13:49:46.377595+00:00",
+        "operation": "postlaunch_existing_training_cooperative_lock_protection",
+        "binding_sha256": "22a8ccf5998e390febb09ca287c3583e91b55b6a53dd6f5e85d054dec35ff288",
+        "guardian_pid": 3024669,
+        "guardian_starttime": "158549879",
+        "trainer_pid": 2829477,
+        "trainer_starttime": "158248846",
+        "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106",
+        "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+        "physical_gpu": 0,
+        "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+        "locks": [
+          {
+            "kind": "training",
+            "path": "/tmp/cluster_project_gpu0_training.lock",
+            "inode": 92537152,
+            "device_major": 259,
+            "device_minor": 4,
+            "kernel_lock_entry": "49: FLOCK  ADVISORY  WRITE 3024669 103:04:92537152 0 EOF"
+          },
+          {
+            "kind": "diagnostic",
+            "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+            "inode": 92537153,
+            "device_major": 259,
+            "device_minor": 4,
+            "kernel_lock_entry": "48: FLOCK  ADVISORY  WRITE 3024669 103:04:92537153 0 EOF"
+          },
+          {
+            "kind": "exclusive",
+            "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+            "inode": 92537154,
+            "device_major": 259,
+            "device_minor": 4,
+            "kernel_lock_entry": "47: FLOCK  ADVISORY  WRITE 3024669 103:04:92537154 0 EOF"
+          }
+        ],
+        "postlaunch_correction": true,
+        "prelaunch_lock_check_proven": false,
+        "GPU_model_or_NVML_calls": false,
+        "signals_sent": false,
+        "training_restarted": false,
+        "released_at": "2026-11-06T13:49:46.377575+00:00",
+        "error": null
+      }
+    },
+    "locks": [
+      {
+        "kind": "training",
+        "inode": 92537152,
+        "kernel_entries": []
+      },
+      {
+        "kind": "diagnostic",
+        "inode": 92537153,
+        "kernel_entries": []
+      },
+      {
+        "kind": "exclusive",
+        "inode": 92537154,
+        "kernel_entries": []
+      }
+    ],
+    "checkpoints": [
+      {
+        "directory": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236",
+        "files": [
+          {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236/best.pth",
+            "bytes": 891298516,
+            "mtime_ns": 1793972474800388124
+          },
+          {
+            "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd/20261106_195236/last.pth",
+            "bytes": 891298516,
+            "mtime_ns": 1793972480552452704
+          }
+        ]
+      }
+    ],
+    "read_only": true,
+    "signals_sent": false,
+    "new_training_launches": 0
+  }
+}

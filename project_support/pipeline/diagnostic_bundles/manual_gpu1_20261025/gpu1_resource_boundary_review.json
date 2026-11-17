@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T03:32:28.591996+00:00",
+  "reviewer": "mdc_review",
+  "project": "cluster_project",
+  "status": "GPU1_RESOURCE_EXPANSION_BOUNDARY_AND_REQUIRED_PORT_POINTS_REVIEWED_NOT_EXECUTION_CLEARANCE",
+  "material_concerns": [],
+  "authorization_boundary": {
+    "latest_human_statement": "server4 GPU1也可以用了",
+    "trusted_evidence": {
+      "path": "pipeline/diagnostic_bundles/manual_gpu1_20261025/gpu1_identity_initial_observation.json",
+      "sha256": "461800f9dbd432ca6587dfb1d24fa1fc46e76c8e7ba04414a5b3dca643108cbb"
+    },
+    "scope": "Server-4 physical GPU1 resource usage is additionally permitted. This supplements current resource authority; it does not change scientific thresholds, reopen old holds, authorize M206 full resume, replace native gates, prove current idleness or grant GPU0 eviction.",
+    "standing_operations": "Existing experiment-first scoped operations continue only on currently authorized resources and under fresh execution guards. No new approval question is needed for this explicit GPU1 resource grant.",
+    "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+    "goal_scientific_contract_unchanged": true,
+    "recorded_gpu1_grant_refs_present_at_review": [
+      {
+        "path": "pipeline/authorizations/server4_gpu1_20261025.json",
+        "sha256": "90f8820a60ef4d4e277904815b025658f7b8b457b0711a4d0ef5f7395fdd23f8"
+      }
+    ],
+    "new_resource_grant_body_independently_read_and_verified": {
+      "path": "pipeline/authorizations/server4_gpu1_20261025.json",
+      "sha256": "90f8820a60ef4d4e277904815b025658f7b8b457b0711a4d0ef5f7395fdd23f8",
+      "source": "direct unambiguous human instruction in owning chat",
+      "scope": "Authorize server-4 physicalGPU1 for this project native diagnostics and training in addition to retained physicalGPU0; one task per card. Routine model/version/test/admission/safe-sync authorization remains the existing experiment-first grant.",
+      "supersedes_only": "The GPU1 resource-release restriction in server4_gpu0_only_20261022_gpu1_pause_105409.json; that record is preserved.",
+      "preserves_explicit_M206_pause_and_existing_jobs": true,
+      "does_not_change_scientific_contract": true,
+      "fresh_idle_and_exclusive_checks_still_required": true
+    }
+  },
+  "observed_local_transition": {
+    "SERVERS_allowed_gpus": [
+      0,
+      1
+    ],
+    "max_tasks_per_gpu": 1,
+    "old_gpu0_only_catalog_remains_immutable": true,
+    "foreground_owner_present_at_read": false,
+    "current_owner_selected_fields": null,
+    "execution_mode_target_thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "review_child_thread_id": "01a15a44-4930-7e13-9aa4-be131458c3a4",
+    "identity_scope": "Reviewer child does not own or impersonate root foreground; actual future operation must run in the owning root thread and match execution_mode target. No owner match or current lease is manufactured by this review."
+  },
+  "root_initial_gpu1_observation": {
+    "ref": {
+      "path": "pipeline/diagnostic_bundles/manual_gpu1_20261025/gpu1_identity_initial_observation.json",
+      "sha256": "461800f9dbd432ca6587dfb1d24fa1fc46e76c8e7ba04414a5b3dca643108cbb"
+    },
+    "reported_observed_at": "2026-10-25T03:30:20.706487+00:00",
+    "hostname": "dl04-MS-7E06",
+    "physical_gpu": 1,
+    "uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+    "memory_used_mib": 15,
+    "utilization_percent": 0,
+    "contexts": "EMPTY",
+    "GPU0": "NOT_QUERIED_NOT_CHANGED",
+    "reviewer_transport": "NONE; inspected saved local root proof only",
+    "availability_scope": "Historical point observation. Future native action must repeat current GPU1-only idle/UUID checks and locks; not a permanent free-card claim."
+  },
+  "protected_state_at_read": {
+    "BTC": {
+      "id": "M211-BTC",
+      "status": "running",
+      "gpu": "0",
+      "pid": 2784474,
+      "code_commit": "00e2b18c6b8d568a64edb496e6979d766440883c"
+    },
+    "M206": {
+      "id": "M206-CGCA",
+      "dispatch_phase": "user_paused",
+      "resume_authorized": false,
+      "pid": null,
+      "hold_retained": true
+    },
+    "resource_grant_not_resume": "M206 cannot auto-resume or migrate after allowed_gpus expands. Its source/checkpoint/full-state human-resume gate remains separate.",
+    "main_runtime": "BTC00e must remain protected while diagnostic candidate11a is staged additively. Source promotion/sync/receipt/training requires a separate concrete guarded action; resource expansion itself does not perform it."
+  },
+  "required_gpu1_port_checklist": [
+    {
+      "item": "Select only physical1",
+      "actual_old_points": [
+        {
+          "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/adapter.py",
+          "lines": [
+            182,
+            306
+          ]
+        },
+        {
+          "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/remote_ops.py",
+          "lines": [
+            56,
+            63
+          ]
+        },
+        {
+          "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/native/native_runtime.py",
+          "lines": [
+            58
+          ]
+        }
+      ],
+      "required": "Every guard/binding/probe/runtime predicate changes to exact integer1; bool/string/0/unknown rejected at each direct entry before inventory/action. Keep UUID capability mapping0,1; do not widen packet selectable GPU set."
+    },
+    {
+      "item": "Current resource authority and snapshot",
+      "required": "Root persist explicit new GPU1 grant; live SERVERS server4 allowed[0,1], max1, UUID map exact; fresh foreground begin binds new context/pending/owner/deadline after authority changes. Old GPU0-only snapshot/token cannot be edited or reused as fresh lease. Snapshot/live allowlist equality retained."
+    },
+    {
+      "item": "Pinned server and GPU1 UUID",
+      "required": "Keys/BatchMode/StrictHostKeyChecking; songcl@192.168.1.115, hostname dl04-MS-7E06 asserted before remote work. Every NVML/nvidia-smi observation is physical1 only and matches GPU-7f82edb9-f620-8045-caea-a75232265cd1. No GPU0 inventory is needed for this GPU1 packet."
+    },
+    {
+      "item": "Physical versus logical CUDA mapping",
+      "required": "Keep CUDA_DEVICE_ORDER=PCI_BUS_ID; retain preferred CUDA_VISIBLE_DEVICES=GPU_UUIDS[1], or equivalently the strictly verified sole physical1 visibility. Under one visible physical card, worker model.cuda() and set_per_process_memory_fraction(0.75,0) remain logicalcuda0. Never change worker to cuda1 or expose both cards; candidate scientific worker bytes should stay identical."
+    },
+    {
+      "item": "Three physical GPU1 locks and busy rejection",
+      "required": "Use /tmp/cluster_project_gpu1_training.lock, _diagnostic.lock, _exclusive.lock; verify idle before and after acquiring all3, before torch import. Queue0 known BTC occupancy must not block selected1 or be touched; any reserved unknown assignment still refuses conservatively. Only ordinary/nonlaunch held waiting M206 is nonoccupying; no cancellation/resume/signals."
+    },
+    {
+      "item": "New isolated GPU1 namespace and identity",
+      "required": "New outer/native/core/release maps under manual GPU1 bundle, exact11a/CID/goal/sourcefaf/parent00e unchanged. Fresh execution/stage names must agree in adapter/remote/runtime and be distinct from historical GPU0 package; all manifest/binding/lease/request/result GPU fields and UUID hash chains exact1. Never relabel or mutate original41eb source/native/origin/refusal/operational artifacts."
+    },
+    {
+      "item": "Candidate versus current runtime source",
+      "required": "Candidate11a staged8/YAML/sourceproof exact originalfaf and isolated9blobs. runtime_code_commit independently probe current00e and verify remains same before each run; do not falsely require runtime11a or sync/checkout active BTC root merely to test staged candidate. Original assets/train/data/YAML/pretrain/resolver remain fixed."
+    },
+    {
+      "item": "No safety or scientific gate changes",
+      "required": "Preserve owner6/context/pending/goal/deadline/grant/eligible candidate/externalrelease anchors; original seed1999/native TRAIN2/five weight gradient-update blocks/n3depth2/path/resource10G and conditional memory15/bs1lang1warm20repeat100. Unknowns remain unknown. Expanding GPU resource does not authorize revised model/native thresholds or old-route reopening."
+    },
+    {
+      "item": "Offline checks appropriate to resource port",
+      "required": "Read independently final source literal/AST diff and all actual finalmap hashes. Required mock negatives: physical0/unknownGPU rejected before process/inventory; GPU1 UUID mismatch/live-snapshot mismatch; registered activeGPU1 busy before transport/lease; knownGPU0 BTC preservesGPU1 usability; wrongstage/request/GPU identity and expired/cross-tick mutations no replay. Actual future native remains separate."
+    },
+    {
+      "item": "Fresh execution and uncertainty",
+      "required": "Only root may materialize static catalog with external anchors and create fresh real owned binding after current GPU1 idle. Before each stage/run repeat current source and idle guards; uncertain SSH/timeout reconcile exact request/PID/start/argv/result with no blind pair retry, no delete/kill/lease extension. Admission/queue/dispatch follows actual four results and canonical gates."
+    }
+  ],
+  "old_source_refs": {
+    "gpu0_outer": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/preparation.json",
+      "sha256": "12dcdebecb7ddf7411ab33cf945e39d1cde52aae0c3b6593e0111130f63cfd55"
+    },
+    "gpu0_native": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/native/preparation.json",
+      "sha256": "a7ba73ba7610fa3e0dbac6f4a496f1657e8cf09f725d2b88f24df1d97ecff604"
+    },
+    "gpu0_adapter": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/adapter.py",
+      "sha256": "85eecbe1910956bd65d2d662d777a011c930c865f0ec0a39eae69e2aa06ec996"
+    },
+    "gpu0_remote_ops": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/remote_ops.py",
+      "sha256": "805afced11566bf300f6bf65090f80d605fc0b3d59fce8aee541a7773c3497d4"
+    },
+    "gpu0_runtime": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/native/native_runtime.py",
+      "sha256": "f60030ee04dbec7e22e809dc70e550a480ee970ad2cf8b49d77fb6a8bc20dcc9"
+    },
+    "dedicated_worker_unchanged_reference": {
+      "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/native/worker.py",
+      "sha256": "a3b10169a9edee14b7943626934abbe46662e366268dcd4919320c86aefd6538"
+    }
+  },
+  "limits": [
+    "New GPU1 package not yet final-reviewed by this checklist. No actual new package algorithm/guard/map PASS is signed here.",
+    "No SSH/GPU/native/tensor/transport/tests/shared ledger or source writes by this reviewer. Saved root initial inventory proof was inspected, not independently repeated remotely.",
+    "Current resource/grant/owner fields are a point snapshot during root authority transition, not execution lease."
+  ],
+  "execution_clearance": "NOT_ISSUED_BY_REVIEW; fresh root transition and exact final GPU1 packet review required",
+  "next_action": "Authors port only physicalGPU1 selectors/namespace/hash metadata into new bundle and freeze; root records resource supplement then fresh snapshot, reviews final packet and currentGPU1 guard before actual native. Keep GPU0BTC and M206pause intact."
+}

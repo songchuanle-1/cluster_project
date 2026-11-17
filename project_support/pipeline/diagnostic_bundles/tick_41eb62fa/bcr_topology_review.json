@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-24T18:22:30.041100+00:00",
+  "status": "ACTUAL_PRODUCTION_STDLIB_BCR_PLAN_AND_STATIC_CONSUMER_CHECKED_NATIVE_NOT_RUN",
+  "candidate_id": "hierarchy-parent-bidirectional-complement-recurrence",
+  "reviewed_source_hashes": {
+    "middle_complement.py": "b8d01a31a5f691b00afe7c6d96f6c0b806304307c49a27945091ee64fd28e54e",
+    "hier_postprocess.py": "122ee1d5ad8f8e41a5fe20df79b88e42f32ddc5361e1e386b0180bc969f8fb7c",
+    "dec.py": "306b3cbd37c6bf372b5fc67f40dd9a96cb7e37fb3fb779c0ba668f9542a9e2c0"
+  },
+  "valid_cases": 14,
+  "invalid_cases": 10,
+  "actual_production_function_calls": 24,
+  "case_results": [
+    {
+      "label": "empty_prefix",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 0,
+      "padded_width": 0,
+      "supported_tokens": 0,
+      "parents": 0,
+      "consumed_scan_steps": 0
+    },
+    {
+      "label": "nonempty_prefix_all_unsupported",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 2,
+      "padded_width": 5,
+      "supported_tokens": 0,
+      "parents": 0,
+      "consumed_scan_steps": 0
+    },
+    {
+      "label": "singleton",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 1,
+      "padded_width": 1,
+      "supported_tokens": 1,
+      "parents": 1,
+      "consumed_scan_steps": 0
+    },
+    {
+      "label": "two_reverse_geometry",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 2,
+      "padded_width": 2,
+      "supported_tokens": 2,
+      "parents": 1,
+      "consumed_scan_steps": 2
+    },
+    {
+      "label": "three_irregular_geometry",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 3,
+      "padded_width": 3,
+      "supported_tokens": 3,
+      "parents": 1,
+      "consumed_scan_steps": 4
+    },
+    {
+      "label": "five_duplicate_centers_ID_tie_break",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 5,
+      "padded_width": 5,
+      "supported_tokens": 5,
+      "parents": 1,
+      "consumed_scan_steps": 8
+    },
+    {
+      "label": "multiple_parent_ID_gaps_support_holes_padding",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 6,
+      "padded_width": 9,
+      "supported_tokens": 4,
+      "parents": 2,
+      "consumed_scan_steps": 4
+    },
+    {
+      "label": "all_parent_singletons",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 3,
+      "padded_width": 5,
+      "supported_tokens": 3,
+      "parents": 3,
+      "consumed_scan_steps": 0
+    },
+    {
+      "label": "secondary_y_z_lexicographic_order",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 4,
+      "padded_width": 4,
+      "supported_tokens": 4,
+      "parents": 1,
+      "consumed_scan_steps": 6
+    },
+    {
+      "label": "negative_coordinates_and_position_ties",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 4,
+      "padded_width": 8,
+      "supported_tokens": 4,
+      "parents": 1,
+      "consumed_scan_steps": 6
+    },
+    {
+      "label": "nonconsecutive_supported_original_IDs",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 8,
+      "padded_width": 10,
+      "supported_tokens": 3,
+      "parents": 1,
+      "consumed_scan_steps": 4
+    },
+    {
+      "label": "max64_one_parent",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 64,
+      "padded_width": 64,
+      "supported_tokens": 64,
+      "parents": 1,
+      "consumed_scan_steps": 126
+    },
+    {
+      "label": "batch_reuse_same_parent_reset_A",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 3,
+      "padded_width": 3,
+      "supported_tokens": 3,
+      "parents": 1,
+      "consumed_scan_steps": 4
+    },
+    {
+      "label": "batch_reuse_same_parent_reset_B",
+      "status": "ACTUAL_STDLIB_PLAN_MATCHES_INDEPENDENT_ORACLE",
+      "prefix": 2,
+      "padded_width": 5,
+      "supported_tokens": 2,
+      "parents": 1,
+      "consumed_scan_steps": 2
+    },
+    {
+      "label": "mismatched_center_length",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "mismatched_support_length",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "center_dimension_not_three",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "nonfinite_NaN_geometry",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "nonfinite_infinite_geometry",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "negative_parent_even_if_unsupported",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "boolean_parent_is_not_integer_ID",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "floating_parent_is_not_integer_ID",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "nonboolean_support",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    },
+    {
+      "label": "prefix_exceeds_declared_max",
+      "status": "ACTUAL_PRODUCTION_VALUEERROR_AS_EXPECTED"
+    }
+  ],
+  "static_consumer_checks": {
+    "single_registered_shared_scan_2C_to_C": true,
+    "single_registered_readout_3C_to_C": true,
+    "actual_forward_consumes_production_plan": true,
+    "left_uses_source_feature_and_source_context": true,
+    "right_uses_source_feature_and_source_context": true,
+    "readout_own_plus_exclusive_left_right": true,
+    "scatter_uses_original_IDs": true,
+    "zero_updates_for_unassigned_padding": true,
+    "no_new_residual_inside_helper": true
+  },
+  "material_concerns": [],
+  "test_scope": "24 deterministic scalar fixtures directly call the extracted current production build_complement_plan. Independent oracle uses ordered-ID slicing and symbolic set/scatter semantics; no torch or model import. These are logical software cases, not 24 scientific experiments or native tensor behavior tests.",
+  "gradients_and_native": "NOT_RUN_NOT_PROVEN",
+  "resources_and_efficacy": "UNKNOWN",
+  "limitations": [
+    "Python symbolic scatter checks addresses and zero-unassigned slots; actual tensor index_copy/autograd/device/numerics remain untested.",
+    "Feature recurrence/GELU/readout values were not executed. Native scan/readout gradients and optimizer updates still require the original actual TRAIN2 protocol; n1-only support would leave shared scan unused.",
+    "Full initialization/data pairing, actual empty/pad/singleton native coverage and resource measurement are unknown.",
+    "This is a reviewed current draft hash. Final author freeze must rebind exactly these source bytes or review changed files before reuse."
+  ]
+}

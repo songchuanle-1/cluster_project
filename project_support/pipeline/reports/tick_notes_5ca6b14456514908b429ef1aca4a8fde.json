@@ -1,0 +1,14 @@
+{
+  "actions": [
+    "本轮13:26:56预检监控和目标检查均返回0，design租约已取得；第0至3段事实表固定于此快照，不代表随后实时占用。",
+    "稳定ID m95-sample-context-support 上做冻结TRAIN 256表达、同一捕获的SHA256绑定诊断：四个fragmented与另12个limited的selected-positive query梯度中位数0.01237对0.09621；固定两条native-positive的2对3场景仍为0.03182对0.08258，但target-feature范数方向相反。证据：pipeline/reports/m95_fragment_gradient_magnitude_20260927.json、m95_fragment_gradient_dilution_20260927.json、m95_fragment_count_matched_20260927.json。仅回顾性关联，不能准入。",
+    "server-6 CPU原生BCE+Dice重放，逐positive反传至最终target-superpoint特征，核对原损失和聚合梯度。正确的all-target coherence中位数0.891(4条)对0.978(6条可定义)，匹配positive=2时0.968(2条)对0.978(3条)；另在best native-positive遗漏的目标支持上重放，coherence 0.927(4)对0.986(4)，固定positive=2则反向0.993(2)对0.976(2)。证据：pipeline/reports/m95_mask_positive_gradient_coherence_corrected_20260927.json、m95_missed_support_gradient_coherence_20260927.json。第一次coherence输出误将双重归一化的聚合梯度与未缩放分量相比，已作废并另存修正结果；不是新模型backward。",
+    "13:55左右server-6 GPU7现场检查利用率82%、显存10257/81559 MiB，外部PID2031350占约10242 MiB；未驱逐外部作业。未做GPU测试或训练推送。无新增科学准入、队列0、训练0；资源门槛和独立性尚未测。监控运行数仍以13:26:56快照为准。",
+    "本地广域unittest：77个测试有4个错误，3个因本地缺torch，另一个既有cause-role绑定样例错误；原生回放在server-6 CPU成功，未将广域测试当作通过。稳定ID保持diagnosis，下一步是寻找独立预测盲信息/监督单元并在同一forward作机制与placebo匹配对照，再完成六门槛。证据哈希在pipeline/research_work.json。收据用量窗口及产出待finish，缺失记未知；缓存/推理不重复累计，也不视作账单。"
+  ],
+  "decisions": [
+    "2026-09-27 13:48 route_change：positive数量单独解释不了fragmentation梯度差；不调mask loss权重，见pipeline/decisions/20260927-134848_route_change.md。",
+    "2026-09-27 14:10 route_change：修正coherence归一化并按positive数量控制，回顾性差异不足以独立准入，见pipeline/decisions/20260927-141019_route_change.md。",
+    "2026-09-27 14:15 route_change：遗漏目标支持的两positive对照反转，不主张跨positive梯度抵消新机制，见pipeline/decisions/20260927-141549_route_change.md。科学状态diagnosis；空槽保留，不放宽准入或启动训练。"
+  ]
+}

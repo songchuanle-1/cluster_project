@@ -1,0 +1,27 @@
+{
+  "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+  "prepared_at": "2026-10-20T22:08:48.463874+00:00",
+  "worker": {
+    "path": "pipeline/diagnostic_bundles/tick_a5a8c4f2/hap_native_worker.py",
+    "sha256": "6370664a07b1e10d78e768eae81f03385ca758f1be0f99ae375ebda768d66dd3"
+  },
+  "fragment": {
+    "path": "pipeline/diagnostic_bundles/tick_a5a8c4f2/hap_smoke_function.py",
+    "sha256": "435a7428d1b812c2f23c33057b88def72ffd222bf3ade55db77c3ddef65f3e33"
+  },
+  "source_basis": "Previously exercised native setup/resource harness, newly adapted HAP smoke instrumentation. Existing CGCA immutable files untouched.",
+  "validation": "Python3.10 AST+compile without exec; resource function AST identical to prior exercised handler/timing implementation. No model import, data load, pinv/kernel execution or GPU use.",
+  "ready_for_next_idle_slot": "Stage this exact worker with a fresh current owner lease, verified assets and HAP candidate_source_hashes/config/commit; runtime must freshly select only an idle authorizedserver4 GPU. This file cannot be executed as local native behavior.",
+  "intended_checks": [
+    "Original native TRAINloader/AdamW/train.train2steps and one-element finite loss",
+    "Isolated HAP full_backward fine/middle/coarseinput and2outputedges, fine/mid nonconstantgradient/readout, coarse parentpath",
+    "Native3FFN per-level weightgradfinite/nonzero and eachlevelupdated; centeredfine/midbiaszeroallowed",
+    "Smoke-only actualpinv spy original function once+original args/kwargs+returnoriginal tensor,finally restored; actualG/Gplus finite and diagnostic spectrum/rankreadout distinctly labelled",
+    "Failure JSON nonfinite scalar null plus explicitfinite flags/counts; original immutable runs/evidence preserved",
+    "Resource mode untouched and no instrumentation overhead in resourceprofile"
+  ],
+  "status": "PREPARED_UNEXECUTED",
+  "native_smoke_passed": false,
+  "admission_ready": false,
+  "source_model_version": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0"
+}

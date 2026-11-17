@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-09-17T05:12:00+08:00",
+  "candidate_id": "referent-supervision-axis",
+  "experiment_id": "M197-PIRS",
+  "scope": "Bounded original-source check for the soft-IoU referent target used by PIRS",
+  "sources": [
+    {
+      "title": "VarifocalNet: An IoU-aware Dense Object Detector",
+      "doi": "10.1109/CVPR46437.2021.00841",
+      "arxiv": "2008.13367v2",
+      "source_observation": "The original method trains an IoU-aware classification score. The target q is gt_IoU for foreground points and 0 otherwise, and the predicted IACS is used directly as the candidate ranking score.",
+      "retrieval": "arXiv abstract plus ar5iv full-text sections 3 and 4.2, retrieved 2026-09-17"
+    },
+    {
+      "title": "IoU-aware single-stage object detector for accurate localization",
+      "doi": "10.1016/j.imavis.2020.103911",
+      "source_observation": "Direct prior work on making localization quality available to detection confidence.",
+      "retrieval": "Crossref title search, retrieved 2026-09-17"
+    }
+  ],
+  "assessment": {
+    "prior_art_overlap": "Continuous IoU-valued classification targets for ranking candidate hypotheses are established prior art.",
+    "narrow_pirs_difference": "PIRS applies a detached mask-IoU target to every sparse 3D referent query, removes the seed-derived label, and retains the existing BCE referent path. It does not add asymmetric positive weighting or the VarifocalNet feature and box-refinement pipeline.",
+    "admission_gap": "The M197 literature gate cites RefMask3D as original-source evidence, but its note that IoU/quality-aware classification was distinguished does not cite a direct VFNet/IACS source. M197 cannot claim core mechanism novelty from the soft-IoU target alone.",
+    "unresolved": "This bounded check found no direct ScanRefer or 3D referring-expression paper using the same sparse-query mask-IoU target, but absence in a bounded search is not evidence of novelty."
+  },
+  "action": {
+    "queue": "No launch, restart, stop, or queue mutation.",
+    "training": "Continue M197 to terminal and preserve its efficacy/rejection result.",
+    "science": "Before any paper-level novelty claim or successor, run a direct original-source audit over ScanRefer and 3D referring-expression query-selection work. Treat M197 success as mechanism/application evidence, not proof of core novelty."
+  }
+}

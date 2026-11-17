@@ -1,0 +1,39 @@
+{
+  "recorded_at": "2026-10-21T18:16:49.634647+00:00",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "source_hashes": {
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/hier_postprocess.py": "d6ae0a7136be5f1779d7c771f5bcbb32e1234c60abfc39393b4e81d8e5863e07",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/refined_composition.py": "919e42b85e422792f933852265fc74bb1a0477b2fc9f97c5177d7683622bbb0d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999",
+    "configs/Quard/ctf_hcg_csort_hrc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+  },
+  "reviewers": [
+    "new_variant",
+    "mdc_review",
+    "pce_audit",
+    "root"
+  ],
+  "scope": "Source, native YAML, fixed pooling semantics and bounded historical/banned comparison; no native tensor execution.",
+  "observed": [
+    "mdc独立逐项核9hash、四个原class AST、8源3.10 AST/compile与原YAML同字节；root重新执行validate_preparation.py通过并核28个既有脏/未跟踪文件保持。",
+    "HRC只有refined fine→原fixed mean→middle FFN→原fixed mean→coarse FFN新依赖；原三FFN各一次、仅最终一次HCG point交付。",
+    "有限定向核REAG_CASC点级重复回写、lite_agg learnedweightedpool、MFP辅助损失、CCP parent加法，未发现相同图或直接ban；不是全历史/文献独立性证明。",
+    "原batch padding依ids.numel剔除，内部empty-ID child行继续参与等权mean，不增加occupancy weighting；CSORT仍原rawbanks。"
+  ],
+  "risks": [
+    "empty child经FFN的bias可传播到父层",
+    "细节反复池化可能损失/尺度重复",
+    "两次额外scatter的实测FLOPs/延迟/显存未知",
+    "helper shape/index/autograd及native resolver没有fallback到默认模型仍待真实native检查"
+  ],
+  "static_review": "no_blocker_observed",
+  "native_backward": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "efficacy": "UNKNOWN"
+}

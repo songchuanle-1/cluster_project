@@ -1,0 +1,33 @@
+{
+  "preregistered_at": "2026-10-20T06:22:52.165650+00:00",
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "revision": 1,
+  "failure_scope": "implementation",
+  "reason": "Full predict median 901.2897ms vs matched M95 33.7900ms; per-recipient GPU launch loop is explicit in source. Standard FVCore misses added elementwise/sum/softmax work.",
+  "change": "Group receivers by exact physical donor degree and batch the SAME headwise dot/softmax/value sum. Geometry sorting, all donors, fallback, heads, weights, dtype, topology and model/config stay unchanged.",
+  "prediction": "Native-feature outputs, input gradients, deleted-edge and row-permutation operator controls stay within original1e-6; full predict latency improves without >15% peak memory increase.",
+  "test": "Frozen original native contact fixture, all eight expressions and original operator, then same full model bs1/warmup20/repeat100 and corrected full-source controls/native backward.",
+  "nonclaims": "Kernel grouping is engineering, not new architecture. Existing full-source numerical failures are NOT waived by operator equivalence or speedup.",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/resources_candidate_result.json",
+      "sha256": "d1409fffba29a93e82b9d3a54692c298e2902305673920bea70631b41fa5679c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/resources_champion_result.json",
+      "sha256": "340088044f47eaaea2d9da2af8e14195e9ab267eb4679c401184f0e0c84f2a68"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/harness_r1/controls_candidate_result.json",
+      "sha256": "64ef761d94fe7ae920895eccff91b6287eb8b2d1c7841ddf14577b444c275418"
+    }
+  ],
+  "original_source": {
+    "path": "pipeline/diagnostic_bundles/tick_fefdcc2a/contact_exchange_original.py",
+    "sha256": "f60f8531145dad48bda169665cf843a2bf6984843afe961a9345215404914d0e"
+  },
+  "tolerance": 1e-06,
+  "new_parameters": 0,
+  "new_hyperparameters": 0,
+  "maximum_revisions": 2
+}

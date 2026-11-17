@@ -1,0 +1,101 @@
+# Research Pipeline Report - cluster_project
+快照时间：2026-10-25T14:03:54.140252+00:00；生成报告时快照年龄：380 秒；模式：design
+
+## 0. Goal Status
+- 目标：mIoU / 0.51；数据集：ScanRefer
+- 目标检查返回码：0
+- Champion / Gap / Phase：以下为本轮目标检查原始结果，缺项为未知。
+```text
+================================================================================
+  Goal Check Report — 2026-10-25 22:03:53
+================================================================================
+  Target: cluster: 面向 ScanRefer 三维语言定位，回归用户最初的点云特征更新主线，研究不同层级承担不同注意力/信息交互作用的轻量结构机制，目标 mIoU ≥ 0.51。核心路径是分层信息交互真实更新点云/超点 inst_feats，再与 query 特征共同生成 mask；不能把仅修改监督损失、沿用已有层级骨架或无效路由计算称为该主线创新。以多尺度 context-only 和 M95 为既有对照，先诊断层级互补性、局部细节及跨层信息是否真正进入 mask 特征，再依据证据选择一个可推导、可证伪的结构机制。监督与关系绑定仅作辅助诊断/匹配对照，不再取代主线。覆盖机制对照、泛化稳健性和同口径效率验证；已有收益不证明新的分层注意力有效，也不自动重开历史失败或禁止的路线。
+
+## Phase 1: Metric Target
+  Target: mIoU ≥ 0.5100
+  [✗] Champion: M95-CTF-HCG-CSORT — mIoU=0.5020 (gap to target: +0.0080)
+       Epochs: 22/50, State: done_earlystop
+  Phase 1: NOT YET — continue exploring ✗
+
+## Baseline
+  Baseline: model_base1 — mIoU=0.4894
+  Champion vs Baseline: γ = +0.0126
+
+## Phase 2: Story Verification
+  (等待 Phase 1 达标后启动)
+
+## Overall
+  Phase 1: champion=0.5020, target=0.5100, gap=+0.0080
+================================================================================
+```
+
+## 1. GPU Overview
+- 仅列授权卡；未采集利用率、显存或进程时标为未知，不推断空闲。
+| Server | GPU | Util | Memory | Process |
+|---|---|---|---|---|
+| server-4 | 0 | 未知 | 未知 | 未知 |
+| server-4 | 1 | 未知 | 未知 | 未知 |
+- 可用 GPU：未做实时占用确认，不能据此分配。
+- 监控摘要（begin 已执行，不再重复探测）：
+```text
+================================================== 2026-10-25 22:03 : cluster_project ==================================================
+
+--- local (192.168.1.175) ---
+  无训练进程
+
+--- server-2 (192.168.1.163) ---
+  [白名单] SERVERS.yaml allowed_gpus=[] ，本项目流水线跳过该机
+
+--- server-3 (192.168.1.120) ---
+  [白名单] SERVERS.yaml allowed_gpus=[] ，本项目流水线跳过该机
+
+--- server-4 (192.168.1.115) ---
+  [model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_btc] Best=0.4914 29/50 no_improve=7/10 gpu=0 ? 序列: 0.4821, 0.4796, 0.4828, 0.4808, 0.4823
+  [model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr] Best=0.4848 12/50 no_improve=2/10 gpu=1 ? 序列: 0.4682, 0.4752, 0.4848, 0.4809, 0.4841
+
+--- server-6 (100.64.3.28) ---
+  [白名单] SERVERS.yaml allowed_gpus=[] ，本项目流水线跳过该机
+
+--- 队列: cluster_project ---
+  server-4: done_earlystop=24 running=2 waiting=1 withdrawn=6
+    待推: [M206-CGCA] configs/Quard/ctf_hcg_csort_cgca/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca.yaml gpu=1
+  server-6: done_earlystop=4
+  server-3:
+```
+
+## 2. Running Experiments
+| ID | Config | Server | GPU | Epoch | Best mIoU | Acc@50 | spmIOU | No-Impr | Status |
+|---|---|---|---|---|---|---|---|---|---|
+| M211-BTC | configs/Quard/ctf_hcg_csort_btc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_btc.yaml | server-4 | 0 | 未知 | 未知 | 未知 | 未知 | 未知 | 登记运行；实时进度须核实 |
+| M212-BCR | configs/Quard/ctf_hcg_csort_bcr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr.yaml | server-4 | 1 | 未知 | 未知 | 未知 | 未知 | 未知 | 登记运行；实时进度须核实 |
+
+## 3. Queue Status
+| Position | ID | Config | Status | Depends On | Server |
+|---|---|---|---|---|---|
+| 1 | M206-CGCA | configs/Quard/ctf_hcg_csort_cgca/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca.yaml | waiting | - | server-4 |
+- 活跃 2（运行 2 / 认领 0 / 等待 1）；目标 4；准入预算 2。
+- 研究储备 2 / 2；储备准备预算 0，不增加训练并发或启动授权。
+- 储备只计可推进候选及已排队项；另有待人工 5、待资源 0、数值诊断待解 4、未分类阻塞 0。
+- 非终态候选与排队项合计 2；总上限 4。阻塞不授权重开旧路线；其他合法独立工作按剩余预算推进。
+- 候选累计记录 140：complete=33 / rejected=94 / blocked=9 / training=2 / validation=1 / implementation=1。
+- 否决范围：unclassified=91 / hypothesis=3；实现修订累计 12；收据文件 18（含修订或重试，不代表成功率）。
+- 待人工确认（列出动作不代表已授权）：
+| ID | Required Confirmation | Retry After |
+|---|---|---|
+| m95-native-relation-other-sign-conflict | Preserve original evidence, failures and historical gates. Do not resume/promote this supervision route or recover M201 merely because retry is due/GPU opens. Resume the primary point-feature-path diagnosis first. | 2026-10-20T00:38:18.296045+00:00 |
+| m95-native-main-role-weight-precedence | Preserve original evidence, failures and historical gates. Do not resume/promote this supervision route or recover M201 merely because retry is due/GPU opens. Resume the primary point-feature-path diagnosis first. | 2026-10-20T00:38:18.296045+00:00 |
+| m95-native-secondary-positive-mass | Preserve original evidence, failures and historical gates. Do not resume/promote this supervision route or recover M201 merely because retry is due/GPU opens. Resume the primary point-feature-path diagnosis first. | 2026-10-20T00:38:18.296045+00:00 |
+| m95-native-between-pair-support | Preserve original evidence, failures and historical gates. Do not resume/promote this supervision route or recover M201 merely because retry is due/GPU opens. Resume the primary point-feature-path diagnosis first. | 2026-10-20T00:38:18.296045+00:00 |
+| hierarchy-coarse-conditioned-fine-channel-attention | Preserve manually paused M206 and full epoch24 checkpoint. Do not resume/migrate/cold-start on any GPU without a later explicit human instruction; GPU1 remains released to others. | 2026-10-22T16:24:16.243554+00:00 |
+
+## 4. This Tick's Actions
+- preflight查询/派发既有合格队列后，仍2running/0ready/0terminal/0operationalissue；现有BFC+CTS储备已满、creation0，不新增候选或新研究工具。
+- BTC首双样本原Train29及Val29都完成，3秒窗口无TRAIN增长并原样保存；没有据此推断失败。一轮边界复核确认原PID/start/argv/cwd/fd1/source/YAML/UUID不变，Train30 95→100；BCR Train12 3613→3620正常增长。
+- 22:03上海preflight Best BTC.4914/BCR.4848是训练中采集值，BTC后续自然进30；无新champion/终态，验证完成游标不当best，当前最终效能未知。
+- BFC当前资源可用性复用本轮真实NVML/原native进度，两个授权物理卡仍有原任务；本地current-owner/context/原deadline busy拒绝0transport。resource_check blocked只指无安全空槽，不代表FLOPs/显存/延迟profile或原生PASS。
+- 既有BFC源48fc/worker8839与CTS源bfab/禁用包ff7及未来parent null保持；旧9未到期不复测/读655正文或旧grantbody。M206暂停、旧科学状态及所有授权边界不变；0新版本/准入/queue/launch/运行变更。
+
+## 5. Decisions Made
+- 本轮没有新增研究或调度决策、失败或需用户处理事项。沿用BFC优先等自然空卡后fresh owner/UUID/idle/三锁/assets复核及原生测试；CTS保留准备，M206暂停。完整留档后例行无变化保持静默。
+
+Next tick: 以已保存自动化为准；本脚本未读取调度时间。

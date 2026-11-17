@@ -1,0 +1,36 @@
+{
+  "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+  "kind": "resource_check",
+  "result": "blocked",
+  "command": "SSH key+StrictHostKeyChecking to pinnedserver4; python -B nvidia-smi GPU0/1 UUID,memory,utilization,compute-context read-only guard",
+  "observation": {
+    "observed_at": "2026-10-20T21:26:39.053340+00:00",
+    "returncode": 0,
+    "stdout": "{\"observed_at\": \"2026-10-20T21:26:39.819670+00:00\", \"hostname\": \"dl04-MS-7E06\", \"gpus\": [{\"index\": 0, \"uuid\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\", \"used_memory_mib\": 15187, \"utilization_percent\": 25, \"contexts\": \"3842306, 15136\", \"idle\": false}, {\"index\": 1, \"uuid\": \"GPU-7f82edb9-f620-8045-caea-a75232265cd1\", \"used_memory_mib\": 14597, \"utilization_percent\": 80, \"contexts\": \"3873690, 14572\", \"idle\": false}]}\n",
+    "stderr": "",
+    "data": {
+      "observed_at": "2026-10-20T21:26:39.819670+00:00",
+      "hostname": "dl04-MS-7E06",
+      "gpus": [
+        {
+          "index": 0,
+          "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+          "used_memory_mib": 15187,
+          "utilization_percent": 25,
+          "contexts": "3842306, 15136",
+          "idle": false
+        },
+        {
+          "index": 1,
+          "uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+          "used_memory_mib": 14597,
+          "utilization_percent": 80,
+          "contexts": "3873690, 14572",
+          "idle": false
+        }
+      ]
+    }
+  },
+  "native_gpu_execution_started": false,
+  "reason": "Both latest-requested authorized server4 cards contain existing M205/M206 CUDA contexts; do not share/stop/move/evict. Static version prepared; real native check unrun."
+}

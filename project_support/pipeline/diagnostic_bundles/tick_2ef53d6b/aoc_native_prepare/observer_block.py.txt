@@ -1,0 +1,124 @@
+    if candidate:
+        aoc_module=importlib.import_module(qualified+'.ancestral_commutator')
+        original_plan=aoc_module.build_ancestry_path_plan;original_mean=aoc_module.mean_path_messages
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def exchange_pre(owner,values):
+            normalized,ids=values
+            assert owner is att.ancestral_commutator and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=aoc_coverage_preflight(members)
+            if not coverage['true_ancestral_order_path_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_ANCESTRY_PATH'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: no supported fine ancestry path before watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'cell_calls':[],'mean_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Two actual global shared-cell/GELU captures, each2F rows; actual second halves difference feeds two original means once. Actual outputs copied for reference, no cell/GELU/mean replay or auxiliary backward.',
+                'algebraic_swap_or_equal_ancestor_numerical_gate':'NOT_IMPLEMENTED_NOT_REQUIRED',
+                'offdiagonal_dependency_probe':'NOT_IMPLEMENTED_NOT_MEASURED'}
+            assert 'aoc_context' not in state
+            state['aoc_context']={'record':record,'normalized':normalized,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'builder_calls':0,'fine_index':[],'middle_input':[],'coarse_input':[],'middle_index':[],'coarse_index':[],
+                'mp':[],'cp':[],'mc':[],'cc':[],'phase':'first_cell','cell_count':0,'GELU_count':0,'mean_count':0,'mean_outputs':[]}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core input not differentiable before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,widths):
+            context=state['aoc_context'];batch=context['builder_calls'];context['builder_calls']+=1
+            assert (ids0,ids1,ids2)==context['members'][batch] and widths==context['widths']
+            output=original_plan(ids0,ids1,ids2,widths);record=aoc_plan_observation(output,(ids0,ids1,ids2));record['batch']=batch
+            context['record']['plans'].append(record);mo=len(context['middle_index']);co=len(context['coarse_index'])
+            for key,level,source in [('fine_index',0,'fine_ids'),('middle_input',1,'middle_for_paths'),('coarse_input',2,'coarse_for_paths'),('middle_index',1,'middle_ids'),('coarse_index',2,'coarse_ids')]:
+                context[key].extend(batch*widths[level]+i for i in output[source])
+            context['mp'].extend(mo+i for i in output['middle_parent_positions']);context['cp'].extend(co+i for i in output['coarse_parent_positions'])
+            context['mc'].extend(output['middle_path_counts']);context['cc'].extend(output['coarse_path_counts'])
+            return output
+        setattr(aoc_module,'build_ancestry_path_plan',observed_plan);global_replacements.append((aoc_module,'build_ancestry_path_plan',original_plan))
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def cell_pre(owner,values):
+            context=state['aoc_context'];which=context['cell_count'];assert which in (0,1)
+            assert context['phase']==('first_cell' if which==0 else 'second_cell') and context['builder_calls']==int(context['normalized'][0].shape[0])
+            value=values[0];c=att.ancestral_commutator.channels;n=len(context['fine_index'])
+            if which==0:
+                selected=[]
+                for level,key in enumerate(('fine_index','middle_input','coarse_input')):
+                    index=torch.tensor(context[key],device=value.device,dtype=torch.long)
+                    selected.append(context['normalized'][level].detach().reshape(-1,c).index_select(0,index))
+                a,b,coarse=selected;context['original_path_inputs']=selected
+                expected=torch.cat([torch.cat([a,b],dim=-1),torch.cat([a,coarse],dim=-1)],dim=0)
+            else:
+                a,b,coarse=context['original_path_inputs'];first=context['first_snapshot']
+                expected=torch.cat([torch.cat([first[:n],coarse],dim=-1),torch.cat([first[n:],b],dim=-1)],dim=0)
+            assert list(value.shape)==[2*n,2*c] and fingerprint(torch,value)==fingerprint(torch,expected)
+            record={'stage':which+1,'input':summary(value),'input_sha256':fingerprint(torch,value),
+                'actual_rows':2*n,'shared_original_cell':True,'input_matches_actual_raw_or_first_GELU_captures':True,'original_linear_calls':1}
+            assert record['input']['finite'];lite_watch(value,context['record']);context['pending_record']=record
+        def cell_post(owner,values,output):
+            context=state['aoc_context'];record=context['pending_record']
+            record.update(linear_output=summary(output),linear_output_sha256=fingerprint(torch,output));assert record['linear_output']['finite']
+            lite_watch(output,context['record']);context['linear_ref']=output;context['cell_count']+=1;context['phase']='GELU'
+        def activation_post(owner,values,output):
+            context=state['aoc_context'];which=context['GELU_count'];assert which in (0,1) and context['phase']=='GELU' and values[0] is context['linear_ref']
+            record=context['pending_record'];record.update(output=summary(output),output_sha256=fingerprint(torch,output),original_GELU_calls=1)
+            assert record['output']['finite'];lite_watch(output,context['record']);context['record']['cell_calls'].append(record)
+            if which==0:context['first_snapshot']=output.detach().clone();context['phase']='second_cell'
+            else:
+                context['second_ref']=output;context['second_snapshot']=output.detach().clone();n=len(context['fine_index'])
+                context['contrast_reference']=context['second_snapshot'][:n]-context['second_snapshot'][n:];context['phase']='middle_mean'
+            context['GELU_count']+=1
+        def observed_mean(messages,positions,counts):
+            context=state['aoc_context'];which=context['mean_count'];assert which in (0,1)
+            assert context['phase']==('middle_mean' if which==0 else 'coarse_mean')
+            assert positions==context['mp' if which==0 else 'cp'] and counts==context['mc' if which==0 else 'cc']
+            assert fingerprint(torch,messages)==fingerprint(torch,context['contrast_reference'])
+            if which==0:context['contrast_ref']=messages
+            else:assert messages is context['contrast_ref']
+            record={'level':which+1,'input':summary(messages),'input_sha256':fingerprint(torch,messages),
+                'actual_second_GELU_two_halves_difference':True,'same_actual_contrast_object':True,'parent_positions':list(positions),
+                'fine_path_counts':list(counts),'original_mean_function_calls':1,'returned_original_object_unchanged':True,
+                'mean_replayed_by_observer':False,'coarse_direct_fine_path_mean_not_middle_mean':which==1,'learned_pool_weights':False}
+            lite_watch(messages,context['record']);output=original_mean(messages,positions,counts)
+            record.update(output=summary(output),output_sha256=fingerprint(torch,output));assert record['output']['finite']
+            lite_watch(output,context['record']);context['mean_outputs'].append(output.detach().clone())
+            context['record']['mean_calls'].append(record);context['mean_count']+=1;context['phase']='coarse_mean' if which==0 else 'complete'
+            return output
+        setattr(aoc_module,'mean_path_messages',observed_mean);global_replacements.append((aoc_module,'mean_path_messages',original_mean))
+        hooks.extend([att.ancestral_commutator.cell.register_forward_pre_hook(cell_pre),att.ancestral_commutator.cell.register_forward_hook(cell_post),att.ancestral_commutator.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('aoc_context');record=context['record']
+            assert context['phase']=='complete' and len(output)==3 and context['cell_count']==context['GELU_count']==context['mean_count']==2
+            assert context['builder_calls']==int(output[0].shape[0]);c=att.ancestral_commutator.channels
+            sources=[context['contrast_reference'],*context['mean_outputs']]
+            for level,key in enumerate(('fine_index','middle_index','coarse_index')):
+                value=output[level];index=torch.tensor(context[key],device=value.device,dtype=torch.long)
+                reference=value.new_zeros((value.shape[0]*value.shape[1],c)).index_copy(0,index,sources[level]).reshape(value.shape)
+                assert fingerprint(torch,value)==fingerprint(torch,reference)
+                if not value.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core output not differentiable before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),
+                actual_true_fine_paths=sum(p['path_count'] for p in record['plans']),actual_cell_calls=context['cell_count'],
+                actual_GELU_calls=context['GELU_count'],actual_private_mean_calls=context['mean_count'],
+                actual_cell_rows=[v['actual_rows'] for v in record['cell_calls']],actual_original_builder_calls=context['builder_calls'],
+                actual_three_LN_calls=list(state['norm_counts']),actual_shared_cell_two_stage_diamond=True,
+                contrast_from_actual_second_GELU_halves_exact=True,upper_means_from_same_actual_contrast_exact=True,
+                final_deltas_from_actual_captures_exact=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'paths':p['path_count'],'empty_scene':not p['fine_ids'],
+                    'singleton_path':p['path_count']==1,'middle_path_counts':p['middle_path_counts'],'coarse_path_counts':p['coarse_path_counts'],
+                    'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            assert record['actual_true_fine_paths']>0
+            state['aoc_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.ancestral_commutator.register_forward_pre_hook(exchange_pre),att.ancestral_commutator.register_forward_hook(exchange_post)])

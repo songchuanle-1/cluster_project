@@ -1,0 +1,60 @@
+"""Read-only current runtime/source/process/original lock observation."""
+from pathlib import Path
+from datetime import datetime,timezone
+import base64,fcntl,hashlib,json,os,socket,stat,subprocess,sys
+P=json.load(sys.stdin)
+assert socket.gethostname()=="dl04-MS-7E06" and os.getuid()==os.geteuid()==1001
+assert datetime.now(timezone.utc)<datetime.fromisoformat(P["owner"]["deadline_at"])
+root=Path(P["runtime_root"]);assert root.resolve()==root and str(root)=="/data/songcl/Project/Cluster_project/Cluster_nsd_20261107"
+env={k:v for k,v in os.environ.items() if not k.startswith("GIT_")};env.update(GIT_OPTIONAL_LOCKS="0",GIT_CONFIG_NOSYSTEM="1",GIT_CONFIG_SYSTEM="/dev/null",GIT_CONFIG_GLOBAL="/dev/null")
+def git(*a):return subprocess.check_output(["/usr/bin/git","--no-optional-locks","-c","core.fsmonitor=false","-C",str(root),*a],env=env,timeout=15)
+def sha(q):return hashlib.sha256(q.read_bytes()).hexdigest()
+assert git("rev-parse","HEAD").decode().strip()==P["source_commit"]
+actual={}
+for relative,expected in P["source_files_exact9"].items():
+ q=root/relative;s=os.lstat(q);assert q.resolve()==q and stat.S_ISREG(s.st_mode) and s.st_uid==1001
+ actual[relative]=sha(q)
+ if relative==P["config"]:
+  preview=base64.b64decode(P["canonical_preview_bytes_base64"],validate=True);assert hashlib.sha256(preview).hexdigest()==P["canonical_preview_sha256"]
+  assert actual[relative] in (expected,P["canonical_preview_sha256"])
+ else:assert actual[relative]==expected,relative
+project=Path("/data/songcl/Project/Cluster_project");oldstage=project/"pipeline/runtime/rvec_path_prepare_558ef1ee";oldprod=project/"pipeline/runtime/rvec_path_prod_558ef1ee"
+trainers=[];workers=[]
+for proc in Path("/proc").iterdir():
+ if not proc.name.isdigit() or int(proc.name)==os.getpid():continue
+ try:
+  if proc.stat().st_uid!=1001:continue
+  argv=[x.decode(errors="replace") for x in (proc/"cmdline").read_bytes().split(b"\0") if x]
+  cwd=os.readlink(proc/"cwd")
+  item={"pid":int(proc.name),"argv":argv,"cwd":cwd}
+  if any(x=="tools/train.py" or x.endswith("/tools/train.py") for x in argv) and cwd.startswith(str(project)+"/"):trainers.append(item)
+  if any(x==str(q) or x.startswith(str(q)+"/") for q in (oldstage,oldprod) for x in argv):workers.append(item)
+ except (FileNotFoundError,ProcessLookupError,PermissionError):pass
+assert not trainers,"Project trainer exists; reconcile"
+assert not workers,"Old 558 production worker exists; reconcile"
+locks=[]
+for label,inode in (("training",92537152),("diagnostic",92537153),("exclusive",92537154)):
+ path=Path("/tmp/cluster_project_gpu0_"+label+".lock");fd=os.open(path,os.O_RDWR|os.O_CLOEXEC|os.O_NOFOLLOW)
+ try:
+  x,y=os.fstat(fd),os.lstat(path);assert stat.S_ISREG(x.st_mode) and x.st_uid==1001 and (x.st_dev,x.st_ino)==(y.st_dev,y.st_ino)==(66308,inode)
+  fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB);z=os.lstat(path);assert (z.st_dev,z.st_ino)==(66308,inode)
+  locks.append({"kind":label,"path":str(path),"dev":66308,"ino":inode,"device":66308,"inode":inode,"nonblocking_available":True})
+ finally:os.close(fd)
+def inspect(q):
+ exists=os.path.lexists(q);item={"path":str(q),"exists":exists}
+ if not exists:return item
+ s=os.lstat(q);assert stat.S_ISDIR(s.st_mode) and s.st_uid==1001 and q.resolve()==q
+ entries=sorted(q.iterdir());assert len(entries)<=100
+ item.update(mode=oct(stat.S_IMODE(s.st_mode)),files={})
+ for x in entries:
+  m=os.lstat(x);assert not stat.S_ISLNK(m.st_mode)
+  if stat.S_ISREG(m.st_mode):
+   assert m.st_size<=2*1024*1024;item["files"][x.name]={"sha256":sha(x),"bytes":m.st_size}
+ return item
+stage=inspect(oldstage);prod=inspect(oldprod)
+assert prod["exists"] is False,"Old production stage exists; preserve and reconcile"
+assert not os.path.lexists(oldprod/"train-consumed.json")
+gpu=subprocess.check_output(["nvidia-smi","-i","0","--query-gpu=index,uuid","--format=csv,noheader,nounits"],text=True,timeout=10).strip()
+assert [x.strip() for x in gpu.split(",")]==["0","GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"]
+assert git("rev-parse","HEAD").decode().strip()==P["source_commit"]
+print(json.dumps({"observed_at":datetime.now(timezone.utc).isoformat(),"current_owner":P["owner"],"hostname":socket.gethostname(),"uid":1001,"runtime_root":str(root),"runtime_HEAD":P["source_commit"],"source_files":actual,"runtime_config_sha256":actual[P["config"]],"config_is_original_or_exact_canonical_preview":True,"gpu0_identity_only":gpu,"original_locks":locks,"no_same_root_trainer":True,"project_trainers":trainers,"old_558_stage_workers":workers,"old_558_producer_stage":stage,"old_558_production_stage":prod,"old_558_marker_absent":True,"old_intents_replayed":False,"GPU_compute":False,"GPU_occupancy_or_resource_PASS":False,"signals_sent":False,"remote_files_written":False}))

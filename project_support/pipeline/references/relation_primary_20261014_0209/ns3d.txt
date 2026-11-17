@@ -1,0 +1,677 @@
+                          This CVPR paper is the Open Access version, provided by the Computer Vision Foundation.
+                                       Except for this watermark, it is identical to the accepted version;
+                                 the final published version of the proceedings is available on IEEE Xplore.
+
+
+
+
+              NS3D: Neuro-Symbolic Grounding of 3D Objects and Relations
+
+         Joy Hsu                                Jiayuan Mao                                                    Jiajun Wu
+    Stanford University              Massachusetts Institute of Technology                                 Stanford University
+    joycj@stanford.edu                             jiayuanm@mit.edu                                 jiajunwu@cs.stanford.edu
+
+
+
+                          Abstract                                     Complex 3D Grounding in 3D-REC
+                                                                       Instruction: Looking at the front of      Instruction: Facing the front of the
+                                                                       the copier, pick the printer that is to   cabinet, choose the lamp that is on
+    Grounding object properties and relations in 3D scenes is          the right of the copier.                  the left of it.
+a prerequisite for a wide range of artificial intelligence tasks,
+such as visually grounded dialogues and embodied manipu-
+lation. However, the variability of the 3D domain induces
+two fundamental challenges: 1) the expense of labeling and
+2) the complexity of 3D grounded language. Hence, essential
+desiderata for models are to be data-efficient, generalize to
+different data distributions and tasks with unseen semantic
+forms, as well as ground complex language semantics (e.g.,                                                  NS3D
+view-point anchoring and multi-object reference). To ad-                   Data Efficiency                                       Zero-Shot Transfer
+                                                                                                       Generalization               Train 3D-REC
+dress these challenges, we propose NS3D, a neuro-symbolic                     n% Train                                                   Task
+framework for 3D grounding. NS3D translates language into                                                    Train
+                                                                                                                                      Test 3D-QA
+programs with hierarchical structures by leveraging large                       Test                                                      Task
+language-to-code models. Different functional modules in                                                  Test novel
+                                                                                                           settings
+the programs are implemented as neural networks. Notably,
+NS3D extends prior neuro-symbolic visual reasoning meth-
+                                                                      Figure 1. NS3D achieves grounding of 3D objects and relations
+ods by introducing functional modules that effectively reason
+                                                                      in complex scenes, while showing state-of-the-art results in data
+about high-arity relations (i.e., relations among more than           efficiency, generalization, and zero-shot transfer.
+two objects), key in disambiguating objects in complex 3D
+scenes. Modular and compositional architecture enables
+NS3D to achieve state-of-the-art results on the ReferIt3D             usually given as a collection of object point clouds; the goal
+view-dependence task, a 3D referring expression compre-               is to identify the correct referred object in the scene. The task
+hension benchmark. Importantly, NS3D shows significantly              is challenging: obtaining high-quality annotations for such
+improved performance on settings of data-efficiency and gen-          tasks is expensive; the referring expressions often require
+eralization, and demonstrate zero-shot transfer to an unseen          reasoning about multiple objects, such as anchoring speaker
+3D question-answering task.                                           viewpoints (i.e., facing X, select the object Y behind Z) and
+                                                                      utilizing multiple objects in the scene as reference points.
+1. Introduction                                                           Many prior works have studied end-to-end methods to
+                                                                      tackle this problem [1, 2, 16–18, 20, 30, 37, 39, 40], jointly at-
+   Interacting with the physical world requires 3D visual             tending over features from language and point clouds. These
+understanding; it entails the ability to interpret 3D objects         methods report strong performance, but generally require
+and relations among multiple entities, as well as reason              large amounts of data to train and are prone to dataset bi-
+about 3D instances in a scene from language expressions.              ases, such as object co-occurrences. Meanwhile, the learned
+However, due to the variability of the 3D domain, there               3D representations cannot be directly transferred to related
+are two prevalent challenges: the expense of annotating               downstream tasks, such as 3D question answering. In addi-
+3D labels and the complexity of 3D grounded language.                 tion, most prior works in 3D grounding are based on Trans-
+In this paper, we tackle these two challenges on a specific           formers [33], which reduce the set of realizable functions to a
+task of 3D scene understanding, the referring expression              subset of reasoning tasks with binary relations [26, 33]. This
+comprehension (3D-REC) task. As shown in Figure 1, in a               has limited their ability to resolve complex 3D grounded
+3D-REC task, the input contains a sentence and a 3D scene,            languages, empirically leading to a noticeable performance
+
+
+
+                                                                    2614
+drop when the language contains view-dependent relations.            ficiency and generalization to unseen object co-occurrences
+    To this end, we propose NS3D as a powerful neuro-                and new scenes, with our neuro-symbolic method outper-
+symbolic approach to solve 3D visual reasoning tasks, with           forming all prior work by a large margin. Finally, we show
+more faithful grounding of 3D objects and relations. NS3D            NS3D’s ability to zero-shot transfer from the 3D reference
+first parses the referring expression from the free language         task to a new 3D visual question answering task, achieving
+form to a neuro-symbolic program form. We introduce the              strong performance without any data in this novel setup.
+use of Codex [11], a large language-to-code model, for se-               To summarize, the contribution of this paper is three-
+mantic parsing with a small number of prompting examples,            fold: 1) We propose a neuro-symbolic method to ground
+leading to perfect identification of entities and program struc-     3D objects and relations that integrates the power of large
+tures. Such program structures decompose each referring              language-to-code models and modular neural networks. 2)
+expression into a set of functional modules that are hierarchi-      We introduce a neural program executor that reasons about
+cally chained together. Functional modules can perform an            high-arity relations as a principled solution to view-point
+object-level grounding step, such as selecting the bathroom          anchoring and multi-object reference. 3) We show state-of-
+vanity from the input point clouds, and a relational grounding       the-art view-dependent grounding results in 3D-REC tasks,
+step, such as finding objects that are behind another reference      high accuracy in data-efficient settings (a 24.5 percent point
+object. This functional composition strategy can be easily           gain from prior work with 1.5% of data), significant improve-
+extended to more complex functions that require multiple ob-         ments in generalization to different data distributions, and
+jects, such as view-dependent relation grounding. In NS3D,           ability to zero-shot transfer to an unseen 3D-QA task.
+functional modules are implemented as different neural net-
+works that take object features of the corresponding arity:          2. Related Work
+e.g., object-level grounding modules take per-object features,       3D grounding. Many prior works that tackle the 3D-REC
+while relation grounding modules take a set of vector encod-         task employ end-to-end approaches that jointly attend over
+ings for each pair of objects. Importantly, NS3D extends             language and point clouds [7–10, 23], commonly leveraging
+prior neuro-symbolic approaches for visual reasoning [24]            a Transformer architecture [33]. These methods can be
+by introducing modules that execute high-arity programs,             broadly categorized into two types: object-centric ones, and
+such as those for relation grounding over multiple objects,          ones that model the full 3D scene. Most works based on full
+especially ubiquitous in the 3D domain.                              3D scene modeling use a detection module to create object
+    The combination of compositional structures and modular          proposals. For example, Text-guided Graph Neural Network
+neural networks fulfills many desiderata for 3D visual rea-          [17] conducts instance segmentation on the full scene to
+soning (see Figure 1). First, specializing neural modules for        create candidate objects as input to a graph neural network
+relations that involve multiple objects improves performance,        [32]; InstanceRefer [39] selects instance candidates from the
+particularly in resolving complex view-dependent referring           panoptic segmentation of point clouds; 3DVG-Transformer
+expressions. Our approach is noticeably simpler and more             [40] uses outputs from an object proposal generation module
+effective than existing models that solve this task by fusing        to fully leverage contextual clues for cross-modal proposal
+multiple view representations [18]. Second, the disentan-            disambiguation. The best performing work in this category,
+gled grounding of objects and relations brings significantly         BUTD-DETR [20], uses box proposals from a pretrained
+improved data efficiency. Third, by following symbolic               detector and scene features from the full 3D scene to decode
+structures to compose functional modules, NS3D general-              objects with a detection head. The Multi-View Transformer
+izes better to scenarios with unseen object co-occurrences           [18] separately models the scene by projecting the 3D scene
+and scene types. Fourth, the compositional nature of the             to a multi-view space, to eliminate dependence on specific
+functional structures and the flexibility of our Codex-based         views and learn robust representations.
+parser enables NS3D to zero-shot generalize to novel reason-             By contrast, object-centric models perform reasoning
+ing tasks, such as 3D visual question answering (3D-QA).             over an input set of object point clouds. ReferIt3DNet [2]
+Furthermore, as a byproduct of our modular approach, NS3D            utilizes a graph convolutional network with input objects as
+enables better interpretability, allowing attribution to where       nodes of the graph. 3DRefTransformer [1], LanguageRe-
+visual grounding fails and succeeds; we show in ablations            fer [30] TransRefer [16], and SAT [37] are Transformer-
+that NS3D learns almost perfect relation grounding.                  based methods that operate on language and 3D object point
+    We validate NS3D on the ReferIt3D benchmark, which               clouds. 3DRefTransformer [1] is an end-to-end Transformer
+evaluates referring expression comprehension in 3D scenes,           model that incorporates an object pairwise spatial relation
+and requires fine-grained object-centric and multi-object            loss. LanguageRefer [30] uses a Transformer architecture
+relation grounding [2]. We report state-of-the-art view-             over bounding box embeddings and language embedding
+dependent accuracy and comparable overall accuracy to                from DistilBert [31]. TransRefer [16] utilizes a Transformer-
+top-performing methods. We also present results on data ef-          based network to extract entity-and-relation-aware represen-
+
+
+
+                                                                   2615
+                                                               Symbolic Functional Program
+ Input Language:
+ Facing the front ...      𝒰          Semantic Parser                             𝑃                                                      Target Object
+                                                                                                             Neural Program
+                                                              3D Object and Relation Features                   Executor                          𝒯
+ Input
+                                      3D Object-Centric
+ Objects                   𝒪                                          (𝑓 !"# , 𝑓 $%& , 𝑓 '%$()$* )
+                                          Encoder
+
+
+Figure 2. NS3D is composed of three main components. a) A semantic parser parses the input language into a symbolic program. b) A 3D
+object-centric encoder takes input objects and learns object, relation, and ternary relation features. c) A neural program executor executes
+the symbolic program with the learned features to retrieve the target referred object.
+
+tations. SAT [37] leverages 2D image semantics with a multi-                                                   Parser
+modal Transformer for joint representation learning. NS3D
+                                                                                 𝓤 = “Facing the front                  anchor(
+lives in this category of methods, focusing on grounding ob-                     of the shelf, select the
+                                                                                                                          filter(scene(), shelf),
+                                                                                                                          relate(
+                                                                                 door that is on the                        filter(scene(), door),
+jects and relations over an object-centric representation. In                                               Codex           filter(scene(), shelf),
+                                                                                 right side of it.”                         anchor-right
+contrast to prior works, NS3D enables strong data efficiency,                                                             )
+                                                                                  Prompts                               )
+generalization, and zero-shot transfer to novel tasks, while
+not restricted to functions that Transformers can realize or
+constrained by the need for additional 2D data.                              Figure 3. The NS3D semantic parser leverages Codex to parse
+                                                                             input language into symbolic programs.
+Neuro-symbolic visual reasoning methods. Neuro-
+symbolic methods have shown strong data efficiency and                       tion f from the input point clouds of objects O (Section 3.2).
+generalization capability in the 2D visual reasoning do-                     The third is a neural network-based program executor that
+main, from visual question answering to image caption re-                    takes the symbolic program and the learned object-centric
+trieval [3, 4, 12, 15, 19, 21, 22, 25, 35, 36, 38], with the Neuro-          representation, and returns the target object T (Section 3.3).
+Symbolic Concept Learner [24] as a representative work.
+However, the 3D domain poses additional challenges, such                     3.1. Semantic parser
+as more complex, high-arity programs, required for anchor-                       The goal of the NS3D parser is to parse utterances U into a
+ing speaker view and using multiple reference objects to                     symbolic program P that resembles the underlying reasoning
+resolve a referring expression. NS3D builds on a 3D scene-                   process of U. The program has a hierarchy of primitive op-
+graph like representation [5, 34]. It retains all the benefits               erations defined in a minimal but powerful domain-specific
+of existing neuro-symbolic visual reasoning models, while                    language (DSL) for 3D visual reasoning tasks. Each opera-
+extending them to this challenging 3D domain. In addition,                   tion is composed of a function name (e.g., anchor or filter),
+NS3D sheds new lights on a broad criticism of prior neuro-                   and arguments (e.g., shelf, door, right). A key feature of
+symbolic methods on their use of a predefined grammar or                     such programs is that the output of one operation can be the
+trained parser [14, 24]: NS3D leverages large language-to-                   input (argument) to another operation, as shown in Figure 3.
+code models for semantic parsing [11].                                       Informally, the anchor program grounds the viewpoint, the
+                                                                             filter program takes all the input objects in the full scene and
+3. NS3D                                                                      outputs those that are of the specified category, and the relate
+                                                                             program returns objects that satisfy the given relationship
+    In this section, we describe NS3D applied to the task
+                                                                             constraint. We include a more formal definition of these
+of referring expression comprehension (3D-REC). We set
+                                                                             operations and the DSL in the supplementary material.
+up the task following ReferIt3D [2]: given a set of M ob-
+                                                                                 Parsing the input language into this hierarchical program
+jects in the scene O = {O1 , ..., OM }, where each object
+                                                                             allows NS3D to disentangle the learning of different func-
+is represented as an RGB-colored point cloud of N points
+                                                                             tional modules that perform object-level or relational ground-
+Oi ∈ RN ×6 , and given an utterance U, the goal is to predict
+                                                                             ing and reasoning. These neural programs can be trained
+the target referred object T ∈ O. Due to the existence of
+                                                                             and combined in different ways.
+many distractor objects in O, it is crucial to parse the full
+referring expression to select the correct target.                           Semantic parsing with Codex. In contrast to most exist-
+    NS3D is a neuro-symbolic approach that combines pro-                     ing neuro-symbolic reasoning frameworks, e.g., [24], instead
+grammatic functional structures and modular neural net-                      of using a pretrained or jointly-trained semantic parser, we
+works. It consists of three main components (see Figure 2).                  introduce the use of large language-to-code models for pars-
+The first is a semantic parser that parses the input language U              ing. Specifically, we use Codex [6,11] with the Synchromesh
+into a symbolic program P that resembles a hierarchical rea-                 framework [27]. By specifying only a small number of ex-
+soning process underlying U (Section 3.1). The second is a                   amples of language input and expected programs, we gain
+3D feature encoder that extracts an object-centric representa-               perfect parsing capabilities across unseen categories and re-
+
+
+
+                                                                        2616
+                                                    Encoder                                                                                                                                                                                         Executor
+   For each object 𝑖       For each pair of objects (𝑖, j)                                                                                                                                                                                                                                                                                                  𝒯
+                                         0,1                                      0,1
+         𝑂'                          𝑂'                                      𝑂)                                                                                                                                                                              anchor
+
+       𝜀 ,!-                     𝜀 %*+                                   𝜀 %*+                                                        filter                                                                                                                 relate
+             ,!-
+        𝑓'                                 MLP           !"#$%&
+                                                                                                                                                                                                                                                                                                                                                                              anchor-right
+                                                                                                                                      shelf                                                                    filter                                                                                      filter
+                                                        %*+                             /*%#$%&                /*%#$%&
+       𝑂! ∈ 𝒪                                         𝑓',)                 MLP                               𝑓',),.
+
+                                                                                                                                                                                                                     door                                                                                     shelf
+                                                                                                                                                                                                                                                                                                                                                                                                         …
+                                                                          "#$   "#$
+                                                                        (𝑂! , 𝑂% ) ∈ 𝒪 × 𝒪
+                                                                                                                         …
+                                                                                                                               Figure 5. The NS3D neural program executor executes the symbolic
+Figure 4. The NS3D object-centric encoder learns object, relation,                                                             program recursively with the learned 3D features, and returns the
+and ternary relation features from input object point clouds.                                                                  target referred object T .
+
+
+lations in the ReferIt3D task. Synchromesh constrains the                                                                      clouds Oipos ∈ R1024×3 , as we are interested in modeling
+output of Codex to be a valid, executable program, adhering                                                                    the spatial relations between objects rather than object types.
+to the syntactic rules of the DSL.                                                                                             Next, NS3D concatenates the per-object encoding for Oi
+    Using Codex as our semantic parser has two major ad-                                                                       and Oj and applies a small 2-layer multi-layer perceptron
+vantages. First, it only requires a small number of example                                                                    MLPbinary to extract relational features for the object pair:
+programs to achieve strong parsing accuracy, compared to                                                                              f^\text {rel}_{i,j} = \mathrm {MLP}^\text {binary}\left ( \mathrm {concat}\left ( \gE ^\text {rel}(O^\text {pos}_i), \gE ^\text {rel}(O^\text {pos}_j) \right ) \right ), 
+defining rules for semantic parsers or training from scratch.
+This enables us to easily generalize to new DSLs and tasks,                                                                    where concat denotes the concatenation operation for two
+such as recombining the learned functional modules in a                                                                        vectors. In our design, E rel is a shallower network that uses
+completely new way to answer visually grounded questions.                                                                      a sparser amount of samples than the object feature encoder
+Second, compared to existing works that assume a given set                                                                     E obj , which requires more fine-grained encoding of point
+of visual concepts (categories and relations) [19, 24], Codex                                                                  clouds to classify categories.
+can automatically identify unseen concepts from language                                                                           We also model ternary relations as seen in ReferIt3D (e.g.,
+through its built-in knowledge, even if they never appear in                                                                   a vector embedding for each triple of objects (Oi , Oj , Ok )).
+the prompting examples. In our experiments, we show that                                                                       Specifically, we propose using the encoder to also extract
+                                                                                                                                                    ternary
+Codex outperforms a T5-based parser [29] finetuned on the                                                                      a ternary feature fi,j,k     . As both the binary-relation fea-
+same set of prompting examples.                                                                                                tures and ternary-relation features focus on encoding spatial
+                                                                                                                               relationships among objects, NS3D shares the underlying
+3.2. 3D object-centric encoder                                                                                                 PointNet encoder for them. This reduces the time and mem-
+   NS3D’s 3D encoder generates object-centric and rela-                                                                        ory cost for high-arity inference. Mathematically,
+tional features for each scene in a latent space for 3D ground-                                                                                           g^\text {ternary}_{i,j} = & \mathrm {MLP}^\text {ternary}\left ( f^\text {rel}_{i, j} \right ), \\ f^\text {ternary}_{i,j,k} = & \mathrm {concat}\left ( g^\text {ternary}_{i,j}, g^\text {ternary}_{j,k}, g^\text {ternary}_{i,k} \right ),
+ing (see Figure 4). Recall that the input to the encoder is a
+collection of object point clouds O = {O1 , O2 , · · · , OM },
+where M is the number of objects. For each 3D object
+                                                                                                                               where MLPternary is another 2-layer multi-layer perceptron
+point cloud, the encoder first extracts an object feature vec-
+                                                                                                                               that shares the same architecture as MLPbinary .
+tor through a PointNet++ backbone E obj [28]. E obj takes
+as input every object Oi ∈ R1024×6 , representing the RGB                                                                      3.3. Neural program executor
+color of each point and their XYZ location in the Cartesian
+space, and outputs encoded features,                                                                                              The neural program executor takes the parsed program
+                                                                                                                               P and the learned representation (f obj , f rel , f ternary ) for each
+                        f^\text {obj}_{i} = \mathcal {E}^\text {obj}(O_i),\ \forall O_i \in \mathcal {O} .                     scene as input, and executes the program based on the 3D
+    Next, for each pair of 3D objects (Oi , Oj ), NS3D uses                                                                    representation, returning the target object being referred to.
+a separate encoder to extract their relational feature vector.                                                                 At a high-level, NS3D follows the hierarchical structure in
+The relation encoders are designed not to share weights with                                                                   P and executes the program recursively (see Figure 5). Here,
+the object encoders, allowing them to learn semantically                                                                       we describe the neural implementation for each operation.
+relevant features for relational reasoning. Specifically, NS3D                                                                    The key representation we will be using during program
+first encodes each object with a different PointNet++ network                                                                  execution is the object score vector, which is a vector of
+E rel . E rel takes in only the XYZ positions of object point                                                                  length M (the number of objects in the scene), indicating
+
+
+
+                                                                                                                             2617
+whether an object has been selected or not. For example,                                                                                                                                                                   front of the shelf, select the door that is on the right side of it.”
+semantically, the operation filter takes an input set of objects                                                                                                                                                           yields the program anchor(filter(shelf), ...). Internally, such
+being selected and an object category, and outputs a subset                                                                                                                                                                anchor operation will be handled as a ternary relation func-
+of input objects belonging to the specified category. Both the                                                                                                                                                             tion: ternary relate( filter(door), filter(shelf), filter(shelf),
+input and output of the filter operation will be represented                                                                                                                                                               anchor-right ). The two reference objects (the reference
+as such object score vectors. For numerical stability, such                                                                                                                                                                for the relation “right” and the anchor for “facing”) are the
+scores are represented in the log space. One interpretation                                                                                                                                                                same. Notably, NS3D’s ternary operation can be generalized
+is that each entry vi in a score vector represents the log                                                                                                                                                                 as a principled solution to any high-arity relations that can
+probability of object Oi being selected.                                                                                                                                                                                   be executed based on learned features of the corresponding
+scene() → y: the scene operation returns a object score                                                                                                                                                                    arity. In our ternary case, it is executed as the following:
+vector representing “all objects in the scene.” Recall that
+the values are in the log space; therefore, yi = 0, for all                                                                                                                                                                       & \textit {prob}^\text {trel}_{i, j, k} = \mathrm {MLP}^{\text {trel}}(f^\text {ternary}_{i, j, k})\\ & y_i = \min \left ( x^t_i, \sum _j \sum _k \textit {sx}(x^{r1})_j \cdot \textit {sx}(x^{r2})_k \cdot \textit {prob}^\text {trel}_{i, j, k} \right ).
+i ∈ {1, 2, · · · , M }.
+filter(x, c) → y: the filter operation takes an input object
+score vector x, an object category c, and returns a new object
+score vector, selecting objects that are in x and belongsto cat-                                                                                                                                                            The NS3D neural program executor composes the above
+                                                                                                                                                                                                                          operations and outputs the final object score vector, whose
+egory c. Therefore, we first compute probci = MLPc fiobj ,                                                                                                                                                                 maximum-valued index represents the referred object T .
+which is a score for object i belonging to category c, where
+MLPc is a mapping (specialized for c) from the dimension                                                                                                                                                                   3.4. Training
+of fiobj to dimension 1. Next, we merge it with the input
+                                                                                                                                                                                                                               Modules in NS3D can be trained end-to-end with only the
+object score vector x. Overall,
+                                                                                                                                                                                                                           groundtruth referred objects as supervision; each can also be
+          y_i = \min \left ( x_i, \textit {prob}^\text {c}_i \right ) = \min \left ( x_i, \mathrm {MLP}^\text {c}\left ( f^\text {obj}_i \right ) \right ).                                                                trained individually whenever additional labels are available.
+                                                                                                                                                                                                                           In this paper, we use a hybrid training objective similar to
+relate(xt , xr , rel) → y: the relate program takes as input                                                                                                                                                               prior works [2, 20]. Specifically, we use the groundtruth
+two sets of objects, target objects xt and reference objects                                                                                                                                                               object category to compute a per-object classification loss
+xr , as well as a relational concept rel, and outputs target                                                                                                                                                               Loce (applied to all probc , where c is the category) and the
+objects that satisfy the specified relation. As an example, the                                                                                                                                                            groundtruth final target object to compute a per-expression
+expression “the chair beside the shelf” will be parsed into                                                                                                                                                                loss Ltce . Both loss functions are standard cross-entropy
+the program relate(filter(chair), filter(shelf), beside)* . In this                                                                                                                                                        losses. The final total loss, with α = 1 in our experiments,
+case, xt will be the filter result for chair, while xr will be the                                                                                                                                                         is: Ltotal = Loce + α(Ltce ). Practically, we perform a two-
+filter result for shelf. The relate operation classifies whether                                                                                                                                                           stage training: we first pretrain the model with Loce until
+each pair of objects satisfy the relation rel, and selects the                                                                                                                                                             convergence, and then train with the full loss.
+objects in xt that have relation rel with objects in xr :                                                                                                                                                                      As a byproduct of NS3D’s modular structure, we gain
+                   \textit {prob}^\text {rel}_{i, j} = & \mathrm {MLP}^{\text {rel}}(f^\text {rel}_{i, j})\\ y_i = & \min \left ( x^t_i, \sum _j \textit {sx}(x^r)_j \cdot \textit {prob}^\text {rel}_{i, j} \right ),     improved model interpretability. We can validate whether
+                                                                                                                                                                                                                           specific programs yield correct outputs at each stage. This
+                                                                                                                                                                                                                           can help determine what types of additional data will be valu-
+                                                                                                                                                                                                                           able. In our experiments, we find that object categorization
+where MLPrel is a linear layer with scalar output and special-                                                                                                                                                             is the most challenging part of the 3D-REC task.
+ized for concept                                                                                                                                                                                                               NS3D does not need the full scene point cloud as its
+             P rel, and sx is the softmax function applied                                                                                                                                                                 input, and instead only explicitly models a given object set
+to xr . The j operator can be interpreted as a “soft” se-
+                                                                                                                                                                                                                           O. Therefore, we can train on scenes with a small number
+lection of the j ∗ -th row in the relation matrix probrel , where
+                                                                                                                                                                                                                           of objects (10 objects in our experiments) and directly test
+j ∗ = arg max xr , the index of the referred object.
+                                                                                                                                                                                                                           on scenes with much more objects (88 objects maximum in
+ternary relate(xt , xr1 , xr2 , trel) → y: we propose to extend                                                                                                                                                            the test set). This improves training efficiency and reduces
+the formulations above to handle object relationships that                                                                                                                                                                 the need for annotated 3D objects, which are expensive to
+involve more than two objects. In this case, xr1 and xr2                                                                                                                                                                   acquire in 3D domains. It also enables generalization to more
+are two reference objects. In ReferIt3D [2], there are two                                                                                                                                                                 cluttered and complex scenes. In all of our experiments, we
+types of ternary relationships: spatial ternary relations (e.g.,                                                                                                                                                           train NS3D on scenes with a sparse amount of objects and
+between), and view-dependent relations. Both are resolved                                                                                                                                                                  see no performance drop compared to training with a dense
+with this operation. As an example, the sentence “Facing the                                                                                                                                                               train set. By contrast, baseline methods yield significantly
+      * For conciseness, we have used filter(shelf) as a short-hand notation                                                                                                                                               decreased performance under this setting; we present these
+for filter(scene(), shelf).                                                                                                                                                                                                results in the supplementary material.
+
+
+
+                                                                                                                                                                                                                         2618
+4. Experiments                                                                                           OVERALL      V IEW- DEP.
+
+   We evaluate NS3D and compare it to prior work on the                   - W ITHOUT 3D SCENE MODELING
+ReferIt3D benchmark [2], a 3D referring expression compre-                NS3D ( OURS )                 0.627         0.620
+hension (3D-REC) task. We specifically focus on the SR3D                  SAT [37]                      0.579         0.492
+setting, which tackles spatially-oriented object referential              T RANS R EFER [16]            0.574         0.499
+language in 3D scenes. In Section 4.1, we compare perfor-                 L ANGUAGE R EFER [30]         0.560         0.492
+mance against baselines and report ablations. In Section 4.2              3DR EF T RANSFORMER [1]       0.470         0.443
+and Section 4.3, we show experiments on data efficiency and               R EFER I T 3D [2]             0.408         0.392
+generalization. Finally, in Section 4.4, we present NS3D’s                + W ITH 3D SCENE MODELING
+ability to zero-shot transfer to a 3D-QA task.
+                                                                          BUTD-DETR [20]                0.670†        0.530
+                                                                          MVT [18]                      0.645         0.584
+4.1. 3D referring expression comprehension
+                                                                          3DVG-T RANSFORMER [40]        0.514         0.446
+   In the ReferIt3D task, the input is a set of point clouds,             I NSTANCE R EFER [39]         0.480         0.454
+one for each object in the scene, as well as the utterance,               T EXT-G UIDED -GNN S [17]     0.450         0.458
+and the target object is assumed to be unique. Therefore,
+                                                                    Table 1. NS3D yields the highest overall accuracy on the SR3D task
+models can be evaluated by the accuracy of selecting the            among object-centric methods, and state-of-the-art view-dependent
+correct object. Figure 6 shows an example task instance in          accuracy across all methods.
+ReferIt3D and its NS3D execution trace.
+Results. In Table 1, we compare NS3D to baselines. We                𝓤 = “Facing the couch
+group methods into two categories: methods that only use the         from the side you sit on it,
+                                                                     choose the cabinet that is
+per-object point clouds and methods that model the full scene.
+                                                                     to the right of this couch.”
+The results show that we outperform other object-centric
+methods and achieve comparable performance with top-
+                                                                         filter(scene(), couch)
+performing methods. In addition, we demonstrate state-of-
+the-art view-dependent accuracy compared to all prior work,
+with an improvement of 3.6% against the top-performing
+baseline. NS3D shows close performance between overall
+and view-dependent accuracy, while all other methods yield
+                                                                         filter(scene(), cabinet)
+a large gap. Note that unlike models such as MVT [18] that
+explicitly transform and encode point clouds from multi-
+ple views to improve multi-view performances, our model
+simply uses a general high-arity neural network.
+                                                                         anchor(
+Ablations. In Table 3, we first discuss the performance                    filter(couch),
+of relational grounding modules. Specifically, since the                   relate(
+                                                                             filter(cabinet),
+ReferIt3D dataset does not contain groundtruth labels for                    filter(couch),
+object relations, we study the performance of relation ground-               anchor-right
+                                                                           )
+ing modules by evaluting NS3D performance using the                      )
+groundtruth object classification for all filter operations. We
+see that NS3D achieves almost perfect performance on the
+task, indicating that it learns relations and high-arity rela-      Figure 6. Example of NS3D’s execution trace on a view-dependent
+                                                                    3D-REC task. NS3D returns the correct target cabinet object.
+tions well. Our neuro-symbolic approach allows for such
+diagnostics of model performance: the primary challenge             relations) by removing the second reference object. It leads
+to NS3D is object classification, which can potentially be          to a 5.8% drop in view-dependent accuracy, which supports
+improved with more object labels.                                   the importance of high-arity modules.
+    We next explore the importance of separating object en-
+coders E obj and E rel . Having separate object and relation        4.2. Data efficiency
+features allows each to specialize in different goals: object
+classification and relational reasoning. We see that over-             We report experiments on data efficiency compared to
+all performance decreases by 4.6% if they share the same            four top-performing prior work on ReferIt3D, two object-
+feature encoder. We additionally present results on using           centric methods (SAT [37] and TransRefer [16]) and two
+an incorrect number of arguments for executing high-arity               †We note that BUTD-DETR operates on a more constrained setting,
+
+queries (i.e., spatial ternary relations and view-dependent         assuming 485 classes instead of the full 607 classes in ReferIt3D.
+
+
+
+
+                                                                  2619
+                                     0.5%                    1.5%                   2.5%                       5%                     10%
+                              A LL      V- DEP.       A LL      V- DEP.      A LL       V- DEP.        A LL      V- DEP.       A LL       V- DEP.
+  NS3D + FULL (O URS )        0.503     0.395         0.576     0.468        0.587      0.505          0.597     0.505         0.612      0.552
+  NS3D (O URS )               0.426     0.375         0.520     0.424        0.556      0.483          0.591     0.493         0.600      0.527
+  BUTD-DETR [20]              0.083     0.089         0.158     0.138        0.259      0.223          0.395     0.302         0.528      0.420
+  MVT [18]                    0.161     0.118         0.275     0.199        0.322      0.270          0.380     0.375         0.491      0.426
+  SAT [37]                    0.172     0.149         0.260     0.254        0.298      0.273          0.330     0.309         0.362      0.334
+  T RANS R EFER [16]          0.188     0.152         0.268     0.233        0.305      0.278          0.362     0.380         0.390      0.378
+
+Table 2. Data efficiency results of NS3D compared to prior works, with 0.5%, 1.5%, 2.5%, 5%, and 10% of train data. We report two
+variations of NS3D, with object classification pretrained on the full dataset and pretrained on the specified data-efficient train set.
+                                                                                             Overall                           View-Dependent
+                                      OVERALL       V IEW- DEP.
+    NS3D W / GT OBJ . CLS .           0.969         0.823
+    NS3D W / O SEP. FEAT.             0.581         0.512
+    NS3D W / O TERNARY ARG .          0.609         0.562
+    NS3D (F ULL )                     0.627         0.620
+
+Table 3. Ablation on NS3D with groundtruth object classification
+results in filter, without separation of object and relation features,
+and without leveraging the correct arity for ternary operations.
+
+methods that model the full 3D scene (BUTD-DETR [20]
+and MVT [18]). We test on 0.5% (329 examples), 1.5% (987
+                                                                            Figure 7. NS3D outperforms prior works by a large margin with
+examples), 2.5% (1,646 examples), 5% (3,292 examples),                      0.5%, 1.5%, 2.5%, 5%, and 10% of train data.
+and 10% of data (6,584 examples) in the train set, with the
+same full test set. We note that BUTD-DETR [20] uses
+                                                                            erence object category (e.g., chair-closest-door). The test
+pretrained object classification results on the full ScanNet
+                                                                            set contains the bottom 95 percent of object-relation-object
+dataset [13], while others do not. Hence in Table 2, we
+                                                                            pairs in the long-tailed distribution. NS3D does not see a
+report NS3D’s performance on both settings: pretrained
+                                                                            noticeable performance drop, while methods that encode
+object classification on the full ReferIt3D train set (NS3D +
+                                                                            dataset bias by attending over all objects regardless of the
+Full), and on the smaller train set only (NS3D).
+                                                                            functional structures perform poorly in evaluation.
+    Shown in Figure 7, we see that in both settings, our
+                                                                               The second setting (SCENE) evaluates model perfor-
+neuro-symbolic approach significantly outperforms prior
+                                                                            mance on an unseen scene type. The train set includes train
+work across all data-efficient settings, achieving only small
+                                                                            examples with all scene types aside from that of “living
+drops in accuracy compared to training on the full train set.
+                                                                            room”, while the test set only contains examples in living
+NS3D yields 52.0% accuracy with just 1.5% of the train data,
+                                                                            rooms. This is an important generalization setting, as we
+with 987 examples only, while all other baselines report ac-
+                                                                            often want to evaluate models on new environments, without
+curacy lower than 27.5%. We see this trend persist across
+                                                                            having to additionally label examples with every new scene
+data-efficient settings. NS3D sees only a 3.6% gap when
+                                                                            type. NS3D outperforms all prior work in this setting‡ .
+using 5% vs 100% of data, while all other methods decrease
+in performance significantly. NS3D’s accuracy of 59.1% at                   4.4. Zero-shot transfer
+5% train data is higher than that of baselines at 100% train
+data, aside from BUTD-DETR [20] and MVT [18]. This                             Finally, we showcase NS3D’s ability to zero-shot transfer
+is a significant improvement in the 3D domain, where data                   to a new 3D question answering task (3D-QA). Since there
+annotation is especially labor intensive and expensive.                     are no existing closed-vocabulary 3D-QA datasets in the
+                                                                            same domain, we have manually created a small evaluation
+4.3. Generalization                                                         set of 50 examples for 3D-QA, where the input is a set of
+    We present two additional generalization settings and                   objects in the scene, O = {O1 , ..., OM }, and a question
+compare our model against prior work in Table 4. The first                  Q. In contrast to the 3D-REC task, where the output is
+setting (PAIRS) evaluates performance on unseen object-                     the target object, the output for 3D-QA is an answer in
+relation-object pairs. The referring expressions in the train                   ‡We note that view-dependent accuracy for scene generalization has
+set include the top 5 percent of object-relation-object pairs:              high variance due to the small amount (36 examples) of test view-dependent
+i.e., the referred object category, relation type, and the ref-             examples in living room scenes.
+
+
+
+
+                                                                          2620
+                                  PAIRS             S CENE                                     A LL       E XIST   C OUNT       O BJ      R EL
+                           A LL      V- DEP.   A LL     V- DEP              NS3D + C ODEX      0.68       0.80     0.67         0.60     0.60
+                                                                            NS3D + T5          0.30       0.40     0.13         0.40     0.30
+ NS3D + FULL (O URS )      0.612     0.635     0.563    0.583
+                                                                            R ANDOM            0.16       0.40     0.07         0.00     0.10
+ NS3D (O URS )             0.599     0.620     0.544    0.611
+ BUTD-DETR [20]            0.440     0.423     0.515    0.583          Table 5. NS3D’s zero-shot transfer performance on the 3D-QA
+ MVT [18]                  0.420     0.353     0.502    0.500          task, with comparison of semantic parsers (Codex vs T5), and with
+ SAT [37]                  0.359     0.380     0.451    0.500          a randomly initialized model as baseline.
+ T RANS R EFER [16]        0.322     0.344     0.384    0.361
+                                                                                      Exist                                Count
+Table 4. Generalization performance to unseen object co-
+occurrence pairs and scene. NS3D outperforms all baselines.
+
+text form (the vocabulary contains all categories, relations,
+Yes/No, and integers). The dataset consists of four main
+types of questions; see Figure 8 for examples of each type.             Q: Is there a chair between the      Q: How many keyboards are in
+The first are exist-typed questions, which ask whether an               table and the window?                the scene?
+object of the specified class and relation exists. The second           A: Yes            NS3D: Yes          A: 6          NS3D: 6
+are count-typed questions, which ask for the number of                               Object                               Relation
+objects that satisfies the specification. The third are object-
+typed questions, which ask for object categories, and the last
+are relation-typed questions, which ask for the relationship
+between the specified objects. Each type of question has
+view-dependent and ternary relation variants.
+    In the semantic parsing stage, NS3D parses the new in-              Q: What is the object under          Q: Facing the fridge, what is the
+put questions into symbolic programs by specifying only a               the laptop?                          relation between the stove and
+                                                                        A: Table         NS3D: Table         the fridge?
+handful of prompts for our Codex-based parser (10 sentence-                                                  A: Right         NS3D: Right
+program pairs). By simply specifying one prompt for each
+                                                                        Figure 8. Examples of 4 questions types from the 3D-QA task.
+type of expected program structure, we gain perfect parsing
+capabilities of this new program structure. In the 3D feature          syntactically and semantically correct programs. We also
+encoding stage, NS3D can directly re-use learned object and            report accuracy from a randomly initialized NS3D model,
+relation grounding modules from 3D-REC for 3D-QA. The                  showing that executing programs with learned modules is
+3D object-centric features are the same across both tasks.             indeed significantly more successful in this task. We show
+    The new functional modules introduced in NS3D for 3D-              more qualitative examples in the supplementary material.
+QA task output text answers. The query exist operation is              5. Conclusion
+implemented as max over a threshold, and the query count
+operation as the sum over a threshold, both based on the                  We have presented NS3D, a neuro-symbolic model for
+object score vector. The query object and query relation op-           3D grounding that leverages compositional programs and
+erations return the category or relation label with the highest        modular neural networks to solve complex 3D-REC tasks. It
+prediction probability across labels. Formal definitions for           enables strong data-efficiency, generalization to novel data
+each operation are described in the supplementary material.            distributions, and zero-shot transfer of 3D knowledge to
+Note that all modules require no additional training, and are          a new 3D-QA task. We show that we can integrate large
+built through composing learned models from 3D-REC.                    language-to-code models with modular neural networks, and
+    We show that NS3D can zero-shot transfer across tasks              accurately parse language into symbolic programs for vi-
+in 3D, with no additional finetuning or training of neural             sual reasoning. We also present a neural program executor
+networks required. In Table 5, we report accuracy, calculated          that implements high-arity operations effectively to ground
+as the exact match of the text output, for overall performance         complex semantic forms, such as view-dependent anchor-
+and for each question type. We compare against NS3D with               ing. Together, these components of NS3D form a powerful
+a finetuned T5 conditional generation model [29] as its se-            model for 3D visual understanding. As a future direction,
+mantic parser (NS3D + T5), instead of with Codex (NS3D +               combining NS3D with strong object localization models can
+Codex). The T5 model is pretrained then finetuned on the               potentially enable learning directly from 3D scenes.
+same set of examples that Codex received. NS3D with Codex              Acknowledgments. This work is in part supported by Stan-
+outperforms NS3D with the finetuned T5 model by a large                ford HAI, NSF RI #2211258, ONR MURI N00014-22-1-
+margin, due to T5’s inability to generalize to new words out-          2740, AFOSR YIP FA9550-23-1-0127, Amazon, Analog
+side of its small train set as well as errors in parsing text into     Devices, Bosch, JPMorgan Chase, Meta, and Salesforce.
+
+
+
+                                                                     2621
+References                                                                    Proceedings of the IEEE conference on computer vision and
+                                                                              pattern recognition, pages 5828–5839, 2017. 7
+ [1] Ahmed Abdelreheem, Ujjwal Upadhyay, Ivan Skorokhodov,
+                                                                         [14] Mingtao Feng, Zhen Li, Qi Li, Liang Zhang, XiangDong
+     Rawan Al Yahya, Jun Chen, and Mohamed Elhoseiny. 3dref-
+                                                                              Zhang, Guangming Zhu, Hui Zhang, Yaonan Wang, and Aj-
+     transformer: Fine-grained object identification in real-world
+                                                                              mal Mian. Free-form description guided 3d visual graph
+     scenes using natural language. In Proceedings of the
+                                                                              network for object grounding in point cloud. In Proceed-
+     IEEE/CVF Winter Conference on Applications of Computer
+                                                                              ings of the IEEE/CVF International Conference on Computer
+     Vision, pages 3941–3950, 2022. 1, 2, 6
+                                                                              Vision, pages 3722–3731, 2021. 3
+ [2] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed
+                                                                         [15] Chi Han, Jiayuan Mao, Chuang Gan, Josh Tenenbaum, and
+     Elhoseiny, and Leonidas Guibas. Referit3d: Neural listeners
+                                                                              Jiajun Wu. Visual concept-metaconcept learning. Advances
+     for fine-grained 3d object identification in real-world scenes.
+                                                                              in Neural Information Processing Systems, 32, 2019. 3
+     In European Conference on Computer Vision, pages 422–440.
+     Springer, 2020. 1, 2, 3, 5, 6                                       [16] Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei
+                                                                              Huang, Aixi Zhang, and Si Liu. Transrefer3d: Entity-and-
+ [3] Jacob Andreas, Marcus Rohrbach, Trevor Darrell, and Dan
+                                                                              relation aware transformer for fine-grained 3d visual ground-
+     Klein. Learning to compose neural networks for question
+                                                                              ing. In Proceedings of the 29th ACM International Conference
+     answering. arXiv preprint arXiv:1601.01705, 2016. 3
+                                                                              on Multimedia, pages 2344–2352, 2021. 1, 2, 6, 7, 8
+ [4] Jacob Andreas, Marcus Rohrbach, Trevor Darrell, and Dan
+     Klein. Neural module networks. In Proceedings of the IEEE           [17] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and
+     conference on computer vision and pattern recognition, pages             Tyng-Luh Liu. Text-guided graph neural networks for refer-
+     39–48, 2016. 3                                                           ring 3d instance segmentation. In Proceedings of the AAAI
+                                                                              Conference on Artificial Intelligence, pages 1610–1618, 2021.
+ [5] Iro Armeni, Zhi-Yang He, JunYoung Gwak, Amir R Zamir,
+                                                                              1, 2, 6
+     Martin Fischer, Jitendra Malik, and Silvio Savarese. 3d scene
+     graph: A structure for unified semantics, 3d space, and cam-        [18] Shijia Huang, Yilun Chen, Jiaya Jia, and Liwei Wang. Multi-
+     era. In Proceedings of the IEEE/CVF international conference             view transformer for 3d visual grounding. In Proceedings of
+     on computer vision, pages 5664–5673, 2019. 3                             the IEEE/CVF Conference on Computer Vision and Pattern
+ [6] Tom Brown, Benjamin Mann, Nick Ryder, Melanie Sub-                       Recognition, pages 15524–15533, 2022. 1, 2, 6, 7, 8
+     biah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakantan,        [19] Drew Hudson and Christopher D Manning. Learning by
+     Pranav Shyam, Girish Sastry, Amanda Askell, et al. Language              abstraction: The neural state machine. Advances in Neural
+     models are few-shot learners. Advances in neural information             Information Processing Systems, 32, 2019. 3, 4
+     processing systems, 33:1877–1901, 2020. 3                           [20] Ayush Jain, Nikolaos Gkanatsios, Ishita Mediratta, and Kate-
+ [7] Daigang Cai, Lichen Zhao, Jing Zhang, Lu Sheng, and Dong                 rina Fragkiadaki. Bottom up top down detection transform-
+     Xu. 3djcg: A unified framework for joint dense captioning                ers for language grounding in images and point clouds. In
+     and visual grounding on 3d point clouds. In Proceedings of               European Conference on Computer Vision, pages 417–433.
+     the IEEE/CVF Conference on Computer Vision and Pattern                   Springer, 2022. 1, 2, 5, 6, 7, 8
+     Recognition, pages 16464–16473, 2022. 2                             [21] Justin Johnson, Bharath Hariharan, Laurens Van Der Maaten,
+ [8] Dave Zhenyu Chen, Angel X Chang, and Matthias Nießner.                   Judy Hoffman, Li Fei-Fei, C Lawrence Zitnick, and Ross
+     Scanrefer: 3d object localization in rgb-d scans using natural           Girshick. Inferring and executing programs for visual reason-
+     language. In European Conference on Computer Vision, pages               ing. In Proceedings of the IEEE international conference on
+     202–221. Springer, 2020. 2                                               computer vision, pages 2989–2998, 2017. 3
+ [9] Dave Zhenyu Chen, Qirui Wu, Matthias Nießner, and An-               [22] Qing Li, Siyuan Huang, Yining Hong, Yixin Chen, Ying Nian
+     gel X. Chang. D3net: A speaker-listener architecture for                 Wu, and Song-Chun Zhu. Closed loop neural-symbolic learn-
+     semi-supervised dense captioning and visual grounding in                 ing via integrating neural perception, grammar parsing, and
+     rgb-d scans, 2021. 2                                                     symbolic reasoning. In International Conference on Machine
+[10] Jiaming Chen, Weixin Luo, Xiaolin Wei, Lin Ma, and                       Learning, pages 5884–5894. PMLR, 2020. 3
+     Wei Zhang. Ham: Hierarchical attention model with                   [23] Junyu Luo, Jiahui Fu, Xianghao Kong, Chen Gao, Haibing
+     high performance for 3d visual grounding. arXiv preprint                 Ren, Hao Shen, Huaxia Xia, and Si Liu. 3d-sps: Single-stage
+     arXiv:2210.12513, 2022. 2                                                3d visual grounding via referred point progressive selection.
+[11] Mark Chen, Jerry Tworek, Heewoo Jun, Qiming Yuan, Hen-                   In Proceedings of the IEEE/CVF Conference on Computer
+     rique Ponde de Oliveira Pinto, Jared Kaplan, Harri Edwards,              Vision and Pattern Recognition, pages 16454–16463, 2022. 2
+     Yuri Burda, Nicholas Joseph, Greg Brockman, et al. Evalu-           [24] Jiayuan Mao, Chuang Gan, Pushmeet Kohli, Joshua B Tenen-
+     ating large language models trained on code. arXiv preprint              baum, and Jiajun Wu. The neuro-symbolic concept learner:
+     arXiv:2107.03374, 2021. 2, 3                                             Interpreting scenes, words, and sentences from natural super-
+[12] Wenhu Chen, Zhe Gan, Linjie Li, Yu Cheng, William Wang,                  vision. arXiv preprint arXiv:1904.12584, 2019. 2, 3, 4
+     and Jingjing Liu. Meta module network for compositional             [25] David Mascharka, Philip Tran, Ryan Soklaski, and Arjun
+     visual reasoning. In WACV, 2021. 3                                       Majumdar. Transparency by design: Closing the gap be-
+[13] Angela Dai, Angel X Chang, Manolis Savva, Maciej Hal-                    tween performance and interpretability in visual reasoning.
+     ber, Thomas Funkhouser, and Matthias Nießner. Scannet:                   In Proceedings of the IEEE conference on computer vision
+     Richly-annotated 3d reconstructions of indoor scenes. In                 and pattern recognition, pages 4942–4950, 2018. 3
+
+
+
+
+                                                                       2622
+[26] William Merrill and Ashish Sabharwal. Transformers imple-            [39] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang, Sheng
+     ment first-order logic with majority quantifiers. arXiv preprint          Wang, Zhen Li, and Shuguang Cui. Instancerefer: Cooper-
+     arXiv:2210.02671, 2022. 1                                                 ative holistic understanding for visual grounding on point
+[27] Gabriel Poesia, Oleksandr Polozov, Vu Le, Ashish Tiwari,                  clouds through instance multi-level contextual referring. In
+     Gustavo Soares, Christopher Meek, and Sumit Gulwani. Syn-                 Proceedings of the IEEE/CVF International Conference on
+     chromesh: Reliable code generation from pre-trained lan-                  Computer Vision, pages 1791–1800, 2021. 1, 2, 6
+     guage models. arXiv preprint arXiv:2201.11227, 2022. 3               [40] Lichen Zhao, Daigang Cai, Lu Sheng, and Dong Xu. 3dvg-
+[28] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J                     transformer: Relation modeling for visual grounding on point
+     Guibas. Pointnet++: Deep hierarchical feature learning on                 clouds. In Proceedings of the IEEE/CVF International Con-
+     point sets in a metric space. Advances in neural information              ference on Computer Vision, pages 2928–2937, 2021. 1, 2,
+     processing systems, 30, 2017. 4                                           6
+[29] Colin Raffel, Noam Shazeer, Adam Roberts, Katherine Lee,
+     Sharan Narang, Michael Matena, Yanqi Zhou, Wei Li, Pe-
+     ter J Liu, et al. Exploring the limits of transfer learning
+     with a unified text-to-text transformer. J. Mach. Learn. Res.,
+     21(140):1–67, 2020. 4, 8
+[30] Junha Roh, Karthik Desingh, Ali Farhadi, and Dieter Fox.
+     Languagerefer: Spatial-language model for 3d visual ground-
+     ing. In Conference on Robot Learning, pages 1046–1056.
+     PMLR, 2022. 1, 2, 6
+[31] Victor Sanh, Lysandre Debut, Julien Chaumond, and Thomas
+     Wolf. Distilbert, a distilled version of bert: Smaller, faster,
+     cheaper and lighter. arXiv preprint arXiv:1910.01108, 2019.
+     2
+[32] Franco Scarselli, Marco Gori, Ah Chung Tsoi, Markus Hagen-
+     buchner, and Gabriele Monfardini. The graph neural network
+     model. IEEE transactions on neural networks, 20(1):61–80,
+     2008. 2
+[33] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+     reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+     Polosukhin. Attention is all you need. Advances in neural
+     information processing systems, 30, 2017. 1, 2
+[34] Johanna Wald, Helisa Dhamo, Nassir Navab, and Federico
+     Tombari. Learning 3d semantic scene graphs from 3d indoor
+     reconstructions. In Proceedings of the IEEE/CVF Conference
+     on Computer Vision and Pattern Recognition, pages 3961–
+     3970, 2020. 3
+[35] Hao Wu, Jiayuan Mao, Yufeng Zhang, Yuning Jiang, Lei
+     Li, Weiwei Sun, and Wei-Ying Ma. Unified visual-semantic
+     embeddings: Bridging vision and language with structured
+     meaning representations. In Proceedings of the IEEE/CVF
+     Conference on Computer Vision and Pattern Recognition,
+     pages 6609–6618, 2019. 3
+[36] Jiajun Wu, Joshua B Tenenbaum, and Pushmeet Kohli. Neural
+     scene de-rendering. In Proceedings of the IEEE Conference
+     on Computer Vision and Pattern Recognition, pages 699–707,
+     2017. 3
+[37] Zhengyuan Yang, Songyang Zhang, Liwei Wang, and Jiebo
+     Luo. Sat: 2d semantics assisted training for 3d visual ground-
+     ing. In Proceedings of the IEEE/CVF International Confer-
+     ence on Computer Vision, pages 1856–1866, 2021. 1, 2, 3, 6,
+     7, 8
+[38] Kexin Yi, Jiajun Wu, Chuang Gan, Antonio Torralba, Push-
+     meet Kohli, and Joshua B Tenenbaum. Neural-symbolic
+     VQA: Disentangling Reasoning from Vision and Language
+     Understanding. In NeurIPS, 2018. 3
+
+
+
+
+                                                                        2623
+

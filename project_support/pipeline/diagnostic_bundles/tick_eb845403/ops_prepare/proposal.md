@@ -1,0 +1,7 @@
+Selected next diagnostic: one permission-first, bounded exact-PID search in /var/log/kern.log, kern.log.1, syslog and syslog.1. This may expose the actual worker faulting shared object/IP; no Torch, extension call, training, restart, configuration change, journal/core retry or readelf repeat.
+
+Read at most128KiB per file (512KiB total), only if currently readable and nonsymlink regular files. Emit only exact worker3815203/main3813109 PID matches, bounded to8 lines/file; retain original timestamps and require root to corroborate the original11:27:46–11:37:46UTC window. No unmatched lines or raw suffixes are emitted. Missing/denied/no-match observations do not prove absence of a crash record or target-window coverage.
+
+This precedes speculative CPU smoke: the static audit exposes low-level voxel API contract gaps, while the admitted caller prevents normal empty/three-column inputs and supplies expected dtype/device/contiguity/batch IDs. Reproducing an invalid standalone call would establish a different fact. The actual worker sample and stage were not captured, so arbitrary data/CPU passes cannot demonstrate repair.
+
+Root may execute the optional body once after current-owner source review, with its existing exclusive-intent read-only wrapper. Stdin payload: execute_root=true and the exact current owner. Body has a defaultNOP, hostname/UID/deadline pins and no subprocess calls. Author only syntax-checked/default-NOP locally; all previous leases and evidence remain unchanged.

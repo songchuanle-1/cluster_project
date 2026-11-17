@@ -1,0 +1,27 @@
+{
+  "status": "CPU_DIAGNOSTIC_EXCEPTION_COLLECTOR_FIX_ONLY_NOT_NATIVE_PASS",
+  "previous_remote": {
+    "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r1/remote_cpu_import_probe.py",
+    "sha256": "33c5930f4e5fa1fbf87bdaf3eb06621585b04a74ab0b5568c8bcc4633701dfe3"
+  },
+  "previous_result": {
+    "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r1/cpu_import_probe_result.json",
+    "sha256": "3d86c32f911c6c70f057350356a0c96bf2592189791830688fd678e78890bd38"
+  },
+  "actual_previous_error": "CPU importtools.train failed in sympy/re/sre_compile for-unpack expected0; its formatter then failed in audit genexpr. Original CPU diagnostic result retained.",
+  "changes": [
+    "Collect original exception frames first, without traceback.format_exc/linecache/regex. Include f_lasti and raw co_code window.",
+    "Audit mode scan uses simple loop; precise /dev/null and uname -p allowances unchanged.",
+    "Emit initial loaded-vs-freshly-source-compiled code fingerprints and each stage start before imports; capture collector faults separately. No stdlib function replacement or dependency/source mutation.",
+    "A fresh private diagnostic CPU attempt only; no native request replay or GPU setup."
+  ],
+  "new_remote": {
+    "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r2/remote_cpu_import_probe.py",
+    "sha256": "a9ae009495696e9c05cfcdb82c3760de69f5541bfa52d421977e1e17e03bde12"
+  },
+  "new_controller": {
+    "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r2/run_cpu_import_probe.py",
+    "sha256": "e689b941c32f4ddc65a8bcebe201b63fc6514fc26f8d143e1d09e783cad11482"
+  },
+  "compiled_not_executed_by_author": true
+}

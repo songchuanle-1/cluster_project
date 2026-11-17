@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-30T00:15:45.819904+00:00",
+  "status": "BOUNDED_ELC_PROPOSAL_DAG_DISTINCT_FROM_REVIEWED_NEIGHBORS_NO_EXPLICIT_BAN_IDENTIFIED_NOT_SOURCE_OR_NATIVE_PASS",
+  "candidate_id": "hierarchy-undirected-edge-state-line-graph-composition",
+  "experiment_id": "M225-ELC",
+  "code_commit": null,
+  "source_commit": null,
+  "source_parent_commit": null,
+  "prospective_reference_commit": "0314b932a92a8cc7f67804068ecb1c1f7a5f2e33",
+  "material_concerns": [],
+  "blocking_same_DAG_or_explicit_ban_identified": false,
+  "anchors": {
+    "bounded26_mechanism_index": {
+      "path": "pipeline/diagnostic_bundles/tick_87f03f29/recent_mechanism_index.json",
+      "sha256": "d934b4b7875e99bc1e6ad28b0bcc35aba3cdb96fceb2cb9309a6d45d5ebb86a2"
+    },
+    "actual_DCE_forward_source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/directed_cavity.py",
+      "sha256": "a8141fe8a86d9846bdd2a812a9d3d8be99dc48b6485b206e0900c1ba6f8ad55e"
+    },
+    "actual_SFC_forward_source": {
+      "path": "pipeline/diagnostic_bundles/tick_9169196d/new_candidate_prepare/staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sfc/synchronous_forest.py",
+      "sha256": "1a77779eecad16ae4ab948ba501a429d31139115c48890781a43ddb070c9e1da"
+    },
+    "prior_SFC_source_review": {
+      "path": "pipeline/diagnostic_bundles/tick_9169196d/sfc_source_independent_review.json",
+      "sha256": "caf4c8838f9f34ee4ce641bdaecc0c4c05b2b72fecaa47706f8ca50e961468e7"
+    },
+    "current_routine_protection_review": {
+      "path": "pipeline/diagnostic_bundles/tick_87f03f29/current_aoc_wait_independent_review.json",
+      "sha256": "510576d00ad5783d3f788499fb4b71449677d1876bb96fade01293586a0945c3"
+    }
+  },
+  "precise_proposal_only": {
+    "initial_state": "One persistent C state per actual supported original child-parent undirected edge, initialized as GELU(U[originalLN_child, originalLN_parent]); U shared across fine-middle and middle-coarse edges. Canonical child/parent orientation concerns feature order only; one state is shared by the two endpoints.",
+    "round": "For edge e=(u,v), mean each distinct OTHER edge sharing u or v once from the same OLD state; denominator deg(u)+deg(v)-2. Update all active receivers simultaneously with GELU(R[old_e,neighbor_mean]); one shared R across actual rounds/components. A mean of endpoint means is not this degree-weighted edge-neighbor mean.",
+    "duration": "Each true three-level component uses exact line-graph diameter treeD-1 (supported forest gives1 or3); finished components have no fake updates.",
+    "readout": "Each supported node receives the equal mean of its incident final edge states directly as delta. Unsupported/empty rows0; original three LN/raw skips/rawbanks/FPS/IDs/CSORT/HCG/singleinst remain.",
+    "parameters_and_gate": "Two maps2C->C total262656 atC256. Any future gate only wholecore original-loss aggregate finite/nonzero weight gradient and real aggregate update. Individual map/edge/round/column/bias zero legal."
+  },
+  "bounded_neighbor_findings": [
+    {
+      "neighbor": "M220-DCE",
+      "actual_source_scope": "Forward/source only, original a814 bytes; no old native/evidence body.",
+      "difference": "Actual DCE computes directed recipient-specific up/down cavity messages and six node readouts with reverse-edge exclusion. ELC uses E shared undirected edge carrier states, recurrent neighboring-edge feedback and incidence node readout. It is not the same2E directed cavity DAG renamed."
+    },
+    {
+      "neighbor": "M224-SFC",
+      "actual_source_scope": "Forward/source only plus frozen prior source review.",
+      "difference": "Actual SFC stores N node states from three raw LN banks and performs D rounds of full-neighbor node mean before direct node-state deltas. ELC stores E edge states initialized jointly from both endpoint roles, uses D-1 line-graph rounds, and projects final edges through incident means. This changes state domain, dependency edges, parameter roles and readout constraints, not only update order."
+    },
+    {
+      "neighbor": "M221-PES",
+      "scope": "26-index short mechanism metadata only; no crash logs/recovery/checkpoint.",
+      "difference": "PES stores N node states and sequentially updates one receiver in Euler/reverse traversal. ELC is synchronous E-state edge-neighbor composition and incidence readout, not a traversal reschedule of those node updates."
+    },
+    {
+      "neighbor": "M215-BEC/M216-AEF/M214-CTS",
+      "scope": "Short mechanisms in bounded index only.",
+      "difference": "BEC is one upward-edge split/downward synthesis tree; AEF is signed endpoint flux on same-parent geometric MST with raw middle skip; CTS is synchronous geometric middle-token cycle mixing. None describes persistent undirected original-membership edge states followed by both-endpoint incident readout."
+    }
+  ],
+  "algebraic_readout_risks_not_gates": {
+    "general_constraint": "For an original bipartition sign s(v)=+1/-1, equal incident-edge readout implies sum_v s(v)*deg(v)*delta_v=0 in exact real arithmetic per component, since every edge contributes with opposite endpoint signs. This constrains node outputs and is not evidence of useful invariance or point-mass conservation.",
+    "three_node_chain": "delta_middle=(delta_fine+delta_coarse)/2 for the fine-middle-coarse chain. This is a real functional restriction, not an FP32 hard threshold.",
+    "DAG_non_equivalence_witness": "SFC on normalized scalar chain(0,0,1), shared own weight0/neighbor weight1/bias0 and two rounds gives middle delta0 and both endpoint deltas GELU(GELU(1/2))>0, violating the ELC chain readout identity. This symbolic witness excludes a universal node relabel/schedule identity; no numerical/Torch test was run.",
+    "interpretation": "Ordinary edge-state/line-graph GNN-family mechanism; may oversmooth, merge endpoint roles or constrain output capacity. Original ancestor raw inputs already contain descendant information; other-edge exclusion does not remove physical self-information.",
+    "forbidden_inferences": "No FP32 conservation/residual/Jacobian test, oldRSTR numerical boundary/recovery authorization, per-edge/column/map positivity, novelty/benefit or diagnosed bottleneck claim follows."
+  },
+  "explicit_ban_boundary": {
+    "no_identified_match": "Private true-cluster edge graph replaces the three FFN branch computations; no learned pooling/selector, gates, language/query routing, QKV projection, pointN2 attention, repeated inst delivery/new residual skip or numeric-only config/schedule/seed/precision change. Fixed equal graph means are not alone grounds to rename this as the historically rejected agg/multi branch.",
+    "implementation_conditions": "Actual source must realize precisely this supported scene-local E-carrier DAG, correct per-edge denominator/OLD state/no fake rounds and original single readback. Endpoint grouping/prefix-suffix reductions should avoid materialized point-pair attention and unjustified cost/coverage claims. Source freeze and independent production-path/integration software review are still outstanding."
+  },
+  "disposition": "No bounded same-DAG/explicit-ban blocker found for the one root-selected private source prototype. This is not general novelty, model implementation, science admission, GPU/queue/resource or native approval; no second route is sought. OriginalNULL metadata/reference0314 must stay frozen.",
+  "native_TRAIN2": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "actual_FP32_autograd_Torch_behavior": "UNKNOWN",
+  "efficacy_novelty": "UNKNOWN",
+  "scope": "Read26 short metadata items and2 most relevant actual forward sources, plus original goal constraints/bans; source algebra reasoning only. No broad history/evidence/grant/checkpoint scan, oldsuite or new numerical test, Torch/GPU/SSH/Git command or mutation/shared action."
+}

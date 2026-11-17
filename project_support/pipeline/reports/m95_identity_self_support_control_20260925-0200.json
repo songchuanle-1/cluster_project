@@ -1,0 +1,858 @@
+{
+  "admission": false,
+  "candidate_handoff": {
+    "instance-identity-representation": "Is target-versus-peer separability driven by prototype self-inclusion?",
+    "referent-discrimination": "Does the identity-versus-score advantage survive on the identical matched pairs?",
+    "referent-supervision-axis": "Does identity evidence survive removal of query support?"
+  },
+  "contract": "m95_identity_self_support_control_v1",
+  "contracts": {
+    "control": "Subtract the candidate query's labeled point support from every target and peer prototype before cosine classification.",
+    "minimum_prototype_points": 3,
+    "score_match_tolerance": 0.1
+  },
+  "counts": {
+    "attempted_queries_by_stage": {
+      "final": 9649,
+      "fused": 9649,
+      "projected_2d": 9649,
+      "projected_3d": 9649,
+      "raw_2d": 9649,
+      "raw_3d": 9649
+    },
+    "ineligible_expressions": 128,
+    "skipped_queries_by_stage": {
+      "final": 3252,
+      "fused": 3252,
+      "projected_2d": 3252,
+      "projected_3d": 3252,
+      "raw_2d": 3252,
+      "raw_3d": 3252
+    }
+  },
+  "generated_at": "2026-09-24T18:02:33.615503+00:00",
+  "manifest": {
+    "path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813/manifest.json",
+    "rows": 256,
+    "sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023"
+  },
+  "native_backward_measured": false,
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable efficacy",
+    "population effect",
+    "novelty",
+    "whole-mechanism benefit"
+  ],
+  "resources_measured": false,
+  "schema_version": 1,
+  "scope": "CPU-only query-support-exclusion control on the frozen 256-expression M95 identity capture.",
+  "source_capture": {
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813/capture.json",
+    "producer_sha256": "cb49cfee9853756b66b234a59b77c2f631d7c10e3d5084a102fd19f06d6cb82a",
+    "sha256": "f90286842d9d82d835652a29048100a10b6286ee5630e0d7c296363e95880025"
+  },
+  "stages": {
+    "final": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.05509494884844912,
+        "baseline": {
+          "accuracy": 0.9849929654525559,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9826166269721606,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9908496814321313,
+            "lo": 0.9747138232967357,
+            "point_estimate": 0.9835492036877634,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.9193371893074879,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9275216781237114,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9509838693958127,
+            "lo": 0.903924959117753,
+            "point_estimate": 0.928806850672277,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.05474235301548647
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.1262135922330097,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.8737864077669902,
+          "identity_disagrees_with_score": 111,
+          "identity_matches_iou": 450,
+          "identity_minus_score": -0.001941747572815534,
+          "identity_only_matches_iou": 55,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.35088834776334776,
+              "lo": -0.00196608946608947,
+              "point_estimate": 0.1707566738816739,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 0.7555916305916306,
+              "point_estimate": 0.9021013708513709,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 56
+        }
+      }
+    },
+    "fused": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.10199595669914019,
+        "baseline": {
+          "accuracy": 0.9829607628575895,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9823691773698235,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9895002759569834,
+            "lo": 0.974704623153544,
+            "point_estimate": 0.9827324706999987,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.8772862279193372,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.8803732206706834,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9131714829674639,
+            "lo": 0.8490649965151734,
+            "point_estimate": 0.8821012968507842,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.1006311738492145
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.35145631067961164,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.6485436893203883,
+          "identity_disagrees_with_score": 179,
+          "identity_matches_iou": 334,
+          "identity_minus_score": -0.22718446601941747,
+          "identity_only_matches_iou": 31,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.19664351851851852,
+              "lo": -0.18167087542087546,
+              "point_estimate": 0.0163404882154882,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 0.9351851851851851,
+              "lo": 0.537037037037037,
+              "point_estimate": 0.7476851851851852,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 148
+        }
+      }
+    },
+    "projected_2d": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.29653165406084026,
+        "baseline": {
+          "accuracy": 0.9579490386118493,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9546298461658389,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9686747903380323,
+            "lo": 0.9388636976406292,
+            "point_estimate": 0.9552014778890849,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.6651555416601532,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.6580981921049986,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.7452583075273088,
+            "lo": 0.6492263019048554,
+            "point_estimate": 0.6977289593687851,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.25747251852029984
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.7864077669902912,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.21359223300970873,
+          "identity_disagrees_with_score": 355,
+          "identity_matches_iou": 110,
+          "identity_minus_score": -0.6621359223300971,
+          "identity_only_matches_iou": 7,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": -0.2518992744344857,
+              "lo": -0.6990530303030302,
+              "point_estimate": -0.47794094110115243,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 0.4526408450704225,
+              "lo": 0.08333333333333333,
+              "point_estimate": 0.25340375586854463,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 348
+        }
+      }
+    },
+    "projected_3d": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.06872298568330959,
+        "baseline": {
+          "accuracy": 0.982335469751446,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9815707741762107,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9898541576992338,
+            "lo": 0.9732481558841414,
+            "point_estimate": 0.982282467375171,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.9066750039080819,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9128477884929012,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9382487835776341,
+            "lo": 0.8791265189555802,
+            "point_estimate": 0.9098920634826554,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.07239040389251561
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.312621359223301,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.6873786407766991,
+          "identity_disagrees_with_score": 161,
+          "identity_matches_iou": 354,
+          "identity_minus_score": -0.1883495145631068,
+          "identity_only_matches_iou": 32,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.31875,
+              "lo": -0.07954545454545456,
+              "point_estimate": 0.12282196969696971,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 0.6666666666666667,
+              "point_estimate": 0.8541666666666667,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 129
+        }
+      }
+    },
+    "raw_2d": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.24286622028296956,
+        "baseline": {
+          "accuracy": 0.9770204783492262,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9749977434647663,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9826979379874455,
+            "lo": 0.965348074851906,
+            "point_estimate": 0.9744886667976367,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.7370642488666562,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.7321315231817968,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.7987731668791626,
+            "lo": 0.7071894506589819,
+            "point_estimate": 0.7540602046306153,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.2204284621670214
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.5844660194174757,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.4155339805825243,
+          "identity_disagrees_with_score": 263,
+          "identity_matches_iou": 214,
+          "identity_minus_score": -0.4601941747572815,
+          "identity_only_matches_iou": 13,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": -0.09141414141414142,
+              "lo": -0.61875,
+              "point_estimate": -0.3507891414141414,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 0.6041666666666667,
+              "lo": 0.16666666666666666,
+              "point_estimate": 0.38055555555555554,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 250
+        }
+      }
+    },
+    "raw_3d": {
+      "query_classification": {
+        "balanced_accuracy_delta": -0.06962011229339882,
+        "baseline": {
+          "accuracy": 0.9834297326871971,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.9828257154755238,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9908829072844214,
+            "lo": 0.9746958938908534,
+            "point_estimate": 0.9834818452823143,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "leave_query_support_out": {
+          "accuracy": 0.9074566202907612,
+          "attempted_queries": 9649,
+          "balanced_accuracy": 0.913205603182125,
+          "bootstrap_seed": 1999,
+          "coverage": 0.6629702559850762,
+          "eligible_expressions": 119,
+          "peer_queries": 3892,
+          "queries": 6397,
+          "scene_bootstrap_accuracy": {
+            "draws": 10000,
+            "hi": 0.9395367713249746,
+            "lo": 0.8797690301328536,
+            "point_estimate": 0.91111837569977,
+            "scene_count": 119,
+            "seed": 1999,
+            "unit": "scene"
+          },
+          "skipped_missing_prototype": 3252,
+          "target_queries": 2505
+        },
+        "scene_bootstrap_point_delta": -0.07236346958254436
+      },
+      "score_matched_query_pairs": {
+        "baseline": {
+          "expressions": 16,
+          "identity_accuracy": 1.0,
+          "identity_disagrees_with_score": 64,
+          "identity_matches_iou": 515,
+          "identity_minus_score": 0.12427184466019417,
+          "identity_only_matches_iou": 64,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.42083333333333334,
+              "lo": 0.1300189393939394,
+              "point_estimate": 0.26865530303030305,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 1.0,
+              "point_estimate": 1.0,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 0
+        },
+        "identity_minus_score_delta": -0.312621359223301,
+        "leave_query_support_out": {
+          "expressions": 16,
+          "identity_accuracy": 0.6873786407766991,
+          "identity_disagrees_with_score": 161,
+          "identity_matches_iou": 354,
+          "identity_minus_score": -0.1883495145631068,
+          "identity_only_matches_iou": 32,
+          "pairs": 515,
+          "scene_bootstrap": {
+            "difference": {
+              "draws": 10000,
+              "hi": 0.31875,
+              "lo": -0.07954545454545456,
+              "point_estimate": 0.12282196969696971,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "identity": {
+              "draws": 10000,
+              "hi": 1.0,
+              "lo": 0.6666666666666667,
+              "point_estimate": 0.8541666666666667,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            },
+            "score": {
+              "draws": 10000,
+              "hi": 0.8698863636363637,
+              "lo": 0.578314393939394,
+              "point_estimate": 0.731344696969697,
+              "scene_count": 16,
+              "seed": 1999,
+              "unit": "scene"
+            }
+          },
+          "score_accuracy": 0.8757281553398059,
+          "score_matches_iou": 451,
+          "score_only_matches_iou": 129
+        }
+      }
+    }
+  }
+}

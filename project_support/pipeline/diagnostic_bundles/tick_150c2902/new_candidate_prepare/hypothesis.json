@@ -1,0 +1,38 @@
+{
+  "candidate_id": "hierarchy-parent-antisymmetric-edge-flux",
+  "experiment_id": "M216-AEF",
+  "hypothesis": "Original M95 middle FFN processes each middle token independently. A fixed same-original-parent geometric MST can instead generate a signed nonlinear contrast at each real edge and deliver equal/opposite updates to its endpoints before original HCG. This may alter local boundary/detail evidence in the actual inst_feats mask path; whether such a deficit or gain exists is UNKNOWN.",
+  "variables": {
+    "input": "Original middle pre-norm tokens x=LN1(rawcf), original parent IDs ids2, true point support ids1[ids0], existing detached per_layer_coords[2].",
+    "operator": "For each MST undirectededge(i,j), q=f([xi,xj])-f([xj,xi]), f=GELU(Linear2C->C); delta_i+=q,delta_j-=q; refinedmiddle=rawcf+delta.",
+    "fine_coarse": "Original M95 FFN/LN/skip at fine and coarse unchanged.",
+    "output": "Original rawCSORT/HCG/gate/message_norm and single inst_feats writeback remain."
+  },
+  "matched_control": "Original M95 same original YAML/data/pretrain/seed1999/epochs50/max_iters70/native loader TRAIN2 and original prediction-resource protocol. The full architecture substitution is tested; not single-factor causal attribution.",
+  "causal_path_to_test": "Original native loss must backpropagate through actual signed incidence, both actual orientations of the shared edge_map/GELU, then HCG->singleinst->original prediction/loss.",
+  "scope": "A same-parent nonlinear signed edge-incidence family alternative, not attention/novelty/coverage/mean-preserving RSTR repair.",
+  "nearest_routes": {
+    "RSTR": "Old held fine-leaf pi=count nonnegative reversible MarkovP(X)X; AEF middle dense cross-channel signed nonlinear q on fixed geometry, not a convex/Markov transport and generally NOT point-mass/π weighted-mean preserving. Oldhold/R2status unchanged.",
+    "MDC": "Original6direction nearest stencil/depthwise+pointwise one-hop; AEF MST pairMLP applied to two orientations and coupled +q/-q endpoints, not kernel-size tuning.",
+    "CTS_BFC": "They replace all n states through repeated composition; AEF is one flux pass on a tree and does not give all-parent one-forward reception.",
+    "BEC": "BEC changes cross-level up/down roles; AEF keeps fine/coarse M95 and changes onlymiddle. This narrower scope is explicit.",
+    "BTC_BCR_PSBR": "No inside/outside or prefix/suffix/inclusive state compression/scan. MST connectivity is topology, not recurrent globalcontext."
+  },
+  "algebraic_properties_only": [
+    "For arbitrary q, unweighted sum ofmiddle delta perparent is zero in real arithmetic. FP32 scatter error is unmeasured; no bitwise/conservation or information-losslessness claim.",
+    "Swapping edgeorientation also negatesq, so endpoint delta algebra is unchanged.",
+    "n<=1 has noedge and delta0: no fallback to originalmiddleFFN. Constant equal sibling inputs yield q0 in real arithmetic.",
+    "No positivity/contraction/mean-inst-preservation or monotonicity guarantee."
+  ],
+  "risks": [
+    "Onehop MST neighborhoods can miss nonlocal siblings, unlike full-parent composition.",
+    "Large tree degree and unscaled sum can amplify activation/gradients; the original external skip is retained but no new scalar/normalization is added.",
+    "Unweighted token conservation does not preserve point-count weighted readback mean; π effect is untested, not repaired.",
+    "CPU geometry tolist/Prim O(n^2) can hurt latency despite lower linear parameter count.",
+    "Geometry ties depend on originalID tie-breaks, no relabeling/rotation/FP32 invariance claim.",
+    "NewCPUfork restores subsequent RNG position but may reuse random subsequences; common initialization/data pairing still must be measured."
+  ],
+  "novelty": "UNKNOWN; bounded local route review only, no whole-literature novelty claim.",
+  "efficacy": "UNKNOWN",
+  "evidence_scope": "Source dataflow and exact stdlib topology correctness only; no trained checkpoint/data/gradient/performance experiment performed."
+}

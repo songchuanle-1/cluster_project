@@ -1,0 +1,177 @@
+% 3 Pages
+\section{{\papernameAbbrev}}
+\label{sec_methodology}
+
+% --------------------------------------------------------
+\begin{figure}[t!]
+\vspace{-3em}
+\captionsetup{font=small}
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/CoT_arch.pdf}
+\caption{An overview of our Chain-of-Thoughts Data-Efficient 3D visual grounding framework ({\papernameAbbrev}). First, we predict the anchors $\mathcal{O^T}$ from the input utterance, then sort the anchors in a logical order $\mathcal{O^P}$ using the Pathway module.
+Then, we feed the multi-modal features $\mathcal{F}$, the parallel localized objects $\mathcal{R^F}$, and the logical path $\mathcal{O^P}$ to our Chain-of-Thoughts decoder to localize the referred object and the anchors in a logical order $\mathcal{R^P}$.
+\vspace{-2em}}
+\label{fig_cot_arch}
+\end{figure}
+% --------------------------------------------------------
+
+In this section, we propose a simple yet effective approach to decompose the referring task into multiple interpretable steps by modeling the problem as Seq2Seq, as shown in Figure \ref{fig_cot_arch}.
+First, we briefly cover the general 3D visual grounding models' skeleton and its main components (Sec. \ref{sec_Preliminaries}). Then, we present our method in detail (Sec. \ref{sec_CoT}). Finally, we detail our loss function (Sec. \ref{sec_loss}).
+
+% --------------------------------------------------------
+\subsection{Preliminaries}
+\label{sec_Preliminaries}
+
+We built our framework in a generic way where it could be integrated into any state-of-the-art 3D visual grounding model.
+An arbitrary 3D visual grounding model mainly consists of three essential blocks; a Visual Encoder, a Language Encoder, and a Multi-Modal Fusion module.
+
+\noindent \textbf{Visual Encoder.}
+An arbitrary 3D scene $S \in \mathbb{R}^{N\times 6}$ is represented by $N$ points with spatial and color information, i.e., XYZ, and RGB, respectively.
+Using one of the off-the-shelf 3D object detectors or manual annotations, we have access to the object proposals $\mathcal{P}=\{P_k\}_{k=1}^{L}$, where $P_k \in \mathbb{R}^{N'\times 6}$, $N'$ represents the number of the object's points and $L$ is the number of proposals in the scene.
+Then, the visual encoder encodes the proposals into lower-resolution feature maps $\mathcal{V}=\{V_k\}_{k=1}^{L}$, where $V_k \in \mathbb{R}^{1\times d}$ and $d$ is the number of hidden dimensions.
+
+\noindent \textbf{Language Encoder.}
+Simultaneously, given an input utterance that describes a particular object in a scene, called \texttt{target}, a pre-trained BERT model \citep{devlin2018bert} encodes the input sentence into $\mathcal{T}=\{T_j\}_{j=1}^{W}$, where $W$ is the maximum sentence length.
+Then, a language classification head is utilized to predict only the referred object.
+We notice that limiting the language encoder to only predict the target object restricts its capability of learning representative features.
+
+\noindent \textbf{Multi-Modal Fusion.}
+After encoding the object proposals and the utterance, a multi-modal fusion block is exploited to refine the visual features $\mathcal{V}$ based on the language embeddings $\mathcal{T}$ generating fused features $\mathcal{F}=\{F_k\}_{k=1}^{L}$, where $F_k \in \mathbb{R}^{1\times d}$. 
+Both graphs \citep{achlioptas2020referit3d} and transformers \citep{huang2022multi, bakr2022look, yang2021sat} are explored to capture the correlation between the two different modalities. 
+However, our CoT framework can be integrated easily into any existing 3D visual grounding architecture, regardless of how the multi-modal features $\mathcal{F}$ are obtained.
+
+% --------------------------------------------------------
+\subsection{Chain-of-Thoughts}
+\label{sec_CoT}
+
+We decompose the referring task into multiple interpretable steps, whereas to reach the final target the model must first predict the anchors one by one, in a logical order called Chain-of-Thoughts.
+To this end, we first have to predict the anchors from the input utterance, then sort the anchors in a logical order using our Pathway module.
+Then, we replace the naive referring decoder with our Chain-of-Thoughts decoder.
+
+We formulate the referring task as a Seq2Seq problem by localizing the anchors as an intermediate step. Instead of anticipating the target directly, we first predict the chain of anchors sequentially, then utilize them to predict the target.
+
+\noindent \textbf{Pathway generation.}
+First, we extend the language head, i.e., Target Anchors Head, to extract both the target and the anchors $\mathcal{O^T}=\{O^T_i \}_{i=1}^{M}$, where $M$ is the maximum number of objects in the sentence, depicted in the lower red part of Figure \ref{fig_cot_arch}.
+We add a ``no\_obj'' class to pad the output to the maximum length $M$.
+However, the predicted anchors are unsorted or sorted based on the occurrence order in the sentence, which can not be fit in our Chain-of-Thoughts framework.
+Accordingly, we introduce a ``Pathway Head'' which takes the encoded sentence $\mathcal{T}$ and the predicted objects of the utterance $\mathcal{O^T}$ to produce logically ordered objects $\mathcal{O^P}=\left(O^P_i  \right)_{i=1}^{M}$.
+% detail the pathway architecture here
+One possible solution is to exploit an MLP head to predict the logical order for each object.
+However, for better performance, we use a single transformer encoder layer to capture the correlation between different objects.
+
+\noindent \textbf{Sequence-to-Sequence.}
+Similar to the language stream, we first employ a parallel referring head to localize the referred object alongside the anchors, ignoring their logical order. The parallel referring head only takes the multi-modal features $\mathcal{F}$ as input and localizes the target and the anchors $\mathcal{R^F}=\{R^F_i\}_{i=1}^{M}$.
+We experiment both with localizing the target and the anchors in parallel, and localizing them one by one in a sequential logical order using previously localized objects as prior information.
+In other words, we formulate the 3D referring task as a Seq2Seq task, where the input is two sequences; 1) a set of object proposals $\mathcal{P}$, 2) a sequence of words (utterance). The output is a sequence of locations for the anchors and the target.
+Specifically, we add positioning awareness to the plain localized objects $\mathcal{R^F}$ using the predicted ordered objects $\mathcal{O^P}$, which act as a positional encoding. These positions indicate a logical order that mimics human perception \citep{mcvay2009conducting, chen2017unified}.
+Furthermore, we employ a single transformer decoder layer, depicted in Figure \ref{fig_cot_arch}, to localize the objects in sequence w.r.t the predicted logical order $\mathcal{O^P}$. In this decoder layer, the queries are $\mathcal{R^F}+\mathcal{O^P}$ and the values and keys are $\mathcal{F}$. Accordingly, the attention maps denoted as $\mathcal{A}$ follow Eq.~\ref{eq_self_attention}.
+\begin{equation}
+    \label{eq_self_attention}
+    \mathcal{A} = \sigma(\frac{(\mathcal{R^F}+\mathcal{O^P}) \mathcal{F}^T}{\sqrt{d}}),
+\end{equation}
+where $\sigma$ is the Softmax function and $d$ is the embedding dimensions.
+We use a masked self-attention layer to enforce the Chain-of-Thoughts, where while predicting the next object's location, we only attend to the previously located objects. This could be interpreted as a one-direction CoT.
+We also experiment with another variant where no masking is applied so that we can attend to any object in the chain, as shown in Appendix \ref{appendix_Causal_NonCausal_CoT}.
+
+% --------------------------------------------------------
+\subsection{Pseudo labels}
+\label{sec_pseudo_labels}
+
+During the training phase, our proposed framework requires more information than the standard available GT in existing datasets \citep{achlioptas2020referit3d, chen2020scanrefer}. These datasets only annotate the referred object and the target. However, our framework requires anchor annotations.
+Three types of extra annotations are needed:
+1) Given an input utterance, we need to identify the mentioned objects other than the target; the \textit{anchors}.
+2) Once we extract the anchors from the utterance, we need to know their logical order to create a chain of thoughts.
+3) Finally, we need the localization information for each anchor, i.e., to assign a bounding box to every anchor.
+
+To make our framework self-contained and scalable, we do not require any manual effort. Instead, we collect pseudo-labels automatically without any human intervention.
+
+\noindent \textbf{Anchors parser.}
+We extract the textual information from the utterance using rule-based heuristics and a scene graph parser \citep{schuster-etal-2015-generating, wu2022eda}.
+First, we extract the whole mentioned objects and their relations from the utterance using the scene graph parser. 
+Then, we match the objects to their closest matching class from the ScanNet labels \citep{dai2017scannet} using SBERT \citep{reimers2019sentence}.
+Due to the free-from nature of Nr3D, the anchors mentioned in the GT descriptions sometimes do not precisely match the ScanNet class labels.
+For instance, the GT description is “The plant at the far right-hand side of the bookcase tucked in the furthest corner of the desk.” However, there is no “bookcase” class in ScanNet.
+Therefore, we need to match it to the nearest ScanNet class labels, which in this case will be “bookshelf.”
+
+\noindent \textbf{Anchors pathway.}
+We utilize GPT-3.5 \citep{ouyang2022training} to extract the logical order of objects given an input utterance, using in-context learning \citep{brown2020gpt3}.
+The full prompt used for pathway extraction is provided in Appendix \ref{appendix_In_context_prompt_used_for_object_order_extraction}.
+
+\noindent \textbf{Anchors localization.} 
+The anchors localization module employs object proposals $\mathcal{P}$, extracted relations $\mathcal{R}$ and utterance objects\ $\widetilde{\mathcal{O^T}}$ to establish associations between anchors and object bounding boxes within an input scene. Our method involves iterating over all anchors extracted from the utterance and searching for candidate objects in $\mathcal{P}$ that share the same class. 
+When the anchor class is represented singularly in the scene, we return the matched object. However, in scenarios where disambiguation is required due to multiple objects belonging to the anchor class, we leverage the parsed spatial relations and the localized objects within the scene to identify the intended anchor accurately, termed FIND in Algorithm \ref{alg_geomodule}.
+However, it is not guaranteed that the FIND function will be able to localize the remaining unlocalized anchors accurately.
+Thus, in this case, as shown in the last step in Algorithm 1, we randomly sample an object of the same class.
+We summarize our localization method in Algorithm \ref{alg_geomodule}.
+
+\vspace{-2mm}
+\begin{algorithm}[h]
+    \scriptsize{
+        \caption{\small Localizing objects mentioned in an input utterance}
+        \label{alg_geomodule}
+        % TODO: Add bullet points for the input variables
+        \textbf{Input}: \vspace{0.25em}\\
+        \null \ \textbullet \ $\widetilde{\mathcal{O^T}} = \{o_i\}_{i=1}^{K}$: unlocalized objects mentioned in the utterance, \textit{extracted using the syntactic parser}.
+        \vspace{-1.em}
+    
+        \null \ \textbullet \ $\mathcal{P}$: object proposals for the scene $\mathcal{P} = (\mathcal{B}, \mathcal{C})$, with:\\
+        \null \quad \quad \ $\mathcal{B} = \{\mathbf{b_i}\}_{i=1}^{L}$:\ bounding boxes $\mathbf{b}_i \in \mathbb{R}^6$ and $\mathcal{C} = \{ c_i\}_{i=1}^{L}$ classes of the $L$ object proposals for the scene.\\
+        \vspace{-1.75em}
+        
+        \null \ \textbullet \ $\textsc{Relate}:\widetilde{\mathcal{O^T}} \rightarrow \mathcal{R} \times \widetilde{\mathcal{O^T}}$:
+        map objects mentioned in the input utterance to a $\langle$spatial relation, object$\rangle$ pair.
+        \vspace{-1em}
+    
+        \null \ \textbullet \ $\textsc{Find}:\mathcal{P} \times \mathcal{R} \times \mathcal{P}^{m} \rightarrow \ \mathcal{P}$: map a localized object, a relation and a set of $m$ candidate objects to an output localized object.\\
+    
+        \vspace{-0.5em}
+        \textbf{Output}: \vspace{0.25em}\\
+        \null \ \textbullet \ $\mathcal{A}$: localized anchors used in the utterance, where $\mathcal{A} \subseteq \mathcal{P}$.
+        \vspace{0.5em}%
+        
+        \begin{algorithmic}[1]
+            \Function{Localize}{$o, \mathcal{P}, \mathcal{A}$} \algorithmiccomment{Localizing a single utterance}
+                \State $\mathcal{K} \gets \{\mathcal{P}_j \mid o \propto c_j, c_j \in \mathcal{C}\}$ \algorithmiccomment{Find a set of candidates with the same class as $o$}
+                \If {$|\mathcal{K}| = 1$} \algorithmiccomment{A single object has the anchor class}
+                    \State \Return $\mathcal{K}$
+                \EndIf
+                \For{$(r_m,\ o_k) \in \textsc{Relate}(o)$}
+                    \If {$o_k \in \mathcal{A}$}: \ \Return $\textsc{Find}(\mathcal{P}_k, r_m, \mathcal{K})$ \algorithmiccomment{The related object is already localized} 
+                    \EndIf
+                    \State $p \gets \text{\textsc{Localize}}(o_k, \mathcal{P}, \mathcal{A})$ \algorithmiccomment{\text{Otherwise, attempt to localize the related object}}
+                    \If {$p \neq \emptyset$}: \ \ \ \ \Return $\{ p \} \cup \textsc{Find}(p, r_m, \mathcal{K})$
+                    \EndIf
+                \EndFor
+                \State \Return $\{ p \}, p \sim \{ p_i \mid p_i = (\mathbf{b_i}, c_i), o \propto c_i, p_i \in \mathcal{P}\}$ \algorithmiccomment{\text{If all else fails: randomly sample an object of the same class}}
+            \EndFunction
+            \State $\mathcal{A} \gets \emptyset$
+            \For{\texttt{$o_i \in \widetilde{\mathcal{O^T}}$}}: $\mathcal{A} \gets \mathcal{A} \cup \textsc{Localize}(o_i, \mathcal{P}, \mathcal{A}) $
+            \EndFor
+           \end{algorithmic}
+    }
+    \vspace{-0.3em}
+\end{algorithm}
+\vspace{-5mm}
+
+% --------------------------------------------------------
+\subsection{Losses}
+\label{sec_loss}
+
+Mainly, three losses exist in most existing 3D visual grounding architectures.
+Two of them are considered auxiliary losses, i.e., 3D classification loss $\mathcal{L}_{cls}^{\mathcal{V}}$ and language classification loss $\mathcal{L}_{cls}^{\mathcal{T}}$.
+Hence, the third one is the primary loss, i.e., referring loss $\mathcal{L}_{ref}$.
+First, we extend the language classification loss $\mathcal{L}_{cls}^{\mathcal{T}}$ by recognizing the referred object class and the anchors based on the input utterance.
+Similarly, the referring loss is extended to localize both the target and the anchors, termed as parallel referring loss $\mathcal{L}_{ref}^{\mathcal{P}}$, as we localize the target and anchors in one step.
+Furthermore, we add another referring loss after the transformer decoder, termed as CoT referring loss $\mathcal{L}_{ref}^{\mathcal{COT}}$.
+Finally, an auxiliary distractor binary classification loss $\mathcal{L}_{dist}$ is introduced to distinguish between the target and the distractors, i.e., objects with the same class as the target.
+Grouping all these losses, we optimize the whole model in an end-to-end manner with the following loss function:
+\begingroup
+\setlength\abovedisplayskip{6pt}
+\setlength\belowdisplayskip{6pt}
+\begin{equation}
+\label{equ_losses}
+\small
+    \mathcal{L} = (\lambda_{{\mathcal{V}}} \cdot \mathcal{L}_{cls}^{\mathcal{V}}) + (\lambda_{{\mathcal{T}}} \cdot \mathcal{L}_{cls}^{T}) + \lambda_{ref} \cdot (\mathcal{L}_{ref}^{\mathcal{P}}+\mathcal{L}_{ref}^{\mathcal{COT}}) + \lambda_{dist} \cdot \mathcal{L}_{dist} ,
+\end{equation}
+\endgroup
+where $\lambda$ is the corresponding loss weight for each term.

@@ -1,0 +1,73 @@
+{
+  "name": "D1 score/MoU calibration and mask-support complementarity audit",
+  "artifact_time": "2026-09-11T18:15:00+08:00",
+  "status": "post-hoc protocol record; worker was fixed before execution but no separate protocol was frozen before the run",
+  "scope": "Read only the 568 existing candidate-bank .pth artifacts from reports/d1_expansion_20260911-0715. Do not load a model, ScanRefer sample, checkpoint, or optimizer; do not run inference or training; do not allocate CUDA.",
+  "inputs": {
+    "remote_bank_root": "/tmp/cluster_d1_expansion_20260911_0715",
+    "remote_bank_count": 568,
+    "models": {
+      "baseline": 284,
+      "m95": 284
+    },
+    "candidates_per_bank": 128,
+    "upstream_report": "pipeline/reports/d1_expansion_20260911-0715/diagnostic_report.md"
+  },
+  "definitions": {
+    "score": "p_q = softmax(indis_q)[1]",
+    "candidate_iou": "IoU_q = IoU(sigmoid(mask_logits_q) >= 0.5, GT mask)",
+    "selected": "q_selected = argmax_q p_q",
+    "oracle": "q_oracle = argmax_q IoU_q",
+    "strata": "success if IoU_oracle > 0.5 and IoU_selected > 0.5; recoverable if IoU_oracle > 0.5 and IoU_selected <= 0.5; bank_failure if IoU_oracle <= 0.5",
+    "soft_area": "A_soft(q) = mean_n sigmoid(mask_logits[q,n])",
+    "binary_area": "A_bin(q) = mean_n 1[sigmoid(mask_logits[q,n]) >= 0.5]",
+    "rank_fusion": "equal rank-sum of p_q and A_bin(q), an exploratory complementarity probe only"
+  },
+  "hypotheses": [
+    "H1: the saved indis score has weaker rank agreement with candidate IoU on recoverable banks than on successful banks.",
+    "H2: a simple mask-area proxy or equal rank fusion is not sufficient to recover the oracle."
+  ],
+  "primary_readouts": [
+    "Spearman and Kendall tau-b between p_q and IoU_q",
+    "binary and continuous NDCG of the score ordering",
+    "oracle membership in the score top-5",
+    "same metrics for soft_area and binary_area",
+    "exploratory equal rank fusion top-5 oracle membership"
+  ],
+  "observations": {
+    "baseline_recoverable": {
+      "banks": 90,
+      "top5_contains_oracle": 16,
+      "score_spearman": 0.11365157406975132,
+      "score_ndcg_binary": 0.4858007403580557
+    },
+    "m95_recoverable": {
+      "banks": 111,
+      "top5_contains_oracle": 14,
+      "score_spearman": 0.17225341600654898,
+      "score_ndcg_binary": 0.4921242341183581
+    },
+    "baseline_success": {
+      "banks": 171,
+      "top5_contains_oracle": 64,
+      "score_spearman": 0.4086553583043164,
+      "score_ndcg_binary": 0.9296688999029119
+    },
+    "m95_success": {
+      "banks": 158,
+      "top5_contains_oracle": 59,
+      "score_spearman": 0.5143249501956549,
+      "score_ndcg_binary": 0.9316872331454147
+    }
+  },
+  "rejection_if": [
+    "H1 is false: recoverable score/IoU rank agreement is not materially below the success stratum.",
+    "H2 is false: a simple fixed mask-support proxy or rank fusion already recovers the oracle at a materially useful rate."
+  ],
+  "limitations": [
+    "The saved indis score is a classifier logit, not a calibrated mask-quality posterior.",
+    "The diagnostic is descriptive and cannot establish a causal scoring mechanism.",
+    "The rank fusion probe is equal-weight and exploratory; it is not a proposed deployable reranker.",
+    "No new data, annotation, model forward pass, or efficiency claim is produced."
+  ]
+}

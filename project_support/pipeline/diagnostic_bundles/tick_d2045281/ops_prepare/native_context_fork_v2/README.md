@@ -1,0 +1,11 @@
+# Fork-only v2: prepared, not run
+
+Small harness delta from immutable eb845403. Fresh actual d8a5b0d97479b20d31c58015a1cbd58023187294b8299436108be68f5f0186bc retains its original owner, 32 passing fresh calls and the terminal pre-fork AttributeError. No fork child was launched there. V2 does not repeat fresh cells, TRAIN2, model/data, checkpoints or scientific gates. No author SSH/native execution occurred.
+
+System Python3.12 creates eight anonymous memfds, passes them through Popen(pass_fds=...) to ordinary project Python, and the carrier uses os.dup before explicit os.fork. No ctypes or named remote files. Parent warm CPU state matches v1: Torch and exact extension imported, file_system sharing, zero parent native calls. CUDA visibility empty, TOKENIZERS_PARALLELISM=false, CUDA-uninitialized assertions and child core limit0. No CUDA-parent claim or GPU query/context; root separately owns current GPU identity evidence.
+
+Four original ordered contracts, eight new calls each, one child at a time; global soft55s, carrier45s, child6s, outer75s. On unknown PID stop new cells, retain identities/descriptors and local transport captures, send no signal and never retry. Output invariants/digests compare against immutable historical fresh baselines. All-pass concerns these synthetic CPU contexts across separate observations; it does not establish historical cause, repair or operator clearance.
+
+Git/runtime/source/binary/interpreter hashes and original three lock dev/inodes verified before imports; locks stat only. Current owner, foreground thread/mode, lease, context/pending, goal and SERVERS guard all writes/dispatch. New packet owns a separate exclusive intent/result. Default wrapper NOP. Distinct source peer must review full code plus FROZEN and provide owner, reviewer_thread_id, passed=true, material_concerns=[], frozen_sha256, wrapper_sha256, body_sha256 and cell_sha256. Root executes only after exact review hash, using local Python -B, PYTHONDONTWRITEBYTECODE=1, GIT_OPTIONAL_LOCKS=0 and current CODEX_THREAD_ID. Flags: --execute-root --review ABS --review-sha256 SHA.
+
+Static verification: AST only. Old FROZEN file hashes and actual SHA rechecked without writes. A missing capability, provenance mismatch or child failure remains evidence; there is no fallback or automatic rerun.

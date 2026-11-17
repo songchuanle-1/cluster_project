@@ -1,0 +1,251 @@
+"""Fork-only v2 carrier: inherited memfds supplied by the stdlib system supervisor."""
+from pathlib import Path
+import collections
+import faulthandler
+import hashlib
+import importlib.util
+import json
+import os
+import resource
+import stat
+import struct
+import sys
+import time
+import traceback
+
+RUNTIME = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+BINARY = RUNTIME / "framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so"
+BINARY_SHA = "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033"
+CALLS = 8  # Fork-only new calls; previous fresh calls are immutable historical evidence.
+CASES = ("unique", "balanced", "mixed", "asymmetric")
+
+
+def event(stage, **values):
+    print(json.dumps({"stage": stage, "pid": os.getpid(), **values}), flush=True)
+
+
+def sha(path):
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for chunk in iter(lambda: stream.read(65536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def coordinates(name):
+    if name == "unique":
+        rows = [[batch, index, 0, 0] for batch in range(2) for index in range(2048)]
+    elif name == "balanced":
+        rows = [[batch, index // 8, 0, 0] for batch in range(2) for index in range(2048)]
+    elif name == "mixed":
+        rows = [[0, 0, 0, 0] for _ in range(2048)]
+        rows += [[1, index, 0, 0] for index in range(2048)]
+    elif name == "asymmetric":
+        rows = [[0, index, 0, 0] for index in range(17)]
+        rows += [[1, index % 17, 0, 0] for index in range(4079)]
+    else:
+        raise ValueError("Undeclared case")
+    counts = collections.Counter(map(tuple, rows))
+    digest = hashlib.sha256()
+    for row in rows:
+        assert len(row) == 4 and row[0] in (0, 1) and all(type(value) is int and 0 <= value < 8192 for value in row)
+        digest.update(struct.pack("<4q", *row))
+    contract = {"case": name, "N": len(rows), "M": len(counts),
+                "max_occupancy": max(counts.values()), "input_sha256": digest.hexdigest(),
+                "batch_counts": [sum(row[0] == batch for row in rows) for batch in range(2)],
+                "projected_dense_bytes_each": len(counts) * (max(counts.values()) + 1) * 4}
+    assert 0 < contract["N"] <= 4096 and contract["projected_dense_bytes_each"] <= 32 * 1024 * 1024
+    return rows, contract
+
+
+def start_ticks(pid):
+    return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+
+
+def rss():
+    rows = Path("/proc/self/status").read_text().splitlines()
+    return {"VmRSS": next((line.split(":", 1)[1].strip() for line in rows if line.startswith("VmRSS:")), None),
+            "ru_maxrss_KiB": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss}
+
+
+def load_cpu():
+    assert os.environ.get("CUDA_VISIBLE_DEVICES") == ""
+    assert os.environ.get("TOKENIZERS_PARALLELISM") == "false"
+    assert BINARY.resolve() == BINARY and BINARY.stat().st_size <= 32 * 1024 * 1024 and sha(BINARY) == BINARY_SHA
+    event("torch_import_enter")
+    import torch
+    assert not torch.cuda.is_initialized()
+    torch.multiprocessing.set_sharing_strategy("file_system")  # Original train.py setting, process-local.
+    event("extension_import_enter")
+    spec = importlib.util.spec_from_file_location("pointgroup_ops_ext", str(BINARY))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert Path(module.__file__).resolve() == BINARY and not torch.cuda.is_initialized()
+    event("cpu_modules_ready", torch_version=torch.__version__, torch_origin=torch.__file__,
+          extension_origin=module.__file__, extension_sha256=BINARY_SHA,
+          cpu_threads=torch.get_num_threads(), interop_threads=torch.get_num_interop_threads(),
+          sharing_strategy=torch.multiprocessing.get_sharing_strategy(),
+          default_mp_start_method=torch.multiprocessing.get_start_method(allow_none=True),
+          task_threads=len(list(Path("/proc/self/task").iterdir())), cuda_initialized=False,
+          env={key: os.environ.get(key) for key in (
+              "CUDA_VISIBLE_DEVICES", "TOKENIZERS_PARALLELISM", "OMP_NUM_THREADS",
+              "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")})
+    return torch, module
+
+
+def run_case(torch, module, name, expected, context):
+    rows, contract = coordinates(name)
+    assert contract == expected
+    event("input_contract", context=context, start_ticks=start_ticks(os.getpid()), **contract)
+    coords = torch.tensor(rows, dtype=torch.int64, device="cpu").contiguous()
+    assert coords.shape == (contract["N"], 4) and coords.is_contiguous() and coords.device.type == "cpu"
+    first_digest = None
+    for index in range(CALLS):
+        assert not torch.cuda.is_initialized()
+        out_coords = torch.empty((0,), dtype=torch.int64, device="cpu")
+        input_map = torch.zeros((contract["N"],), dtype=torch.int32, device="cpu")
+        output_map = torch.empty((0,), dtype=torch.int32, device="cpu")
+        event("native_enter", context=context, case=name, call=index)
+        module.voxelize_idx(coords, out_coords, input_map, output_map, 2, 4)
+        event("native_exit", context=context, case=name, call=index)
+        assert not torch.cuda.is_initialized()
+        assert tuple(out_coords.shape) == (contract["M"], 4) and out_coords.dtype == torch.int64
+        assert tuple(input_map.shape) == (contract["N"],) and input_map.dtype == torch.int32
+        assert tuple(output_map.shape) == (contract["M"], contract["max_occupancy"] + 1)
+        assert output_map.dtype == torch.int32 and all(x.device.type == "cpu" for x in (out_coords, input_map, output_map))
+        assert output_map.numel() * output_map.element_size() == contract["projected_dense_bytes_each"]
+        mapping = input_map.tolist()
+        native_coords = out_coords.tolist()
+        assert all(0 <= value < contract["M"] for value in mapping)
+        assert all(native_coords[mapping[i]] == rows[i] for i in range(contract["N"]))
+        counts = output_map[:, 0].tolist()
+        assert all(1 <= count <= contract["max_occupancy"] for count in counts) and sum(counts) == contract["N"]
+        groups, covered = [], []
+        for voxel, count in enumerate(counts):
+            members = output_map[voxel, 1:count + 1].tolist()
+            assert len(members) == count and all(0 <= point < contract["N"] and mapping[point] == voxel for point in members)
+            groups.append(members)
+            covered.extend(members)
+        assert sorted(covered) == list(range(contract["N"]))
+        # Digest valid native mapping/counts only; never materialize padded dense map as Python lists.
+        digest = hashlib.sha256(json.dumps([native_coords, mapping, groups], separators=(",", ":")).encode()).hexdigest()
+        assert first_digest is None or digest == first_digest
+        first_digest = digest
+        del out_coords, input_map, output_map, groups, covered
+    return {"status": "VALID_CONTRACT_NATIVE_AND_INVARIANTS_PASS", "context": context,
+            "case": name, "pid": os.getpid(), "start_ticks": start_ticks(os.getpid()),
+            "native_calls": CALLS, "input_contract": contract, "valid_output_digest": first_digest,
+            "coverage_exact_once": True, "coordinate_lookup_equal": True,
+            "map_counts_indices_shapes_dtypes_valid": True, "deterministic_repeats": True,
+            "cuda_initialized": torch.cuda.is_initialized(), "rss": rss()}
+
+
+def snapshot(fd, limit):
+    size = os.fstat(fd).st_size
+    return os.pread(fd, min(size, limit), max(0, size - limit)).decode("utf-8", "replace")
+
+
+def parsed_output(fd):
+    text = snapshot(fd, 32768)
+    parsed = []
+    for line in text.splitlines():
+        try:
+            parsed.append(json.loads(line))
+        except ValueError:
+            pass
+    return parsed
+
+
+def fork_case(torch, module, name, expected, stop, capture_pair):
+    # No memfd_create in this interpreter; only duplicate supervisor-owned anonymous FDs.
+    out, err = (os.dup(descriptor) for descriptor in capture_pair)
+    assert not torch.cuda.is_initialized()
+    pid = os.fork()  # Explicit CPU-only inherited module; never a CUDA-initialized parent.
+    if pid == 0:
+        os.dup2(out, 1)
+        os.dup2(err, 2)
+        faulthandler.disable()
+        faulthandler.enable(file=sys.stderr, all_threads=True)
+        try:
+            event("fork_child_started", parent_pid=os.getppid(), start_ticks=start_ticks(os.getpid()),
+                  task_threads=len(list(Path("/proc/self/task").iterdir())), cuda_initialized=False)
+            result = run_case(torch, module, name, expected, "fork_inherited_cpu_module")
+            event("cell_result", result=result)
+            faulthandler.disable()
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(0)
+        except BaseException as error:
+            event("cell_exception", error_type=type(error).__name__, error=str(error)[:600])
+            traceback.print_exc(limit=8)
+            sys.stdout.flush()
+            sys.stderr.flush()
+            os._exit(2)
+    identity = start_ticks(pid)
+    status = None
+    until = min(stop, time.monotonic() + 6)
+    while time.monotonic() < until:
+        found, value = os.waitpid(pid, os.WNOHANG)
+        if found:
+            status = value
+            break
+        time.sleep(0.02)
+    events = parsed_output(out)
+    result = {"case": name, "context": "fork_inherited_cpu_module", "pid": pid,
+              "start_ticks": identity, "certainty": "terminal" if status is not None else "uncertain",
+              "returncode": os.waitstatus_to_exitcode(status) if status is not None else None,
+              "stage_events": events[-24:], "faulthandler_stderr_tail": snapshot(err, 3072),
+              "signals_sent": False}
+    if status is None:
+        result["reason"] = "SOFT_TIMEOUT_PRESERVE_PID_NO_SIGNAL_OR_RETRY"
+        result["retained_child_output_fds"] = [f"/proc/{pid}/fd/1", f"/proc/{pid}/fd/2"]
+    else:
+        os.close(out)
+        os.close(err)
+    return result
+
+
+def main():
+    payload = json.load(sys.stdin)
+    assert payload["role"] == "fork_matrix_fd_v2"
+    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
+    faulthandler.enable(file=sys.stderr, all_threads=True)
+    event("child_boot", role=payload["role"], start_ticks=start_ticks(os.getpid()),
+          faulthandler_enabled=faulthandler.is_enabled())
+    try:
+        torch, module = load_cpu()
+        assert payload["role"] == "fork_matrix_fd_v2"
+        pairs = payload["capture_pairs"]
+        assert tuple(pairs) == CASES
+        descriptors = [fd for name in CASES for fd in pairs[name]]
+        assert len(descriptors) == 8 and len(set(descriptors)) == 8
+        for name in CASES:
+            assert len(pairs[name]) == 2
+            for kind, descriptor in zip(("stdout", "stderr"), pairs[name]):
+                assert type(descriptor) is int and descriptor > 2
+                info = os.fstat(descriptor)
+                assert stat.S_ISREG(info.st_mode) and info.st_nlink == 0 and info.st_size == 0
+                assert os.readlink("/proc/self/fd/" + str(descriptor)).startswith(
+                    "/memfd:rve_fork_v2_" + name + "_" + kind)
+        event("fork_parent_ready", capture_pair_count=4, parent_native_calls=0,
+              warm_cpu_state="same_v1_Torch_and_extension_import_only", cuda_initialized=False)
+        cells = []
+        for name in CASES:
+            assert time.monotonic() < payload["stop_monotonic"]
+            result = fork_case(torch, module, name, payload["contracts"][name],
+                               payload["stop_monotonic"], pairs[name])
+            cells.append(result)
+            if result["certainty"] != "terminal" or result["returncode"] != 0:
+                break
+        event("fork_matrix_result", cells=cells, cuda_parent_initialized=torch.cuda.is_initialized())
+        assert not torch.cuda.is_initialized()
+        event("faulthandler_disable", enabled_before=faulthandler.is_enabled())
+        faulthandler.disable()
+    except BaseException as error:
+        event("cell_exception", error_type=type(error).__name__, error=str(error)[:600])
+        traceback.print_exc(limit=8)
+        raise
+
+
+if __name__ == "__main__":
+    main()

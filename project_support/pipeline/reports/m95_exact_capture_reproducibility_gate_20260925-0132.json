@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "contract": "m95_exact_capture_reproducibility_gate_implementation_v1",
+  "timestamp": "2026-09-25T01:32:05+08:00",
+  "supersedes": {
+    "path": "pipeline/reports/m95_exact_capture_reproducibility_gate_20260925-0127.json",
+    "sha256": "51e5c936b9d2d097aa010a18e22fc54d6ef368aeefda9895a3ffa90b711ffc1a",
+    "reason": "Remote bundle path resolution was corrected before native use."
+  },
+  "scope": "Fail-closed identity-analysis reproducibility gate for the running exact M95 match-cause capture.",
+  "status": "implementation_complete_native_validation_pending",
+  "reference": {
+    "path": "pipeline/reports/m95_identity_control_analysis_20260924-231333.json",
+    "sha256": "c7b6e78c64e29144d3abfea5007e5ec0843142b3e7aa6294c600e8eb114d4abb",
+    "rows": 256,
+    "source_capture_sha256": "f90286842d9d82d835652a29048100a10b6286ee5630e0d7c296363e95880025",
+    "remote_path": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/reports/m95_identity_control_analysis_20260924-231333.json",
+    "remote_hash_validated": true
+  },
+  "artifacts": {
+    "checker": {
+      "path": "scripts/m95_exact_capture_reproducibility_20260925.py",
+      "sha256": "918caa7911cc04366475bd7fdc306534af540ff57a1fb33d79e65a589ae31b65"
+    },
+    "checker_tests": {
+      "path": "scripts/test_m95_exact_capture_reproducibility_20260925.py",
+      "sha256": "36a5298bb24e4c0bb96efde60d4140d90d3ffad7d2f3c2802d6f9d68575ca42b"
+    },
+    "postprocess_runner": {
+      "path": "scripts/m95_exact_capture_postprocess_20260925.py",
+      "sha256": "0c627b2eb3b3b47547efe8622a86b2ac7ef65fe00d8c241863e269146d78a6f7"
+    },
+    "postprocess_tests": {
+      "path": "scripts/test_m95_exact_capture_postprocess_20260925.py",
+      "sha256": "263bc4740502ff7c7554d9f06dfd45362464dabefba74ba203e572df4d4340a7"
+    },
+    "remote_bundle": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/manifest_capture_match_20260924"
+  },
+  "gate": {
+    "required_before_match_cause_acceptance": true,
+    "comparison_unit": "all 256 manifest expressions",
+    "exact_fields": [
+      "scene_id",
+      "ann_id",
+      "stratum",
+      "query_count",
+      "native_positive",
+      "dominant_instance",
+      "fps_seed_inside_target",
+      "deployed_query",
+      "target_positive_query",
+      "target_objectness_query",
+      "class_matched_selector_query",
+      "class_matched_non_target_query",
+      "score_matched_pair"
+    ],
+    "numeric_tolerance": 1e-6,
+    "numeric_fields": [
+      "query_scores",
+      "query_iou_vector",
+      "stage_identity_features",
+      "selector_derived_iou_deltas"
+    ],
+    "failure_policy": "stop the postprocess chain and record no admission"
+  },
+  "validation": {
+    "local_focused_tests_passed": 17,
+    "local_dependent_tests_passed": 38,
+    "remote_focused_tests_passed": 17,
+    "python_compile_passed": true,
+    "reference_hash_validated": true,
+    "reference_rows_validated": 256,
+    "remote_reference_resolution_validated": true,
+    "server_runtime": "python3",
+    "native_execution_completed": false
+  },
+  "live_capture": {
+    "host": "server-6",
+    "gpu": 7,
+    "pid": 3140840,
+    "status": "running",
+    "last_observed_step": 1245,
+    "expected_steps": 4663,
+    "capture_ready": false
+  },
+  "next_executable_action": "When capture.json exists, run the updated postprocess runner with fresh component, identity-control, identity-analysis, reproducibility, and receipt outputs. The runner now requires exact reproduction of the frozen 256-row selector and identity analysis before accepting the match-cause evidence.",
+  "admission": false,
+  "native_backward_measured": false,
+  "resources_measured": false,
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable efficacy",
+    "population effect",
+    "novelty",
+    "whole-mechanism benefit"
+  ]
+}

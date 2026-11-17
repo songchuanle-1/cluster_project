@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T21:17:13.049419+00:00",
+  "passed": true,
+  "owner": {
+    "token": "10a3f8b7d1bc4c5083b9b476c4d6fb94",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T21:09:22.656483+00:00",
+    "deadline_at": "2026-11-08T22:09:22.656483+00:00",
+    "context_sha256": "96ccdaba46f448a2c295d1407b3e782b9f9d1052825fe18b2e4f967a458d3d71",
+    "pending_sha256": "a5a8fe814217e681000a6efca7eaeca7999792c27b10345892113ebb4f31ef9f"
+  },
+  "reviewer_agent": "/root/fresh_peer",
+  "reviewer_thread_id": "/root/fresh_peer",
+  "scope": "READ_ONLY_NEAREST_EXECUTABLE_WORK_AUDIT_OF_ONLY_DUE_HVD_AND_LATEST_M233_RUNTIME_HOLDS; no gate tests, CPU/GPU/SSH or shared mutations.",
+  "current_context": {
+    "path": "pipeline/headless/.tick_context.json",
+    "sha256": "96ccdaba46f448a2c295d1407b3e782b9f9d1052825fe18b2e4f967a458d3d71"
+  },
+  "research_work_snapshot": {
+    "path": "pipeline/research_work.json",
+    "sha256": "6d4b5cf8093f100e127a6765a37896b54a3567a9387db2c0af4ea6817a02f3f2"
+  },
+  "due_candidate_id": "hierarchy-native-variance-decomposition-composition",
+  "experiment_id": "M230-HVD",
+  "missing_authorized_gate_identified": false,
+  "distinct_reviewed_runtime_test_ready": false,
+  "HVD_evidence": {
+    "canonical_admission": {
+      "path": "pipeline/admissions/M230-HVD.json",
+      "sha256": "c92fcd22366cd5d84253c33ab37b2b72857915e239cfc5bb7741a58baa549a33"
+    },
+    "actual_native_smoke": {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_actual_results/native_smoke.json",
+      "sha256": "75206eed75e554fcaef40f759193b218d04f1742fa7696e0752f4af6872b136c"
+    },
+    "actual_resources": {
+      "path": "pipeline/diagnostic_bundles/tick_154767c2/hvd_actual_results/resources.json",
+      "sha256": "649c8702ec09391aff567b206f426c047d54be9548796b58fa03697ea481ab65"
+    },
+    "CPU_diagnosis": {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/diagnosis.json",
+      "sha256": "d12697a06c26acd34c36ca2091edcaa40be3d6f8912f46bcc4e651433e318e91"
+    },
+    "terminal_experiment": {
+      "path": "pipeline/experiments/M230-HVD.json",
+      "sha256": "be72add428834d9a55f2c852b73f77c2bdaa2e0d9328568c6c3e82520bb86786"
+    },
+    "all_four_canonical_gates_already_passed": true,
+    "source_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "archive_id": "656485273dd0482fb5ec08cef6a68df4",
+    "last_complete_epoch": 4,
+    "failed_partial_epoch": 5,
+    "failed_partial_step": 1449,
+    "root_cause": "UNKNOWN",
+    "automatic_restart_or_resume": false
+  },
+  "M233_evidence": {
+    "diagnosis": {
+      "path": "pipeline/diagnostic_bundles/tick_9dfa43fa/faketensor_cpu_diagnosis.json",
+      "sha256": "35cf31a33961f38ed47d0231568eae36b3a655f1b33026a53324e55811db09c8"
+    },
+    "actual_CPU_independent_review": {
+      "path": "pipeline/diagnostic_bundles/tick_9dfa43fa/operational_review/faketensor_cpu_actual_independent_review.json",
+      "sha256": "052cb176c0691941dc3ebcb65d5e1f8ee8f3a64e99c5af73b0d1f780749ba07b"
+    },
+    "stage": "complete",
+    "training_status": "crashed",
+    "root_cause": "UNKNOWN",
+    "repair_proven": false,
+    "reproduction_established": false
+  },
+  "manual_pauses": [
+    {
+      "id": "M206-CGCA",
+      "status": "waiting",
+      "dispatch_phase": "user_paused",
+      "resume_authorized": false,
+      "dispatch_hold_present": true
+    },
+    {
+      "id": "M227-LFT",
+      "status": "waiting",
+      "dispatch_phase": "user_paused",
+      "resume_authorized": false,
+      "dispatch_hold_present": true
+    }
+  ],
+  "stale_HVD_metadata_not_missing_gates": [
+    "Torch_FP32_autograd=NOT_RUN despite authenticated actual TRAIN2/backward evidence and native_backward gate passed",
+    "worker_preparation/execution_adapter NOT_EXECUTED flags describe superseded preparation, while later actual results and canonical admission exist",
+    "unblock_condition says an HVD trainer holds GPU0, but matching HVD experiment is archived crashed and no active HVD/M233 queue row remains"
+  ],
+  "narrow_next_action": "Root may reconcile only stale HVD operational-readiness wording to the already documented runtime-failure hold. No gate rerun, source/model revision, old lease renewal, null signature, restart/resume or consumed-entry replay is supported.",
+  "concrete_runtime_blocker": "Both failed live training objects/history are unavailable. HVD128 fresh traversal/clipnorm checks and M2333 fresh FakeTensor/_apply checks already passed without reconstructing the failures. No supplied existing frozen protocol captures a materially different causal state, so refreshing an owner or rerunning those checks would not close this gap.",
+  "new_diagnostic_admission_condition": "A distinct diagnosis needs an identified new failing object/state/history or separately preserved evidence plus a falsifiable contrast. A saved tensor checkpoint alone does not recover live Python bindings or CUDA history; do not label another fresh healthy process as repair.",
+  "classification": "IMPLEMENTATION_RUNTIME_INCONCLUSIVE; no mechanism rejection or efficacy claim",
+  "external_actions_by_reviewer": false,
+  "shared_mutations_by_reviewer": false,
+  "new_execution_authorized_by_review": false
+}

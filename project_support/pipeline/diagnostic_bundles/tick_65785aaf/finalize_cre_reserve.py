@@ -1,0 +1,123 @@
+"""Root-only once recorder: one real isolated CRE source reserve and current existing progress."""
+from pathlib import Path
+from datetime import datetime,timezone
+import argparse,copy,hashlib,json,os,re,sys
+from anchor_bfc_packet import guard
+from verify_protected_assets import snapshot
+ROOT=Path('D:/project/cluster_project');HERE=Path(__file__).resolve().parent
+TOKEN='65785aaff14a4dcb96615ccd91c62a07';BASE='026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563'
+CRE='hierarchy-cross-root-directed-edge-broadcast';AEF='hierarchy-parent-antisymmetric-edge-flux';BEC='hierarchy-cross-level-bipartite-edge-composition'
+SOURCE=HERE/'new_candidate_prepare';SOURCE_SHA='c760d9fd353d2b3e208837b9489ba511918e73821c278d97b5067c14701a41fe'
+ONCE=['reserve_finalize_before.json','reserve_finalize_intent.json','reserve_finalize_result.json','reserve_finalize_memory_before.md','reserve_finalize_preflight_source.json','report_notes.json']
+EXPECTED={'bec_training_progress_observation.json':'7bbb904dd3283180bfcdc1bf57aec9a1aadd7b7effe5a6a00a91774d0159eef5','aef_actual_local_guard.json':'6771bc524aa3bd94b306f7ced8a2be1eac47a398bf6ea0934b84b7f9ad07e168','bec_and_aef_current_review.json':'d642951874eda911498e23aa48ddc76e05cd7b31d9a6ed403fe312e92a080947','protected_assets_before.json':'ee0b76bf9470aa03cc31fed00e68ec4e33d15ab8a7acc612c788b54db082fce5'}
+BOUNDARY='Current026c compatibility only. AEF56b2 is a separate sibling and is not this parent. If main moves first, preserve this source proof and package unchangedCRE9 on the then-current compatible parent and test that version. No model revision/tuning or relabelled old raw results is implied. Frozen source null metadata stays untouched.'
+
+def read(p):return json.loads(Path(p).read_text('utf8'))
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def ref(p):
+ p=Path(p).resolve();assert p.is_relative_to(ROOT.resolve());return {'path':p.relative_to(ROOT).as_posix(),'sha256':sha(p)}
+def encoded(x):return (json.dumps(x,ensure_ascii=False,indent=2,allow_nan=False)+'\n').encode('utf8')
+def exclusive(p,data):
+ with Path(p).open('xb') as f:f.write(data);f.flush();os.fsync(f.fileno())
+def replace(p,data):
+ temp=p.with_name(p.name+'.'+TOKEN+'.cre_reserve_finalize.tmp');exclusive(temp,data);os.replace(temp,p)
+def protected_records(w,exclude):return {c['id']:c for c in w['candidates'] if c['id'] not in exclude}
+def main():
+ parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--execute-root',action='store_true');args=parser.parse_args()
+ if not args.execute_root:print('DEFAULT_READ_ONLY_NO_RECORDING');return
+ owner=guard();assert owner['token']==TOKEN and os.environ.get('GIT_OPTIONAL_LOCKS')=='0' and sys.dont_write_bytecode
+ assert not any((HERE/n).exists() for n in ONCE),'Partial/existing recorder outputs: reconcile read-only, never replay'
+ for name,digest in EXPECTED.items():assert sha(HERE/name)==digest,name
+ assert sha(SOURCE/'preparation.json')==SOURCE_SHA
+ prep=read(SOURCE/'preparation.json');original=read(SOURCE/'candidate_record.json');source_peer=read(HERE/'new_candidate_source_independent_review.json');version_path=HERE/'version_prepare/isolated_source_version.json';version=read(version_path);version_peer=read(HERE/'new_candidate_actual_version_review.json')
+ assert prep['candidate_id']==CRE and prep['experiment_id']=='M217-CRE' and prep['source_file_count']==9 and prep['model_file_count']==8 and prep['code_commit'] is None and prep['source_commit'] is None
+ for name in ['candidate_record.json','source_manifest.json','native_protocol.md','static_validation_final.json']:assert sha(SOURCE/name)==prep['prepared_file_hashes'][name]
+ assert original['id']==CRE and original['experiment_id']=='M217-CRE' and original['stage']=='implementation' and original['native_status']==original['resource_status']=='NOT_RUN' and all(original[k] is None for k in ['code_commit','source_commit','source_parent_commit'])
+ frozen=prep['source_files'];assert len(frozen)==9 and frozen==read(SOURCE/'source_manifest.json')['source_files']
+ assert source_peer['status']=='STATIC_CRE_SOURCE_TOPOLOGY_AND_INTEGRATION_REVIEWED_NOT_NATIVE_PASS' and source_peer['candidate_id']==CRE and source_peer['experiment_id']=='M217-CRE' and source_peer['code_commit'] is None and source_peer['material_concerns']==[]
+ assert source_peer['anchors']['preparation']==ref(SOURCE/'preparation.json') and source_peer['source_files_exact9']==frozen
+ commit=version['code_commit'];assert re.fullmatch('[0-9a-f]{40}',commit) and commit!=BASE and version['status']=='ISOLATED_CRE_SOURCE_COMMIT_ONLY_NATIVE_NOT_RUN'
+ assert version['candidate_id']==CRE and version['experiment_id']=='M217-CRE' and version['parent_commit']==BASE and version['source_preparation']==ref(SOURCE/'preparation.json') and version['independent_source_review']==ref(HERE/'new_candidate_source_independent_review.json')
+ assert version['frozen_source_files']==version['committed_blob_sha256']==frozen and version['diff_exact9A'] is True and version['isolated_worktree_and_index_clean'] is True and version['primary_HEAD_before']==version['primary_HEAD_after']==BASE
+ assert version['primary_HEAD_index_status_28_protected_bytes_unchanged'] is True and version['public_primary_or_runtime_promoted'] is False and version['native_resources_remote_queue_launch']=='NOT_RUN' and version['material_concerns']==[]
+ assert version_peer['candidate_id']==CRE and version_peer['experiment_id']=='M217-CRE' and version_peer['code_commit']==commit and version_peer['parent_commit']==BASE and version_peer['material_concerns']==[]
+ assert version_peer['anchors']['source_preparation']==ref(SOURCE/'preparation.json') and version_peer['anchors']['source_independent_review']==ref(HERE/'new_candidate_source_independent_review.json') and version_peer['anchors']['source_version']==ref(version_path)
+ obs=read(HERE/'bec_training_progress_observation.json');resource=read(HERE/'aef_actual_local_guard.json');current_peer=read(HERE/'bec_and_aef_current_review.json');first,last=obs['observations']
+ assert obs['owner_token']==TOKEN and obs['native_TRAIN_growth'] is True and first['train_progress']==[13,50,4117,4686] and last['train_progress']==[13,50,4126,4686]
+ assert all((x['pid'],x['start_ticks'],x['runtime_HEAD'],x['gpu_contexts'])==(1558071,'64444390',BASE,'1558071, 19768') for x in [first,last])
+ assert resource['kind']=='resource_check' and resource['result']=='blocked' and resource['candidate_id']==AEF and resource['owner']=={k:owner[k] for k in resource['owner']} and len(resource['owner'])==6
+ assert resource['actual_local_guard_events']==[{'physical_gpu':0,'refused':True,'reason':'Selected GPU has registered running task'},{'physical_gpu':1,'refused':True,'reason':'Explicit physical GPU0 is required'}]
+ assert all(resource[k]==0 for k in ['transport_calls','Popen_calls','network_calls','GPU_queries','GPU1_queries']) and resource['Torch_imported'] is False and resource['active_execution_created'] is False and resource['native_TRAIN2']==resource['resources']=='NOT_RUN' and resource['native_PASS_or_receipt_queue_created'] is False
+ assert resource['hardware_evidence']==ref(HERE/'bec_training_progress_observation.json') and current_peer['material_concerns']==[] and current_peer['actual_progress_checks_count']==18 and current_peer['AEF_actual_local_resource_check_verified'] is True
+ ctx=read(ROOT/'pipeline/headless/.tick_context.json');assert ctx['research_work']['creation_budget']==1 and ctx['research_work']['reserve_budget']==1
+ line=next(x for x in ctx['preflight']['monitor_output'].splitlines() if '_ctf_hcg_csort_bec]' in x);m=re.search(r'Best=([0-9.]+) (\d+)/(\d+) no_improve=(\d+)/(\d+) gpu=(\d+)',line);assert m and m.groups()==('0.4879','13','50','1','10','0')
+ preflight={'generated_at':ctx['generated_at'],'source_context':ref(ROOT/'pipeline/headless/.tick_context.json'),'monitor_line':line,'scope':'Original begin preflight; separate from later root TRAIN sample.'};pb=encoded(preflight)
+ partial={'best_mIoU_4dp':m.group(1),'epoch':13,'max_epochs':50,'no_improve':1,'patience':10,'gpu':0,'observed_at':ctx['generated_at'],'source':{'path':(HERE/'reserve_finalize_preflight_source.json').relative_to(ROOT).as_posix(),'sha256':hashlib.sha256(pb).hexdigest()},'not_final_efficacy':True}
+ sys.path.insert(0,'C:/Users/chuanle song/.codex/skills/songcl_research_pipeline');import pipeline_monitor as monitor
+ lock=monitor.acquire_lock(str(ROOT));assert lock is not None
+ try:
+  guard();before=snapshot();baseline=read(HERE/'protected_assets_before.json');assert all(before[k]==baseline[k] for k in ['head','index_empty','status_hex','files','protected_ledgers','candidate_digests'])
+  wp=ROOT/'pipeline/research_work.json';mp=ROOT/'pipeline/codex_memory.md';work=read(wp);out=copy.deepcopy(work);assert len(work['candidates'])==142 and len({c['id'] for c in work['candidates']})==142 and not any(c['id']==CRE or c.get('experiment_id')=='M217-CRE' for c in work['candidates'])
+  for path in [ROOT/'pipeline/admissions/M217-CRE.json',ROOT/'pipeline/experiments/M217-CRE.json']:assert not path.exists()
+  queue=read(ROOT/'pipeline/queue.json');assert not any(c.get('id')=='M217-CRE' for rows in queue['gpu_queues'].values() for c in rows)
+  now=datetime.now(timezone.utc).isoformat();new=copy.deepcopy(original)
+  new['source_version_history']=[{'recorded_at':now,'original_frozen_candidate_record':ref(SOURCE/'candidate_record.json'),'original_source_preparation':ref(SOURCE/'preparation.json'),'prior_null_fields':{k:copy.deepcopy(original[k]) for k in ['code_commit','source_commit','source_parent_commit']},'actual_source_version':ref(version_path),'actual_version_independent_review':ref(HERE/'new_candidate_actual_version_review.json'),'compatibility_boundary':BOUNDARY}]
+  new.update(stage='implementation',code_commit=commit,source_commit=commit,source_parent_commit=BASE,future_version_parent=BASE,source_preparation=ref(SOURCE/'preparation.json'),source_version=ref(version_path),isolated_worktree=version['worktree'],native_execution_code_commit=None,native_status='NOT_RUN',resource_status='NOT_RUN',queued=False,worker_preparation=None,execution_adapter=None,registered_at=now,implementation_status='EXACT_ISOLATED_SOURCE_VERSION_SAVED_NATIVE_TOOLING_PENDING',source_status='CURRENT026C_COMPATIBLE_EXACT9A_NATIVE_NOT_RUN')
+  new['resource_authorization']={'path':'pipeline/authorizations/server4_gpu0_only_20261026.json','sha256':'94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09'}
+  new['operational_compatibility']={'source_commit':commit,'actual_parent_commit':BASE,'actual_primary_runtime_unchanged':BASE,'compatibility_scope':BOUNDARY,'frozen_null_declarations_unchanged':True,'actual_native_or_resource_results':'NOT_RUN'}
+  new['implementation_validation']={'kind':'stdlib_software_static_validation','result':'passed','evidence':ref(SOURCE/'static_validation_final.json'),'actual_checks':prep['actual_static_counts'],'scope':prep['static_scope'],'not_native_or_FP32':True}
+  new['known_limits']=['CPA historical wording clarification: actual CPA r1 is projection-free point-query/coarse dot-product softmax. CRE graph difference rests receiver-root joint nonlinear vector messages and original-ancestor synthesis, not the removal of QKV projections.','Whole-graph alternative only; resource/FP32/autograd/common initialization/efficacy remain UNKNOWN. No old held route is reopened.',BOUNDARY]
+  new['source_review_scope']='Finite actual-source topology/integration review plus actual exact9 isolated version proof; neither establishes literature novelty, native behavior, resource PASS or causal benefit.'
+  new['next_action']='Prepare CRE-specific native worker against this exact isolated version and original protocol; actual matched M95/CRE TRAIN2/resources wait genuinely idle authorizedGPU0/fresh root context/UUID/assets/three locks/original deadline. Existing AEF56 is a sibling on026c; if main moves first, repackage unchangedCRE9 compatibly and test that exact version. No source promotion, borrowed raw result, tuning or automatic recovery.'
+  for entry in [ref(SOURCE/'preparation.json'),ref(HERE/'new_candidate_source_independent_review.json'),ref(version_path),ref(HERE/'new_candidate_actual_version_review.json')]:
+   if entry not in new['evidence']:new['evidence'].append(entry)
+  out['candidates'].append(new);assert len(out['candidates'])-len(work['candidates'])==1<=ctx['research_work']['creation_budget']
+  a=next(c for c in out['candidates'] if c['id']==AEF);b=next(c for c in out['candidates'] if c['id']==BEC)
+  assert a['stage']=='validation' and a['code_commit']=='56b2a96dc48cc8a88f0f7105527ef448113b1060' and a.get('native_execution_code_commit') is None and a['native_status']==a['resource_status']=='NOT_RUN'
+  a.setdefault('resource_check_history',[]).append({'recorded_at':now,'prior_resource_check':copy.deepcopy(a.get('resource_check')),'prior_current_resource_check':copy.deepcopy(a.get('current_resource_check'))})
+  a['resource_check']=ref(HERE/'aef_actual_local_guard.json');a['current_resource_check']={'kind':'resource_check','result':'blocked','physical_gpu':0,'recorded_at':resource['recorded_at'],'evidence':ref(HERE/'aef_actual_local_guard.json'),'hardware_evidence':ref(HERE/'bec_training_progress_observation.json'),'scope':'Current root NoTransport refusals; separate root hardware samples, no new hardware query/native test/exclusive hold.'}
+  a['next_action']='Reuse existing reviewed AEF native/op tools on genuine fresh authorized idleGPU0 after original BEC releases it. Current guard refuses busy0 and unauthorized1; keep native/resources NOT_RUN, no new tool duplication or old binding replay.'
+  b.setdefault('training_progress_history',[]).append(copy.deepcopy(b.get('training_progress_observation')))
+  b['training_progress_observation']={'first':first['train_progress'],'last':last['train_progress'],'pid':1558071,'start_ticks':'64444390','observed_at':last['observed_at'],'evidence':ref(HERE/'bec_training_progress_observation.json'),'independent_review':ref(HERE/'bec_and_aef_current_review.json'),'preflight_partial_metrics':partial}
+  b['current_resource_check']={'result':'original_training_running','physical_gpu':0,'observed_at':last['observed_at'],'evidence':ref(HERE/'bec_training_progress_observation.json'),'scope':'Root bounded original process/source/native-step/context samples, not continuous exclusivity/pureTRAIN peak.'}
+  for candidate,entries in [(a,[ref(HERE/'aef_actual_local_guard.json'),ref(HERE/'bec_and_aef_current_review.json')]),(b,[ref(HERE/'bec_training_progress_observation.json'),ref(HERE/'bec_and_aef_current_review.json')])]:
+   for entry in entries:
+    if entry not in candidate['evidence']:candidate['evidence'].append(entry)
+  if work.get('tick_attempt'):out.setdefault('tick_attempt_history',[]).append(copy.deepcopy(work['tick_attempt']))
+  out['tick_attempt']={'tick_started_at':owner['generated_at'],'candidate_id':AEF,'kind':'resource_check','result':'blocked','command':'python -B -X utf8 '+(HERE/'check_aef_actual_guard.py').as_posix()+' --execute-root','observation':'Actual current owner AEF NoTransport guard: busy0/unauthorized1,0transport/Popen/network/Torch/newGPUqueries/active. Existing BEC current progress is separately observed. One newCRE source reserve has46 stdlib software checks and an actual isolated commit/independent proof, not native or resource PASS.','evidence':[ref(HERE/'aef_actual_local_guard.json'),ref(HERE/'bec_and_aef_current_review.json')],'related_implementation_preparation':{'candidate_id':CRE,'source_preparation':ref(SOURCE/'preparation.json'),'static_software_evidence':ref(SOURCE/'static_validation_final.json'),'actual_source_version':ref(version_path),'native_resources':'NOT_RUN'}}
+  out['updated_at']=now;out['next_action']='Monitor original BEC1558071 on soleGPU0. Reuse full reviewed AEF tools when real idle; newCRE is one exact current-parent source reserve pending native tooling/testing. NoGPU1, primary sibling ff assumption, tuning, old-hold recovery or raw-result relabel.'
+  assert len(out['candidates'])==143 and set(c['id'] for c in out['candidates'])==set(c['id'] for c in work['candidates'])|{CRE}
+  assert protected_records(out,{CRE,AEF,BEC})==protected_records(work,{AEF,BEC})
+  memory_old=mp.read_bytes();parts={};key=None
+  for text in memory_old.decode('utf8').splitlines():
+   if text.startswith('## '):key=text;parts[key]=[]
+   elif key:parts[key].append(text)
+  headers=['## Goal And Phase','## Champion And Baseline','## Active Hypotheses','## Closed Or Failed Directions','## Running And Queue','## Open Questions And Risks','## Last Tick'];assert set(parts)==set(headers)
+  parts[headers[0]][0]='- 当前65785aaff14a4dcb96615ccd91c62a07，actual/target01a159c5-29ab-7a22-ba7f-e79174757253一致；generated2026-10-26T22:03:25.203343+00:00/deadline23:03:25.203343+00:00原值保持。'
+  parts[headers[2]]+=['- 新M217-CRE唯一储备：receiver coarse root与不同sender原coarse state共同经共享U/GELU得定向vector message，再固定等权mean；D0/D1把原fine/middle state与原ancestor root message合成，原三LN/外skip/rawbanks/CSORT/HCG/单inst保持，原三FFN移除。整图替代，收益/新颖性未知。','- CRE冻结prep c760d9fd/19map/8独立模型源+1原YAML；46原生产AST/plan/mean/forward标量替身软件检查及独审仅表明有限接线/索引性质，无Torch/GELU/autograd/FP32/common pairing/资源。三2C→C map在C256静态参数差−1182720，是源算式，不是实测全模型inventory或FLOPs。',f'- CRE实际隔离source {commit}，唯一父026c/恰9A/9blob/clean，原冻结code/source null原件不改；native/resources NOT_RUN、queuedfalse、stageimplementation。AEF56同父兄弟未测；将来若main先推进，须保留本proof并将 unchangedCRE9重新兼容打包和真测，不假定跨兄弟ff，不算新模型修订/调参。']
+  parts[headers[3]]=[('- 旧10本轮notdue，不重复复核；0500a683只作先前bounded metadata历史引用，旧记录/禁用项/修订上限保持，无新恢复授权，不读655正文/旧grant/checkpoint体，不重开或重测。' if x.lstrip('- ').startswith('旧10') else x) for x in parts[headers[3]]]
+  parts[headers[4]][0]='- 当前1个确认训练：M215-BEC source026c，GPU0原PID1558071/start64444390；root本轮TRAIN13/50 4117→4126/4686、sole context19768MiB，观测7bbb904d/18项+资源peer d6429518；source8/YAML/receipt/R1digest/唯一映射保持，不声称持续独占。'
+  parts[headers[4]]=[('- 本轮begin原始监控截至22:03:25Z：BEC partial Best=.4879、13/50、no_improve1/10；来源当前context原行，和稍后TRAIN增长分开，不是最终效果。M95.5020/目标.5100/gap.0080保持。' if x.startswith('- 本轮begin原始监控') else '- AEF本轮真实guard6771bc52：已审现成工具按当前root/source/白名单核后prepare0 registered busy、1 unauthorized；0transport/Popen/network/Torch/新硬件查询/active，硬件依据另采7bbb原BEC样本，native/resources仍NOT_RUN，不增exclusive槽位hold。' if x.startswith('- AEF本轮') else x) for x in parts[headers[4]]]
+  parts[headers[4]]=[('- CTS已unknown终态归档并释放登记槽位，无自动resume；M206waiting但paused/dispatch_hold/resume_authorized=false不计ready，GPU1禁用。当前0ready，AEF已备受审原生工具、CRE已备隔离source版本，两者均未准入/入队；BFC不恢复。' if x.startswith('- CTS已unknown') else x) for x in parts[headers[4]]]
+  parts[headers[5]]+=['- CRE冻结hypothesis对CPA的宽泛QKV措辞由外部审查澄清：实际CPA r1是projection-free point-query/coarse dotproduct softmax；CRE区别在receiver-root联合非线性vector message及原ancestor synthesis，不以去QKV作图区别证据。原19map母本不改。','- 新CRE仅当前026c兼容源版本，真实Native/commonpairing/梯度/资源/准确率未知；任何未来sourceparent变化须新兼容版本+实际测试，不能借AEF/BEC旧结果。']
+  parts[headers[6]]=['- begin一次canonical监控/goal/已有派发；原BEC健康进展，无新终态/运维问题，仅GPU0；旧10未到期不复核/不读655或旧grant/checkpoint。','- 本轮1新候选M217-CRE、1隔离本地source commit；source19map/原YAML保留，46 stdlib软件检查与独立源/实际版本审按真实范围记录，不是native/GPU/资源PASS。0新revision/准入/入队/训练启动，不改primary026c。','- tick_attempt为既有AEF实际resource_check/blocked，当前rootguard6771与peer d642绑定；新CRE实现软件证据并列记录，保持AEF现成工具待空卡，不重复造工具/抢GPU1。','- 收尾142→143，新增1<=snapshotcreation1；仅旧AEF/BEC当前资源/进度更新，其他140/14账/primary28status+bytes/index保持。report/finish/postflight由root另执行，以真实最终receipt和lease释放为准。']
+  memory='# Codex Research Memory\n\n'+'\n'.join(h+'\n'+'\n'.join(parts[h]).strip()+'\n' for h in headers)+'\n';assert len(memory.splitlines())<120 and memory.count('\n## ')==7
+  notes={'actions':['原BEC source026c/PID1558071/start64444390在唯一GPU0真实TRAIN13/50 4117→4126，sole19768MiB；当前7bbb观测和d642 peer核源8/YAML/收据/R1digest/三账，未动原进程。','新增唯一M217-CRE：c760冻结8独立model+原YAML，46实际stdlib接线/索引软件检查，独立源码审和实际隔离单父026c/恰9A/clean source版本审；无Torch/native/resource或效果实测。','AEF复用已有完整工具，当前6771 NoTransport guard证实prepare0忙/1未授权，零transport/process/network/Torch/新GPU查询/active；硬件证据为另采本轮原BEC样本。'], 'decisions':['1新候选/1隔离source commit、0revision/准入/入队/launch；CRE stageimplementation、native/resourcesNOT_RUN，AEF保持validation和resource_checkblocked，不增exclusive槽位hold。','原始22:03:25缓存Best.4879/13of50/noimprove1与稍后TRAIN增长分开；M95.5020/目标.5100/gap.0080不变，无新champion/最终效果。'], 'risks':['CRE静态参数差−1182720仅算式，真实FLOPs/latency/memory/梯度/common初始化/准确率未知；CPA r1的无投影点积softmax读取与CRE联合非线性向量消息的图区别已准确记录，不声称移除QKV创新。','CRE与AEF56都是026c子版本；若main先推进，必须新兼容版本并实测，保留旧proof，不跨兄弟ff或重标旧raw。'], 'next_actions':['继续原BEC，仅等待唯一GPU0真实可用时fresh currentowner/原deadline/UUID/资产/三锁运行现成AEF原生配对；CRE后续只做必要专属native工具。','其他140候选/14生命周期账/primary026c和28status+bytes/index保持；postflight/finish由root按实际执行，不预签成功，无新增人工权限请求。']}
+  notes['decisions'].extend(notes.pop('risks'));notes['decisions'].extend(notes.pop('next_actions'))
+  wp_before=sha(wp);mp_before=sha(mp);wb,mb,nb=encoded(out),memory.encode('utf8'),encoded(notes)
+  before_doc={'owner_token':TOKEN,'recorded_at':now,'work_sha256':wp_before,'memory_sha256':mp_before,'protected_snapshot':before,'AEF_before':next(c for c in work['candidates'] if c['id']==AEF),'BEC_before':next(c for c in work['candidates'] if c['id']==BEC),'source_preparation':ref(SOURCE/'preparation.json'),'actual_version':ref(version_path)}
+  intent={'owner_token':TOKEN,'recorded_at':now,'scope':'One new frozen/actual-version CRE reserve, current oldAEF+BEC progress/resource only; no lifecycle/source/native mutation','work_before_sha256':wp_before,'memory_before_sha256':mp_before,'proposed_work_sha256':hashlib.sha256(wb).hexdigest(),'proposed_memory_sha256':hashlib.sha256(mb).hexdigest(),'new_candidate_id':CRE,'source_commit':commit,'partial_failure_policy':'Preserve and reconcile exact journal/bytes; no blind replay/rollback.'}
+  result={'recorded_at':now,'owner_token':TOKEN,'old_candidate_count':142,'candidate_count':143,'new_candidates':1,'new_source_commits':1,'new_implementation_revisions':0,'new_admissions':0,'new_queue_tasks':0,'new_training_launches':0,'CRE_source_commit':commit,'CRE_parent_commit':BASE,'CRE_stage':'implementation','CRE_native_resources':'NOT_RUN','queued':False,'other140_candidates_unchanged':True,'all14_lifecycle_ledgers_unchanged':True,'primary026c_protected28_status_bytes_and_index_unchanged':True,'memory_lines':len(memory.splitlines()),'work_sha256':hashlib.sha256(wb).hexdigest(),'memory_sha256':hashlib.sha256(mb).hexdigest(),'report_notes':{'path':(HERE/'report_notes.json').relative_to(ROOT).as_posix(),'sha256':hashlib.sha256(nb).hexdigest()},'postflight_or_finish_preclaimed':False}
+  # All payload bytes must serialize successfully before any journal/shared write.
+  bb,ib,rb=encoded(before_doc),encoded(intent),encoded(result)
+  guard();assert sha(wp)==wp_before and sha(mp)==mp_before and not any((HERE/n).exists() for n in ONCE)
+  exclusive(HERE/'reserve_finalize_before.json',bb);exclusive(HERE/'reserve_finalize_memory_before.md',memory_old);exclusive(HERE/'reserve_finalize_preflight_source.json',pb);exclusive(HERE/'reserve_finalize_intent.json',ib)
+  guard();assert sha(wp)==wp_before and sha(mp)==mp_before
+  replace(wp,wb);replace(mp,mb);exclusive(HERE/'report_notes.json',nb)
+  after=snapshot();assert all(after[k]==before[k] for k in ['head','index_empty','status_hex','files','protected_ledgers'])
+  assert read(wp)==out and protected_records(read(wp),{CRE,AEF,BEC})==protected_records(work,{AEF,BEC}) and mp.read_bytes()==mb
+  assert set(after['candidate_digests'])==set(before['candidate_digests'])|{CRE} and all(after['candidate_digests'][k]==v for k,v in before['candidate_digests'].items() if k not in (AEF,BEC))
+  guard();exclusive(HERE/'reserve_finalize_result.json',rb)
+  print(json.dumps({'status':'ONE_CRE_SOURCE_RESERVE_AND_CURRENT_RESOURCE_RECORDED_NOT_NATIVE_PASS','result':ref(HERE/'reserve_finalize_result.json'),'memory_lines':len(memory.splitlines())},ensure_ascii=False))
+ finally:lock.close()
+if __name__=='__main__':main()

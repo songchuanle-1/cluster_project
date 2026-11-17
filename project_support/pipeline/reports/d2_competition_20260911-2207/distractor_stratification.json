@@ -1,0 +1,151 @@
+{
+  "source_instance_sha256": "4455b8857ade37aaafa32581537a961a77bcc756b22d8143ed4021bc88b7931f",
+  "source_calibration_sha256": "2f732df4748c9f368f2fed3e108192015379845721d94d69848e36538dfabe8c\r",
+  "models": {
+    "baseline": {
+      "distractor_table": [
+        {
+          "distractors": "0",
+          "banks": 57,
+          "selection_failures": 4,
+          "selection_fail_rate": 0.0702,
+          "recoverable": 2,
+          "recoverable_wrong_instance": 2,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": "1-2",
+          "banks": 74,
+          "selection_failures": 22,
+          "selection_fail_rate": 0.2973,
+          "recoverable": 20,
+          "recoverable_wrong_instance": 17,
+          "wrong_instance_fraction_of_recoverable": 0.85
+        },
+        {
+          "distractors": "3-5",
+          "banks": 32,
+          "selection_failures": 19,
+          "selection_fail_rate": 0.5938,
+          "recoverable": 17,
+          "recoverable_wrong_instance": 16,
+          "wrong_instance_fraction_of_recoverable": 0.9412
+        },
+        {
+          "distractors": "6-10",
+          "banks": 23,
+          "selection_failures": 18,
+          "selection_fail_rate": 0.7826,
+          "recoverable": 14,
+          "recoverable_wrong_instance": 14,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": ">10",
+          "banks": 27,
+          "selection_failures": 21,
+          "selection_fail_rate": 0.7778,
+          "recoverable": 18,
+          "recoverable_wrong_instance": 18,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": "NA",
+          "banks": 71,
+          "selection_failures": 29,
+          "selection_fail_rate": 0.4085,
+          "recoverable": 19,
+          "recoverable_wrong_instance": 18,
+          "wrong_instance_fraction_of_recoverable": 0.9474
+        }
+      ],
+      "calibration": {
+        "recoverable": {
+          "banks": 90,
+          "median_oracle_score_rank": 19,
+          "mean_oracle_score_rank": 31.74,
+          "median_selected_minus_oracle_score": 0.4299
+        },
+        "success": {
+          "banks": 171,
+          "median_oracle_score_rank": 10,
+          "mean_oracle_score_rank": 21.61,
+          "median_selected_minus_oracle_score": 0.0722
+        }
+      }
+    },
+    "m95": {
+      "distractor_table": [
+        {
+          "distractors": "0",
+          "banks": 57,
+          "selection_failures": 5,
+          "selection_fail_rate": 0.0877,
+          "recoverable": 4,
+          "recoverable_wrong_instance": 4,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": "1-2",
+          "banks": 74,
+          "selection_failures": 24,
+          "selection_fail_rate": 0.3243,
+          "recoverable": 23,
+          "recoverable_wrong_instance": 21,
+          "wrong_instance_fraction_of_recoverable": 0.913
+        },
+        {
+          "distractors": "3-5",
+          "banks": 32,
+          "selection_failures": 20,
+          "selection_fail_rate": 0.625,
+          "recoverable": 19,
+          "recoverable_wrong_instance": 19,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": "6-10",
+          "banks": 23,
+          "selection_failures": 19,
+          "selection_fail_rate": 0.8261,
+          "recoverable": 15,
+          "recoverable_wrong_instance": 15,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": ">10",
+          "banks": 27,
+          "selection_failures": 21,
+          "selection_fail_rate": 0.7778,
+          "recoverable": 20,
+          "recoverable_wrong_instance": 20,
+          "wrong_instance_fraction_of_recoverable": 1.0
+        },
+        {
+          "distractors": "NA",
+          "banks": 71,
+          "selection_failures": 37,
+          "selection_fail_rate": 0.5211,
+          "recoverable": 30,
+          "recoverable_wrong_instance": 26,
+          "wrong_instance_fraction_of_recoverable": 0.8667
+        }
+      ],
+      "calibration": {
+        "recoverable": {
+          "banks": 111,
+          "median_oracle_score_rank": 17,
+          "mean_oracle_score_rank": 31.17,
+          "median_selected_minus_oracle_score": 0.546
+        },
+        "success": {
+          "banks": 158,
+          "median_oracle_score_rank": 10,
+          "mean_oracle_score_rank": 21.68,
+          "median_selected_minus_oracle_score": 0.0945
+        }
+      }
+    }
+  },
+  "monotone_recalibration_note": "Within a fixed candidate bank, argmax is invariant under any strictly increasing transform of the per-candidate score. Therefore per-bank score standardization, temperature rescaling, or min-max normalization cannot change the selected candidate; only a mechanism that changes the score field (new evidence or new supervision) can fix the measured error."
+}

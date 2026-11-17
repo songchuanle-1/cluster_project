@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T21:44:23.781100+00:00",
+  "owner": {
+    "token": "10a3f8b7d1bc4c5083b9b476c4d6fb94",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T21:09:22.656483+00:00",
+    "deadline_at": "2026-11-08T22:09:22.656483+00:00",
+    "context_sha256": "96ccdaba46f448a2c295d1407b3e782b9f9d1052825fe18b2e4f967a458d3d71",
+    "pending_sha256": "a5a8fe814217e681000a6efca7eaeca7999792c27b10345892113ebb4f31ef9f"
+  },
+  "producer_agent": "/root/fresh_ops",
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "producer_sha256": "9d329eecab5fa19345a64e5ec2d8c4ca8c06a968a27b35453ac801355eccf878",
+  "transport_sha256": "cf46bb5196ddf95e3699a9e359c6f66b0d8bbfc366d5d164e98486fc7e092d23",
+  "source_binding_sha256": "f33a05f577c2da4da91636af9124b21c433ba3933030c917b6b4c9d028c9e60f",
+  "fixed_C_H_D_K": [
+    256,
+    8,
+    32,
+    32
+  ],
+  "cases": [
+    "singleton",
+    "small_padded_batch",
+    "K_minus_one",
+    "K_exactly",
+    "K_plus_one",
+    "cutoff_ties_and_other_leaf",
+    "all_valid_multileaf",
+    "float32_K_plus_one"
+  ],
+  "tolerances": {
+    "float64": {
+      "atol": 2e-10,
+      "rtol": 2e-08
+    },
+    "float32": {
+      "atol": 5e-05,
+      "rtol": 0.0005
+    }
+  },
+  "outputs_and_gradients": "Actual optimized vs actual literal reference for full and matched own-only paths; feature input and every named parameter; unused gradients must match exactly.",
+  "support": "Exact original FLE graph fields plus independent allowed-degree, donor uniqueness, leaf containment, nearest support and cutoff-tie checks.",
+  "own_only": "Same original graph/parameters. Ordinary W2 GELU(Wr xi+b1)+b2; original fallback rows raw xi. Independent formula equality and zero ALL offdiagonal input gradients on ordinary/fallback rows.",
+  "structural": "Actual same-leaf offdiagonal gradients positive; cross-leaf gradients exactly zero on ordinary and fallback rows; padding outputs/input gradients exactly zero; tie permutation equivariance.",
+  "complete_core_update": "Entire isolated source operator; fixed sine parameters, deterministic input/target, squared toy loss, every parameter/input gradient finite, all parameters active and changed by exactly one manual CPU step lr0.001; no native task optimizer.",
+  "RNG": "Python/TorchCPU/NumPy restored exactly; CUDA false before/after",
+  "replay": "Exclusive create request/intent/result, no signal or retry on timeout or failure.",
+  "source_imports": "Hash-bound operator and historical small FLE graph reference only; no native model/framework/dataset/checkpoint import.",
+  "actual_CPU_SSH_Torch": "NOT_RUN_BY_AUTHOR",
+  "native_model_data_taskloss_two_steps_resources": "NOT_RUN",
+  "independent_review": "PENDING_GENUINE_REVIEW_NOT_SELF_APPROVED",
+  "scientific_admission": false,
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN"
+}

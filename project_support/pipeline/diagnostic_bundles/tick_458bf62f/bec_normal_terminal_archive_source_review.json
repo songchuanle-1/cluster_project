@@ -1,0 +1,52 @@
+{
+  "status": "EXACT_NORMAL_BEC_TERMINAL_ARCHIVE_WRAPPER_SOURCE_REVIEWED_NOT_EXECUTED_BY_REVIEWER",
+  "reviewed_at": "2026-10-27T04:21:29.401651+00:00",
+  "owner_token": "458bf62f20024209b63da2009998d280",
+  "experiment_id": "M215-BEC",
+  "candidate_id": "hierarchy-cross-level-bipartite-edge-composition",
+  "code_commit": "026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563",
+  "anchors": {
+    "archive_wrapper": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/archive_bec_normal_terminal.py",
+      "sha256": "29cc6655ccae63a4e5ef9a8f4beb0169667f2ff3e171162a1fda1b6297435e35"
+    },
+    "original_terminal_observation": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/bec_end_and_slot_observation.json",
+      "sha256": "bbd04aba05cbac4629cb0a5c96c3598a6f725104b8c1f0cc1318b814475758d3"
+    },
+    "current_owner_guard": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/anchor_bfc_packet.py",
+      "sha256": "72241ced230b84f1acb654a0040bbed8bfae8b320fd4ed7a1b9d8e710f8f6e80"
+    }
+  },
+  "material_concerns": [],
+  "canonical_source": {
+    "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/pipeline_monitor.py",
+    "sha256": "b8886763e21bfec3eab09c0afdc53be3ed87ab5f4a9f285cc26cfdf5cec14f47",
+    "functions_reviewed": [
+      "acquire_lock",
+      "_save_json",
+      "pull_log",
+      "_finish_archive",
+      "recover_archives",
+      "finalize_task",
+      "monitor_project",
+      "_monitor_project"
+    ]
+  },
+  "findings": [
+    "Explicit original own-log normal earlystop24/50 best0.5001, original PID1558071 absent, source8/YAML/UUID0 matching in frozen root observation. No crash classification or recovery requested.",
+    "finalize_task is the canonical targeted terminal publication API; it does not require deathwatch3 and does not acquire its own lock. Wrapper supplies current owner/snapshot/policy guard and canonical project lock.",
+    "Wrapper requires original log binary stable size/mtime with matching remote/local SHA, original PID absence before/after and same-config same-cwd own-UID processes empty before finalization. It checks unique exact registered task, original PID/config/log/code/receipt/launch and occupied running slot under project lock.",
+    "Temporary exact_pull checks every argument and SHA, returns only the verified original local full log, then restores original callback in finally. No generic latest log collection, checkpoint access or GPU1 operation.",
+    "Finalization args match original API order: done_earlystop,0.5001,24/50,0,exact original remote log. Receipt comparison correctly uses path string while receipt file SHA113a is separately checked.",
+    "Private x-only intent plus canonical pending journal existence guard prevent fresh replay. Canonical journal is atomic-replace JSON under project lock, not an xb journal; interrupted partial archive should use recover_archives instead of fresh finalize.",
+    "No third monitor invocation, synthetic missing counter change, restart, signal, new dispatch or source modification is introduced by this wrapper."
+  ],
+  "limitations": [
+    "Reviewer did not execute wrapper, monitor, SSH, GPU or shared mutation. Root actual archive outcome is not pre-signed.",
+    "Reviewer examined frozen root observation and wrapper source; future wrapper full-log capture/result and lifecycle publication need actual outcome evidence.",
+    "GPU idle/lock observation is historical at04:16:05 only; later AEF diagnostics still require their current guard, lease and physical0 identity/idle checks."
+  ],
+  "scientific_native_or_resource_PASS_issued": false
+}

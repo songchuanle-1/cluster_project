@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "experiment_id": "M209-PSBR",
+  "status": "ROOT_APPROVED_SOURCE_CLARIFICATION_STATIC_ONLY",
+  "frozen_proposal_sha256": "7a82845976c83accb74f730fef4500046c6f7e004c5dff84b2ea02c2f0c79650",
+  "approved_in_current_parent_task": true,
+  "parent_token": "8fafa3d4ebcb48e7ba3436e084f6ee9f",
+  "created_at": "2026-10-22T02:22:57.414629+00:00",
+  "change": "Only the newly added middle_recurrence constructor is wrapped in torch.random.fork_rng(devices=[]), after the original CTF three FFNs and three LayerNorms have been constructed. The replaced middle FFN is still removed from registration.",
+  "purpose": "Restore the original downstream CPU RNG position after the new module default construction, supporting matched common-module initialization and native-loader randomness.",
+  "unchanged": [
+    "Original YAML and seed 1999",
+    "Original model initialization entry and ordering for common modules",
+    "nn.Linear default initialization",
+    "No manual_seed or new initializers",
+    "No initialization search",
+    "No CUDA RNG interaction: new module constructs on default CPU, devices=[]"
+  ],
+  "risk": "The new module consumes a CPU RNG subsequence that is restored and may be reused by subsequent common-module initialization, introducing weight-sequence correlations. This is a declared deterministic pairing control, not an efficacy claim.",
+  "actual_common_weights_verified": false,
+  "actual_native_train_batches_paired": false,
+  "torch_imported_or_model_executed": false,
+  "native_status": "NOT_RUN",
+  "resources_status": "NOT_RUN"
+}

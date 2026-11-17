@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T22:16:02.594163+08:00",
+  "scope": "Shared static diagnostic",
+  "validation": {
+    "tests_run": 137,
+    "tests_passed": 135,
+    "skipped": [
+      {
+        "test": "test_exception_removes_real_module_hook (test_geometry_torch_static_20260919.SyntheticTorchTest.test_exception_removes_real_module_hook)",
+        "reason": "Torch not installed locally"
+      },
+      {
+        "test": "test_strided_float_labels_real_module_hooks (test_geometry_torch_static_20260919.SyntheticTorchTest.test_strided_float_labels_real_module_hooks)",
+        "reason": "Torch not installed locally"
+      }
+    ],
+    "failures": 0,
+    "errors": 0,
+    "output": ".................ss......................................................................................................................\n----------------------------------------------------------------------\nRan 137 tests in 1.603s\n\nOK (skipped=2)\n",
+    "modules": [
+      "test_referent_geometry_registry_20260919",
+      "test_geometry_torch_static_20260919",
+      "test_native_geometry_runtime_20260919",
+      "test_referent_geometry_capture_20260919",
+      "test_referent_geometry_control_20260919",
+      "test_referent_native_expression_producer_20260919",
+      "test_referent_object_rank_capture_20260919",
+      "test_referent_target_rank_evaluator_20260919",
+      "test_native_endpoint_capture_20260916",
+      "test_frozen_capture_contract_20260916"
+    ]
+  },
+  "fixed_registry": {
+    "primary_pairs": 31,
+    "scenes": 17,
+    "captured_pairs": 0,
+    "verified_bindings": 0,
+    "missing_binding_pairs": 31,
+    "report": "pipeline/reports/geometry_registry_missing_20260919-2215.json"
+  },
+  "evidence": [
+    {
+      "path": "scripts/referent_geometry_registry_20260919.py",
+      "sha256": "219818764e50d79a86a0881d5ee18fe05b910389c80eb69275f34aaa2dda420a"
+    },
+    {
+      "path": "scripts/test_referent_geometry_registry_20260919.py",
+      "sha256": "4da0cd0f0d0b55644fcda98935f6cb17f3169fbd2453373499b82d9b1b64199b"
+    },
+    {
+      "path": "scripts/test_geometry_torch_static_20260919.py",
+      "sha256": "422a3d42db9cc15d832a8a4d06bc4212463b8499c2f3cf3b05426044b99833fe"
+    },
+    {
+      "path": "scripts/persist_geometry_registry_20260919.py",
+      "sha256": "a6d2aa61effa21732f0a084f449ded4f5659894e8e4e426e1fae4295338ab850"
+    },
+    {
+      "path": "pipeline/reports/referent_control_pairing_20260918-1812.json",
+      "sha256": "a1a87913b30ffa3151c5eb33316cc239193cd349f636d01861475f88d8d5d3a7"
+    },
+    {
+      "path": "pipeline/decisions/20260919-221211_other.md",
+      "sha256": "f5c90df6da01a43875c36c1148aab55cbb8cf2c71537bbf9f4463818526dc84c"
+    },
+    {
+      "path": "pipeline/reports/geometry_registry_missing_20260919-2215.json",
+      "sha256": "805dd4ad9cac9ad01d05fab96905749d38a8a58715db634329c339bfddc25d52"
+    }
+  ],
+  "resumed_due_ids": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "gpu_observation": {
+    "observed_at": "2026-09-19T22:11:18+08:00",
+    "raw_server_timestamp": "2026/09/19 14:11:18.488",
+    "server": "server-6",
+    "gpu": 7,
+    "total_mib": 81559,
+    "used_mib": 62483,
+    "free_mib": 18597,
+    "utilization_percent": 27,
+    "processes": [
+      {
+        "pid": 1134192,
+        "memory_mib": 19956,
+        "role": "M197"
+      },
+      {
+        "pid": 3827570,
+        "memory_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "training_progress": {
+    "epoch": 24,
+    "total_steps": 4686,
+    "steps_observed": [
+      3786,
+      3787,
+      3788,
+      3789,
+      3790,
+      3791
+    ],
+    "previous_tick_last_step": 2408,
+    "pid_config_log_verified": true,
+    "preflight_best_miou": 0.4924
+  },
+  "findings": [
+    "Strict physical identity join; no scene/annotation fallback.",
+    "Missing, tied and near-tied counts retained per scene and overall.",
+    "Fixed31-pair registry across17 scenes has zero captured/bound pairs this tick.",
+    "Synthetic query-selection coverage loss and order reversal detected.",
+    "135 static tests passed;2 Torch tests skipped, not native evidence.",
+    "Existing11-file runtime manifest including frozen7-file producer unchanged."
+  ],
+  "initial_test_failure": "Exact-tie synthetic fixture suffered floating-point translation roundoff. Replaced exact-tie case with symmetric integer coordinates; near-tie fixture retained; production equality rule unchanged.",
+  "blocker": "22:11 GPU7 observation still has M1971134192 at19956MiB and foreign3827570 at42488MiB, free18597MiB; two-process cap prevents native execution. No verified registry/native bindings; independent objectness unresolved. Local Torch unavailable, so two synthetic Torch checks remain skipped.",
+  "retry_after": "2026-09-19T23:07:00+08:00",
+  "next_action": "Continue the same diagnostic: implement an explicit fixed-registry to native-dataset binding exporter (including target/object identity, dataset index, scene occurrence, transformed input and physical support), with collision/missing checks and synthetic static tests. Do not infer identity from scene/ann alone or equate smoke capture with31-pair coverage. The two synthetic Torch-module tests are unexecuted because local Torch is absent; retain as pending, do not install/run native model locally. After 2026-09-19T23:07:00+08:00 recheck authorized server-6 GPU7 capacity. With fewer than two processes and sufficient measured memory, verify remote source/model/config/checkpoint binding and run the separate bounded diagnostic through the authorized coordinated path, recording increasing native outputs and dtype/layout. GPU availability does not resolve independent objectness, fixed-registry coverage or candidate-specific admission gates.",
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "independent_objectness_resolved": false,
+  "queue_changed": false,
+  "deployment_performed": false,
+  "frozen_seven_file_producer_modified": false,
+  "limitations": [
+    "Failure-selected target/control registry, not a population sample.",
+    "Join bindings require external native-dataset verification; hashes do not prove it.",
+    "Annotation-assisted radial geometry is not objectness or efficacy.",
+    "FPS versus selected queries diagnoses selection sensitivity, not independence.",
+    "Scene-balanced denominators retain every eligible pair, including missing pairs."
+  ]
+}

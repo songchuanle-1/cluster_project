@@ -1,0 +1,216 @@
+{
+  "id": "M213-BFC",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "config": "configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml",
+  "code_commit": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.537283897399902,
+    13.908477783203125
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/bfc_336ca5d7_gpu0/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "common_initialized_parameter_observations": {
+    "names_equal": true,
+    "tensor_count": 843,
+    "parameter_count": 156958522,
+    "fingerprints_equal": true,
+    "sha256": "04231c23641ec4d1fd7b9a31292b1b117ee84c5c22385379f641ddba2063b07a",
+    "scope": "Original common named parameters after native backbone pretrain, before TRAIN loader; exclude exact replaced-middle and new-butterfly prefixes on both targets; retain middle LayerNorm",
+    "excluded_name_prefixes": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.middle_butterfly."
+    ],
+    "full_buffer_values": "NOT_RECORDED"
+  },
+  "actual_n_ge3_supported_parent_group_counts": [
+    64,
+    64
+  ],
+  "actual_map_call_counts": [
+    {
+      "round": 56,
+      "singleton": 0
+    },
+    {
+      "round": 56,
+      "singleton": 0
+    }
+  ],
+  "actual_nonpower2_supported_parent_group_counts": [
+    56,
+    60
+  ],
+  "actual_multistage_supported_parent_group_counts": [
+    64,
+    64
+  ],
+  "actual_required_weight_blocks": [
+    "left_output_from_left_input",
+    "left_output_from_right_input",
+    "right_output_from_left_input",
+    "right_output_from_right_input"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/smoke_champion_execution.json",
+      "sha256": "4bf17d9e68649ab3e0733f6ce7cb6cc13e7fcebe060bde5b7a42d8ebaa2de75f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/smoke_candidate_execution.json",
+      "sha256": "cbe70a6144ca25d542e4a09b783773e46dcaba0b337939ef5c1f37d24d17c90b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/resources_champion_execution.json",
+      "sha256": "b09b83793f418547ffd4b7da6a7db6c65d0347ce3090dae1bc8dd258c30f93b2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/resources_candidate_execution.json",
+      "sha256": "fdd0940de8d50b427ed2269ebdddc35df428145fb844bd5b9780a21587bd2710"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/execution_binding.json",
+      "sha256": "3d4715b68d2a3135bb30657889723fe2bea8e53877ead42257555064c3b104f1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/native_manifest.json",
+      "sha256": "5324b97597acefac1c2bb961b3c94ca6307c474a536a9003b998115276eff5b4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution/execution_lease.json",
+      "sha256": "67f0b80c20da026204a3c5232fd037ba738272ab59ff9db44c5b077d884d7f9b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution_review_prepare/actual_four_result_review.json",
+      "sha256": "b8fa916c6c746e86d03fc3aa4fc3325382e11266c6662de85ece09a35934ae4b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_native_resource_independent_review.json",
+      "sha256": "43afc27994befe726f987d3e029e19307b421de1ff43e1c4ef7135fd7970248a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution_review_prepare/admit_bfc_draft.py",
+      "sha256": "a95d0cd210059f94963d526ff1bd08f9ae1c351dcdaf772a23bd637fa638e9d0"
+    },
+    {
+      "path": "pipeline/authorizations/server4_gpu1_20261025.json",
+      "sha256": "90f8820a60ef4d4e277904815b025658f7b8b457b0711a4d0ef5f7395fdd23f8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_status_after_four.json",
+      "sha256": "f2e1a34971b95a986681a150ccbd16cf6b9153ce894df727a6098ee2ef1a8002"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_native_operation_history.json",
+      "sha256": "01cd9beafe694e53200a318a0b84e2a0aabece719101df4030ef841afa701dcf"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/status_after_four_console.json",
+      "sha256": "f2e1a34971b95a986681a150ccbd16cf6b9153ce894df727a6098ee2ef1a8002"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/reconcile_smoke_champion_console.json",
+      "sha256": "61f9d6004bd48b40fbffba91f56569a66bf7629f5a757206e449d637e9f66b92"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/reconcile_smoke_candidate_console.json",
+      "sha256": "beb4abe4226f9c7931b1a80a63294f71a72b6144b0cc8dc40c8909135c1ef04c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/reconcile_resources_champion_console.json",
+      "sha256": "b859dc0282dd1de336f502958a8e58608ea41e03a05dd852032134d608a58490"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/reconcile_resources_candidate_console.json",
+      "sha256": "cc842a558e93b3c0aa7d5e1d51f622a39a7d9081f83efc024448f75a59d1aef3"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_336ca5d7/bfc_execution_review_prepare/bfc_operation_history.py",
+      "sha256": "17c44a9675b17d3c3099e09047ab05d8382d5fa2f38c92c12c9b147bc621f34c"
+    }
+  ],
+  "recorded_at": "2026-10-25T16:31:49.271572+00:00",
+  "limitations": {
+    "training_efficacy": "UNKNOWN",
+    "full_buffer_values": "NOT_RECORDED",
+    "offdiagonal_probe": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "empty_padding_singleton_coverage": {
+      "actual_unsupported_internal_rows": [
+        0,
+        0
+      ],
+      "actual_padding_rows": [
+        0,
+        0
+      ],
+      "actual_supported_singleton_groups": [
+        0,
+        0
+      ]
+    },
+    "raw_cross_target_digest_scope": "Cross-target exact intermediate output equality is not a new gate. Digest differences do not establish magnitude/cause or efficacy.",
+    "pure_TRAIN_memory": "UNKNOWN; no separate no-observer native TRAIN process pair"
+  }
+}

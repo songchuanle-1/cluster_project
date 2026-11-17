@@ -1,0 +1,92 @@
+{
+  "contract": "tmr_uniform_resource_review_v2",
+  "evidence": [
+    {
+      "path": "pipeline/reports/root_role_resources_baseline_20261012_0810.json",
+      "sha256": "7a5d74551e8de75e9dba05669593b272cc24b074a7446216e3d99603114177f8"
+    },
+    {
+      "path": "pipeline/reports/root_role_resources_champion_20261012_0810.json",
+      "sha256": "f64375bcf3abe230f3b1bd82e520f143784e71a59429dc9d9f7e3f30ebde2b08"
+    },
+    {
+      "path": "pipeline/reports/root_role_resources_v2_target_role_20261012_0810.json",
+      "sha256": "f84b87ada3c0908caa7e8d2f04a2eca62aa667743bdfcb34df5143dfdbf4a0c9"
+    }
+  ],
+  "protocol": {
+    "batch_size": 1,
+    "flops_counter": "fvcore.nn.FlopCountAnalysis",
+    "forward_mode": "predict",
+    "input": "real_validation_batch",
+    "lang_num_max": 1,
+    "latency_statistics": [
+      "median",
+      "p90"
+    ],
+    "memory_counter": "torch.cuda.max_memory_allocated",
+    "repeat": 100,
+    "sample_identity": {
+      "ann_ids": [
+        "0"
+      ],
+      "feature_shape": [
+        237360,
+        6
+      ],
+      "language_tokens_shape": [
+        1,
+        23
+      ],
+      "scan_ids": [
+        "scene0011_00"
+      ]
+    },
+    "warmup": 20
+  },
+  "metrics": {
+    "baseline": {
+      "flops_g": 9.700876364,
+      "params": 155905851,
+      "latency_ms_median": 108.86777006089687,
+      "latency_ms_p90": 113.11022061854601,
+      "peak_allocated_mib": 980.5361328125
+    },
+    "champion": {
+      "flops_g": 9.762532428,
+      "params": 157484090,
+      "latency_ms_median": 65.22472389042377,
+      "latency_ms_p90": 66.92775078117847,
+      "peak_allocated_mib": 976.0322265625
+    },
+    "candidate": {
+      "flops_g": 9.762532428,
+      "params": 157484090,
+      "latency_ms_median": 71.34969718754292,
+      "latency_ms_p90": 74.09863956272602,
+      "peak_allocated_mib": 1008.8515625
+    }
+  },
+  "increments": {
+    "baseline": {
+      "flops_g": 0.06165606399999923,
+      "params": 1578239,
+      "latency_ms_median": -37.51807287335396,
+      "latency_ms_p90": -39.01158105581999,
+      "peak_allocated_mib": 28.3154296875,
+      "memory_relative": 0.028877497462823865
+    },
+    "champion": {
+      "flops_g": 0.0,
+      "params": 0,
+      "latency_ms_median": 6.124973297119141,
+      "latency_ms_p90": 7.170888781547546,
+      "peak_allocated_mib": 32.8193359375,
+      "memory_relative": 0.03362525851537379
+    }
+  },
+  "uniform_resource_gate_passed": true,
+  "native_repeat_gate_passed": true,
+  "prediction_catalog_control_passed": true,
+  "limitations": "Execution gates only; no trained efficacy, novelty, train memory or speed claim. Uniform unsupported ops retained."
+}

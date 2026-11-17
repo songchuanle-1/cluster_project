@@ -1,0 +1,29 @@
+--- frozen_prepare/before.py
++++ new_activation/after.py
+@@ -17,7 +17,7 @@
+ TICK = HERE.parent
+ EXEC = TICK / 'nde_deployment_execute'
+ ARGS = None
+-DRAFT_EXECUTION_DISABLED = True
++DRAFT_EXECUTION_DISABLED = False
+ CPU_CONDA_SOURCE = '/data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh'
+ CPU_CONDA_SOURCE_SHA256 = '6c80f3659817b63d1dfb79555dded6e2a486cc4cd75685b462a3082c4a2885d0'
+ CODE = ROOT / "Cluster"
+@@ -142,7 +142,7 @@
+     receipt_path, review_path = local(receipt_path), local(review_path)
+     native_path, resources_path, manifest_path = map(local, (ARGS.native_result, ARGS.resource_result, ARGS.native_manifest))
+     assert sha(manifest_path) == TESTED_NATIVE_MANIFEST_SHA256, "Historical tested native manifest changed"
+-    assert sha(receipt_path) == "PENDING_REAL_M233_CANONICAL_ADMISSION_SHA256", "Canonical tested NSD admission changed"
++    assert sha(receipt_path) == "52bf897dc89729063ffb429035b1cd07f14d3ea8d3e690812a4e3adfb48ed266", "Canonical tested NSD admission changed"
+     assert sha(review_path) == ARGS.review_sha256
+     authorization = ROOT / "pipeline/authorizations/server4_gpu0_overlay_20261104.json"
+     assert sha(authorization) == "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+@@ -182,7 +182,7 @@
+         "physical_gpu": 0, "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c", "allowed_gpus": [0],
+     }.items())
+     assert manifest.get("draft_execution_disabled") is False
+-    version_path = ROOT / "pipeline/diagnostic_bundles/tick_2218a502/nde_deployment_prepare/deployment_source_version.json"
++    version_path = ROOT / "pipeline/diagnostic_bundles/tick_2218a502/nde_deployment_active/deployment_source_version.json"
+     assert sha(version_path) == "d8e4abf3b5417cee839d44d5032bbe7682bb98299a01d198f6acdf43b2f6a749"
+     version = read(version_path)
+     assert version["code_commit"] == SOURCE and version["parent_commit"] == BASE

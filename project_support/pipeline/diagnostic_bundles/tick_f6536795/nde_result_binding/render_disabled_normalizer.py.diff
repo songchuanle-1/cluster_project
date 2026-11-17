@@ -1,0 +1,51 @@
+--- frozen4fa/render_disabled_normalizer.py
++++ newf653/render_disabled_normalizer.py
+@@ -11,7 +11,7 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ ROOT = Path('D:/project/cluster_project').resolve()
+-TICK = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e'
++TICK = ROOT / 'pipeline/diagnostic_bundles/tick_f6536795'
+ 
+ 
+ def read(path):
+@@ -90,8 +90,19 @@
+           'Historical champion compatibility review is not affirmative')
+     native, mother, output = (Path(value).resolve() for value in
+                               (args.native_dir, args.base_native_dir, args.output))
+-    check(native.is_relative_to(TICK) and mother.is_relative_to(TICK)
+-          and native != mother, 'Use the actual distinct fresh active/mother native packets')
++    check(native == (ROOT / inputs['reused_native']['directory']).resolve()
++          and mother == (ROOT / inputs['reused_native']['disabled_mother_directory']).resolve()
++          and native != mother, 'Use the exact immutable reviewed revision1 native and disabled mother')
++    for name, entry in inputs['reused_native']['files'].items():
++        check(sha(ROOT / entry['path']) == entry['sha256'],
++              'Immutable reused native/source payload changed: ' + name)
++    operational_refs = inputs['fresh_operational_refs']
++    check(isinstance(operational_refs, dict) and bool(operational_refs),
++          'Actual current-owner operational software hashes are not finalized')
++    for name, entry in operational_refs.items():
++        artifact = (ROOT / entry['path']).resolve()
++        check(artifact.is_relative_to(TICK) and sha(artifact) == entry['sha256'],
++              'Actual current-owner operational artifact changed: ' + name)
+     check(output.is_relative_to(TICK) and not output.exists(),
+           'Output must be absent and inside this tick')
+     manifest = read(native / 'manifest_template.json')
+@@ -112,6 +123,8 @@
+         'BASE_NATIVE': 'Path(' + repr(str(mother)) + ')',
+         'EXPECTED_WORKER_SHA256': repr(sha(native / 'worker.py')),
+         'EXPECTED_RUNTIME_SHA256': repr(sha(native / 'native_runtime.py')),
++        'EXPECTED_NATIVE': 'Path(' + repr(str(native)) + ')',
++        'EXPECTED_OPERATIONAL_REFS': repr(operational_refs),
+     })
+     check('DRAFT_NORMALIZATION_DISABLED = True' in source,
+           'Rendered normalizer must remain DRAFT-disabled')
+@@ -131,6 +144,8 @@
+         'historical_reuse_review': inputs['historical_reuse_review'],
+         'historical_champion_provenance': inputs['historical_champion_provenance'],
+         'generator': ref(HERE / 'FROZEN.json'),
++        'fresh_operational_refs': operational_refs,
++        'reused_native': inputs['reused_native'],
+         'fresh_arms': inputs['fresh_arms'], 'historical_arm': inputs['historical_arm'],
+         'prepared_file_hashes': {
+             'normalize_nde_actual_results.py': sha(output / 'normalize_nde_actual_results.py')},

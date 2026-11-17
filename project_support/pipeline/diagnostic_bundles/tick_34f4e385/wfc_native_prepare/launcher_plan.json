@@ -1,0 +1,59 @@
+{
+  "status": "PLAN_ONLY_NOT_AN_EXECUTABLE_RELEASE",
+  "candidate_id": "hierarchy-wedge-factor-incidence-composition",
+  "code_commit": "94c4fe61b38f46f321a7ee84236fea70ade04d9b",
+  "runtime_expected_commit": "18e64b8d95ed0ba5c1053ead114c0f91a4b0c324",
+  "native_status": "NOT_RUN",
+  "resources_status": "NOT_RUN",
+  "requires": "Independent native observer review, separately frozen activation/operational release, current root owner/resources guard, actual idle selectedGPU0, fresh manifest+lease10fields, three physicalGPU locks; preserve both running jobs.",
+  "four_future_worker_commands": [
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "smoke",
+      "--target",
+      "champion"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "smoke",
+      "--target",
+      "candidate"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "resources",
+      "--target",
+      "champion"
+    ],
+    [
+      "python",
+      "-B",
+      "worker.py",
+      "--lease",
+      "<fresh_exact_lease>",
+      "--mode",
+      "resources",
+      "--target",
+      "candidate"
+    ]
+  ],
+  "stage_formula": "wfc_<fresh_owner_token8>_gpu0",
+  "local_execution_directory": "wfc_execution",
+  "no_active_manifest_lease_request_result_or_release_created": true,
+  "model_source_or_protocol_modified": false
+}

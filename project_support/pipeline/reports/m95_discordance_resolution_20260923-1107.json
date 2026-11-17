@@ -1,0 +1,219 @@
+{
+  "contract": "m95_saved_discordance_event_resolution_v1",
+  "generated_at": "2026-09-23T11:16:04.428448+08:00",
+  "context_generated_at": "2026-09-23T03:07:05.340757+00:00",
+  "mode": "event",
+  "summary": {
+    "all": {
+      "classes": 32,
+      "scenes": 24,
+      "queries": 182,
+      "by_identity": {
+        "target_dominant": 26,
+        "same_class_peer": 5,
+        "outside_target_and_registered_peers": 1
+      },
+      "max_abs_logit_difference": 46.65871620178223,
+      "metrics": {
+        "logits_differ": {
+          "classes": 32,
+          "scene_bootstrap": {
+            "available": 32,
+            "scenes": 24,
+            "pooled_mean": 1.0,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 1.0,
+              "scene_count": 24,
+              "lo": 1.0,
+              "hi": 1.0
+            }
+          }
+        },
+        "seed_membership_equals_label": {
+          "classes": 26,
+          "scene_bootstrap": {
+            "available": 32,
+            "scenes": 24,
+            "pooled_mean": 0.8125,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.7777777777777777,
+              "scene_count": 24,
+              "lo": 0.611111111111111,
+              "hi": 0.9166666666666666
+            }
+          }
+        },
+        "positive_outside_seed": {
+          "classes": 6,
+          "scene_bootstrap": {
+            "available": 32,
+            "scenes": 24,
+            "pooled_mean": 0.1875,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.2222222222222222,
+              "scene_count": 24,
+              "lo": 0.08333333333333333,
+              "hi": 0.3888888888888889
+            }
+          }
+        },
+        "negative_inside_seed": {
+          "classes": 0,
+          "scene_bootstrap": {
+            "available": 32,
+            "scenes": 24,
+            "pooled_mean": 0.0,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.0,
+              "scene_count": 24,
+              "lo": 0.0,
+              "hi": 0.0
+            }
+          }
+        }
+      }
+    },
+    "acceptable": {
+      "classes": 23,
+      "scenes": 19,
+      "queries": 118,
+      "by_identity": {
+        "target_dominant": 23
+      },
+      "max_abs_logit_difference": 46.65871620178223,
+      "metrics": {
+        "logits_differ": {
+          "classes": 23,
+          "scene_bootstrap": {
+            "available": 23,
+            "scenes": 19,
+            "pooled_mean": 1.0,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 1.0,
+              "scene_count": 19,
+              "lo": 1.0,
+              "hi": 1.0
+            }
+          }
+        },
+        "seed_membership_equals_label": {
+          "classes": 20,
+          "scene_bootstrap": {
+            "available": 23,
+            "scenes": 19,
+            "pooled_mean": 0.8695652173913043,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.8421052631578947,
+              "scene_count": 19,
+              "lo": 0.6842105263157895,
+              "hi": 1.0
+            }
+          }
+        },
+        "positive_outside_seed": {
+          "classes": 3,
+          "scene_bootstrap": {
+            "available": 23,
+            "scenes": 19,
+            "pooled_mean": 0.13043478260869565,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.15789473684210525,
+              "scene_count": 19,
+              "lo": 0.0,
+              "hi": 0.3157894736842105
+            }
+          }
+        },
+        "negative_inside_seed": {
+          "classes": 0,
+          "scene_bootstrap": {
+            "available": 23,
+            "scenes": 19,
+            "pooled_mean": 0.0,
+            "scene_bootstrap_95ci": {
+              "draws": 10000,
+              "seed": 1999,
+              "unit": "scene",
+              "point_estimate": 0.0,
+              "scene_count": 19,
+              "lo": 0.0,
+              "hi": 0.0
+            }
+          }
+        }
+      }
+    }
+  },
+  "tests": {
+    "local_synthetic": 7,
+    "server6_cpu_synthetic": 7,
+    "failed": 0
+  },
+  "candidate_stages": {
+    "referent-supervision-axis": "diagnosis",
+    "referent-discrimination": "diagnosis",
+    "instance-identity-representation": "diagnosis"
+  },
+  "candidate_next_actions": {
+    "referent-supervision-axis": "Check whether saved native geometry and target centroid permit exact replay of the criterion's nearest-GT assignment for six positive-outside-target-seed classes (three acceptable). If unavailable, record the missing cause tag and test a distinct supervision unit only after matched controls and admission gates.",
+    "referent-discrimination": "Use the same six class IDs to separate nearest-GT from sampled-instance membership if frozen coordinates permit; retain target26/peer5/outside1 physical strata. Do not infer outside-peer class or add a selector.",
+    "instance-identity-representation": "Saved32 classes all have different mask logits despite identical binary masks. Keep diagnosis open only for a falsifiable representation-level mechanism with an independently captured query-state control; do not infer collapse, deduplicate queries or launch a new capture from this descriptive audit."
+  },
+  "native_cpu_analysis_completed": true,
+  "native_backward_executed": false,
+  "model_forward_executed": false,
+  "candidate_admission": false,
+  "queue_mutation": false,
+  "pending_questions_24h": [],
+  "new_research_question": "Can the six positive-outside-target-seed classes be attributed to nearest-GT assignment with saved geometry?",
+  "limitations": [
+    "40 outcome-selected TRAIN failures; 32 classes, not a population effect.",
+    "Equal thresholded masks do not entail equal logits or decoder query states.",
+    "Saved positives identify matching membership, not nearest-vs-instance cause.",
+    "Outside registered peers is not a validated cross-class annotation.",
+    "No native backward, resource gate, mechanism admission or training."
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/m95_discordance_provenance_20260923-1107.json",
+      "sha256": "6ed69abe4d26a2bd20283bb59119c2ebf30d4c0e73e2252903c210925292e372"
+    },
+    {
+      "path": "pipeline/decisions/20260923-111459_route_change.md",
+      "sha256": "c294772a7797bcb350da375120e144652b2c28979ca6bf3750f9f858827bcbb5"
+    },
+    {
+      "path": "scripts/m95_discordance_provenance_20260923.py",
+      "sha256": "d32af490e9fb18f4e3e89f93e3198d60d454d0902583085e3f313a441bcbddc7"
+    },
+    {
+      "path": "scripts/test_m95_discordance_provenance_20260923.py",
+      "sha256": "e1d917938fac45b6b02580a46adb853d7484854dfcf92c6ad2fac027f26bb61e"
+    },
+    {
+      "path": "scripts/persist_discordance_tick_20260923.py",
+      "sha256": "9d90c08b63c4cff21eb72be616f7e067aa5342e89194c5872dec7076ddc11cfe"
+    }
+  ]
+}

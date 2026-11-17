@@ -1,0 +1,392 @@
+--- tested_NSD_normalizer
++++ NDE_normalizer
+@@ -1,7 +1,8 @@
+-"""Normalize only complete actual NSD results; never admit, enqueue or execute."""
++"""Normalize only complete actual NDE results; never admit, enqueue or execute."""
+ from pathlib import Path
+ from datetime import datetime, timezone
+ import ast
++import argparse
+ import hashlib
+ import json
+ import math
+@@ -16,17 +17,17 @@
+ OUTPUT = HERE / ("results_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ"))
+ OWNER_KEYS = ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")
+ TICK = HERE.parent
+-EXECUTION = TICK / "nsd_execution"
+-ACTIVATION = TICK / "nsd_current_activation"
+-NATIVE = ACTIVATION / "native"
++EXECUTION = TICK / "nde_execution"
++BASE_NATIVE = TICK / "nde_native_prepare"
++NATIVE = None  # Actual reviewed execution copy is passed explicitly by root.
+ PROTOCOL = ROOT / "pipeline/diagnostic_bundles/tick_2e51495f/reserve_candidate/native_protocol.md"
+-PROOF = ROOT / "pipeline/diagnostic_bundles/tick_c706ca80/nsd_compatible_source/compatible_source_version.json"
+-SOURCE_REVIEW = ROOT / "pipeline/diagnostic_bundles/tick_c706ca80/nsd_compatible_source_independent_review.json"
+-TOKEN = "355279e0b7b14943aa7b6060b58d63f0"
++PROOF = ROOT / "pipeline/diagnostic_bundles/tick_13eb9f90/nde_source_commit.json"
++SOURCE_REVIEW = ROOT / "pipeline/diagnostic_bundles/tick_13eb9f90/nde_source_commit_independent_review.json"
++TOKEN = "71e15360fb3349f08e5af82b14daea55"
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+-CID = "hierarchy-native-spatial-dirichlet-composition"
+-SOURCE = "f6257de79148581334ee495e6e2d60ccb525457c"
+-PARENT = "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d"
++CID = "hierarchy-native-distribution-embedding-composition"
++SOURCE = "46adb90573118902d0a7c7723ce8817a085f38b9"
++PARENT = "f6257de79148581334ee495e6e2d60ccb525457c"
+ GOAL = "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+ PAIRS = (("smoke", "champion"), ("smoke", "candidate"), ("resources", "champion"), ("resources", "candidate"))
+ CHECKS = []
+@@ -52,7 +53,7 @@
+ 
+ 
+ def guard():
+-    assert HERE == ROOT / "pipeline/diagnostic_bundles/tick_355279e0/nsd_result_prepare"
++    assert HERE == ROOT / "pipeline/diagnostic_bundles/tick_71e15360/nde_result_prepare"
+     owner = read(ROOT / "pipeline/headless/.foreground.lockdir/owner.json")
+     assert owner["token"] == TOKEN and owner["thread_id"] == THREAD
+     assert os.environ.get("CODEX_THREAD_ID") == THREAD
+@@ -111,92 +112,102 @@
+             key: read(ROOT / "pipeline/headless/.foreground.lockdir/owner.json")[key] for key in OWNER_KEYS},
+         "missing": missing or [], "error_type": type(error).__name__ if error else None,
+         "error": str(error) if error else None, "checks_before_refusal": CHECKS,
+-        "actual_results_preserved": entries, "PASS_artifacts_written": False,
+-        "native_pass_claimed": False, "resources_pass_claimed": False,
++        "actual_results_preserved": entries,
++        "PASS_artifacts_written": any((OUTPUT / name).exists() for name in
++            ('native_smoke.json', 'resources.json', 'constraints_independence.json', 'draft_receipt.json')),
++        "native_pass_claimed": (OUTPUT / 'native_smoke.json').exists(),
++        "resources_pass_claimed": (OUTPUT / 'resources.json').exists(),
+         "shared_or_raw_files_written": False, "GPU_SSH_model_execution": False,
+         "failure_scope": "Observed implementation/data/resource evidence only; no whole-mechanism rejection.",
+         "conditional_memory_rule": "Above15% requires actual trained +0.003mIoU retention evidence; never synthesized.",
+-        "unrelated_parent_runtime_root_causes": "UNKNOWN; not a NSD scientific gate.",
++        "unrelated_parent_runtime_root_causes": "UNKNOWN; not a NDE scientific gate.",
+     })
+ 
+ 
+ def validate_external_arm_identity(result, mode, target):
+-    package = "framework.model.Quard_model.model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort" + ("_nsd" if target == "candidate" else "")
+-    expected = {"candidate_id": "hierarchy-native-spatial-dirichlet-composition", "code_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+-                "experiment_id": "M232-NSD", "goal_sha256": GOAL,
+-                "config": "configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml",
++    package = "framework.model.Quard_model.model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort" + ("_nde" if target == "candidate" else "")
++    expected = {"candidate_id": "hierarchy-native-distribution-embedding-composition", "code_commit": "46adb90573118902d0a7c7723ce8817a085f38b9",
++                "experiment_id": "M233-NDE", "goal_sha256": GOAL,
++                "config": "configs/Quard/ctf_hcg_csort_nde/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde.yaml",
+                 "mode": mode, "target": target, "model_package": package}
+-    check("external_literal_NSD_arm_identity_" + mode + "_" + target,
++    check("external_literal_NDE_arm_identity_" + mode + "_" + target,
+           mode in ("smoke", "resources") and target in ("champion", "candidate")
+           and isinstance(result, dict) and all(result.get(k) == v for k, v in expected.items()))
+ 
+ 
+-def validate_nsd_path(observation):
+-    step = str(observation["forward"])
+-    check("NSD_original_native_coordinate_encoder_refs_" + step,
+-          observation["exact_original_decoder_padded_positions_reference"] is True
+-          and observation["exact_original_encoder_feature_and_mask_references"] is True
+-          and observation["actual_three_LN_calls"] == [1, 1, 1]
+-          and observation["native_positions"]["finite"] is True
+-          and observation["native_positions"]["shape"][-1] == 3
+-          and observation["per_parameter_nonzero_FP32_minimum_effect_gate_added"] is False)
+-    active = [scene for scene in observation["scene_observations"] if scene["true_supported_nodes_by_scale"][0] > 0]
+-    check("NSD_original_supported_scene_count_" + step, len(active) == observation["actual_supported_scene_count"])
++def validate_nde_path(observation):
++    step = str(observation['forward'])
++    check('NDE_original_native_feature_encoder_refs_' + step,
++          observation['exact_original_encoder_feature_and_mask_references'] is True
++          and observation['actual_three_LN_calls'] == [1, 1, 1]
++          and observation['native_point_analysis_precedes_first_private_mean'] is True
++          and observation['per_parameter_nonzero_FP32_minimum_effect_gate_added'] is False)
++    active = [scene for scene in observation['scene_observations'] if scene['true_supported_nodes_by_scale'][0] > 0]
++    check('NDE_original_supported_scene_count_' + step, len(active) == observation['actual_supported_scene_count'])
++    mappings = ['point_to_fine', 'fine_to_middle', 'middle_to_coarse']
+     for index, scene in enumerate(active):
+-        suffix = step + "_scene" + str(index)
+-        counts = scene["true_supported_nodes_by_scale"]
+-        check("NSD_original_single_call_topology_" + suffix,
+-              scene["actual_original_support_builder_calls"] == 1
+-              and scene["actual_original_valid_coordinate_and_feature_mask_reference"] is True
+-              and all(scene[k] == 3 for k in ("actual_chain_energy_calls", "actual_chain_builder_calls",
+-                  "actual_analysis_calls", "actual_synthesis_calls", "actual_final_index_copy_calls")))
+-        energies = scene["energy_observations"]
+-        check("NSD_original_three_chain_levels_" + suffix,
+-              len(energies) == 3 and [x["level"] for x in energies] == [0, 1, 2])
+-        for level, energy in enumerate(energies):
+-            has_edges = energy["actual_edge_count"] > 0
+-            channels = energy["output"]["shape"][-1]
+-            check("NSD_original_coordinate_chain_tie_mean_squared_contrast_" + suffix + "_" + str(level),
+-                  energy["original_calls"] == 1 and energy["returned_original_object_unchanged"] is True
+-                  and energy["energy_arithmetic_replayed"] is False
+-                  and all(energy[k]["finite"] is True for k in ("input", "native_coordinates", "output"))
+-                  and energy["output"]["shape"] == [counts[level], channels]
+-                  and energy["actual_coordinate_mean_and_contrast_mean_calls"] == (2 if has_edges else 0)
+-                  and energy["original_empty_chain_zero_branch"] is (not has_edges)
+-                  and energy["optional_boundary_coverage_is_not_a_new_nonzero_or_resampling_gate"] is True)
+-            if has_edges:
+-                square = energy["actual_squared_pair_contrast"]
+-                check("NSD_original_square_native_dtype_" + suffix + "_" + str(level),
+-                      square["original_calls"] == 1 and square["input_dtype_equals_output_dtype"] is True
+-                      and square["extra_FP32_cast_added"] is False
+-                      and square["input"]["finite"] is True and square["output"]["finite"] is True)
+-        check("NSD_six_original_center_calls_plus_optional_chain_means_" + suffix,
+-              scene["actual_group_mean_calls"] == 6 + sum(x["actual_coordinate_mean_and_contrast_mean_calls"] for x in energies)
+-              and len(scene["mean_observations"]) == scene["actual_group_mean_calls"]
+-              and all(x["original_calls"] == 1 and x["returned_original_object_unchanged"] is True
+-                      and x["input"]["finite"] is True and x["output"]["finite"] is True for x in scene["mean_observations"]))
+-        for kind, order, width in (("analysis", [0, 1, 2], 3), ("synthesis", [2, 1, 0], 2)):
+-            stages = scene[kind + "_observations"]
+-            check("NSD_original_shared_" + kind + "_" + suffix,
+-                  len(stages) == 3 and [x["level"] for x in stages] == order
+-                  and all(x["original_calls"] == 1 and x["actual_original_shared_module"] is True
+-                          and x["no_replay_or_replacement"] is True
+-                          and x["input"]["finite"] is True and x["output"]["finite"] is True
+-                          and x["input"]["shape"] == [counts[x["level"]], width * x["output"]["shape"][-1]] for x in stages))
+-        restored = scene["restoration_observations"]
+-        check("NSD_original_supported_id_restoration_" + suffix,
+-              len(restored) == 3 and [x["level"] for x in restored] == [0, 1, 2]
+-              and all(x["original_calls"] == 1 and x["actual_synthesis_delta_ref"] is True
+-                      and x["zero_initialized_destination"] is True and x["returned_original_object_unchanged"] is True
+-                      and x["original_node_ids"] == scene["nodes"][x["level"]] and x["output"]["finite"] is True for x in restored))
++        suffix = step + '_scene' + str(index)
++        counts = scene['true_supported_nodes_by_scale']
++        check('NDE_original_single_call_topology_' + suffix,
++              scene['actual_original_support_builder_calls'] == 1
++              and scene['actual_original_valid_feature_mask_reference'] is True
++              and all(scene[k] == 3 for k in ('actual_group_mean_calls', 'actual_parent_context_broadcast_calls',
++                  'actual_analysis_calls', 'actual_synthesis_calls', 'actual_final_index_copy_calls')))
++        contexts = scene['parent_context_observations']
++        check('NDE_original_three_parent_contexts_' + suffix,
++              len(contexts) == 3 and [x['level'] for x in contexts] == [0, 1, 2]
++              and all(x['mapping'] == mappings[x['level']]
++                      and x['actual_original_normalized_parent_token_ref'] is True
++                      and x['actual_original_ancestry_mapping'] is True
++                      and x['original_calls'] == 1 and x['output']['finite'] is True for x in contexts))
++        means = scene['mean_observations']
++        check('NDE_original_three_transformed_value_means_' + suffix,
++              len(means) == 3 and [x['level'] for x in means] == [0, 1, 2]
++              and all(x['mapping'] == mappings[x['level']] and x['groups'] == counts[x['level']]
++                      and x['actual_shared_analysis_precedes_private_mean'] is True
++                      and x['actual_original_parent_ids'] is True
++                      and x['original_calls'] == 1 and x['returned_original_object_unchanged'] is True
++                      and x['input']['finite'] is True and x['output']['finite'] is True
++                      and x['output']['shape'][0] == counts[x['level']] for x in means))
++        for kind, order in (('analysis', [0, 1, 2]), ('synthesis', [2, 1, 0])):
++            stages = scene[kind + '_observations']
++            check('NDE_original_shared_' + kind + '_' + suffix,
++                  len(stages) == 3 and [x['level'] for x in stages] == order
++                  and all(x['original_calls'] == 1 and x['actual_original_shared_module'] is True
++                          and x['no_replay_or_replacement'] is True
++                          and x['input']['finite'] is True and x['output']['finite'] is True
++                          and x['input']['shape'] == [x['output']['shape'][0], 2 * x['output']['shape'][-1]] for x in stages))
++            if kind == 'analysis':
++                check('NDE_native_points_before_first_mean_then_actual_child_states_' + suffix,
++                      all(x['before_private_mean'] is True and x['analysis_source'] ==
++                          ('actual_native_points' if x['level'] == 0 else 'actual_child_state') for x in stages)
++                      and stages[0]['output']['shape'][0] == scene['point_count']
++                      and all(stages[level]['output']['shape'][0] == counts[level - 1] for level in (1, 2))
++                      and all(means[level]['input']['shape'] == stages[level]['output']['shape'] for level in range(3)))
++            else:
++                check('NDE_original_synthesis_supported_counts_' + suffix,
++                      all(x['output']['shape'][0] == counts[x['level']] for x in stages))
++        restored = scene['restoration_observations']
++        check('NDE_original_supported_id_restoration_' + suffix,
++              len(restored) == 3 and [x['level'] for x in restored] == [0, 1, 2]
++              and all(x['original_calls'] == 1 and x['actual_synthesis_delta_ref'] is True
++                      and x['zero_initialized_destination'] is True and x['returned_original_object_unchanged'] is True
++                      and x['original_node_ids'] == scene['nodes'][x['level']] and x['output']['finite'] is True for x in restored))
+     for level in range(3):
+-        for key in ("native_normalized_level" + str(level) + "_gradients", "native_output_level" + str(level) + "_gradients"):
+-            check("NSD_original_finite_observed_backward_" + step + "_" + key,
+-                  bool(observation[key]) and all(x["finite"] is True for x in observation[key]))
++        for key in ('native_normalized_level' + str(level) + '_gradients', 'native_output_level' + str(level) + '_gradients'):
++            check('NDE_original_finite_observed_backward_' + step + '_' + key,
++                  bool(observation[key]) and all(x['finite'] is True for x in observation[key]))
+ 
+ 
+ 
+ def main():
++    global NATIVE
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument('--native-dir', required=True,
++                        help='Actual separately reviewed current-owner execution payload directory; never the disabled mother packet')
++    args = parser.parse_args()
++    NATIVE = Path(args.native_dir).resolve()
++    assert NATIVE.is_relative_to(TICK.resolve()) and NATIVE != BASE_NATIVE.resolve()
+     owner = guard()
+     missing = [mode + "_" + target + "_execution.json" for mode, target in PAIRS
+                if not (EXECUTION / (mode + "_" + target + "_execution.json")).is_file()]
+@@ -209,13 +220,13 @@
+     lease = read(EXECUTION / "execution_lease.json")
+     proof = read(PROOF)
+     config = manifest["config"]
+-    base = {"id": "M232-NSD", "candidate_id": CID, "config": config, "code_commit": SOURCE,
++    base = {"id": "M233-NDE", "candidate_id": CID, "config": config, "code_commit": SOURCE,
+             "goal_sha256": GOAL, "recorded_at": datetime.now(timezone.utc).isoformat()}
+     input_paths = [EXECUTION / name for name in ("native_manifest.json", "execution_binding.json", "execution_lease.json")]
+     raw = {}
+     check("manifest_exact_identity_source_runtime_goal", manifest["candidate_id"] == CID and manifest["code_commit"] == SOURCE
+           and manifest["runtime_code_commit"] == PARENT and manifest["goal_sha256"] == GOAL
+-          and manifest["root"] == "/data/songcl/Project/Cluster_project/Cluster_psc_20261106")
++          and manifest["root"] == "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+     check("goal_unchanged", sha(ROOT / "pipeline/goal.json") == GOAL)
+     check("binding_manifest_lease_match", binding["native_manifest_sha256"] == sha(EXECUTION / "native_manifest.json")
+           == lease["native_manifest_sha256"] and binding["execution_lease_sha256"] == sha(EXECUTION / "execution_lease.json")
+@@ -223,8 +234,9 @@
+     owner_keys = ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")
+     check("execution_actual_current_owner", binding["owner"] == {k: owner[k] for k in owner_keys}
+           and manifest["current_token"] == lease["token"] == TOKEN)
+-    check("source_compatible_proof_and_review", proof["source_commit"] == SOURCE and proof["parent_commit"] == PARENT
+-          and read(SOURCE_REVIEW)["passed"] is True and len(proof["source_files_exact9"]) == 9)
++    check("source_compatible_proof_and_review", proof["source_commit"] == SOURCE and proof["source_parent_commit"] == PARENT
++          and read(SOURCE_REVIEW)["passed"] is True and proof["exact_nine_additions"] is True
++          and len(proof["files"]) == 9)
+     for mode, target in PAIRS:
+         name = mode + "_" + target
+         path, request_path = EXECUTION / (name + "_execution.json"), EXECUTION / (name + "_request.json")
+@@ -243,7 +255,7 @@
+         check(name + "_original_command", entry["command"] == [
+             "/home/songcl/.conda/envs/project_cluster/bin/python", "-B", binding["stage"] + "/worker.py",
+             "--lease", binding["stage"] + "/execution_lease.json", "--mode", mode, "--target", target])
+-        identity = {"candidate_id": CID, "experiment_id": "M232-NSD", "code_commit": SOURCE,
++        identity = {"candidate_id": CID, "experiment_id": "M233-NDE", "code_commit": SOURCE,
+                     "goal_sha256": GOAL, "config": config, "mode": mode, "target": target,
+                     "stage": binding["stage"], "physical_gpu": 0, "gpu_uuid": binding["gpu_uuid"],
+                     "current_token": TOKEN, "native_manifest_sha256": binding["native_manifest_sha256"],
+@@ -263,15 +275,25 @@
+ 
+     check("manifest_exact_activation_template_projection", manifest == {
+         **read(NATIVE / "manifest_template.json"),
+-        "current_token": TOKEN, "stage": "/data/songcl/Project/Cluster_project/pipeline/nsd_" + TOKEN[:8] + "_gpu0",
++        "current_token": TOKEN, "stage": "/data/songcl/Project/Cluster_project/pipeline/nde_" + TOKEN[:8] + "_gpu0",
+         "tick_generated_at": owner["generated_at"], "deadline_at": owner["deadline_at"],
+         "physical_gpu": 0, "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c", "allowed_gpus": [0],
+         "context_sha256": owner["context_sha256"], "pending_sha256": owner["pending_sha256"], "runtime_code_commit": PARENT})
+-    check("NSD_source_proof_and_review_hashes", sha(PROOF) == "e1a03ed4f1631d78f427fedc153d54bf7a3a0a94bcb2272e11c7caf19c1e3302"
+-          and sha(SOURCE_REVIEW) == "32609b8720b466713911a3d93650272f5ba4e376218253ef5dd261e5992758d2"
++    check("NDE_source_proof_and_review_hashes", sha(PROOF) == "f8da681f87596acfaaff54b276aa8cb1b889ce1409aefe486d5388cecb899eb9"
++          and sha(SOURCE_REVIEW) == "ca707d6567d2ad43e387946e529588e08e3c2cdae76e540a8ee318f4e5450388"
+           and sha(PROTOCOL) == "ab5675efd2d72432c827d60095d3bddbd6fef53fa3b0a2764af5a9f9ba61dee4")
+-    check("exact_reviewed_worker_and_runtime", sha(NATIVE / "worker.py") == "cd1cb8b000b7109db99b7bb44b69867d1c3bb5e63466a749b51bb4d35fd09112"
+-          and sha(NATIVE / "native_runtime.py") == "8ca969c6b4d7099fcf4e407d27ef979e93070a2be06f5f9784f3eed8a29c48f9")
++    check("exact_reviewed_worker_and_runtime", sha(NATIVE / "worker.py") == "0d3bacd0321a6d3c96fbc978cc3fb9ab7adc12ae4085b8decd05affcdbf09d6f"
++          and sha(NATIVE / "native_runtime.py") == "a38061e29fe644b76c87bd342ff5f316b71c6611f208ff58b9d2ddef4fe68244")
++    check('actual_enabled_runtime_is_only_reviewed_DRAFT_flag_change',
++          (NATIVE / 'native_runtime.py').read_bytes() ==
++          (BASE_NATIVE / 'native_runtime.py').read_bytes().replace(
++              b'DRAFT_EXECUTION_DISABLED = True', b'DRAFT_EXECUTION_DISABLED = False', 1))
++    check('actual_worker_same_as_reviewed_NDE_mother', sha(NATIVE / 'worker.py') == sha(BASE_NATIVE / 'worker.py'))
++    version = read(NATIVE / 'source_version_binding.json')
++    check('actual_source_binding_matches_frozen_NDE_and_manifest',
++          version['source_commit'] == version['code_commit'] == SOURCE and version['parent_commit'] == PARENT
++          and version['source_files'] == proof['files'] and version['candidate_source_hashes'] == manifest['candidate_source_hashes']
++          and sha(NATIVE / 'source_version_binding.json') == manifest['source_version_binding_sha256'])
+     for (mode, target), actual in raw.items():
+         for boundary in ("before", "after"):
+             observed = actual[boundary]
+@@ -312,7 +334,7 @@
+           and re.fullmatch(r"[0-9a-f]{64}", common_c["sha256"]) is not None) 
+     check("original_common_initialization_exclusions_only", common_c["excluded_name_prefixes"] == [
+           "dec.cluster_att.cluster_ffn.0.", "dec.cluster_att.cluster_ffn.1.",
+-          "dec.cluster_att.cluster_ffn.2.", "dec.cluster_att.spatial_dirichlet."])
++          "dec.cluster_att.cluster_ffn.2.", "dec.cluster_att.distribution_embedding."])
+     check("paired_two_complete_natural_batch_fingerprints", candidate["batches"] == champion["batches"])
+     check("paired_native_initialization_data_optimizer_schedule", candidate["initialization"] == champion["initialization"]
+           and candidate["data_source"] == champion["data_source"]
+@@ -321,35 +343,35 @@
+           and candidate["scheduler_type"] == champion["scheduler_type"] == "PolyLR")
+     gradient_summary = []
+     for step in candidate["steps"]:
+-        gradient = step["whole_spatial_dirichlet_weight_gradient"]
+-        weight_changed = step["weight_before_step_hash"]["spatial_dirichlet"] != step["weight_after_step_hash"]["spatial_dirichlet"]
+-        module_changed = step["module_before_step_hash"]["spatial_dirichlet"] != step["module_after_step_hash"]["spatial_dirichlet"]
++        gradient = step["whole_distribution_embedding_weight_gradient"]
++        weight_changed = step["weight_before_step_hash"]["distribution_embedding"] != step["weight_after_step_hash"]["distribution_embedding"]
++        module_changed = step["module_before_step_hash"]["distribution_embedding"] != step["module_after_step_hash"]["distribution_embedding"]
+         check("whole_core_gradient_and_update_step" + str(step["forward"]),
+               gradient["finite"] is True and finite(gradient["abs_max"]) and gradient["abs_max"] > 0
+-              and step["whole_spatial_dirichlet_weight_updated"] is weight_changed and weight_changed
+-              and step["whole_spatial_dirichlet_module_updated"] is module_changed and module_changed)
++              and step["whole_distribution_embedding_weight_updated"] is weight_changed and weight_changed
++              and step["whole_distribution_embedding_module_updated"] is module_changed and module_changed)
+         gradient_summary.append({"forward": step["forward"], "aggregate_weight_gradient": gradient,
+                                  "aggregate_weight_updated": weight_changed, "aggregate_module_updated": module_changed})
+-    observations = candidate["NSD_spatial_dirichlet_observations"]
+-    check("two_actual_NSD_path_observations", len(observations) == 2)
++    observations = candidate["NDE_distribution_embedding_observations"]
++    check("two_actual_NDE_path_observations", len(observations) == 2)
+     check("original_three_raw_skips_and_exact_HCG_inputs",
+           len(candidate["hcg_readbacks"]) == 2
+-          and all(x["NSD_original_three_skips_and_exact_HCG_inputs"] == [True, True, True]
++          and all(x["NDE_original_three_skips_and_exact_HCG_inputs"] == [True, True, True]
+                   for x in candidate["hcg_readbacks"]))
+     path_summary = []
+     for observation in observations:
+         count = observation["actual_supported_scene_count"]
+-        check("actual_production_NSD_path_step" + str(observation["forward"]),
++        check("actual_production_NDE_path_step" + str(observation["forward"]),
+               observation["actual_true_fine_paths"] > 0 and count > 0
+-              and all(observation[k] == 3 * count for k in ("actual_chain_energy_calls", "actual_chain_builder_calls",
++              and all(observation[k] == 3 * count for k in ("actual_group_mean_calls", "actual_parent_context_broadcast_calls",
+                   "actual_analysis_calls", "actual_synthesis_calls", "actual_final_index_copy_calls"))
+-              and observation["actual_production_NSDirichlet_path_observed"] is True
+-              and observation["no_feature_energy_or_model_replay"] is True
++              and observation["actual_production_NDEmbedding_path_observed"] is True
++              and observation["no_feature_or_model_replay"] is True
+               and ((observation["actual_internal_backward_callbacks"] > 0
+                     and observation["all_observed_internal_gradients_finite"] is True)
+                    or (observation["actual_internal_backward_callbacks"] == 0
+                        and observation["all_observed_internal_gradients_finite"] is None)))
+-        validate_nsd_path(observation)
++        validate_nde_path(observation)
+         path_summary.append({key: value for key, value in observation.items() if isinstance(value, (str, int, float, bool))})
+     values = yaml.safe_load((NATIVE / "candidate.yaml").read_text(encoding="utf-8"))
+     check("original_data_seed_schedule_saved_YAML", values["train"]["seed"] == 1999 and values["train"]["epochs"] == 50
+@@ -401,15 +423,15 @@
+                  "common_tensor_count": 835, "common_parameter_count": common_c["parameter_count"],
+                  "common_sha256": common_c["sha256"], "excluded_name_prefixes": common_c["excluded_name_prefixes"],
+                  "batches": candidate["batches"]},
+-             "whole_NSD_core_original_loss_gradient_and_update": gradient_summary,
+-             "actual_NSD_path_observations": path_summary, "evidence": evidence,
++             "whole_NDE_core_original_loss_gradient_and_update": gradient_summary,
++             "actual_NDE_path_observations": path_summary, "evidence": evidence,
+              "limitations": ["Two natural TRAIN steps establish technical execution only, not trained efficacy or novelty.",
+                  "Smoke memory includes observer hooks and snapshots; it is not pure optimizer TRAIN memory.",
+                  "Individual rows/maps/biases/statistic components may be zero; no additional coverage or positivity gate was added."]}
+     smoke_ref = save("native_smoke.json", smoke)
+     metrics = {"flops_g": (rb["profile"]["flops_g"], rc["profile"]["flops_g"])}
+     metrics.update({key: (rb[key], rc[key]) for key in ("median_ms", "p90_ms", "peak_allocated_bytes", "peak_reserved_bytes", "parameters")})
+-    resources = {**base, "schema_version": 1, "experiment_id": "M232-NSD", "passed": True,
++    resources = {**base, "schema_version": 1, "experiment_id": "M233-NDE", "passed": True,
+                  "decision": "ORIGINAL_RESOURCE_GATE_PASSED_ACTUAL_MATCHED_SAME_OWNER_FIXTURE",
+                  "champion_actual": evidence[2], "candidate_actual": evidence[3],
+                  "pairing": {key: rc[key] for key in ("input_sha256", "scan_ids", "ann_ids", "batch_size", "lang_num_max", "warmup", "repeat")},
+@@ -430,8 +452,8 @@
+                      "Full optimizer TRAIN peak and no-cluster baseline delta remain UNKNOWN.",
+                      "Memory increase is below15%; no trained +0.003 mIoU condition is triggered. Efficacy/novelty remain UNKNOWN."]}
+     resource_ref = save("resources.json", resources)
+-    constraints = {**base, "experiment_id": "M232-NSD", "parent_commit": PARENT, "passed": True,
+-                   "actual_git_source_hashes": proof["source_files_exact9"], "exact_nine_paths_only": True,
++    constraints = {**base, "experiment_id": "M233-NDE", "parent_commit": PARENT, "passed": True,
++                   "actual_git_source_hashes": proof["files"], "exact_nine_paths_only": True,
+                    "source_version": ref(PROOF), "independent_source_review": ref(SOURCE_REVIEW),
+                    "native_smoke": smoke_ref, "resources": resource_ref, "protocol": ref(PROTOCOL),
+                    "source_unchanged_from_tested_bytes": True, "config_is_independent_native_YAML": True,
+@@ -439,7 +461,7 @@
+                    "native_yaml_record": {"seed": 1999, "epochs": 50, "max_iters": 70,
+                                           "precision_intervention": False, "optimizer": candidate["optimizer_type"],
+                                           "scheduler": candidate["scheduler_type"], "data_source": candidate["data_source"]},
+-                   "mainline": "Actual original native coordinate-chain spatial Dirichlet energy/shared analysis/synthesis core replaces original three FFNs and reaches original HCG/rawskip/single inst_feats/ILA/mask path.",
++                   "mainline": "Actual original native point conditional vector embedding BEFORE private means/true-ancestry shared analysis/synthesis replaces original three FFNs and reaches original rawskip/HCG/single inst_feats/ILA/mask path.",
+                    "no_goal_server_bans_holds_or_protocol_changes": True,
+                    "efficacy": "UNKNOWN", "novelty": "UNKNOWN", "scientific_admission": False,
+                    "review_status": "PENDING_ROOT_AND_INDEPENDENT_ACTUAL_GATE_REVIEW", "evidence": evidence}
+@@ -478,5 +500,6 @@
+         partial = preserve_partial("ACTUAL_PARTIAL_FAILURE_OR_UNVERIFIED_NO_PASS", error=error)
+         print(json.dumps({"status": "ACTUAL_PARTIAL_FAILURE_OR_UNVERIFIED_NO_PASS",
+                           "error_type": type(error).__name__, "error": str(error),
+-                          "partial": partial, "PASS_artifacts_written": False}))
++                          "partial": partial,
++                          "PASS_artifacts_written": any((OUTPUT / n).exists() for n in ('native_smoke.json', 'resources.json', 'constraints_independence.json'))}))
+         raise SystemExit(2)

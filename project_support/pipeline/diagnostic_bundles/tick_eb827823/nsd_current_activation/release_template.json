@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "purpose": "Current-owner NSD activation release template; root independent review/anchors required.",
+  "candidate_id": "hierarchy-native-spatial-dirichlet-composition",
+  "experiment_id": "M232-NSD",
+  "code_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+  "native_preparation_sha256": "1561c98a81d8a0ba07bc769bd51c939c7c54a5c7eed5bf2d8cc921d5ed22be31",
+  "manifest_template_sha256": "62972dc875b48a463fdf17584b2156151a25e62ed77d8994df278aee414f5cd8",
+  "source_version_binding_sha256": "ebadb76a465eec9900759501933a5bf08ff43728c9879be5373538693e9118e5",
+  "source_hashes": {
+    "adapter.py": "e94127b00c4bb1815e026cad6dbfe25a6e1eacd11dbbfafc0bbdef6c61c6f78d",
+    "remote_ops.py": "7b1946bb1ff29640dbd280c8aeea52087cfc515b14f1cb9565c3e251ffe14408"
+  },
+  "external_candidate_preparation_and_release_anchors_required": true,
+  "fresh_owned_binding_and_live_idle_still_required": true,
+  "explicit_selected_physical_GPU_capability": [
+    0
+  ],
+  "selection_scope": "Original GPU0-only overlay/free20000MiB/max1/three locks; NSD diagnostics only, no actual execution or training grant.",
+  "conditional_parent_promotion": {
+    "expected_primary_HEAD": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+    "required_technical_receipt": "pipeline/admissions/M231-PSC.json",
+    "profile": "experiment_first",
+    "training_completion_or_effect_requirement": false,
+    "applies_to_mutations_only": true,
+    "required_PSC_receipt_code_commit": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d"
+  },
+  "resource_policy": {
+    "SERVERS_sha256": "1f1ba94e90c6f44e2e9cb0e6f1e746568e38cc1e92f398ee49efc5e8c40232bf",
+    "authorization": {
+      "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+      "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+    },
+    "live_allowed_gpus": [
+      0
+    ],
+    "selected_GPU_capability": [
+      0
+    ],
+    "max_tasks_per_gpu": 1,
+    "allow_external_overlay": true,
+    "task_memory_mb": 20000,
+    "resource_memory_policy": {
+      "allow_external_overlay": true,
+      "minimum_free_mib_before_launch": 20000,
+      "max_project_tasks_per_gpu": 1,
+      "cooperative_lock_kinds": [
+        "training",
+        "diagnostic",
+        "exclusive"
+      ],
+      "external_contexts": "record_preserve_no_signals",
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+    }
+  },
+  "draft_execution_disabled": false,
+  "operational_ready": false,
+  "runtime_binding": {
+    "expected_runtime_code_commit": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+    "remote_code_root": "/data/songcl/Project/Cluster_project/Cluster_psc_20261106"
+  },
+  "diagnostic_only_conda_override": {
+    "source": "/data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh",
+    "sha256": "6c80f3659817b63d1dfb79555dded6e2a486cc4cd75685b462a3082c4a2885d0",
+    "env": "project_cluster",
+    "reason": "Current SERVERS PSC production shim is historical and expired; preserve it. Only diagnostics use this separately reviewed original immutable base; never full trainer launch."
+  },
+  "current_binding": {
+    "path": "pipeline/diagnostic_bundles/tick_eb827823/nsd_current_activation/current_binding.json",
+    "sha256": "f0d237df975dc9f138090993929253f5b379d0ee9412218037803a58b139efec"
+  },
+  "independent_review": "PENDING_EXTERNAL_ROOT_RELEASE"
+}

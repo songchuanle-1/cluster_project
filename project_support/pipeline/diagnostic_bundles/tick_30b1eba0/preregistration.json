@@ -1,0 +1,23 @@
+{
+  "candidate_id": "hierarchy-middle-directional-token-convolution",
+  "experiment_id": "M205-MDC",
+  "registered_at": "2026-10-20T17:00:28.307077+00:00",
+  "profile": "experiment_first",
+  "hypothesis": "Replacing only the middle-scale independent token FFN with fixed geometric directional convolution can exchange spatial context among 64 middle tokens before original HCG readback, improving referential localization. Efficacy unknown until native training.",
+  "mechanism": "Six nearest directional donors plus self; dominant absolute xyz delta axis/sign, tie axis xyz and donor token ID; no self, duplicate center or padding; missing direction zero. Depthwise 7xC kernel+bias then CxC pointwise/GELU, without new residual. Fine/coarse FFNs and CSORT/raw hierarchy remain unchanged.",
+  "matched_control": "Unmodified M95 same data/seed1999/50epochs/maxiters70. Resource matched native sample bs1 warmup20 repeat100 unchanged fvcore. Two actual native TRAIN loss/backward/optimizer steps precede queue.",
+  "known_risks": [
+    "Fixed xyz directions are rotation-sensitive.",
+    "Middle graph can connect different coarse parents.",
+    "Two native steps establish execution only; no efficacy claim."
+  ],
+  "historical_comparison": "M116-CGA used feature-cosine top8 graph, Q/K/V/O and two GATs per scale, unlike fixed geometric middle-only depthwise convolution. Historical negative evidence retained; no held candidate reopened.",
+  "authorization": {
+    "path": "pipeline/authorizations/experiment_first_20261021.json",
+    "sha256": "2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8"
+  },
+  "seed": 1999,
+  "epochs": 50,
+  "max_iters": 70,
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+}

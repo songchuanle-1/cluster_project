@@ -1,0 +1,35 @@
+{
+  "contract": "m95_quality_native_path_control_v1",
+  "checks": {
+    "native_iou_matches_fixed_control": true,
+    "censored_low_iou_score_gradient_zero": true,
+    "high_iou_score_gradient_nonzero": true,
+    "both_matched_mask_gradients_finite_nonzero": true,
+    "deployment_does_not_read_quality_scores": true,
+    "auxiliary_loss_does_not_rematch": true,
+    "target_geometry_matching_occurs_in_forward": true,
+    "cpu_only_no_cuda_initialized": true
+  },
+  "status": "PASS",
+  "iou": [
+    0.24999994039535522,
+    0.7499998211860657
+  ],
+  "mask_gradient_norms": [
+    0.10672274231910706,
+    0.06217353045940399
+  ],
+  "score_gradients": [
+    0.0,
+    -0.24999982118606567
+  ],
+  "source_hashes": {
+    "loss": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "network": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d"
+  },
+  "script_sha256": "5a6e5cb8a998fc62846a9badee511daff8adf96253a93cc0ec9b0b5e68cd12c7",
+  "device": "cpu",
+  "admission": false,
+  "training_started": false,
+  "limitations": "Fixed native-loss control and source audit, not native full-model backward or trained efficacy."
+}

@@ -1,0 +1,52 @@
+{
+  "status": "SOURCE_RESERVE_VALIDATION_STAGE_CLASSIFICATION_CONFIRMED_FROM_CANONICAL_CODE",
+  "recorded_at": "2026-10-30T10:29:41.738056+00:00",
+  "material_concerns": [],
+  "recommendation": "After the two CPU source prototypes and their reviews are complete, stage=validation truthfully denotes pending compatible source-version/native-tool/native-resource checks. Keep native/resources NOT_RUN and no queue/receipt/ready claim. Attach actual occupied-slot observation separately; do not park as blocked solely to describe unfinished validation.",
+  "evidence": [
+    {
+      "source": "tick_efficiency.py:23,32-43",
+      "fact": "validation is nonterminal pending. actionable_only excludes blocked, not validation. pending_ids counts stable experiment IDs once and does not demand existing native tooling."
+    },
+    {
+      "source": "build_tick_context.py:569-582,826",
+      "fact": "For effective experiment_first, every blocked candidate is parked/excluded; reserve_count derives actionable pending_ids and creation_budget=reserve_budget. With unchanged running2,targetreserve2 and these two validation source reserves, reserve_count2 leaves reserve_budget/creation_budget0. This is a dynamic classification, not a policy modification."
+    },
+    {
+      "source": "closure.py:939-979",
+      "fact": "validation requires normal actionable next_action/evidence; it does not require a technical PASS/receipt. The occupation-proof rule cited here applies specifically to exclusive_gpu_slot blocked candidates when canonical queue opening exists."
+    },
+    {
+      "source": "closure.py:75-87",
+      "fact": "exclusive_gpu_slot_available is canonical queue opening only, not proof of live idle ownership."
+    }
+  ],
+  "boundaries": [
+    "No stage=ready waiting/technical admission/nativePASS is inferred from CPU source completion.",
+    "No native work is run while both original GPU jobs occupy the cards. Real current occupation evidence supports the wait.",
+    "Keep current native/tool/version gaps explicit in next_action instead of claiming all tooling is ready.",
+    "Do not erase genuine pre-existing human/numerical/external holds or change global policy, server slots, budgets, retry limits or old authorizations."
+  ],
+  "anchors": {
+    "tick_efficiency": {
+      "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/tick_efficiency.py",
+      "sha256": "ef11587c890ecf3083cfa382c2a5e7223e013016aea14a354b9775965a963de4"
+    },
+    "build_tick_context": {
+      "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/build_tick_context.py",
+      "sha256": "7aa33ad1c0256720f7be90683fc2f47bbe1d85b0dba9ff01705f0ddd8a79a4c2"
+    },
+    "closure": {
+      "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/closure.py",
+      "sha256": "40a58e41a5d58f74b6826355e02dde48f8dbf9e083b5cf51b20cba2d2ff97172"
+    },
+    "current_anchor": {
+      "path": "pipeline/diagnostic_bundles/tick_34f4e385/anchor.py",
+      "sha256": "fa9f2ffd7a601e8ebcbb36350c0e9d27f9166fc859e6aeef93bd7fa0496caadf"
+    }
+  },
+  "scope": {
+    "local_source_read_and_private_review_only": true,
+    "pipeline_entry_Git_remote_GPU_tests_shared_or_policy_mutation": false
+  }
+}

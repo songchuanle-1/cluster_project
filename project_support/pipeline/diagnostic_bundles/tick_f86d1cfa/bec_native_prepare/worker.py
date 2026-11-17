@@ -1,0 +1,636 @@
+"""BEC native two-step smoke and original-handler resources; fresh lease required."""
+import os
+os.environ.update(PYTHONDONTWRITEBYTECODE='1', HF_HUB_OFFLINE='1',
+    TRANSFORMERS_OFFLINE='1', TOKENIZERS_PARALLELISM='false', OMP_NUM_THREADS='1')
+import argparse
+import copy
+import importlib
+import importlib.util
+import itertools
+import json
+import logging
+from pathlib import Path
+import sys
+import time
+from native_runtime import acquire, release, save, sha, verify, observe, fingerprint, MANIFEST, STAGE, ROOT, NAME
+
+
+
+def bec_membership_observation(point_to_fine, fine_to_middle, middle_to_coarse):
+    """Pure true-point support/count metadata, not feature or numerical thresholds."""
+    fine=sorted(set(point_to_fine));middle=sorted({fine_to_middle[i] for i in fine});coarse=sorted({middle_to_coarse[i] for i in middle})
+    fine_degrees={i:sum(fine_to_middle[j]==i for j in fine) for i in middle}
+    middle_degrees={i:sum(middle_to_coarse[j]==i for j in middle) for i in coarse}
+    return {'fine_ids':fine,'middle_ids':middle,'coarse_ids':coarse,'fine_edges':len(fine),'middle_edges':len(middle),
+        'fine_parent_supported_child_degrees':fine_degrees,'middle_parent_supported_child_degrees':middle_degrees,
+        'singleton_fine_parent_groups':sum(n==1 for n in fine_degrees.values()),'singleton_middle_parent_groups':sum(n==1 for n in middle_degrees.values()),
+        'degree_ge2_fine_parent_groups':sum(n>=2 for n in fine_degrees.values()),'degree_ge2_middle_parent_groups':sum(n>=2 for n in middle_degrees.values())}
+
+
+def bec_core_preflight(members):
+    observations=[bec_membership_observation(*values) for values in members]
+    return {'batches':observations,'fine_edges':sum(x['fine_edges'] for x in observations),
+        'middle_edges':sum(x['middle_edges'] for x in observations),
+        'core_path_possible':any(x['fine_edges']>0 and x['middle_edges']>0 for x in observations),
+        'degree_boundary_scope':'Record only; absent degree>=2/singleton/empty/padding is NOT_EXERCISED, not another hard gate'}
+
+
+def setup(target, mode, result):
+    sys.path[:0] = [str(ROOT), str(ROOT / 'framework/lib')]
+    # Importing this module installs the project's native torch.load compatibility.
+    from tools import train
+    import torch
+    import gorilla
+    import yaml
+    from framework import resolve_network
+    assert not torch.cuda.is_initialized()
+    torch.set_num_threads(1)
+    torch.cuda.set_per_process_memory_fraction(0.75, 0)
+    base_name = NAME
+    candidate_name = MANIFEST['candidate_name']
+    selected_name = candidate_name if target == 'candidate' else base_name
+    qualified = 'framework.model.Quard_model.' + selected_name
+    original_config = Path(MANIFEST['assets']['config_path'])
+    candidate_config = STAGE / 'candidate.yaml'
+    parent_values = yaml.safe_load(original_config.read_text())
+    candidate_values = yaml.safe_load(candidate_config.read_text())
+    assert parent_values == candidate_values, 'Only the config filename may identify the independent model'
+    source_config = candidate_config if target == 'candidate' else original_config
+    values = copy.deepcopy(candidate_values if target == 'candidate' else parent_values)
+    original_work_dir = values.get('work_dir')
+    # Approved private output-path adaptation only. All data and training values stay native.
+    values['work_dir'] = str(STAGE / ('native_' + mode + '_' + target))
+    Path(values['work_dir']).mkdir(exist_ok=False)
+    config_dir = STAGE / ('runtime_config_' + mode + '_' + target)
+    config_dir.mkdir(exist_ok=False)
+    config_path = config_dir / (selected_name + '.yaml')
+    with config_path.open('x') as stream:
+        yaml.safe_dump(values, stream, sort_keys=False)
+    check_values = copy.deepcopy(values)
+    check_values['work_dir'] = original_work_dir
+    assert check_values == parent_values
+    cfg = gorilla.Config.fromfile(str(config_path))
+    cfg.dist = False  # tools/train.py main's default single-GPU CLI state.
+    assert cfg.train.seed == 1999 and cfg.train.epochs == 50 and cfg.lr_scheduler.max_iters == 70
+    assert cfg.dataloader.train.batch_size == 2 and cfg.dataloader.train.num_workers == 4
+    assert cfg.dataloader.train.persistent_workers is True
+    gorilla.set_random_seed(1999)
+    source_hashes = {}
+    if target == 'candidate':
+        directory = STAGE / 'candidate_model'
+        for name, expected in MANIFEST['candidate_source_hashes'].items():
+            observed = sha(directory / name)
+            assert observed == expected, name
+            source_hashes[name] = observed
+        importlib.import_module('framework.model.Quard_model')
+        spec = importlib.util.spec_from_file_location(qualified, directory / '__init__.py',
+            submodule_search_locations=[str(directory)])
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[qualified] = module
+        spec.loader.exec_module(module)
+    else:
+        module = importlib.import_module(qualified)
+        for name, expected in MANIFEST['assets']['source_hashes'].items():
+            observed = sha(ROOT / 'framework/model/Quard_model' / base_name / name)
+            assert observed == expected, name
+            source_hashes[name] = observed
+    network = resolve_network(str(config_path))
+    assert network is module.Network, 'Native YAML resolver silently selected another model'
+    assert network.__module__ == qualified + '.network', 'Unexpected/fallback native Network module'
+    assert cfg.model.dec.cluster_att_num_layers == 1, 'BEC requires only the original final hierarchy injection'
+    model = network(**cfg.model).cuda()
+    # Match tools.train.main: native optimizer/scheduler construction precedes pretrain loading.
+    optimizer = gorilla.build_optimizer(model, cfg.optimizer) if mode == 'smoke' else None
+    scheduler = gorilla.build_lr_scheduler(optimizer, cfg.lr_scheduler) if optimizer is not None else None
+    assert cfg.train.pretrain, 'Native backbone pretrain is required'
+    pretrain = Path(cfg.train.pretrain)
+    assert pretrain.is_file()
+    full_checkpoint = MANIFEST['assets'].get('checkpoint')
+    if full_checkpoint:
+        assert pretrain.resolve() != Path(full_checkpoint).resolve(), 'No trained M95 full-model checkpoint initialization'
+    gorilla.load_checkpoint(model, str(pretrain), strict=False, map_location='cpu')
+    model.eval()
+    result.update(source_hashes=source_hashes,
+        config_sha256=sha(source_config), runtime_config_sha256=sha(config_path),
+        original_config_sha256=sha(original_config), model_package=qualified,
+        config_source=str(source_config), runtime_config_path=str(config_path),
+        configuration_adaptations={'work_dir': {'from': original_work_dir, 'to': cfg.work_dir},
+            'dist': 'False, native single-GPU CLI default'},
+        initialization={'kind': 'native_train_pretrain', 'path': str(pretrain),
+            'sha256': sha(pretrain), 'loader': 'gorilla.load_checkpoint(strict=False,map_location=cpu)',
+            'trained_m95_checkpoint_loaded': False, 'seed': 1999},
+        native_train_source_sha256=sha(ROOT / 'tools/train.py'),
+        data_source={key: {'data_root': value.get('data_root'), 'prefix': value.get('prefix'),
+            'type': value.get('type'), 'training': value.get('training')}
+            for key, value in cfg.data.items()})
+    if mode == 'smoke':
+        excluded = ('dec.cluster_att.cluster_ffn.0.', 'dec.cluster_att.cluster_ffn.1.', 'dec.cluster_att.bipartite_edges.')
+        common = {name:p.detach() for name,p in model.named_parameters() if not name.startswith(excluded)}
+        result['common_initialized_parameters'] = {
+            'scope':'Original common named parameters after native backbone pretrain, before TRAIN loader; exclude exact replaced fine/middle FFN and new bipartite_edges prefixes on both targets; retain all three original LayerNorms and coarse FFN; derive actual names/counts, no fixed843',
+            'excluded_name_prefixes':list(excluded), 'names':list(common), 'tensor_count':len(common),
+            'parameter_count':sum(p.numel() for p in common.values()),
+            'sha256':fingerprint(torch,common),
+            'paired_equality':'NOT_VALIDATED_BY_SINGLE_TARGET_WORKER; observation only, not a full-common-state gate'}
+    return torch, gorilla, cfg, model, qualified, train, optimizer, scheduler
+
+
+def smoke(torch, gorilla, cfg, model, qualified, train, optimizer, scheduler, result):
+    """Original TRAIN2 with actual BEC hooks; no auxiliary forward/backward/probe."""
+    from framework.dataset import build_dataset, build_dataloader
+    dataset = build_dataset(cfg.data.train, logging.getLogger('bec-native-smoke'))
+    loader = build_dataloader(dataset, dist=cfg.dist, **cfg.dataloader.train)
+    assert loader.batch_size == 2 and loader.num_workers == 4 and loader.persistent_workers and loader.drop_last
+    class TwoNativeBatches:
+        def __init__(self,native):self.native,self.sampler=native,native.sampler
+        def __len__(self):return 2
+        def __iter__(self):yield from itertools.islice(iter(self.native),2)
+    att, bank = model.dec.cluster_att, model.dec.cluster_bank
+    candidate = result['target'] == 'candidate'
+    assert sum(bool(layer.use_cluster) for layer in model.dec.encoder_layers) == 1
+    last_encoder = model.dec.encoder_layers[-1]
+    assert last_encoder.use_cluster and last_encoder.cluster_gate_type == 'sigmoid'
+    assert last_encoder.cluster_message_type == 'context' and cfg.model.dec.dropout == 0.0
+    ffn_levels = (2,) if candidate else (0,1,2)
+    tracked_modules = {'ffn_'+str(i):att.cluster_ffn[i] for i in ffn_levels}
+    assert all(sum(p.numel() for p in module.parameters()) == 525568 for module in tracked_modules.values())
+    if candidate:
+        assert all(sum(p.numel() for p in att.cluster_ffn[i].parameters())==0 for i in (0,1))
+        for name in ('up_fine','up_middle','down_middle','down_fine'):
+            tracked_modules[name]=getattr(att.bipartite_edges,name)
+        assert sum(p.numel() for p in att.bipartite_edges.parameters())==787968
+    tracked = {name:dict(module.named_parameters()) for name,module in tracked_modules.items()}
+    initial = {name:fingerprint(torch,{n:p.detach() for n,p in ps.items()}) for name,ps in tracked.items()}
+    calls, rawbanks, csort, readbacks, bec_calls, path_records = [], [], [], [], [], []
+    losses, steps, batches, backward_records = [], [], [], []
+    hooks, replacements, global_replacements = [], [], []
+    state = {'forward_index':0}
+    def summary(value):
+        finite=bool(torch.isfinite(value).all())
+        return {'shape':list(value.shape),'dtype':str(value.dtype),'finite':finite,
+            'nonfinite_count':int((~torch.isfinite(value)).sum()),
+            'abs_max':float(value.detach().float().abs().max().cpu()) if value.numel() and finite else (0.0 if not value.numel() else None)}
+    def logvar(value):
+        value=torch.as_tensor(value).detach();info=summary(value)
+        info['value']=float(value.cpu()) if info['finite'] and value.numel()==1 else None
+        return info
+    def watch(value,record,key):
+        assert value.requires_grad,key
+        def receive(gradient):
+            info=summary(gradient);record.setdefault(key,[]).append(info)
+            assert info['finite'];return None
+        hooks.append(value.register_hook(receive))
+    def replace(owner,name,replacement):
+        assert name not in vars(owner),'Expected inherited original method'
+        setattr(owner,name,replacement);replacements.append((owner,name))
+    original_build=bank.build_cluster_feats
+    def observed_build(sp_feats,batch_offsets):
+        output=original_build(sp_feats,batch_offsets)
+        if candidate:
+            members=[tuple(level[b].detach().cpu().tolist() for level in bank.cluster_ids_list) for b in range(len(bank.cluster_ids_list[0]))]
+            coverage=bec_core_preflight(members);result.setdefault('native_coverage_preflight_observations',[]).append(coverage)
+            if not coverage['core_path_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_LACKS_BEC_CORE_EDGES'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: original fixed TRAIN batch lacks real edges at both levels; before tensor watches, no replacement sample/seed or mechanism rejection')
+        record={'forward':state['forward_index'],'raw_sha256':fingerprint(torch,[x.detach().clone() for x in output]),
+            'id_sha256':fingerprint(torch,bank.cluster_ids_list),'map_sha256':fingerprint(torch,bank.child_cluster_maps),
+            'levels':[summary(x) for x in output]}
+        rawbanks.append(record);state['raw_refs'],state['raw_record']=output,record
+        return output
+    replace(bank,'build_cluster_feats',observed_build)
+    def ffn_hook(level):
+        def observe_ffn(owner,values,output):
+            record={'forward':state['forward_index'],'level':level,'input':summary(values[0]),'output':summary(output)}
+            assert record['input']['finite'] and record['output']['finite']
+            calls.append(record);state['ffn_snapshots'][level]=output.detach().clone()
+            watch(values[0],record,'native_input_gradients');watch(output,record,'native_output_gradients')
+        return observe_ffn
+    for level in ffn_levels:hooks.append(att.cluster_ffn[level].register_forward_hook(ffn_hook(level)))
+    if candidate:
+        edge_module=att.bipartite_edges
+        bec_module=importlib.import_module(qualified+'.bipartite_edges');original_plan=bec_module.build_bipartite_plan
+        original_mean=edge_module._mean_messages
+        def norm_pre(level):
+            def observe(owner,values):
+                state['bec_norm_counts'][level]+=1
+                if level in (0,1):assert values[0] is state['raw_refs'][level]
+                else:
+                    context=state['bec_context'];assert context['builder_calls']==context['batch_size'] and not context['up_expected']
+                    assert all(context['mean_counts'].get(b,0)==2 for b in range(context['batch_size']))
+                    expected=torch.stack([context['a2'][b] for b in range(context['batch_size'])],dim=0)
+                    assert fingerprint(torch,values[0])==fingerprint(torch,expected)
+                    context['record']['coarse_collected_input_sha256']=fingerprint(torch,values[0])
+                    context['record']['actual_a2_enters_original_LN2']=True
+                    watch(values[0],context['record'],'native_collected_coarse_input_gradients')
+            return observe
+        def norm_post(level):
+            def observe(owner,values,output):state['bec_norm_output_refs'][level]=output
+            return observe
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def bec_pre(owner,values):
+            fine,middle,coarse,ids,coarse_transform=values
+            assert owner is edge_module and fine is state['bec_norm_output_refs'][0] and middle is state['bec_norm_output_refs'][1]
+            assert coarse is state['raw_refs'][2] and ids is bank.cluster_ids_list
+            assert state['bec_norm_counts']=={0:1,1:1,2:0} and callable(coarse_transform)
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(fine.shape[0])]
+            coverage=bec_core_preflight(members)
+            if not coverage['core_path_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_LACKS_BEC_CORE_EDGES'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: classify absent/all-empty BEC paths before requires_grad watches; no sample/seed replacement')
+            record={'forward':state['forward_index'],'fine_input':summary(fine),'middle_input':summary(middle),'coarse_raw_input':summary(coarse),
+                'native_coverage_preflight':coverage,'operator_calls':[],'private_mean_calls':[],'batches':[],
+                'offdiagonal_dependency_probe':'NOT_IMPLEMENTED_NOT_MEASURED',
+                'reference_scope':'Only actual captured operator/mean outputs with detached gather/scatter/add reference. No Linear/GELU/FFN/mean re-evaluation or auxiliary backward.'}
+            state['bec_context']={'record':record,'fine':fine,'middle':middle,'coarse':coarse,'members':members,
+                'widths':tuple(int(x.shape[1]) for x in (fine,middle,coarse)),'batch_size':int(fine.shape[0]),'builder_calls':0,
+                'plans':{},'mean_counts':{},'up_expected':[],'down_expected':[],'u0':{},'v0':{},'u1':{},'v1':{},'a1':{},'a2':{},'d1':{},'d0':{},
+                'pending':None,'pending_activation':None,'coarse_FFN_count':0,'phase':'up'}
+            for key,value in (('native_fine_norm_input_gradients',fine),('native_middle_norm_input_gradients',middle),('native_coarse_raw_input_gradients',coarse)):watch(value,record,key)
+        def observed_plan(point_to_fine,fine_to_middle,middle_to_coarse,widths):
+            context=state['bec_context'];b=context['builder_calls'];context['builder_calls']+=1
+            assert (point_to_fine,fine_to_middle,middle_to_coarse)==context['members'][b] and tuple(widths)==context['widths']
+            plan=original_plan(point_to_fine,fine_to_middle,middle_to_coarse,widths);context['plans'][b]=plan;context['active_b']=b
+            if plan['fine_ids']:context['up_expected'].append(('up_fine',b))
+            if plan['middle_ids']:context['up_expected'].append(('up_middle',b))
+            if plan['middle_ids']:context['down_expected'].append(('down_middle',b))
+            if plan['fine_ids']:context['down_expected'].append(('down_fine',b))
+            metadata=bec_membership_observation(point_to_fine,fine_to_middle,middle_to_coarse)
+            assert tuple(metadata['fine_ids'])==plan['fine_ids'] and tuple(metadata['middle_ids'])==plan['middle_ids'] and tuple(metadata['coarse_ids'])==plan['coarse_ids']
+            context['record']['batches'].append({'batch':b,'original_plan':plan,'true_support':metadata,
+                'fine_prefix':len(fine_to_middle),'middle_prefix':len(middle_to_coarse),'coarse_prefix':plan['prefixes'][2],
+                'unsupported_internal_fine_ids':sorted(set(range(len(fine_to_middle)))-set(plan['fine_ids'])),
+                'unsupported_internal_middle_ids':sorted(set(range(len(middle_to_coarse)))-set(plan['middle_ids'])),
+                'unsupported_internal_coarse_ids':sorted(set(range(plan['prefixes'][2]))-set(plan['coarse_ids'])),
+                'padding_rows':[widths[i]-plan['prefixes'][i] for i in range(3)]})
+            return plan
+        setattr(bec_module,'build_bipartite_plan',observed_plan);global_replacements.append((bec_module,'build_bipartite_plan',original_plan))
+        def observed_mean(messages,groups,width):
+            context=state['bec_context'];b=context['active_b'];index=context['mean_counts'].get(b,0);assert index in (0,1)
+            plan=context['plans'][b];key='v0' if index==0 else 'v1';expected_groups=plan['fine_mean_groups'] if index==0 else plan['middle_mean_groups']
+            assert groups==expected_groups and width==context['widths'][index+1]
+            if messages.shape[0]:assert fingerprint(torch,messages)==fingerprint(torch,context[key][b])
+            else:assert not groups
+            record={'forward':state['forward_index'],'batch':b,'level':index,'groups':groups,'width':width,'input':summary(messages),
+                'input_sha256':fingerprint(torch,messages),'actual_supported_rows':int(messages.shape[0]),'original_mean_calls':1,
+                'equal_child_row_counts':[len(rows) for _,rows in groups],'means_recomputed_by_observer':False}
+            if messages.shape[0]:watch(messages,record,'native_mean_input_gradients')
+            output=original_mean(messages,groups,width)
+            record.update(output=summary(output),output_sha256=fingerprint(torch,output));assert record['input']['finite'] and record['output']['finite']
+            if messages.shape[0]:watch(output,record,'native_mean_output_gradients')
+            else:record['empty_boundary_status']='NOT_EXERCISED_GRADIENT_PATH; legal zero private mean'
+            context['a1' if index==0 else 'a2'][b]=output.detach().clone();context['mean_counts'][b]=index+1
+            context['record']['private_mean_calls'].append(record);return output
+        replace(edge_module,'_mean_messages',observed_mean)
+        def operator_pre(name):
+            def observe(owner,values):
+                context=state['bec_context'];assert context['pending'] is None and context['pending_activation'] is None
+                queue=context['up_expected'] if name.startswith('up_') else context['down_expected']
+                expected,b=queue.pop(0);assert expected==name
+                if name.startswith('down_'):assert context['phase']=='down' and context['coarse_FFN_count']==1
+                plan=context['plans'][b];value=values[0];c=edge_module.channels
+                def index(ids):return torch.tensor(ids,dtype=torch.long,device=value.device)
+                if name=='up_fine':refs=[context['fine'][b].detach().index_select(0,index(plan['fine_ids'])),context['middle'][b].detach().index_select(0,index(plan['fine_parent_ids']))]
+                elif name=='up_middle':refs=[context['a1'][b].index_select(0,index(plan['middle_ids'])),context['coarse'][b].detach().index_select(0,index(plan['middle_parent_ids']))]
+                elif name=='down_middle':refs=[context['u1'][b],context['refined_coarse_reference'][b].index_select(0,index(plan['middle_parent_ids']))]
+                else:refs=[context['u0'][b],context['d1'][b].index_select(0,index(plan['fine_parent_ids']))]
+                assert value.shape==(refs[0].shape[0],2*c) and all(fingerprint(torch,value[:,j*c:(j+1)*c])==fingerprint(torch,ref) for j,ref in enumerate(refs))
+                record={'forward':state['forward_index'],'batch':b,'operator':name,'input':summary(value),'input_sha256':fingerprint(torch,value),
+                    'field_shapes':[list(x.shape) for x in refs],'field_sha256':[fingerprint(torch,x) for x in refs],
+                    'actual_original_branch_inputs_match':True,'actual_real_edges':int(value.shape[0])}
+                assert record['input']['finite'];watch(value,record,'native_input_gradients');context['pending']=record
+            return observe
+        def operator_post(name):
+            def observe(owner,values,output):
+                context=state['bec_context'];record=context['pending'];assert record['operator']==name
+                record.update(linear_output=summary(output),linear_output_sha256=fingerprint(torch,output));assert record['linear_output']['finite']
+                watch(output,record,'native_linear_output_gradients');context['pending_activation']=(record,output);context['pending']=None
+            return observe
+        def activation_post(owner,values,output):
+            context=state['bec_context'];record,linear_output=context['pending_activation'];assert values[0] is linear_output
+            name=record['operator'];b=record['batch'];c=edge_module.channels;plan=context['plans'][b]
+            record.update(output=summary(output),output_sha256=fingerprint(torch,output),original_GELU_calls=1);assert record['output']['finite']
+            watch(output,record,'native_output_gradients')
+            if name.startswith('up_'):
+                assert output.shape[-1]==2*c
+                ukey,vkey=('u0','v0') if name=='up_fine' else ('u1','v1')
+                context[ukey][b]=output[:,:c].detach().clone();context[vkey][b]=output[:,c:].detach().clone()
+                record['actual_split_views']={'retained_sha256':fingerprint(torch,context[ukey][b]),'upward_sha256':fingerprint(torch,context[vkey][b])}
+                def split_gradient(gradient):
+                    record.setdefault('native_split_output_gradients',[]).append({'retained':summary(gradient[:,:c]),'upward':summary(gradient[:,c:])});return None
+                hooks.append(output.register_hook(split_gradient))
+            else:
+                key='d1' if name=='down_middle' else 'd0';ids=plan['middle_ids'] if key=='d1' else plan['fine_ids'];width=context['widths'][1 if key=='d1' else 0]
+                reference=output.new_zeros((width,c)).index_copy(0,torch.tensor(ids,dtype=torch.long,device=output.device),output.detach())
+                context[key][b]=reference
+            context['record']['operator_calls'].append(record);context['pending_activation']=None
+        for name in ('up_fine','up_middle','down_middle','down_fine'):
+            module=getattr(edge_module,name);hooks.extend([module.register_forward_pre_hook(operator_pre(name)),module.register_forward_hook(operator_post(name))])
+        hooks.append(edge_module.activation.register_forward_hook(activation_post))
+        def original_coarse_post(owner,values,output):
+            context=state['bec_context'];context['coarse_FFN_count']+=1
+            assert values[0] is state['bec_norm_output_refs'][2] and state['bec_norm_counts'][2]==context['coarse_FFN_count']==1
+            assert context['pending'] is None and context['pending_activation'] is None and not context['up_expected']
+            mask=torch.zeros(output.shape[:2],dtype=torch.bool,device=output.device)
+            for b,plan in context['plans'].items():mask[b]=mask[b].index_fill(0,torch.tensor(plan['coarse_ids'],dtype=torch.long,device=output.device),True)
+            context['masked_coarse_delta']=output.detach().clone().masked_fill(~mask.unsqueeze(-1),0)
+            context['refined_coarse_reference']=context['coarse'].detach()+context['masked_coarse_delta'];context['phase']='down'
+            context['record'].update(coarse_actual_FFN_output_sha256=fingerprint(torch,output),coarse_supported_mask_sha256=fingerprint(torch,mask),
+                coarse_masked_delta_sha256=fingerprint(torch,context['masked_coarse_delta']),unsupported_coarse_bias_masked_in_reference=True)
+        hooks.append(att.cluster_ffn[2].register_forward_hook(original_coarse_post))
+        def bec_post(owner,values,output):
+            context=state.pop('bec_context');record=context['record'];d0,d1,h2=output
+            assert context['pending'] is None and context['pending_activation'] is None and not context['up_expected'] and not context['down_expected']
+            assert context['builder_calls']==context['batch_size'] and all(context['mean_counts'][b]==2 for b in range(context['batch_size']))
+            for b,plan in context['plans'].items():
+                reference0=context['d0'].get(b,d0[b].new_zeros(d0[b].shape));reference1=context['d1'].get(b,d1[b].new_zeros(d1[b].shape))
+                assert fingerprint(torch,d0[b])==fingerprint(torch,reference0) and fingerprint(torch,d1[b])==fingerprint(torch,reference1)
+            assert fingerprint(torch,h2)==fingerprint(torch,context['refined_coarse_reference'])
+            record.update(outputs=[summary(x) for x in output],output_sha256=[fingerprint(torch,x) for x in output],
+                original_ID_restoration_and_unsupported_padding_delta0_exact=True,actual_two_up_split_private_mean_two_down_path=True,
+                actual_original_coarse_skip_masked_and_consumed=True,coarse_original_LN_FFN_calls=context['coarse_FFN_count'],
+                original_LN_calls=dict(state['bec_norm_counts']),actual_builder_calls=context['builder_calls'],
+                actual_fine_edges=sum(len(x['fine_edges']) for x in context['plans'].values()),actual_middle_edges=sum(len(x['middle_edges']) for x in context['plans'].values()),
+                degree_boundary_status='Record true counts; absent singleton/degree>=2/internal-empty/pad NOT_EXERCISED, no forced gate')
+            record['core_path_observed']=record['actual_fine_edges']>0 and record['actual_middle_edges']>0 and context['coarse_FFN_count']==1
+            assert record['core_path_observed'],'INCONCLUSIVE_COVERAGE: missing actual BEC core path, no replacement original batch'
+            for level,value in enumerate(output):watch(value,record,'native_helper_level'+str(level)+'_output_gradients')
+            bec_calls.append(record);state['bec_output_snapshots']=[x.detach().clone() for x in output];state['bec_coarse_output_ref']=h2
+        hooks.extend([edge_module.register_forward_pre_hook(bec_pre),edge_module.register_forward_hook(bec_post)])
+    original_csort=att._cross_scale_orth_loss
+    def observed_csort(coarse_tokens,fine_tokens,child_maps):
+        raw=state['raw_refs'];pair=next((i for i in range(2) if coarse_tokens is raw[i+1] and fine_tokens is raw[i]),None)
+        assert pair is not None and child_maps is bank.child_cluster_maps[pair]
+        before=fingerprint(torch,[coarse_tokens.detach().clone(),fine_tokens.detach().clone()])
+        value=original_csort(coarse_tokens,fine_tokens,child_maps);assert fingerprint(torch,[coarse_tokens,fine_tokens])==before
+        csort.append({'forward':state['forward_index'],'pair':pair,'original_raw_objects':True,
+            'original_childmap_object':True,'input_sha256':before,'output':logvar(value),'original_calls':1})
+        return value
+    replace(att,'_cross_scale_orth_loss',observed_csort)
+    original_readback=att._cluster_to_points
+    def observed_readback(point_feats,refined,ids_list,point_mask):
+        assert ids_list is bank.cluster_ids_list
+        record={'forward':state['forward_index'],'levels':[summary(x) for x in refined],
+            'refined_sha256':fingerprint(torch,[x.detach().clone() for x in refined]),
+            'ids_sha256':fingerprint(torch,ids_list),'point_padding':summary(point_mask),'original_residual_levels':{}}
+        raw=state['raw_refs']
+        if candidate:
+            snapshots=state['bec_output_snapshots']
+            expected=[raw[0].detach()+snapshots[0],raw[1].detach()+snapshots[1],snapshots[2]]
+            record['BEC_original_three_skip_HCG_inputs']=[fingerprint(torch,x)==fingerprint(torch,y) for x,y in zip(refined,expected)]
+            assert all(record['BEC_original_three_skip_HCG_inputs'])
+            record['BEC_helper_coarse_object_exact']=refined[2] is state['bec_coarse_output_ref'];assert record['BEC_helper_coarse_object_exact']
+        else:
+            for level in ffn_levels:
+                exact=fingerprint(torch,refined[level])==fingerprint(torch,raw[level].detach()+state['ffn_snapshots'][level])
+                record['original_residual_levels'][str(level)]=exact;assert exact
+        output=original_readback(point_feats,refined,ids_list,point_mask);record['output']=summary(output)
+        readbacks.append(record);watch(output,record,'native_point_message_gradients');return output
+    replace(att,'_cluster_to_points',observed_readback)
+    def last_encoder_pre(owner,values):
+        assert state.get('encoder_inst_before') is None
+        state['encoder_inst_before']=values[2].detach().clone();state['encoder_gate']=torch.sigmoid(owner.cluster_att_gate).detach().clone()
+    def attention_post(owner,values,output):state['cluster_message']=output['point'].detach().clone()
+    def ila_pre(owner,values):
+        exact=fingerprint(torch,values[1])==fingerprint(torch,state['encoder_inst_before']+state['encoder_gate']*state['cluster_message'])
+        record={'forward':state['forward_index'],'inst_before_sha256':fingerprint(torch,state['encoder_inst_before']),
+            'cluster_message_sha256':fingerprint(torch,state['cluster_message']),'gate':logvar(state['encoder_gate']),
+            'ILA_query_sha256':fingerprint(torch,values[1]),'single_native_inst_update_exact':exact,'new_extra_injection':False}
+        assert exact;watch(values[1],record,'native_post_cluster_inst_gradients');path_records.append(record)
+    def last_encoder_post(owner,values,output):watch(output[1],path_records[-1],'native_post_ILA_inst_gradients')
+    def decoder_post(owner,values,output):watch(output['masks'],path_records[-1],'native_final_mask_gradients')
+    hooks.extend([last_encoder.register_forward_pre_hook(last_encoder_pre),att.register_forward_hook(attention_post),
+        last_encoder.ila.register_forward_pre_hook(ila_pre),last_encoder.register_forward_hook(last_encoder_post),
+        model.dec.register_forward_hook(decoder_post)])
+    def native_input(owner,values):
+        state['forward_index']+=1;state['ffn_snapshots']={};state['bec_norm_counts']={0:0,1:0,2:0};state['bec_norm_output_refs']={}
+        batch=values[0];batches.append({'sha256':fingerprint(torch,batch),'scan_ids':[str(x) for x in batch.get('scan_ids',[])],
+            'ann_ids':[int(x) for x in batch.get('ann_ids',[])],'scenes_len':[int(x) for x in batch.get('scenes_len',[])]})
+    def native_output(owner,values,output):
+        loss,variables=output;result.setdefault('loss_tensor_observations',[]).append(logvar(loss))
+        result.setdefault('loss_component_observations',[]).append({k:logvar(v) for k,v in variables.items()})
+        assert loss.numel()==1 and bool(torch.isfinite(loss).all())
+        losses.append(float(loss.detach().cpu()));result['native_loss_forwards']+=1
+        record={'forward':state['forward_index'],'count':0};backward_records.append(record)
+        def loss_backward(gradient):
+            record['count']+=1;record['gradient']=summary(gradient)
+            assert record['count']==1 and record['gradient']['finite'];result['native_criterion_backwards']+=1;return None
+        hooks.append(loss.register_hook(loss_backward))
+        raw_record=state['raw_record'];raw_record['unchanged_after_full_forward']=fingerprint(torch,state['raw_refs'])==raw_record['raw_sha256']
+        raw_record['ids_unchanged_after_full_forward']=fingerprint(torch,bank.cluster_ids_list)==raw_record['id_sha256']
+        raw_record['maps_unchanged_after_full_forward']=fingerprint(torch,bank.child_cluster_maps)==raw_record['map_sha256']
+        assert all(raw_record[k] for k in ('unchanged_after_full_forward','ids_unchanged_after_full_forward','maps_unchanged_after_full_forward'))
+        for key in ('raw_refs','raw_record','bec_output_snapshots','bec_coarse_output_ref','bec_norm_output_refs','encoder_inst_before','encoder_gate','cluster_message'):state.pop(key,None)
+        state['ffn_snapshots'].clear()
+    def parameter_blocks():
+        if not candidate:return {}
+        c=att.bipartite_edges.channels;result_blocks={}
+        for name in ('up_fine','up_middle'):
+            weight=getattr(att.bipartite_edges,name).weight
+            for output,r0,r1 in (('retained',0,c),('upward',c,2*c)):
+                for field,c0,c1 in (('child',0,c),('parent',c,2*c)):
+                    result_blocks[name+'_'+output+'_'+field]=(weight,r0,r1,c0,c1)
+        for name in ('down_middle','down_fine'):
+            weight=getattr(att.bipartite_edges,name).weight
+            for field,c0,c1 in (('retained',0,c),('context',c,2*c)):
+                result_blocks[name+'_'+field]=(weight,0,c,c0,c1)
+        assert len(result_blocks)==12
+        return result_blocks
+    def before_step(owner,args,kwargs):
+        assert backward_records[-1]['count']==1
+        if candidate:
+            assert bec_calls[-1]['core_path_observed'] and bec_calls[-1]['coarse_original_LN_FFN_calls']==1
+        observed={n:p.grad for n,p in model.named_parameters() if p.grad is not None};bad=[n for n,g in observed.items() if not bool(torch.isfinite(g).all())]
+        record={'forward':state['forward_index'],'gradient_tensor_count':len(observed),'nonfinite_parameter_names':bad,
+            'all_observed_gradients_finite':bool(observed) and not bad,'tracked_module_gradients':{},'optimizer_step_completed':False,
+            'module_before_step_hash':{n:fingerprint(torch,{k:p.detach() for k,p in ps.items()}) for n,ps in tracked.items()},
+            'weight_before_step_hash':{n:fingerprint(torch,{k:p.detach() for k,p in ps.items() if k.endswith('weight')}) for n,ps in tracked.items()}}
+        steps.append(record);assert observed and not bad
+        for name,parameters in tracked.items():
+            gradients={n:summary(p.grad) if p.grad is not None else None for n,p in parameters.items()}
+            record['tracked_module_gradients'][name]=gradients
+            assert gradients and all(g is not None and g['finite'] for g in gradients.values())
+            assert all(g['abs_max']>0 for n,g in gradients.items() if n.endswith('weight')),'Native tracked weight gradient is zero; local path control failed, not whole-mechanism rejection; no seed/readout change'
+        record['native_parameter_block_gradients']={}
+        record['parameter_block_before_step_hash']={}
+        for name,(weight,r0,r1,c0,c1) in parameter_blocks().items():
+            assert weight.grad is not None
+            info=summary(weight.grad[r0:r1,c0:c1]);record['native_parameter_block_gradients'][name]=info
+            assert info['finite'] and info['abs_max']>0,'Native required BEC12 weight-block loss gradient missing/zero; local path control, not whole-mechanism rejection'
+            record['parameter_block_before_step_hash'][name]=fingerprint(torch,weight.detach()[r0:r1,c0:c1])
+    def after_step(owner,args,kwargs):
+        record=steps[-1];record['optimizer_step_completed']=True
+        record['module_after_step_hash']={n:fingerprint(torch,{k:p.detach() for k,p in ps.items()}) for n,ps in tracked.items()}
+        record['weight_after_step_hash']={n:fingerprint(torch,{k:p.detach() for k,p in ps.items() if k.endswith('weight')}) for n,ps in tracked.items()}
+        assert all(record['module_before_step_hash'][n]!=record['module_after_step_hash'][n] and record['weight_before_step_hash'][n]!=record['weight_after_step_hash'][n] for n in tracked)
+        record['parameter_block_after_step_hash']={name:fingerprint(torch,weight.detach()[r0:r1,c0:c1]) for name,(weight,r0,r1,c0,c1) in parameter_blocks().items()}
+        assert all(record['parameter_block_before_step_hash'][name]!=record['parameter_block_after_step_hash'][name] for name in record['parameter_block_before_step_hash'])
+        result['optimizer_steps']+=1
+    hooks.extend([model.register_forward_pre_hook(native_input),model.register_forward_hook(native_output),
+        optimizer.register_step_pre_hook(before_step),optimizer.register_step_post_hook(after_step)])
+    result.update(actual_train_command='tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)',
+        native_train_cli_reference=['python','tools/train.py',result['runtime_config_path'],'--num_gpus','1','--skip_validate'],
+        native_data_loaded=False,losses=losses,steps=steps,batches=batches,native_backward_records=backward_records,
+        ffn_calls=calls,raw_bank_observations=rawbanks,csort_raw_input_observations=csort,hcg_readbacks=readbacks,
+        BEC_edge_observations=bec_calls,inst_to_mask_path_observations=path_records,native_dataloader_config=dict(cfg.dataloader.train),
+        offdiagonal_dependency_probe='NOT_IMPLEMENTED_NOT_MEASURED',
+        actual_champion_candidate_batch_pairing='NOT_VALIDATED_BY_SINGLE_TARGET_WORKER; compare both complete raw batch fingerprints and common named initialization',
+        smoke_memory_scope='Two native TRAIN steps including observer hooks, detached snapshots, actual topology/source recording; not pure TRAIN memory',
+        pure_training_peak_memory='UNKNOWN; no separate no-observer native TRAIN process pair',auxiliary_autograd_grad_or_backward_used=False,
+        native_failure_is_not_whole_mechanism_rejection=True,
+        coverage_gate_scope='Original fixed TRAIN batches only; absent true core edges is INCONCLUSIVE. Degree/singleton/empty/pad absence is NOT_EXERCISED, no sample/seed replacement',
+        dynamic_parameter_inventory={'original_FFN_parameters_by_level':{str(i):sum(p.numel() for p in att.cluster_ffn[i].parameters()) for i in range(3)},
+            'new_declared_parameters':sum(p.numel() for p in att.bipartite_edges.parameters()) if candidate else 0,
+            'actual_full_model_parameters':sum(p.numel() for p in model.parameters()),'actual_named_parameter_tensors':sum(1 for _ in model.named_parameters()),
+            'state_dict_keys':list(model.state_dict()),'new_registered_buffer_names':[n for n,_ in model.named_buffers() if 'bipartite_edges' in n]})
+    logger=logging.getLogger('bec-native-smoke');logger.addHandler(logging.StreamHandler(sys.stderr)) if not logger.handlers else None
+    writer=train.SummaryWriter(cfg.work_dir);torch.cuda.reset_peak_memory_stats()
+    try:
+        train.train(1,model,TwoNativeBatches(loader),optimizer,scheduler,cfg,logger,writer);torch.cuda.synchronize()
+    finally:
+        for owner,name,original in reversed(global_replacements):setattr(owner,name,original)
+        for owner,name in reversed(replacements):delattr(owner,name)
+        for hook in hooks:hook.remove()
+        state.clear();writer.flush();writer.close()
+    assert len(losses)==len(steps)==len(batches)==len(backward_records)==result['optimizer_steps']==result['native_criterion_backwards']==2
+    assert len(rawbanks)==len(readbacks)==len(path_records)==2 and len(csort)==4
+    assert len(calls)==(2 if candidate else 6) and len(bec_calls)==(2 if candidate else 0)
+    for forward in (1,2):assert [v['level'] for v in calls if v['forward']==forward]==list(ffn_levels)
+    for record in calls:
+        for key in ('native_input_gradients','native_output_gradients'):assert record.get(key) and all(g['finite'] for g in record[key])
+    for record in bec_calls:
+        assert record['core_path_observed'] and record['coarse_original_LN_FFN_calls']==1
+        for call in record['operator_calls']:
+            for key in ('native_input_gradients','native_linear_output_gradients','native_output_gradients'):
+                assert call.get(key) and all(g['finite'] for g in call[key])
+            if call['operator'].startswith('up_'):
+                assert call.get('native_split_output_gradients') and all(x['retained']['finite'] and x['upward']['finite'] for x in call['native_split_output_gradients'])
+        # A legal call/row may be zero; only original-loss aggregate12 parameter blocks are hard gates.
+        for call in record['private_mean_calls']:
+            if call['actual_supported_rows']:
+                for key in ('native_mean_input_gradients','native_mean_output_gradients'):assert call.get(key) and all(g['finite'] for g in call[key])
+    for record in readbacks:assert record.get('native_point_message_gradients') and all(g['finite'] and g['abs_max']>0 for g in record['native_point_message_gradients'])
+    for record in path_records:
+        for key in ('native_post_cluster_inst_gradients','native_post_ILA_inst_gradients','native_final_mask_gradients'):assert record.get(key) and all(g['finite'] and g['abs_max']>0 for g in record[key])
+    final={n:fingerprint(torch,{k:p.detach() for k,p in ps.items()}) for n,ps in tracked.items()}
+    assert all(final[n]!=initial[n] for n in tracked);verify()
+    result.update(execution_completed=True,native_data_loaded=True,native_train_function_executed=True,backward_finite=True,
+        intended_path_observed=(len(bec_calls)==2 and all(v['core_path_observed'] and v['coarse_original_LN_FFN_calls']==1 for v in bec_calls)) if candidate else len(calls)==6,
+        new_operator_parameters=787968 if candidate else None,native_tracked_initial_hash=initial,native_tracked_after_hash=final,
+        native_tracked_each_module_updated=True,observer_readout_complete=True,native_smoke_checks_passed=True,wrappers_and_hooks_restored=True,
+        training_checkpoint_saved=False,native_smoke_training=True,new_training=0,optimizer_type=type(optimizer).__name__,
+        scheduler_type=type(scheduler).__name__,smoke_peak_allocated_bytes=torch.cuda.max_memory_allocated(),
+        smoke_peak_reserved_bytes=torch.cuda.max_memory_reserved(),after=observe())
+
+
+def resources(torch, gorilla, cfg, model, result):
+    import numpy as np
+    from framework.dataset import build_dataset, build_dataloader
+    import fvcore
+    from fvcore.nn import FlopCountAnalysis
+    profile_cfg = copy.deepcopy(cfg.data.val)
+    profile_cfg.lang_num_max = 1
+    dataset = build_dataset(profile_cfg, logging.getLogger('mdc-resource-only'))
+    loader_cfg = copy.deepcopy(cfg.dataloader.val)
+    loader_cfg.batch_size = 1
+    loader_cfg.num_workers = 0
+    loader_cfg.persistent_workers = False
+    gorilla.set_random_seed(1999)
+    sample = next(iter(build_dataloader(dataset, training=False, **loader_cfg)))
+    assert len(sample['ann_ids']) == len(sample['scan_ids']) == 1
+    signature = fingerprint(torch, sample)
+    handlers = {name: sha(Path(importlib.import_module('fvcore.nn.' + name).__file__))
+        for name in ('flop_count', 'jit_analysis', 'jit_handles')}
+    expected = {'flop_count': 'b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba',
+        'jit_analysis': '110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31',
+        'jit_handles': 'ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129'}
+    assert handlers == expected, 'Historical profiler handlers must not change'
+    model.eval()
+    flags = {key: value.requires_grad for key, value in model.named_parameters()}
+    with torch.no_grad():
+        analysis = FlopCountAnalysis(model, (sample, 'predict'))
+        analysis.unsupported_ops_warnings(False)
+        analysis.uncalled_modules_warnings(False)
+        total = analysis.total()
+        result['native_predict_calls'] += 1
+        result['profile'] = {'flops': float(total), 'flops_g': float(total / 1e9),
+            'within10G': bool(total <= 10e9), 'fvcore_version': fvcore.__version__,
+            'profiler_file_sha256': handlers, 'by_operator': {key: float(value) for key, value in analysis.by_operator().items()},
+            'unsupported_ops': dict(analysis.unsupported_ops())}
+        for _ in range(20):
+            model(sample, mode='predict')
+            result['native_predict_calls'] += 1
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
+        times = []
+        for _ in range(100):
+            torch.cuda.synchronize()
+            start = time.perf_counter()
+            prediction = model(sample, mode='predict')
+            torch.cuda.synchronize()
+            times.append((time.perf_counter() - start) * 1000)
+            result['native_predict_calls'] += 1
+        assert prediction['piou'] and all(bool(torch.isfinite(value).all()) for value in prediction['piou'])
+    assert fingerprint(torch, sample) == signature
+    assert {key: value.requires_grad for key, value in model.named_parameters()} == flags
+    verify()
+    result.update(execution_completed=True, input_sha256=signature, scan_ids=sample['scan_ids'],
+        ann_ids=sample['ann_ids'], parameters=sum(value.numel() for value in model.parameters()),
+        batch_size=1, lang_num_max=1, warmup=20, repeat=100, median_ms=float(np.median(times)),
+        p90_ms=float(np.percentile(times, 90)), measurements_ms=times,
+        peak_allocated_bytes=torch.cuda.max_memory_allocated(), peak_reserved_bytes=torch.cuda.max_memory_reserved(),
+        full_optimizer_training_peak='UNKNOWN; separate resource process, no optimizer or scheduler steps',
+        original_no_cluster_resource_delta='UNKNOWN; no-cluster baseline not measured',
+        validation_accuracy_evaluated_for_selection=False, parameter_flags_preserved=True,
+        source_body_executed_without_replacement=True, after=observe())
+
+def json_safe(value):
+    import math
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(k):json_safe(v) for k,v in value.items()}
+    if isinstance(value, (list,tuple)):
+        return [json_safe(v) for v in value]
+    return value
+
+def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--lease',required=True)
+    parser.add_argument('--mode',choices=['smoke','resources'],required=True)
+    parser.add_argument('--target',choices=['candidate','champion'],required=True)
+    args=parser.parse_args()
+    result={'execution_completed':False,'mode':args.mode,'target':args.target,
+        'candidate_id':MANIFEST.get('candidate_id'),'code_commit':MANIFEST.get('code_commit'),
+        'goal_sha256':MANIFEST.get('goal_sha256'),'optimizer_steps':0,'native_loss_forwards':0,
+        'native_criterion_backwards':0,'native_predict_calls':0,'new_training':0,
+        'native_model_and_yaml_unchanged':False,'source_scope':'Exact native BEC or original M95, original backbone pretrain and native train loop'}
+    result.update(experiment_id=MANIFEST['experiment_id'],config=MANIFEST['config'],
+        native_manifest_sha256=sha(STAGE/'native_manifest.json'),
+        diagnostic_worker_sha256=sha(Path(__file__)),runtime_sha256=sha(STAGE/'native_runtime.py'),
+        source_preparation_sha256=MANIFEST['source_preparation_sha256'],
+        stage=str(STAGE),physical_gpu=MANIFEST['physical_gpu'],gpu_uuid=MANIFEST['gpu_uuid'],
+        current_token=MANIFEST['current_token'],tick_generated_at=MANIFEST['tick_generated_at'],
+        deadline_at=MANIFEST['deadline_at'],context_sha256=MANIFEST['context_sha256'],pending_sha256=MANIFEST['pending_sha256'])
+    try:
+        result['before']=acquire(args.lease)
+        torch,gorilla,cfg,model,qualified,train,optimizer,scheduler=setup(args.target,args.mode,result)
+        result['native_model_and_yaml_unchanged']=True
+        if args.mode=='smoke':
+            smoke(torch,gorilla,cfg,model,qualified,train,optimizer,scheduler,result)
+        else:
+            resources(torch,gorilla,cfg,model,result)
+    except BaseException as error:
+        import traceback
+        result.update(error_type=type(error).__name__,error=str(error))
+        traceback.print_exc()
+        raise
+    finally:
+        try:
+            save(args.mode+'_'+args.target+'_result.json',json_safe(result))
+        finally:
+            release()
+            print(json.dumps({'execution_completed':result['execution_completed'],
+                'optimizer_steps':result['optimizer_steps'],'result_mode':args.mode,'target':args.target}),flush=True)
+
+if __name__=='__main__':
+    main()

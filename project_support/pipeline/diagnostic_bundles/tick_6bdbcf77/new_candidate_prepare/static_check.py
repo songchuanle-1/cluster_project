@@ -1,0 +1,239 @@
+"""Execute actual BEC plan/mean/forward with stdlib tensor-interface carriers.
+
+Set-valued cells test possible information dependencies, not Torch/autograd,
+GELU numeric values, FP32 or efficacy. Numeric cells separately test actual means.
+No duplicated BEC forward is implemented; the production AST is executed.
+"""
+from pathlib import Path
+from datetime import datetime,timezone
+import argparse,ast,copy,hashlib,itertools,json,math,random,sys,types
+ROOT=Path('D:/project/cluster_project');HERE=Path(__file__).resolve().parent
+BASE_NAME='model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort'
+MODEL=HERE/'staged_repository/framework/model/Quard_model'/(BASE_NAME+'_bec')
+BASE=ROOT/'Cluster/framework/model/Quard_model'/BASE_NAME
+CHECKS=[];ASSERTIONS=0;VALID=0;INVALID=0;FORWARDS=0
+
+def check(value,label):
+ global ASSERTIONS
+ ASSERTIONS+=1
+ if not value:raise AssertionError(label)
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def coords(shape):return itertools.product(*(range(n) for n in shape))
+def add(a,b):
+ if isinstance(a,frozenset) or isinstance(b,frozenset):return (a if isinstance(a,frozenset) else frozenset()) | (b if isinstance(b,frozenset) else frozenset())
+ return a+b
+
+class Tensor:
+ def __init__(self,shape,data=None,dtype='float',device='cpu'):
+  self.shape=tuple(shape);self.ndim=len(shape);self.dtype=dtype;self.device=device;self.requires_grad=False
+  self.data={i:(data[i] if data is not None else False if dtype=='bool' else 0) for i in coords(self.shape)}
+ def __getitem__(self,key):
+  keys=key if isinstance(key,tuple) else (key,);keys=keys+(slice(None),)*(self.ndim-len(keys))
+  axes=[];outshape=[]
+  for n,k in zip(self.shape,keys):
+   if isinstance(k,int):axes.append([k if k>=0 else n+k])
+   else:rows=list(range(n))[k];axes.append(rows);outshape.append(len(rows))
+  out={}
+  for old in itertools.product(*axes):
+   new=tuple(axes[d].index(old[d]) for d,k in enumerate(keys) if not isinstance(k,int));out[new]=self.data[old]
+  return Tensor(outshape,out,self.dtype,self.device)
+ def __setitem__(self,index,value):
+  assert value.shape==self.shape[1:]
+  for key in coords(value.shape):self.data[(index,*key)]=value.data[key]
+ def detach(self):return self
+ def cpu(self):return self
+ def tolist(self):
+  def make(prefix,axis):return self.data[prefix] if axis==self.ndim else [make(prefix+(i,),axis+1) for i in range(self.shape[axis])]
+  return make((),0)
+ def new_zeros(self,shape):return Tensor(shape,dtype=self.dtype,device=self.device)
+ def index_select(self,dim,indices):
+  assert dim==0
+  ids=indices.tolist();shape=(len(ids),)+self.shape[1:]
+  return Tensor(shape,{(j,*tail):self.data[(i,*tail)] for j,i in enumerate(ids) for tail in coords(self.shape[1:])},self.dtype,self.device)
+ def index_copy(self,dim,indices,values):
+  assert dim==0 and values.shape==(len(indices.tolist()),)+self.shape[1:]
+  result=Tensor(self.shape,self.data,self.dtype,self.device)
+  for j,i in enumerate(indices.tolist()):
+   for tail in coords(self.shape[1:]):result.data[(i,*tail)]=values.data[(j,*tail)]
+  return result
+ def index_fill(self,dim,indices,value):
+  assert dim==0
+  result=Tensor(self.shape,self.data,self.dtype,self.device)
+  for i in indices.tolist():
+   for tail in coords(self.shape[1:]):result.data[(i,*tail)]=value
+  return result
+ def mean(self,dim):
+  assert dim==0 and self.shape[0]>0
+  result={}
+  for tail in coords(self.shape[1:]):
+   values=[self.data[(i,*tail)] for i in range(self.shape[0])]
+   if any(isinstance(v,frozenset) for v in values):result[tail]=frozenset().union(*(v if isinstance(v,frozenset) else frozenset() for v in values))
+   else:result[tail]=sum(values)/len(values)
+  return Tensor(self.shape[1:],result,self.dtype,self.device)
+ def unsqueeze(self,dim):
+  assert dim==-1
+  return Tensor(self.shape+(1,),{i+(0,):v for i,v in self.data.items()},self.dtype,self.device)
+ def __invert__(self):return Tensor(self.shape,{i:not v for i,v in self.data.items()},'bool',self.device)
+ def masked_fill(self,mask,value):
+  assert mask.shape==self.shape[:-1]+(1,)
+  return Tensor(self.shape,{i:value if mask.data[i[:-1]+(0,)] else v for i,v in self.data.items()},self.dtype,self.device)
+ def __add__(self,other):
+  assert self.shape==other.shape
+  return Tensor(self.shape,{i:add(v,other.data[i]) for i,v in self.data.items()},self.dtype,self.device)
+
+class TorchStub:
+ long='long';bool='bool'
+ @staticmethod
+ def tensor(values,dtype='float',device='cpu'):
+  def shape(v):return (len(v),)+shape(v[0]) if isinstance(v,(tuple,list)) and v else (0,) if isinstance(v,(tuple,list)) else ()
+  dims=shape(values)
+  def get(i):
+   v=values
+   for n in i:v=v[n]
+   return v
+  return Tensor(dims,{i:get(i) for i in coords(dims)},dtype,device)
+ @staticmethod
+ def zeros(shape,dtype='float',device='cpu'):return Tensor(shape,dtype=dtype,device=device)
+ @staticmethod
+ def zeros_like(value):return value.new_zeros(value.shape)
+ @staticmethod
+ def stack(values,dim=0):
+  assert dim==0 and values and all(v.shape==values[0].shape for v in values)
+  return Tensor((len(values),)+values[0].shape,{(b,*i):v.data[i] for b,v in enumerate(values) for i in coords(v.shape)},values[0].dtype,values[0].device)
+ @staticmethod
+ def cat(values,dim=-1):
+  assert dim==-1 and values and all(v.shape[:-1]==values[0].shape[:-1] for v in values)
+  shape=values[0].shape[:-1]+(sum(v.shape[-1] for v in values),);result={};offset=0
+  for v in values:
+   for i,x in v.data.items():result[(*i[:-1],i[-1]+offset)]=x
+   offset+=v.shape[-1]
+  return Tensor(shape,result,values[0].dtype,values[0].device)
+
+class Module:
+ def __init__(self):pass
+ def __call__(self,*args,**kwargs):return self.forward(*args,**kwargs)
+class Linear:
+ serial=0
+ def __init__(self,ins,outs):self.ins,self.outs=ins,outs;self.name=('U0','U1','D1','D0')[Linear.serial%4];Linear.serial+=1;self.calls=[]
+ def __call__(self,value):
+  assert value.shape[-1]==self.ins;self.calls.append(copy.deepcopy(value))
+  result={}
+  for prefix in coords(value.shape[:-1]):
+   deps=frozenset().union(*(v if isinstance(v,frozenset) else frozenset() for i in range(self.ins) for v in [value.data[(*prefix,i)]]))
+   for j in range(self.outs):result[(*prefix,j)]=deps|frozenset({('operator',self.name,j)})
+  return Tensor(value.shape[:-1]+(self.outs,),result)
+class GELU:
+ def __call__(self,value):return value  # provenance only; no numeric GELU claim
+
+
+def load_production():
+ t=ast.parse((MODEL/'bipartite_edges.py').read_text());nodes=[n for n in t.body if isinstance(n,(ast.FunctionDef,ast.ClassDef))]
+ scope={'torch':TorchStub,'nn':types.SimpleNamespace(Module=Module,Linear=Linear,GELU=GELU)}
+ exec(compile(ast.Module(body=nodes,type_ignores=[]),str(MODEL/'bipartite_edges.py'),'exec'),scope)
+ return scope,t
+
+def valid(planfn,p,f,m,widths,label):
+ global VALID
+ plan=planfn(p,f,m,widths);VALID+=1
+ fine=set(p);mid={f[i] for i in fine};coarse={m[i] for i in mid}
+ check(set(plan['fine_ids'])==fine and set(plan['middle_ids'])==mid and set(plan['coarse_ids'])==coarse,label+' true composed support')
+ check(plan['fine_edges']==tuple((i,f[i]) for i in sorted(fine)),label+' actual original fine-parent edges')
+ check(plan['middle_edges']==tuple((i,m[i]) for i in sorted(mid)),label+' actual original middle-parent edges')
+ for key,edges,parents in [('fine_mean_groups',plan['fine_edges'],mid),('middle_mean_groups',plan['middle_edges'],coarse)]:
+  check({parent for parent,_ in plan[key]}==parents,label+' mean parent coverage')
+  rows=[r for _,children in plan[key] for r in children]
+  check(len(rows)==len(set(rows))==len(edges),label+' each supported child once')
+  for parent,children in plan[key]:check(children and all(edges[r][1]==parent for r in children),label+' nonempty correct equal-row groups')
+ return plan
+
+def full_forward(Cls,p,f,m,widths,label):
+ global FORWARDS
+ op=Cls(2)
+ banks=[Tensor((1,w,2),{(0,i,j):frozenset({('raw',level,i,j)}) for i in range(w) for j in range(2)}) for level,w in enumerate(widths)]
+ ids=[[TorchStub.tensor(x,dtype='long')] for x in (p,f,m)];callback=[]
+ def coarse_transform(value):
+  callback.append(copy.deepcopy(value));return Tensor(value.shape,{i:(v if isinstance(v,frozenset) else frozenset())|frozenset({('coarse_FFN',i[1],i[2])}) for i,v in value.data.items()})
+ d0,d1,h2=op(*banks,ids,coarse_transform);FORWARDS+=1
+ check(len(callback)==1,label+' original coarse callback once')
+ fine=set(p);mid={f[i] for i in fine};coarse={m[i] for i in mid}
+ for lev,out in enumerate((d0,d1,h2)):
+  check(out.shape==banks[lev].shape,label+' bank shape retained')
+  active=(fine,mid,coarse)[lev]
+  for i in range(widths[lev]):
+   for c in range(2):
+    deps=out.data[(0,i,c)]
+    if i not in active:
+     expected=banks[2].data[(0,i,c)] if lev==2 else 0
+     check(deps==expected,label+' unsupported/pad delta0 and coarse original skip')
+    else:
+     parent=m[f[i]] if lev==0 else m[i] if lev==1 else i
+     expected_fine={j for j in fine if m[f[j]]==parent}
+     expected_mid={f[j] for j in expected_fine}
+     raw={t for t in deps if t[0]=='raw'}
+     expected={('raw',0,j,k) for j in expected_fine for k in range(2)}|{('raw',1,j,k) for j in expected_mid for k in range(2)}|{('raw',2,parent,k) for k in range(2)}
+     check(raw==expected,label+' actual production up/coarse/down possible dependencies, no unrelated parent')
+     if lev<2:check(any(t[0]=='coarse_FFN' for t in deps),label+' lower bank consumes actual coarse transform output')
+ return op
+
+def main():
+ global INVALID
+ parser=argparse.ArgumentParser();parser.add_argument('--output',default='static_validation_final.json');args=parser.parse_args()
+ scope,tree=load_production();planfn=scope['build_bipartite_plan'];Cls=scope['CrossLevelBipartiteEdgeComposition']
+ previous=ast.parse((HERE/'bipartite_edges_before_linear_grouping.py.txt').read_text());oldfn=next(n for n in previous.body if isinstance(n,ast.FunctionDef) and n.name=='build_bipartite_plan');oldscope={};exec(compile(ast.Module(body=[oldfn],type_ignores=[]),'<actual-prior-plan>','exec'),oldscope)
+ for n in range(129):
+  f=[i//3 for i in range(n)];m=[i//3 for i in range((n+2)//3)];widths=(n,len(m),(len(m)+2)//3)
+  check(planfn(list(range(n)),f,m,widths)==oldscope['build_bipartite_plan'](list(range(n)),f,m,widths),'one-pass grouping preserves exact original plan n'+str(n))
+
+ for p in sorted(MODEL.glob('*.py')):compile(p.read_text(),str(p),'exec')
+ for n in range(129):
+  f=[i//3 for i in range(n)];km=(n+2)//3;m=[i//3 for i in range(km)];kc=(km+2)//3
+  plan=valid(planfn,list(range(n)),f,m,(n,km,kc),'n'+str(n))
+  if n<=32 or n in (63,64,65,127,128):full_forward(Cls,list(range(n)),f,m,(n,km,kc),'forward'+str(n))
+ cases=[([],[],[],(0,0,0)),([],[0,0],[0],(4,3,2)),([2,2,7],[4,0,4,1,2,2,3,0],[1,0,2,1,2],(10,7,4)),([0,1,2,3],[0,0,1,1],[0,1],(7,4,4))]
+ for i,(p,f,m,widths) in enumerate(cases):valid(planfn,p,f,m,widths,'special'+str(i));full_forward(Cls,p,f,m,widths,'special'+str(i))
+ # Duplicate actual points must not reweight the private mean over token edges.
+ a=planfn([0,1],[0,0],[0],(2,1,1));b=planfn([0,0,0,1],[0,0],[0],(2,1,1));check(a==b,'private means count supported child tokens, not real-point multiplicity')
+ op=Cls(2);messages=TorchStub.tensor([[1.,2.],[3.,4.],[9.,10.]])
+ pooled=op._mean_messages(messages,((0,(0,1)),(3,(2,))),5)
+ check(pooled.tolist()==[[2.,3.],[0,0],[0,0],[9.,10.],[0,0]],'actual production _mean_messages numerical equal mean and original parent IDs')
+ check(op._mean_messages(Tensor((0,2)),(),3).tolist()==[[0,0],[0,0],[0,0]],'actual empty private mean zero')
+ malformed=[([0],[],[],(0,0,0)),([1],[0],[0],(1,1,1)),([0],[2],[0],(1,1,1)),([0],[0],[2],(1,1,1)),([-1],[0],[0],(1,1,1)),([True],[0],[0],(1,1,1)),([0],[False],[0],(1,1,1)),([0],[0],[False],(1,1,1)),([0],[0],[0],(0,1,1)),([0],[0],[0],(1,0,1)),([0],[0],[0],(1,1,0)),([0],[0],[0],(1,True,1)),([0],[0],[0],(1,-1,1)),([0],[0],[0],(1,1))]
+ for case in malformed:
+  try:planfn(*case)
+  except ValueError:INVALID+=1
+  else:raise AssertionError('Invalid original ID metadata accepted '+str(case))
+ # Execute the real production forward B0 path and confirm coarse callback once.
+ empty=Cls(2);count=[]
+ result=empty(Tensor((0,4,2)),Tensor((0,3,2)),Tensor((0,2,2)),[[],[],[]],lambda x:(count.append(x) or x))
+ check([t.shape for t in result]==[(0,4,2),(0,3,2),(0,2,2)] and len(count)==1,'actual production zero-batch shapes/coarse once')
+ base=ast.parse((BASE/'hier_postprocess.py').read_text());new=ast.parse((MODEL/'hier_postprocess.py').read_text())
+ def node(t,name):return next(n for n in t.body if isinstance(n,(ast.ClassDef,ast.FunctionDef)) and n.name==name)
+ def same(a,b):return ast.dump(a,include_attributes=False)==ast.dump(b,include_attributes=False)
+ for name in ('HierarchicalClusterPartitioner','SharedClusterBank','C2F_ClusterAttn_CTF_HCG','C2F_ClusterAttn_CTF_HCG_CSORT'):
+  # Actual base partitioner/bank class names are discovered below if different.
+  if any(isinstance(n,ast.ClassDef) and n.name==name for n in base.body):check(same(node(base,name),node(new,name)),'original '+name+' full AST unchanged')
+ for p in BASE.glob('*.py'):
+  if p.name!='hier_postprocess.py':check(p.read_bytes()==(MODEL/p.name).read_bytes(),'original copied byte-identical '+p.name)
+ check(len(list(MODEL.glob('*.py')))==8,'exact eight independent model sources')
+ config=HERE/'staged_repository/configs/Quard/ctf_hcg_csort_bec'/(BASE_NAME+'_bec.yaml')
+ check(config.read_bytes()==(ROOT/'Cluster/configs/Quard/ctf_hcg_csort'/(BASE_NAME+'.yaml')).read_bytes(),'original native YAML exact bytes')
+ ctor=next(n for n in node(new,'C2F_ClusterAttn_CTF').body if isinstance(n,ast.FunctionDef) and n.name=='__init__')
+ forward=next(n for n in node(new,'C2F_ClusterAttn_CTF').body if isinstance(n,ast.FunctionDef) and n.name=='forward')
+ text=ast.unparse(ctor);ft=ast.unparse(forward)
+ check('fork_rng(devices=[])' in text and 'manual_seed' not in text and text.count('nn.Identity()')==2,'new constructors CPU-fork after original 3FFN/3LN and delete replaced registrations')
+ check('self.cluster_ffn_norm[0](fine)' in ft and 'self.cluster_ffn_norm[1](middle)' in ft and 'self.cluster_ffn[2](self.cluster_ffn_norm[2](values))' in ft,'all three original LN and sole coarse FFN path')
+ check('fine + delta_fine' in ft and 'middle + delta_middle' in ft and ft.count('self._cluster_to_points(')==1,'original fine/middle skips and one HCG call')
+ helper=(MODEL/'bipartite_edges.py').read_text();check('refined_coarse = coarse + coarse_delta' in helper and 'coarse_delta.masked_fill(~mask.unsqueeze(-1), 0)' in helper,'original single coarse skip after unsupported delta mask')
+ C=256;newparams=2*((2*C)*(2*C)+2*C)+2*(2*C*C+C);oldremoved=2*(8*C*C+5*C)
+ check((newparams,oldremoved,newparams-oldremoved)==(787968,1051136,-263168),'exact source-inferred parameter delta')
+ check('torch' not in sys.modules,'no Torch import or real tensor/native execution')
+ result={'schema_version':1,'recorded_at':datetime.now(timezone.utc).isoformat(),'candidate_id':'hierarchy-cross-level-bipartite-edge-composition','experiment_id':'M215-BEC',
+  'status':'STDLIB_PRODUCTION_PLAN_FORWARD_DEPENDENCY_AND_MEAN_CHECKS_PASSED_NATIVE_NOT_RUN',
+  'assertions':ASSERTIONS,'production_plan_valid_cases':VALID,'production_forward_provenance_cases':FORWARDS,'invalid_metadata_refusals':INVALID,
+  'source_inferred_new_parameters':newparams,'source_inferred_removed_parameters':oldremoved,'source_inferred_delta_parameters':newparams-oldremoved,
+  'limits':'Actual production AST executed with list/set tensor-interface provenance carriers and numeric mean cells only. Not Torch, autograd, GELU/FP32 numerical equivalence, actual initializer/loader pairing, native resource or efficacy evidence.',
+  'native':'NOT_RUN','resources':'NOT_RUN','code_commit':None,'source_commit':None,'future_version_parent':None,'script_sha256':sha(Path(__file__)),
+  'source_sha256':{p.name:sha(p) for p in sorted(MODEL.glob('*.py'))},'config_sha256':sha(config)}
+ with (HERE/args.output).open('x',encoding='utf-8',newline='\n') as f:json.dump(result,f,indent=2);f.write('\n')
+ print(json.dumps({k:result[k] for k in ('status','assertions','production_plan_valid_cases','production_forward_provenance_cases','invalid_metadata_refusals')}))
+if __name__=='__main__':main()

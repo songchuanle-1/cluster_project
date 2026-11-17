@@ -1,0 +1,64 @@
+{
+  "scope": "Event retry audit: live capacity, frozen checkpoint identity and static capture readiness; no native inference",
+  "generated_at": "2026-09-17T01:08:00+08:00",
+  "mode": "event",
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "pirs_training": {
+    "id": "M197-PIRS",
+    "pid": 1134192,
+    "state": "running",
+    "elapsed_seconds": 45776,
+    "preflight_epoch": 9,
+    "best_miou": 0.4621,
+    "log_observation": "Train[9/50] complete; Val[9/50] observed in progress at 83/363"
+  },
+  "gpu_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62473,
+    "free_mib": 18607,
+    "process_count": 2,
+    "processes": [
+      {
+        "pid": 1134192,
+        "owner": "project",
+        "used_mib": 19948
+      },
+      {
+        "pid": 3827570,
+        "owner": "foreign",
+        "used_mib": 42488
+      }
+    ]
+  },
+  "capacity_gate": {
+    "passed": false,
+    "condition": "Fewer than two GPU7 processes and sufficient measured free memory",
+    "observed": "Two processes occupy GPU7; native capture was not launched"
+  },
+  "static_readiness": {
+    "tests_passed": 71,
+    "test_command": "python -m unittest -q test_model_pair_audit_20260916 test_hierarchical_partition_contract_20260916 test_sampling_pair_contract_20260916 test_frozen_capture_contract_20260916 test_paired_capture_evaluation_20260916 test_native_endpoint_capture_20260916 test_native_support_capture_20260916 test_capture_support_20260916 test_physical_mask_endpoints_20260916",
+    "result": "OK"
+  },
+  "frozen_checkpoint_identity": [
+    {
+      "role": "baseline_reference",
+      "path": "/data3/songcl/Project/Cluster_project/pipeline/baseline_reference_20260916.pth",
+      "sha256": "dbc37e8fe8428f0f295121df61fae8a9ffd7dd98c10913ef911354345ff16745"
+    },
+    {
+      "role": "m95_candidate",
+      "path": "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/best.pth",
+      "sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e"
+    }
+  ],
+  "next_action": "Await terminal PIRS; then retry GPU7 and execute the frozen TRAIN/control capture for both bound model classes with --model-class and explicit --config. Require identical native input and hierarchical partition hashes before strict scene-balanced paired evaluation; no learned-selection conditioning.",
+  "limitations": [
+    "The static suite and remote checkpoint hashes do not establish scientific validity or native-output equality.",
+    "No native capture, paired semantic endpoint result, efficacy claim, admission or queue change occurred.",
+    "PIRS is still in epoch 9 validation; no terminal checkpoint or comparison was available."
+  ]
+}

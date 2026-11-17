@@ -1,0 +1,63 @@
+{
+  "recorded_at": "2026-10-21T22:12:28.224110+00:00",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "kind": "resource_check",
+  "result": "blocked",
+  "command": [
+    "python",
+    "-B",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_4059b69c\\observe_resources.py",
+    "--output",
+    "native_resource_check.json"
+  ],
+  "evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_4059b69c/native_resource_check.json",
+    "sha256": "f5cfa58d1e28f32e87a7b4f0dc83df7e26409ff265ac5d3719fca34922b86fa2"
+  },
+  "observed_at": "2026-10-21T22:10:54.195873+00:00",
+  "allowed_server": "server-4",
+  "allowed_physical_gpus": [
+    0,
+    1
+  ],
+  "max_tasks_per_gpu": 1,
+  "actual_contexts": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 979955, 19742\nGPU-7f82edb9-f620-8045-caea-a75232265cd1, 732137, 19774",
+  "native_progress": {
+    "M207-HAP": [
+      {
+        "epoch": 10,
+        "epochs": 50,
+        "step": 1816,
+        "steps": 4686
+      },
+      {
+        "epoch": 10,
+        "epochs": 50,
+        "step": 1817,
+        "steps": 4686
+      }
+    ],
+    "M206-CGCA": [
+      {
+        "epoch": 18,
+        "epochs": 50,
+        "step": 3128,
+        "steps": 4686
+      },
+      {
+        "epoch": 18,
+        "epochs": 50,
+        "step": 3129,
+        "steps": 4686
+      }
+    ]
+  },
+  "authorized_empty_slot_available": false,
+  "important_observation": "GPU0 utilization9percent alone is not idle: original HAP PID979955 remains bound to its UUID with19742MiB context; GPU1 also has original CGCA context.",
+  "slot_status_changed_since_previous_tick": false,
+  "native_HRC": "NOT_RUN",
+  "resources_HRC": "NOT_RUN",
+  "no_staging_worker_GPU_queue_or_running_mutation": true,
+  "next_action": "Keep both original native runs. Use the frozen exact9e543af HRC preparation on a genuinely authorized idle slot, with fresh root execution binding/lease/stage and real native/resource results before admission."
+}

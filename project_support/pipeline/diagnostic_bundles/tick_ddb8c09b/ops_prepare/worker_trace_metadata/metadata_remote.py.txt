@@ -1,0 +1,352 @@
+"""Bounded stdlib-only observation of data metadata and installed shutdown source."""
+from datetime import datetime, timezone
+from pathlib import Path
+import ast
+import hashlib
+import json
+import os
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {
+    "token": "ddb8c09b53df46f8bbf86ed042d307a4",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T21:05:16.984708+00:00",
+    "deadline_at": "2026-11-09T22:05:16.984708+00:00",
+    "context_sha256": "f9b0c7ae3e45d15014a6c7a27621dd3e84621d68e4467673644cf7874bd342cd",
+    "pending_sha256": "4b878cddbb930374fb0422d442d2fa600c274c503e58791284488fd4b0f209e1",
+}
+PROJECT = Path("/data/songcl/Project/Cluster_project")
+ROOT = PROJECT / "Cluster_nsd_20261107"
+PRODUCER = PROJECT / "pipeline/runtime/rvec_path_prepare_21ebd237"
+PRODUCTION = PROJECT / "pipeline/runtime/rvec_path_prod_21ebd237"
+PREFIX = Path("/home/songcl/.conda/envs/project_cluster")
+SITE = PREFIX / "lib/python3.10/site-packages"
+DATA = Path("/home/songcl/data/data")
+UUID = "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+CONFIG = "configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml"
+HASH_BUDGET = 384 * 1024 * 1024
+HASH_READ = 0
+SOURCE_READ = 0
+SOURCE_LINES = 0
+STOP = None
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+    if STOP is not None:
+        assert time.monotonic() < STOP, "GLOBAL_SOFT_BUDGET_NO_NEW_OPERATION"
+
+
+def identity(pid):
+    try:
+        return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return None
+
+
+def fingerprint(info):
+    return {"dev": info.st_dev, "ino": info.st_ino, "bytes": info.st_size,
+            "mtime_ns": info.st_mtime_ns, "uid": info.st_uid, "mode": stat.S_IMODE(info.st_mode)}
+
+
+def metadata(path, hash_max=0):
+    global HASH_READ
+    pin()
+    path = Path(path)
+    result = {"path": str(path), "resolved": str(path.resolve())}
+    try:
+        link = os.lstat(path)
+        info = os.stat(path)
+        result.update(lstat=fingerprint(link), stat=fingerprint(info),
+                      regular=stat.S_ISREG(info.st_mode), directory=stat.S_ISDIR(info.st_mode))
+        if hash_max and stat.S_ISREG(info.st_mode):
+            if info.st_size <= hash_max and HASH_READ + info.st_size <= HASH_BUDGET:
+                digest = hashlib.sha256()
+                with path.open("rb") as stream:
+                    for block in iter(lambda: stream.read(65536), b""):
+                        pin()
+                        HASH_READ += len(block)
+                        assert HASH_READ <= HASH_BUDGET
+                        digest.update(block)
+                assert fingerprint(info) == fingerprint(os.stat(path)), "FILE_CHANGED_DURING_HASH"
+                result["sha256"] = digest.hexdigest()
+            else:
+                result["hash_omitted"] = "PER_FILE_OR_TOTAL_HASH_BYTE_BOUND"
+        result["outcome"] = "OBSERVED"
+    except (FileNotFoundError, PermissionError) as error:
+        result.update(outcome=type(error).__name__, error=str(error)[:240])
+    return result
+
+
+def require_hash(path, expected):
+    item = metadata(path, 32 * 1024 * 1024)
+    assert item.get("sha256") == expected, "PINNED_FILE_MISMATCH: " + str(path)
+    return item
+
+
+def text(path, maximum):
+    global SOURCE_READ
+    pin()
+    path = Path(path)
+    with path.open("rb") as stream:
+        raw = stream.read(maximum + 1)
+    assert len(raw) <= maximum, "TEXT_FILE_BYTE_BOUND"
+    SOURCE_READ += len(raw)
+    assert SOURCE_READ <= 2 * 1024 * 1024, "TOTAL_SOURCE_TEXT_BYTE_BOUND"
+    return raw.decode("utf-8", "replace")
+
+
+def optional_text(path, maximum):
+    try:
+        value = text(path, maximum)
+        return {"path": str(path), "text": value, "bytes": len(value.encode())}
+    except (FileNotFoundError, PermissionError) as error:
+        return {"path": str(path), "outcome": type(error).__name__}
+
+
+def source(path, requested):
+    global SOURCE_LINES
+    item = metadata(path, 512 * 1024)
+    if item["outcome"] != "OBSERVED":
+        return item
+    value = text(path, 512 * 1024)
+    rows, tree = value.splitlines(), ast.parse(value, filename=str(path))
+    sections = []
+    for parent_name, function_name, limit in requested:
+        parents = [tree] if parent_name is None else [
+            node for node in tree.body if isinstance(node, ast.ClassDef) and node.name == parent_name]
+        nodes = [node for parent in parents for node in parent.body
+                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == function_name]
+        if len(nodes) != 1:
+            sections.append({"class": parent_name, "function": function_name, "outcome": "MISSING_OR_AMBIGUOUS"})
+            continue
+        node = nodes[0]
+        selected = rows[node.lineno - 1:min(node.end_lineno, node.lineno - 1 + limit)]
+        SOURCE_LINES += len(selected)
+        assert SOURCE_LINES <= 1250, "TOTAL_SOURCE_EXCERPT_LINE_BOUND"
+        sections.append({"class": parent_name, "function": function_name, "start": node.lineno,
+                         "end": node.end_lineno, "complete": node.end_lineno - node.lineno + 1 <= limit,
+                         "lines": [{"line": node.lineno + i, "text": line[:320],
+                                    "truncated": len(line) > 320} for i, line in enumerate(selected)]})
+    item["sections"] = sections
+    return item
+
+
+def manifest(directory, suffix, limit=5000):
+    pin()
+    directory = Path(directory)
+    result = metadata(directory)
+    if result["outcome"] != "OBSERVED":
+        return result, []
+    names, count = [], 0
+    with os.scandir(directory) as entries:
+        for entry in entries:
+            count += 1
+            assert count <= limit, "DIRECTORY_ENTRY_COUNT_BOUND: " + str(directory)
+            if entry.name.endswith(suffix):
+                names.append(entry.name)
+    rows = []
+    for name in sorted(names):
+        pin()
+        info = os.stat(directory / name)
+        assert stat.S_ISREG(info.st_mode)
+        rows.append({"name": name, **fingerprint(info)})
+    raw = json.dumps(rows, sort_keys=True, separators=(",", ":")).encode()
+    result.update(manifest_sha256=hashlib.sha256(raw).hexdigest(), matching_files=len(rows),
+                  directory_entries=count, total_file_bytes=sum(row["bytes"] for row in rows),
+                  first_12=rows[:12], complete_metadata_manifest=True, file_contents_read=False)
+    return result, rows
+
+
+def observe(argv, env, seconds, label):
+    pin()
+    out = os.memfd_create("worker_metadata_stdout", os.MFD_CLOEXEC)
+    err = os.memfd_create("worker_metadata_stderr", os.MFD_CLOEXEC)
+    process = subprocess.Popen(argv, cwd=str(ROOT), env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err)
+    PROCESSES.append(process)
+    start = identity(process.pid)
+    until = min(STOP, time.monotonic() + seconds)
+    while process.poll() is None and time.monotonic() < until:
+        time.sleep(0.02)
+    code = process.poll()
+    def tail(fd):
+        size = os.fstat(fd).st_size
+        return os.pread(fd, min(size, 1024), max(0, size - 1024)).decode("utf-8", "replace")
+    result = {"label": label, "argv": argv, "pid": process.pid, "start_ticks": start,
+              "certainty": "terminal" if code is not None else "uncertain", "returncode": code,
+              "stdout_bytes": os.fstat(out).st_size, "stdout": tail(out), "stderr_tail": tail(err),
+              "signals_sent": False, "automatic_retry": False}
+    if code is None:
+        result.update(reason="SOFT_TIMEOUT_PRESERVE_PID_NO_SIGNAL_OR_RETRY",
+                      output_descriptors=[f"/proc/{process.pid}/fd/1", f"/proc/{process.pid}/fd/2"])
+    else:
+        os.close(out)
+        os.close(err)
+    return result
+
+
+def main():
+    global STOP
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NO_HELPERS_OR_ASSET_READS"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    assert (datetime.fromisoformat(OWNER["deadline_at"]) - datetime.now(timezone.utc)).total_seconds() > 60
+    STOP = time.monotonic() + 35
+    result = {"owner": OWNER, "kind": "REAL_WORKER_TRACE_METADATA_AND_SHUTDOWN_SOURCE_ONLY",
+              "pid": os.getpid(), "start_ticks": identity(os.getpid()), "recorded_at": datetime.now(timezone.utc).isoformat(),
+              "Torch_imported": False, "data_unpickled": False, "CUDA_initialized": False,
+              "worker_or_training_started": False, "consumed_entry_executed": False,
+              "signals_sent": False, "automatic_retry": False, "maximum_global_soft_seconds": 35}
+    try:
+        assert ROOT.resolve() == ROOT
+        env = dict(os.environ)
+        env.update(PYTHONDONTWRITEBYTECODE="1", GIT_OPTIONAL_LOCKS="0", GIT_CONFIG_NOSYSTEM="1",
+                   GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null")
+        git = observe(["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+                       "-C", str(ROOT), "rev-parse", "HEAD"], env, 3, "runtime_HEAD")
+        result["git"] = git
+        if git["certainty"] != "terminal" or git["returncode"] != 0:
+            result["status"] = "PREIMPORT_GIT_UNCERTAIN_OR_FAILED"
+            return
+        assert git["stdout"].strip() == "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e" and git["stdout_bytes"] <= 128
+        pins = [
+            (PRODUCER / "entry_factory.py", "0a8ed26bd62327314de89f4228b53c8c633fdd73e4e1867d674df94b24d073dd"),
+            (PRODUCTION / "bin/python", "62ae097cd67499ab86941c79c4eb8526173f4a694ffb6e41406f42355b37a64e"),
+            (PRODUCTION / "binding.json", "beb2c6497cc5fa5fdf0bb33e0d1d7cff2060a9a0315c919f45ef2124e6c07e29"),
+            (PRODUCTION / "conda_source.sh", "4d105e749269d02d3978e822a63eac5a1215113a3d3f5e1be6504a2576524b7e"),
+            (ROOT / "framework/dataset/scannetv2.py", "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"),
+            (ROOT / "tools/train.py", "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"),
+            (ROOT / "framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so",
+             "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033"),
+            (PREFIX / "bin/python3.10", "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5"),
+        ]
+        result["provenance"] = [require_hash(path, expected) for path, expected in pins]
+        assert (PREFIX / "bin/python").resolve() == PREFIX / "bin/python3.10"
+        smi = observe(["/usr/bin/nvidia-smi", "-i", "0", "--query-gpu=index,uuid",
+                       "--format=csv,noheader,nounits"], env, 5, "GPU0_IDENTITY_ONLY")
+        result["GPU0_identity"] = smi
+        if smi["certainty"] != "terminal" or smi["returncode"] != 0:
+            result["status"] = "IDENTITY_QUERY_UNCERTAIN_OR_FAILED"
+            return
+        assert smi["stdout_bytes"] <= 128 and smi["stdout"].strip() == "0, " + UUID
+        config = metadata(ROOT / CONFIG, 16384)
+        config["text"] = text(ROOT / CONFIG, 16384)
+        config["matches_historical_rendered"] = config.get("sha256") == "6807c2528dde696409dd2dc1102f9873d5b7b2d28b223338adcd22ec3ac07a26"
+        result["actual_runtime_YAML"] = config
+        result["required_cache_assets"] = [
+            metadata(DATA / "scanrefer/ScanRefer_train_new.json", 256 * 1024 * 1024),
+            metadata(DATA / "scanrefer/scene_graphs_new_train.json", 256 * 1024 * 1024),
+            metadata(DATA / "scannetv2-labels.combined.tsv", 8 * 1024 * 1024),
+            metadata("/home/songcl/.dgl/config.json", 65536),
+        ]
+        result["tokenizer_directory"] = metadata(DATA / "roberta-base")
+        result["tokenizer_assets"] = [metadata(DATA / "roberta-base" / name, 16 * 1024 * 1024) for name in (
+            "config.json", "tokenizer_config.json", "tokenizer.json", "merges.txt", "vocab.json",
+            "special_tokens_map.json", "added_tokens.json")]
+        train_manifest, train_rows = manifest(DATA / "scannetv2/train", "_refer.pth")
+        clip_manifest, _ = manifest(DATA / "clip_feat", ".pth")
+        result["train_file_metadata_manifest"], result["clip_metadata_manifest"] = train_manifest, clip_manifest
+        result["selected_first12_scene_metadata_only_not_sampler_order"] = [
+            {"scene": row["name"][:-10], "point_file": row,
+             "clip_file": metadata(DATA / "clip_feat" / (row["name"][:-10] + ".pth"))}
+            for row in train_rows[:12]]
+        torch_data = SITE / "torch/utils/data"
+        result["installed_shutdown_sources"] = [
+            source(torch_data / "dataloader.py", [
+                ("DataLoader", "__iter__", 35), ("DataLoader", "_get_iterator", 25),
+                ("_BaseDataLoaderIter", "__init__", 105),
+                ("_MultiProcessingDataLoaderIter", "__init__", 220),
+                ("_MultiProcessingDataLoaderIter", "_try_put_index", 65),
+                ("_MultiProcessingDataLoaderIter", "_mark_worker_as_unavailable", 65),
+                ("_MultiProcessingDataLoaderIter", "_shutdown_workers", 190),
+                ("_MultiProcessingDataLoaderIter", "__del__", 15)]),
+            source(torch_data / "_utils/worker.py", [(None, "_worker_loop", 190)]),
+            source(PREFIX / "lib/python3.10/multiprocessing/util.py", [(None, "_exit_function", 100)]),
+            source(PREFIX / "lib/python3.10/multiprocessing/process.py", [
+                ("BaseProcess", "start", 55), ("BaseProcess", "join", 35)]),
+            source(PREFIX / "lib/python3.10/multiprocessing/popen_fork.py", [("Popen", "_launch", 90)]),
+        ]
+        result["authentic_import_source_observation"] = []
+        for path in (PRODUCTION / "bin/python", PRODUCTION / "conda_source.sh",
+                     SITE / "dgl/__init__.py", SITE / "dgl/backend/__init__.py", ROOT / "sng_parser/__init__.py"):
+            item = metadata(path, 512 * 1024)
+            if item["outcome"] == "OBSERVED":
+                lines = text(path, 512 * 1024).splitlines()
+                selected = [(i + 1, line) for i, line in enumerate(lines) if any(word in line for word in (
+                    "sys.path", "PYTHONPATH", "site", "import ", "backend", "config", "open(", "mkdir", "environ",
+                    "exec(", "runpy", "train-consumed", "torchdata", "graphbolt"))]
+                item["selected_lines"] = [{"line": i, "text": line[:320], "truncated": len(line) > 320}
+                                         for i, line in selected[:80]]
+                item["selected_lines_truncated"] = len(selected) > 80
+            result["authentic_import_source_observation"].append(item)
+        result["host"] = {"meminfo": optional_text("/proc/meminfo", 8192),
+                          "loadavg": optional_text("/proc/loadavg", 256), "cpu_count": os.cpu_count(),
+                          "cpu_affinity": sorted(os.sched_getaffinity(0)),
+                          "cgroup_membership": optional_text("/proc/self/cgroup", 8192)}
+        shm = os.statvfs("/dev/shm")
+        result["host"]["dev_shm"] = {"total_bytes": shm.f_blocks * shm.f_frsize,
+                                    "available_bytes": shm.f_bavail * shm.f_frsize}
+        membership = result["host"]["cgroup_membership"].get("text", "")
+        group = next((line.split(":", 2)[2] for line in membership.splitlines() if line.startswith("0::")), None)
+        if group is not None:
+            base = (Path("/sys/fs/cgroup") / group.lstrip("/")).resolve()
+            assert base.is_relative_to(Path("/sys/fs/cgroup"))
+            result["host"]["cgroup_v2_limits"] = [optional_text(base / name, 8192) for name in (
+                "memory.max", "memory.current", "memory.high", "memory.events", "cpu.max", "cpu.stat",
+                "cpuset.cpus.effective", "pids.max", "pids.current")]
+        else:
+            result["host"]["cgroup_limits_ambiguity"] = "NO_V2_MEMBERSHIP; V1_LIMITS_NOT_INFERRED"
+        result["original_lock_identity_stat_only"] = []
+        for kind, inode in (("training", 92537152), ("diagnostic", 92537153), ("exclusive", 92537154)):
+            path = Path("/tmp/cluster_project_gpu0_" + kind + ".lock")
+            info = os.lstat(path)
+            assert stat.S_ISREG(info.st_mode) and (info.st_dev, info.st_ino) == (66308, inode)
+            result["original_lock_identity_stat_only"].append({"kind": kind, **fingerprint(info)})
+        result["status"] = "METADATA_OBSERVATION_COMPLETE_REQUIRES_FEASIBILITY_REVIEW"
+    except BaseException as error:
+        result.update(status="OBSERVATION_INCOMPLETE_OR_PROVENANCE_BLOCKED", error_type=type(error).__name__,
+                      error=str(error)[:600])
+    finally:
+        ambiguities = []
+        def audit(value, location="observation"):
+            if isinstance(value, dict):
+                if value.get("outcome") not in (None, "OBSERVED"):
+                    ambiguities.append({"location": location, "outcome": value["outcome"],
+                                        "path": value.get("path")})
+                if value.get("hash_omitted"):
+                    ambiguities.append({"location": location, "outcome": value["hash_omitted"],
+                                        "path": value.get("path")})
+                if value.get("complete") is False or value.get("truncated") is True or value.get("selected_lines_truncated") is True:
+                    ambiguities.append({"location": location, "outcome": "SOURCE_COVERAGE_TRUNCATED"})
+                for key, item in value.items():
+                    if isinstance(item, (dict, list)):
+                        audit(item, location + "/" + key)
+            elif isinstance(value, list):
+                for i, item in enumerate(value):
+                    audit(item, location + "/" + str(i))
+        audit(result)
+        if result.get("actual_runtime_YAML", {}).get("matches_historical_rendered") is False:
+            ambiguities.append({"outcome": "RUNTIME_YAML_DIFFERS_FROM_HISTORICAL_RENDERED"})
+        if result.get("host", {}).get("cgroup_limits_ambiguity"):
+            ambiguities.append({"outcome": result["host"]["cgroup_limits_ambiguity"]})
+        result["readiness_ambiguities"] = ambiguities[:80]
+        result["readiness_ambiguity_count"] = len(ambiguities)
+        result.update(finished_at=datetime.now(timezone.utc).isoformat(), hash_bytes_read=HASH_READ,
+                      source_text_bytes_read=SOURCE_READ, source_excerpt_lines=SOURCE_LINES,
+                      maximum_remote_JSON_bytes=262144, no_execution_readiness_inferred=True)
+        encoded = json.dumps(result, ensure_ascii=True)
+        assert len(encoded.encode()) <= 262144, "REMOTE_JSON_BYTE_BOUND_NO_RETRY"
+        print(encoded)
+
+
+if __name__ == "__main__":
+    main()

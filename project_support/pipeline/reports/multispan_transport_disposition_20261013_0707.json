@@ -1,0 +1,18 @@
+{
+  "stage": "rejected",
+  "diagnosis": "Native mapper sums all valid stored target span rows. Among36665 TRAIN expressions/562scenes,9748 have multiple root spans and10878 later-only token positions; native token omissions and value mismatches are both0. Original two-span control retains tokens2/8 while a first-only broken control loses8.",
+  "rejection_scope": "Reject only stored later-root-span transport loss, not parser completeness/co-reference semantics or every repeated-mention mechanism.",
+  "next_action": "Do not reopen this transport premise without changed native-source or contradictory actual stored-span evidence.",
+  "gates": {
+    "diagnosis": {"passed": false, "reason": "Registered omission premise absent in actual full TRAIN"},
+    "controls": {"passed": true, "reason": "Original mapper retains separated later token; deliberately first-only control loses it"},
+    "native_backward": {"passed": false, "status": "not_run"},
+    "resources": {"passed": false, "status": "not_run"},
+    "independence": {"passed": false, "status": "not_run"},
+    "constraints": {"passed": false, "status": "no_admission_review"}
+  },
+  "evidence": [
+    {"path": "pipeline/reports/relation_multispan_audit_20261013_0707.json", "sha256": "ac0ac8e5702eca0ba03246ac28bae4f9d6e9f675fa0198b06f8e05b1c07aed7e"},
+    {"path": "scripts/relation_multispan_audit_20261013_0707.py", "sha256": "46231bf57823b97b3d9fa7d35161c8affc72ed50eef096be37c4504ec0bf4e89"}
+  ]
+}

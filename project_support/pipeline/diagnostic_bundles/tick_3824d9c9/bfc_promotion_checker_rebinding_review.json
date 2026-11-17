@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T08:25:30.933558+00:00",
+  "status": "DISABLED_PROMOTION_V1_STATIC_REVIEW_REQUIRES_LIFECYCLE_GUARD_REVISION",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "code_commit": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+  "owner_provenance": {
+    "token": "3824d9c96f6343e09d60362b4a00495b",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-25T08:06:47.370222+00:00",
+    "deadline_at": "2026-10-25T09:06:47.370222+00:00",
+    "context_sha256": "eeb5e674ac8ae4fb2c3d5142b0d3cfaa39a96e426127b39702ad55b02b839fe3",
+    "pending_sha256": "fe7d536849cc9c0d1dc633d37f1ec8bfb47c977d30ded4d77d2fc35a0835571c"
+  },
+  "promotion_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/preparation.json",
+    "sha256": "82d11e19477cafb96c7578722f074aa782ebf74efeb52e23406cc9a7d21f8a53"
+  },
+  "checker_rebinding_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/preparation.json",
+    "sha256": "d16808a86d030b11dd932ab32734011547119f0f30b63cfdac47a6b6f4553542"
+  },
+  "reviewed_core": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/promotion_common.py",
+      "sha256": "a0cec41f9621c9fc6265c43fe6dba1c615397d3e36b316ed4fd6021e87948536"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/fast_forward_tested_bfc.py",
+      "sha256": "96f7772d9998c2e04123935a3bf8bb8d818004a53d36dd1497755f143b97ba21"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/dispatch_bfc.py",
+      "sha256": "b0184e3670e52183108deb6f3dd46bfe60936c4c44a116e8a487149c4ca6170d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/review_bfc.py",
+      "sha256": "cb245895a3f4b8619f4e1fad183a5654d0ac11fc68bf96a202bce66a1550ecb8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/admit_bfc_draft.py",
+      "sha256": "12c71c2141f6199e2b7295944a1ceffb0562d2ddf9a335bcb824e64b0eef3996"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/bfc_operation_history.py",
+      "sha256": "17c44a9675b17d3c3099e09047ab05d8382d5fa2f38c92c12c9b147bc621f34c"
+    }
+  ],
+  "source_port_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/port_provenance.json",
+      "sha256": "7cb9c79095084227f6fc266bed126b38e7fafae665b8667d815aa5d6eb3c03cb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_7526f819/bcr_promotion_execute/promotion_common.py",
+      "sha256": "d557ab8ba7abe4cb18e301fe2656040f450bcfd89ed46ea3ceb374f55b3c6897"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_7526f819/bcr_promotion_execute/fast_forward_tested_bcr.py",
+      "sha256": "cd5bf29420477dbf54e1608545f710ea6c55a6c5a7bfff8194a56a52f8ce945f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_7526f819/bcr_promotion_execute/dispatch_bcr.py",
+      "sha256": "5a7d4a6c36266356c4b07ddf98a7395e8b6a5318afb3b27dd68e7e938b727300"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/disabled_validation.json",
+      "sha256": "2858a67af8603d791ff16d75f62d5b56422c8e4fffe9554dafe2b7231b3a03d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/rebinding_validation.json",
+      "sha256": "167487295361a282880c998e9adfbc3e4a2a739fe4b1599821cbf0d7ad0751cd"
+    }
+  ],
+  "material_concerns": [
+    {
+      "code": "PROTECTED_ACTIVE_ASSIGNMENT_AND_RUNNING_MAP_NOT_FULLY_BOUND",
+      "location": "promotion_common.protected_lifecycle / dispatch_bfc active and registered preconditions",
+      "finding": "A protected active row is checked for original PID/verified state but not exact original GPU/source/receipt assignment. Dispatcher stringifies any gpu assignment as busy and only checks registered values are known IDs, without requiring row-to-running-map equality. This is broader than failclosed unknown-assignment/current-actual-active metadata policy. Current real BTC0/BCR1 rows are valid; no actual fault is asserted.",
+      "required_resolution": "Preserve V1. In a separately versioned V2, validate original BTC0/BCR1 GPU, row commit/receipt and exact running-map association, rejecting missing/malformed/unknown/stale assignments before dispatch transport."
+    },
+    {
+      "code": "NONCANONICAL_DONE_PREFIX_ACCEPTED",
+      "location": "promotion_common.protected_lifecycle missing queue row condition",
+      "finding": "str(status).startswith(done) accepts undefined done_* strings as canonical terminal archives.",
+      "required_resolution": "Use an explicit canonical terminal status set and valid present-row classification; no broad prefix. Preserve natural known terminal archives and do not require the two jobs to run forever."
+    }
+  ],
+  "other_static_findings": [
+    "Both helper defaults return before actions; DRAFT flag is False and all four actual review path/hash slots remain None. No BFC raw or old M212 raw is relabeled as actual BFC evidence.",
+    "Identity/pins changed from executed M212/00e-to11a helpers to M213/BFC11a-to48fc; current six owner/goal/context/deadline and original policy/auth hashes are explicit. Both real local/independent four-result refs and worker883/source8512/YAMLa18f are mandatory at materialization.",
+    "Local ff keeps exact single-parent11a, nineA/100644 Git blob/source paths/emptyindex/28status-and-bytes/nohooks/LF/noautostash and immediate owner recheck. Added before/after protected lifecycle/ledger-byte snapshots do not change source scope.",
+    "Selected GPU int0or1 comes only from actual four-result manifest/binding and exact UUID/stage. No fixedGPU1 or implicit other-card choice remains.",
+    "Strict pinned keySSH/hostname precedes remote work, canonical inventory is narrowed to selected card, unknown GPU/launch command shapes refuse. Same outer holder acquires all three selected-card flocks, checks exact selected UUID/idle/no contexts, then retains locks until the original canonical Popen returns.",
+    "One original canonical_process_queue call uses only selected allowset, current active count and max2/max1percard, overlayFalse. Existing intent/pending-progress/uncertain phases refuse replay; a second observed native launch in the helper invocation is refused.",
+    "Other-task lifecycle snapshots are deep copies and running mappings exclude only new BFC; dispatch result records the final full running map. It does not intentionally resume, relaunch or relabel BTC/BCR/M206.",
+    "Checker rebinding is exactly the single module TICK literal64ac-to3824 in admission; all function ASTs unchanged. Reviewer/history/evidence contract bytes are original frozen c42f. No scientific/resource/gradient criteria are changed.",
+    "Author-local12logical/16negative stub-validation and rebinding proof were read, not executed. They are source/command-construction evidence only, not native, hardware idle, transport, Git or independent actual results."
+  ],
+  "current_disabled_values": {
+    "DRAFT_EXECUTION_ENABLED": false,
+    "SEMANTIC_REVIEW_PATH": null,
+    "SEMANTIC_REVIEW_SHA": null,
+    "INDEPENDENT_REVIEW_PATH": null,
+    "INDEPENDENT_REVIEW_SHA": null
+  },
+  "actual_BFC_four_raw": "PENDING_REAL_RESULTS",
+  "source_ff_admission_dispatch": "NOT_RUN",
+  "native_resources": "NOT_RUN",
+  "SSH_GPU_Git_tests_or_shared_actions_by_this_review": "NOT_RUN",
+  "future_execution_presigned": false,
+  "root_resolution_agreed": "Root requested original82d preserved and PCE creates V2 with only canonical lifecycle/assignment/running-map failclosed strengthening; source/model/worker/protocol and current actual protected jobs remain unchanged.",
+  "next_action": "Review exact V2 diff and evidence separately without tests/actions before any future root copied materialization. Current both cards remain busy; source/technical preparation can be finalized without activation this round."
+}

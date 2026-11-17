@@ -1,0 +1,40 @@
+{
+  "contract": "m95_cluster_query_boundary_prepare_v1",
+  "observed_at": "2026-09-25T16:17:30+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "authorized_location": "server-6 GPU7",
+  "gpu_observation": {
+    "utilization_percent": 0,
+    "memory_used_mib": 19991,
+    "memory_total_mib": 81559,
+    "foreign_pid": 3789326,
+    "foreign_process_memory_mib": 19982
+  },
+  "runtime_paths_verified": true,
+  "strict_producer": {
+    "path": "scripts/native_manifest_capture_20260922.py",
+    "sha256": "c76eae8906bc8abe136acd4df8fe5eb4e78a6755508d80a318a9371c4658d821"
+  },
+  "changed_producer": {
+    "path": "scripts/native_manifest_boundary_capture_20260925.py",
+    "sha256": "7f606a1b9ecaab59210c78a88a49d9fbfff0ed120c5f11b8d332c1c5fc757882"
+  },
+  "trace_helper": {
+    "path": "scripts/m95_cluster_query_boundary_20260925.py",
+    "sha256": "5b8d8ab0387e1881df3cb6520bac10945a12721151210f06e54c615dd93cd096"
+  },
+  "trace_test": {
+    "path": "scripts/test_m95_cluster_query_boundary_20260925.py",
+    "sha256": "aa451c4f7505149f0d4d8402411c265f5e7bcf7d5e388c76aaa4ca22e4a6716e"
+  },
+  "local_tests_passed": 20,
+  "remote_cpu_tests_passed": 5,
+  "syntax_checks_passed": true,
+  "local_torch_dependent_test": "Unavailable: Windows Python has no torch; no native claim.",
+  "trace_scope": "Opt-in cluster input/message, pre-ILA readback, decoder point and query input/output at active M95 encoder layers for manifest rows 83 and 174. Separate changed producer; frozen strict producer unchanged.",
+  "native_model_execution_completed": false,
+  "strict_reproducibility_status": "fail_28_of_65",
+  "admission": false,
+  "blocker": "Foreign process holds approximately 20 GB on the sole authorized GPU7; project idle threshold requires <1 GB, regardless of instantaneous 0% utilization.",
+  "next_action": "When GPU7 utilization <10% and memory <1 GB with adequate headroom, verify code, conda, data, checkpoint, manifest and hashes. Run the changed-producer bounded partition and cluster/query trace for rows 83/174, then separately run the unchanged strict producer comparator. Do not equate trace provenance with a strict replay."
+}

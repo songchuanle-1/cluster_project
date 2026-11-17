@@ -1,0 +1,14 @@
+{
+  "actions": [
+    "先完成项目归属、最新版experiment_first授权和Disabled后台调度核验；canonical begin监控显示M205/M206均在server4运行，无新终态/故障/验证结果，waiting0。没有重启、迁移、暂停或占用现有训练卡。",
+    "按快照准备一个独立储备M207-HAP：用已更新parent截距加几何子空间中的原child变化，coarse→middle→fine；新增0参数，保留原三层FFN/CSORT/HCG/inst_feats路径。occupied由真实点逐层传播，几何detached、特征RHS与detail保留梯度，不构造N²矩阵。",
+    "独立八份模型源码和一份原生YAML已本地保存版本f51823bb；Python3.10语法/compile不exec、相对导入、配置数值与M95一致、champion源码哈希未变均通过；独立只读源码审查未发现确定接口/梯度连接阻断。未执行本地torch、合成行为或原生数据训练。",
+    "原生最小训练检查和全部资源指标尚未执行。05:26:39上海时间新鲜UUID/CUDA上下文核验确认server4两卡仍被M205/M206占用；锁文件可用不能抵消活跃CUDA上下文，因此HAP保留validation/native_pending_resource，不生成收据、推送、入队或启动。明确原生2步/输入输出梯度/pinv谱秩有限性/同口径资源协议，待真实空卡续做。",
+    "截至05:27:26上海时间，M205为第1/50轮2982/4686步，M206为第1/50轮1395/4686步，原生日志均持续增长。尚无新验证mIoU；本轮新增1静态准备候选，0准入/0排队/0启动。"
+  ],
+  "decisions": [
+    "沿用新版流程，旧8项挂起与所有失败/修订上限保留，不以它们阻止独立准备，也不以静态检查代替工程准入。HAP与已核CCP残差/GEO位置投影并非同一计算图，但新颖性和任务收益未知。",
+    "显式保留HAP退化与风险：单child或零几何差异只有parent；至多4个独立子中心可能仅替换组均值；不宣称所有组几何低秩平滑或pointmass守恒。FP32 normal equations条件数平方、pinv unsupported及小矩阵延迟均须实测，不添加ridge/改精度/调数值来绕过失败。",
+    "无需用户新增常规授权；待已授权server4卡真正空闲后，先复核精确版本/原生YAML与资产，再执行真实TRAIN至少2步和配对资源检查，通过才准入派发。现有训练按原数据、seed1999、50epochs/maxiters70和patience继续；无全局冷却或耗尽声明。"
+  ]
+}

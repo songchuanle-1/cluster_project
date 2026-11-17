@@ -1,0 +1,10 @@
+{
+  "tick_token": "f38daa9ab2914c97a74bd716613388f8",
+  "v1_result_sha256": "9a8b6ad95b8437a63181b4bc1b2af921af8f6f152ffb6604a62f28b6945e59b6",
+  "v1_result": "pipeline/reports/native_role_direction_f38daa9ab2914c97a74bd716613388f8.json",
+  "issue": "v1 selected calls[-1], but native Criterion evaluates final loss first and auxiliary layer losses afterwards. v1 gradients are auxiliary-layer observations, not final-layer evidence.",
+  "source_evidence": "Original loss.py forward calls loss_sem_align before the aux_outputs loop at lines614-620. Preserve frozen source SHA c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5.",
+  "v1_scope": "Retain raw observations and exact source hash. Withdraw final-layer attribution only; do not erase results or claim original map incidence was falsified.",
+  "repair": "Version2 selects exactly one semantic call whose tokens and queries are the identical tensors in the native Criterion final pred dictionary. Assert uniqueness, persist call index/count, rerun unchanged frozen25group cohort.",
+  "unchanged": "Original model, checkpoint, cohort, seed1999, controls, strict1e6, GPU7/shared allocation. No optimizer or parameter update."
+}

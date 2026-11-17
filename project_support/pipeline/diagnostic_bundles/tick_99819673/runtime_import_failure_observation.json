@@ -1,0 +1,16 @@
+{
+  "observed_at": "2026-10-20T16:02:26.932838+00:00",
+  "returncode": 0,
+  "stdout": "{\"python\": \"3.10.20 | packaged by conda-forge | (main, Jun 11 2026, 03:31:56) [GCC 14.3.0]\", \"sha256\": \"f583964744872979cfa28723226033e1210f2096a110db7cdf2c3aec71343b40\", \"source\": \"import copy\\nfrom collections import OrderedDict\\nfrom pathlib import Path\\nfrom typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union\\nimport enum\\nfrom ccimport import compat\\n\\n\\ndef group_dict_by_split(data: Dict[str, List[str]], split: str = \\\",\\\"):\\n    \\\"\\\"\\\"convert {gcc,clang++: [xxx], clang++: [yyy]}\\n    to {gcc: [xxx], clang++: [xxx, yyy]}\\n    \\\"\\\"\\\"\\n    new_data = OrderedDict()  # type: Dict[str, List[Any]]\\n    for k, v in data.items():\\n        ks = k.split(split)\\n        for k_ in ks:\\n            k_ = k_.strip()\\n            if k_ not in new_data:\\n                new_data[k_] = []\\n            new_data[k_].extend(v)\\n    return new_data\\n\\n\\ndef _unique_list_keep_order(seq: list):\\n    if compat.Python3_7AndLater:\\n        # https:/\", \"memory\": [\"MemTotal:       197556668 kB\", \"MemFree:        23800712 kB\", \"MemAvailable:   189802912 kB\"]}\n",
+  "stderr": "",
+  "data": {
+    "python": "3.10.20 | packaged by conda-forge | (main, Jun 11 2026, 03:31:56) [GCC 14.3.0]",
+    "sha256": "f583964744872979cfa28723226033e1210f2096a110db7cdf2c3aec71343b40",
+    "source": "import copy\nfrom collections import OrderedDict\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union\nimport enum\nfrom ccimport import compat\n\n\ndef group_dict_by_split(data: Dict[str, List[str]], split: str = \",\"):\n    \"\"\"convert {gcc,clang++: [xxx], clang++: [yyy]}\n    to {gcc: [xxx], clang++: [xxx, yyy]}\n    \"\"\"\n    new_data = OrderedDict()  # type: Dict[str, List[Any]]\n    for k, v in data.items():\n        ks = k.split(split)\n        for k_ in ks:\n            k_ = k_.strip()\n            if k_ not in new_data:\n                new_data[k_] = []\n            new_data[k_].extend(v)\n    return new_data\n\n\ndef _unique_list_keep_order(seq: list):\n    if compat.Python3_7AndLater:\n        # https:/",
+    "memory": [
+      "MemTotal:       197556668 kB",
+      "MemFree:        23800712 kB",
+      "MemAvailable:   189802912 kB"
+    ]
+  }
+}

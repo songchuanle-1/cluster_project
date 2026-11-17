@@ -1,0 +1,58 @@
+--- framework\model\Quard_model\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort\hier_postprocess.py
++++ framework\model\Quard_model\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc\hier_postprocess.py
+@@ -12,6 +12,7 @@
+ import torch.nn.functional as F
+ from pointnet2.pointnet2_utils import FurthestPointSampling
+ from torch_scatter import scatter_mean, scatter_max
++from .refined_composition import refined_parent_mean
+ 
+ # ── Module-level accumulator for diversity loss (differentiable) ──
+ # CSORT (cross-scale orth) 与 ORT 共用同一累积器; dec.py 在 forward 末尾取用。
+@@ -521,21 +522,12 @@
+ 
+ 
+ class C2F_ClusterAttn_CTF(C2F_ClusterAttn_Lite):
+-    """M41 Cluster Token Feed-Forward: per-scale FFN refinement of cluster tokens.
+-
+-    DRP (0.5012) 证明 routing 是死代码。CTF 在此基础上测试: cluster token 自身
+-    是否需要 non-linear refinement 才能提供更好的 context?
+-
+-    每级 cluster token 在 readback 前经过:
+-      token = token + FFN(LayerNorm(token))
+-      FFN = Linear(d→4d) → GELU → Linear(4d→d)
+-
+-    C2C (队列中) 测试 token 交互 (self-attention between tokens);
+-    CTF 测试 token 自身 refinement (per-token FFN, no interaction).
+-    两者互补: C2C=interaction, CTF=refinement.
+-
+-    假设: mean-pool 聚合丢失了非线性特征交互, per-token FFN 恢复表达能力,
+-    提升 readback context 质量, 突破 0.5012 天花板.
++    """HRC: compose refined tokens bottom-up before the original readback.
++
++    Fine tokens retain the M95 residual FFN. Their original fixed-child mean
++    becomes the middle FFN input; the refined middle mean becomes the coarse
++    FFN input. Every original scale FFN executes once. Raw banks, geometric IDs,
++    CSORT and the existing HCG/point update remain unchanged.
+     """
+ 
+     def __init__(self, d_model=256, nhead=8, cluster_layer_nums=None,
+@@ -563,11 +555,16 @@
+ 
+     def forward(self, point_feats, query, point_mask,
+                 cluster_feats_list, child_cluster_maps, cluster_ids_list):
+-        # Skip routing (like DRP). Apply per-scale FFN refinement to cluster tokens.
++        # HRC changes only the inputs to the existing middle/coarse FFNs.
+         refined_cluster_feats = []
+         for lvl in range(self.num_scales):
+-            cf = cluster_feats_list[lvl]  # [B, K_lvl, C]
+-            # Pre-norm residual FFN
++            if lvl == 0:
++                cf = cluster_feats_list[lvl]  # original raw fine bank
++            else:
++                cf = refined_parent_mean(
++                    refined_cluster_feats[-1], cluster_ids_list[lvl],
++                    cluster_feats_list[lvl])
++            # Original pre-norm residual FFN, exactly once at each scale.
+             refined = cf + self.cluster_ffn[lvl](self.cluster_ffn_norm[lvl](cf))
+             refined_cluster_feats.append(refined)
+ 

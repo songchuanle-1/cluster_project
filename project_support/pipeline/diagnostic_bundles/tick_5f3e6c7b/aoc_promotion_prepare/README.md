@@ -1,0 +1,9 @@
+# Current-owner AOC promotion templates (disabled)
+
+The five helpers are copied from frozen tick_f8d84d12/aoc_promotion_prepare_r1 (38ab), which already retains the corrected `shapes` common-parameter key. Only the ordinary-training owner-token assertion and dispatcher temp suffix are rebound to this current tick. All other helper bytes and source_bindings/evidence_bindings bytes match that R1 source. Original0314/base9c/native9cf/op e45/prototypef7/protocol a041 remain unchanged.
+
+Common DRAFT is True and actual raw/local review/independent peer references are null. No result is pre-signed. Root's separate default-readonly bind_aoc_actual_review.py can make one private active copy only after four real current terminal rc0 envelopes and a real SHA-bound independent semantic review, with exact current owner/manifest/lease/source. It must leave this template untouched; its only active common change is True→False plus actual evidence JSON, journaled before exclusive destination creation. Partial copies are reconciled read-only, never blindly repeated.
+
+Root must capture protected_assets_before.json after real PES canonical terminal archival and before summary/ff/admission, while primary still9c, index empty and the original28 files unchanged. The helpers use that fresh current-tick baseline and a fresh complete lifecycle capture from the summary; no old running/earlystop assumption is rebound. Sequence after actual binding: summary → exact9A ff9c→0314 → canonical admission/receipt/FIFO waiting → one canonical GPU0 dispatch. Each mutation retains real current owner/original deadline/auth/locks and once-intent/no-replay checks. No GPU1, extra scientific gate, PES4E schema or training-exclusive field is introduced.
+
+Only private copying/compile/AST checks occurred here. No helper entry, native/SSH/Git/shared write, receipt, queue or launch was executed.

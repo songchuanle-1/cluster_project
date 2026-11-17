@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\run_nde_operation.py", line 60, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\run_nde_operation.py", line 52, in main
+    elif a.operation=='run':result=adapter.run(a.mode,a.target)
+                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\adapter.py", line 583, in run
+    require(result.get('certainty')=='terminal' and result.get('returncode')==0
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and self._raw_result_identity(result.get('result'),binding,mode,target)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and result['result'].get('execution_completed') is True,'Native process failed/identity unknown; no PASS or replay')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f6536795\nde_operational_active\adapter.py", line 85, in require
+    raise Refused(reason)
+nde_reviewed_adapter.Refused: Native process failed/identity unknown; no PASS or replay

@@ -1,0 +1,146 @@
+"""Read-only metadata, source bytes and GPU resource query; no imports of Torch."""
+import base64
+from datetime import datetime, timezone
+import hashlib
+import json
+import os
+from pathlib import Path
+import socket
+import stat
+import subprocess
+import sys
+
+assert sys.flags.isolated and sys.dont_write_bytecode and not sys.flags.optimize
+assert socket.gethostname() == 'dl04-MS-7E06' and os.getuid() == os.geteuid() == 1001
+packet = json.load(sys.stdin)
+owner, baseline = packet['owner'], packet['baseline']
+assert owner == baseline['owner']
+assert owner['token'] == '9573f1fc8cad435fb47660949b563298'
+assert owner['thread_id'] == '01a159c5-29ab-7a22-ba7f-e79174757253'
+assert datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+assert packet['read_only'] is True
+root = Path('/data/songcl/Project/Cluster_project/Cluster_nsd_20261107')
+project = root.parent
+source = 'b1e639b3ceb14bb5c65d9f81a084d41c834b951c'
+assert root.is_dir() and root.resolve() == root
+git_env = {'PATH':'/usr/bin:/bin','GIT_OPTIONAL_LOCKS':'0','GIT_CONFIG_NOSYSTEM':'1',
+           'GIT_CONFIG_SYSTEM':'/dev/null','GIT_CONFIG_GLOBAL':'/dev/null','LANG':'C'}
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def regular(path):
+    a = os.lstat(path)
+    assert stat.S_ISREG(a.st_mode) and a.st_uid == 1001 and a.st_nlink == 1
+    assert Path(path).resolve() == Path(path)
+    return a
+
+def run(argv, env=None):
+    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    try:
+        stdout, stderr = process.communicate(timeout=25)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError('Read-only child timeout; preserve process, no signal or retry')
+    assert process.returncode == 0, stderr.decode('utf-8','replace')[-1500:]
+    return stdout
+
+def git(*args):
+    return run(['/usr/bin/git','--no-optional-locks','-c','core.fsmonitor=false','-C',str(root),*args],git_env)
+
+def snapshot():
+    head = git('rev-parse','--verify','HEAD').decode().strip()
+    assert head == source
+    hashes = {}
+    for relative, expected in baseline['source_files_exact9'].items():
+        regular(root/relative)
+        original = git('cat-file','blob',source+':'+relative)
+        assert hashlib.sha256(original).hexdigest() == expected
+        if relative.endswith('.py'):
+            hashes[relative] = sha(root/relative)
+            assert hashes[relative] == expected, relative
+    return head, hashes
+
+head, hashes = snapshot()
+config_name = next(k for k in baseline['source_files_exact9'] if k.endswith('.yaml'))
+original = git('cat-file','blob',source+':'+config_name)
+mappings = [['/home/songcl/data/data','/home/songcl/data/data'],
+            ['/home/songcl/3dres/project/cluster_project/Checkpoints',str(project/'Cluster_checkpoints')]]
+preview_program = '''import base64,hashlib,json,sys,yaml
+assert 'torch' not in sys.modules
+raw=base64.b64decode(sys.argv[1]); mappings=json.loads(sys.argv[2])
+def adapt(x):
+ if isinstance(x,dict):return {k:adapt(v) for k,v in x.items()}
+ if isinstance(x,list):return [adapt(v) for v in x]
+ if isinstance(x,str):
+  for a,b in mappings:x=x.replace(a,b)
+ return x
+out=yaml.safe_dump(adapt(yaml.safe_load(raw.decode('utf-8'))),sort_keys=False).encode('utf-8')
+assert 'torch' not in sys.modules
+print(json.dumps({'sha256':hashlib.sha256(out).hexdigest(),'bytes_base64':base64.b64encode(out).decode()}))
+'''
+preview = json.loads(run(['/home/songcl/.conda/envs/project_cluster/bin/python','-I','-B','-c',
+                         preview_program,base64.b64encode(original).decode(),json.dumps(mappings)]))
+adapted = base64.b64decode(preview['bytes_base64'],validate=True)
+assert hashlib.sha256(adapted).hexdigest() == preview['sha256']
+current = (root/config_name).read_bytes()
+assert current in (original,adapted), 'Unexpected native YAML edit'
+native = {'config':config_name,'mappings':mappings,'source_sha256':hashlib.sha256(original).hexdigest(),
+          'canonical_preview_sha256':preview['sha256'],'runtime_sha256':hashlib.sha256(current).hexdigest(),
+          'matches_original_or_deterministic_mapping':True,'YAML_written':False}
+train = root/'tools/train.py'
+regular(train)
+assert train.read_bytes() == git('cat-file','blob',source+':tools/train.py')
+base = project/'pipeline/runtime/server4_conda_4ca73fba.sh'
+regular(base)
+assert sha(base) == '6c80f3659817b63d1dfb79555dded6e2a486cc4cd75685b462a3082c4a2885d0'
+producer = Path(baseline['historical_producer'])
+assert producer.is_dir() and producer.resolve() == producer
+producer_hashes = {}
+for filename, expected in baseline['historical_producer_files'].items():
+    regular(producer/filename)
+    producer_hashes[filename] = sha(producer/filename)
+    assert producer_hashes[filename] == expected
+newpaths = [project/'pipeline/runtime'/name for name in ('sinc_path_prepare_9573f1fc','sinc_path_prod_9573f1fc')]
+assert all(not os.path.lexists(path) for path in newpaths)
+markers = [newpaths[0]/'train-consumed.json',newpaths[1]/'train-consumed.json',
+           project/'pipeline/runtime/sinc_path_prod_6b23467a/train-consumed.json']
+assert all(not os.path.lexists(path) for path in markers)
+proc_locks = Path('/proc/locks').read_text()
+locks = []
+for kind, ino in [('training',92537152),('diagnostic',92537153),('exclusive',92537154)]:
+    path = Path('/tmp/cluster_project_gpu0_'+kind+'.lock')
+    a = regular(path)
+    assert (a.st_dev,a.st_ino) == (66308,ino)
+    key = '%02x:%02x:%d' % (os.major(a.st_dev),os.minor(a.st_dev),ino)
+    held = any(key in line.split() for line in proc_locks.splitlines())
+    locks.append({'kind':kind,'path':str(path),'dev':a.st_dev,'ino':a.st_ino,'held_at_observation':held})
+trainers = []
+for proc in Path('/proc').iterdir():
+    if not proc.name.isdigit(): continue
+    try:
+        if proc.stat().st_uid != 1001 or (proc/'cwd').resolve() != root: continue
+        argv = (proc/'cmdline').read_bytes().decode('utf-8','replace').split('\0')
+        if any(Path(arg).name in ('train.py','test.py') or arg in ('tools.train','tools.test') for arg in argv):
+            trainers.append({'pid':int(proc.name),'argv':argv})
+    except (OSError,RuntimeError): pass
+assert not trainers, 'Existing same-root trainer/test preserved'
+gpu_line = run(['/usr/bin/nvidia-smi','-i','0','--query-gpu=index,uuid,memory.free,memory.used,memory.total,utilization.gpu',
+                '--format=csv,noheader,nounits']).decode().strip()
+parts = [x.strip() for x in gpu_line.split(',')]
+assert len(parts) == 6 and parts[:2] == ['0','GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c']
+gpu = dict(zip(('index','uuid','memory_free_mib','memory_used_mib','memory_total_mib','utilization_percent'),
+               [int(parts[0]),parts[1],*map(int,parts[2:])]))
+head_after, hashes_after = snapshot()
+assert (head_after,hashes_after) == (head,hashes) and (root/config_name).read_bytes() == current
+assert 'torch' not in sys.modules and datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+actual = {'hostname':socket.gethostname(),'uid':os.getuid(),'runtime_root':str(root),'runtime_HEAD':head,
+          'source_files':hashes,'native_yaml_mapping':native,'tools_train_sha256':sha(train),
+          'original_locks':locks,'lock_observation_method':'lstat_and_proc_locks_only_no_acquisition',
+          'base_conda_sha256':sha(base),'historical_producer':str(producer),'producer_hashes':producer_hashes,
+          'new_stage_paths':[str(p) for p in newpaths],'new_stage_absent':True,
+          'marker_paths':[str(p) for p in markers],'markers_absent':True,
+          'no_same_root_trainer':True,'same_root_trainers':trainers,'gpu0':gpu,
+          'resource_query_only':True,'free_memory_meets_20000_at_observation':gpu['memory_free_mib']>=20000,
+          'Torch_imported':False,'GPU_context_created':False,'remote_mutations':False}
+print(json.dumps({'owner':owner,'actual':actual,'source_integrity_before_after':True,
+                  'observed_at':datetime.now(timezone.utc).isoformat()}))

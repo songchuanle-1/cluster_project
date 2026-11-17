@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-10-19T16:32:53.749295+00:00",
+  "source_cpu_branch_excerpt": "70:at::Tensor furthest_point_sampling(at::Tensor points, const int nsamples) {\n71:  CHECK_CONTIGUOUS(points);\n72:  CHECK_IS_FLOAT(points);\n73:\n74:  at::Tensor output =\n75:      torch::zeros({points.size(0), nsamples},\n76:                   at::device(points.device()).dtype(at::ScalarType::Int));\n77:\n78:  at::Tensor tmp =\n79:      torch::full({points.size(0), points.size(1)}, 1e10,\n80:                  at::device(points.device()).dtype(at::ScalarType::Float));\n81:\n82:  if (points.device().is_cuda()) {\n83:    furthest_point_sampling_kernel_wrapper(\n84:        points.size(0), points.size(1), nsamples, points.data_ptr<float>(),\n85:        tmp.data_ptr<float>(), output.data_ptr<int>());\n86:  } else {\n87:    TORCH_CHECK(false, \"CPU not supported\");\n88:  }\n89:\n90:  return output;\n91:}",
+  "wrapper_path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/pointnet2_utils.py",
+  "binary_sha256": "ef0daa5ccf7fe471a5d73528762f209ba6d2dd89a6c3b50c6371eb9e0edebcfe",
+  "cpu_fps_supported": false,
+  "native_model_mask_test": false,
+  "error_type": "RuntimeError",
+  "error": "CPU not supported",
+  "cuda_initialized": false,
+  "scope": "One original binary CPU capability probe,not full geometry/mask/efficacy;do not treat a no-CUDA support error as hypothesis failure."
+}

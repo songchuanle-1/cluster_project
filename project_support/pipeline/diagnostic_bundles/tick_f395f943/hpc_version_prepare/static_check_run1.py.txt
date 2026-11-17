@@ -1,0 +1,46 @@
+"""Small source/default/wrong-actual-thread checks; no Git/native entry is executed."""
+import ast,contextlib,hashlib,io,json,os,runpy,sys
+from pathlib import Path
+HERE=Path(__file__).resolve().parent
+ROOT=Path('D:/project/cluster_project')
+HELPER=HERE/'prepare_isolated_hpc_version.py'
+checks=[]
+def check(name,value):
+ if not value:raise AssertionError(name)
+ checks.append(name)
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def read(p):return json.loads(p.read_bytes())
+blocked=[]
+def audit(event,args):
+ if event in ('subprocess.Popen','socket.connect','socket.getaddrinfo','os.system') or (event=='import' and str(args[0]).split('.')[0]=='torch'):
+  blocked.append(event);raise RuntimeError('Forbidden static-check action: '+event)
+sys.addaudithook(audit)
+source=HELPER.read_text('utf8');tree=ast.parse(source);compile(source,str(HELPER),'exec')
+check('Helper syntax and compilation',True)
+check('Actual subagent identity differs from owner and is not overridden',os.environ.get('CODEX_THREAD_ID')=='01a15a3d-3c65-78b3-9ac7-57d0423dcc6e' and 'os.environ["CODEX_THREAD_ID"]' not in source and "os.environ['CODEX_THREAD_ID']" not in source)
+prep=ROOT/'pipeline/diagnostic_bundles/tick_d08825b5/new_candidate_prepare/preparation.json'
+check('Exact immutable c760 preparation',sha(prep)=='c94f9c289dbf92019d01d3674907a4765368fa3849160ff8268f7788f921a70c')
+payload=read(prep)
+check('Original code/source null declarations remain',payload['code_commit'] is None and payload['source_commit'] is None)
+frozen={n.removeprefix('staged_repository/'):h for n,h in payload['prepared_file_hashes'].items() if n.startswith('staged_repository/')}
+check('Exact nine source/config staged files',len(frozen)==9 and all(sha(prep.parent/'staged_repository'/n)==h for n,h in frozen.items()))
+check('Original native YAML bytes',sum(n.endswith('.yaml') for n in frozen)==1 and next(h for n,h in frozen.items() if n.endswith('.yaml'))=='a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a')
+check('Old source peer anchored',sha(ROOT/'pipeline/diagnostic_bundles/tick_d08825b5/hpc_source_topology_independent_review_final.json')=='0311d80df87c2e4f33767bea3ecc024b9dd95112aedf3719bd30efebf29f575e')
+check('Fresh baseline anchored',sha(HERE.parent/'protected_assets_before.json')=='91ee2fdaf62aeac07ff83fbc7687d227c5724ebf98fc69f5088b346b64aeac18')
+check('HPC own null eligibility and AEF56 parent, no historical CRE commit gate',"BASE='56b2a96dc48cc8a88f0f7105527ef448113b1060'" in source and "CID='hierarchy-tree-resolvent-nonlinear-composition';EXP='M218-HPC'" in source and 'OLD_CRE' not in source)
+oldargv=sys.argv[:]
+try:
+ sys.argv=[str(HELPER)];out=io.StringIO()
+ with contextlib.redirect_stdout(out):runpy.run_path(str(HELPER),run_name='__main__')
+ check('Actual default entry returns without Git or write',out.getvalue().strip()=='DEFAULT_READ_ONLY_NO_GIT_OR_SOURCE_WRITE')
+ sys.argv=[str(HELPER),'--execute-root','--source-preparation-sha256',sha(prep),'--independent-review-sha256','0311d80df87c2e4f33767bea3ecc024b9dd95112aedf3719bd30efebf29f575e']
+ refused=False
+ try:runpy.run_path(str(HELPER),run_name='__main__')
+ except AssertionError:refused=True
+ check('Actual wrong-thread execute refuses in current root guard before Git',refused)
+finally:sys.argv=oldargv
+check('No isolated destination or intent created',not (ROOT/'pipeline/isolated_versions/hpc_f395f943').exists() and not any((HERE/n).exists() for n in ['isolated_source_version.json','isolated_version_before.json','isolated_version_operation_intent.json','empty_hooks']))
+check('No forbidden process/network/Torch attempts',blocked==[] and 'torch' not in sys.modules)
+result={'status':'LOCAL_SOURCE_DEFAULT_AND_ACTUAL_THREAD_REFUSAL_CHECKS_PASSED_NOT_GIT_SAVE','checks_count':len(checks),'checks':checks,'helper_sha256':sha(HELPER),'actual_thread':os.environ.get('CODEX_THREAD_ID'),'root_identity_overridden':False,'forbidden_events':blocked,'git_mutations':'NOT_RUN','native_resources':'NOT_RUN'}
+with (HERE/'static_validation.json').open('x',encoding='utf8') as f:json.dump(result,f,indent=2,ensure_ascii=False,allow_nan=False);f.write('\n')
+print(json.dumps({'checks_count':len(checks),'result_sha256':sha(HERE/'static_validation.json')}))

@@ -1,0 +1,11 @@
+--- M176-CTF-HCG-CSORT-MQSD
++++ M191-CTF-HCG-CSORT-MQSD-TR
+@@ -751,7 +751,7 @@
+                 query, sp_pos, query_pos,
+                 batch_offsets=batch_offsets)
+ 
+-            if previous_masks is not None:
++            if layer_i == len(self.decoder_layers) - 1 and previous_masks is not None:
+                 query = self.query_context_refiner(
+                     query, previous_masks, inst_feats, batch_mask,
+                     cluster_bank=self.cluster_bank,

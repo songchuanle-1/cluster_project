@@ -1,0 +1,85 @@
+{
+  "scope": "Event-mode overdue capacity retry and static contract revalidation for blocked native capture stages; no native capture or efficacy claim",
+  "timestamp": "2026-09-18T14:11:35+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "capture_launched": false
+  },
+  "m197_live_progress": {
+    "preflight_epoch": "17/50",
+    "best_miou": 0.4803,
+    "no_improve": "1/10",
+    "recent_validation_sequence": [
+      0.4778,
+      0.4800,
+      0.4786,
+      0.4803,
+      0.4782
+    ],
+    "native_step": "2690/4686",
+    "native_log": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs/20260916_042843/20260916_042843.log",
+    "native_progress_observed": true
+  },
+  "static_validation": {
+    "status": "passed",
+    "test_modules": [
+      "scripts/test_capture_support_20260916.py",
+      "scripts/test_frozen_capture_contract_20260916.py",
+      "scripts/test_hierarchical_partition_contract_20260916.py",
+      "scripts/test_model_pair_audit_20260916.py",
+      "scripts/test_native_endpoint_capture_20260916.py",
+      "scripts/test_native_support_capture_20260916.py",
+      "scripts/test_paired_capture_evaluation_20260916.py",
+      "scripts/test_physical_mask_endpoints_20260916.py",
+      "scripts/test_sampling_pair_contract_20260916.py"
+    ],
+    "tests_passed": 74,
+    "tests_failed": 0
+  },
+  "coverage_limit": {
+    "test": "scripts/test_native_feature_contrasts_20260916.py",
+    "local_result": "not run: local python lacks torch",
+    "remote_result": "not run: the registered Cluster checkout lacks this script",
+    "impact": "The omitted module is diagnostic-only and does not weaken the executed frozen contract suite; no GPU capture was authorized."
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied at the two-process cap by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-18T15:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Performed one bounded live GPU/process and native-log query after the 09:07 retry deadline, then reran nine frozen contract test modules (74 tests) without GPU use. The optional torch-dependent diagnostic could not run locally and is absent from the registered remote checkout. No launch was attempted and the foreign DAS workload was not touched."
+  },
+  "limitations": [
+    "No paired native capture ran, so no efficacy result or scientific validation is claimed.",
+    "Static test passage establishes contract identity and implementation integrity, not scientific validity.",
+    "M197-PIRS remains prior-art engineering evidence only.",
+    "The foreign DAS workload was observed only and was not touched."
+  ]
+}

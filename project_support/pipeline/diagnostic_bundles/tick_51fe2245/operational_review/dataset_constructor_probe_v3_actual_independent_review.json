@@ -1,0 +1,80 @@
+{
+  "owner": {
+    "token": "51fe22452ecf43a390b8cfa6fddbc733",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T23:11:05.069988+00:00",
+    "deadline_at": "2026-11-10T00:11:05.069988+00:00",
+    "context_sha256": "482c41f2754c8b9c3b32d723704c68b51226b580d9df3580089980943a2a9b8b",
+    "pending_sha256": "f5c034a4857e02d924d8af70181e8cbc3a7326853317a733843068a2f96993d4"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "recorded_at": "2026-11-09T23:58:38.772045+00:00",
+  "passed": true,
+  "material_concerns": [],
+  "scope": "ACTUAL_V3_HARNESS_TEMPFILE_DENIAL_ONLY",
+  "actual_sha256": "0efbfc8ec9a4608171d21b89d6c824b13218ded1cb29971dcff5c6836d8a1af5",
+  "frozen_sha256": "f7550eec9c5fb8db2a0f26ce2d9c67d377606013d224490e852ffa1f2428b440",
+  "source_review_sha256": "196aee275ebd1e3e7ae2d6995886abcc195cc0d7025d005ce118843ffe02872c",
+  "classification": "DIAGNOSTIC_TEMPFILE_AUDIT_OVERRESTRICTION_NO_CONSTRUCTOR_OUTCOME",
+  "carrier_pid": 3293302,
+  "carrier_terminal_rc": 3,
+  "blocked_phase": "gorilla_config_import",
+  "audit_event": "open",
+  "blocked_target": "/tmp/nna5hqb7",
+  "blocked_stack": [
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 835,
+      "function": "__init__"
+    },
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 373,
+      "function": "mkdtemp"
+    },
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 126,
+      "function": "_sanitize_params"
+    },
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 315,
+      "function": "gettempdir"
+    },
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 308,
+      "function": "_gettempdir"
+    },
+    {
+      "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/tempfile.py",
+      "line": 203,
+      "function": "_get_default_tempdir"
+    },
+    {
+      "file": "<string>",
+      "line": 151,
+      "function": "audit"
+    }
+  ],
+  "readonly_helper": {
+    "pid": 3293344,
+    "start_ticks": "188495770",
+    "argv": [
+      "uname",
+      "-p"
+    ],
+    "returncode": 0
+  },
+  "all23guarded_file_identities_unchanged": true,
+  "constructor_complete": false,
+  "interpretation": [
+    "Exactowner/frozen/intent/peer/actual chain verified; v3ranonceandis terminal.",
+    "Authenticateduname-p helperPID3293344 returned0. Nextopen/tmp path wasdenied throughstandardtempfile/TemporaryDirectory setup duringgorilla/config phase. Thisis harnessrestriction onowntransientIO, notproductiondataset/cache/nativeworker failure.",
+    "No Datasetconstructor result/cachecoverage, worker, sample/PTH, model/training orhistoricalfault reproduction follows. AseparatelyfrozenprivateTMPDIRdelta canallowroutineowntransientIO withoutbroadHF/DGL/data/sourcecache/network/subprocess permissions; nohumanapproval neededfor scopedowncleanup."
+  ],
+  "historical_worker_fault": "UNKNOWN",
+  "reviewer_actions": "LOCAL_JSON_HASH_AND_FROZEN_SOURCE_ONLY_NO_SSH_OR_NATIVE_EXECUTION"
+}

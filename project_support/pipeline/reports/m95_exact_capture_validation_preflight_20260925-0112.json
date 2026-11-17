@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "contract": "m95_exact_capture_validation_preflight_v1",
+  "timestamp": "2026-09-25T01:12:34+08:00",
+  "host": "server-6",
+  "gpu": 7,
+  "capture": {
+    "output": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_match_capture_full_20260924-2351",
+    "log": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_match_capture_full_20260924-2351.log",
+    "parent_pid": 3140839,
+    "child_pid": 3140840,
+    "status": "running",
+    "expected_steps": 4663,
+    "last_observed_step": 1010,
+    "matching_expressions_at_last_step": 0,
+    "capture_match_causes": true,
+    "capture_identity_query": true,
+    "exact_frozen_trajectory": true
+  },
+  "live_gpu": {
+    "memory_used_mib": 45883,
+    "memory_free_mib": 35197,
+    "utilization_percent": 0,
+    "project_pid": 3140840,
+    "project_memory_mib": 3852,
+    "external_pid": 3694608,
+    "external_memory_mib": 41996
+  },
+  "producer_preflight": {
+    "expected_sha256": "206c594d8c5219c6e249d89f7cb91815467bd443a030bc8bbd76d457de0b485a",
+    "local_composite_sha256": "206c594d8c5219c6e249d89f7cb91815467bd443a030bc8bbd76d457de0b485a",
+    "matches": true
+  },
+  "analyzer_preflight": {
+    "component_analyzer": {
+      "path": "scripts/native_component_counterfactual_20260924.py",
+      "sha256": "ebb940a11a6ed8b5d2a163fd09801d265342d62b187c95344f3e85067cc0355a"
+    },
+    "identity_query_analyzer": {
+      "path": "scripts/m95_identity_query_controls_20260923.py",
+      "sha256": "8e9a88ef3e800c2fe5c67aba3f19b3d689528370ef84ba4e5c69bf91907c92c2"
+    },
+    "capture_producer": {
+      "path": "scripts/native_manifest_capture_20260922.py",
+      "sha256": "86fcbb9cea4f55117ffd248e97f387486c7d851f976b145c384bb1182200095b"
+    },
+    "focused_tests_passed": 37,
+    "focused_test_modules": [
+      "test_native_component_counterfactual_20260924.py",
+      "test_m95_score_component_control_20260924.py",
+      "test_m95_mask_component_counterfactual_20260924.py",
+      "test_native_manifest_capture_20260922.py",
+      "test_m95_identity_query_controls_20260923.py"
+    ],
+    "python_compile_passed": true
+  },
+  "completion_actions": [
+    "Recheck PID 3140840 and require a final log step with no crash marker.",
+    "Validate capture.json manifest, checkpoint, producer, artifact coverage and exact full-train mode.",
+    "Run scripts/native_component_counterfactual_20260924.py on the exact capture.",
+    "Run scripts/m95_identity_query_controls_20260923.py on the exact capture.",
+    "Evaluate hard admission gates separately; do not infer native backward, resources or deployable efficacy from these CPU-only analyses."
+  ],
+  "admission": false,
+  "native_component_counterfactual_completed": false,
+  "identity_query_controls_completed": false,
+  "native_backward_measured": false,
+  "resources_measured": false,
+  "not_evidence_of": [
+    "admission",
+    "native backward",
+    "resource gate",
+    "deployable efficacy",
+    "population effect",
+    "novelty",
+    "whole-mechanism benefit"
+  ]
+}

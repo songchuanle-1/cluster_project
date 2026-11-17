@@ -1,0 +1,156 @@
+    if candidate:
+        wfc_module=importlib.import_module(qualified+'.wedge_factor')
+        original_plan=wfc_module.build_wedge_factor_plan;original_prepare=wfc_module.prepare_wedge_factor_plans
+        original_mean=wfc_module.mean_wedge_incidence
+        original_stack=torch.stack;original_cat=torch.cat
+        original_select=torch.Tensor.index_select;original_add=torch.Tensor.index_add;original_copy=torch.Tensor.index_copy
+        def queue_replace(owner,name,replacement,original):
+            installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            normalized,ids=values;assert owner is att.wedge_factor and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=wfc_coverage_preflight(members)
+            if not coverage['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FOREST';raise RuntimeError('INCONCLUSIVE_COVERAGE before WFC watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'map_calls':[],'mean_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual one global factor_map/GELU; scoped stack, cat, select, add, copy and original incidence mean each return passed through once. No learned/mean/model/criterion/backward replay.',
+                'FP32_Jacobian_role_coverage_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'wfc_context' not in state
+            state['wfc_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,
+                'widths':[int(x.shape[1]) for x in normalized],'phase':'prepare','builder_calls':0,'prepare_calls':0,
+                'stack_calls':0,'cat_calls':0,'map_calls':0,'GELU_calls':0,'mean_calls':0,'mean_add_calls':0,
+                'map_selects':[],'final_level':0,'final_outputs':[]}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE_COVERAGE original WFC input before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(points,fm,mc,widths):
+            context=state['wfc_context'];b=context['builder_calls'];context['builder_calls']+=1
+            assert (points,fm,mc)==context['members'][b] and widths==context['widths']
+            output=original_plan(points,fm,mc,widths);record=wfc_plan_observation(output,(points,fm,mc));record['batch']=b
+            context['record']['plans'].append(record);return output
+        def observed_prepare(levels,ids):
+            context=state['wfc_context'];assert context['phase']=='prepare' and ids is context['ids_ref'] and not context['prepare_calls']
+            assert all(levels[l] is context['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);context['prepare_calls']=1;context['plans_ref']=output
+            assert context['builder_calls']==len(output)==int(levels[0].shape[0])
+            rows=[];left=[];centers=[];right=[];positions=[[],[],[]];destinations=[[],[],[]]
+            incidence_sources=[];incidence_receivers=[];counts=[];factor_offset=0
+            for b,plan in enumerate(output):
+                offset=len(rows)
+                for node,(level,original_id) in enumerate(plan['node_keys']):
+                    positions[level].append(offset+node);destinations[level].append(b*context['widths'][level]+original_id)
+                    rows.append((b,level,original_id))
+                for a,m,z in plan['wedges']:left.append(offset+a);centers.append(offset+m);right.append(offset+z)
+                for node,incident in enumerate(plan['incidence']):
+                    incidence_sources.extend(factor_offset+f for f in incident);incidence_receivers.extend([offset+node]*len(incident));counts.append(len(incident))
+                factor_offset+=plan['factor_count']
+            assert centers and all(counts)
+            context.update(rows=rows,left=left,centers=centers,right=right,positions=positions,destinations=destinations,
+                incidence_sources=incidence_sources,incidence_receivers=incidence_receivers,counts=counts,phase='pack')
+            return output
+        def observed_stack(values,*args,**kwargs):
+            context=state.get('wfc_context')
+            if context is None:return original_stack(values,*args,**kwargs)
+            assert context['phase']=='pack' and len(values)==len(context['rows']) and not context['stack_calls']
+            assert all(torch.equal(value,context['normalized'][level][b,original_id]) for value,(b,level,original_id) in zip(values,context['rows']))
+            output=original_stack(values,*args,**kwargs);context['nodes_ref']=output;context['stack_calls']=1;context['phase']='map_gathers'
+            context['record']['primitive_calls'].append({'kind':'actual_normalized_node_stack','original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            context=state.get('wfc_context')
+            if context is None:return original_select(tensor,dim,index,*args,**kwargs)
+            assert dim==0
+            phase=context['phase']
+            if phase=='map_gathers':
+                count=len(context['map_selects']);expected=(context['centers'],context['left'],context['right'])[count]
+                assert tensor is context['nodes_ref'] and index.detach().cpu().tolist()==expected
+                output=original_select(tensor,dim,index,*args,**kwargs);context['map_selects'].append(output)
+                if len(context['map_selects'])==3:context['phase']='map_cat'
+                kind='center_left_right_original_gather'
+            elif phase=='mean_active':
+                assert tensor is context['factors_ref'] and index.detach().cpu().tolist()==context['incidence_sources'] and 'incidence_gather_ref' not in context
+                output=original_select(tensor,dim,index,*args,**kwargs);context['incidence_gather_ref']=output;kind='actual_incidence_factor_gather'
+            elif phase=='final_scatter':
+                level=context['final_level'];assert tensor is context['delta_ref'] and index.detach().cpu().tolist()==context['positions'][level]
+                output=original_select(tensor,dim,index,*args,**kwargs);context['scatter_source_ref']=output;context['phase']='final_copy';kind='final_level_original_gather'
+            else:raise AssertionError('Unexpected WFC active index_select phase '+phase)
+            context['record']['primitive_calls'].append({'kind':kind,'original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_cat(values,*args,**kwargs):
+            context=state.get('wfc_context')
+            if context is None:return original_cat(values,*args,**kwargs)
+            assert context['phase']=='map_cat' and len(values)==2 and values[0] is context['map_selects'][0] and not context['cat_calls']
+            assert list(values[1].shape)==list(values[0].shape)
+            # Observe the actual endpoint-sum object; do not replay its addition or learned operators.
+            context['endpoint_sum_ref']=values[1];output=original_cat(values,*args,**kwargs)
+            context['cat_ref']=output;context['cat_calls']=1;context['phase']='map_ready';return output
+        def map_pre(owner,values):
+            context=state['wfc_context'];assert owner is att.wedge_factor.factor_map and context['phase']=='map_ready' and values[0] is context['cat_ref'] and not context['map_calls']
+            context['record']['map_calls'].append({'input':summary(values[0]),'input_sha256':fingerprint(torch,values[0]),
+                'actual_center_sha256':fingerprint(torch,context['map_selects'][0]),'actual_left_sha256':fingerprint(torch,context['map_selects'][1]),
+                'actual_right_sha256':fingerprint(torch,context['map_selects'][2]),'actual_endpoint_sum_sha256':fingerprint(torch,context['endpoint_sum_ref'])})
+        def map_post(owner,values,output):
+            context=state['wfc_context'];context['map_ref']=output;context['map_calls']+=1;context['phase']='activation_ready';lite_watch(output,context['record'])
+        def activation_post(owner,values,output):
+            context=state['wfc_context'];assert owner is att.wedge_factor.activation and context['phase']=='activation_ready' and values[0] is context['map_ref'] and not context['GELU_calls']
+            context['factors_ref']=output;context['GELU_calls']=1;context['phase']='mean_ready'
+            context['record']['map_calls'][-1].update(actual_GELU_output=summary(output),actual_GELU_sha256=fingerprint(torch,output));lite_watch(output,context['record'])
+        def observed_add(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('wfc_context')
+            if context is None:return original_add(tensor,dim,index,source,*args,**kwargs)
+            assert context['phase']=='mean_active' and dim==0 and index.detach().cpu().tolist()==context['incidence_receivers']
+            assert source is context['incidence_gather_ref'] and not context['mean_add_calls'] and bool((tensor==0).all())
+            output=original_add(tensor,dim,index,source,*args,**kwargs);context['mean_add_calls']=1
+            context['record']['primitive_calls'].append({'kind':'actual_incidence_index_add','original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_mean(factors,plans):
+            context=state['wfc_context'];assert context['phase']=='mean_ready' and factors is context['factors_ref'] and plans is context['plans_ref'] and not context['mean_calls']
+            context['phase']='mean_active';output=original_mean(factors,plans)
+            assert context['mean_add_calls']==1 and list(output.shape)==[len(context['rows']),att.wedge_factor.channels]
+            context['mean_calls']=1;context['delta_ref']=output;context['phase']='final_scatter'
+            context['record']['mean_calls'].append({'input_sha256':fingerprint(torch,factors),'output_sha256':fingerprint(torch,output),
+                'output':summary(output),'incidence_sources':list(context['incidence_sources']),'incidence_receivers':list(context['incidence_receivers']),
+                'actual_incidence_counts':list(context['counts']),'original_mean_calls':1,'returned_original_object_unchanged':True,
+                'mean_replayed_by_observer':False,'normalization_body':'Frozen original mean_wedge_incidence divides actual summed returns by these exact positive counts; no floating mean replay or new tolerance gate.'})
+            assert context['record']['mean_calls'][-1]['output']['finite'];lite_watch(output,context['record']);return output
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('wfc_context')
+            if context is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            level=context['final_level'];assert context['phase']=='final_copy' and dim==0 and level<3
+            assert index.detach().cpu().tolist()==context['destinations'][level] and source is context['scatter_source_ref'] and bool((tensor==0).all())
+            output=original_copy(tensor,dim,index,source,*args,**kwargs);context['final_outputs'].append(output);context['final_level']+=1
+            context['phase']='final_scatter' if context['final_level']<3 else 'complete'
+            context['record']['primitive_calls'].append({'kind':'final_original_ID_scatter','original_calls':1,'returned_original_object_unchanged':True});return output
+        for name,replacement,original in [('build_wedge_factor_plan',observed_plan,original_plan),('prepare_wedge_factor_plans',observed_prepare,original_prepare),('mean_wedge_incidence',observed_mean,original_mean)]:queue_replace(wfc_module,name,replacement,original)
+        for owner,name,replacement,original in [(torch,'stack',observed_stack,original_stack),(torch,'cat',observed_cat,original_cat),(torch.Tensor,'index_select',observed_select,original_select),(torch.Tensor,'index_add',observed_add,original_add),(torch.Tensor,'index_copy',observed_copy,original_copy)]:queue_replace(owner,name,replacement,original)
+        hooks.extend([att.wedge_factor.factor_map.register_forward_pre_hook(map_pre),att.wedge_factor.factor_map.register_forward_hook(map_post),att.wedge_factor.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('wfc_context');record=context['record']
+            assert context['phase']=='complete' and len(output)==3 and context['prepare_calls']==context['stack_calls']==context['cat_calls']==context['map_calls']==context['GELU_calls']==context['mean_calls']==context['mean_add_calls']==1
+            assert context['final_level']==3 and len(context['map_selects'])==3
+            for level,value in enumerate(output):
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,context['final_outputs'][level].detach().reshape(-1))
+                if not value.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE WFC output before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),
+                actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),actual_nodes=len(context['rows']),actual_wedges=len(context['centers']),
+                actual_factor_map_calls=context['map_calls'],actual_GELU_calls=context['GELU_calls'],actual_private_incidence_mean_calls=context['mean_calls'],
+                actual_original_builder_calls=context['builder_calls'],actual_prepare_calls=context['prepare_calls'],actual_final_index_copy_calls=context['final_level'],
+                actual_three_LN_calls=list(state['norm_counts']),final_deltas_from_actual_incidence_mean=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'true_fine':len(p['fine_ids']),'wedges':p['factor_count'],
+                    'empty_scene':not p['fine_ids'],'single_true_path':len(p['fine_ids'])==1,
+                    'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['wfc_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.wedge_factor.register_forward_pre_hook(exchange_pre),att.wedge_factor.register_forward_hook(exchange_post)])

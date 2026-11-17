@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "candidate_id": "hierarchy-nonlinear-lifting-analysis-synthesis",
+  "experiment_id": "M227-LFT",
+  "selected_by_root": true,
+  "recorded_at": "2026-10-30T10:18:00.189350+00:00",
+  "code_commit": null,
+  "source_commit": null,
+  "source_parent_commit": null,
+  "future_version_parent": null,
+  "base_reference_commit": "18e64b8d95ed0ba5c1053ead114c0f91a4b0c324",
+  "graph": "df=a-P0(b_parent); bt=b+U0(mean_f_to_m(df)); dm=bt-P1(c_parent); ct=c+U1(mean_m_to_c(dm)); Ff=originalFFN0(df), Fm=originalFFN1(dm), Fc=originalFFN2(ct); c_out=Fc-U1(mean(Fm)); bt_out=Fm+P1(c_out_parent); b_out=bt_out-U0(mean(Ff)); a_out=Ff+P0(b_out_parent). Return three deltas then original raw skips/HCG/singleinst.",
+  "maps": "Four shared C-to-C+GELU predict/update maps, each used twice. Parent predictions cached per true parent before original-ID gather. Original3FFNs remain registered only under original cluster_ffn.",
+  "matched_control": "OriginalM95 same nativeYAML/data/pretrain/criterion/optimizer/seed1999/50epochs/max_iters70, naturalpairedTRAIN2 and unchanged resource handlers.",
+  "closest_history": {
+    "M210-PSNC": "Fixed signed orthogonal analysis/nonlinear middle/inverse within original coarse-parent middle groups, not learned cross3bank lifting.",
+    "M218-HPC": "Fixed linear resolvent S F S, not nonlinear predict/update and inverse-order detail synthesis.",
+    "M215-BEC": "Split binary edge up/down messages, no preserved two-level details with exact reverse updates.",
+    "M208-HRC": "Refined-child means only bottom-up; no reverse learned synthesis."
+  },
+  "ordinary_family_scope": "Analysis/synthesis/lifting family. No novelty/new-information/task-deficit/efficacy or whole-model invertibility claim. Not reopening RSTR/PCE/PSNC/HPC holds or budgets.",
+  "source_inference_only": {
+    "new_parameters_C256": 263168,
+    "extra_linear_MAC_formula": "4*(M+C_coarse)*channels^2",
+    "extra_linear_MAC_at64_8_C256": 18874368,
+    "whole_model_resources": "NOT_RUN"
+  },
+  "preserved": "Raw/FPS/IDs, original3LN/FFN/3rawskip/HCG/rawCSORT/uniqueinst, seed/data/YAMLschedule/loss/optimizer/resourcegates unchanged.",
+  "known_risks": [
+    "Detail amplification or cancellation; optimization and capacity unknown.",
+    "Only analysis/inverse with identity core are algebraic inverses in real arithmetic. No FP32 exactness/inverse-residual or conservation admission gate.",
+    "Supported nodes only; padding and empty support do not create graph edges or nonzero output."
+  ],
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN"
+}

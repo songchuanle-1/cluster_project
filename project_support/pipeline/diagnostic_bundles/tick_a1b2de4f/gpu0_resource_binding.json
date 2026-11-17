@@ -1,0 +1,129 @@
+{
+  "preregistered_at": "2026-10-19T20:16:04.890131+00:00",
+  "token": "a1b2de4f938b490c9f4cf17decc7a8f6",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "reason": "M204 natural patience earlystop at28;PIDabsent,authorizedGPU0idle/contextsnone/threefreelocks. Preserve all train/checkpoint evidence;no restart or migration.",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "records": [
+    {
+      "kind": "resolution",
+      "source_manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_4e35c1ce/native/native_manifest.json",
+        "sha256": "716d462f854b6d9eb0bb997732655e966bbe86468a69b392e10cb53a3c08e92e"
+      },
+      "new_manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_a1b2de4f/native_resolution/native_manifest.json",
+        "sha256": "68e6f0c885505cb4ba90ef5e71b81aa206313f747c35d6f9e72ef3848f83b971"
+      },
+      "runtime_diff": [
+        "--- ",
+        "+++ ",
+        "@@ -38,10 +38,10 @@",
+        " ",
+        " def observe(require_idle=False):",
+        "     assert socket.gethostname() == 'dl04-MS-7E06'",
+        "-    row = subprocess.check_output(['nvidia-smi', '-i', '1', '--query-gpu=index,uuid,memory.used,utilization.gpu', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "+    row = subprocess.check_output(['nvidia-smi', '-i', '0', '--query-gpu=index,uuid,memory.used,utilization.gpu', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "     fields = [s.strip() for s in row.split(',')]",
+        "-    assert fields[:2] == ['1', 'GPU-7f82edb9-f620-8045-caea-a75232265cd1']",
+        "-    contexts = subprocess.check_output(['nvidia-smi', '-i', '1', '--query-compute-apps=pid,used_memory', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "+    assert fields[:2] == ['0', 'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c']",
+        "+    contexts = subprocess.check_output(['nvidia-smi', '-i', '0', '--query-compute-apps=pid,used_memory', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "     foreign = [s for s in contexts.splitlines() if int(s.split(',')[0]) != os.getpid()]",
+        "     assert not foreign, 'Occupied authorized GPU;no sharing or eviction'",
+        "     if require_idle:",
+        "@@ -57,7 +57,7 @@",
+        "     before = observe(True)",
+        "     try:",
+        "         for kind in ('training', 'diagnostic', 'exclusive'):",
+        "-            handle = open('/tmp/cluster_project_gpu1_' + kind + '.lock', 'a+b')",
+        "+            handle = open('/tmp/cluster_project_gpu0_' + kind + '.lock', 'a+b')",
+        "             try:",
+        "                 fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)",
+        "             except BaseException:",
+        "@@ -66,7 +66,7 @@",
+        "             HANDLES.append(handle)",
+        "         observe(True)",
+        "         verify()",
+        "-        os.environ.update(CUDA_DEVICE_ORDER='PCI_BUS_ID', CUDA_VISIBLE_DEVICES='GPU-7f82edb9-f620-8045-caea-a75232265cd1')",
+        "+        os.environ.update(CUDA_DEVICE_ORDER='PCI_BUS_ID', CUDA_VISIBLE_DEVICES='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c')",
+        "         signal.alarm(min(1200, int(remaining) - 150))",
+        "         return before",
+        "     except BaseException:"
+      ],
+      "unchanged_task_sha256": {
+        "native_resolution_task.py": "dadac507d09900e28b7e16cacfa19a8fa0736c7dc25024b08b287352af2814d7"
+      },
+      "protocol_unchanged": {
+        "path": "pipeline/diagnostic_bundles/tick_4e35c1ce/native_resolution_protocol.json",
+        "sha256": "4bd72a093b1ae485d2a4c94609a57306728dc5b1c460be6b54bc99126055c560"
+      },
+      "assets_unchanged": true,
+      "cohort_unchanged": true,
+      "scientific_change": false,
+      "implementation_revision": false
+    },
+    {
+      "kind": "relabel",
+      "source_manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_ae419db5/native_manifest.json",
+        "sha256": "92195eb99e15b6b8ec3050af4e48ac34abbbbe7dc97e8bf09028b1fcdf4aaf24"
+      },
+      "new_manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_a1b2de4f/native_relabel/native_manifest.json",
+        "sha256": "0e209288b04fcb54cfee2e438fc37f330bdb9e94c0f83b68e7c74bc22004d883"
+      },
+      "runtime_diff": [
+        "--- ",
+        "+++ ",
+        "@@ -38,10 +38,10 @@",
+        " ",
+        " def observe(require_idle=False):",
+        "     assert socket.gethostname() == 'dl04-MS-7E06'",
+        "-    row = subprocess.check_output(['nvidia-smi', '-i', '1', '--query-gpu=index,uuid,memory.used,utilization.gpu', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "+    row = subprocess.check_output(['nvidia-smi', '-i', '0', '--query-gpu=index,uuid,memory.used,utilization.gpu', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "     fields = [s.strip() for s in row.split(',')]",
+        "-    assert fields[:2] == ['1', 'GPU-7f82edb9-f620-8045-caea-a75232265cd1']",
+        "-    contexts = subprocess.check_output(['nvidia-smi', '-i', '1', '--query-compute-apps=pid,used_memory', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "+    assert fields[:2] == ['0', 'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c']",
+        "+    contexts = subprocess.check_output(['nvidia-smi', '-i', '0', '--query-compute-apps=pid,used_memory', '--format=csv,noheader,nounits'], text=True, timeout=10).strip()",
+        "     foreign = [s for s in contexts.splitlines() if int(s.split(',')[0]) != os.getpid()]",
+        "     assert not foreign, 'Occupied authorized GPU;no sharing or eviction'",
+        "     if require_idle:",
+        "@@ -57,7 +57,7 @@",
+        "     before = observe(True)",
+        "     try:",
+        "         for kind in ('training', 'diagnostic', 'exclusive'):",
+        "-            handle = open('/tmp/cluster_project_gpu1_' + kind + '.lock', 'a+b')",
+        "+            handle = open('/tmp/cluster_project_gpu0_' + kind + '.lock', 'a+b')",
+        "             try:",
+        "                 fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)",
+        "             except BaseException:",
+        "@@ -66,7 +66,7 @@",
+        "             HANDLES.append(handle)",
+        "         observe(True)",
+        "         verify()",
+        "-        os.environ.update(CUDA_DEVICE_ORDER='PCI_BUS_ID', CUDA_VISIBLE_DEVICES='GPU-7f82edb9-f620-8045-caea-a75232265cd1')",
+        "+        os.environ.update(CUDA_DEVICE_ORDER='PCI_BUS_ID', CUDA_VISIBLE_DEVICES='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c')",
+        "         signal.alarm(min(1200, int(remaining) - 150))",
+        "         return before",
+        "     except BaseException:"
+      ],
+      "unchanged_task_sha256": {
+        "native_geometry_probe.py": "5860dd2234af28c82d8908211f14cf86e77fac6d37f43d2243e3116ad1106fa0"
+      },
+      "protocol_unchanged": {
+        "path": "pipeline/diagnostic_bundles/tick_ae419db5/relabeling_protocol.json",
+        "sha256": "6a1582f31f668fbff951ca411a8065f75627ac52b5f475a94ed7695a7cf64659"
+      },
+      "assets_unchanged": true,
+      "cohort_unchanged": true,
+      "scientific_change": false,
+      "implementation_revision": false
+    }
+  ],
+  "order": "Original resolution pair0;continue original remaining pairs only with controls passing,then original native relabel geometry.",
+  "unchanged": "Original model/config/checkpoint/annotations/cohorts/controls1e-6/seed1999/targets/readouts/protocols. Resource mapping only;not new candidate/mechanism or revision.",
+  "frozen_stop": "Retain any failed control. No task-effect interpretation if controls fail;no automatic scientificadmission or training."
+}

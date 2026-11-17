@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-10-19T08:10:30.249151+00:00",
+  "experiment_id": "M204-CPA",
+  "launch_verified": false,
+  "before_steps": [],
+  "after_steps": [],
+  "state_restore_verified": false,
+  "environment": {
+    "observed_at": "2026-10-19T08:10:31.227325+00:00",
+    "pid": 1002720,
+    "owned_resume_process_live": false,
+    "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 41, 0",
+    "contexts": "",
+    "lifetime_lock_fds": [],
+    "resume_restoration": null,
+    "native_exit": {
+      "started_at": "2026-10-19T08:09:27.597412+00:00",
+      "experiment_id": "M204-CPA",
+      "scientific_admission": false,
+      "return_status": "failed",
+      "resume_observed": false,
+      "pid": 1002720,
+      "physical_gpu": 0,
+      "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+      "before": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 41, 0",
+      "locks": [
+        "training",
+        "diagnostic",
+        "exclusive"
+      ],
+      "error_type": "AssertionError",
+      "error": "Model state restore mismatch",
+      "finished_at": "2026-10-19T08:09:42.013756+00:00"
+    }
+  },
+  "traceback": true,
+  "unstable_loss_skip": false,
+  "log_tail": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\nset CUDA_VISIBLE_DEVICES as 0\nCPA_CHECKPOINT_RESUME_GUARD={\"started_at\": \"2026-10-19T08:09:27.597412+00:00\", \"experiment_id\": \"M204-CPA\", \"scientific_admission\": false, \"return_status\": \"training\", \"resume_observed\": false, \"pid\": 1002720, \"physical_gpu\": 0, \"gpu_uuid\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\", \"before\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 41, 0\", \"locks\": [\"training\", \"diagnostic\", \"exclusive\"]}\n2026-10-19 16:09:34,148 - INFO - set random seed: 1999\n2026-10-19 16:09:41,906 - WARNING - The model and loaded state dict do not match exactly\n\nunexpected key in source state_dict: text_encoder.embeddings.position_ids, text_encoder.embeddings.token_type_ids\n\n2026-10-19 16:09:41,907 - INFO - Loading checkpoint from /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/20261019_093003/last.pth\n2026-10-19 16:09:41,988 - INFO - Loading optimizer from /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/20261019_093003/last.pth\n2026-10-19 16:09:41,988 - INFO - Loading scheduler from /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/20261019_093003/last.pth\nTraceback (most recent call last):\n  File \"/data/songcl/Project/Cluster_project/pipeline/cpa_resume_2546d803/guarded_resume.py\", line 115, in <module>\n    train.gorilla.launch(train.main,1,num_machines=native.num_machines,machine_rank=native.machine_rank,dist_url=native.dist_url,args=(native,))\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/core/launch.py\", line 68, in launch\n    main_func(*args)\n  File \"/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/tools/train.py\", line 438, in main\n    meta = gorilla.resume(model=model,\n  File \"/data/songcl/Project/Cluster_project/pipeline/cpa_resume_2546d803/guarded_resume.py\", line 103, in observed_resume\n    assert actual_layout==expected_layout and actual_anchor==expected_anchor,'Model state restore mismatch'\nAssertionError: Model state restore mismatch",
+  "scientific_admission": false
+}

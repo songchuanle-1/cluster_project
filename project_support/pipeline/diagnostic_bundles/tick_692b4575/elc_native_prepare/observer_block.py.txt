@@ -1,0 +1,197 @@
+    if candidate:
+        elc_module=importlib.import_module(qualified+'.edge_line_graph')
+        original_plan=elc_module.build_edge_line_graph_plan;original_prepare=elc_module.prepare_edge_line_graph_plans
+        original_rounds=elc_module.build_edge_rounds;original_mean=elc_module.mean_adjacent_edge_states
+        original_incident=elc_module.incident_node_means
+        original_stack=torch.stack;original_select=torch.Tensor.index_select;original_copy=torch.Tensor.index_copy
+        def queue_replace(owner,name,replacement,original):
+            installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            normalized,ids=values;assert owner is att.edge_line_graph and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[level] is state['norm_outputs'][level] for level in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=elc_coverage_preflight(members)
+            if not coverage['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FOREST'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: empty original core before watches; no replacement sample')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'initialize_calls':[],'round_calls':[],'mean_calls':[],'incident_mean_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'native_observer_scope':'Actual E-state initialize/cell/sharedGELU, original prepare/rounds/adjacent-other mean/incident mean and scoped actual stack/index_select/index_copy calls once. Capture original returns unchanged; no operator/model/criterion/backward replay.',
+                'diameter_multicomponent_FP32_signed_degree_Jacobian_gate':'NOT_IMPLEMENTED_NOT_REQUIRED'}
+            assert 'elc_context' not in state
+            state['elc_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'builder_calls':0,'prepare_calls':0,'round_builder_calls':0,'stack_count':0,'edge_rows':[],
+                'destinations':[[],[],[]],'positions':[[],[],[]],'node_count':0,'round_index':0,'mean_count':0,'incident_count':0,
+                'initialize_count':0,'cell_count':0,'GELU_count':0,'state_write_count':0,'final_level':0,'final_flat_outputs':[],'phase':'prepare'}
+            for level,x in enumerate(normalized):
+                if not x.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE'
+                    raise RuntimeError('INCONCLUSIVE_COVERAGE: original core input not differentiable before watches')
+                watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,widths):
+            context=state['elc_context'];batch=context['builder_calls'];context['builder_calls']+=1
+            assert (ids0,ids1,ids2)==context['members'][batch] and widths==context['widths']
+            output=original_plan(ids0,ids1,ids2,widths);record=elc_plan_observation(output,(ids0,ids1,ids2));record['batch']=batch
+            context['record']['plans'].append(record);return output
+        def observed_prepare(levels,ids):
+            context=state['elc_context'];assert context['phase']=='prepare' and ids is context['ids_ref'] and context['prepare_calls']==0
+            assert all(levels[l] is context['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);context['prepare_calls']=1;context['plans_ref']=output
+            assert context['builder_calls']==len(output)==int(levels[0].shape[0])
+            for batch,plan in enumerate(output):
+                for child,parent in plan['edges']:
+                    context['edge_rows'].append((batch,plan['node_keys'][child],plan['node_keys'][parent]))
+                for node,(level,original_id) in enumerate(plan['node_keys']):
+                    context['positions'][level].append(context['node_count']+node)
+                    context['destinations'][level].append(batch*context['widths'][level]+original_id)
+                context['node_count']+=len(plan['node_keys'])
+            context['phase']='initial_children';return output
+        def observed_stack(values,*args,**kwargs):
+            context=state.get('elc_context')
+            if context is None:return original_stack(values,*args,**kwargs)
+            phase=context['phase'];assert phase in ('initial_children','initial_parents') and len(values)==len(context['edge_rows'])
+            role=1 if phase=='initial_children' else 2
+            for row,entry in zip(values,context['edge_rows']):
+                batch=entry[0];level,original_id=entry[role]
+                assert fingerprint(torch,row)==fingerprint(torch,context['normalized'][level][batch,original_id])
+            output=original_stack(values,*args,**kwargs);context['stack_count']+=1
+            context['child_stack_ref' if role==1 else 'parent_stack_ref']=output
+            context['phase']='initial_parents' if role==1 else 'initialize'
+            context['record']['primitive_calls'].append({'kind':phase,'original_calls':1,'returned_original_object_unchanged':True,'rows':len(values)})
+            return output
+        def initialize_pre(owner,values):
+            context=state['elc_context'];assert owner is att.edge_line_graph.initialize and context['phase']=='initialize'
+            value=values[0];c=att.edge_line_graph.channels
+            assert list(value.shape)==[len(context['edge_rows']),2*c]
+            assert fingerprint(torch,value[:,:c])==fingerprint(torch,context['child_stack_ref']) and fingerprint(torch,value[:,c:])==fingerprint(torch,context['parent_stack_ref'])
+            context['record']['initialize_calls'].append({'rows':len(context['edge_rows']),'input':summary(value),'input_sha256':fingerprint(torch,value),'child_parent_roles_exact':True})
+            assert context['record']['initialize_calls'][-1]['input']['finite'];lite_watch(value,context['record'])
+        def initialize_post(owner,values,output):
+            context=state['elc_context'];context['linear_ref']=output;context['initialize_count']+=1;context['phase']='initialize_GELU'
+            assert summary(output)['finite'];lite_watch(output,context['record'])
+        def observed_rounds(plans):
+            context=state['elc_context'];assert plans is context['plans_ref'] and context['phase']=='rounds' and context['round_builder_calls']==0
+            output=original_rounds(plans);elc_rounds_observation(plans,output);context['round_builder_calls']=1;context['rounds']=output
+            context['phase']='own' if output else 'incident_ready';return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            context=state.get('elc_context')
+            if context is None:return original_select(tensor,dim,index,*args,**kwargs)
+            assert dim==0;phase=context['phase'];actual_ids=index.detach().cpu().tolist()
+            if phase=='own':
+                round_plan=context['rounds'][context['round_index']]
+                assert tensor is context['current_state_ref'] and actual_ids==round_plan['receivers']
+                output=original_select(tensor,dim,index,*args,**kwargs);context['own_ref']=output;context['phase']='mean_ready';kind='own_edge_gather'
+            elif phase=='mean_active':
+                round_plan=context['rounds'][context['round_index']];bucket=round_plan['endpoint_buckets'][context['bucket_gather_count']]
+                assert tensor is context['current_state_ref'] and actual_ids==bucket['edges']
+                output=original_select(tensor,dim,index,*args,**kwargs);context['bucket_gather_count']+=1;kind='endpoint_incidence_gather'
+            elif phase=='incident_active':
+                assert tensor is context['current_state_ref'] and actual_ids==context['incident_sources'] and context['incident_gather_count']==0
+                output=original_select(tensor,dim,index,*args,**kwargs);context['incident_gather_count']+=1;kind='final_incident_edge_gather'
+            else:
+                assert phase=='final_scatter';level=context['final_level']
+                assert tensor is context['node_state_ref'] and actual_ids==context['positions'][level]
+                output=original_select(tensor,dim,index,*args,**kwargs);context['final_source_ref']=output;context['phase']='final_copy';kind='final_node_gather'
+            context['record']['primitive_calls'].append({'kind':kind,'round':context['round_index'],'original_calls':1,'returned_original_object_unchanged':True})
+            return output
+        def observed_mean(old_state,round_plan):
+            context=state['elc_context'];assert context['phase']=='mean_ready' and old_state is context['current_state_ref'] and round_plan is context['rounds'][context['round_index']]
+            context['phase']='mean_active';context['bucket_gather_count']=0
+            output=original_mean(old_state,round_plan)
+            assert context['bucket_gather_count']==len(round_plan['endpoint_buckets'])
+            assert list(output.shape)==[len(round_plan['receivers']),att.edge_line_graph.channels]
+            context['mean_ref']=output;context['mean_count']+=1;context['phase']='cell'
+            record={'round':context['round_index'],'input_state_sha256':fingerprint(torch,old_state),'output':summary(output),'output_sha256':fingerprint(torch,output),
+                'counts':list(round_plan['counts']),'endpoint_buckets':copy.deepcopy(round_plan['endpoint_buckets']),
+                'original_mean_calls':1,'returned_original_object_unchanged':True,'mean_replayed_by_observer':False,
+                'actual_endpoint_gathers_from_same_OLDstate':True,'actual_endpoint_bucket_gather_calls':context['bucket_gather_count'],
+                'exclusive_prefix_suffix_semantics':'Frozen production body; original helper executed once; no independent numeric mean replay or FP32 conservation gate'}
+            assert record['output']['finite'];context['record']['mean_calls'].append(record);lite_watch(output,context['record']);return output
+        def cell_pre(owner,values):
+            context=state['elc_context'];assert owner is att.edge_line_graph.cell and context['phase']=='cell'
+            value=values[0];c=att.edge_line_graph.channels;round_plan=context['rounds'][context['round_index']]
+            assert list(value.shape)==[len(round_plan['receivers']),2*c]
+            assert fingerprint(torch,value[:,:c])==fingerprint(torch,context['own_ref']) and fingerprint(torch,value[:,c:])==fingerprint(torch,context['mean_ref'])
+            context['pending_round']={'round':context['round_index'],'receivers':list(round_plan['receivers']),'neighbor_counts':list(round_plan['counts']),
+                'input':summary(value),'input_sha256':fingerprint(torch,value),'same_OLD_state_before_all_updates':True}
+            assert context['pending_round']['input']['finite'];lite_watch(value,context['record'])
+        def cell_post(owner,values,output):
+            context=state['elc_context'];context['linear_ref']=output;context['cell_count']+=1;context['phase']='round_GELU'
+            context['pending_round']['linear_output']=summary(output);assert context['pending_round']['linear_output']['finite'];lite_watch(output,context['record'])
+        def activation_post(owner,values,output):
+            context=state['elc_context'];assert owner is att.edge_line_graph.activation and values[0] is context['linear_ref']
+            phase=context['phase'];assert phase in ('initialize_GELU','round_GELU');context['GELU_count']+=1
+            assert summary(output)['finite'];lite_watch(output,context['record'])
+            if phase=='initialize_GELU':
+                context['current_state_ref']=output;context['phase']='rounds'
+                context['record']['initialize_calls'][-1].update(output=summary(output),output_sha256=fingerprint(torch,output),original_initialize_calls=1,original_GELU_calls=1)
+            else:
+                context['GELU_ref']=output;context['phase']='state_write'
+                context['pending_round'].update(output=summary(output),output_sha256=fingerprint(torch,output),original_cell_calls=1,original_GELU_calls=1)
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            context=state.get('elc_context')
+            if context is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            assert dim==0
+            if context['phase']=='state_write':
+                round_plan=context['rounds'][context['round_index']]
+                assert tensor is context['current_state_ref'] and source is context['GELU_ref'] and index.detach().cpu().tolist()==round_plan['receivers']
+                output=original_copy(tensor,dim,index,source,*args,**kwargs);context['current_state_ref']=output;context['state_write_count']+=1
+                context['pending_round'].update(original_state_index_copy_calls=1,functional_update_after_OLDstate_reads=True,actual_state_sha256=fingerprint(torch,output))
+                context['record']['round_calls'].append(context.pop('pending_round'));context['round_index']+=1
+                context['phase']='own' if context['round_index']<len(context['rounds']) else 'incident_ready';kind='state_write'
+            else:
+                assert context['phase']=='final_copy';level=context['final_level']
+                assert index.detach().cpu().tolist()==context['destinations'][level] and source is context['final_source_ref'] and bool((tensor==0).all())
+                output=original_copy(tensor,dim,index,source,*args,**kwargs);context['final_flat_outputs'].append(output)
+                context['final_level']+=1;context['phase']='final_scatter' if context['final_level']<3 else 'complete';kind='final_scatter'
+            context['record']['primitive_calls'].append({'kind':kind,'original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_incident(edge_state,plans):
+            context=state['elc_context'];assert context['phase']=='incident_ready' and edge_state is context['current_state_ref'] and plans is context['plans_ref'] and context['incident_count']==0
+            sources=[];counts=[];offset=0
+            for plan in plans:
+                for incident in plan['incident']:
+                    sources.extend(offset+e for e in incident);counts.append(len(incident))
+                offset+=len(plan['edges'])
+            context['incident_sources']=sources;context['incident_gather_count']=0;context['phase']='incident_active'
+            output=original_incident(edge_state,plans)
+            assert context['incident_gather_count']==1 and list(output.shape)==[context['node_count'],att.edge_line_graph.channels]
+            context['incident_count']=1;context['node_state_ref']=output;context['phase']='final_scatter'
+            record={'input_state_sha256':fingerprint(torch,edge_state),'output':summary(output),'output_sha256':fingerprint(torch,output),
+                'incident_sources':sources,'incident_counts':counts,'original_incident_mean_calls':1,'returned_original_object_unchanged':True,
+                'mean_replayed_by_observer':False,'same_final_edge_state_shared_by_endpoints':True}
+            assert record['output']['finite'];context['record']['incident_mean_calls'].append(record);lite_watch(output,context['record']);return output
+        for name,replacement,original in [('build_edge_line_graph_plan',observed_plan,original_plan),('prepare_edge_line_graph_plans',observed_prepare,original_prepare),('build_edge_rounds',observed_rounds,original_rounds),('mean_adjacent_edge_states',observed_mean,original_mean),('incident_node_means',observed_incident,original_incident)]:queue_replace(elc_module,name,replacement,original)
+        queue_replace(torch,'stack',observed_stack,original_stack);queue_replace(torch.Tensor,'index_select',observed_select,original_select);queue_replace(torch.Tensor,'index_copy',observed_copy,original_copy)
+        hooks.extend([att.edge_line_graph.initialize.register_forward_pre_hook(initialize_pre),att.edge_line_graph.initialize.register_forward_hook(initialize_post),
+            att.edge_line_graph.cell.register_forward_pre_hook(cell_pre),att.edge_line_graph.cell.register_forward_hook(cell_post),att.edge_line_graph.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('elc_context');record=context['record'];round_count=len(context['rounds'])
+            assert context['phase']=='complete' and len(output)==3 and context['prepare_calls']==context['round_builder_calls']==context['initialize_count']==context['incident_count']==1 and context['stack_count']==2
+            assert context['round_index']==context['mean_count']==context['cell_count']==context['state_write_count']==round_count and context['GELU_count']==round_count+1
+            for level,value in enumerate(output):
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,context['final_flat_outputs'][level].detach().reshape(-1))
+                if not value.requires_grad:
+                    result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE core output before watches')
+                watch(value,record,'native_output_level'+str(level)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),
+                actual_nodes=context['node_count'],actual_true_edges=len(context['edge_rows']),actual_rounds=round_count,actual_initialize_calls=context['initialize_count'],
+                actual_neighbor_mean_calls=context['mean_count'],actual_incident_mean_calls=context['incident_count'],actual_cell_calls=context['cell_count'],actual_GELU_calls=context['GELU_count'],
+                actual_state_index_copy_calls=context['state_write_count'],actual_final_index_copy_calls=context['final_level'],actual_original_builder_calls=context['builder_calls'],
+                actual_three_LN_calls=list(state['norm_counts']),actual_state_update_rows=sum(len(r['receivers']) for r in context['rounds']),
+                actual_finished_components_no_fake_updates=True,actual_all_neighbor_same_OLDstate=True,final_incident_mean_delta_from_actual_operator_captures=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundary_counts=[{'batch':p['batch'],'components':[{'root':c['root_id'],'tree_D':c['tree_diameter'],'line_D':c['line_diameter'],'edges':len(c['edges'])} for c in p['components']],
+                    'empty_scene':not p['fine_ids'],'one_true_fine':len(p['fine_ids'])==1,'unsupported_or_padding':[context['widths'][l]-len(p[k]) for l,k in enumerate(('fine_ids','middle_ids','coarse_ids'))]} for p in record['plans']])
+            state['elc_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.edge_line_graph.register_forward_pre_hook(exchange_pre),att.edge_line_graph.register_forward_hook(exchange_post)])

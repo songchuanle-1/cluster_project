@@ -1,0 +1,11 @@
+--- frozen_v1/clear_cso_hold_once.py
++++ fresh_v2/clear_cso_hold_once.py
+@@ -13,7 +13,7 @@
+   guard(a);queue=monitor.load_queue(str(ROOT));tasks=[x for xs in queue['gpu_queues'].values() for x in xs if x.get('id')=='M236-CSO'];assert len(tasks)==1
+   task=tasks[0];assert task['status']=='waiting' and task['code_commit']==SOURCE and task['config']==CONFIG and not task.get('pid')
+   assert task.get('dispatch_hold'),'Existing cleared/uncertain hold: reconcile, never replay'
+-  execution=TICK/'cso_pointer_execution';execution.mkdir(exist_ok=True);intent=execution/'clear_hold.intent.json';actual=execution/'clear_hold.actual.json';assert not intent.exists() and not actual.exists()
++  execution=TICK/'cso_pointer_execution_v2';execution.mkdir(exist_ok=True);intent=execution/'clear_hold.intent.json';actual=execution/'clear_hold.actual.json';assert not intent.exists() and not actual.exists()
+   old=task['dispatch_hold'];save(intent,{'owner':OWNER,'old_hold':old,'production_result_sha256':sha(a.production_result),'no_replay':True})
+   task.pop('dispatch_hold',None);task.update(production_ready=True,production_result={'path':str(a.production_result),'sha256':sha(a.production_result)},production_owner=OWNER['token']);monitor.save_queue(str(ROOT),queue)
+   assert sha(ROOT/'SERVERS.yaml')==read(HERE/'baseline.json')['SERVERS_sha256'];save(actual,{'owner':OWNER,'only_M236_hold_cleared':True,'production_ready':True,'old_hold':old,'production_shim':production['shim']});print(json.dumps({'path':str(actual),'sha256':sha(actual)}))

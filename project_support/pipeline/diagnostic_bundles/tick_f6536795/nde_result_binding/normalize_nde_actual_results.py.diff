@@ -1,0 +1,125 @@
+--- frozen4fa/normalize_nde_actual_results.py
++++ newf653/normalize_nde_actual_results.py
+@@ -16,14 +16,14 @@
+ HERE = Path(__file__).resolve().parent
+ OUTPUT = HERE / ("results_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ"))
+ OWNER_KEYS = ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")
+-TICK = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e'
++TICK = ROOT / 'pipeline/diagnostic_bundles/tick_f6536795'
+ EXECUTION = TICK / "nde_execution"
+-BASE_NATIVE = TICK / 'nde_revision_native_prepare'
++BASE_NATIVE = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_native_prepare'
+ NATIVE = None  # Actual reviewed execution copy is passed explicitly by root.
+ PROTOCOL = ROOT / "pipeline/diagnostic_bundles/tick_2e51495f/reserve_candidate/native_protocol.md"
+-PROOF = TICK / 'nde_revision1_source/source_version.json'
+-SOURCE_REVIEW = TICK / 'nde_revision_source_independent_review.json'
+-TOKEN = '4fa1481eb5e14bd1a0637720635b6410'
++PROOF = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision1_source/source_version.json'
++SOURCE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_source_independent_review.json'
++TOKEN = 'f653679598744de7ac2fafb23a96c1ea'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ CID = "hierarchy-native-distribution-embedding-composition"
+ SOURCE = '0747f6acec1c61018ec99acf2efa5329c9b3523c'
+@@ -31,12 +31,14 @@
+ GOAL = "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+ PAIRS = (("smoke", "champion"), ("smoke", "candidate"), ("resources", "champion"), ("resources", "candidate"))
+ DRAFT_NORMALIZATION_DISABLED = True
+-EXPECTED_WORKER_SHA256 = None
+-EXPECTED_RUNTIME_SHA256 = None
+-HISTORICAL_PROVENANCE = Path('D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_4fa1481e\\nde_revision_result_prepare\\historical_champion_smoke_provenance.json')
++EXPECTED_WORKER_SHA256 = 'b37fe5cf29ce04b8110752c7321d34b8d1a26218a6d8e02940b5773d9e4d5f72'
++EXPECTED_RUNTIME_SHA256 = '348024f11e6a106788840c1359ad8c65363914d1f1882cfe4a5f8d319d5ea1a4'
++HISTORICAL_PROVENANCE = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_result_prepare/historical_champion_smoke_provenance.json'
+ HISTORICAL_PROVENANCE_SHA256 = 'cbad63e6da551b6024572c47d0df6b6c147af5aaad890d8eb05dd14eea58d170'
+-REUSE_REVIEW = TICK / 'nde_historical_champion_smoke_reuse_review.json'
++REUSE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_historical_champion_smoke_reuse_review.json'
+ REUSE_REVIEW_SHA256 = '1c2913321b0bf0b9681043104096cad0100939f8fc1acc5ca52dd9b67a9ad756'
++EXPECTED_NATIVE = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_native_active'
++EXPECTED_OPERATIONAL_REFS = {'FROZEN.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/FROZEN.json', 'sha256': '19171f4e3094bcd5a11a911c7a7d135a65bb6bf9e3710921e937f84ad77dfd4f'}, 'adapter.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/adapter.py', 'sha256': '8c2613e18c51b2c03e603028ec123b26c16057d930c04587a3c9309e92e25364'}, 'remote_ops.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/remote_ops.py', 'sha256': 'db82eab9dd05fd90e30194119b0e1df559ed11a4178a2015923b11e16a48779e'}, 'run_nde_operation.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/run_nde_operation.py', 'sha256': '1a43c01799c9b6fba00fb9a9e31ed6824c0034237399f8733e4aa16c3b7dab9f'}, 'current_binding.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/current_binding.json', 'sha256': '6dac90238cb877863d9ed22237ee9119f9230ba05da116cbb52ce3d7e4daa160'}, 'release_template.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/release_template.json', 'sha256': 'aaf4b8734321fe6ff5dff33e7f5419e0c48230a8d44bb724143ed9bfdaa8cc18'}, 'preparation.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/preparation.json', 'sha256': '48cd8101c6999fad6a7c1cf2dfd7b85bda35b6f21fac9f922289e7c4faf0bd78'}, 'software_validation.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/software_validation.json', 'sha256': '141c48cba979292485f6b4e1deba37f8e29823785629c34ca8842009543e6c2d'}}
+ CHECKS = []
+ 
+ 
+@@ -192,7 +194,9 @@
+           observation['exact_original_encoder_feature_and_mask_references'] is True
+           and observation['actual_three_LN_calls'] == [1, 1, 1]
+           and observation['native_point_analysis_precedes_first_private_mean'] is True
+-          and observation['per_parameter_nonzero_FP32_minimum_effect_gate_added'] is False)
++          and observation['per_parameter_nonzero_FP32_minimum_effect_gate_added'] is False
++          and observation['actual_revision1_affine_factoring_observed'] is True
++          and observation['implementation_revision'] == 1)
+     active = [scene for scene in observation['scene_observations'] if scene['true_supported_nodes_by_scale'][0] > 0]
+     check('NDE_original_supported_scene_count_' + step, len(active) == observation['actual_supported_scene_count'])
+     mappings = ['point_to_fine', 'fine_to_middle', 'middle_to_coarse']
+@@ -210,6 +214,11 @@
+               and all(x['mapping'] == mappings[x['level']]
+                       and x['actual_original_normalized_parent_token_ref'] is True
+                       and x['actual_original_ancestry_mapping'] is True
++                       and x['projected_unique_parent_before_gather'] is True
++                       and x['unique_parent_rows'] == counts[x['level']]
++                       and x['child_rows'] == (scene['point_count'] if x['level'] == 0
++                                              else counts[x['level'] - 1])
++                       and x['output']['shape'][0] == x['child_rows']
+                       and x['original_calls'] == 1 and x['output']['finite'] is True for x in contexts))
+         means = scene['mean_observations']
+         check('NDE_original_three_transformed_value_means_' + suffix,
+@@ -233,13 +242,44 @@
+                       all(x['before_private_mean'] is True and x['analysis_source'] ==
+                           ('actual_native_points' if x['level'] == 0 else 'actual_child_state')
+                           and x['parent_input']['shape'] == [counts[x['level']], x['output']['shape'][-1]]
++                           and x['parent_input']['finite'] is True
+                           and x['actual_three_argument_analysis'] is True
++                           and x['actual_child_and_unique_parent_first_affine_halves'] is True
++                           and x['actual_original_first_affine_bias_applied_once'] is True
+                           and x['actual_parent_projection_before_gather'] is True
+                           and x['original_per_child_GELU_and_second_Linear'] is True
++                           and x['analysis_first_affine_source_rows'] == x['input']['shape'][0]
++                           and x['analysis_first_affine_unique_parent_rows'] == counts[x['level']]
+                           and x['original_parameter_topology_and_precision'] is True for x in stages)
+                       and stages[0]['output']['shape'][0] == scene['point_count']
+                       and all(stages[level]['output']['shape'][0] == counts[level - 1] for level in (1, 2))
+                       and all(means[level]['input']['shape'] == stages[level]['output']['shape'] for level in range(3)))
++                for stage in stages:
++                    level = stage['level']
++                    channels = stage['output']['shape'][-1]
++                    child_rows = stage['input']['shape'][0]
++                    linear = stage['affine_factorization_observations']
++                    check('NDE_revision1_actual_original_weight_linear_operations_' + suffix + '_level' + str(level),
++                          len(linear) == 3
++                          and [entry['role'] for entry in linear] == [
++                              'actual_child_first_affine_half',
++                              'actual_unique_parent_first_affine_half',
++                              'actual_original_second_linear']
++                          and all(entry['original_calls'] == 1
++                                  and entry['actual_original_parameter_or_slice_reference'] is True
++                                  and entry['returned_original_object_unchanged'] is True
++                                  and entry['FP32_cast_added'] is False
++                                  and entry['input']['finite'] is True
++                                  and entry['weight']['finite'] is True
++                                  and entry['output']['finite'] is True
++                                  and entry['weight']['shape'] == [channels, channels]
++                                  and entry['input']['shape'] == [
++                                      counts[level] if ordinal == 1 else child_rows, channels]
++                                  and entry['output']['shape'] == entry['input']['shape']
++                                  for ordinal, entry in enumerate(linear))
++                          and [entry['first_affine_original_bias_applied_here'] for entry in linear]
++                              == [True, False, None]
++                          and contexts[level]['output']['shape'] == [child_rows, channels])
+             else:
+                 check('NDE_original_synthesis_supported_counts_' + suffix,
+                       all(x['output']['shape'][0] == counts[x['level']] for x in stages))
+@@ -267,8 +307,14 @@
+         print(json.dumps({'status':'DEFAULT_NOP_NO_NORMALIZATION','draft_disabled':DRAFT_NORMALIZATION_DISABLED}));return
+     assert not DRAFT_NORMALIZATION_DISABLED and args.native_dir, 'Reviewed activation and explicit actual native directory required'
+     NATIVE = Path(args.native_dir).resolve()
+-    assert NATIVE.is_relative_to(TICK.resolve()) and NATIVE != BASE_NATIVE.resolve()
++    assert NATIVE == EXPECTED_NATIVE.resolve() and NATIVE != BASE_NATIVE.resolve()
+     owner = guard()
++    check('fresh_operational_payload_refs_bound', isinstance(EXPECTED_OPERATIONAL_REFS, dict)
++          and bool(EXPECTED_OPERATIONAL_REFS))
++    for name, entry in EXPECTED_OPERATIONAL_REFS.items():
++        artifact = (ROOT / entry['path']).resolve()
++        check('fresh_operational_immutable_' + name,
++              artifact.is_relative_to(TICK.resolve()) and sha(artifact) == entry['sha256'])
+     missing = [mode + "_" + target + "_execution.json" for mode, target in PAIRS
+                if not arm_path(mode, target, "execution").is_file()]
+     if missing:

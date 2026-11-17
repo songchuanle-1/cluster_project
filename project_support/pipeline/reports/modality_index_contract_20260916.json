@@ -1,0 +1,27 @@
+{
+  "source_checks": {
+    "transform_train": true,
+    "transform_test": true,
+    "cache_uses_original_ids": true,
+    "same_expansion_order": true,
+    "padding_preserves_order": true,
+    "lia_source_is_sp": true
+  },
+  "synthetic_cases": 340,
+  "deliberately_misaligned_controls_detected": 302,
+  "shared_index": "(batch, scene occurrence, expanded expression offset, local superpoint index)",
+  "conclusion": "Consumer code preserves SP-row correspondence; no index-misalignment evidence.",
+  "limitations": [
+    "Static source contract plus synthetic indexing, not native cache provenance verification.",
+    "clip_feat cache producer and source per-view/visibility metadata remain unverified.",
+    "Independent captures do not persist vectors/support IDs; matching expression IDs alone cannot establish tensor alignment across runs.",
+    "Aligned rows do not guarantee semantic alignment or justify fusion novelty.",
+    "Point subsampling changes 3D aggregation; cached2D comes from precomputed SPs. This distinction is not evidence of harmful mismatch."
+  ],
+  "sources": {
+    "Cluster\\framework\\dataset\\scannetv2.py": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "Cluster\\framework\\model\\Quard_model\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort\\network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "Cluster\\framework\\model\\Quard_model\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort\\dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "scripts\\modality_index_contract_20260916.py": "684b73eb9342c1221fb1ac246714e6e83e464c8c3a43f0c9fb3192228c00d3df"
+  }
+}

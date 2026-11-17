@@ -1,0 +1,99 @@
+{
+  "scope": "Event-mode overdue capacity retry and CPU-only native-feature-contrast validation for blocked native capture stages; no native capture or efficacy claim",
+  "timestamp": "2026-09-18T15:10:00+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "capture_launched": false
+  },
+  "m197_live_progress": {
+    "preflight_epoch": "17/50",
+    "best_miou": 0.4803,
+    "no_improve": "1/10",
+    "recent_validation_sequence": [
+      0.4778,
+      0.4800,
+      0.4786,
+      0.4803,
+      0.4782
+    ],
+    "previous_observed_step": "2690/4686",
+    "native_step": "3760/4686",
+    "native_log": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs/20260916_042843/20260916_042843.log",
+    "native_progress_observed": true
+  },
+  "cpu_validation": {
+    "status": "passed",
+    "scope": "Five unit tests for support-bound leave-one-superpoint-out cosine retrieval",
+    "environment": "remote server-6 project_cluster Python 3.10 with torch 2.8.0+cu128; CPU execution only",
+    "staging": "/tmp; no candidate checkout, queue, config, model, or training state modified",
+    "tests_passed": 5,
+    "tests_failed": 0,
+    "test_module": {
+      "path": "scripts/test_native_feature_contrasts_20260916.py",
+      "sha256": "bbaee48dfc7bd46fbae7a66874124cb216a25d3d990c5710986adddfb3dd2bdc"
+    },
+    "producer_module": {
+      "path": "scripts/native_feature_contrasts_20260916.py",
+      "sha256": "ece045a9b5a31416b95d99e294cda95f1716a4165288e4f78471dcc6818924ef"
+    },
+    "staged_dependencies": [
+      {
+        "path": "scripts/native_support_capture_20260916.py",
+        "sha256": "83d8bda90de0720cf9307d633831bbb5d6cd904c7047279eff649e917ec944a7"
+      },
+      {
+        "path": "scripts/capture_support_20260916.py",
+        "sha256": "8ed9e62427981d7ad5a413ac8114ebf95c25f6bb517d7c6db741c799f5475975"
+      }
+    ],
+    "coverage_note": "This closes the previously skipped unit-test coverage gap for the existing CPU-only diagnostic. The diagnostic result itself was produced earlier and is not rerun or upgraded here."
+  },
+  "existing_diagnostic_evidence": {
+    "path": "pipeline/reports/native_feature_contrasts_20260916-1615.json",
+    "sha256": "6e578bff3361668696ce659fa43875595aca49f37b478f3fe1dd5e42d9e402eb",
+    "source_capture_path": "pipeline/reports/native_support_capture_20260916-1517.json",
+    "source_capture_sha256": "41d27702be33f6d8db27ff195359a52863149efd7649408a3b62a40cbd776de8",
+    "interpretation": "Existing four-scene diagnostic only; no efficacy or causal identity-loss claim."
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied at the two-process cap by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-18T16:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Performed one bounded live GPU/process and native-log query after the 15:07 retry deadline, then executed the five CPU-only native-feature-contrast tests under remote torch without using a GPU. No launch was attempted and the foreign DAS workload was not touched."
+  },
+  "limitations": [
+    "No paired native capture ran, so no efficacy result or scientific validation is claimed.",
+    "Unit-test passage establishes implementation integrity for the retrieval diagnostic, not scientific validity.",
+    "The existing contrast result covers four scenes and does not identify causal identity loss.",
+    "M197-PIRS remains prior-art engineering evidence only.",
+    "The foreign DAS workload was observed only and was not touched."
+  ]
+}

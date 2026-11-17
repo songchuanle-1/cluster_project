@@ -1,0 +1,3007 @@
+{
+  "owner": {
+    "token": "91c85c4270bd407ba432eca5dbf7d3a8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T15:11:36.784479+00:00",
+    "deadline_at": "2026-11-10T16:11:36.784479+00:00",
+    "context_sha256": "d1a82f07e45547ddd21ae1b683c512ebdc507d2918a2e3d29f3042d06c4cfb29",
+    "pending_sha256": "f72d8f0311730464227da959d659ce43712b147d50bfba10cdbd70ceaa256985"
+  },
+  "kind": "READ_ONLY_INSTALLED_OPTIMIZER_SOURCE_PYC_STATIC_DIAGNOSIS",
+  "body_sha256": "5c932e9d63612e03cb707cc2c3a97bfe4a6e49f9de7259c2bf94e466e3db6c54",
+  "started_at": "2026-11-10T15:19:58.154386+00:00",
+  "certainty": "terminal",
+  "signals_sent": false,
+  "remote_mutations": false,
+  "Torch_imported": false,
+  "GPU_compute": false,
+  "local_ssh_pid": 63816,
+  "returncode": 0,
+  "stderr": "",
+  "stdout_sha256": "1f00c9afe01fd965656c351d59ee513506ff6c2e7ee8039a4c1ee5337bbc6ffe",
+  "observation": {
+    "owner": {
+      "token": "91c85c4270bd407ba432eca5dbf7d3a8",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-10T15:11:36.784479+00:00",
+      "deadline_at": "2026-11-10T16:11:36.784479+00:00",
+      "context_sha256": "d1a82f07e45547ddd21ae1b683c512ebdc507d2918a2e3d29f3042d06c4cfb29",
+      "pending_sha256": "f72d8f0311730464227da959d659ce43712b147d50bfba10cdbd70ceaa256985"
+    },
+    "hostname": "dl04-MS-7E06",
+    "uid": 1001,
+    "python": "/home/songcl/.conda/envs/project_cluster/bin/python",
+    "python_version": "3.10.20 | packaged by conda-forge | (main, Jun 11 2026, 03:31:56) [GCC 14.3.0]",
+    "python_identity": {
+      "path": "/home/songcl/.conda/envs/project_cluster/bin/python3.10",
+      "sha256": "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5",
+      "size": 17331920,
+      "mtime_ns": 1784019280194757290,
+      "ctime_ns": 1784019283029948101,
+      "device": 66308,
+      "inode": 56362993,
+      "uid": 1001,
+      "read_stable": true
+    },
+    "adam_source_identity": {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/optim/adam.py",
+      "sha256": "46296644b82ae5f2ecae17ee30ce4691f4cc2078a0e478ec2beef10ffbe8018e",
+      "size": 39250,
+      "mtime_ns": 1782094216515795192,
+      "ctime_ns": 1784019270297721689,
+      "device": 66308,
+      "inode": 56269921,
+      "uid": 1001,
+      "read_stable": true
+    },
+    "adam_source_lines135_245": [
+      {
+        "line": 135,
+        "text": "                        else torch.tensor(step_val, dtype=_get_scalar_dtype())"
+      },
+      {
+        "line": 136,
+        "text": "                    )"
+      },
+      {
+        "line": 137,
+        "text": ""
+      },
+      {
+        "line": 138,
+        "text": "    def _init_group("
+      },
+      {
+        "line": 139,
+        "text": "        self,"
+      },
+      {
+        "line": 140,
+        "text": "        group,"
+      },
+      {
+        "line": 141,
+        "text": "        params_with_grad,"
+      },
+      {
+        "line": 142,
+        "text": "        grads,"
+      },
+      {
+        "line": 143,
+        "text": "        exp_avgs,"
+      },
+      {
+        "line": 144,
+        "text": "        exp_avg_sqs,"
+      },
+      {
+        "line": 145,
+        "text": "        max_exp_avg_sqs,"
+      },
+      {
+        "line": 146,
+        "text": "        state_steps,"
+      },
+      {
+        "line": 147,
+        "text": "    ):"
+      },
+      {
+        "line": 148,
+        "text": "        has_complex = False"
+      },
+      {
+        "line": 149,
+        "text": "        for p in group[\"params\"]:"
+      },
+      {
+        "line": 150,
+        "text": "            if p.grad is not None:"
+      },
+      {
+        "line": 151,
+        "text": "                has_complex |= torch.is_complex(p)"
+      },
+      {
+        "line": 152,
+        "text": "                params_with_grad.append(p)"
+      },
+      {
+        "line": 153,
+        "text": "                if p.grad.is_sparse:"
+      },
+      {
+        "line": 154,
+        "text": "                    raise RuntimeError("
+      },
+      {
+        "line": 155,
+        "text": "                        \"Adam does not support sparse gradients, please consider SparseAdam instead\""
+      },
+      {
+        "line": 156,
+        "text": "                    )"
+      },
+      {
+        "line": 157,
+        "text": "                grads.append(p.grad)"
+      },
+      {
+        "line": 158,
+        "text": ""
+      },
+      {
+        "line": 159,
+        "text": "                state = self.state[p]"
+      },
+      {
+        "line": 160,
+        "text": "                # Lazy state initialization"
+      },
+      {
+        "line": 161,
+        "text": "                if len(state) == 0:"
+      },
+      {
+        "line": 162,
+        "text": "                    if group[\"fused\"]:"
+      },
+      {
+        "line": 163,
+        "text": "                        _device_dtype_check_for_fused(p)"
+      },
+      {
+        "line": 164,
+        "text": "                    # note(crcrpar): [special device hosting for step]"
+      },
+      {
+        "line": 165,
+        "text": "                    # Deliberately host `step` on CPU if both capturable and fused are off."
+      },
+      {
+        "line": 166,
+        "text": "                    # This is because kernel launches are costly on CUDA and XLA."
+      },
+      {
+        "line": 167,
+        "text": "                    state[\"step\"] = ("
+      },
+      {
+        "line": 168,
+        "text": "                        torch.zeros("
+      },
+      {
+        "line": 169,
+        "text": "                            (),"
+      },
+      {
+        "line": 170,
+        "text": "                            dtype=_get_scalar_dtype(is_fused=group[\"fused\"]),"
+      },
+      {
+        "line": 171,
+        "text": "                            device=p.device,"
+      },
+      {
+        "line": 172,
+        "text": "                        )"
+      },
+      {
+        "line": 173,
+        "text": "                        if group[\"capturable\"] or group[\"fused\"]"
+      },
+      {
+        "line": 174,
+        "text": "                        else torch.tensor(0.0, dtype=_get_scalar_dtype())"
+      },
+      {
+        "line": 175,
+        "text": "                    )"
+      },
+      {
+        "line": 176,
+        "text": "                    # Exponential moving average of gradient values"
+      },
+      {
+        "line": 177,
+        "text": "                    state[\"exp_avg\"] = torch.zeros_like("
+      },
+      {
+        "line": 178,
+        "text": "                        p, memory_format=torch.preserve_format"
+      },
+      {
+        "line": 179,
+        "text": "                    )"
+      },
+      {
+        "line": 180,
+        "text": "                    # Exponential moving average of squared gradient values"
+      },
+      {
+        "line": 181,
+        "text": "                    state[\"exp_avg_sq\"] = torch.zeros_like("
+      },
+      {
+        "line": 182,
+        "text": "                        p, memory_format=torch.preserve_format"
+      },
+      {
+        "line": 183,
+        "text": "                    )"
+      },
+      {
+        "line": 184,
+        "text": "                    if group[\"amsgrad\"]:"
+      },
+      {
+        "line": 185,
+        "text": "                        # Maintains max of all exp. moving avg. of sq. grad. values"
+      },
+      {
+        "line": 186,
+        "text": "                        state[\"max_exp_avg_sq\"] = torch.zeros_like("
+      },
+      {
+        "line": 187,
+        "text": "                            p, memory_format=torch.preserve_format"
+      },
+      {
+        "line": 188,
+        "text": "                        )"
+      },
+      {
+        "line": 189,
+        "text": ""
+      },
+      {
+        "line": 190,
+        "text": "                exp_avgs.append(state[\"exp_avg\"])"
+      },
+      {
+        "line": 191,
+        "text": "                exp_avg_sqs.append(state[\"exp_avg_sq\"])"
+      },
+      {
+        "line": 192,
+        "text": ""
+      },
+      {
+        "line": 193,
+        "text": "                if group[\"amsgrad\"]:"
+      },
+      {
+        "line": 194,
+        "text": "                    max_exp_avg_sqs.append(state[\"max_exp_avg_sq\"])"
+      },
+      {
+        "line": 195,
+        "text": "                if group[\"differentiable\"] and state[\"step\"].requires_grad:"
+      },
+      {
+        "line": 196,
+        "text": "                    raise RuntimeError("
+      },
+      {
+        "line": 197,
+        "text": "                        \"`requires_grad` is not supported for `step` in differentiable mode\""
+      },
+      {
+        "line": 198,
+        "text": "                    )"
+      },
+      {
+        "line": 199,
+        "text": ""
+      },
+      {
+        "line": 200,
+        "text": "                # Foreach without capturable does not support a tensor lr"
+      },
+      {
+        "line": 201,
+        "text": "                if ("
+      },
+      {
+        "line": 202,
+        "text": "                    group[\"foreach\"]"
+      },
+      {
+        "line": 203,
+        "text": "                    and torch.is_tensor(group[\"lr\"])"
+      },
+      {
+        "line": 204,
+        "text": "                    and not group[\"capturable\"]"
+      },
+      {
+        "line": 205,
+        "text": "                ):"
+      },
+      {
+        "line": 206,
+        "text": "                    raise RuntimeError("
+      },
+      {
+        "line": 207,
+        "text": "                        \"lr as a Tensor is not supported for capturable=False and foreach=True\""
+      },
+      {
+        "line": 208,
+        "text": "                    )"
+      },
+      {
+        "line": 209,
+        "text": ""
+      },
+      {
+        "line": 210,
+        "text": "                state_steps.append(state[\"step\"])"
+      },
+      {
+        "line": 211,
+        "text": "        return has_complex"
+      },
+      {
+        "line": 212,
+        "text": ""
+      },
+      {
+        "line": 213,
+        "text": "    @_use_grad_for_differentiable"
+      },
+      {
+        "line": 214,
+        "text": "    def step(self, closure=None):"
+      },
+      {
+        "line": 215,
+        "text": "        \"\"\"Perform a single optimization step."
+      },
+      {
+        "line": 216,
+        "text": ""
+      },
+      {
+        "line": 217,
+        "text": "        Args:"
+      },
+      {
+        "line": 218,
+        "text": "            closure (Callable, optional): A closure that reevaluates the model"
+      },
+      {
+        "line": 219,
+        "text": "                and returns the loss."
+      },
+      {
+        "line": 220,
+        "text": "        \"\"\""
+      },
+      {
+        "line": 221,
+        "text": "        self._cuda_graph_capture_health_check()"
+      },
+      {
+        "line": 222,
+        "text": ""
+      },
+      {
+        "line": 223,
+        "text": "        loss = None"
+      },
+      {
+        "line": 224,
+        "text": "        if closure is not None:"
+      },
+      {
+        "line": 225,
+        "text": "            with torch.enable_grad():"
+      },
+      {
+        "line": 226,
+        "text": "                loss = closure()"
+      },
+      {
+        "line": 227,
+        "text": ""
+      },
+      {
+        "line": 228,
+        "text": "        for group in self.param_groups:"
+      },
+      {
+        "line": 229,
+        "text": "            params_with_grad: list[Tensor] = []"
+      },
+      {
+        "line": 230,
+        "text": "            grads: list[Tensor] = []"
+      },
+      {
+        "line": 231,
+        "text": "            exp_avgs: list[Tensor] = []"
+      },
+      {
+        "line": 232,
+        "text": "            exp_avg_sqs: list[Tensor] = []"
+      },
+      {
+        "line": 233,
+        "text": "            max_exp_avg_sqs: list[Tensor] = []"
+      },
+      {
+        "line": 234,
+        "text": "            state_steps: list[Tensor] = []"
+      },
+      {
+        "line": 235,
+        "text": "            beta1, beta2 = group[\"betas\"]"
+      },
+      {
+        "line": 236,
+        "text": ""
+      },
+      {
+        "line": 237,
+        "text": "            has_complex = self._init_group("
+      },
+      {
+        "line": 238,
+        "text": "                group,"
+      },
+      {
+        "line": 239,
+        "text": "                params_with_grad,"
+      },
+      {
+        "line": 240,
+        "text": "                grads,"
+      },
+      {
+        "line": 241,
+        "text": "                exp_avgs,"
+      },
+      {
+        "line": 242,
+        "text": "                exp_avg_sqs,"
+      },
+      {
+        "line": 243,
+        "text": "                max_exp_avg_sqs,"
+      },
+      {
+        "line": 244,
+        "text": "                state_steps,"
+      },
+      {
+        "line": 245,
+        "text": "            )"
+      }
+    ],
+    "source_init_group_start_end": [
+      138,
+      211
+    ],
+    "source_grad_attribute_lines": [
+      150,
+      153,
+      157
+    ],
+    "source_compiled_for_static_comparison_only": true,
+    "code_objects_executed": false,
+    "current_source_compiled_init_group_co_code_sha256": "eab5b7b136cecda905a5625aa0a0f249f3b0c9b87dfd87b34825fc14fe89f538",
+    "current_source_compiled_grad_instructions": [
+      {
+        "offset": 18,
+        "opname": "LOAD_ATTR",
+        "argrepr": "grad",
+        "starts_line": null,
+        "effective_line": 150
+      },
+      {
+        "offset": 52,
+        "opname": "LOAD_ATTR",
+        "argrepr": "grad",
+        "starts_line": null,
+        "effective_line": 153
+      },
+      {
+        "offset": 72,
+        "opname": "LOAD_ATTR",
+        "argrepr": "grad",
+        "starts_line": null,
+        "effective_line": 157
+      }
+    ],
+    "pyc_caches": [
+      {
+        "identity": {
+          "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/optim/__pycache__/adam.cpython-310.pyc",
+          "sha256": "5ba459a960780f7f744e0d31f84d123ee7e250f74e41564051cf526a0040d253",
+          "size": 19040,
+          "mtime_ns": 1782094219087886529,
+          "ctime_ns": 1784019262716633226,
+          "device": 66308,
+          "inode": 56258210,
+          "uid": 1001,
+          "read_stable": true
+        },
+        "header_hex": "6f0d0d0a000000008899386a52990000",
+        "magic_matches_interpreter": true,
+        "flags": 0,
+        "mode": "timestamp",
+        "source_mtime_header": 1782094216,
+        "source_size_header": 39250,
+        "current_source_mtime_seconds": 1782094216,
+        "current_source_size": 39250,
+        "header_matches_current_source": true,
+        "optimization_tag": 0,
+        "init_group_code_objects": 1,
+        "functions": [
+          {
+            "co_filename": "/home/songcl/.conda/envs/cluster/lib/python3.10/site-packages/torch/optim/adam.py",
+            "co_firstlineno": 138,
+            "co_code_sha256": "eab5b7b136cecda905a5625aa0a0f249f3b0c9b87dfd87b34825fc14fe89f538",
+            "co_lnotab_hex": "000a04010c010a010e010a010801020102ff04030c020a020c010801080a06fb020506fb060102010c0104fd06060ef9060a040106ff0a04040106ff0a030802040106ff0a040e010e0208010e011201020102ff040606ff02020cfe020306fd0205020102ff04041001",
+            "line_starts": [
+              [
+                0,
+                148
+              ],
+              [
+                4,
+                149
+              ],
+              [
+                16,
+                150
+              ],
+              [
+                26,
+                151
+              ],
+              [
+                40,
+                152
+              ],
+              [
+                50,
+                153
+              ],
+              [
+                58,
+                154
+              ],
+              [
+                60,
+                155
+              ],
+              [
+                62,
+                154
+              ],
+              [
+                66,
+                157
+              ],
+              [
+                78,
+                159
+              ],
+              [
+                88,
+                161
+              ],
+              [
+                100,
+                162
+              ],
+              [
+                108,
+                163
+              ],
+              [
+                116,
+                173
+              ],
+              [
+                122,
+                168
+              ],
+              [
+                124,
+                173
+              ],
+              [
+                130,
+                168
+              ],
+              [
+                136,
+                169
+              ],
+              [
+                138,
+                170
+              ],
+              [
+                150,
+                171
+              ],
+              [
+                154,
+                168
+              ],
+              [
+                160,
+                174
+              ],
+              [
+                174,
+                167
+              ],
+              [
+                180,
+                177
+              ],
+              [
+                184,
+                178
+              ],
+              [
+                190,
+                177
+              ],
+              [
+                200,
+                181
+              ],
+              [
+                204,
+                182
+              ],
+              [
+                210,
+                181
+              ],
+              [
+                220,
+                184
+              ],
+              [
+                228,
+                186
+              ],
+              [
+                232,
+                187
+              ],
+              [
+                238,
+                186
+              ],
+              [
+                248,
+                190
+              ],
+              [
+                262,
+                191
+              ],
+              [
+                276,
+                193
+              ],
+              [
+                284,
+                194
+              ],
+              [
+                298,
+                195
+              ],
+              [
+                316,
+                196
+              ],
+              [
+                318,
+                197
+              ],
+              [
+                320,
+                196
+              ],
+              [
+                324,
+                202
+              ],
+              [
+                330,
+                201
+              ],
+              [
+                332,
+                203
+              ],
+              [
+                344,
+                201
+              ],
+              [
+                346,
+                204
+              ],
+              [
+                352,
+                201
+              ],
+              [
+                354,
+                206
+              ],
+              [
+                356,
+                207
+              ],
+              [
+                358,
+                206
+              ],
+              [
+                362,
+                210
+              ],
+              [
+                378,
+                211
+              ]
+            ],
+            "varnames": [
+              "self",
+              "group",
+              "params_with_grad",
+              "grads",
+              "exp_avgs",
+              "exp_avg_sqs",
+              "max_exp_avg_sqs",
+              "state_steps",
+              "has_complex",
+              "p",
+              "state"
+            ],
+            "names": [
+              "grad",
+              "torch",
+              "is_complex",
+              "append",
+              "is_sparse",
+              "RuntimeError",
+              "state",
+              "len",
+              "_device_dtype_check_for_fused",
+              "zeros",
+              "_get_scalar_dtype",
+              "device",
+              "tensor",
+              "zeros_like",
+              "preserve_format",
+              "requires_grad",
+              "is_tensor"
+            ],
+            "grad_attribute_instruction_windows": [
+              [
+                {
+                  "offset": 10,
+                  "opname": "GET_ITER",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 149
+                },
+                {
+                  "offset": 12,
+                  "opname": "FOR_ITER",
+                  "argrepr": "to 378",
+                  "starts_line": null,
+                  "effective_line": 149
+                },
+                {
+                  "offset": 14,
+                  "opname": "STORE_FAST",
+                  "argrepr": "p",
+                  "starts_line": null,
+                  "effective_line": 149
+                },
+                {
+                  "offset": 16,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "p",
+                  "starts_line": 150,
+                  "effective_line": 150
+                },
+                {
+                  "offset": 18,
+                  "opname": "LOAD_ATTR",
+                  "argrepr": "grad",
+                  "starts_line": null,
+                  "effective_line": 150
+                },
+                {
+                  "offset": 20,
+                  "opname": "LOAD_CONST",
+                  "argrepr": "None",
+                  "starts_line": null,
+                  "effective_line": 150
+                },
+                {
+                  "offset": 22,
+                  "opname": "IS_OP",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 150
+                },
+                {
+                  "offset": 24,
+                  "opname": "POP_JUMP_IF_FALSE",
+                  "argrepr": "to 376",
+                  "starts_line": null,
+                  "effective_line": 150
+                },
+                {
+                  "offset": 26,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "has_complex",
+                  "starts_line": 151,
+                  "effective_line": 151
+                },
+                {
+                  "offset": 28,
+                  "opname": "LOAD_GLOBAL",
+                  "argrepr": "torch",
+                  "starts_line": null,
+                  "effective_line": 151
+                }
+              ],
+              [
+                {
+                  "offset": 44,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "p",
+                  "starts_line": null,
+                  "effective_line": 152
+                },
+                {
+                  "offset": 46,
+                  "opname": "CALL_METHOD",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 152
+                },
+                {
+                  "offset": 48,
+                  "opname": "POP_TOP",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 152
+                },
+                {
+                  "offset": 50,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "p",
+                  "starts_line": 153,
+                  "effective_line": 153
+                },
+                {
+                  "offset": 52,
+                  "opname": "LOAD_ATTR",
+                  "argrepr": "grad",
+                  "starts_line": null,
+                  "effective_line": 153
+                },
+                {
+                  "offset": 54,
+                  "opname": "LOAD_ATTR",
+                  "argrepr": "is_sparse",
+                  "starts_line": null,
+                  "effective_line": 153
+                },
+                {
+                  "offset": 56,
+                  "opname": "POP_JUMP_IF_FALSE",
+                  "argrepr": "to 66",
+                  "starts_line": null,
+                  "effective_line": 153
+                },
+                {
+                  "offset": 58,
+                  "opname": "LOAD_GLOBAL",
+                  "argrepr": "RuntimeError",
+                  "starts_line": 154,
+                  "effective_line": 154
+                },
+                {
+                  "offset": 60,
+                  "opname": "LOAD_CONST",
+                  "argrepr": "'Adam does not support sparse gradients, please consider SparseAdam instead'",
+                  "starts_line": 155,
+                  "effective_line": 155
+                },
+                {
+                  "offset": 62,
+                  "opname": "CALL_FUNCTION",
+                  "argrepr": "",
+                  "starts_line": 154,
+                  "effective_line": 154
+                }
+              ],
+              [
+                {
+                  "offset": 64,
+                  "opname": "RAISE_VARARGS",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 154
+                },
+                {
+                  "offset": 66,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "grads",
+                  "starts_line": 157,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 68,
+                  "opname": "LOAD_METHOD",
+                  "argrepr": "append",
+                  "starts_line": null,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 70,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "p",
+                  "starts_line": null,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 72,
+                  "opname": "LOAD_ATTR",
+                  "argrepr": "grad",
+                  "starts_line": null,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 74,
+                  "opname": "CALL_METHOD",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 76,
+                  "opname": "POP_TOP",
+                  "argrepr": "",
+                  "starts_line": null,
+                  "effective_line": 157
+                },
+                {
+                  "offset": 78,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "self",
+                  "starts_line": 159,
+                  "effective_line": 159
+                },
+                {
+                  "offset": 80,
+                  "opname": "LOAD_ATTR",
+                  "argrepr": "state",
+                  "starts_line": null,
+                  "effective_line": 159
+                },
+                {
+                  "offset": 82,
+                  "opname": "LOAD_FAST",
+                  "argrepr": "p",
+                  "starts_line": null,
+                  "effective_line": 159
+                }
+              ]
+            ],
+            "line191_instructions": [
+              {
+                "offset": 262,
+                "opname": "LOAD_FAST",
+                "argrepr": "exp_avg_sqs",
+                "starts_line": 191,
+                "effective_line": 191
+              },
+              {
+                "offset": 264,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 266,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 268,
+                "opname": "LOAD_CONST",
+                "argrepr": "'exp_avg_sq'",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 270,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 272,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 274,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              }
+            ],
+            "all_instructions": [
+              {
+                "offset": 0,
+                "opname": "LOAD_CONST",
+                "argrepr": "False",
+                "starts_line": 148,
+                "effective_line": 148
+              },
+              {
+                "offset": 2,
+                "opname": "STORE_FAST",
+                "argrepr": "has_complex",
+                "starts_line": null,
+                "effective_line": 148
+              },
+              {
+                "offset": 4,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 149,
+                "effective_line": 149
+              },
+              {
+                "offset": 6,
+                "opname": "LOAD_CONST",
+                "argrepr": "'params'",
+                "starts_line": null,
+                "effective_line": 149
+              },
+              {
+                "offset": 8,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 149
+              },
+              {
+                "offset": 10,
+                "opname": "GET_ITER",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 149
+              },
+              {
+                "offset": 12,
+                "opname": "FOR_ITER",
+                "argrepr": "to 378",
+                "starts_line": null,
+                "effective_line": 149
+              },
+              {
+                "offset": 14,
+                "opname": "STORE_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 149
+              },
+              {
+                "offset": 16,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 150,
+                "effective_line": 150
+              },
+              {
+                "offset": 18,
+                "opname": "LOAD_ATTR",
+                "argrepr": "grad",
+                "starts_line": null,
+                "effective_line": 150
+              },
+              {
+                "offset": 20,
+                "opname": "LOAD_CONST",
+                "argrepr": "None",
+                "starts_line": null,
+                "effective_line": 150
+              },
+              {
+                "offset": 22,
+                "opname": "IS_OP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 150
+              },
+              {
+                "offset": 24,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 376",
+                "starts_line": null,
+                "effective_line": 150
+              },
+              {
+                "offset": 26,
+                "opname": "LOAD_FAST",
+                "argrepr": "has_complex",
+                "starts_line": 151,
+                "effective_line": 151
+              },
+              {
+                "offset": 28,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 30,
+                "opname": "LOAD_METHOD",
+                "argrepr": "is_complex",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 32,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 34,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 36,
+                "opname": "INPLACE_OR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 38,
+                "opname": "STORE_FAST",
+                "argrepr": "has_complex",
+                "starts_line": null,
+                "effective_line": 151
+              },
+              {
+                "offset": 40,
+                "opname": "LOAD_FAST",
+                "argrepr": "params_with_grad",
+                "starts_line": 152,
+                "effective_line": 152
+              },
+              {
+                "offset": 42,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 152
+              },
+              {
+                "offset": 44,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 152
+              },
+              {
+                "offset": 46,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 152
+              },
+              {
+                "offset": 48,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 152
+              },
+              {
+                "offset": 50,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 153,
+                "effective_line": 153
+              },
+              {
+                "offset": 52,
+                "opname": "LOAD_ATTR",
+                "argrepr": "grad",
+                "starts_line": null,
+                "effective_line": 153
+              },
+              {
+                "offset": 54,
+                "opname": "LOAD_ATTR",
+                "argrepr": "is_sparse",
+                "starts_line": null,
+                "effective_line": 153
+              },
+              {
+                "offset": 56,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 66",
+                "starts_line": null,
+                "effective_line": 153
+              },
+              {
+                "offset": 58,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "RuntimeError",
+                "starts_line": 154,
+                "effective_line": 154
+              },
+              {
+                "offset": 60,
+                "opname": "LOAD_CONST",
+                "argrepr": "'Adam does not support sparse gradients, please consider SparseAdam instead'",
+                "starts_line": 155,
+                "effective_line": 155
+              },
+              {
+                "offset": 62,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": 154,
+                "effective_line": 154
+              },
+              {
+                "offset": 64,
+                "opname": "RAISE_VARARGS",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 154
+              },
+              {
+                "offset": 66,
+                "opname": "LOAD_FAST",
+                "argrepr": "grads",
+                "starts_line": 157,
+                "effective_line": 157
+              },
+              {
+                "offset": 68,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 157
+              },
+              {
+                "offset": 70,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 157
+              },
+              {
+                "offset": 72,
+                "opname": "LOAD_ATTR",
+                "argrepr": "grad",
+                "starts_line": null,
+                "effective_line": 157
+              },
+              {
+                "offset": 74,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 157
+              },
+              {
+                "offset": 76,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 157
+              },
+              {
+                "offset": 78,
+                "opname": "LOAD_FAST",
+                "argrepr": "self",
+                "starts_line": 159,
+                "effective_line": 159
+              },
+              {
+                "offset": 80,
+                "opname": "LOAD_ATTR",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 159
+              },
+              {
+                "offset": 82,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 159
+              },
+              {
+                "offset": 84,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 159
+              },
+              {
+                "offset": 86,
+                "opname": "STORE_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 159
+              },
+              {
+                "offset": 88,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "len",
+                "starts_line": 161,
+                "effective_line": 161
+              },
+              {
+                "offset": 90,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 161
+              },
+              {
+                "offset": 92,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 161
+              },
+              {
+                "offset": 94,
+                "opname": "LOAD_CONST",
+                "argrepr": "0",
+                "starts_line": null,
+                "effective_line": 161
+              },
+              {
+                "offset": 96,
+                "opname": "COMPARE_OP",
+                "argrepr": "==",
+                "starts_line": null,
+                "effective_line": 161
+              },
+              {
+                "offset": 98,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 248",
+                "starts_line": null,
+                "effective_line": 161
+              },
+              {
+                "offset": 100,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 162,
+                "effective_line": 162
+              },
+              {
+                "offset": 102,
+                "opname": "LOAD_CONST",
+                "argrepr": "'fused'",
+                "starts_line": null,
+                "effective_line": 162
+              },
+              {
+                "offset": 104,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 162
+              },
+              {
+                "offset": 106,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 116",
+                "starts_line": null,
+                "effective_line": 162
+              },
+              {
+                "offset": 108,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "_device_dtype_check_for_fused",
+                "starts_line": 163,
+                "effective_line": 163
+              },
+              {
+                "offset": 110,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": null,
+                "effective_line": 163
+              },
+              {
+                "offset": 112,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 163
+              },
+              {
+                "offset": 114,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 163
+              },
+              {
+                "offset": 116,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 173,
+                "effective_line": 173
+              },
+              {
+                "offset": 118,
+                "opname": "LOAD_CONST",
+                "argrepr": "'capturable'",
+                "starts_line": null,
+                "effective_line": 173
+              },
+              {
+                "offset": 120,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 173
+              },
+              {
+                "offset": 122,
+                "opname": "POP_JUMP_IF_TRUE",
+                "argrepr": "to 132",
+                "starts_line": 168,
+                "effective_line": 168
+              },
+              {
+                "offset": 124,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 173,
+                "effective_line": 173
+              },
+              {
+                "offset": 126,
+                "opname": "LOAD_CONST",
+                "argrepr": "'fused'",
+                "starts_line": null,
+                "effective_line": 173
+              },
+              {
+                "offset": 128,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 173
+              },
+              {
+                "offset": 130,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 160",
+                "starts_line": 168,
+                "effective_line": 168
+              },
+              {
+                "offset": 132,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": null,
+                "effective_line": 168
+              },
+              {
+                "offset": 134,
+                "opname": "LOAD_ATTR",
+                "argrepr": "zeros",
+                "starts_line": null,
+                "effective_line": 168
+              },
+              {
+                "offset": 136,
+                "opname": "LOAD_CONST",
+                "argrepr": "()",
+                "starts_line": 169,
+                "effective_line": 169
+              },
+              {
+                "offset": 138,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "_get_scalar_dtype",
+                "starts_line": 170,
+                "effective_line": 170
+              },
+              {
+                "offset": 140,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": null,
+                "effective_line": 170
+              },
+              {
+                "offset": 142,
+                "opname": "LOAD_CONST",
+                "argrepr": "'fused'",
+                "starts_line": null,
+                "effective_line": 170
+              },
+              {
+                "offset": 144,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 170
+              },
+              {
+                "offset": 146,
+                "opname": "LOAD_CONST",
+                "argrepr": "('is_fused',)",
+                "starts_line": null,
+                "effective_line": 170
+              },
+              {
+                "offset": 148,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 170
+              },
+              {
+                "offset": 150,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 171,
+                "effective_line": 171
+              },
+              {
+                "offset": 152,
+                "opname": "LOAD_ATTR",
+                "argrepr": "device",
+                "starts_line": null,
+                "effective_line": 171
+              },
+              {
+                "offset": 154,
+                "opname": "LOAD_CONST",
+                "argrepr": "('dtype', 'device')",
+                "starts_line": 168,
+                "effective_line": 168
+              },
+              {
+                "offset": 156,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 168
+              },
+              {
+                "offset": 158,
+                "opname": "JUMP_FORWARD",
+                "argrepr": "to 174",
+                "starts_line": null,
+                "effective_line": 168
+              },
+              {
+                "offset": 160,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": 174,
+                "effective_line": 174
+              },
+              {
+                "offset": 162,
+                "opname": "LOAD_ATTR",
+                "argrepr": "tensor",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 164,
+                "opname": "LOAD_CONST",
+                "argrepr": "0.0",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 166,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "_get_scalar_dtype",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 168,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 170,
+                "opname": "LOAD_CONST",
+                "argrepr": "('dtype',)",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 172,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 174
+              },
+              {
+                "offset": 174,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": 167,
+                "effective_line": 167
+              },
+              {
+                "offset": 176,
+                "opname": "LOAD_CONST",
+                "argrepr": "'step'",
+                "starts_line": null,
+                "effective_line": 167
+              },
+              {
+                "offset": 178,
+                "opname": "STORE_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 167
+              },
+              {
+                "offset": 180,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": 177,
+                "effective_line": 177
+              },
+              {
+                "offset": 182,
+                "opname": "LOAD_ATTR",
+                "argrepr": "zeros_like",
+                "starts_line": null,
+                "effective_line": 177
+              },
+              {
+                "offset": 184,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 178,
+                "effective_line": 178
+              },
+              {
+                "offset": 186,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": null,
+                "effective_line": 178
+              },
+              {
+                "offset": 188,
+                "opname": "LOAD_ATTR",
+                "argrepr": "preserve_format",
+                "starts_line": null,
+                "effective_line": 178
+              },
+              {
+                "offset": 190,
+                "opname": "LOAD_CONST",
+                "argrepr": "('memory_format',)",
+                "starts_line": 177,
+                "effective_line": 177
+              },
+              {
+                "offset": 192,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 177
+              },
+              {
+                "offset": 194,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 177
+              },
+              {
+                "offset": 196,
+                "opname": "LOAD_CONST",
+                "argrepr": "'exp_avg'",
+                "starts_line": null,
+                "effective_line": 177
+              },
+              {
+                "offset": 198,
+                "opname": "STORE_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 177
+              },
+              {
+                "offset": 200,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": 181,
+                "effective_line": 181
+              },
+              {
+                "offset": 202,
+                "opname": "LOAD_ATTR",
+                "argrepr": "zeros_like",
+                "starts_line": null,
+                "effective_line": 181
+              },
+              {
+                "offset": 204,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 182,
+                "effective_line": 182
+              },
+              {
+                "offset": 206,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": null,
+                "effective_line": 182
+              },
+              {
+                "offset": 208,
+                "opname": "LOAD_ATTR",
+                "argrepr": "preserve_format",
+                "starts_line": null,
+                "effective_line": 182
+              },
+              {
+                "offset": 210,
+                "opname": "LOAD_CONST",
+                "argrepr": "('memory_format',)",
+                "starts_line": 181,
+                "effective_line": 181
+              },
+              {
+                "offset": 212,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 181
+              },
+              {
+                "offset": 214,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 181
+              },
+              {
+                "offset": 216,
+                "opname": "LOAD_CONST",
+                "argrepr": "'exp_avg_sq'",
+                "starts_line": null,
+                "effective_line": 181
+              },
+              {
+                "offset": 218,
+                "opname": "STORE_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 181
+              },
+              {
+                "offset": 220,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 184,
+                "effective_line": 184
+              },
+              {
+                "offset": 222,
+                "opname": "LOAD_CONST",
+                "argrepr": "'amsgrad'",
+                "starts_line": null,
+                "effective_line": 184
+              },
+              {
+                "offset": 224,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 184
+              },
+              {
+                "offset": 226,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 248",
+                "starts_line": null,
+                "effective_line": 184
+              },
+              {
+                "offset": 228,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": 186,
+                "effective_line": 186
+              },
+              {
+                "offset": 230,
+                "opname": "LOAD_ATTR",
+                "argrepr": "zeros_like",
+                "starts_line": null,
+                "effective_line": 186
+              },
+              {
+                "offset": 232,
+                "opname": "LOAD_FAST",
+                "argrepr": "p",
+                "starts_line": 187,
+                "effective_line": 187
+              },
+              {
+                "offset": 234,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": null,
+                "effective_line": 187
+              },
+              {
+                "offset": 236,
+                "opname": "LOAD_ATTR",
+                "argrepr": "preserve_format",
+                "starts_line": null,
+                "effective_line": 187
+              },
+              {
+                "offset": 238,
+                "opname": "LOAD_CONST",
+                "argrepr": "('memory_format',)",
+                "starts_line": 186,
+                "effective_line": 186
+              },
+              {
+                "offset": 240,
+                "opname": "CALL_FUNCTION_KW",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 186
+              },
+              {
+                "offset": 242,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 186
+              },
+              {
+                "offset": 244,
+                "opname": "LOAD_CONST",
+                "argrepr": "'max_exp_avg_sq'",
+                "starts_line": null,
+                "effective_line": 186
+              },
+              {
+                "offset": 246,
+                "opname": "STORE_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 186
+              },
+              {
+                "offset": 248,
+                "opname": "LOAD_FAST",
+                "argrepr": "exp_avgs",
+                "starts_line": 190,
+                "effective_line": 190
+              },
+              {
+                "offset": 250,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 252,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 254,
+                "opname": "LOAD_CONST",
+                "argrepr": "'exp_avg'",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 256,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 258,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 260,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 190
+              },
+              {
+                "offset": 262,
+                "opname": "LOAD_FAST",
+                "argrepr": "exp_avg_sqs",
+                "starts_line": 191,
+                "effective_line": 191
+              },
+              {
+                "offset": 264,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 266,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 268,
+                "opname": "LOAD_CONST",
+                "argrepr": "'exp_avg_sq'",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 270,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 272,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 274,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 191
+              },
+              {
+                "offset": 276,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 193,
+                "effective_line": 193
+              },
+              {
+                "offset": 278,
+                "opname": "LOAD_CONST",
+                "argrepr": "'amsgrad'",
+                "starts_line": null,
+                "effective_line": 193
+              },
+              {
+                "offset": 280,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 193
+              },
+              {
+                "offset": 282,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 298",
+                "starts_line": null,
+                "effective_line": 193
+              },
+              {
+                "offset": 284,
+                "opname": "LOAD_FAST",
+                "argrepr": "max_exp_avg_sqs",
+                "starts_line": 194,
+                "effective_line": 194
+              },
+              {
+                "offset": 286,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 288,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 290,
+                "opname": "LOAD_CONST",
+                "argrepr": "'max_exp_avg_sq'",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 292,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 294,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 296,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 194
+              },
+              {
+                "offset": 298,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 195,
+                "effective_line": 195
+              },
+              {
+                "offset": 300,
+                "opname": "LOAD_CONST",
+                "argrepr": "'differentiable'",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 302,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 304,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 324",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 306,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 308,
+                "opname": "LOAD_CONST",
+                "argrepr": "'step'",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 310,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 312,
+                "opname": "LOAD_ATTR",
+                "argrepr": "requires_grad",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 314,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 324",
+                "starts_line": null,
+                "effective_line": 195
+              },
+              {
+                "offset": 316,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "RuntimeError",
+                "starts_line": 196,
+                "effective_line": 196
+              },
+              {
+                "offset": 318,
+                "opname": "LOAD_CONST",
+                "argrepr": "'`requires_grad` is not supported for `step` in differentiable mode'",
+                "starts_line": 197,
+                "effective_line": 197
+              },
+              {
+                "offset": 320,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": 196,
+                "effective_line": 196
+              },
+              {
+                "offset": 322,
+                "opname": "RAISE_VARARGS",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 196
+              },
+              {
+                "offset": 324,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 202,
+                "effective_line": 202
+              },
+              {
+                "offset": 326,
+                "opname": "LOAD_CONST",
+                "argrepr": "'foreach'",
+                "starts_line": null,
+                "effective_line": 202
+              },
+              {
+                "offset": 328,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 202
+              },
+              {
+                "offset": 330,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 362",
+                "starts_line": 201,
+                "effective_line": 201
+              },
+              {
+                "offset": 332,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "torch",
+                "starts_line": 203,
+                "effective_line": 203
+              },
+              {
+                "offset": 334,
+                "opname": "LOAD_METHOD",
+                "argrepr": "is_tensor",
+                "starts_line": null,
+                "effective_line": 203
+              },
+              {
+                "offset": 336,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": null,
+                "effective_line": 203
+              },
+              {
+                "offset": 338,
+                "opname": "LOAD_CONST",
+                "argrepr": "'lr'",
+                "starts_line": null,
+                "effective_line": 203
+              },
+              {
+                "offset": 340,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 203
+              },
+              {
+                "offset": 342,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 203
+              },
+              {
+                "offset": 344,
+                "opname": "POP_JUMP_IF_FALSE",
+                "argrepr": "to 362",
+                "starts_line": 201,
+                "effective_line": 201
+              },
+              {
+                "offset": 346,
+                "opname": "LOAD_FAST",
+                "argrepr": "group",
+                "starts_line": 204,
+                "effective_line": 204
+              },
+              {
+                "offset": 348,
+                "opname": "LOAD_CONST",
+                "argrepr": "'capturable'",
+                "starts_line": null,
+                "effective_line": 204
+              },
+              {
+                "offset": 350,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 204
+              },
+              {
+                "offset": 352,
+                "opname": "POP_JUMP_IF_TRUE",
+                "argrepr": "to 362",
+                "starts_line": 201,
+                "effective_line": 201
+              },
+              {
+                "offset": 354,
+                "opname": "LOAD_GLOBAL",
+                "argrepr": "RuntimeError",
+                "starts_line": 206,
+                "effective_line": 206
+              },
+              {
+                "offset": 356,
+                "opname": "LOAD_CONST",
+                "argrepr": "'lr as a Tensor is not supported for capturable=False and foreach=True'",
+                "starts_line": 207,
+                "effective_line": 207
+              },
+              {
+                "offset": 358,
+                "opname": "CALL_FUNCTION",
+                "argrepr": "",
+                "starts_line": 206,
+                "effective_line": 206
+              },
+              {
+                "offset": 360,
+                "opname": "RAISE_VARARGS",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 206
+              },
+              {
+                "offset": 362,
+                "opname": "LOAD_FAST",
+                "argrepr": "state_steps",
+                "starts_line": 210,
+                "effective_line": 210
+              },
+              {
+                "offset": 364,
+                "opname": "LOAD_METHOD",
+                "argrepr": "append",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 366,
+                "opname": "LOAD_FAST",
+                "argrepr": "state",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 368,
+                "opname": "LOAD_CONST",
+                "argrepr": "'step'",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 370,
+                "opname": "BINARY_SUBSCR",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 372,
+                "opname": "CALL_METHOD",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 374,
+                "opname": "POP_TOP",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 376,
+                "opname": "JUMP_ABSOLUTE",
+                "argrepr": "to 12",
+                "starts_line": null,
+                "effective_line": 210
+              },
+              {
+                "offset": 378,
+                "opname": "LOAD_FAST",
+                "argrepr": "has_complex",
+                "starts_line": 211,
+                "effective_line": 211
+              },
+              {
+                "offset": 380,
+                "opname": "RETURN_VALUE",
+                "argrepr": "",
+                "starts_line": null,
+                "effective_line": 211
+              }
+            ],
+            "same_bytecode_as_current_source_compile": true,
+            "same_firstlineno_as_current_source_compile": true,
+            "same_line_starts_as_current_source_compile": true,
+            "same_varnames_and_names_as_current_source_compile": true
+          }
+        ]
+      }
+    ],
+    "integration_sources": [
+      {
+        "identity": {
+          "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py",
+          "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+          "size": 23368,
+          "mtime_ns": 1794079471741848739,
+          "ctime_ns": 1794079471741848739,
+          "device": 2048,
+          "inode": 193276725,
+          "uid": 1001,
+          "read_stable": true
+        },
+        "direct_optimizer_pattern_hit_lines": [
+          95,
+          123,
+          126,
+          130,
+          132,
+          141,
+          149,
+          178,
+          184,
+          420,
+          421,
+          422,
+          440,
+          476,
+          494,
+          499,
+          503
+        ],
+        "bounded_relevant_source": [
+          {
+            "line": 92,
+            "text": "        out[k] = v.val"
+          },
+          {
+            "line": 93,
+            "text": "    return out"
+          },
+          {
+            "line": 94,
+            "text": ""
+          },
+          {
+            "line": 95,
+            "text": "def train(epoch, model, dataloader, optimizer, lr_scheduler, cfg, logger, writer):"
+          },
+          {
+            "line": 96,
+            "text": "    model.train()"
+          },
+          {
+            "line": 97,
+            "text": "    iter_time = AverageMeter()"
+          },
+          {
+            "line": 98,
+            "text": "    data_time = AverageMeter()"
+          },
+          {
+            "line": 120,
+            "text": ""
+          },
+          {
+            "line": 121,
+            "text": "        if torch.isnan(loss).any() or torch.isinf(loss).any():"
+          },
+          {
+            "line": 122,
+            "text": "            logger.info(\"Skipping backward due to unstable loss\")"
+          },
+          {
+            "line": 123,
+            "text": "            optimizer.zero_grad()  # \u6e05\u9664\u68af\u5ea6"
+          },
+          {
+            "line": 124,
+            "text": "            continue   # \u8df3\u8fc7\u8be5\u6279\u6b21"
+          },
+          {
+            "line": 125,
+            "text": "        else:"
+          },
+          {
+            "line": 126,
+            "text": "            optimizer.zero_grad()"
+          },
+          {
+            "line": 127,
+            "text": "            loss.backward()"
+          },
+          {
+            "line": 128,
+            "text": "            if cfg.train.grad_clip > 0:"
+          },
+          {
+            "line": 129,
+            "text": "                grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)"
+          },
+          {
+            "line": 130,
+            "text": "            optimizer.step()"
+          },
+          {
+            "line": 131,
+            "text": "        # backward"
+          },
+          {
+            "line": 132,
+            "text": "        # optimizer.zero_grad()"
+          },
+          {
+            "line": 133,
+            "text": "        # loss.backward()"
+          },
+          {
+            "line": 134,
+            "text": "        # #with torch.autograd.detect_anomaly():"
+          },
+          {
+            "line": 135,
+            "text": "        # #     loss.backward()"
+          },
+          {
+            "line": 138,
+            "text": "        # if cfg.train.grad_clip > 0:"
+          },
+          {
+            "line": 139,
+            "text": "        #     grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)"
+          },
+          {
+            "line": 140,
+            "text": "            "
+          },
+          {
+            "line": 141,
+            "text": "        # optimizer.step()"
+          },
+          {
+            "line": 142,
+            "text": ""
+          },
+          {
+            "line": 143,
+            "text": "        # time and print"
+          },
+          {
+            "line": 144,
+            "text": "        remain_iter = len(dataloader) * (cfg.train.epochs - epoch + 1) - i"
+          },
+          {
+            "line": 146,
+            "text": "        end = time.time()"
+          },
+          {
+            "line": 147,
+            "text": "        remain_time = remain_iter * iter_time.avg"
+          },
+          {
+            "line": 148,
+            "text": "        remain_time = str(datetime.timedelta(seconds=int(remain_time)))"
+          },
+          {
+            "line": 149,
+            "text": "        lr = optimizer.param_groups[0]['lr']"
+          },
+          {
+            "line": 150,
+            "text": "        "
+          },
+          {
+            "line": 151,
+            "text": "        if i % 10 == 0 and gorilla.is_main_process():"
+          },
+          {
+            "line": 152,
+            "text": "            log_str = f'Epoch [{epoch}/{cfg.train.epochs}][{i}/{len(dataloader)}]  '"
+          },
+          {
+            "line": 175,
+            "text": "    gorilla.synchronize()            "
+          },
+          {
+            "line": 176,
+            "text": "    # update lr"
+          },
+          {
+            "line": 177,
+            "text": "    lr_scheduler.step()"
+          },
+          {
+            "line": 178,
+            "text": "    lr = optimizer.param_groups[0]['lr']"
+          },
+          {
+            "line": 179,
+            "text": ""
+          },
+          {
+            "line": 180,
+            "text": "    # save checkpoint"
+          },
+          {
+            "line": 181,
+            "text": "    # if gorilla.is_main_process():"
+          },
+          {
+            "line": 182,
+            "text": "    #     save_file = osp.join(cfg.work_dir, 'last.pth')"
+          },
+          {
+            "line": 183,
+            "text": "    #     meta = dict(epoch=epoch)"
+          },
+          {
+            "line": 184,
+            "text": "    #     gorilla.save_checkpoint(model, save_file, optimizer, lr_scheduler, meta)"
+          },
+          {
+            "line": 185,
+            "text": ""
+          },
+          {
+            "line": 186,
+            "text": "@torch.no_grad()"
+          },
+          {
+            "line": 187,
+            "text": "def model_profile(model, cfg, logger):"
+          },
+          {
+            "line": 417,
+            "text": ""
+          },
+          {
+            "line": 418,
+            "text": "    # model"
+          },
+          {
+            "line": 419,
+            "text": "    model = resolve_network(args.config)(**cfg.model).cuda()"
+          },
+          {
+            "line": 420,
+            "text": "        # optimizer and scheduler"
+          },
+          {
+            "line": 421,
+            "text": "    optimizer = gorilla.build_optimizer(model, cfg.optimizer)"
+          },
+          {
+            "line": 422,
+            "text": "    lr_scheduler = gorilla.build_lr_scheduler(optimizer, cfg.lr_scheduler)"
+          },
+          {
+            "line": 423,
+            "text": ""
+          },
+          {
+            "line": 424,
+            "text": "    # multi-gpu"
+          },
+          {
+            "line": 425,
+            "text": "    if args.num_gpus > 1:"
+          },
+          {
+            "line": 437,
+            "text": "        if gorilla.is_main_process(): logger.info(f'Resume from {resume_path}')"
+          },
+          {
+            "line": 438,
+            "text": "        meta = gorilla.resume(model=model,"
+          },
+          {
+            "line": 439,
+            "text": "                              filename=resume_path,"
+          },
+          {
+            "line": 440,
+            "text": "                              optimizer=optimizer,"
+          },
+          {
+            "line": 441,
+            "text": "                              scheduler=lr_scheduler,"
+          },
+          {
+            "line": 442,
+            "text": "                              strict=False,"
+          },
+          {
+            "line": 443,
+            "text": "                              map_location='cpu')"
+          },
+          {
+            "line": 473,
+            "text": ""
+          },
+          {
+            "line": 474,
+            "text": "    for epoch in range(start_epoch, cfg.train.epochs + 1):"
+          },
+          {
+            "line": 475,
+            "text": "        if not args.skip_training:"
+          },
+          {
+            "line": 476,
+            "text": "            train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)"
+          },
+          {
+            "line": 477,
+            "text": "        if not args.skip_validate and (epoch % cfg.train.interval == 0) and gorilla.is_main_process():"
+          },
+          {
+            "line": 478,
+            "text": "            miou = eval(epoch, best_miou, model, val_loader, cfg, logger, writer, not args.skip_training)"
+          },
+          {
+            "line": 479,
+            "text": "            if gorilla.is_main_process():"
+          },
+          {
+            "line": 491,
+            "text": "            meta = dict(epoch=epoch,best_miou=best_miou,epochs_no_improve=epochs_no_improve)"
+          },
+          {
+            "line": 492,
+            "text": "            if miou >= best_miou:"
+          },
+          {
+            "line": 493,
+            "text": "                save_file = osp.join(cfg.work_dir, f'best.pth')"
+          },
+          {
+            "line": 494,
+            "text": "                gorilla.save_checkpoint(model, save_file,optimizer, lr_scheduler,meta)"
+          },
+          {
+            "line": 495,
+            "text": "                logger.info(f'save best pth to {save_file}')"
+          },
+          {
+            "line": 496,
+            "text": "                print(f'save best pth to {save_file}')"
+          },
+          {
+            "line": 497,
+            "text": "            if epoch > cfg.train.save_epoch:"
+          },
+          {
+            "line": 498,
+            "text": "                save_file = osp.join(cfg.work_dir, f'epoch_{epoch:04d}.pth')"
+          },
+          {
+            "line": 499,
+            "text": "                gorilla.save_checkpoint(model, save_file, optimizer, lr_scheduler, meta)"
+          },
+          {
+            "line": 500,
+            "text": "                logger.info(f'save epoch pth to {save_file}') "
+          },
+          {
+            "line": 501,
+            "text": "                print(f'save epoch pth to {save_file}') "
+          },
+          {
+            "line": 502,
+            "text": "            save_file = osp.join(cfg.work_dir, f'last.pth')"
+          },
+          {
+            "line": 503,
+            "text": "            gorilla.save_checkpoint(model, save_file,optimizer, lr_scheduler,meta)"
+          },
+          {
+            "line": 504,
+            "text": "            logger.info(f'save last pth to {save_file}')    "
+          },
+          {
+            "line": 505,
+            "text": "            print(f'save last pth to {save_file}')    "
+          },
+          {
+            "line": 506,
+            "text": "        writer.flush()"
+          }
+        ],
+        "train_line130_context": [
+          {
+            "line": 110,
+            "text": "        # reduce log_vars for multi-gpu"
+          },
+          {
+            "line": 111,
+            "text": "        # print(log_vars)"
+          },
+          {
+            "line": 112,
+            "text": "        log_vars = gorilla.reduce_dict(log_vars, average=True)"
+          },
+          {
+            "line": 113,
+            "text": "        if gorilla.is_main_process():"
+          },
+          {
+            "line": 114,
+            "text": "            # meter_dict"
+          },
+          {
+            "line": 115,
+            "text": "            for k, v in log_vars.items():"
+          },
+          {
+            "line": 116,
+            "text": "                if k not in meter_dict.keys():"
+          },
+          {
+            "line": 117,
+            "text": "                    meter_dict[k] = AverageMeter()"
+          },
+          {
+            "line": 118,
+            "text": "                meter_dict[k].update(v.item())"
+          },
+          {
+            "line": 119,
+            "text": ""
+          },
+          {
+            "line": 120,
+            "text": ""
+          },
+          {
+            "line": 121,
+            "text": "        if torch.isnan(loss).any() or torch.isinf(loss).any():"
+          },
+          {
+            "line": 122,
+            "text": "            logger.info(\"Skipping backward due to unstable loss\")"
+          },
+          {
+            "line": 123,
+            "text": "            optimizer.zero_grad()  # \u6e05\u9664\u68af\u5ea6"
+          },
+          {
+            "line": 124,
+            "text": "            continue   # \u8df3\u8fc7\u8be5\u6279\u6b21"
+          },
+          {
+            "line": 125,
+            "text": "        else:"
+          },
+          {
+            "line": 126,
+            "text": "            optimizer.zero_grad()"
+          },
+          {
+            "line": 127,
+            "text": "            loss.backward()"
+          },
+          {
+            "line": 128,
+            "text": "            if cfg.train.grad_clip > 0:"
+          },
+          {
+            "line": 129,
+            "text": "                grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)"
+          },
+          {
+            "line": 130,
+            "text": "            optimizer.step()"
+          },
+          {
+            "line": 131,
+            "text": "        # backward"
+          },
+          {
+            "line": 132,
+            "text": "        # optimizer.zero_grad()"
+          },
+          {
+            "line": 133,
+            "text": "        # loss.backward()"
+          },
+          {
+            "line": 134,
+            "text": "        # #with torch.autograd.detect_anomaly():"
+          },
+          {
+            "line": 135,
+            "text": "        # #     loss.backward()"
+          },
+          {
+            "line": 136,
+            "text": "        "
+          },
+          {
+            "line": 137,
+            "text": "        # # clip grad"
+          },
+          {
+            "line": 138,
+            "text": "        # if cfg.train.grad_clip > 0:"
+          },
+          {
+            "line": 139,
+            "text": "        #     grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)"
+          },
+          {
+            "line": 140,
+            "text": "            "
+          },
+          {
+            "line": 141,
+            "text": "        # optimizer.step()"
+          },
+          {
+            "line": 142,
+            "text": ""
+          },
+          {
+            "line": 143,
+            "text": "        # time and print"
+          },
+          {
+            "line": 144,
+            "text": "        remain_iter = len(dataloader) * (cfg.train.epochs - epoch + 1) - i"
+          },
+          {
+            "line": 145,
+            "text": "        iter_time.update(time.time() - end)"
+          }
+        ]
+      },
+      {
+        "identity": {
+          "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/loss.py",
+          "sha256": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+          "size": 27972,
+          "mtime_ns": 1794304851667256584,
+          "ctime_ns": 1794304851667256584,
+          "device": 2048,
+          "inode": 193276819,
+          "uid": 1001,
+          "read_stable": true
+        },
+        "direct_optimizer_pattern_hit_lines": [],
+        "bounded_relevant_source": [],
+        "train_line130_context": []
+      },
+      {
+        "identity": {
+          "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/network.py",
+          "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+          "size": 11433,
+          "mtime_ns": 1794304851667256584,
+          "ctime_ns": 1794304851667256584,
+          "device": 2048,
+          "inode": 193276820,
+          "uid": 1001,
+          "read_stable": true
+        },
+        "direct_optimizer_pattern_hit_lines": [],
+        "bounded_relevant_source": [],
+        "train_line130_context": []
+      }
+    ],
+    "Torch_imported": false,
+    "GPU_context_created": false,
+    "signals_sent": false,
+    "remote_mutations": false,
+    "observed_at": "2026-11-10T15:19:59.610204+00:00"
+  },
+  "completed_at": "2026-11-10T15:19:58.509573+00:00"
+}

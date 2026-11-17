@@ -1,0 +1,37 @@
+{
+  "status": "SOURCE_API_FIXED_PENDING_INDEPENDENT_REVIEW",
+  "owner": {
+    "token": "10a3f8b7d1bc4c5083b9b476c4d6fb94",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T21:09:22.656483+00:00",
+    "deadline_at": "2026-11-08T22:09:22.656483+00:00",
+    "context_sha256": "96ccdaba46f448a2c295d1407b3e782b9f9d1052825fe18b2e4f967a458d3d71",
+    "pending_sha256": "a5a8fe814217e681000a6efca7eaeca7999792c27b10345892113ebb4f31ef9f"
+  },
+  "candidate_id": "fine-leaf-receiver-conditioned-vector-exchange",
+  "experiment_id": "M234-RVE",
+  "source_parent_commit": "0747f6acec1c61018ec99acf2efa5329c9b3523c",
+  "model_name": "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec",
+  "source_module": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_10a3f8b7\\rvec_prepare\\source\\framework\\model\\Quard_model\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec\\receiver_vector_exchange.py",
+  "constructor": "FineLeafReceiverVectorExchange(channels=256, k=32, heads=8)",
+  "parameters": {
+    "wr": "[H,D,D]",
+    "wd": "[H,D,D]",
+    "w2": "[H,D,D]",
+    "b1": "[H,D]",
+    "b2": "[H,D]"
+  },
+  "functions": [
+    "exchange_reference(features, graph, wr, wd, w2, b1, b2, *, donor_cut=False)",
+    "exchange_optimized(features, graph, wr, wd, w2, b1, b2, *, donor_cut=False)",
+    "build_graph(coordinates, leaves, k=32)"
+  ],
+  "methods": [
+    "forward(features, padding, positions, fine_ids)",
+    "forward_reference(features, padding, positions, fine_ids, *, donor_cut=False)",
+    "forward_own_only(features, padding, positions, fine_ids)"
+  ],
+  "own_only_control": "Untied W2 GELU(Wr xi+b1)+b2; tied raw xi. EVERY off-diagonal input derivative mathematically zero. Actual fallback remains raw whole-leaf mean.",
+  "parameters_total_at_C256_H8": 25088,
+  "torch_or_source_module_imported_by_author": false
+}

@@ -1,0 +1,34 @@
+{
+  "status": "READY_DEFAULT_NOP_PENDING_ACTUAL_DISPATCH_IDENTITY_PATHS",
+  "dispatch_proof_required_fields": [
+    "owner",
+    "task_id",
+    "source_commit",
+    "pid",
+    "start_ticks",
+    "runtime_root",
+    "log",
+    "binding_path",
+    "binding_sha256",
+    "entry_sha256",
+    "core_path",
+    "core_sha256",
+    "marker_sha256"
+  ],
+  "optional_fields": [
+    "work_dir"
+  ],
+  "derivation": "Root/ops must normalize these values ONLY from actual queue/dispatch result/PID start identity/materialized production binding+entry+marker hashes and runtime config. No PID/log/stage/workdir is guessed by the observer; missing start identity requires reconciliation. Production filenames are not yet asserted actual by author.",
+  "usage": "python -B observe_once.py --execute-root --label before --dispatch-proof ACTUAL_DISPATCH_FACTS_JSON --dispatch-proof-sha256 ACTUAL_SHA; repeat with fresh --label after --previous BEFORE_ACTUAL_JSON --previous-sha256 BEFORE_SHA",
+  "bounds": "One35s read-only SSH call; max128KB log read; output last5 native steps/validation epochs plus terminal/error flags, never raw carriage-return tail. No remote writes or signals. Local unique intent/result only.",
+  "genuine_peer_review": "Quick actual program review requested; author has not executed SSH/GPU or changed shared state.",
+  "owner": {
+    "token": "ee6f5eda28ef4b02a751c84d4c7df626",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T07:10:46.030397+00:00",
+    "deadline_at": "2026-11-09T08:10:46.030397+00:00",
+    "context_sha256": "46627417b6d7adcfc06ef708ebe894cc6f854a5af97bcefd5e35dbba4452f65c",
+    "pending_sha256": "5a94ff8d3aaf2c3f3180fe8c1ca3c2f2a50a73aaf42ecbc9acd5d1b5a177f249"
+  },
+  "delta": "Only current owner binding and actual dispatch-proof owner equality added; original bounded128KB canonical native-step parser and remote verification body retained byte-identically. No old execution replay."
+}

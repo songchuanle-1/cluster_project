@@ -1,0 +1,328 @@
+{
+  "status": "CRE_AND_HPC_FIRST_CONTROL_IMPORT_FAILURES_INDEPENDENTLY_REVIEWED_NO_ADMISSION",
+  "reviewed_at": "2026-10-27T16:38:27.233894+00:00",
+  "owner_token": "0f02aaa25b1a4f6e9d27cf8da33b8ca1",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "root_cause": "UNKNOWN",
+  "material_concerns": [
+    {
+      "kind": "UNRESOLVED_ORIGINAL_M95_DEPENDENCY_IMPORT_FAILURE",
+      "detail": "Two independent first champion attempts failed during original M95 dependency import at different sites, before model construction/loss/backward/optimizer. No evidence identifies a shared root cause or justifies changing candidate/worker/cache/dependencies."
+    },
+    {
+      "kind": "NATIVE_AND_RESOURCE_ADMISSION_GATES_INCOMPLETE",
+      "detail": "Each first control request is terminal rc1; candidate smoke and both resource arms are NOT_RUN. No native path/parameter pairing/gradient update/resource result/four-arm PASS is established."
+    }
+  ],
+  "actual_first_control_attempts": [
+    {
+      "candidate_id": "hierarchy-cross-root-directed-edge-broadcast",
+      "experiment_id": "M217-CRE",
+      "code_commit": "d58576b396cfb54577652be972f3ffaffda508c9",
+      "runtime_code_commit": "56b2a96dc48cc8a88f0f7105527ef448113b1060",
+      "mode": "smoke",
+      "target": "champion",
+      "execution": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/smoke_champion_execution.json",
+        "sha256": "998c15df671d2e12c0b8a2ce741f9fb35011e425c77683d192c817201d97081c"
+      },
+      "execution_path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/smoke_champion_execution.json",
+      "execution_sha256": "998c15df671d2e12c0b8a2ce741f9fb35011e425c77683d192c817201d97081c",
+      "result_sha256": "858d4a59c1913d00a3818e99a23e3bbb9ebcfbdccf9acd9c2940ec2bdeecbe06",
+      "request": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/smoke_champion_request.json",
+        "sha256": "9835a6e603848e9c5ce181590b84cf6ebaf6d05b0fcd44a2210a07d185ba120b"
+      },
+      "remote_LF_request_sha256": "3f781e76ecb08e4384c41689032ac967cdb5230d7247e3ca584866cc26120acd",
+      "request_id": "f11717294d4f4e82b66daa065b58c2ee",
+      "pid": 3716926,
+      "original_start_ticks": "73420355",
+      "binding": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/execution_binding.json",
+        "sha256": "2639a8b4346a75418e4b075e4ce29de6d795fe33d2aca493877efc8e6bc20be6"
+      },
+      "manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/native_manifest.json",
+        "sha256": "f8610731de82f6d5629e07f486c33f942d3bfecdc45c845dec59751ddabcbba3"
+      },
+      "lease": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_execution/execution_lease.json",
+        "sha256": "1585fb32c49492a40106327a3b18920a5a7b904c3d16090295e2f66f01f74914"
+      },
+      "trace": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_initial_smoke_trace.json",
+        "sha256": "71c7968b6b19437023e01d37e371ac9f4acc803419249d35ad5980f30787b095"
+      },
+      "stderr_sha256": "75365cdf475db16bf26ddd32d181a347dba885dd451488f6e6f7959286c3a0ec",
+      "canonical_readonly_reconcile": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_original_request_reconcile_cli.log",
+        "sha256": "c78f536501802a03770dd97baee1c8cef5b1632c077bf54025f9b7c8808faaf9"
+      },
+      "outcome": {
+        "certainty": "terminal",
+        "returncode": 1,
+        "execution_completed": false,
+        "error_type": "TypeError",
+        "error": "'list' object is not callable",
+        "native_loss_forwards": 0,
+        "native_criterion_backwards": 0,
+        "optimizer_steps": 0,
+        "native_predict_calls": 0,
+        "model_construction_reached": false,
+        "candidate_graph_executed": false,
+        "resource_measurement_reached": false,
+        "other_three_arms": [
+          {
+            "mode": "smoke",
+            "target": "candidate",
+            "status": "NOT_RUN"
+          },
+          {
+            "mode": "resources",
+            "target": "champion",
+            "status": "NOT_RUN"
+          },
+          {
+            "mode": "resources",
+            "target": "candidate",
+            "status": "NOT_RUN"
+          }
+        ]
+      },
+      "scope": "Exact original M95 package import -> spconv -> pccm -> Lark before Network construction; not execution of the CRE/HPC graph.",
+      "reconcile": {
+        "request_started_completed_identity_and_command_flags": true,
+        "full_remote_completed_and_result_objects_equal_local": true,
+        "original_pid_no_longer_same": true,
+        "workers_empty": true,
+        "GPU0_contexts_empty_at_readonly_observation": true,
+        "success_model_package_match_flags": false,
+        "flag_explanation": "Success matcher requires model_package, not populated because setup import failed. These false success flags are preserved, not promoted into native PASS."
+      }
+    },
+    {
+      "candidate_id": "hierarchy-tree-resolvent-nonlinear-composition",
+      "experiment_id": "M218-HPC",
+      "code_commit": "2f7eff19ca59cc4586e13ca81a547a18ea7e313d",
+      "runtime_code_commit": "56b2a96dc48cc8a88f0f7105527ef448113b1060",
+      "mode": "smoke",
+      "target": "champion",
+      "execution": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/smoke_champion_execution.json",
+        "sha256": "5fe727bb2f18f854b06ca3efde4175b318e9dbf750ecc1928656959fc7ca6f51"
+      },
+      "execution_path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/smoke_champion_execution.json",
+      "execution_sha256": "5fe727bb2f18f854b06ca3efde4175b318e9dbf750ecc1928656959fc7ca6f51",
+      "result_sha256": "a419d060654df8551b2159a787616817e144c98f3973a95bf76a46d2202f131b",
+      "request": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/smoke_champion_request.json",
+        "sha256": "76ab1b427bf2cfda99b175a813f660d854644589f30a2becba2298e43e5f019f"
+      },
+      "remote_LF_request_sha256": "7dd1c83cd09e9c9c2140f7b42b330669af0976b1c883ed854d4cf2fa8ede388b",
+      "request_id": "cb0abedec37c4d5586814d8d45965f7f",
+      "pid": 3793749,
+      "original_start_ticks": "73531401",
+      "binding": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/execution_binding.json",
+        "sha256": "54e2869ba7bf3c6cec36b52fdbb823247e42c8af2c350d20c6e5f3d4cfececfd"
+      },
+      "manifest": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/native_manifest.json",
+        "sha256": "ded0b75ed52c5038b9b28189d6ef940c5c22dea5273a8d0164fcb12076b5466e"
+      },
+      "lease": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_execution/execution_lease.json",
+        "sha256": "b6c0a8ff733699d8ebc1fe3cfda2bccda6f2320b42dab195023f51d2f08b7d08"
+      },
+      "trace": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_initial_smoke_trace.json",
+        "sha256": "ab8eccdef6468111b46327bc15474b5362b1ab93192de8750fda020ea7a95352"
+      },
+      "stderr_sha256": "41b232a399da105a159e67250540ba4b516baf08abdb2b6474f5d70c5850ad10",
+      "canonical_readonly_reconcile": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/hpc_original_request_reconcile_cli.log",
+        "sha256": "73fefbdee9c8a24be8c3a3d5bb3a1611f4b632755d6be81b9449a4c7f1ce106c"
+      },
+      "outcome": {
+        "certainty": "terminal",
+        "returncode": 1,
+        "execution_completed": false,
+        "error_type": "AttributeError",
+        "error": "'Transformer_NonRecursive' object has no attribute 'children'",
+        "native_loss_forwards": 0,
+        "native_criterion_backwards": 0,
+        "optimizer_steps": 0,
+        "native_predict_calls": 0,
+        "model_construction_reached": false,
+        "candidate_graph_executed": false,
+        "resource_measurement_reached": false,
+        "other_three_arms": [
+          {
+            "mode": "smoke",
+            "target": "candidate",
+            "status": "NOT_RUN"
+          },
+          {
+            "mode": "resources",
+            "target": "champion",
+            "status": "NOT_RUN"
+          },
+          {
+            "mode": "resources",
+            "target": "candidate",
+            "status": "NOT_RUN"
+          }
+        ]
+      },
+      "scope": "Exact original M95 package import -> spconv -> pccm -> Lark before Network construction; not execution of the CRE/HPC graph.",
+      "reconcile": {
+        "request_started_completed_identity_and_command_flags": true,
+        "full_remote_completed_and_result_objects_equal_local": true,
+        "original_pid_no_longer_same": true,
+        "workers_empty": true,
+        "GPU0_contexts_empty_at_readonly_observation": true,
+        "success_model_package_match_flags": false,
+        "flag_explanation": "Success matcher requires model_package, not populated because setup import failed. These false success flags are preserved, not promoted into native PASS."
+      }
+    }
+  ],
+  "bounded_CPU_diagnostics": [
+    {
+      "attempt": "cre_import_diagnostic_prepare",
+      "actual_result": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_prepare/cpu_import_probe_result.json",
+        "sha256": "e2e8cbc4a8435a141b95c72f1ec12f880ef8fb96ffd4edb5b8d62e594d679500"
+      },
+      "returncode": 0,
+      "status": "CPU_IMPORT_DIAGNOSTIC_RETURNED",
+      "structured_probe_status": "CPU_IMPORT_DIAGNOSTIC_FAILED_AT_STAGE",
+      "failed_stage": "import_tools_train_and_original_imports",
+      "fence_events": [
+        {
+          "event": "open",
+          "path": "/dev/null"
+        }
+      ],
+      "native_PASS": false,
+      "scope": "Stopped by its own /dev/null/platform discovery fence."
+    },
+    {
+      "attempt": "cre_import_diagnostic_r1",
+      "actual_result": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r1/cpu_import_probe_result.json",
+        "sha256": "3d86c32f911c6c70f057350356a0c96bf2592189791830688fd678e78890bd38"
+      },
+      "returncode": 1,
+      "status": "CPU_IMPORT_DIAGNOSTIC_REMOTE_OR_PARSE_FAILURE_NO_REPLAY",
+      "structured_probe_status": null,
+      "failed_stage": null,
+      "fence_events": null,
+      "native_PASS": false,
+      "scope": "CPU import exception in sympy/re/sre_compile plus collector/audit genexpr failure; incomplete observation, not a clean reproduction or repair of the original TypeError."
+    },
+    {
+      "attempt": "cre_import_diagnostic_r2",
+      "actual_result": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r2/cpu_import_probe_result.json",
+        "sha256": "3fe7122fbb0c323ecc1ddef8218232e5bf71f2c4bdbac5850bebf2c7b4d3653c"
+      },
+      "returncode": 0,
+      "status": "CPU_IMPORT_DIAGNOSTIC_RETURNED",
+      "structured_probe_status": "CPU_IMPORT_DIAGNOSTIC_FAILED_AT_STAGE",
+      "failed_stage": "import_tools_train_and_original_imports",
+      "fence_events": [
+        {
+          "event": "open",
+          "path": "/tmp/bp6eu0jh"
+        }
+      ],
+      "native_PASS": false,
+      "loaded_vs_source_compiled_initial": {
+        "same_co_code": true,
+        "same_varnames": true,
+        "same_names": true,
+        "same_marshal_sha256": true
+      },
+      "loaded_vs_source_compiled_final": {
+        "same_co_code": true,
+        "same_varnames": true,
+        "same_names": true,
+        "same_marshal_sha256": true
+      },
+      "scope": "Stopped on its own read-only fence before import chain completed; no original failure frame or code/cache corruption evidence established."
+    },
+    {
+      "attempt": "cre_import_diagnostic_r3",
+      "actual_result": {
+        "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/cre_import_diagnostic_r3/cpu_import_probe_result.json",
+        "sha256": "475f2fa7e104c86ccabc1a6f86e78bf0004c0cb09edbd713912a515dfea3d247"
+      },
+      "returncode": 0,
+      "status": "CPU_IMPORT_DIAGNOSTIC_RETURNED",
+      "structured_probe_status": "CPU_IMPORT_DIAGNOSTIC_FAILED_AT_STAGE",
+      "failed_stage": "import_tools_train_and_original_imports",
+      "fence_events": [
+        {
+          "event": "os.mkdir",
+          "path": "/home/songcl/.config/matplotlib"
+        }
+      ],
+      "native_PASS": false,
+      "loaded_vs_source_compiled_initial": {
+        "same_co_code": true,
+        "same_varnames": true,
+        "same_names": true,
+        "same_marshal_sha256": true
+      },
+      "loaded_vs_source_compiled_final": {
+        "same_co_code": true,
+        "same_varnames": true,
+        "same_names": true,
+        "same_marshal_sha256": true
+      },
+      "scope": "Stopped on its own read-only fence before import chain completed; no original failure frame or code/cache corruption evidence established."
+    }
+  ],
+  "conclusions": {
+    "CRE_mechanism_falsified": false,
+    "HPC_mechanism_falsified": false,
+    "candidate_implementation_revision_justified_by_this_evidence": false,
+    "environment_cache_worker_repair_proven": false,
+    "four_actual_results_or_native_backward_PASS": false,
+    "resources_measured": false,
+    "standard_PASS_receipt_queue_created_by_reviewer": false,
+    "efficacy_generalization_novelty": "UNKNOWN"
+  },
+  "serialization_scope": "Local Windows request file hashes are separately anchored. Remote request SHA was checked against its original LF JSON serialization and full object equality; no false byte-equality assumption is imposed across local Windows line endings.",
+  "next_action": "Preserve original frozen packages, both failed first requests/results/exact stderr and all bounded CPU diagnostics. Stop further probe/fence expansion and do not replay either request or alter dependencies/cache/model without concrete causal evidence. No admission. Treat current checks as unresolved original-M95 import/diagnostic operational blockage, not candidate mechanism rejection.",
+  "reviewer_scope": "Read-only local raw/request/binding/manifest/lease/reconcile/trace/CPU results. No worker/native/Torch/GPU/SSH/Git/shared-ledger operation by reviewer. Private CPU probe scripts were authored as explicitly delegated; root performed all actual remote executions.",
+  "new_issue": true,
+  "new_action": false,
+  "user_decision": false,
+  "bounded_Lark_only_control": {
+    "actual_result": {
+      "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/lark_only_control_r1_result.json",
+      "sha256": "17386cf374db9628c0945045dd52a1c29abfb3d80dac1a08bef1451ad1f80813"
+    },
+    "initial_collection_failure_preserved": {
+      "path": "pipeline/diagnostic_bundles/tick_0f02aaa2/lark_only_control_result.json",
+      "sha256": "db8241d740c57abb543d781caec64b53abd5cd9332636cb9fb1d51982a09f48b"
+    },
+    "status": "ORIGINAL_GRAMMAR_WITHOUT_USER_TRANSFORMER_LARK_CONSTRUCTION_PASSED_WITHOUT_TORCH",
+    "original_grammar_sha256": "77632b808824acd627f6004d08c04a95ee563e1f49026a218c7effda534aca96",
+    "literal_parser_options": {
+      "parser": "lalr",
+      "start": "args"
+    },
+    "omitted_native_constructor_kwargs": {
+      "transformer": "Call(func=Name(id='AttrArgTransformer', ctx=Load()), args=[], keywords=[])"
+    },
+    "scope_difference": "Original package grammar and literal parser options only. Native user-transformer construction is omitted; no parse or full pccm import equivalence is claimed.",
+    "torch_imported": false,
+    "model_or_data_loaded": false,
+    "GPU_queries_or_work": false,
+    "library_or_cache_mutation": false,
+    "inference": "This excludes only the claim that the bare original grammar plus literal lalr/args options always fails in a fresh no-Torch process. It does not validate the original user-transformer constructor, parse/full pccm/spconv/M95 import, original native setup, or a remedy. Root cause remains UNKNOWN."
+  },
+  "finalization_note": "Newly available read-only Lark control incorporated before first external publication; all original native failures/CPU outcomes and unresolved conclusions retained. No additional probes or file writes are planned after this final review."
+}

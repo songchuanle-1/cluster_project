@@ -1,0 +1,9 @@
+Root-only targeted system diagnostic body; author has not executed SSH or system queries.
+
+Supply stdin JSON {"execute_root":true,"owner":CURRENT_EXACT_OWNER}. The root-owned once wrapper must verify the foreground lease/context and fresh exclusive intent, pin SSH key/known-host/hostname/UID, and retain uncertain attempts without replay. Body also verifies exact current owner/deadline and hostname dl04-MS-7E06/uid1001 before target commands. No standalone shared-state apply helper is supplied.
+
+Four bounded commands: exact COREDUMP_PID3815203/COREDUMP_UID1001 coredumpctl info; kernel journal lines matching only worker3815203 or main3813109 in registered-stdout-mtime +/-5min; current-only /dev/shm df; uname. Each child uses Popen with <=8s timeout, <=32KiB captured output, no kill/terminate; uncertainty retains its PID and is explicit. Whole JSON is <=64KiB, with truncation flags. Missing tools, access denial and nonzero status remain actual observations, never sudo/password fallbacks.
+
+Reads current core_pattern/os-release and training-environment package/Python source metadata without importing packages. If targeted collector info is unavailable/unsuccessful, inspect only immediate project runtime/workdir core-like names and owned-file size/mtime metadata, no recursive listing or core contents. No Torch, GPU queries, training, restart/resume, signals, system/config changes or remote writes. No other-user/private log/context requests. Current shm usage and current package/kernel files do not establish failure-time pressure or ABI. Root cause remains UNKNOWN unless actual evidence supports a narrower conclusion.
+
+Original terminal evidence retains owner342a; this new owner149 packet only observes system evidence. A successful SSH transport does not convert denied/uncertain command results into a diagnostic PASS. Review body/binding/FROZEN before root execution.

@@ -1,0 +1,141 @@
+{
+  "contract": "bei_visible_admission_audit_v1",
+  "timestamp": "2026-10-09T10:42:58.450255+08:00",
+  "code_commit": "85d47eb4526ae635ffdcc5789bf99ee5411e8cb7",
+  "goal_sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b",
+  "config": "configs/Quard/bei/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei.yaml",
+  "model_source_sha256": "24d9f990e8279bba71583a7a1d7018ef367bd12eb89264f0a959a5e65c0f6215",
+  "physical_sources": [
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/__init__.py",
+      "sha256": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/backbone.py",
+      "sha256": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/boundary_incidence.py",
+      "sha256": "747196165c27da59341162ce03a27f9c4f932f8f52aa4231930daeaff9a6f81b"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/dec.py",
+      "sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/hier_postprocess.py",
+      "sha256": "9947caad7ce89ea1ea78831bfc1cfce9dab5dab54417576a03f128b91a302906"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/loss.py",
+      "sha256": "6afe3957ae9eb29dd86c643f3daeff9e2923ad8ef64ed5225de9cacfe09eef61"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/network.py",
+      "sha256": "fba0d3330baf3b904a546426f63da4ae7317a563568fbc01232ef6a86f3e0950"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bei/sample_model.py",
+      "sha256": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+    }
+  ],
+  "same_numeric_config_as_champion": true,
+  "resources": {
+    "baseline": {
+      "params": 155905851,
+      "trainable_params": 31260219,
+      "flops_g": 9.700876364,
+      "latency_ms_median": 104.95198331773281,
+      "latency_ms_p90": 608.4176622331171,
+      "peak_allocated_mib": 980.5361328125,
+      "peak_reserved_mib": 1204.0
+    },
+    "champion": {
+      "params": 157484090,
+      "trainable_params": 32838458,
+      "flops_g": 9.762532428,
+      "latency_ms_median": 197.65625521540642,
+      "latency_ms_p90": 269.87683549523354,
+      "peak_allocated_mib": 976.0322265625,
+      "peak_reserved_mib": 1214.0
+    },
+    "candidate": {
+      "params": 157484090,
+      "trainable_params": 32838458,
+      "flops_g": 9.762532428,
+      "latency_ms_median": 211.92019898444414,
+      "latency_ms_p90": 284.3565180897713,
+      "peak_allocated_mib": 1008.8515625,
+      "peak_reserved_mib": 1156.0
+    }
+  },
+  "candidate_minus": {
+    "baseline": {
+      "params": 1578239,
+      "flops_g": 0.06165606399999923,
+      "median_ms": 106.96821566671133,
+      "p90_ms": -324.06114414334576,
+      "memory_percent": 2.8877497462823865
+    },
+    "champion": {
+      "params": 0,
+      "flops_g": 0.0,
+      "median_ms": 14.263943769037724,
+      "p90_ms": 14.479682594537792,
+      "memory_percent": 3.362525851537379
+    }
+  },
+  "paired_predict_protocol": true,
+  "gates": {
+    "diagnosis": true,
+    "controls": true,
+    "native_backward": true,
+    "resources": true,
+    "independence": true
+  },
+  "constraint_count": 18,
+  "banned_count": 11,
+  "requires_posttraining_gain_for_memory_retention": false,
+  "limitations": [
+    "Latency is measured on a shared training GPU; not an isolated speed claim.",
+    "fvcore unsupported operations retain the historical paired protocol.",
+    "No trained efficacy or exhaustive novelty is established.",
+    "Separate substantive constraints review is required."
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/bei_contracts_20261009-1029.json",
+      "sha256": "3be5ffc3a25fb208761383293b0b7fd2e2bbd1e10f44f870f4c4f980d24f7612"
+    },
+    {
+      "path": "pipeline/reports/bei_native_20261009-1029.json",
+      "sha256": "60a4782a3655b381e8e8d134c91eedfad1dd723c1d571354c50b8dba88c9c16d"
+    },
+    {
+      "path": "pipeline/reports/bei_sorted_native_20261009-1030.json",
+      "sha256": "bcd12ef04994203deafca3be5d4a5238fdd456ffa42d776abfafa7bc0806c233"
+    },
+    {
+      "path": "pipeline/reports/bei_sorted_batch2_20261009-1030.json",
+      "sha256": "8e049686df2cd4f155375e6154efd5c9e7b1aaa6657db8877d842380f46a5db4"
+    },
+    {
+      "path": "pipeline/reports/m95_boundary_incidence_20261009-1014.json",
+      "sha256": "0cabf3d19f3e09c5dcab4fa916d545e4cb18d08d4e8ee71649cf4ca4c5bb8a84"
+    },
+    {
+      "path": "pipeline/reports/bei_resource_baseline_20261009-1030.json",
+      "sha256": "1a7e415dd81ad49e1d7b871a2225b2070e128c51f7552c9901064bf6cbf8db64"
+    },
+    {
+      "path": "pipeline/reports/bei_resource_champion_20261009-1030.json",
+      "sha256": "25adce56cb5238c99580ecdfb6afb7d6040a67fb80e06f90ea7d4d05cf20674f"
+    },
+    {
+      "path": "pipeline/reports/bei_resource_candidate_20261009-1030.json",
+      "sha256": "a849f98ff4cc19b30eaeab9abfea32df5e1fb1066968174d09e316154a10c0e1"
+    }
+  ],
+  "admission": false,
+  "queue_mutated": false
+}

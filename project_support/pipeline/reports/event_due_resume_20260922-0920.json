@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-09-22T09:20:41+08:00",
+  "mode": "event",
+  "status": "native_routes_reachability_verified_checkpoint_blocked",
+  "preflight": {
+    "context_generated_at": "2026-09-22T09:07:31.825637+08:00",
+    "monitor_rc": 0,
+    "goal_rc": 0,
+    "terminal_changes": [],
+    "server_6_monitor_status": "unreachable"
+  },
+  "due_ids": [
+    {
+      "id": "referent-supervision-axis",
+      "stage": "design",
+      "disposition": "open_axis",
+      "action": "Keep the axis open in the normal design-mode admission chain; event mode does not authorize a new design."
+    },
+    {
+      "id": "referent-causality-audit",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "action": "Keep blocked until the exact M95 checkpoint is bound under allowed server-6 storage."
+    },
+    {
+      "id": "modality-identity-preservation",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "action": "Keep blocked until paired same-forward modality controls can bind the exact M95 checkpoint."
+    },
+    {
+      "id": "referent-discrimination",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "action": "Keep blocked until complete same-forward candidate-rank capture can bind the exact M95 checkpoint."
+    },
+    {
+      "id": "instance-identity-representation",
+      "stage": "blocked",
+      "disposition": "external_blocker",
+      "action": "Keep blocked until paired raw/projected/fused/final identity evidence can bind the exact M95 checkpoint."
+    }
+  ],
+  "live_checks": {
+    "ssh_reachable": true,
+    "host": "server-6",
+    "gpu": 7,
+    "gpu_name": "NVIDIA H100 80GB HBM3",
+    "gpu_memory_used_mib": 42023,
+    "gpu_memory_total_mib": 81559,
+    "gpu_memory_free_mib": 39536,
+    "gpu_utilization_percent": 72,
+    "foreign_work_touched": false,
+    "exact_m95_checkpoint_dir": "missing",
+    "exact_checkpoint_payload_found": false,
+    "checkpoint_root": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints",
+    "checkpoint_directory": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort"
+  },
+  "prior_deployment": {
+    "path": "pipeline/reports/frozen_capture_deployment_20260922-0716.json",
+    "sha256": "04febb33c925f68a5f7cbe337085803382c834c93d85a5384724ce27f8cf9654",
+    "bundle_importable": true,
+    "source_remote_hashes_match": true
+  },
+  "alternatives_attempted": [
+    "The scheduled 09:20 retry performed one bounded SSH reachability query.",
+    "The same query read GPU7 memory and utilization without sending signals or evicting foreign work.",
+    "The exact champion checkpoint directory was tested on allowed server-6 storage and found missing.",
+    "No unauthorized fallback host, local training substitute, or checkpoint identity substitution was used."
+  ],
+  "retry_after": "2026-09-22T10:20:00+08:00",
+  "unblock_condition": "An exact M95 checkpoint payload is present under allowed server-6 storage with a frozen hash; then run the already deployed frozen capture routes on GPU7 without evicting foreign work.",
+  "next_action": "At the next scheduled retry, verify the exact checkpoint payload under allowed storage before any capture. If it is still absent, keep the four native routes blocked and continue the open-axis design only in design mode.",
+  "queue_mutation": false,
+  "training_launched": false,
+  "native_execution_completed": false,
+  "admission": false
+}

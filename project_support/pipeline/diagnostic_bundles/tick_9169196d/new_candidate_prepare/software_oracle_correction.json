@@ -1,0 +1,24 @@
+{
+  "scope": "Software oracle arithmetic correction only, not model/protocol or numeric tolerance change",
+  "first_failure": {
+    "path": "pipeline/diagnostic_bundles/tick_9169196d/new_candidate_prepare/static_validation_run1.json",
+    "sha256": "4bb23350222a247470b9d274bbf4c4a0eb8b0aee428f499ab260d9846748f645"
+  },
+  "diagnosis": {
+    "mixed_batch_stage_rows_actual_and_reference": [
+      13,
+      13,
+      6,
+      6
+    ],
+    "single_mismatched_middle_scalar_actual": -0.0839033968855392,
+    "reference_builtin_sum": -0.08390339688553919,
+    "delta": -1.3877787807814457e-17,
+    "explanation": "Reference builtin sum floating accumulation differed from the list index_add carrier explicit left fold. Reference now explicitly adds sorted original neighbors left-to-right as that carrier does; independent graph/diameter/oracle construction remains separate. No epsilon/tolerance or production-source change."
+  },
+  "final_software_result": {
+    "path": "pipeline/diagnostic_bundles/tick_9169196d/new_candidate_prepare/static_validation.json",
+    "sha256": "5aeaef589079a4fc846e6092a8943ac81c9ec93d87394963cde0453131533a45"
+  },
+  "Torch_native_resources": "NOT_RUN"
+}

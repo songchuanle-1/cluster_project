@@ -1,0 +1,618 @@
+                                                        3D-SPS: Single-Stage 3D Visual Grounding via
+                                                               Referred Point Progressive Selection
+
+                                                         Junyu Luo1,2 , Jiahui Fu1,2 *, Xianghao Kong1,2 , Chen Gao1,2 ,
+                                                                 Haibing Ren3 , Hao Shen3 , Huaxia Xia3 , Si Liu1,2
+
+                                        1Institute of Artificial Intelligence, Beihang University 2Hangzhou Innovation Institute, Beihang University 3Meituan Inc.
+
+arXiv:2204.06272v1 [cs.CV] 13 Apr 2022                          Abstract                                                                           Two-Stage
+                                                                                                                              (a) Sparse Proposals
+                                           3D visual grounding aims to locate the referred target
+                                        object in 3D point cloud scenes according to a free-form                                               Wrong Prediction
+                                        language description. Previous methods mostly follow a
+                                        two-stage paradigm, i.e., language-irrelevant detection and   Ground Truth            Detection Stage                    Matching Stage
+                                        cross-modal matching, which is limited by the isolated ar-
+                                        chitecture. In such a paradigm, the detector needs to sample                                           Wrong Prediction
+                                        keypoints from raw point clouds due to the inherent proper-
+                                        ties of 3D point clouds (irregular and large-scale), to gen-  Description:            (b) Dense Proposals
+                                        erate the corresponding object proposal for each keypoint.    There is a sofa chair                      Single-Stage
+                                        However, sparse proposals may leave out the target in de-     near a couch. The sofa
+                                        tection, while dense proposals may confuse the matching       chair has a table on    (c) 3D-SPS
+                                        model. Moreover, the language-irrelevant detection stage      each side.
+                                        can only sample a small proportion of keypoints on the                                                                                            Correct Prediction
+                                        target, deteriorating the target prediction. In this paper,
+                                        we propose a 3D Single-Stage Referred Point Progressive       Figure 1. Traditional two-stage 3D VG methods are limited by the
+                                        Selection (3D-SPS) method, which progressively selects        isolation of the detection stage and the matching stage. (a) Sparse
+                                        keypoints with the guidance of language and directly lo-      proposals may leave out the target in detection. (b) Dense
+                                        cates the target. Specifically, we propose a Description-     proposals could confuse the matching model. (c) 3D-SPS progres-
+                                        aware Keypoint Sampling (DKS) module to coarsely focus        sively selects keypoints (blue pointsred pointsgreen points)
+                                        on the points of language-relevant objects, which are sig-    and performs referring at a single stage. Noted that dense surfaces
+                                        nificant clues for grounding. Besides, we devise a Target-    are utilized only to help readers understand the example 3D scene,
+                                        oriented Progressive Mining (TPM) module to finely con-       while the input of our method only contains sparse point clouds.
+                                        centrate on the points of the target, which is enabled by
+                                        progressive intra-modal relation modeling and inter-modal     as autonomous robots and human-machine interaction in
+                                        target mining. 3D-SPS bridges the gap between detection       AR/VR/Metaverse. Even though much progress [29,33≠38,
+                                        and matching in the 3D visual grounding task, localizing the  40, 41, 43] has been achieved in the 2D VG task, it is still
+                                        target at a single stage. Experiments demonstrate that 3D-    challenging to locate the referred target object in 3D scenes
+                                        SPS achieves state-of-the-art performance on both ScanRe-     since point clouds are irregular and large-scale.
+                                        fer and Nr3D/Sr3D datasets.
+                                                                                                         Existing 3D VG methods [2, 7, 11, 39, 42, 44] are mainly
+                                        1. Introduction                                               based on the detection-then-matching two-stage pipeline.
+                                                                                                      The first stage is language-irrelevant detection, where gen-
+                                           Visual Grounding (VG) aims to localize the target ob-      eral 3D object detectors [4, 20, 23] are adopted to produce
+                                        ject in the scene based on an object-related linguistic de-   numerous object proposals. The second stage is cross-
+                                        scription. In recent years, the 3D VG task has received       modal matching, where specific vision-language attention
+                                        increasing attention owing to its wide applications, such
+
+                                            *Equal contribution
+                                            Corresponding author: Chen Gao (gaochen.ai@gmail.com).
+mechanisms are usually designed to match the proposal and          the target box regression. Finally, 3D-SPS distinguishes
+the description. Previous methods primarily focus on the           the target from the condensed keypoint set and regresses its
+second stage, i.e., exploring relations among proposals to         bounding box. Note that 3D-SPS is also consistent with the
+distinguish the target object.                                     commonsense of how human finds the target object. Com-
+                                                                   monly, a human first selects a coarse candidate set accord-
+   We argue that the separation of the two stages limits the       ing to the language description and then finely recognize
+existing methods. Previous 2D detection methods adopt              and judge it to select the target object. [16, 31]
+data-independent anchor boxes as proposals on regular and
+well-organized images. However, the anchor-based fashion              In summary, we make the following contributions:
+is generally impractical for the large-scale and irregular 3D
+point clouds. Consequently, the 3D detector utilized in the           ∑ We propose the 3D-SPS method, which directly per-
+first stage needs to sample a limited number of keypoints to             forms 3D VG at a single stage to bridge the gap be-
+represent the whole scene and generate the corresponding                 tween detection and matching. To the best of our
+proposal for each keypoint. However, sparse proposals may                knowledge, 3D-SPS is the first work investigating
+leave out the target in the detection stage (e.g., the sofa chair        single-stage 3D VG.
+in Figure 1 (a)), which leads to the inability to locate the tar-
+get in the matching stage. Meanwhile, dense proposals may             ∑ We treat the 3D VG task as a keypoint selection prob-
+contain redundant objects, causing the inter-proposal rela-              lem. Two selection modules, i.e., DKS and TPM,
+tionship so complex that the matching module struggles to                are designed to progressively select target-related key-
+distinguish the target. As shown in Figure 1 (b), it is difficult        points. DKS samples the coarse language-relevant
+to select the right sofa chair from these numerous proposals             keypoints, and TPM finely mines the cross-modal re-
+with similar appearances. Therefore, the two-stage ground-               lationship to distinguish the target.
+ing methods face a dilemma of deciding the proposal num-
+ber. Besides, the keypoint sampling strategy (e.g., Farthest          ∑ Extensive experiments confirm the effectiveness of our
+Point Sampling (FPS) [25]) usually adopted in the detec-                 method. 3D-SPS achieves the state-of-the-art per-
+tor at the first stage is also language-irrelevant. The strat-           formance on both ScanRefer [2] and Nr3D/Sr3D [1]
+egy aims to sample keypoints to cover the entire scene as                datasets. The code is provided in https : / /
+much as possible to detect all potential objects. Thus, the              github.com/fjhzhixi/3D-SPS.
+proportion of target keypoints is relatively small, which is
+unfavorable for the target prediction.                             2. Related Work
+
+   To address the aforementioned issues, we propose a              Visual Grounding on 2D Images. The goal of visual
+3D Single-Stage Referred Point Progressive Selection (3D-          grounding on 2D images is to select a referred target ac-
+SPS) method in this paper. Our main idea is to progres-            cording to the referring expression [8,14,22,40]. Two main-
+sively select keypoints under the guidance of the language         stream frameworks have been proposed in succession: two-
+description throughout the whole process, as shown in Fig-         stage and one-stage methods. Specifically, two-stage meth-
+ure 1 (c). Based on this idea, we propose a Description-           ods [13, 19, 33≠36, 40, 41, 43, 46] first generate region pro-
+aware Keypoint Sampling (DKS) module to coarsely fo-               posals with object detectors and then select the target region
+cus on the points of language-relevant objects, e.g., sofa         by matching the language features with the proposals. Each
+chair, couch, and table in Figure 1 (c). These keypoints           proposal is treated the same in the matching stage, despite
+provide significant clues for localizing the grounding target      their importance in the referring context varies. Besides,
+in the following cross-modal interaction. Besides, we de-          one-stage methods [3,6,17,29,37,38] eliminate the proposal
+vise a Target-oriented Progressive Mining (TPM) module,            generation and feature extraction stage in two-stage frame-
+which conducts progressive mining to finely figure out the         works. In these methods, linguistic features are densely
+target. We leverage the self/cross-attention mechanism to          fused with each pixel or patch to generate multi-modal fea-
+model intra/inter-modal relationships respectively. In addi-       ture maps for regressing the bounding box.
+tion, we fuse the keypoint features with point features of the
+whole scene to achieve global localization perception. To             However, one-stage methods in 2D VG could not be di-
+progressively select keypoints of the target, we utilize the       rectly lifted to 3D VG. Firstly, 3D point clouds are numer-
+language-points cross-attention map to select the keypoints        ous and noisy. Therefore, it is computationally unaccept-
+that the language pays more attention to and discard irrele-       able [9, 10, 45] to treat each point as a candidate. Then,
+vant points. The model gradually concentrates on the target        due to the large-scale and complexity of 3D scenes, it is
+and obtains a condensed set of keypoints through multiple          not easy to model the relationship of all objects and figure
+layers. Thus, the proportion of target points will gradually       out the target [11, 39, 44]. Moreover, 2D one-stage meth-
+increase with richer target-related features, which benefits       ods adopt the sliding-window manner like [12, 30], which
+                                                                   cannot deal with 3D points since 2D input is highly regu-
+                                                                   lar while 3D points are inherently sparse, unordered, and
+Description D
+
+ The kitchen cabinet is   Language
+  L0
+between the refrigerator  Encoder
+
+        and oven.
+
+Pcloud                    Pseed                                 P0                       PT                              MLP
+ sr
+                                                                            TPM  LT                                           ArgMax
+
+N ◊ (3+F)
+                                    M ◊ (3+C)DKS                                                                                Index    Predicted
+                                                                     K0 ◊ (3+C)                                              Selection
+     Box
+
+                                                                                                             KT ◊ (3+C)
+        Backbone
+
+                                                                                 T layers
+
+Pcloud                    Pseed                                 P0                         PT                                            Predicted Box
+
+Figure 2. 3D-SPS framework. We take the 3D VG task as a keypoint selection problem and avoid the separation of detection and
+
+matching. Specifically, we use PointNet++ as the backbone to extract point seeds Pseed from Pcloud. After that, we coarsely sample the
+
+language-relevant keypoints P0 by DKS with word features L0, which are mostly on the kitchen cabinets, refrigerator and oven in the
+
+figure. Then, TPM finely selects target keypoints PT and predict referring confidence scores sr. Here the keypoints are concentrated on
+
+the target kitchen cabinet. Finally, the target box is regressed from the keypoint with the highest sr in PT . The blue box is the ground
+
+truth. The yellow boxes are objects of the same category as the target. The green box is our target prediction. Best viewed in color.
+
+irregular [24, 25]. In this paper, we propose 3D-SPS to ad-         how we obtain the target by progressive keypoint selection.
+dress the problems introduced by 3D point clouds, which             In Sec 3.4, we introduce the training objectives of 3D-SPS.
+becomes the leading 3D VG solution.
+                                                                    3.1. Overview
+Visual Grounding on 3D Point Clouds. With the preva-
+lence of deep learning technologies on 3D point clouds, the            In the 3D VG task, the inputs are the point clouds
+3D VG task has attracted much attention. Chen et al. [2] re-        Pcloud  RN◊(3+F ) and a free-form plain text description
+leased a 3D VG dataset ScanRefer, in which the bounding             D of the target object with W words, where Pcloud contains
+boxes of objects are referred by their corresponding descrip-       3D coordinates and F -dimensional auxiliary feature (RGB,
+tions in an indoor scene. ReferIt3D [1] also proposes two           normal vectors, etc.) of N points. The goal of this task is to
+datasets, i.e., Sr3D and Nr3D, for the 3D VG task.                  locate the target object (i.e., the most relevant object to the
+                                                                    description) and predict its bounding box.
+   Existing 3D VG works [2, 7, 11, 15, 28, 39, 42, 44] mainly
+focus on better modeling the relationship among objects to             The main idea of 3D-SPS is the progressive keypoint
+locate the target object, e.g., adopting graph neural net-          selection process, as shown in Figure 2. Firstly, we
+work [15], and attention mechanisms [44]. To the best               adopt a widely used PointNet++ [25] as the backbone net-
+of our knowledge, previous 3D grounding approaches can              work to extract point features from Pcloud. The backbone
+generally be concluded into a detection-then-matching two-          outputs M seed points with (x, y, z) coordinates and C-
+stage framework. In these methods, the detection stage              dimensional enriched local features Pseed  RM◊(3+C).
+fails to leverage the language context to concentrate on the        Meanwhile, we use the language encoder to extract H-
+points that are more essential to the referring task. To over-      dimensional word features L0  RW ◊H from W -length de-
+come those shortcomings, we propose the first single-stage          scription D. Secondly, DKS module selects K0 language-
+method in 3D VG to progressively select keypoints under             relevant keypoints with features P0  RK0◊(3+C) from M
+the guidance of the description.                                    seed points based on word features L0. These keypoints
+                                                                    belong to the objects whose categories are mentioned in the
+3. Method                                                           description, providing significant clues to distinguishing the
+                                                                    grounding target. Thirdly, TPM module takes point features
+   In this section, we detail the 3D-SPS method. In Sec 3.1,        P0 and word features L0 as inputs. The t-th layer of the
+we present an overview of 3D VG task and our method. In             TPM module takes Pt-1 and Lt-1 as inputs and outputs
+Sec 3.2 and Sec 3.3, we dive into the technical details and         Pt and Lt. TPM progressively distinguishes the grounding
+                                                               Non-object Points           Word Features                                                 Keypoints
+                                                                                                                Topkr                    Index Selection
+       soMLP                                               sd  Language-irrelevant Points
+                                   Pooling                                                                                                                              
+
+                        c                                      Language-relevant Points
+                                                      MLP
+
+       Topko                            Topkd                                                 Average Pooling                            Add & Norm
+                                                                                                                                              FFN
+         Index                            Index                                                              Cross-attention
+       Selection                        Selection                                                                 Map                    Add & Norm
+
+                                                                                              Add & Norm                    
+       Cross-modal Attention
+
+                                                                                              FFN                                   K&V              Q
+
+                                                                                              Add & Norm                                 Add & Norm
+                                                                                                                                              FFN
+Pseed             Pobj                                         P0                          Cross-modal Attention
+
+Figure 3. The DKS module. We use object confidence score so                                Q                           K&V               Add & Norm
+
+to select points near object centers and description relevance score                          Add & Norm                            Points Cross-Attention
+                                                                                                   FFN
+sd to select language-relevant points.                                                                                              K&V              Q
+
+                                                                                              Add & Norm                                 Add & Norm
+
+target by multi-layer cross-modal transformers. We select                                  Language Self-Attention                  Points Self-Attention
+KT keypoints with features PT  RKT ◊(3+C) and up-
+date the word features as LT . Lastly, we predict the re-                                  Q                           K&V          K&V              Q
+ferring confidence score sr based on keypoint features PT
+and cross-modally aligned word features LT by a simple                                     Word Features                    Points       Keypoints
+MLP head. The keypoint feature with the highest sr is used
+to regress the bounding box of the grounding target as the                                 Figure 4. The TPM mod
+ule. It is a 
+two-stream cross-modal trans-
+center c  R3 and the size s  R3.                                                           former model. We select the keypoints of the target based on the
+
+   By treating the 3D VG task as a keypoint selection prob-                                language-points cross-attention map At at the t-th layer.
+lem, our 3D-SPS concentrates on distinguishing the key-
+points of the target object from point clouds for predicting                               whether the point is near an object center. The keypoint
+the bounding box directly, which is more effective than tra-                               features Pobj with top ko highest so are selected as:
+ditional detection-then-matching two-stage methods.
+                                                                                              so = MLP(Pseed),                                                             (1)
+3.2. Description-aware Keypoint Sampling
+                                                                                              Pobj = Pseed [argtopk(so, ko)] .
+   Since the search space of 3D anchor boxes is huge,
+the data-independent anchor assignment strategy widely                                        Then a description relevance score sd is utilized to select
+adopted in 2D object detection [27] is impractical when                                    top kd keypoints as P0 that are related to the description
+lifted to 3D [20]. To this end, most 3D object detection                                   context L0. We jointly use point features Pobj and global
+methods [4, 20, 23] usually adopt sampling methods (e.g.,                                  word features to predict the sd of each point, which can be
+FPS [25]) to sample keypoints from seed points and gener-                                  formulated as:
+ate a proposal for each selected point. Existing detection-
+then-matching methods for the 3D VG task usually use the                                      sd = MLP(Pobj || MaxPool(L0)),                                               (2)
+same strategy at the detection stage. However, directly
+adopting the sampling strategy in detection to the 3D VG                                      P0 = Pobj [argtopk(sd, kd)] .
+task is not sensible because of the divergence of interest
+of the two tasks. The sampling objective of 3D object de-                                  3.3. Target-oriented Progressive Mining
+tection is to cover the entire scene as much as possible for
+detecting potential objects, while the goal of 3D VG is to                                    With the coarsely selected language-relevant keypoints
+locate the referred target.                                                                by DKS, we perform fine target mining with the TPM mod-
+                                                                                           ule. TPM is constructed by a T -layer stacked multi-modal
+   Therefore, we propose DKS to help the model focus on                                    two-stream transformer model, where both word features
+the keypoints of language-relevant objects instead of the                                  and keypoint features are processed in separate streams and
+whole scene. Specifically, we bring word features into the                                 interact through cross-modal attention layers to model the
+sampling process to select keypoints of the objects whose                                  relationship and mine the target. At the t-th layer, TPM
+categories are mentioned in the description. These key-                                    selects Pt from Pt-1. TPM progressively selects the key-
+points contain the information of not only the target object                               points and concentrates the attention by discarding target-
+but also related objects to help determine the target.                                     irrelevant keypoints in each layer.
+
+   Figure 3 details the DKS. We first obtain an object con-                                Intra/inter-modal Modeling. As Figure 4 shows, we em-
+fidence score so based on point features Pseed to clarify                                  ploy the attention mechanism [32] to learn intra-modal rela-
+                                                                                           tionships. For point features, the point self-attention block
+                                                                                           helps to refine point visual features and exploits their spatial
+                                                                                           relationship. For word features, the language self-attention
+                                                                                           block is used to extract context relationships.
+   Specially, we leverage a point cross-attention block to       box of objects predicted by all keypoints of each TPM layer.
+model the global location of keypoints in the scene be-          During inference, we only use the box prediction of the key-
+cause the interaction of selected keypoints could not well       point with the highest sr from the last TPM layer as our
+model descriptions which include the global location like        predicted grounding target.
+"in the center/corner of room". Therefore, the scene point       Language Classification Loss. Following [2], we also in-
+clouds Pseed (point features before DKS) are fused to ac-        troduce the language classification loss LLang as an auxil-
+quire global scene features.                                     iary loss, which includes a multi-class object classification
+                                                                 loss for the target category based on the updated language
+   Next, point features and word features interact in cross-     features of each TPM layer.
+modal attention blocks. In these blocks, the points branch is
+assisted by word features to distinguish the target, while the      In summary, the total loss is: L = 1LVG + 2LDKS +
+language branch fuses the scene information by attending         3LDet + 4LLang, where the weights 1, 2, 3, 4 are
+to point features.                                               used for balancing different loss terms.
+
+Attention-guided Keypoint Selection. TPM reduces the             4. Experiments
+keypoint set at each layer and gradually focuses on the tar-
+get, as shown in Figure 4. We make use of the language-          4.1. Datasets
+points cross-attention map At, which represents the impor-
+tance of keypoints to the referring task. Specifically, we       ScanRefer. The ScanRefer dataset [2] is a 3D visual
+perform average pooling on At and obtain point-wise at-          grounding dataset with 51, 583 descriptions based on the
+tention scores ^at  RKt-1 . Then the keypoints with top kr       800 ScanNet [5] scenes. Each scene has 13.81 objects and
+highest ^at are selected for the next layer as follow:           64.48 descriptions on average. The evaluation metric of the
+                                                                 dataset is the Acc@mIoU, which means the fraction of de-
+^at = AvgPool(At),              (3)                              scriptions whose predicted box overlaps the ground truth
+                                                                 with IoU > m, where m  {0.25, 0.5}. The accuracy is
+Pt = Pt-1 [argtopk(^at, kr)] .                                   reported in unique and multiple categories. Specifically, a
+                                                                 target object is classified as unique if it is the only object of
+3.4. Training Objectives                                         its class in the scene; otherwise, it is classified as multiple.
+                                                                 Nr3D and Sr3D. The ReferIt3D dataset [1] is also based on
+Visual Grounding Loss. 3D VG loss LVG is the primary             the ScanNet [5] scenes. It contains two subsets: Sr3D and
+loss of our framework. In the training phase, we supervise       Nr3D. Sr3D (Spatial Reference in 3D) contains 83, 572 syn-
+referring confidence scores sr predicted from PT with the        thetic expressions generated by templates and Nr3D (Natu-
+target label. During inference, we only choose the keypoint      ral Reference in 3D) consists of 41, 503 human expressions.
+with the highest sr from PT to predict the target box. We        It directly provides segmented point clouds for each object
+adapt the loss in ScanRefer [2] to our framework. In Scan-       as inputs rather than the whole scene. The evaluation metric
+Refer, the target label of sr is a one-hot label. The keypoint   of ReferIt3D is the accuracy, i.e., whether the model cor-
+whose proposal box has the highest IoU with the ground           rectly selects the target among objects.
+truth target box is set to 1, and others are set to 0. However,
+in 3D-SPS, we usually obtain several feasible keypoints of       4.2. Implementation Details
+the target after TPM since the model aims to select points
+on it. Therefore, we modify this target label from one-hot          Our model is trained end-to-end with the AdamW opti-
+to multi-hot. Specifically, we assign 1 to keypoints whose       mizer [21] and a batch size of 32 for 32 epochs. The initial
+predicted boxes' IoUs with the ground truth target box are       learning rates of TPM layers and the rest of the model are
+the top k1 highest and greater than the threshold .              empirically set to 1e - 4 and 1e - 3, respectively. We apply
+                                                                 learning rate decay at epoch {16, 24, 28} with a rate of 0.1.
+DKS Loss. In the DKS module, we apply LDKS to super-             We adopt the pre-trained PointNet++ [25] following the set-
+vise the object confidence score so and the description rel-     tings in [20] and the language encoder in [26], while the
+evance score sd with Focal Loss [18]. The so is supervised       rest of the network is trained from scratch. For the Scan-
+by whether the point is inside an object box and belongs         Refer dataset, we use xyz coordinates, RGB values, normal
+to the k2-closest points to the object center. The sd is su-     vectors, and extracted multiview features as inputs follow-
+pervised by whether the point belongs to any object whose        ing [2]. The number M of Pseed is empirically set to 1024.
+category is mentioned in the description.                        The number K0 of P0 is empirically set to 512. The number
+                                                                 T of TPM layers is set to 4, and we select 50% keypoints in
+Detection Loss. Following the loss used in [20, 23], we use      each layer, i.e., {Kt|t  {1, 2, 3, 4}} = {256, 128, 64, 32}.
+the object detection loss LDet as an auxiliary loss for VG       The loss weights are empirically set to 1 = 0.1, 2 = 0.8,
+task. Specifically, LDet comprises object semantic classifi-     3 = 5, 4 = 0.1 for balancing terms. We set k1 to 4,
+cation loss LCls, objectness binary classification loss LObj,
+center offset regression loss LCenter, and bounding box re-
+gression loss LBox. In the training phase, we supervise the
+Method                   Pub.    Input           Unique                     Multiple             Overall
+                                        Acc@0.25 Acc@0.5           Acc@0.25 Acc@0.5     Acc@0.25 Acc@0.5
+SCRC [14]              CVPR16  2D only
+One-stage [38]         ICCV19  2D only       24.03          9.22   17.77         5.97   18.70   6.45
+ScanRefer [2]          ECCV20  3D only       29.32          22.82  18.72         6.49   20.38   9.04
+TGNN [15]              AAAI21  3D only       67.64          46.19  32.06         21.26  38.97   26.10
+IntanceRefer [42]      ICCV21  3D only       68.61          56.80  29.84         23.18  37.37   29.70
+SAT [39]               ICCV21  3D only       77.45          66.83  31.27         24.77  40.23   32.93
+3DVG-Transformer [44]  ICCV21  3D only       73.21          50.83  37.64         25.16  44.54   30.14
+3D-SPS (Ours)                  3D only       77.16          58.47  38.38         28.70  45.90   34.47
+ScanRefer [2]               -  2D + 3D       81.63          64.77  39.48         29.61  47.65   36.43
+InstanceRefer [42]     ECCV20  2D + 3D       76.33          53.51  32.73         21.11  41.19   27.40
+3DVG-Transformer [44]  ICCV21  2D + 3D       75.72          64.66  29.41         22.99  38.40   31.08
+3D-SPS (Ours)          ICCV21  2D + 3D       81.93          60.64  39.30         28.42  47.57   34.67
+                                             84.12          66.72  40.32         29.82  48.82   36.98
+                            -
+
+Table 1. Comparison on ScanRefer. The unique stands for samples with no distracting objects and multiple for remaining samples. We
+measure the percentage of predictions whose IoU with the ground truth is greater than {0.25, 0.5}.
+
+Method                   Pub.        Easy          Hard               View-dep.    View-indep.       Overall
+
+ReferIt3DNet [1]       ECCV20  43.6% ± 0.8%      Nr3D              32.5% ± 0.7%  37.1% ± 0.8%   35.6% ± 0.7%
+TGNN [15]              AAAI21  44.2% ± 0.4%  27.9% ± 0.7%          35.8% ± 0.2%  38.0% ± 0.3%   37.3% ± 0.3%
+IntanceRefer [42]      ICCV21  46.0% ± 0.5%  30.6% ± 0.2%          34.5% ± 0.6%  41.9% ± 0.4%   38.8% ± 0.4%
+3DVG-Transformer [44]  ICCV21  48.5% ± 0.2%  31.8% ± 0.4%          34.8% ± 0.7%  43.7% ± 0.5%   40.8% ± 0.2%
+LanguageRefer [28]     CoRL21                34.8% ± 0.4%
+SAT [39]               ICCV21       51.0%                               41.7%         45.0%          43.9%
+3D-SPS (Ours)                  56.3% ± 0.5%       36.6%            46.9% ± 0.3%  50.4% ± 0.3%   49.2% ± 0.3%
+                            -  58.1% ± 0.3%  42.4% ± 0.4%          48.0% ± 0.2%  53.2% ± 0.3%   51.5% ± 0.2%
+ReferIt3DNet [1]                             45.1% ± 0.4%
+TGNN [15]              ECCV20  44.7% ± 0.1%                        39.2% ± 1.0%  40.8% ± 0.1%   40.8% ± 0.2%
+IntanceRefer [42]      AAAI21  48.5% ± 0.2%      Sr3D              45.8% ± 1.1%  45.0% ± 0.2%   45.0% ± 0.2%
+3DVG-Transformer [44]  ICCV21  51.1% ± 0.2%  31.5% ± 0.4%          45.4% ± 0.9%  48.1% ± 0.3%   48.0% ± 0.3%
+LanguageRefer [28]     ICCV21  54.2% ± 0.1%  36.9% ± 0.5%          44.6% ± 0.3%  51.7% ± 0.1%   51.4% ± 0.1%
+SAT [39]               CoRL21                40.5% ± 0.3%
+3D-SPS (Ours)          ICCV21       58.9%    44.9% ± 0.5%               49.2%         56.3%          56.0%
+                                        -                                   -             -     57.9% ± 0.1%
+                            -                     49.3%                                         62.6% ± 0.2%
+                               56.2% ± 0.6%           -            49.2% ± 0.5%  63.2% ± 0.2%
+
+                                             65.4% ± 0.1%
+
+Table 2. Comparison on Nr3D and Sr3D. Easy samples contain no distractor, and the remaining belong to Hard. View-dep./View-indep.
+refer to whether the description is dependent or independent on the camera view.
+
+ to 0.25 in LVG, and k2 to 5 in LDKS. All experiments       an extra 128-dimensional multiview feature for each point is
+are implemented with PyTorch on a single NVIDIA V100        added to 3D only. We concatenate these multiview features
+GPU.                                                        with our point features from the backbone and feed them
+                                                            into TPM together. In the 3D only setting, 3D-SPS has im-
+4.3. Quantitative Comparison                                proved by +1.96% at Acc@0.5 and +1.75% at Acc@0.25
+                                                            compared to the existing state-of-the-art methods. In the
+   In Table 1 and 2, we compare 3D-SPS with existing        2D+3D setting, 3D-SPS outperforms the existing methods
+3D VG works on ScanRefer and Nr3D/Sr3D datasets. The        by 2.31% at Acc@0.5 and 1.25% at Acc@0.25.
+methods involved are 2D-based methods SCRC [14] and
+One-stage [38], the segmentation-based two-stage methods       Note that TGNN and InstanceRefer both rely on a pre-
+TGNN [15] and InstanceRefer [42], the detection-based       fixed 3D instance segmentation model. Thus InstanceRefer
+two-stage methods SAT [39], 3DVG-Transformer [44],          performs better on the Acc@0.5 score in the Unique subset.
+ScanRefer [2], and ReferIt3DNet [1].
+ScanRefer. 3D-SPS outperforms the existing methods by a     Nr3D & Sr3D. The task of the ReferIt3D dataset (Nr3D
+large margin, as shown in Table 1. In the Input column, 3D  & Sr3D) is to identify the target object among the given
+only stands for xyz + RGB + normals, and 2D + 3D means      ground truth object bounding boxes. We modify 3D-SPS
+                                                            accordingly, removing DKS and only verifying the effec-
+0.35                                                                                  0.20                               Keypoints   32          w/o selection   512   w/ selection
+ACC@0.5                                                                                                                     Num     42.06   64 128 256          46.09   512  32
+                                                           Ratio of target keypoints0.300.15                                        31.89  44.77 46.30 46.38    34.98
+                                                                                                                         Acc@0.25          33.88 34.99 35.53              47.65
+                                                                                                                         Acc@0.5                                          36.43
+
+0.25                                                                                  0.10                               Table 5. Ablations of TPM on whether to select keypoints and
+                                                                                                                         different keypoint numbers. Our default setting is w/ selection,
+0.20     3D-SPS                                                                       0.05           3D-SPS              where we progressively select keypoints from 512 to 32.
+         Two-stage Baseline                                                                          Two-stage Baseline
+
+         64 128 256 512                                                               0                                  example and report the Overall accuracy in 3D only setting.
+      Point Number Sampled From Pseed                                                     Pseed P0 P1 P2 P3 P4
+                                                                                                  Keypoint Selections    Sampling Strategy of DKS. Table 3 shows the ablations
+                    (a)                                                                                                  of sampling strategy in the DKS module. FPS [25] is a
+                                                                                                         (b)             widely adopted point sampling method, which makes an ef-
+                                                                                                                         fort to cover the whole scene without special attention to the
+Figure 5. Effectiveness Validation. (a) As the point number                                                              language-relevant points. DKS (w/o sd) means that only the
+sampled from Pseed increases, our 3D-SPS performs better. The                                                            object confidence score so is utilized, and DKS (w/o so) rep-
+performance of the two-stage baseline first increases and then de-                                                       resents that only the description relevance score sd is used.
+creases. (b) As the progressive language-relevant keypoint selec-                                                        DKS means that both so and sd are adopted and is the full
+tion goes, the ratio of target keypoints in our 3D-SPS increases af-                                                     version of the proposed DKS module. According to the re-
+ter each selection. Also, this ratio keeps outperforming language-                                                       sults in Table 3, so and sd are both beneficial to the refer-
+irrelevant sampling (e.g., FPS) used in the two-stage baseline.                                                          ring task, helping DKS select description-related keypoints
+                                                                                                                         near object centers. The joint use of so and sd can produce
+              FPS      Acc@0.25                                                             Acc@0.5                      promising results.
+         DKS (w/o sd)     43.83                                                               31.88
+         DKS (w/o so)     46.15                                                               34.95                      Layer Number of TPM. We investigate the performance
+                          46.06                                                               35.19                      on different TPM layer numbers T  {1, 2, 3, 4, 5}. As
+              DKS        47.65                                                               36.43                       shown in Table 4, more TPM layers bring higher accuracy,
+                                                                                                                         which demonstrates that TPM and the progressive mining
+Table 3. Ablations on the sampling strategy of DKS.                                                                      are essential to grounding. We take T = 4 as the default
+                                                                                                                         setting since more layers might force the model to leave
+      T  1             2                                                              3     4        5                   out some keypoints of the target object and miss the best
+                                                                                                                         bounding box.
+Acc@0.25 45.37 45.99 46.48 47.65 47.02
+                                                                                                                         Progressive Selection of TPM. To further confirm the ef-
+Acc@0.5 33.13 33.97 34.53 36.43 36.07                                                                                    fectiveness of progressive keypoint selection, we compare
+                                                                                                                         the results on whether to adopt keypoint selection, as shown
+         Table 4. Ablations on the layer number T in TPM.                                                                in Table 5. In detail, for the w/o selection setting, we only
+                                                                                                                         conduct multi-modal self/cross-attention. In this way, the
+tiveness of TPM. For fair comparisons, we adopt 2D se-                                                                   number of keypoints does not change in TPM, and the pre-
+mantic assisted training proposed by SAT [39] in the train-                                                              dicted box is chosen from all keypoints after TPM. From
+ing process and only use 3D inputs in the inference process.                                                             Table 5, with the increase of keypoint numbers, the perfor-
+Results in Table 2 show progressive selection is effective for                                                           mance of the w/o selection setting rises at first and then de-
+referring tasks. 3D-SPS significantly improves the ground-                                                               clines. 3D-SPS (w/ selection) achieves significant improve-
+ing accuracy by +2.3% in Nr3D and +4.7% in Sr3D. Al-                                                                     ment compared to the w/o selection settings. This observa-
+though LanguageRefer performs better on the Easy subset                                                                  tion proves the benefits of progressive keypoint selection.
+of the synthetic dataset Sr3D, 3D-SPS outperforms it by a
+large margin on the more challenging Hard subset.                                                                        4.5. Qualitative comparison
+Effectiveness Validation. Figure 5 confirms that our main
+idea, i.e., progressive keypoint selection, can address the is-                                                             In this subsection, we perform a qualitative comparison
+sues from the motivation in Sec. 1. We analyze 3D-SPS and                                                                on ScanRefer validation set to show how 3D-SPS works.
+the two-stage method baseline [2] on the entire validation                                                               Language-relevant Keypoints. We visualize the progres-
+set of ScanRefer. As shown in Figure 5 (a), the two-stage                                                                sive keypoint selection process of 3D-SPS in Figure 6 and
+baseline faces the dilemma of the point number sampled                                                                   compare it with the two-stage baseline ScanRefer [2]. En-
+from Pseed. In contrast, 3D-SPS benefits from more sam-                                                                  abled by DKS and TPM, 3D-SPS gradually focuses on the
+pled points. According to Figure 5 (b), the two-stage base-                                                              target. In contrast, the attention of ScanRefer is scattered
+line is limited by the small ratio of target keypoints due to                                                            everywhere in the scene and ultimately fails to locate the
+the language-irrelevant keypoint sampling, while the ratio                                                               target due to the separation of detection and matching.
+in 3D-SPS increases significantly after each selection.
+
+4.4. Ablation Study
+
+   In this subsection, we investigate the contribution of the
+proposed DKS and TPM module. We take ScanRefer as an
+     Description           Ground Truth                  3D-SPS                                                   Two-stage Baseline
+
+This sink is between
+another sink and a paper
+towel dispenser. A trash
+can is besides the paper
+towel dispenser.
+
+This coffee table is in
+front of a chair on the
+left, and a small round
+table on it's right. To
+the left of the coffee
+table is an orange stool.
+
+On the wall hangs a
+shelf. Beneath it is a
+sink followed by
+washing machines from
+left to right.
+
+                                         (a) P0          (b) PT                                (c) Pred.  (d) P0  (e) Pred.
+
+Figure 6. The two-stage baseline (ScanRefer) fails while our 3D-SPS predicts correctly since 3D-SPS can select more valuable keypoints.
+
+(a) Language-relevant keypoints P0 sampled by DKS. (b) Target keypoints PT selected by TPM. (c) Bounding boxes predicted by 3D-SPS.
+(d) Language-irrelevant keypoints sampled by FPS. (e) Bounding boxes predicted by ScanRefer.
+
+            Ground Truth   Description: The black table is between two gray armchairs.         Description: There is a square table. It is between two armchairs.
+window                     Behind the black table are windows.
+
+                           (a) P0                (b) PT                             (c) Pred.  (a) P0     (b) PT  (c) Pred.
+
+          Ground Truth     Description : this is a brown shelf. it is on the desk.             Description: The object is a small set of shelf. It is sitting
+bed                                                                                            under the bed.
+
+desk
+
+                           (a) P0        (b) PT                (c) Pred.                       (a) P0     (b) PT  (c) Pred.
+
+Figure 7. Visualization of the same referring target with different descriptions in 3D-SPS. (a) P0 sampled by DKS. Comparing the left
+and right subfigures in each row, when the language-relevant objects change (e.g., window, desk, bed), 3D-SPS focuses on different
+keypoints (red keypoints). (b) PT selected by TPM. (c) The predicted target bounding box.
+
+Language-adapted Keypoints. 3D-SPS selects different                                that our method outperforms the existing 3D VG methods
+keypoints for the same target with different descriptions. As                       on both ScanRefer and Nr3D / Sr3D datasets by a large mar-
+shown in Figure 7 (upper), to locate the table, 3D-SPS se-                          gin, leading to the new state-of-the-art performance.
+lects some keypoints on the window for subsequent mining                            Limitation. The limitation of 3D-SPS exists due to the
+when window is mentioned in the left sample. On the right,                          complexity of 3D point clouds and free-form description,
+when only armchairs is mentioned, 3D-SPS only selects                               although we have made significant improvements on exist-
+keypoints on armchairs and tables. In Figure 7 (lower), for                         ing methods. The view-dependent descriptions and the am-
+the target shelf, 3D-SPS finds more keypoints related to the                        biguous queries can both confuse the model. These limita-
+desk when the shelf is described as on the desk in the left                         tions could guide our future work.
+sample. When the description contains under the bed, the
+model pays more attention to the bed.                                               Acknowledgement. This research is partly supported by
+                                                                                    National Natural Science Foundation of China (Grant
+5. Conclusion and Discussion                                                        62122010, 61876177), Fundamental Research Funds for
+                                                                                    the Central Universities, and Key R & D Program of Zhe-
+   In this work, we propose a brand new 3D visual ground-                           jiang Province(2022C01082).
+ing framework on point clouds named 3D Single-Stage Re-
+ferred Point Progressive Selection method (3D-SPS). Under
+the guidance of language, it progressively selects keypoints
+following a coarse-to-fine pattern and directly localizes the
+target at a single stage. Comprehensive experiments reveal
+References                                                                    sentations between brains and deep networks. In Nat. Com-
+                                                                              mun., 2021. 2
+ [1] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed              [17] Yue Liao, Si Liu, Guanbin Li, Fei Wang, Yanjie Chen, Chen
+      Elhoseiny, and Leonidas Guibas. Referit3d: Neural listeners             Qian, and Bo Li. A real-time cross-modality correlation fil-
+      for fine-grained 3d object identification in real-world scenes.         tering method for referring expression comprehension. In
+      In ECCV, 2020. 2, 3, 5, 6                                               CVPR, 2020. 2
+                                                                        [18] Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He, and
+ [2] Dave Zhenyu Chen, Angel X. Chang, and Matthias Nieﬂner.                  Piotr Dollar. Focal loss for dense object detection. In ICCV,
+      Scanrefer: 3d object localization in RGB-D scans using nat-             2017. 5
+      ural language. In ECCV, 2020. 1, 2, 3, 5, 6, 7                    [19] Daqing Liu, Hanwang Zhang, Feng Wu, and Zheng-Jun Zha.
+                                                                              Learning to assemble neural module tree networks for visual
+ [3] Xinpeng Chen, Lin Ma, Jingyuan Chen, Zequn Jie, Wei                      grounding. In ICCV, 2019. 2
+      Liu, and Jiebo Luo. Real-time referring expression compre-        [20] Ze Liu, Zheng Zhang, Yue Cao, Han Hu, and Xin Tong.
+      hension by single-stage grounding network. arXiv preprint               Group-free 3d object detection via transformers. In ICCV,
+      arXiv:1812.03426, 2018. 2                                               2021. 1, 4, 5
+                                                                        [21] Ilya Loshchilov and Frank Hutter. Fixing weight decay reg-
+ [4] Bowen Cheng, Lu Sheng, Shaoshuai Shi, Ming Yang, and                     ularization in adam. ArXiv, abs/1711.05101, 2017. 5
+      Dong Xu. Back-tracing representative points for voting-           [22] Varun K Nagaraja, Vlad I Morariu, and Larry S Davis. Mod-
+      based 3d object detection in point clouds. In CVPR, 2021.               eling context between objects for referring expression under-
+      1, 4                                                                    standing. In ECCV, 2016. 2
+                                                                        [23] Charles R. Qi, Or Litany, Kaiming He, and Leonidas J.
+ [5] Angela Dai, Angel X Chang, Manolis Savva, Maciej Hal-                    Guibas. Deep hough voting for 3d object detection in point
+      ber, Thomas Funkhouser, and Matthias Nieﬂner. Scannet:                  clouds. In ICCV, 2019. 1, 4, 5
+      Richly-annotated 3d reconstructions of indoor scenes. In          [24] Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J Guibas.
+      CVPR, 2017. 5                                                           Pointnet: Deep learning on point sets for 3d classification
+                                                                              and segmentation. In CVPR, 2017. 3
+ [6] Jiajun Deng, Zhengyuan Yang, Tianlang Chen, Wengang                [25] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J.
+      Zhou, and Houqiang Li. Transvg: End-to-end visual ground-               Guibas. Pointnet++: Deep hierarchical feature learning on
+      ing with transformers. In ICCV, 2021. 2                                 point sets in a metric space. In NeurIPS, 2017. 2, 3, 4, 5, 7
+                                                                        [26] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+ [7] Mingtao Feng, Zhen Li, Qi Li, Liang Zhang, XiangDong                     Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+      Zhang, Guangming Zhu, Hui Zhang, Yaonan Wang, and Aj-                   Amanda Askell, Pamela Mishkin, Jack Clark, et al. Learn-
+      mal Mian. Free-form description guided 3d visual graph net-             ing transferable visual models from natural language super-
+      work for object grounding in point cloud. In ICCV, 2021. 1,             vision. In ICML, 2021. 5
+      3                                                                 [27] Shaoqing Ren, Kaiming He, Ross B. Girshick, and Jian Sun.
+                                                                              Faster R-CNN: towards real-time object detection with re-
+ [8] Chen Gao, Jinyu Chen, Si Liu, Luting Wang, Qiong Zhang,                  gion proposal networks. In NeurIPS, 2015. 4
+      and Qi Wu. Room-and-object aware knowledge reasoning              [28] Junha Roh, Karthik Desingh, Ali Farhadi, and Dieter
+      for remote embodied referring expression. In CVPR, 2021.                Fox. Languagerefer: Spatial-language model for 3d visual
+      2                                                                       grounding. In CoRL, 2021. 3, 6
+                                                                        [29] Arka Sadhu, Kan Chen, and Ram Nevatia. Zero-shot ground-
+ [9] Ben Graham. Sparse 3d convolutional neural networks. In                  ing of objects from natural language queries. In ICCV, 2019.
+      BMVC, 2015. 2                                                           1, 2
+                                                                        [30] Karen Simonyan and Andrew Zisserman. Very deep convo-
+[10] Benjamin Graham, Martin Engelcke, and Laurens van der                    lutional networks for large-scale image recognition. In ICLR,
+      Maaten. 3d semantic segmentation with submanifold sparse                2015. 2
+      convolutional networks. In CVPR, 2018. 2                          [31] Shimon Ullman, Liav Assif, Ethan Fetaya, and Daniel
+                                                                              Harari. Atoms of recognition in human and computer vision.
+[11] Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei                 In PNAS, 2016. 2
+      Huang, Aixi Zhang, and Si Liu. Transrefer3d: Entity-and-          [32] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+      relation aware transformer for fine-grained 3d visual ground-           reit, Llion Jones, Aidan N Gomez, Lukasz Kaiser, and Illia
+      ing. In ACM MM, 2021. 1, 2, 3                                           Polosukhin. Attention is all you need. In NeurIPS, 2017. 4
+                                                                        [33] Liwei Wang, Yin Li, Jing Huang, and Svetlana Lazebnik.
+[12] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.                   Learning two-branch neural networks for image-text match-
+      Deep residual learning for image recognition. In CVPR,                  ing tasks. In TPAMI, 2018. 1, 2
+      2016. 2                                                           [34] Peng Wang, Qi Wu, Jiewei Cao, Chunhua Shen, Lianli Gao,
+                                                                              and Anton van den Hengel. Neighbourhood watch: Refer-
+[13] Richang Hong, Daqing Liu, Xiaoyu Mo, Xiangnan He, and
+      Hanwang Zhang. Learning to compose and reason with lan-
+      guage tree structures for visual grounding. In TPAMI, 2019.
+      2
+
+[14] Ronghang Hu, Huazhe Xu, Marcus Rohrbach, Jiashi Feng,
+      Kate Saenko, and Trevor Darrell. Natural language object
+      retrieval. In CVPR, 2016. 2, 6
+
+[15] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and
+      Tyng-Luh Liu. Text-guided graph neural networks for refer-
+      ring 3d instance segmentation. In AAAI, 2021. 3, 6
+
+[16] Georgin Jacob, RT Pramod, Harish Katti, and SP Arun.
+      Qualitative similarities and differences in visual object repre-
+      ring expression comprehension via language-guided graph
+      attention networks. In CVPR, 2019. 1, 2
+[35] Sibei Yang, Guanbin Li, and Yizhou Yu. Cross-modal re-
+      lationship inference for grounding referring expressions. In
+      CVPR, 2019. 1, 2
+[36] Sibei Yang, Guanbin Li, and Yizhou Yu. Dynamic graph
+      attention for referring expression comprehension. In CVPR,
+      2019. 1, 2
+[37] Zhengyuan Yang, Tianlang Chen, Liwei Wang, and Jiebo
+      Luo. Improving one-stage visual grounding by recursive sub-
+      query construction. In ECCV, 2020. 1, 2
+[38] Zhengyuan Yang, Boqing Gong, Liwei Wang, Wenbing
+      Huang, Dong Yu, and Jiebo Luo. A fast and accurate one-
+      stage approach to visual grounding. In ICCV, 2019. 1, 2,
+      6
+[39] Zhengyuan Yang, Songyang Zhang, Liwei Wang, and Jiebo
+      Luo. Sat: 2d semantics assisted training for 3d visual
+      grounding. In ICCV, 2021. 1, 2, 3, 6, 7
+[40] Licheng Yu, Zhe Lin, Xiaohui Shen, Jimei Yang, Xin Lu,
+      Mohit Bansal, and Tamara L Berg. Mattnet: Modular at-
+      tention network for referring expression comprehension. In
+      CVPR, 2018. 1, 2
+[41] Licheng Yu, Patrick Poirson, Shan Yang, Alexander C Berg,
+      and Tamara L Berg. Modeling context in referring expres-
+      sions. In ECCV, 2016. 1, 2
+[42] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang,
+      Sheng Wang, Zhen Li, and Shuguang Cui. Instancerefer:
+      Cooperative holistic understanding for visual grounding on
+      point clouds through instance multi-level contextual refer-
+      ring. In ICCV, 2021. 1, 3, 6
+[43] Hanwang Zhang, Yulei Niu, and Shih-Fu Chang. Grounding
+      referring expressions in images by variational context. In
+      CVPR, 2018. 1, 2
+[44] Lichen Zhao, Daigang Cai, Lu Sheng, and Dong Xu. 3dvg-
+      transformer: Relation modeling for visual grounding on
+      point clouds. In ICCV, 2021. 1, 2, 3, 6
+[45] Yin Zhou and Oncel Tuzel. Voxelnet: End-to-end learning
+      for point cloud based 3d object detection. In CVPR, 2018. 2
+[46] Bohan Zhuang, Qi Wu, Chunhua Shen, Ian Reid, and Anton
+      Van Den Hengel. Parallel attention: A unified framework
+      for visual object discovery through dialogs and queries. In
+      CVPR, 2018. 2
+

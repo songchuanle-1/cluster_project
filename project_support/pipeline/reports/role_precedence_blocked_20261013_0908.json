@@ -1,0 +1,28 @@
+{
+  "stage": "blocked",
+  "blocker_kind": "exclusive_gpu_slot",
+  "required_server": "server-6",
+  "blocker": "Original full TRAIN mapping/source controls and same-input original Criterion synthetic basis/unit64 CPU tests completed. The next whole-native same-forward test requires idle exclusively leased GPU7, now occupied by PID262355 with76279MiB used; no GPU test or eviction performed.",
+  "retry_after": "2026-10-13T10:00:00+08:00",
+  "unblock_condition": "Fresh server-6/das/GPU7UUID match, no compute process, memory<1000MiB and both diagnostic leases acquired; frozen original M95 and cohort unchanged.",
+  "next_action": "Resume this stable ID and prepare/run role_native_confirmation_prereg_20261013_0908.md on actual original M95 same-forward outputs; preserve original1e-6 failures. Do not admit a bare priority-weight patch.",
+  "evidence": [
+    {"path": "pipeline/designs/role_mass_sampling_addendum_20261013_0908.md"},
+    {"path": "pipeline/designs/role_unit64_prereg_20261013_0908.md"},
+    {"path": "pipeline/designs/role_native_confirmation_prereg_20261013_0908.md"},
+    {"path": "pipeline/reports/role_loss_mass_20261013_0908.json", "sha256": "db2b06c8e7a4b462a295f5898c28d0ef4300e972f84ccf8135dd8deac165f3da"},
+    {"path": "pipeline/reports/role_unit64_20261013_0908.json", "sha256": "38a61ed3f97f69d45561bbd69b990cfa5f5861ffec288c0071c7d452dab44e6c"},
+    {"path": "pipeline/reports/role_summary_20261013_0908.json"},
+    {"path": "pipeline/reports/role_gpu_occupation_20261013_0908.json"},
+    {"path": "scripts/role_loss_mass_20261013_0908.py"},
+    {"path": "scripts/role_unit64_20261013_0908.py"}
+  ],
+  "gates": {
+    "diagnosis": {"passed": false, "status": "actual_precedence_observed; task_harm_or_error_not_established"},
+    "controls": {"passed": false, "status": "CPU_source_and_Criterion_controls_separate; identity_and_repeat_exact; whole_native_pending"},
+    "native_backward": {"passed": false, "status": "not_run"},
+    "resources": {"passed": false, "status": "not_run"},
+    "independence": {"passed": false, "status": "bare_priority_patch_not_independent_core"},
+    "constraints": {"passed": false, "status": "no_admission_review"}
+  }
+}

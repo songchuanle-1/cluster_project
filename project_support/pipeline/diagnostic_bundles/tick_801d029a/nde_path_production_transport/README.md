@@ -1,0 +1,1 @@
+Fresh801d owner/path metadata copy of frozen ec NDE transport; defaultNOP/DRAFTtrue/REVIEW_SHA=None. No stage/collect/render call, release, actual evidence or remote action. Core/factory unchanged. After real all gates and independent review only, root creates a new activation copy.

@@ -1,0 +1,35 @@
+# Codex Research Memory
+## Goal And Phase
+- CURRENT lease4e35c1cefe914c04b862004d0c677110,begin2026-10-19T14:32:22.259722Z,deadline15:32:22.259722Z,modeDESIGN;owner01a04987-fdbe-7301-b2f0-f9b6ab60f74c verified,PipelineDisabled,onepreflight only. Previous30bdd3a5 was FINALIZED/PASS/released;never reuse it.
+- GoalSHA0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85,25constraints/11bans,target.5100. Primaryhierarchical point/inst_feats update;four supervision IDs auxiliary scopeholds,not scientific rejection. Fixedseed1999/epochs50/max_iters70/science unchanged.
+- Directhuman GPU1authorization already implemented:pipeline/authorizations/server4_gpu1_20261019.json. server4[0,1],server3[1],1slot/card,nominalcapacity3;no duplicate permissionrequest. No server3GPU0/server6newdispatch/reset/eviction/restart/scheduler change.
+- Pinnedserver4 .115/dl04-MS-7E06 GPU0UUID958e741a-e5cf-127e-ffe8-9b984e1f404c,GPU1UUID7f82edb9-f620-8045-caea-a75232265cd1;server3 .120/sysu311-MS-7C59 GPU1UUID340de111-e7e4-ed2d-15c9-8ab6a253e4a0. Strictknown-host/keySSH,passwordreference unread.
+## Champion And Baseline
+- HistoricalM95.5020,baseline.4894,target.5100,gap.0080. AvailablefrozenM95epoch16=.5024607181549072 is NOTverifiedhistoricalchampion weights.
+- CURRENT22:32beginM204 bestapprox.4944@18/50,noimprove5/10.23:08actualTrain19/50steps3122->3126/4686,logfresh;exactnewvalidationmetricsUNKNOWN,notterminal/newchampion/effect of this diagnostic.
+- CACHEDM203FLE.4885315597@epoch13,earlystop23/50,priorfullVALdelta-.0139291520/sceneCI[-.0223369116,-.0054631474];notrestarted.
+## Active Hypotheses
+- coarse-semantic-point-cross-attention/M204CPA-R1 TRAINING under consumed scoped human resume. Q=currentpoint,K=rawpreCTFcoarse,V=refinedcoarse;fine/middle/fusion/query/loss unchanged. Oneconnectionrevision,zero newparams,no revision2 or automaticrestart.
+- CPA diagnosis/controls/constraints UNPASSED,revision1 inconclusive;graphactivity/nonlocal sensitivity nottaskdeficit. Previous8scene/32exprreadouts mixed. ManualtrainingexceptionNOTscientificadmission. Prior9.769168428GvsM959.762532428G;inferpeak+1.2878%,matchedtrainpeak+.3289%to+.7063%;fulloptimizerpeakUNKNOWN.
+- NEWstablehierarchy-native-batch-minimum-resolution BLOCKED by live_external_gpu_occupation,not rejected. ExactsourceK0=min(256,min(lens));nativeCPUcensus562/562TRAINscenes,28support<256,min131,maxpoints537406<2500000,0missing/samplingunknown. Originalgroups240/9372belongtosmallscenes,not realizedbatch/harmfrequency.
+- SameID:4pairedTRAINcohort/32expr protocol frozen lexically(first4large/first4small),M95epoch16,fixedprefix/finalquery/nativepositives,per-scene native partitioner cap256/64/8,originalstrict1e-6baseline/reaggregation/small-peer controls. SyntaxcheckedONLY;no nativebackward/control/mask PASS.
+- Firstpair0attempt2026-10-19T15:06:22Z->15:06:25Z returned1atfreshGPUobserve BEFORElocks/CUDA/setup:externaloccupation.0executedGPUmaskpairs,0newmodel/admission/training. Keepfailedreceipt;remaining4pairsPENDING,not completed. Resume pair0underNEWlease/freshUUID/idleness/3locks,never failedexecutionlease.
+## Closed Or Failed Directions
+- Allrank/meanmoment/ancestry/padding/prefix/QF/HDS/FLE diagnoses/rejections/bans anddirtyPDC/untrackedBCCA preserved. No renamed routing/gate/residual/largeQKV/N2attention/tuning/HDSrevision3/FLErestart/M201recovery.
+- Previousbounded8scene/32expr studies COMPLETE,nottrainable:expressionmessage donor-minus-ownprobabilityerror+.004466350020434506,7positive/1negative,295correlatedqueryrows. Scale boundaryinteraction-.006994256213229087,2positive/6negative,30/32expressions. Not efficacy/populationCI/newmechanism;do not rerun unchanged studies.
+- Originalexpressionboolsubtractionfailure preserved;measurementrevision1casts only native0/1targetdtype at2arithmetic sites;4correctedpairs controls0. OriginalscaleFULLSOURCEpermutation2.86102294921875e-6FAILED1e-6 onall4pairs;fixed-fusion conditionaloperatorcontrols0NOTfull-sourcePASS. Bothoriginalfailures andrepairprereg preserved.
+- PriorCPUfloat32identity3.814697265625e-6/algebra2.4318695068359375e-5FAILED1e-6,float64internal0/4.44e-14butcachedGPUreconstruction7.48e-6FAILED;no thresholdwaiver oroptional kernel repeat. Finiteaudits not reopened.
+## Running And Queue
+- CURRENT22:32snapshotactive1/target3,waiting0,candidatebudget2,reserve0/2,prep2,pending4aux. AFTERthiswork:oneNEWblockedprimary +4unchangedaux,pending5/8. Noqueueentryorresourcepolicychange.
+- CURRENT23:08:56server4GPU0 M204samePID1085297uses19810MiB,card19863MiB,all3locksheld;nativeTrain19/50progressfresh,no recentTraceback. Sameepoch5resume16:28:59,AdamW/PolyLR/best/patience/fixedschedule preserved;no restart/migration.
+- CURRENT23:08:56server4GPU1externaluserlyb PID2292978uses7556MiB,card7579MiB/util14%;all3projectlocksAVAILABLE but contextbusy independentlyforbids sharing/eviction. No diagnostic CUDA/context/lockleftbehind. Old22:08idleobservation is cached and no longer current.
+- CURRENT23:08:58server3SSH255/bannerconnectionrefused. GPU1occupancyUNKNOWN,notoccupiedoridle;no valid fallback runtime/asset/lease. EarlierNVML255history not recoveryevidence.
+- Productioncommitc31f45994f8d68b78dfe8bb4fef3f9aaefabe86e unchanged,originalbackboneSHAa6f400bcf9bd722230d16ea7c3424b0d7658730126df604f67b4cccf42e25c1f. Nativepreparedstagebatch_minimum_4e35c1ce_gpu;M204originalcheckpointfolder20261019_093003 preserved.
+## Open Questions And Risks
+- Newcensus/source controls establish actual resolutioncouplingincidence ONLY;maskcausalimpact/noise/efficacy/novelattention UNKNOWN. Do not label a batch-min-only repair a newhierarchicalattention contribution or tune256. Preparednativeprotocol remains first executable test afterresource release.
+- Primaryresourcefallback2026-10-20 00:21:42Shanghai cappedbyearliestauxretry;timerNOTidleproof orpermission. Fourauxsamepriorityholds unchanged;resourceaddition doesNOTrestore supervisionprimary/M201. No newhuman confirmationneeded.
+- Currentdesign_cycleexternal_resource_blocked refers realGPU1foreignoccupation plusGPU0M204/server3unreachable,notallroutesexhausted/no_information_gain/expireddeadline/globalpause/missingGPU1authorization. NonGPUpreparation complete;no filler variants.
+## Last Tick
+- tick_4e35c1ce:1newstableID;562nativeCPUscene census;nativegroupincidence240/9372;4pairednativeprotocol frozen;1pre-CUDAresource rejection;0GPUmaskpairs/backwards/models/admissions/training. Fullanalysis/resources/protocols/failure in pipeline/diagnostic_bundles/tick_4e35c1ce/.
+- Officialdecisionlog initialGitbashlookupfailed(FileNotFoundError);failure+originalhashedhelper preserved. Recovery uses verified C:/Program Files (x86)/Git/bin/bash.exe,keeps immutableanalysis/oldretry,doesNOTrerun studies;olddecisionindexbytes preserved,oneactualdecision appended inShanghai timezone.
+- Reportnotes saved;sevensectionmemoryupdated. Currentreport/finish/receipt+ownedlease/pendingabsenceverification STILLREQUIREDatthisprefinishsave. Usageis partiallocalbegin->receiptwindow,excludesearlierread/finalreply,notbill;cachepartofinput/reasoningpartofoutput,unknownnotzero,nopostreleaseprojectwrites.

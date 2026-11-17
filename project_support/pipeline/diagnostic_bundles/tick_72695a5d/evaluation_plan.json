@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-10-19T01:36:15.276479+00:00",
+  "experiment_id": "M204-CPA",
+  "kind": "prospective_post_training_evaluation",
+  "timing": "Declared after startup and before observed validation results;does not change model/config or select a variant.",
+  "primary": "Native ScanRefer VAL mIoU;target0.5100,reported historical M95 comparator0.5020 and no-cluster baseline0.4894.",
+  "reference_caveat": "Available M95epoch16=.5024607181549072 is not verified historical champion weights;use its exact provenance for matched reevaluation,do not silently substitute it.",
+  "sampling_unit": "Scene;expressions and points in the same scene are correlated.",
+  "predefined_subgroups": [
+    "same-class distractor cases",
+    "relation-bearing descriptions"
+  ],
+  "material_harm_rule": "For each predefined subgroup,flag potential systematic harm if a paired scene-clustered95% interval is wholly below zero;without enough independent scenes or with an interval crossing zero,label inconclusive. Do not treat a single adverse scene or untrained gradient as trained harm.",
+  "noise_floor": "UNKNOWN;not estimated from independent repeats. No made-up constant or extra seed sweep.",
+  "pareto": "Retain the original10G standard-counted budget and relative time/memory review;peak memory increase>15% requires>=0.003 mIoU gain. Full optimizer peak relative to original baseline remains unknown until comparably measured.",
+  "validation_boundary": "No TEST-based mechanism selection,no extra datasets or labels,no numeric tuning;seed1999/batch2/workers4/epochs50/max_iters70 unchanged.",
+  "scientific_status": "Efficacy and novelty unresolved;one manual exploration is not a mechanism PASS."
+}

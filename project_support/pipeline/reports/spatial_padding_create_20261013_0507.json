@@ -1,0 +1,10 @@
+{
+  "stage": "diagnosis",
+  "hypothesis_id": "padded-superpoint-columns-contribute-to-native-mask-loss-and-gradient",
+  "hypothesis": "Variable-length native scene supports may leave padded geometry columns active in auxiliary mask supervision, producing gradients unrelated to real points.",
+  "matched_control": "Original native valid-support filtering versus diagnostic broken filtering with padded zero targets, using identical native masks and decoder-shaped loss-boundary inputs.",
+  "next_action": "Run original native augmented getter/collation and Criterion.get_layer_loss on the first eight frozen TRAIN groups; intervene only on padding and measure loss/gradient isolation twice at seed1999.",
+  "evidence": [
+    {"path": "pipeline/designs/spatial_padding_prereg_20261013_0507.md"}
+  ]
+}

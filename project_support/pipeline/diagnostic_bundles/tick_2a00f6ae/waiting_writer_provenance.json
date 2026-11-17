@@ -1,0 +1,99 @@
+{
+  "source": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_d0350093\\record_wait.py",
+  "source_sha256": "b931ed943b6dea9f2555b6dc8407266af0859456251c62b96b842f8ec55365fa",
+  "destination": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2a00f6ae\\record_wait.py",
+  "destination_sha256": "cb50f77f30b41faa7c5ce1d7bbf708587f3dc98be30b8040c02204f138a2caa6",
+  "changes": [
+    {
+      "old": "d0350093fdd8489e8f3f700f67e05584",
+      "new": "2a00f6ae699f448e946a45c3ec25251f",
+      "count": 1
+    },
+    {
+      "old": "tick_d0350093",
+      "new": "tick_2a00f6ae",
+      "count": 1
+    },
+    {
+      "old": "02:11:54.677451",
+      "new": "04:05:44.390066",
+      "count": 2
+    },
+    {
+      "old": "03:11:54.677451",
+      "new": "05:05:44.390066",
+      "count": 2
+    },
+    {
+      "old": "前6814已FINALIZED/released(08:09:53上海)",
+      "new": "前d035已FINALIZED/released(10:15:11上海)",
+      "count": 1
+    },
+    {
+      "old": "本轮d035",
+      "new": "本轮2a00",
+      "count": 1
+    },
+    {
+      "old": "[25,50,2335,4686]",
+      "new": "[29,50,2151,4686]",
+      "count": 1
+    },
+    {
+      "old": "[25,50,2345,4686]",
+      "new": "[29,50,2160,4686]",
+      "count": 1
+    },
+    {
+      "old": "m['epoch']==25",
+      "new": "m['epoch']==29",
+      "count": 1
+    },
+    {
+      "old": "25/50",
+      "new": "29/50",
+      "count": 5
+    },
+    {
+      "old": "2335→2345",
+      "new": "2151→2160",
+      "count": 3
+    },
+    {
+      "old": "2335->2345",
+      "new": "2151->2160",
+      "count": 1
+    },
+    {
+      "old": "10blocked全部notdue，旧8hold/655证据/授权清单均未复查；沿用d8有界复核",
+      "new": "8旧hold到期仅核元数据/引用清单签名/13授权path-size-mtime；655证据正文/hash/stat与grant正文均未读，M206到期仍暂停，PSNC资源忙notdue",
+      "count": 1
+    },
+    {
+      "old": "10blocked全部notdue不复查旧8/655。",
+      "new": "8旧hold到期仅有界核元数据/授权清单，不复查655正文或grant正文；M206保持暂停。",
+      "count": 1
+    },
+    {
+      "old": "前d8收据FINALIZED released",
+      "new": "前d035收据FINALIZED released",
+      "count": 1
+    },
+    {
+      "old": "boundary=read(D/'waiting_boundary_check.json');assert boundary['material_concerns']==[]",
+      "new": "boundary=read(D/'waiting_boundary_check.json');assert boundary['material_concerns']==[]\nassert sha(D/'waiting_boundary_check.json')=='cc433a432263e8ebde0f6cf241f1ea41572392198c6a722a4b3c5783055e1fc8'\nheld=read(D/'held_boundary_check.json');assert held['material_concerns']==[]\nassert sha(D/'held_boundary_check.json')=='74115dae2b6689b92ce338d6568d7186b84f71be6a475fa2bab29f26c66c39ef'\nassert sha(D/'hrc_training_progress_observation.json')=='bf2b4e7461269cf6d85739e1230ceedcc1b645123ff6699cbe75d5970c2aa2db'",
+      "count": 1
+    },
+    {
+      "old": "    w['updated_at']=now.isoformat();save(R/'pipeline/research_work.json',w)",
+      "new": "    w['historical_hold_boundary_review']=ref(D/'held_boundary_check.json')\n    w['updated_at']=now.isoformat();save(R/'pipeline/research_work.json',w)",
+      "count": 1
+    },
+    {
+      "old": "        elif line.startswith('- PSNC当前blocked/'):",
+      "new": "        elif line.startswith('- 8旧hold前轮'):\n            lines[i]='- 当前8旧hold到期有界核完整canonical元数据/声明引用清单签名与13授权path-size-mtime，同d8基准；proof '+ref(D/'held_boundary_check.json')['path']+' SHA'+sha(D/'held_boundary_check.json')+'。655旧证据正文读取/重hash/exists-stat均0、grant正文重读0；无新scope/reopen/extra revision授权或用户事项，原失败/1e-6/修订上限保持。'\n        elif line.startswith('- PSNC当前blocked/'):",
+      "count": 1
+    }
+  ],
+  "purpose": "Reuse bounded persistence under actual unchanged current owner; no scientific or native tests."
+}

@@ -1,0 +1,173 @@
+{
+  "files": 24222,
+  "text_files_scanned": 24222,
+  "current_findings": [
+    {
+      "path": "project_support/scripts/test_bounded_collation_process_20260921.py",
+      "line": 68,
+      "type": "secret_or_token_literal",
+      "confidence": "candidate"
+    }
+  ],
+  "history_findings": [],
+  "history_unique_blobs": 1345,
+  "history_text_blobs": 1317,
+  "large_current": [],
+  "large_history": [],
+  "weight_artifacts": [],
+  "root_integrity": [
+    {
+      "group": "configs",
+      "source_config_files_expected": 23,
+      "missing": [],
+      "byte_different": []
+    },
+    {
+      "group": "framework",
+      "source_config_files_expected": 28,
+      "missing": [],
+      "byte_different": []
+    },
+    {
+      "group": "scripts",
+      "source_config_files_expected": 1071,
+      "missing": [],
+      "byte_different": []
+    },
+    {
+      "group": "pipeline",
+      "source_config_files_expected": 4394,
+      "missing": [],
+      "byte_different": []
+    },
+    {
+      "group": "Checkpoints",
+      "source_config_files_expected": 124,
+      "missing": [],
+      "byte_different": []
+    }
+  ],
+  "tooling_integrity": [
+    {
+      "skill": "songcl_research_pipeline",
+      "canonical_source": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline",
+      "expected_files": 52,
+      "missing": [],
+      "byte_different": []
+    },
+    {
+      "skill": "songcl_remote_train",
+      "canonical_source": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_remote_train",
+      "expected_files": 1,
+      "missing": [],
+      "byte_different": []
+    }
+  ],
+  "local_archive_extra_diff": [],
+  "local_archive_all_source_preserved": true,
+  "all_archived_original_heads_match": true,
+  "head_change_during_history_scan": false,
+  "integrated_main_source_integrity": {
+    "baseline": "5413102c57b526035f3920b5e7a81f3b58ad764d",
+    "source_config_files_expected": 2954,
+    "missing": [],
+    "byte_different": []
+  },
+  "status": "PASS",
+  "actual_credential_findings": [],
+  "closed_pattern_findings": [
+    {
+      "path": "project_support/scripts/test_bounded_collation_process_20260921.py",
+      "line": 68,
+      "type": "secret_or_token_literal",
+      "disposition": "test_placeholder",
+      "reason": "Injected only by patch.dict(os.environ, ...) inside a test function; no external authentication call.",
+      "matched_value_disclosed": false
+    }
+  ],
+  "pass_scope": "Audited complete precommit working tree plus all 29 current refs; uncommitted main source and records were scanned from the filesystem. Pending DEST3D copy and updated export helpers require incremental confirmation.",
+  "unresolved_security_blockers": [],
+  "audit_finished_utc": "2026-11-17T12:28:39.893222+00:00",
+  "nested_dest3d_source_copy_pass": true,
+  "current_new_or_changed_file_findings": [],
+  "pending_incremental_scope": [
+    "Finalize copy of the four audited helper SHA-256 values; subsequent metadata-only audit/provenance documents contain no matched values."
+  ],
+  "bytes": 383470195,
+  "incremental_refs_unchanged": true,
+  "nested_dest3d_files": 49,
+  "portable_helper_source_audit": {
+    "audit_finished_utc": "2026-11-17T12:28:10.864214+00:00",
+    "status": "PASS_UPDATED_HELPER_SOURCE",
+    "checks": [
+      {
+        "path": "tooling/export/materialize_project.py",
+        "source_bytes": 7148,
+        "source_sha256": "789256ba6c2269067f7d4dbe8ccea4eb638632f98eb568c02d9de8ec74a9dd64",
+        "stage_bytes": 1943,
+        "stage_sha256": "654af4d0527b8107639c7d2298c33cb783c6324b99ae3cfa68fc71fb56f27486",
+        "stage_matches_updated_source": false,
+        "ast_parse": "PASS",
+        "findings": []
+      },
+      {
+        "path": "tooling/export/verify_export.py",
+        "source_bytes": 3171,
+        "source_sha256": "1d71ff1cdeab65d6e4a09f4667f4ed18423a3dc1f20129a8843eed72652ef761",
+        "stage_bytes": 3171,
+        "stage_sha256": "1d71ff1cdeab65d6e4a09f4667f4ed18423a3dc1f20129a8843eed72652ef761",
+        "stage_matches_updated_source": true,
+        "ast_parse": "PASS",
+        "findings": []
+      }
+    ],
+    "pending_stage_copy": [
+      "tooling/export/materialize_project.py"
+    ]
+  },
+  "final_four_export_helper_source_audit": {
+    "audit_finished_utc": "2026-11-17T12:46:04.893116+00:00",
+    "scope": "Four updated export helper sources only; source bytes read, AST parsed and compiled without execution. No network, stage mutation, Git mutation, or credential-account reads.",
+    "status": "PASS",
+    "actual_credential_findings": [],
+    "checks": [
+      {
+        "source_path": "D:\\project\\cluster_project\\pipeline\\handoffs\\20261117_github_migration\\build_export.py",
+        "export_path": "tooling/export/build_export.py",
+        "bytes": 22714,
+        "sha256": "bf8f8dadd16387e1c1242b08dc53084cd361be8cbb9ff278d6a85083654c0c68",
+        "ast_parse": "PASS",
+        "compile_without_execution": "PASS",
+        "findings": []
+      },
+      {
+        "source_path": "D:\\project\\cluster_project\\pipeline\\handoffs\\20261117_github_migration\\github_repository.py",
+        "export_path": "tooling/export/github_repository.py",
+        "bytes": 6889,
+        "sha256": "b6819f38d9803dfaf274a82b29660840f468782f371338a641031fe5ba12240b",
+        "ast_parse": "PASS",
+        "compile_without_execution": "PASS",
+        "findings": []
+      },
+      {
+        "source_path": "D:\\project\\cluster_project\\pipeline\\handoffs\\20261117_github_migration\\materialize_project.py",
+        "export_path": "tooling/export/materialize_project.py",
+        "bytes": 7148,
+        "sha256": "789256ba6c2269067f7d4dbe8ccea4eb638632f98eb568c02d9de8ec74a9dd64",
+        "ast_parse": "PASS",
+        "compile_without_execution": "PASS",
+        "findings": []
+      },
+      {
+        "source_path": "D:\\project\\cluster_project\\pipeline\\handoffs\\20261117_github_migration\\verify_export.py",
+        "export_path": "tooling/export/verify_export.py",
+        "bytes": 3171,
+        "sha256": "1d71ff1cdeab65d6e4a09f4667f4ed18423a3dc1f20129a8843eed72652ef761",
+        "ast_parse": "PASS",
+        "compile_without_execution": "PASS",
+        "findings": []
+      }
+    ],
+    "stage_copy_confirmation": "Finalizer must copy these exact source SHA-256 values. Original 29-ref/full-tree audit remains separate and unchanged."
+  }
+}

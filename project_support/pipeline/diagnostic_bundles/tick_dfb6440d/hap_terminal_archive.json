@@ -1,0 +1,186 @@
+{
+  "recorded_at": "2026-10-22T14:08:23.667710+00:00",
+  "token": "dfb6440d1b69401da8e932239883e613",
+  "canonical_function": "pipeline_monitor.finalize_task",
+  "exact_log_adapter": true,
+  "events": [
+    "[model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap] 终态=done_earlystop Best=0.5002 @31/50 on server-4 gpu0；日志→D:\\project\\cluster_project\\Checkpoints\\server_4\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap\\20261022_152554\\train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_152545.log（checkpoint 留远端）"
+  ],
+  "original_queue_task": {
+    "id": "M207-HAP",
+    "label": "M207-HAP hierarchy affine coarse-to-fine prolongation",
+    "config": "configs/Quard/ctf_hcg_csort_hap/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap.yaml",
+    "status": "running",
+    "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+    "admission_receipt": "pipeline/admissions/M207-HAP.json",
+    "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+    "requires_exclusive_ownership": true,
+    "gpu": "0",
+    "server": "server-4",
+    "dispatch_phase": "progress_pending",
+    "launch_verified": true,
+    "launch_verification": "training_progress",
+    "training_status": "running",
+    "resume_from": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_hap_crash_5c46f46a/20261022_002007/last.pth",
+    "resume_authorization": {
+      "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+      "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+    },
+    "resume_checkpoint_evidence": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/checkpoint_evidence.json",
+      "sha256": "b89c4bd17158e5455fb12834e497e146b0659b75f7a5c8445070a95487b2ec1d"
+    },
+    "resume_authorized": true,
+    "note": "Same M207-HAP/f518/native YAML full epoch18 state; native epoch19 resume, no cold start. GPU0 only; M206/GPU1 remain paused/released.",
+    "claimed_gpu": "0",
+    "pid": 1063355,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_152545.log",
+    "launched": "2026-10-22T15:26:21",
+    "native_resume_progress": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+      "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+    }
+  },
+  "archived_experiment": {
+    "id": "M207-HAP",
+    "config": "configs/Quard/ctf_hcg_csort_hap/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap.yaml",
+    "server": "server-4",
+    "gpu": "0",
+    "status": "done_earlystop",
+    "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+    "history": [
+      {
+        "ts": "2026-10-21T16:17:09.170217+00:00",
+        "action": "admitted_after_native_two_step_and_matched_resource_checks",
+        "receipt": {
+          "path": "pipeline/admissions/M207-HAP.json",
+          "sha256": "61aded24398cb95d2296c3fc3fffeeb6e2960e6e9646fffc2d18c466ea564c59"
+        },
+        "numerical_risks": {
+          "path": "pipeline/diagnostic_bundles/tick_008137b4/hap_numerical_risk_observation.json",
+          "sha256": "275288326250af5aacbd8bb30348472135dbabc5a568d0c92a95e480f877f5f0"
+        }
+      },
+      {
+        "ts": "2026-10-22T00:20:30.745155",
+        "action": "launched",
+        "gpu": "0"
+      },
+      {
+        "ts": "2026-10-21T16:24:36.489479+00:00",
+        "action": "formal_native_progress_verified",
+        "epoch": 1,
+        "steps": "346->347/4686",
+        "proof": {
+          "path": "pipeline/diagnostic_bundles/tick_008137b4/hap_formal_launch_proof_r2.json",
+          "sha256": "7380af66fd506a1695c44600e8d24448b9b6fd561e1823d5d776bf9d62bb5494"
+        },
+        "tested_code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0"
+      },
+      {
+        "ts": "2026-10-22T12:25:34.731726",
+        "status": "crashed",
+        "best_miou": "0.4975",
+        "epochs": "19/50 interrupted; full checkpoint epoch18"
+      },
+      {
+        "ts": "2026-10-22T07:25:43.941642+00:00",
+        "action": "human_authorized_full_resume_queued",
+        "from_checkpoint_epoch": 18,
+        "resume_start_epoch": 19,
+        "authorization": {
+          "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+          "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+        },
+        "checkpoint": {
+          "path": "pipeline/manual_ops/20261022_hap_resume_151948/checkpoint_evidence.json",
+          "sha256": "b89c4bd17158e5455fb12834e497e146b0659b75f7a5c8445070a95487b2ec1d"
+        },
+        "prior_archive": {
+          "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_terminal_archive.json",
+          "sha256": "a78fec953d92a929a43b1e1adf2e9189bb97b4d0af1e78f3e630aad09e77d583"
+        }
+      },
+      {
+        "ts": "2026-10-22T15:26:21.401572",
+        "action": "launched",
+        "gpu": "0"
+      },
+      {
+        "ts": "2026-10-22T07:28:13.470149+00:00",
+        "action": "native_full_resume_metadata_and_increasing_progress_verified",
+        "epoch": 19,
+        "from_step": 71,
+        "to_step": 81,
+        "proof": {
+          "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+          "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+        },
+        "authorization": {
+          "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+          "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+        }
+      },
+      {
+        "ts": "2026-10-22T22:08:23.102112",
+        "status": "done_earlystop",
+        "best_miou": "0.5002",
+        "epochs": "31/50"
+      }
+    ],
+    "prior_runs": [
+      {
+        "state": "crashed",
+        "archived_experiment": {
+          "path": "pipeline/manual_ops/20261022_hap_resume_151948/prior_crashed_experiment.json",
+          "sha256": "4327b9106bbd0a8ddec8b16b202376c94a9a281608227a5fda9c98bb42e98405"
+        },
+        "terminal_archive": {
+          "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_terminal_archive.json",
+          "sha256": "a78fec953d92a929a43b1e1adf2e9189bb97b4d0af1e78f3e630aad09e77d583"
+        },
+        "archive_id": "0d70c24a63834dd6845414e6d8c51eb2"
+      }
+    ],
+    "resume_from": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_hap_crash_5c46f46a/20261022_002007/last.pth",
+    "resume_authorization": {
+      "path": "pipeline/authorizations/m207_resume_gpu0_20261022_hap_resume_151948.json",
+      "sha256": "21799cd7854fd9e7b2346b7464822b2682e9cebbf5bfc16926544cb8224f13a5"
+    },
+    "resume_checkpoint_evidence": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/checkpoint_evidence.json",
+      "sha256": "b89c4bd17158e5455fb12834e497e146b0659b75f7a5c8445070a95487b2ec1d"
+    },
+    "training_status": "done_earlystop",
+    "pid": 1063355,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_152545.log",
+    "launched": "2026-10-22T15:26:21",
+    "resume_authorized": true,
+    "native_resume_progress": {
+      "path": "pipeline/manual_ops/20261022_hap_resume_151948/native_resume_progress.json",
+      "sha256": "0cc547c0b43c0fd6775d5bdb8248ba629b82e29518671adb0c4882ed5edcda20"
+    },
+    "final_best": "0.5002",
+    "finished_at": "2026-10-22T22:08:23.102112",
+    "log_local": "D:\\project\\cluster_project\\Checkpoints\\server_4\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap\\20261022_152554\\train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_152545.log",
+    "epochs_final": "31/50",
+    "archive_id": "c4f5278d769e46c09c82655896184ec1",
+    "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+    "admission_receipt": "pipeline/admissions/M207-HAP.json",
+    "launch_verified": true,
+    "launch_verification": "training_progress"
+  },
+  "prior_crash_and_run_history_preserved": true,
+  "m206_queue_unchanged": true,
+  "running_after": {
+    "server-6": {}
+  },
+  "signals_sent": false,
+  "deathwatch_incremented": false,
+  "source_changes": false,
+  "terminal_log_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hap_native_earlystop_log_evidence.json",
+    "sha256": "0e54adb18b9d78a18ceae7578e23f14a0c6d7a965ca76259d61842230c651a80"
+  },
+  "scientific_result": "This HAP realization best0.5002 < M95.5020 by0.0018 and target.5100 by0.0098; not a whole-mechanism falsification."
+}

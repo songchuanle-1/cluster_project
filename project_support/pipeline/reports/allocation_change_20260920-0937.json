@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "project": "cluster_project",
+  "changed_at": "2026-09-20T09:37:00+08:00",
+  "requested_allocation": {
+    "server": "server-4",
+    "gpus": [0, 1],
+    "max_tasks_per_gpu": 1,
+    "capacity": 2
+  },
+  "effective_dispatch": {
+    "server-4": {
+      "allowed_gpus": [0, 1],
+      "max_tasks_per_gpu": 1,
+      "dispatch_enabled": true,
+      "capacity": 2
+    },
+    "server-6": {
+      "allowed_gpus": [7],
+      "max_tasks_per_gpu": 2,
+      "dispatch_enabled": false,
+      "capacity": 0,
+      "grandfathered_running_experiment": "M197-PIRS"
+    }
+  },
+  "connectivity_check": {
+    "server-4_ping": "pass",
+    "server-4_ssh_port_22": "refused",
+    "gpu_inventory_verified": false,
+    "code_sync_performed": false,
+    "training_migrated": false
+  },
+  "safety": {
+    "m197_action": "continue_on_server-6_until_terminal_or_safe_verified_migration",
+    "new_server-6_dispatch": "forbidden",
+    "server-4_launch_before_verification": "forbidden",
+    "foreign_processes_touched": false
+  },
+  "validation": {
+    "capacity_parser": "server-4 GPU0/1 = 2",
+    "unit_tests": "26 passed",
+    "monitor_transition": "server-6 remains monitorable with dispatch disabled"
+  }
+}

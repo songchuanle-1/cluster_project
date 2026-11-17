@@ -1,0 +1,12 @@
+{
+  "preregistered_at": "2026-10-18T22:40:38.265129+00:00",
+  "failure_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_2d7cbb68/independent_package/native_package_candidate_result.json",
+    "sha256": "696f37613ae46d45c50e298b948adc32298a9f88c3176c23625480d84899eb5d"
+  },
+  "scope": "Diagnostic loader isolation only;candidate code/realization/keys/hyperparameters unchanged",
+  "cause": "Loader unnecessarily constructed M95 then imported independent candidate into the same process;both loss.py definitions register Criterion. This is not a native candidate forward/backward failure.",
+  "repair": "In a fresh process import ONLY candidate package and load the same frozen checkpoint directly,using canonical source/buffer/state/seed checks. Do not clear or override registries,force registration,edit installed packages,or rerun successful champion resources.",
+  "full_candidate_backward": "pending",
+  "scientific_admission": false
+}

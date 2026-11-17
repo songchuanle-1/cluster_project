@@ -1,0 +1,66 @@
+{
+  "scope": "Event-mode overdue capacity retry for blocked native capture stages; no native capture or efficacy claim",
+  "timestamp": "2026-09-17T19:10:00+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 19076,
+    "processes": [
+      {
+        "pid": 1134192,
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "capture_launched": false
+  },
+  "static_advance": {
+    "finding": "The bound baseline/PIRS config and model-source identities remain stable and distinct; all 18 fail-closed contract tests pass.",
+    "tests": {
+      "pirs_preregistered_contract": 18,
+      "passed": true
+    },
+    "report": {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1910.json",
+      "sha256": "827fdc016cfc3e71f1002880303857beced8995cb61150f9c9af54b61e39c419"
+    }
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied at the two-process cap by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-17T20:10:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Rechecked live GPU7 process and memory state once, reran the frozen identity contract, and made no launch attempt."
+  },
+  "evidence": [
+    {
+      "path": "scripts/pirs_preregistered_contract_20260917-1408.py",
+      "sha256": "8eeadf703fe645cb23cdc3ea02b79027e48b34f976fd71d373af31dbe80b2b82"
+    },
+    {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1910.json",
+      "sha256": "827fdc016cfc3e71f1002880303857beced8995cb61150f9c9af54b61e39c419"
+    }
+  ],
+  "limitations": [
+    "The capture identities are checked against the bound local source tree; they are not authenticated by an external signed manifest.",
+    "No paired native capture ran, so no P1/P2/P3 or efficacy result is claimed.",
+    "M197-PIRS remains prior-art engineering evidence and does not authorize a successor mechanism."
+  ]
+}

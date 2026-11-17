@@ -1,0 +1,15 @@
+# Real worker trace metadata: prepared, not run
+
+Read-only stdlib observation for current owner. No author SSH/probe run. It does not import Torch, NumPy, DGL, tokenizer, YAML or pickle; no unpickle, dataset constructor, worker, CUDA/model/loss/optimizer/training entry or protocol test is run. Old intents/files and consumed rvec_path_prod_21ebd237 are preserved.
+
+Pins host dl04-MS-7E06/uid1001, actual d214 root, original producer entry_factory, consumed entry/binding/conda shim hashes, dataset/train source, exact c86 extension and installed project Python hash. These assets are only read. Git HEAD and GPU0 index/UUID identity are the only helpers; no GPU memory/context/process enumeration. Current UUID958e741a-e5cf-127e-ffe8-9b984e1f404c required. Three original lock paths are stat only.
+
+Captures actual runtime YAML bytes/hash and historical equality flag; existing train annotations/scene-graph cache/label/DGL metadata; bounded local tokenizer assets; complete sorted train/clip stat-manifest digest plus first12 paired scene metadata. First12 is metadata sampling, not historical or future shuffled sampler order. No scene/feature pth content is read. Cache hash omission, missing/denied assets, source truncation, YAML mismatch or unavailable cgroup-v2 proof is explicitly ambiguous and grants no execution readiness. Optional absent tokenizer assets still appear in the ambiguity list for review.
+
+AST extracts installed dataloader iterator constructor/partial-start, pin-memory condition, shutdown/destructor/index scheduling; complete bounded worker loop and actual conda multiprocessing finalizer/start/join/fork-launch source. It also returns bounded import/config lines from the hash-pinned launch assets and installed DGL/runtime sng_parser. No arbitrary compatibility shim is followed or executed. Host MemAvailable/load/CPU affinity/shared-memory capacity and own cgroup v2 memory/cpu/pids limits are read. No v1 limits are inferred if v2 membership is absent.
+
+Bounds: global soft35s, git3s, identity helper5s, outer55s; source reads2MiB/excerpt1250lines; hashing384MiB total/per-cache256MiB; directory5000entries each; remote JSON256KiB, localstdout288KiB. Unknown helper retains PID/start/anonymous output FDs, no signals or retry. Local transport captures persist safely if SSH uncertain. Partial observations remain honest incomplete evidence.
+
+Default wrapper NOP. Root must receive a distinct independent source review with owner, reviewer_thread_id, passed=true, material_concerns=[], frozen_sha256, wrapper_sha256 and body_sha256. Run once only with local Python -B, PYTHONDONTWRITEBYTECODE=1, GIT_OPTIONAL_LOCKS=0 and current CODEX_THREAD_ID: run_metadata_once.py --execute-root --review ABS --review-sha256 SHA. Key-only BatchMode SSH and strict existing host-key verification; no credentials read. New exclusive metadata.intent/metadata.actual.
+
+Local checks: AST only, no body import or NOP run. Producer/render and earlier source metadata are immutable historical anchors with original owners retained.

@@ -1,0 +1,108 @@
+    if candidate:
+        apf_module=importlib.import_module(qualified+'.ancestry_path_factor')
+        original_plan=apf_module.build_ancestry_path_plan;original_mean=apf_module.mean_path_messages
+        def norm_pre(level):
+            def call(owner,values):
+                assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def exchange_pre(owner,values):
+            normalized,ids=values
+            assert owner is att.path_factor and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[i] is state['norm_outputs'][i] for i in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=apf_coverage_preflight(members)
+            if not coverage['true_factor_path_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FACTOR'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: no supported fine ancestry path before gradient watches; no resampling')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],
+                'normalized_bank_sha256':fingerprint(torch,normalized),'original_three_LN_calls':list(state['norm_counts']),
+                'plans':[],'map_calls':[],'mean_calls':[], 'offdiagonal_dependency_probe':'NOT_IMPLEMENTED_NOT_MEASURED',
+                'native_observer_scope':'Actual single map/GELU/three slices/two original mean calls. Copy actual outputs and gather/scatter references only; no replayed operators or auxiliary backward.'}
+            assert 'apf_context' not in state
+            state['apf_context']={'record':record,'normalized':normalized,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'builder_calls':0,'fine_index':[],'middle_input':[],'coarse_input':[],'middle_index':[],'coarse_index':[],
+                'mp':[],'cp':[],'mc':[],'cc':[],'phase':'path_map','map_count':0,'GELU_count':0,'mean_count':0,'mean_outputs':[]}
+            for level,x in enumerate(normalized):watch(x,record,'native_normalized_level'+str(level)+'_gradients')
+        def observed_plan(ids0,ids1,ids2,widths):
+            context=state['apf_context'];b=context['builder_calls'];context['builder_calls']+=1
+            assert (ids0,ids1,ids2)==context['members'][b] and widths==context['widths']
+            original=original_plan(ids0,ids1,ids2,widths);record=apf_plan_observation(original,(ids0,ids1,ids2));record['batch']=b
+            context['record']['plans'].append(record);mo=len(context['middle_index']);co=len(context['coarse_index'])
+            for key,level,source in [('fine_index',0,'fine_ids'),('middle_input',1,'middle_for_paths'),('coarse_input',2,'coarse_for_paths'),('middle_index',1,'middle_ids'),('coarse_index',2,'coarse_ids')]:
+                context[key].extend(b*widths[level]+i for i in original[source])
+            context['mp'].extend(mo+i for i in original['middle_parent_positions']);context['cp'].extend(co+i for i in original['coarse_parent_positions'])
+            context['mc'].extend(original['middle_path_counts']);context['cc'].extend(original['coarse_path_counts'])
+            return original
+        setattr(apf_module,'build_ancestry_path_plan',observed_plan);global_replacements.append((apf_module,'build_ancestry_path_plan',original_plan))
+        def map_pre(owner,values):
+            context=state['apf_context'];assert context['phase']=='path_map' and context['map_count']==0
+            assert context['builder_calls']==int(context['normalized'][0].shape[0])
+            value=values[0];c=att.path_factor.channels;expected=[]
+            for level,key in enumerate(('fine_index','middle_input','coarse_input')):
+                flat=context['normalized'][level].detach().reshape(-1,c);ids=torch.tensor(context[key],device=value.device,dtype=torch.long)
+                selected=flat.index_select(0,ids);expected.append(summary(selected))
+                assert fingerprint(torch,value[:,level*c:(level+1)*c])==fingerprint(torch,selected)
+            record={'forward':state['forward_index'],'input':summary(value),'input_sha256':fingerprint(torch,value),
+                'three_original_ancestry_gathers':expected,'original_linear_calls':1,'input_matches_actual_true_path_gathers':True}
+            assert record['input']['finite'];watch(value,record,'native_input_gradients')
+            context['map_count']=1;context['pending_record']=record
+        def map_post(owner,values,output):
+            context=state['apf_context'];record=context['pending_record'];record['linear_output']=summary(output)
+            record['linear_output_sha256']=fingerprint(torch,output);assert record['linear_output']['finite']
+            watch(output,record,'native_linear_output_gradients');context['linear_output_ref']=output
+            context['record']['map_calls'].append(record);context['phase']='GELU'
+        def activation_post(owner,values,output):
+            context=state['apf_context'];assert context['phase']=='GELU' and values[0] is context['linear_output_ref'] and context['GELU_count']==0
+            record=context['pending_record'];record.update(output=summary(output),output_sha256=fingerprint(torch,output),original_GELU_calls=1)
+            assert record['output']['finite'];watch(output,record,'native_output_gradients')
+            context['factors_ref']=output;context['factor_snapshot']=output.detach().clone();context['GELU_count']=1;context['phase']='middle_mean'
+        def observed_mean(messages,positions,counts):
+            context=state['apf_context'];which=context['mean_count'];assert which in (0,1)
+            assert context['phase']==('middle_mean' if which==0 else 'coarse_mean')
+            c=att.path_factor.channels;start=(which+1)*c
+            assert positions==context['mp' if which==0 else 'cp'] and counts==context['mc' if which==0 else 'cc']
+            assert fingerprint(torch,messages)==fingerprint(torch,context['factors_ref'][:,start:start+c])
+            record={'forward':state['forward_index'],'level':which+1,'input':summary(messages),'input_sha256':fingerprint(torch,messages),
+                'actual_GELU_slice':which+1,'parent_positions':list(positions),'fine_path_counts':list(counts),
+                'original_mean_function_calls':1,'returned_original_object_unchanged':True,'mean_replayed_by_observer':False,
+                'coarse_direct_fine_path_mean_not_middle_mean':which==1,'learned_pool_weights':False}
+            watch(messages,record,'native_input_gradients');output=original_mean(messages,positions,counts)
+            record.update(output=summary(output),output_sha256=fingerprint(torch,output));assert record['output']['finite']
+            watch(output,record,'native_output_gradients');context['mean_outputs'].append(output.detach().clone())
+            context['record']['mean_calls'].append(record);context['mean_count']+=1;context['phase']='coarse_mean' if which==0 else 'complete'
+            return output
+        setattr(apf_module,'mean_path_messages',observed_mean);global_replacements.append((apf_module,'mean_path_messages',original_mean))
+        hooks.extend([att.path_factor.path_map.register_forward_pre_hook(map_pre),att.path_factor.path_map.register_forward_hook(map_post),att.path_factor.activation.register_forward_hook(activation_post)])
+        def exchange_post(owner,values,output):
+            context=state.pop('apf_context');record=context['record'];assert context['phase']=='complete' and len(output)==3
+            assert context['builder_calls']==int(output[0].shape[0]) and context['map_count']==context['GELU_count']==1 and context['mean_count']==2
+            c=att.path_factor.channels;sources=[context['factor_snapshot'][:,:c],*context['mean_outputs']]
+            for level,key in enumerate(('fine_index','middle_index','coarse_index')):
+                original=output[level];ids=torch.tensor(context[key],device=original.device,dtype=torch.long)
+                reference=original.new_zeros((original.shape[0]*original.shape[1],c)).index_copy(0,ids,sources[level]).reshape(original.shape)
+                assert fingerprint(torch,original)==fingerprint(torch,reference)
+            optional=[]
+            for plan in record['plans']:
+                b=plan['batch'];support=[plan['fine_ids'],plan['middle_ids'],plan['coarse_ids']]
+                entry={'batch':b,'path_count':plan['path_count'],'point_count':plan['point_count'],
+                    'middle_path_counts':plan['middle_path_counts'],'coarse_path_counts':plan['coarse_path_counts'],
+                    'singleton_path':plan['path_count']==1,'multiple_roots':len(plan['coarse_ids'])>1,
+                    'unequal_middle_degree':len(set(plan['middle_path_counts']))>1,'unsupported_or_padding_rows':[]}
+                for level in range(3):
+                    unused=sorted(set(range(output[level].shape[1]))-set(support[level]));entry['unsupported_or_padding_rows'].append(len(unused))
+                    if unused:
+                        ids=torch.tensor(unused,device=output[level].device,dtype=torch.long);assert bool((output[level][b].detach().index_select(0,ids)==0).all())
+                optional.append(entry)
+            record.update(outputs=[summary(x) for x in output],output_sha256=fingerprint(torch,output),
+                actual_true_fine_paths=sum(p['path_count'] for p in record['plans']))
+            record.update(actual_single_factor_map_calls=context['map_count'],actual_GELU_calls=context['GELU_count'],actual_private_mean_calls=context['mean_count'],
+                actual_three_LN_calls=list(state['norm_counts']),three_original_ID_delta_shapes=True,unsupported_padding_deltas_zero=True,
+                final_deltas_from_actual_captures_exact=True,actual_optional_boundary_counts=optional)
+            assert record['actual_true_fine_paths']>0
+            for level,x in enumerate(output):assert record['outputs'][level]['finite'];watch(x,record,'native_output_level'+str(level)+'_gradients')
+            state['apf_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([att.path_factor.register_forward_pre_hook(exchange_pre),att.path_factor.register_forward_hook(exchange_post)])

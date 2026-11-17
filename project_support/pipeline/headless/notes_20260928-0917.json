@@ -1,0 +1,10 @@
+{
+  "actions": [
+    "09:08:51 快照：Phase 1未达标，M95 0.5020/目标0.5100；容量2、运行0、等待0。09:09实时server-6 GPU7外部PID 709354占13184 MiB且利用率100%，未取得独占诊断租约。",
+    "稳定候选m95-sample-context-support：实现原生数据生产边界的物理支持向量重建和原始sp_ref_mask一致性检查；修正合成fixture实例语义不一致；20项CPU契约测试通过。证据pipeline/reports/m95_native31_physical_support_contract_20260928.md；科学状态仍为diagnosis，六项准入门槛未通过，原生捕获、推送和训练均未执行。",
+    "下一步在server-6 GPU7真正空闲并取得独占诊断租约后核验远端源码/数据/checkpoint哈希，原生捕获31表达并测试预注册的same-forward干预/安慰剂。09:18 postflight拒绝：CLOSURE_INCOMPLETE: Capacity gap remains with executable research: m95-sample-context-support。GPU7虽有外部进程，但max_tasks_per_gpu=2，不能假造独占资源block或截止；本轮将保留证据并abort，执行状态INCOMPLETE。"
+  ],
+  "decisions": [
+    "09:16 route_change：保留候选原ID并增加失败即停的CPU契约；不将合成测试当作原生机制效果，未准入、不入队。见pipeline/decisions/20260928-091627_route_change.md。"
+  ]
+}

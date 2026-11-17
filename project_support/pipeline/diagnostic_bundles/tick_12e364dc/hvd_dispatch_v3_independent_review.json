@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-06T11:52:42.784270+00:00",
+  "reviewer_actual_child_thread_id": "01a1a684-e37c-7023-a69a-924d4014a2d5",
+  "root_owner_provenance": {
+    "token": "12e364dc14cd4e1195532c7fd295b834",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-11-06T12:09:29.664423+00:00",
+    "context_sha256": "bf1e90947d091f4e8fe53f8876d130ac0d5493d8ff0a82e1547eb900459588a1",
+    "pending_sha256": "6877a9553b1a86ab70fe0e29c1442ff1e70b52c875adc38549034c975f87f162"
+  },
+  "passed": false,
+  "status": "BLOCKING_CANONICAL_API_AND_PRELAUNCH_LOCK_DEFECTS_FOUND",
+  "reviewed_script": {
+    "path": "pipeline/diagnostic_bundles/tick_12e364dc/hvd_dispatch_prepare_v3/dispatch_hvd_once.py",
+    "sha256": "65d56ea40893b3924440dc8afcdd96221e7f68dcf30c132d2a6ebb3132fdd96e"
+  },
+  "reviewed_frozen": {
+    "path": "pipeline/diagnostic_bundles/tick_12e364dc/hvd_dispatch_prepare_v3/FROZEN.json",
+    "sha256": "55b99b00ebaa2a7927cf6ca36f09dfd42fa435ce24a6f0d87e837a4474f48c74"
+  },
+  "reviewed_actual_shim": {
+    "path": "pipeline/diagnostic_bundles/tick_12e364dc/hvd_three_lock_activation/server4_conda_hvd_three_locks.sh",
+    "sha256": "a3c14e46a52f46bc6545e3d7241609ef75beca9a418b8e10fe98f791f174643f"
+  },
+  "canonical_closure_sha256": "31fdab566c2967a24a61c86802b0a26d7fcbe41da0c051a361080960ba8926ca",
+  "canonical_safe_launch_source_sha256": "66f4931eb5a91a2099724546566db3b61b64c5d1adff77d7743b80d249db0b26",
+  "canonical_verify_progress_source_sha256": "1197fded71bdc64f0a4f703fefcf92160fc73cc4418880629ce94d52f165b867",
+  "current_conda_source": "/data/songcl/Project/Cluster_project/pipeline/runtime/hvd_three_lock_12e364dc/server4_conda_hvd_three_locks.sh",
+  "current_SERVERS_sha256": "6a87d428190d77955500b34d58bff0310eecb13c8b233c7b3e4fd7ef253787a7",
+  "material_concerns": [
+    {
+      "id": "P0_CANONICAL_POPEN_BYPASSES_BASH_PYTHON_FUNCTION",
+      "blocking": true,
+      "dispatch_lines": {
+        "strict_ssh": 241,
+        "main": 307
+      },
+      "canonical_safe_launch_line": 368,
+      "evidence": "safe_launch runs a CPU python -c controller, which calls subprocess.Popen([python,tools/train.py,config,--gpu_ids,0,--num_gpus,1]). Popen resolves executable PATH directly and cannot invoke the Bash python() function. The current shim does not prepend an executable wrapper to PATH. PROBE deliberately holds no outer locks. Thus the actual trainer can start without all three locks, and postlaunch evidence is too late.",
+      "required_correction": "Use an actual executable wrapper visible to canonical child Popen, or another separately reviewed pre-Popen FD inheritance mechanism; prove the real canonical Popen argv/PID/FD path using a CPU sentinel before any training launch."
+    },
+    {
+      "id": "P1_STRICT_SSH_REJECTS_CANONICAL_KILL_ZERO_PROGRESS_PROBE",
+      "blocking": true,
+      "dispatch_line": 241,
+      "canonical_verify_progress_line": 580,
+      "evidence": "verify_progress emits if kill -0 PID; then tail ...; else echo __DEAD__; fi. strict_ssh blanket kill regex rejects this command before transport, causing the genuine progress verifier to fail after any Popen.",
+      "required_correction": "Preserve no-signal behavior by narrowly translating the exact canonical kill-0 existence check to a read-only /proc/PID existence test, or accept only the exact reviewed zero-signal probe; retain rejection of real signal/kill commands."
+    }
+  ],
+  "accepted_scope_observations": [
+    "v3 actual file and every declared frozen file hash verified",
+    "raw YAML UUID correction separates parsed load_servers schema from raw UUID policy",
+    "GPU0-only numeric free memory gate, single task limit, current source/receipt and one-intent controls present",
+    "v2 negative preserved; this review never invoked either dispatch helper"
+  ],
+  "execution_review_only": true,
+  "SSH_GPU_model_Popen_or_dispatch_by_reviewer": false,
+  "native_scientific_tests_repeated": false,
+  "shared_state_written": false
+}

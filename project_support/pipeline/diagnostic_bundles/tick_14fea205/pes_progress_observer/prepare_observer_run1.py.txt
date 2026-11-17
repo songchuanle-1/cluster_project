@@ -1,0 +1,66 @@
+"""Private readonly-observer metadata port; never executes the observer."""
+from pathlib import Path
+from datetime import datetime,timezone
+import ast,difflib,hashlib,json
+ROOT=Path('D:/project/cluster_project')
+HERE=Path(__file__).resolve().parent
+ORIGIN=HERE.parent/'dce_progress_observer/observe_dce.py'
+NATIVE=ROOT/'pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare/preparation.json'
+CODE='9c42fdc4e9168acec18980d782ee9c163e043bb7'
+CID='hierarchy-palindromic-euler-state-composition'
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def ref(p):return {'path':p.relative_to(ROOT).as_posix(),'sha256':sha(p)}
+def save(name,value):(HERE/name).write_text(json.dumps(value,indent=2,allow_nan=False)+'\n',encoding='utf-8')
+assert sha(NATIVE)=='f2fc8cc9f6c090aaf3db532571239ce1e69dba73f199078644512473ef77cdff'
+native=json.loads(NATIVE.read_text(encoding='utf-8'))
+assert native['candidate_id']==CID and native['code_commit']==CODE and len(native['source_files'])==9
+before=ORIGIN.read_text(encoding='utf-8')
+after=before
+literal_changes=[('Future exact original DCE process/log/source readback','Future exact original PES process/log/source readback'),
+    ("COMMIT='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391'",f'COMMIT={CODE!r}'),
+    ('DEFAULT_DISABLED_NO_OBSERVATION','DEFAULT_NO_OPERATION'),
+    ('pipeline/experiments/M220-DCE.json','pipeline/experiments/M221-PES.json'),
+    ('pipeline/diagnostic_bundles/tick_01d9102a/dce_native_prepare/preparation.json','pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare/preparation.json'),
+    ('dce_training_progress_observation.json','pes_training_progress_observation.json')]
+for old,new in literal_changes:
+    assert old in after,old
+    after=after.replace(old,new)
+old="a=sample();time.sleep(3);b=sample();after=identity();assert before==after"
+new=old+"\nassert b['log_size']>a['log_size'] and a['max_native_step'] is not None and b['max_native_step'] is not None and tuple(b['max_native_step'])>tuple(a['max_native_step']), 'Original native TRAIN step did not strictly grow in the two actual samples'"
+assert after.count(old)==1
+after=after.replace(old,new)
+compile(after,'observe_pes.py','exec')
+(HERE/'observe_pes.py').write_text(after,encoding='utf-8',newline='\n')
+tree=ast.parse(after)
+main=next(n for n in tree.body if isinstance(n,ast.FunctionDef) and n.name=='main')
+script=next(n.value.value for n in ast.walk(main) if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='script' for t in n.targets) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Attribute) and isinstance(n.value.func.value,ast.Constant))
+compile(script,'remote_PES_readonly_script','exec')
+checks={
+    'local_and_remote_sources_compile_without_execution':True,
+    'PID_log_startticks_unknown_defaults':"PID=None;EXPECTED_LOG=None;EXPECTED_START_TICKS=None" in after,
+    'default_returns_before_guard_or_transport':"if not args.execute_root:print('DEFAULT_NO_OPERATION');return" in after,
+    'actual_running_experiment_identity':"pipeline/experiments/M221-PES.json" in after and "exp['pid']==args.pid" in after and "exp['code_commit']==COMMIT" in after and "exp['status']=='running'" in after,
+    'exact_frozen_source9_readback':"len(original['source_files'])==9" in after and "'hashes':original['source_files']" in after,
+    'hostname_assert_precedes_proc_or_GPU_read':script.index("assert socket.gethostname()=='dl04-MS-7E06'")<script.index("proc=Path('/proc')"),
+    'GPU0_UUID_only_original_queries':"'nvidia-smi','-i','0'" in script and 'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c' in script and "'-i','1'" not in script,
+    'exact_PID_UID_argv_cwd_stdout_and_startticks':all(s in script for s in ("proc.stat().st_uid==os.getuid()","'tools/train.py' in cmd","p['config'] in cmd","before['start_ticks']==p['start_ticks']","(proc/'fd'/'1').resolve()")),
+    'original_three_second_identity_stability_and_strict_native_growth':"time.sleep(3)" in script and "assert before==after" in script and "tuple(b['max_native_step'])>tuple(a['max_native_step'])" in script,
+    'same_deployed_YAML_77e_hash_and_original_logger_scope':"77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea" in script and "Cluster_checkpoints/'+p['name']+'/'" in script and "'checkpoint_body_read':False" in script,
+    'strict_keys_pinned_host_and_original45s_timeout':all(s in after for s in ('BatchMode=yes','StrictHostKeyChecking=yes','songcl@192.168.1.115','timeout=45')),
+    'no_process_signal_or_training_launch':all(s not in script for s in ('os.kill','killpg','Popen(','torch','CUDA_VISIBLE_DEVICES=')),
+    'exclusive_output_and_final_owner_guard':".open('x',encoding='utf8')" in after and "guard()\n with (HERE/'pes_training_progress_observation.json')" in after,
+}
+assert all(checks.values()),[k for k,v in checks.items() if not v]
+save('static_validation.json',{'status':'PASS_SOURCE_CHECKS_ONLY_OBSERVER_NOT_EXECUTED','recorded_at':datetime.now(timezone.utc).isoformat(),'check_count':len(checks),'checks':checks,'observer_sha256':sha(HERE/'observe_pes.py'),'remote_script_compiled':True,'SSH_GPU_Git_or_observer_executed':False,'native_growth':'NOT_OBSERVED'})
+save('provenance.json',{'origin':ref(ORIGIN),'native_preparation':ref(NATIVE),'literal_metadata_changes':literal_changes,
+    'one_nonmetadata_contract_change':'Add strict log-size and lexicographic native TRAIN(epoch,step) increase after the original two3s samples and stable process identity. The old DCE observer returned samples without asserting growth; root requested a formal native-growth proof. No model/scientific gate or extra query added.',
+    'exact_diff':''.join(difflib.unified_diff(before.splitlines(keepends=True),after.splitlines(keepends=True),fromfile='DCE/origin',tofile='PES/observe_pes.py')),
+    'body_equivalence_scope':'Identical source after the listed metadata substitutions plus one required growth assertion; original commands/query count/strictSSH/source9/logger/three-second sampling unchanged.',
+    'expected_candidate_id':CID,'expected_code_commit':CODE,'PID_log_startticks':'Required future actual root CLI inputs; no prefilled launch identity','native_or_training_success':'NOT_OBSERVED'})
+anchor=ast.parse((HERE.parent/'anchor.py').read_text(encoding='utf-8'))
+owner=next(ast.literal_eval(n.value) for n in anchor.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='EXPECTED' for t in n.targets))
+prepared={p.relative_to(HERE).as_posix():sha(p) for p in sorted(HERE.iterdir()) if p.is_file() and p.name!='preparation.json'}
+save('preparation.json',{'schema_version':1,'status':'STATIC_PES_READONLY_PROGRESS_OBSERVER_PREPARED_NOT_EXECUTED','recorded_at':datetime.now(timezone.utc).isoformat(),'candidate_id':CID,'experiment_id':'M221-PES','code_commit':CODE,'source_parent_commit':'5c0c211c8ecc9479ecb34dbb8118a95f4b20e391','native_preparation':ref(NATIVE),'prepared_under_parent':owner,'default_no_operation':True,'requires_explicit_execute_root':True,'PID':None,'log':None,'start_ticks':None,
+    'actual_command_template':'python -B pipeline/diagnostic_bundles/tick_14fea205/pes_progress_observer/observe_pes.py --execute-root --pid <actualPID> --log <exactOriginalLog> --start-ticks <actualStartTicks>',
+    'output':'pipeline/diagnostic_bundles/tick_14fea205/pes_progress_observer/pes_training_progress_observation.json','observed_growth':'NOT_OBSERVED','SSH_GPU_Git_or_observer_executed':False,'static_validation':ref(HERE/'static_validation.json'),'provenance':ref(HERE/'provenance.json'),'prepared_file_hashes':prepared,'material_concerns':[]})
+print(json.dumps({'observer':ref(HERE/'observe_pes.py'),'preparation':ref(HERE/'preparation.json'),'provenance':ref(HERE/'provenance.json'),'software_check_count':len(checks)}))

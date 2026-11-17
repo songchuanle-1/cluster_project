@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-28T14:25:52.171710+00:00",
+  "status": "STATIC_DCE_SOURCE_TOPOLOGY_AND_INTEGRATION_REVIEWED_NOT_NATIVE_PASS",
+  "candidate_id": "hierarchy-directed-cavity-edge-composition",
+  "experiment_id": "M220-DCE",
+  "code_commit": null,
+  "source_parent_commit": null,
+  "reference_parent_only": "d0e2f95712ed16446907706fbf6a65d34996a9ad",
+  "material_concerns": [],
+  "metadata_blockers": [],
+  "source_files_exact9": {
+    "configs/Quard/ctf_hcg_csort_dce/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/directed_cavity.py": "a8141fe8a86d9846bdd2a812a9d3d8be99dc48b6485b206e0900c1ba6f8ad55e",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/hier_postprocess.py": "4c24cf4202cf71cf0d19a99f982e6fc37032da8838b1c1f6af771cc2d46a386c",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+  },
+  "anchors": {
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/new_candidate_prepare/preparation.json",
+      "sha256": "44e75f7c33e15d049716b8b477a601e8fbbc74a226c13a5552ace927a3e3ed5e"
+    },
+    "source_manifest": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/new_candidate_prepare/source_manifest.json",
+      "sha256": "747d0ae1382dee602291dff017da259e0a6bd82892b7ca172d16b2eaf6b32cc6"
+    },
+    "native_protocol": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/new_candidate_prepare/native_protocol.md",
+      "sha256": "4b3c658abb4687b38cde3788de8f4c46687c96b76c66563d6fdbe47bb3714f58"
+    },
+    "production_helper": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/new_candidate_prepare/staged_repository/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_dce/directed_cavity.py",
+      "sha256": "a8141fe8a86d9846bdd2a812a9d3d8be99dc48b6485b206e0900c1ba6f8ad55e"
+    },
+    "independent_software_runner": {
+      "path": "pipeline/diagnostic_bundles/tick_01d9102a/dce_independent_software.py",
+      "sha256": "a0e0e81d029372585e7116056ed6e4e12f60316b2b31b383ca0ac1f5f0112edf"
+    }
+  },
+  "independent_software_execution": {
+    "command": "python -B pipeline/diagnostic_bundles/tick_01d9102a/dce_independent_software.py",
+    "actual_exit_code": 0,
+    "actual_checks": 30,
+    "production_helper_sha256": "a8141fe8a86d9846bdd2a812a9d3d8be99dc48b6485b206e0900c1ba6f8ad55e",
+    "actual_forward_cases": [
+      "empty",
+      "single",
+      "unequal_siblings",
+      "holes_multiroot",
+      "samefine_duplicatepoints",
+      "two_batch_empty_then_nonempty"
+    ],
+    "invalid_cases": 6,
+    "actual_methods_executed": [
+      "build_cavity_plan",
+      "prepare_cavity_plans",
+      "mean_by_parent",
+      "exclusive_group_sums",
+      "DirectedCavityComposition.forward"
+    ],
+    "oracle": "Direct original-ID receiver-neighbor edge enumeration with role-specific scalar affine maps and identity activation; does not use production grouped caches or prefix/suffix reduction.",
+    "primitive_check": "Actual exclusive_group_sums([2,3,7,11],groups[[0,2,3],[1]]) -> [18,0,13,9].",
+    "scope": "Pure stdlib list carriers executing production AST; no real Tensor/Linear/GELU/autograd/FP32/native/resource evidence. No original author23 or31 suite rerun."
+  },
+  "integration": {
+    "frozen_file_map_verified": 17,
+    "source9_verified": true,
+    "original_six_model_files_byte_identical": [
+      "__init__.py",
+      "backbone.py",
+      "dec.py",
+      "loss.py",
+      "network.py",
+      "sample_model.py"
+    ],
+    "original_YAML_byte_identical": true,
+    "hier_function_changes_exact": [
+      "C2F_ClusterAttn_CTF.__init__",
+      "C2F_ClusterAttn_CTF.forward"
+    ],
+    "all_other_hier_functions_AST_unchanged": true,
+    "original_raw_FPS_membership_CSORT_HCG_and_single_inst_path_preserved": true,
+    "common_constructor_order": "All three original FFNs then three original LNs initialize in original order. Six new maps constructed inside CPU fork_rng(devices=[]); removed three FFNs become Identity. Actual RNG/common parameter equality still requires native pair.",
+    "residuals": "Exactly three original raw cf + delta skips, then original HCG and one original inst injection. No extra point routing/QKV/gate/residual."
+  },
+  "graph_scope": {
+    "mechanism": "Original true point-supported fine-middle-coarse forest. Fine up raw normalized; middle-up own+mean fine; root-to-middle excludes that recipient middle-up; middle-to-fine excludes recipient fine-up while including one root-down; three original-ID readouts.",
+    "checked_weighting": "Middle-to-fine denominator is fine degree for one root-down plus each other fine message, including degree1; middle readout denominator is fine degree+1. No mean-of-means substitution.",
+    "checked_reverse_exclusion": "Actual prefix/suffix cumsum only before/after rows; root degree1 has private zero context, no total-minus-own.",
+    "empty_support": "Deltas all zero; mixed empty/nonempty batch offsets and unsupported holes preserved in actual list execution.",
+    "near_neighbor_scope": "Bounded PCE mechanism comparison found no identical BTC/BCR/BEC/CRE/HPC/APF graph or explicit ban. Cavity/BP family acknowledged; no general novelty claim and no old held-route budget reset.",
+    "physical_self_scope": "Only reverse bank-token message branches excluded; original ancestor raw already contains descendant points. No physical point-self exclusion or old contamination repair claimed."
+  },
+  "static_cost": {
+    "C": 256,
+    "six_Linear2C_to_C_parameters": 787968,
+    "replaced_three_FFN_parameters": 1576704,
+    "parameter_delta": -788736,
+    "new_map_rows": "2F+3M+C for actual supported row counts, plus private sums/means/indexing metadata.",
+    "scope": "Source arithmetic only. Actual full model parameter count, counted FLOPs<=10G, whole-call CPU latency and prediction/optimizer memory remain unmeasured."
+  },
+  "future_native_protocol": "Original fixed TRAIN2/criterion/optimizer/precision/data/seed1999 unchanged. Whole cavity weight aggregate finite/nonzero original-loss gradient and actual aggregate weight/module step update; individual maps/rows/columns/calls/bias may be zero or unchanged. All-empty support INCONCLUSIVE without redraw; absent optional degree/unsupported boundaries NOT_EXERCISED. No new mean/FP32/Jacobian/Markov gate.",
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "Torch_FP32_autograd": "NOT_RUN",
+  "accuracy_efficacy_novelty": "UNKNOWN",
+  "review_actions": "Only local frozen source/hash/AST and one bounded independent stdlib execution; no Torch, GPU, SSH, Git, root entry, shared/model write or candidate registration."
+}

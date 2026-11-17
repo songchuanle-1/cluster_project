@@ -1,0 +1,13 @@
+{
+  "actions": [
+    "本轮真实设计诊断：固定 M95 TRAIN 128 表达的物理目标少数支持暴露为 10 表达/6 场景，失败 3/10；未暴露失败 31/118。三条暴露失败仅有两个独立目标、一条选中目标实例种子，不足以归因主要失败。",
+    "全 TRAIN 562 场景、36665 标注审计发现原生空格分词遗漏 shower curtain 复合键。281 表达提及短语；102 表达/28 场景有非目标物理 curtain（33 独立实例）。4747 是按表达重复的审计超点行，不是独立样本或性能提升。",
+    "图谱角色审计的 110 次提及中 73 次 other Object、36 次 target、1 次未绑定；只 65/102 表达全部属于 other Object。冻结 2 场景的 11 暴露表达、20 个唯一同目标对照、30 对、7 个 scene-target 单位；文本编辑距离 9-39，仍有混杂。原先 256 表达结果不涵盖这两场景。",
+    "01:05:45 复核 server-6 GPU7 13199 MiB、利用率 100%，外部 PID 709354 仍在；未干扰外部进程，未启动原生 capture。已将预注册、脚本、产物哈希与决策绑定稳定候选；本轮未入队、同步或启动训练。",
+    "01:05 postflight 返回 CLOSURE_INCOMPLETE: Capacity gap remains with executable research: m95-sample-context-support。真实截止 01:10:24 尚未进入 180 秒窗口，不能声称 tick_deadline_near；保持诊断待续并以 abort 释放本轮租约，本轮执行状态 INCOMPLETE。"
+  ],
+  "decisions": [
+    "m95-sample-context-support 仍为 diagnosis；词汇漏召回不能冒充新的 Phase 1 结构机制。物理绑定、同输入干预、失败特异性、原生 backward、资源、独立性与约束未过，不准入。",
+    "后续只在实时 GPU7 空闲且取得独占租约后执行冻结原生 capture，再做同一输入的 context-support 干预与 placebo；不同描述的同目标对照仅用于诊断，不宣称因果。当前科学准入 0、训练启动 0。"
+  ]
+}

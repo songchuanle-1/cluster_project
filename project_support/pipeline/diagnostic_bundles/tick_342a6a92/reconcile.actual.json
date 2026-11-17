@@ -1,0 +1,150 @@
+{
+  "owner": {
+    "token": "342a6a92a2c645fdb64f7806feec102f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T13:08:28.948399+00:00",
+    "deadline_at": "2026-11-09T14:08:28.948399+00:00",
+    "context_sha256": "c7344ae3ab20886d287949637f58899502995c689db4fd0b085e7646b00a5538",
+    "pending_sha256": "91bf76b3b34db24f0c2ae77f739973004b635a0360d0b7e01e5066e00ddf9162"
+  },
+  "certainty": "terminal",
+  "local_ssh_pid": 7408,
+  "kind": "CURRENT_EXACT_EXISTING_TRAINER_TERMINAL_AND_RESOURCE_RECONCILIATION",
+  "read_only": true,
+  "historical_launch_owner_preserved": true,
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-09T13:19:36.906687+00:00",
+    "hostname": "dl04-MS-7E06",
+    "uid": 1001,
+    "source_commit": "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+    "source_and_producer_verified": true,
+    "process": {
+      "pid": 3813109,
+      "expected_start_ticks": "183481242",
+      "exists": false,
+      "alive": false,
+      "same_identity": null
+    },
+    "project_trainers": [],
+    "logs": {
+      "registered_stdout": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec_20261109_175751.log",
+        "size": 2671896,
+        "offset": 2540824,
+        "bytes_read": 131072,
+        "tail_sha256": "f7d0513bd5ce08c4fab2d0f01462b3d4e02845262a97404142dd1e0f71997b55",
+        "latest_native_step": [
+          2,
+          4297
+        ],
+        "native_steps_last5": [
+          [
+            2,
+            4295
+          ],
+          [
+            2,
+            4296
+          ],
+          [
+            2,
+            4296
+          ],
+          [
+            2,
+            4297
+          ],
+          [
+            2,
+            4297
+          ]
+        ],
+        "exact_validations_in_bounded_tail": [],
+        "complete_log_observed": false,
+        "error_markers": {
+          "Traceback": true,
+          "CUDA out of memory": false,
+          "RuntimeError": true,
+          "Segmentation fault": true,
+          "TypeError": false
+        },
+        "error_excerpt": "Traceback (most recent call last):\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py\", line 515, in <module>\n    gorilla.launch(\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/core/launch.py\", line 68, in launch\n    main_func(*args)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py\", line 476, in main\n    train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py\", line 109, in train\n    loss, log_vars = model(batch, mode='loss')\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/network.py\", line 110, in forward\n    return self.loss(**batch)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/utils/utils.py\", line 20, in wrapper\n    return func(*new_args, **new_kwargs)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/network.py\", line 126, in loss\n    out = self.dec(sp_feats, fps_seed_sp, batch_offsets, lang_feats, lang_masks, sp_coords_float, feats_2d)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/dec.py\", line 528, in forward\n    return self.forward_iter_pred(x, fps_seed_sp, batch_offsets,\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/dec.py\", line 462, in forward_iter_pred\n    self.cluster_bank.get_cluster(sp_pos, batch_offsets)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py\", line 151, in get_cluster\n    self.cluster_ids_list, self.child_cluster_maps = self.partitioner(sp_pos, batch_offsets)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1773, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py\", line 1784, in _call_impl\n    return forward_call(*args, **kwargs)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py\", line 109, in forward\n    coords_b, cid = self.cluster_layer(coords_b, layer_nums[lvl], device)\n  File \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py\", line 87, in cluster_layer\n    cid[idx.long()] = k\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/signal_handling.py\", line 73, in handler\n    _error_if_any_worker_fails()\nRuntimeError: DataLoader worker (pid 3815203) is killed by signal: Segmentation fault. \n\rTrain[2/50]:  92%|██████████████████▎ | 4297/4686 [43:33<03:56,  1.64it/s, lr=9.4e-05, eta=1 day, 13:40:53, iter_time=0.60]\n",
+        "terminal_markers": {
+          "Early stopping": false,
+          "Training finished": false,
+          "Training completed": false
+        }
+      },
+      "actual_native_logger": {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800/20261109_175800.log",
+        "size": 929903,
+        "offset": 798831,
+        "bytes_read": 131072,
+        "tail_sha256": "629c8d2abe65b4811cb1d35a4ad171994743c83bde0804a77bc3d09a0f9942d3",
+        "latest_native_step": null,
+        "native_steps_last5": [],
+        "exact_validations_in_bounded_tail": [],
+        "complete_log_observed": false,
+        "error_markers": {
+          "Traceback": false,
+          "CUDA out of memory": false,
+          "RuntimeError": false,
+          "Segmentation fault": false,
+          "TypeError": false
+        },
+        "error_excerpt": null,
+        "terminal_markers": {
+          "Early stopping": false,
+          "Training finished": false,
+          "Training completed": false
+        }
+      }
+    },
+    "checkpoint_metadata_only": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800/best.pth",
+        "bytes": 918230926,
+        "mtime_ns": 1794221352547444222
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800/last.pth",
+        "bytes": 918230926,
+        "mtime_ns": 1794221353119452408
+      }
+    ],
+    "original_locks": [
+      {
+        "kind": "training",
+        "dev": 66308,
+        "ino": 92537152,
+        "available": true
+      },
+      {
+        "kind": "diagnostic",
+        "dev": 66308,
+        "ino": 92537153,
+        "available": true
+      },
+      {
+        "kind": "exclusive",
+        "dev": 66308,
+        "ino": 92537154,
+        "available": true
+      }
+    ],
+    "gpu0": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 25930, 32607, 4",
+    "free_memory_mib": 6677,
+    "marker_consumed": true,
+    "marker_sha256": "110f8ba271ce60190fde18bfe6291fdd406b22e2768e45ac2665d8095f625292",
+    "original_launch_owner_retained": true,
+    "read_only": true,
+    "GPU_compute": false,
+    "signals_sent": false,
+    "remote_files_written": false,
+    "checkpoint_content_loaded": false
+  },
+  "passed": true
+}

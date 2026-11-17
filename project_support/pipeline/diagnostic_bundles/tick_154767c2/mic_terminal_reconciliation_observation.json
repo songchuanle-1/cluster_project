@@ -1,0 +1,143 @@
+{
+  "owner": {
+    "token": "154767c278664ba4a7b666c69f12abaa",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T09:12:59.944792+00:00",
+    "deadline_at": "2026-11-06T10:12:59.944792+00:00",
+    "context_sha256": "53703cbd1a484e565a296843d90b4b65999250b84cc51949376b963943abe1f7",
+    "pending_sha256": "00c5795b6ab5872c56eb7a40be61771eb6708cef5a02fc2206f0f83364789d2f"
+  },
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "stdin_program": "import socket,subprocess,json,os,re,hashlib\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='dl04-MS-7E06'\nroot=Path('/data/songcl/Project/Cluster_project/Cluster_mic_20261105');pid=2881795\nproc=Path('/proc')/str(pid);identity={'pid':pid,'exists':proc.exists()}\nif proc.exists():\n raw=proc.joinpath('stat').read_text();parts=raw[raw.rfind(')')+2:].split();identity.update(starttime=parts[19],state=parts[0],cwd=os.readlink(proc/'cwd'),argv=proc.joinpath('cmdline').read_bytes().replace(b'\\0',b' ').decode(errors='replace'))\nlog=root/'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log'\nwith log.open('rb') as f:\n size=f.seek(0,2);f.seek(max(0,size-98304));tail=f.read(98304)\ntext=tail.decode('utf-8','replace');clean=text.replace('\\r','\\n');selected=[]\nfor line in clean.splitlines():\n if any(s in line.lower() for s in ('early stop','earlystop','patience','best miou','best_miou','best epoch','training finished','traceback','cuda out of memory','runtimeerror','validation','val epoch')) and len(line)<2500:selected.append(line)\nprogress=[list(map(int,x)) for x in re.findall(r'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/(\\d+)',text)]\ninv=subprocess.check_output(['nvidia-smi','-i','0','--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total','--format=csv,noheader,nounits'],text=True).strip();row=[v.strip() for v in inv.split(',')];assert row[0]=='0' and row[1]=='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\napps=subprocess.check_output(['nvidia-smi','-i','0','--query-compute-apps=pid,used_memory','--format=csv,noheader,nounits'],text=True).strip()\nstatepath=Path('/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m229_fd2aae2a/state.json');guard=json.loads(statepath.read_text());gp=Path('/proc')/str(guard['guardian_pid']);guardlive={'pid':guard['guardian_pid'],'exists':gp.exists()}\nif gp.exists():\n raw=gp.joinpath('stat').read_text();parts=raw[raw.rfind(')')+2:].split();guardlive.update(starttime=parts[19],state=parts[0])\nlocks=[];table=Path('/proc/locks').read_text().splitlines()\nfor k in ['training','diagnostic','exclusive']:\n f=Path('/tmp/cluster_project_gpu0_'+k+'.lock');st=f.stat() if f.exists() else None;key='%02x:%02x:%d'%(os.major(st.st_dev),os.minor(st.st_dev),st.st_ino) if st else None;locks.append({'kind':k,'exists':bool(st),'kernel_entries':[l for l in table if key and len(l.split())>5 and l.split()[5]==key]})\nhead=subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip();assert head=='07ef534a6e44f22bd7b2d083550ebd7823d1d3d3'\nprint(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'trainer':identity,'runtime_root':str(root),'source_commit':head,'log':str(log),'log_bytes':size,'tail_bytes':len(tail),'tail_sha256':hashlib.sha256(tail).hexdigest(),'terminal_matching_lines':selected[-12:],'native_progress_samples':sorted(set(tuple(x) for x in progress))[-5:],'fatal_markers':[x for x in ['Traceback','CUDA out of memory','RuntimeError'] if x in text],'GPU0_inventory':inv,'GPU0_contexts':apps,'post_observation_free_mib':int(row[4])-int(row[3]),'guardian_state':guard,'guardian_process':guardlive,'current_locks':locks,'read_only':True,'GPU1_queried':False}))\n",
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-06T09:18:39.514942+00:00",
+    "hostname": "dl04-MS-7E06",
+    "trainer": {
+      "pid": 2881795,
+      "exists": false
+    },
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+    "source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "log": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+    "log_bytes": 34482783,
+    "tail_bytes": 98304,
+    "tail_sha256": "6b0f04ef0bbfc25e7c3de79ef3c7eb347de901fed4e28e5cc5d6d08b8893dce6",
+    "terminal_matching_lines": [
+      "Early stopping at epoch 26: no improvement for 10 epochs (best=0.4988)"
+    ],
+    "native_progress_samples": [
+      [
+        26,
+        4682,
+        4686
+      ],
+      [
+        26,
+        4683,
+        4686
+      ],
+      [
+        26,
+        4684,
+        4686
+      ],
+      [
+        26,
+        4685,
+        4686
+      ],
+      [
+        26,
+        4686,
+        4686
+      ]
+    ],
+    "fatal_markers": [],
+    "GPU0_inventory": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 24, 3206, 32607",
+    "GPU0_contexts": "2010501, 3100",
+    "post_observation_free_mib": 29401,
+    "guardian_state": {
+      "status": "RELEASED",
+      "recorded_at": "2026-11-06T07:54:27.709832+00:00",
+      "operation": "postlaunch_existing_training_cooperative_lock_protection",
+      "binding_sha256": "08a1f752669db19b33f6f47cc16885e37ee0e58571eb1883b944ab232ac3bac2",
+      "guardian_pid": 3033165,
+      "guardian_starttime": "152434416",
+      "trainer_pid": 2881795,
+      "trainer_starttime": "152216088",
+      "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+      "source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+      "physical_gpu": 0,
+      "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+      "locks": [
+        {
+          "kind": "training",
+          "path": "/tmp/cluster_project_gpu0_training.lock",
+          "inode": 92537152,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "31: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF"
+        },
+        {
+          "kind": "diagnostic",
+          "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+          "inode": 92537153,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "30: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF"
+        },
+        {
+          "kind": "exclusive",
+          "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+          "inode": 92537154,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "29: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+        }
+      ],
+      "postlaunch_correction": true,
+      "prelaunch_lock_check_proven": false,
+      "GPU_model_or_NVML_calls": false,
+      "signals_sent": false,
+      "training_restarted": false,
+      "released_at": "2026-11-06T07:54:27.709811+00:00",
+      "error": null
+    },
+    "guardian_process": {
+      "pid": 3033165,
+      "exists": false
+    },
+    "current_locks": [
+      {
+        "kind": "training",
+        "exists": true,
+        "kernel_entries": []
+      },
+      {
+        "kind": "diagnostic",
+        "exists": true,
+        "kernel_entries": []
+      },
+      {
+        "kind": "exclusive",
+        "exists": true,
+        "kernel_entries": []
+      }
+    ],
+    "read_only": true,
+    "GPU1_queried": false
+  },
+  "raw_stdout_on_failure": null
+}

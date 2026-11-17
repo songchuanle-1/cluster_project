@@ -1,0 +1,14 @@
+# TRAIN Diagnostic: Exact-Prefix Three-Scale Attribution
+
+- Stable ID: m202-trained-scale-contribution. New measurement of frozen M202-HDS, not a model revision, training variant, admissible mechanism, or reopening of a closed candidate.
+- Question: do fine/middle/coarse signed point-feature contributions disagree on the four already-fixed TRAIN scenes?
+- Local falsifiable hypothesis: every scale has nonnegative scene-mean fixed-normal-query point-IoU contribution on all four scenes. A negative cell refutes only this local all-scales-beneficial premise. No population, novelty, validation-deficit cause, or architecture-selection claim follows.
+- Inputs: HDS best epoch19 SHA c863202420152aeeef3efd2b21932f24a33a636f3db2904e6772cfa7ece078e8; seed1999; original TRAIN groups [0,60,101,124], all16expressions, no outcome-based filtering. Sources/config/schedule/parameters unchanged.
+- Capture each native prefix once. Instrument canonical readout without replacing its result: compute three weighted terms with exact support/matmul/softmax order; verify ordered sum equals actual fused tensor within1e-6. Record support counts, weights and norms. All8subsets keep trained weights without renormalization: off-distribution omissions, never deployable variants.
+- For every subset, use unchanged native point_out_proj/message_norm and captured ILA/final decoder. Empty subset retains projection/normalization bias; not assumed zero message. Replay true zero-message separately without bias subtraction or tuning.
+- Freeze normal-pass normalized query and selection for primary point-feature readout. Report fixed-selection joint Q/F and own-selection IoUs secondarily; no mechanism selection from them.
+- Exact3player Shapley marginal contributions for point IoU/BCE from8subsets. Report every expression/scene, signed means, efficiency residual. Descriptive counterfactual decomposition, not independent population causal pathways.
+- Controls: ordered sum, native message reconstruction/injection, all-scales suffix Q/F/logits, head/native IoU, identical captured FPS/proposals, finite values, Shapley efficiency. Native tolerance1e-6; float64 scalar efficiency1e-12. Failure is inconclusive; no precision/deterministic/tolerance/source/gate/revision change.
+- CPU controls: additive game with negative component, pure3way interaction, symmetry, all6permutations/efficiency. Synthetic controls are not task evidence.
+- Planned4full TRAIN captures,36native suffix replays (8subsets+1true-zero per scene),0backward/optimizer/VAL/training. Require live pinned server4GPU0,no foreign contexts,3existing flocks,unchanged12hashes/checkpoint.
+- Finish before actual deadline; preserve failures, verify own processes/contexts gone and flocks released. Auxiliary holds remain. Earlier full-forward repeat failure remains.

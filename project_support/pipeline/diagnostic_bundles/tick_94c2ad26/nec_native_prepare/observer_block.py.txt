@@ -1,0 +1,131 @@
+    if candidate:
+        core=att.node_edge_coupling;graph=importlib.import_module(qualified+'.node_edge_coupling')
+        original_plan=graph.build_node_edge_plan;original_prepare=graph.prepare_node_edge_plans;original_rounds=graph.build_node_edge_rounds
+        original_endpoint=graph.mean_endpoint_nodes;original_incident=graph.mean_incident_edges
+        original_select=torch.Tensor.index_select;original_copy=torch.Tensor.index_copy;original_stack=torch.stack;original_cat=torch.cat
+        def queue_replace(owner,name,replacement,original):installations.append((owner,name,replacement));global_replacements.append((owner,name,original))
+        def norm_pre(level):
+            def call(owner,values):assert values[0] is state['raw_refs'][level];state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):state['norm_outputs'][level]=output
+            return call
+        for level in range(3):hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def lite_watch(value,record):
+            if value.requires_grad:
+                def receive(gradient):record['_internal_gradient_flags'].append(torch.isfinite(gradient).all());return None
+                hooks.append(value.register_hook(receive))
+        def exchange_pre(owner,values):
+            normalized,ids=values
+            assert owner is core and ids is bank.cluster_ids_list and state['norm_counts']==[1,1,1]
+            assert all(normalized[l] is state['norm_outputs'][l] for l in range(3))
+            members=[tuple(level[b].detach().cpu().tolist() for level in ids) for b in range(int(normalized[0].shape[0]))]
+            coverage=nec_coverage_preflight(members)
+            if not coverage['true_supported_core_possible']:
+                result['coverage_status']='INCONCLUSIVE_ORIGINAL_BATCH_HAS_NO_TRUE_FOREST';raise RuntimeError('INCONCLUSIVE NEC before watches; no changed seed/sample')
+            record={'forward':state['forward_index'],'inputs':[summary(x) for x in normalized],'normalized_bank_sha256':fingerprint(torch,normalized),
+                'plans':[],'rounds':[],'map_calls':[],'mean_calls':[],'primitive_calls':[],'_internal_gradient_flags':[],
+                'observer_scope':'Actual OLD node/edge state references, endpoint mean, edge update, NEW-edge incident mean, node update; originals called once and actual returns passed through. No learned/mean/state-update/model/criterion/backward replay.'}
+            assert 'nec_context' not in state
+            state['nec_context']={'record':record,'normalized':normalized,'ids_ref':ids,'members':members,'widths':[int(x.shape[1]) for x in normalized],
+                'phase':'prepare','builder_calls':0,'prepare_calls':0,'round_index':0,'map_calls':0,'GELU_calls':0,'endpoint_calls':0,'incident_calls':0,'edge_copies':0,'node_copies':0,'final_level':0,'final_outputs':[]}
+            for l,x in enumerate(normalized):
+                if not x.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_INPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE NEC input before watches')
+                watch(x,record,'native_normalized_level'+str(l)+'_gradients')
+        def observed_plan(points,fm,mc,widths):
+            c=state['nec_context'];b=c['builder_calls'];assert (points,fm,mc)==c['members'][b] and widths==c['widths']
+            output=original_plan(points,fm,mc,widths);c['builder_calls']+=1;record=nec_plan_observation(output,(points,fm,mc));record['batch']=b;c['record']['plans'].append(record);return output
+        def observed_prepare(levels,ids):
+            c=state['nec_context'];assert c['phase']=='prepare' and ids is c['ids_ref'] and all(levels[l] is c['normalized'][l] for l in range(3))
+            output=original_prepare(levels,ids);assert c['builder_calls']==len(output)==int(levels[0].shape[0]);c['prepare_calls']+=1;c['plans_ref']=output
+            positions=[[],[],[]];destinations=[[],[],[]];rowkeys=[]
+            for b,p in enumerate(output):
+                for level,original_id in p['node_keys']:positions[level].append(len(rowkeys));destinations[level].append(b*c['widths'][level]+original_id);rowkeys.append((b,level,original_id))
+            assert rowkeys;c.update(positions=positions,destinations=destinations,rowkeys=rowkeys,phase='initial_stack');return output
+        def observed_stack(values,*args,**kwargs):
+            c=state.get('nec_context')
+            if c is None or c['phase']!='initial_stack':return original_stack(values,*args,**kwargs)
+            assert len(values)==len(c['rowkeys']) and kwargs.get('dim',args[0] if args else 0)==0
+            assert all(fingerprint(torch,value)==fingerprint(torch,c['normalized'][level][b,original_id]) for value,(b,level,original_id) in zip(values,c['rowkeys']))
+            output=original_stack(values,*args,**kwargs);c.update(node_state=output,phase='rounds');c['record']['initial_node_state']=summary(output);c['record']['initial_node_state_sha256']=fingerprint(torch,output)
+            c['record']['primitive_calls'].append({'kind':'original_supported_node_stack','original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_rounds(plans):
+            c=state['nec_context'];assert c['phase']=='rounds' and plans is c['plans_ref'];output=original_rounds(plans)
+            c['rounds_ref']=output;c['record']['rounds']=nec_rounds_observation(output,plans);assert output;c['phase']='select_old_edge';return output
+        def observed_select(tensor,dim,index,*args,**kwargs):
+            c=state.get('nec_context')
+            if c is None or c.get('mean_active'):return original_select(tensor,dim,index,*args,**kwargs)
+            assert dim==0;phase=c['phase']
+            if phase=='select_old_edge':
+                rp=c['rounds_ref'][c['round_index']];assert index.detach().cpu().tolist()==rp['edge_receivers']
+                if c['round_index']==0:
+                    assert list(tensor.shape)==[sum(len(p['edges']) for p in c['plans_ref']),core.channels] and bool((tensor==0).all());c['edge_state']=tensor;c['record']['initial_real_edge_states_zero']=True
+                assert tensor is c['edge_state'];output=original_select(tensor,dim,index,*args,**kwargs);c.update(old_edges=output,phase='endpoint_mean');kind='actual_OLD_edge_receiver_read'
+            elif phase=='select_old_node':
+                rp=c['rounds_ref'][c['round_index']];assert tensor is c['node_state'] and index.detach().cpu().tolist()==rp['node_receivers']
+                output=original_select(tensor,dim,index,*args,**kwargs);c.update(old_nodes=output,phase='incident_mean');kind='actual_OLD_node_receiver_read'
+            else:
+                assert phase=='final_select';l=c['final_level'];assert tensor is c['node_state'] and index.detach().cpu().tolist()==c['positions'][l]
+                output=original_select(tensor,dim,index,*args,**kwargs);c.update(final_source=output,phase='final_scatter');kind='actual_final_hD_original_ID_read'
+            c['record']['primitive_calls'].append({'kind':kind,'round_index':c['round_index'],'original_calls':1,'returned_original_object_unchanged':True});return output
+        def observed_endpoint(old_nodes,rp):
+            c=state['nec_context'];assert c['phase']=='endpoint_mean' and old_nodes is c['node_state'] and rp is c['rounds_ref'][c['round_index']]
+            c['mean_active']=True
+            try:output=original_endpoint(old_nodes,rp)
+            finally:c['mean_active']=False
+            c['endpoint_calls']+=1;c.update(mean_ref=output,phase='edge_cat');c['record']['mean_calls'].append({'kind':'equal_TWO_OLD_endpoint_nodes','round_index':c['round_index'],'output':summary(output),'output_sha256':fingerprint(torch,output),'original_calls':1,'returned_original_object_unchanged':True,'mean_replayed':False});lite_watch(output,c['record']);return output
+        def observed_incident(new_edges,rp):
+            c=state['nec_context'];assert c['phase']=='incident_mean' and new_edges is c['edge_state'] and rp is c['rounds_ref'][c['round_index']]
+            c['mean_active']=True
+            try:output=original_incident(new_edges,rp)
+            finally:c['mean_active']=False
+            c['incident_calls']+=1;c.update(mean_ref=output,phase='node_cat');c['record']['mean_calls'].append({'kind':'equal_incident_NEW_edges','round_index':c['round_index'],'output':summary(output),'output_sha256':fingerprint(torch,output),'actual_positive_node_counts':list(rp['node_counts']),'original_calls':1,'returned_original_object_unchanged':True,'mean_replayed':False});lite_watch(output,c['record']);return output
+        def observed_cat(values,*args,**kwargs):
+            c=state.get('nec_context')
+            if c is None:return original_cat(values,*args,**kwargs)
+            assert c['phase'] in ('edge_cat','node_cat') and len(values)==2 and values[1] is c['mean_ref']
+            role='edge' if c['phase']=='edge_cat' else 'node';assert values[0] is c['old_edges' if role=='edge' else 'old_nodes'] and kwargs.get('dim',args[0] if args else 0)==-1
+            output=original_cat(values,*args,**kwargs);c.update(cat_ref=output,phase='map_'+role);return output
+        def map_pre(role):
+            def call(owner,values):
+                c=state['nec_context'];assert c['phase']=='map_'+role and owner is getattr(core,role+'_cell') and values[0] is c['cat_ref']
+                c['record']['map_calls'].append({'map':role+'_cell','round_index':c['round_index'],'input':summary(values[0]),'input_sha256':fingerprint(torch,values[0]),'actual_OLD_own_and_intended_mean_references':True})
+            return call
+        def map_post(role):
+            def call(owner,values,output):
+                c=state['nec_context'];c.update(map_ref=output,map_role=role,phase='activation');c['map_calls']+=1;lite_watch(output,c['record'])
+            return call
+        def activation_post(owner,values,output):
+            c=state['nec_context'];assert owner is core.activation and c['phase']=='activation' and values[0] is c['map_ref'];c['GELU_calls']+=1
+            c.update(next_state=output,phase='copy_'+c['map_role']);c['record']['map_calls'][-1].update(actual_GELU_output=summary(output),actual_GELU_sha256=fingerprint(torch,output));lite_watch(output,c['record'])
+        def observed_copy(tensor,dim,index,source,*args,**kwargs):
+            c=state.get('nec_context')
+            if c is None:return original_copy(tensor,dim,index,source,*args,**kwargs)
+            assert dim==0;phase=c['phase']
+            if phase in ('copy_edge','copy_node'):
+                role='edge' if phase=='copy_edge' else 'node';rp=c['rounds_ref'][c['round_index']];assert tensor is c[role+'_state'] and source is c['next_state'] and index.detach().cpu().tolist()==rp[role+'_receivers']
+                output=original_copy(tensor,dim,index,source,*args,**kwargs);c[role+'_state']=output;c[role+'_copies']+=1;kind='single_functional_'+role+'_state_update'
+                if role=='edge':c['phase']='select_old_node'
+                else:c['round_index']+=1;c['phase']='select_old_edge' if c['round_index']<len(c['rounds_ref']) else 'final_select'
+            else:
+                assert phase=='final_scatter';l=c['final_level'];assert bool((tensor==0).all()) and source is c['final_source'] and index.detach().cpu().tolist()==c['destinations'][l]
+                output=original_copy(tensor,dim,index,source,*args,**kwargs);c['final_outputs'].append(output);c['final_level']+=1;c['phase']='final_select' if c['final_level']<3 else 'complete';kind='final_original_ID_hD_scatter'
+            c['record']['primitive_calls'].append({'kind':kind,'original_calls':1,'returned_original_object_unchanged':True});return output
+        for name,replacement,original in [('build_node_edge_plan',observed_plan,original_plan),('prepare_node_edge_plans',observed_prepare,original_prepare),('build_node_edge_rounds',observed_rounds,original_rounds),('mean_endpoint_nodes',observed_endpoint,original_endpoint),('mean_incident_edges',observed_incident,original_incident)]:queue_replace(graph,name,replacement,original)
+        for owner,name,replacement,original in [(torch,'stack',observed_stack,original_stack),(torch,'cat',observed_cat,original_cat),(torch.Tensor,'index_select',observed_select,original_select),(torch.Tensor,'index_copy',observed_copy,original_copy)]:queue_replace(owner,name,replacement,original)
+        for role in ('edge','node'):hooks.extend([getattr(core,role+'_cell').register_forward_pre_hook(map_pre(role)),getattr(core,role+'_cell').register_forward_hook(map_post(role))])
+        hooks.append(core.activation.register_forward_hook(activation_post))
+        def exchange_post(owner,values,output):
+            c=state.pop('nec_context');record=c['record'];R=len(c['rounds_ref'])
+            assert c['phase']=='complete' and c['prepare_calls']==1 and c['map_calls']==c['GELU_calls']==2*R and c['endpoint_calls']==c['incident_calls']==c['edge_copies']==c['node_copies']==R and c['final_level']==3
+            for l,value in enumerate(output):
+                assert fingerprint(torch,value.detach().reshape(-1))==fingerprint(torch,c['final_outputs'][l].detach().reshape(-1))
+                if not value.requires_grad:result['coverage_status']='INCONCLUSIVE_CORE_OUTPUT_NOT_DIFFERENTIABLE';raise RuntimeError('INCONCLUSIVE NEC output before watches')
+                watch(value,record,'native_output_level'+str(l)+'_gradients')
+            record.update(outputs=[summary(x) for x in output],actual_true_fine_paths=sum(len(p['fine_ids']) for p in record['plans']),actual_true_nodes=sum(len(p['node_keys']) for p in record['plans']),actual_true_edges=sum(len(p['edges']) for p in record['plans']),
+                actual_original_builder_calls=c['builder_calls'],actual_prepare_calls=1,actual_rounds=R,actual_map_calls=c['map_calls'],actual_GELU_calls=c['GELU_calls'],actual_endpoint_mean_calls=c['endpoint_calls'],actual_incident_mean_calls=c['incident_calls'],actual_edge_state_updates=c['edge_copies'],actual_node_state_updates=c['node_copies'],actual_final_index_copy_calls=3,actual_three_LN_calls=list(state['norm_counts']),
+                synchronous_OLD_endpoint_and_own_states_exact=True,node_update_uses_NEW_incident_edges_exact=True,finished_components_no_fake_updates=True,final_deltas_from_actual_hD_captures=True,unsupported_padding_deltas_zero=True,
+                actual_optional_boundaries={'empty_scene':any(not p['fine_ids'] for p in record['plans']),'single_true_path':any(len(p['fine_ids'])==1 for p in record['plans']),'component_diameters':[x['diameter'] for p in record['plans'] for x in p['components']]})
+            state['nec_delta_snapshots']=[x.detach().clone() for x in output];exchange_calls.append(record)
+        hooks.extend([core.register_forward_pre_hook(exchange_pre),core.register_forward_hook(exchange_post)])
+

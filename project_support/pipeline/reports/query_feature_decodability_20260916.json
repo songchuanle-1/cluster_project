@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "expressions": 123,
+    "scenes": 32,
+    "feature_dim": 264,
+    "folds": 5,
+    "protocol": "scene-grouped CV, no scene in both train and test",
+    "labels": {
+      "accept": {
+        "expressions": 123,
+        "probe_selects_acceptable": 0.5934959349593496,
+        "indis_selects_acceptable": 0.6910569105691057,
+        "probe_top1_matches_label": 0.5934959349593496,
+        "indis_top1_matches_label": 0.6910569105691057
+      },
+      "positive": {
+        "expressions": 123,
+        "probe_selects_acceptable": 0.6260162601626016,
+        "indis_selects_acceptable": 0.6829268292682927,
+        "probe_top1_matches_label": 0.6504065040650406,
+        "indis_top1_matches_label": 0.6910569105691057
+      }
+    }
+  },
+  "scope": "Fixed16 TRAIN batches, M95 eval forward, ONE same-forward capture. Features per query: final decoder query embedding (256), query position relative to the scene centroid, predicted-mask centroid offset, normalised mask size, max mask logit. No GT is used as a feature; GT is used only to form labels. A scene-grouped 3-layer MLP is trained per fold and evaluated on held-out scenes, so this measures whether the information is present in the head's own input, not memorisation. Feasibility probe only; not a deployable head, and no model, novelty or efficacy admission.",
+  "sources": {
+    "/data3/songcl/Project/Cluster_project/pipeline/query_feature_decodability_20260916.py": "38b72dfeddf923a2b104b4c6d3d86336c016b1b6ea00bf44c5b2eecf662a409b",
+    "/data3/songcl/Project/Cluster_project/Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "/data3/songcl/Project/Cluster_project/pipeline/scm_admission_20260914/best.pth": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "revision": 1,
+  "failure_scope": "implementation",
+  "reason": "Prototype compares original point queries against independently FFN-refined coarse keys. Native entropy2.04991269/ln8 and own-coarse probabilities.127-.135 show weak coarse discrimination;loss+0.0001196265 resembles uniformmean+0.0001214743. These are risk signals,not trained harm.",
+  "change": "Move ONLY attention keys to the pre-CTF coarse bank,which is an aggregation of the same point feature basis as the query. Keep refined coarse VALUES,point queries,all heads/scales/sqrtD,fine/middle,fusion and original loss unchanged.",
+  "prediction": "Same-prefix controls compare raw-bank keys against original refined-key prototype,uniformmean and cyclic value mismatch;measure physical own-coarse alignment,entropy,actual task masks/loss and supervision. No minimum pretraining loss gain or retuned temperature.",
+  "preregistered_at": "2026-10-18T22:28:19.170567+00:00",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2d7cbb68/native_coarse/native_coarse_result.json",
+      "sha256": "3a1095462d691e1869a87c1cd8fad37df723e95064a9f3616f4cfc85b076e6ad"
+    }
+  ],
+  "result": "pending",
+  "evidence": []
+}

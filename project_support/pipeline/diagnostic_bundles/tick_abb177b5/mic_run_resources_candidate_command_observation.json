@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-11-05T11:48:09.718100+00:00",
+  "recorded_at": "2026-11-05T11:48:11.507524+00:00",
+  "command": [
+    "C:\\song_data\\app\\miniconda\\root\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\run_mic_operation.py",
+    "--execute-root",
+    "--operation",
+    "run",
+    "--mode",
+    "resources",
+    "--target",
+    "candidate"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\run_mic_operation.py\", line 60, in <module>\n    if __name__=='__main__':main()\n                            ~~~~^^\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\run_mic_operation.py\", line 52, in main\n    elif a.operation=='run':result=adapter.run(a.mode,a.target)\n                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\adapter.py\", line 498, in run\n    current,_,binding=self._binding(mutation=True,required_seconds=1020)\n                      ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\adapter.py\", line 389, in _binding\n    current=self.guard(required_seconds,gpu,mutation=True)\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\adapter.py\", line 181, in guard\n    require((deadline-now).total_seconds()>required_seconds,'Insufficient unchanged owner deadline')\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_abb177b5\\mic_gpu0_activation\\operational\\adapter.py\", line 81, in require\n    raise Refused(reason)\nmic_reviewed_adapter.Refused: Insufficient unchanged owner deadline\n"
+}

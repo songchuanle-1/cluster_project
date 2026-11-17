@@ -1,0 +1,7 @@
+Isolated nine-file M234-RVE source preparation under current owner10a3; parent0747. Nothing was added to Cluster, committed, registered, deployed or executed with Torch/GPU/SSH. Source is in source/ and its exact9 map is source_version.json.
+
+Fixed API is api.json. It exposes the same five headwise parameters to exchange_reference and exchange_optimized. Actual forward is always optimized with donor_cut=False. forward_reference allows the reference/control for tests; forward_own_only uses the optimized donor cut. Ordinary own-only is W2 GELU(Wr xi+b1)+b2; fallback own-only is raw xi, so all off-diagonal input gradients should be exactly zero. Actual fallback remains the original raw whole-leaf mean.
+
+The fine support helper is AST-exact to admitted FLE587c. Current FLE startup_guard/init are deliberately not copied; the five common files use plain original M95 bytes from parent0747. FLE integration preserves its fine FFN/norm removal and every unrelated middle/coarse/CSORT/fusion/writeback method. YAML changes only mode identity; GELU/H8/C256/K32 and every training/data/optimizer/schedule number remain inherited.
+
+static_check.py is read-only stdlib and passed24 source/AST/hash/config/exact-rational checks. It does not import Torch and does not establish float output/gradient equivalence, native backward, resources, efficacy or novelty. Historical FLE negative and all tie/exact-distance/continuity failures remain linked in proposal.json. Independent model/config/source review and actual operator/native/resource gates are pending.

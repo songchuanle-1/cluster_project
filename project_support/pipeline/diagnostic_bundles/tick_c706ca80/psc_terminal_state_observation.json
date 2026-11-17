@@ -1,0 +1,123 @@
+{
+  "owner_provenance_only": {
+    "token": "c706ca805df642f3b7d41f51206ed921",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T19:05:17.840971+00:00",
+    "deadline_at": "2026-11-06T20:05:17.840971+00:00",
+    "context_sha256": "6758593bed23ab56d15374fd311174f538ccc72ce981bb0a39e073c77e91a94b",
+    "pending_sha256": "d974423c258040c800d637da85433c8057023aa529b496c90edb5f71361745cf"
+  },
+  "recorded_at": "2026-11-06T19:12:47.452709+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "/usr/bin/python3 -I -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport os,json,subprocess,socket,hashlib,re,fcntl,time,base64\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"' and os.getuid()==1001\nroot=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_psc_20261106'\"'\"');pid=141056\nassert subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',str(root),'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip()=='\"'\"'0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d'\"'\"'\np=Path('\"'\"'/proc'\"'\"')/str(pid);samples=[]\nfor i in range(3):\n samples.append({'\"'\"'at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'pid_exists'\"'\"':p.exists(),'\"'\"'stat'\"'\"':(p/'\"'\"'stat'\"'\"').read_text() if p.exists() else None})\n if i<2:time.sleep(1)\nlog=root/'\"'\"'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc_20261107_020327.log'\"'\"';meta=log.stat();budget=32*1024*1024\nwith log.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,meta.st_size-budget));raw=f.read(budget)\ntext=raw.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"');tail=raw[-96000:];s=tail.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"')\nvals=[float(x) for x in re.findall(r'\"'\"'mIoU : ([0-9.eE+-]+)'\"'\"',text)];best=None;noimp=0\nfor v in vals:\n if best is None or v>best:best=v;noimp=0\n else:noimp+=1\npairs=[tuple(int(z) for z in match if z) for match in re.findall(r'\"'\"'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+|Epoch:\\s*\\[(\\d+)\\]\\s*\\[\\s*(\\d+)/\\d+\\]'\"'\"',s)]\nerrors=[line[-1400:] for line in s.replace('\"'\"'\\r'\"'\"','\"'\"'\\n'\"'\"').splitlines() if ('\"'\"'Error:'\"'\"' in line or '\"'\"'Traceback'\"'\"' in line or '\"'\"'File \"'\"'\"' in line)]\nlocks=[]\nfor k in ('\"'\"'training'\"'\"','\"'\"'diagnostic'\"'\"','\"'\"'exclusive'\"'\"'):\n f=Path('\"'\"'/tmp/cluster_project_gpu0_'\"'\"'+k+'\"'\"'.lock'\"'\"');m=f.stat()\n with f.open('\"'\"'r+b'\"'\"') as h:\n  try:fcntl.flock(h,fcntl.LOCK_EX|fcntl.LOCK_NB);available=True\n  except BlockingIOError:available=False\n locks.append({'\"'\"'kind'\"'\"':k,'\"'\"'dev'\"'\"':m.st_dev,'\"'\"'ino'\"'\"':m.st_ino,'\"'\"'available'\"'\"':available})\ngpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,memory.total,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\ncontexts=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nproject=[]\nfor q in Path('\"'\"'/proc'\"'\"').iterdir():\n if not q.name.isdigit():continue\n try:\n  if q.stat().st_uid!=os.getuid():continue\n  argv=[x.decode(errors='\"'\"'replace'\"'\"') for x in (q/'\"'\"'cmdline'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if x]\n  if not any(a=='\"'\"'tools/train.py'\"'\"' or a.endswith('\"'\"'/tools/train.py'\"'\"') for a in argv):continue\n  cwd=os.readlink(q/'\"'\"'cwd'\"'\"')\n  if cwd.startswith('\"'\"'/data/songcl/Project/Cluster_project/'\"'\"'):project.append({'\"'\"'pid'\"'\"':int(q.name),'\"'\"'cwd'\"'\"':cwd,'\"'\"'argv'\"'\"':argv})\n except (FileNotFoundError,ProcessLookupError,PermissionError):pass\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'proc_samples'\"'\"':samples,'\"'\"'gpu'\"'\"':gpu,'\"'\"'contexts'\"'\"':contexts,'\"'\"'locks'\"'\"':locks,'\"'\"'project_trainers'\"'\"':project,'\"'\"'log'\"'\"':str(log),'\"'\"'log_bytes'\"'\"':meta.st_size,'\"'\"'log_mtime_utc'\"'\"':datetime.fromtimestamp(meta.st_mtime,timezone.utc).isoformat(),'\"'\"'scan_full_log'\"'\"':meta.st_size<=budget,'\"'\"'scan_bytes'\"'\"':len(raw),'\"'\"'validation_count'\"'\"':len(vals),'\"'\"'native_logged_validation_values'\"'\"':vals,'\"'\"'native_logged_best'\"'\"':best,'\"'\"'noimp'\"'\"':noimp,'\"'\"'exact_checkpoint_best'\"'\"':None,'\"'\"'last_native_pairs'\"'\"':pairs[-4:],'\"'\"'traceback_lines'\"'\"':errors,'\"'\"'early_stop_marker'\"'\"':bool(re.search(r'\"'\"'early.?stop'\"'\"',s,re.I)),'\"'\"'tail_sha256'\"'\"':hashlib.sha256(tail).hexdigest(),'\"'\"'tail_bytes_base64'\"'\"':base64.b64encode(tail).decode(),'\"'\"'signals_sent'\"'\"':False,'\"'\"'GPU_or_model_execution'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-06T19:12:47.599254+00:00",
+    "hostname": "dl04-MS-7E06",
+    "proc_samples": [
+      {
+        "at": "2026-11-06T19:12:45.504880+00:00",
+        "pid_exists": false,
+        "stat": null
+      },
+      {
+        "at": "2026-11-06T19:12:46.505141+00:00",
+        "pid_exists": false,
+        "stat": null
+      },
+      {
+        "at": "2026-11-06T19:12:47.505422+00:00",
+        "pid_exists": false,
+        "stat": null
+      }
+    ],
+    "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 98, 32607, 0",
+    "contexts": "",
+    "locks": [
+      {
+        "kind": "training",
+        "dev": 66308,
+        "ino": 92537152,
+        "available": true
+      },
+      {
+        "kind": "diagnostic",
+        "dev": 66308,
+        "ino": 92537153,
+        "available": true
+      },
+      {
+        "kind": "exclusive",
+        "dev": 66308,
+        "ino": 92537154,
+        "available": true
+      }
+    ],
+    "project_trainers": [],
+    "log": "/data/songcl/Project/Cluster_project/Cluster_psc_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc_20261107_020327.log",
+    "log_bytes": 1681008,
+    "log_mtime_utc": "2026-11-06T18:46:56.833353+00:00",
+    "scan_full_log": true,
+    "scan_bytes": 1681008,
+    "validation_count": 0,
+    "native_logged_validation_values": [],
+    "native_logged_best": null,
+    "noimp": 0,
+    "exact_checkpoint_best": null,
+    "last_native_pairs": [
+      [
+        2,
+        983
+      ],
+      [
+        2,
+        983
+      ],
+      [
+        2,
+        984
+      ],
+      [
+        2,
+        984
+      ]
+    ],
+    "traceback_lines": [
+      "Train[2/50]:  21%|████▏               | 984/4686 [07:12<26:38,  2.32it/s, lr=9.4e-05, eta=1 day, 3:56:15, iter_time=0.44]Traceback (most recent call last):",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_psc_20261106/tools/train.py\", line 515, in <module>",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/core/launch.py\", line 68, in launch",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_psc_20261106/tools/train.py\", line 476, in main",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_psc_20261106/tools/train.py\", line 105, in train",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/dataloader.py\", line 734, in __next__",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/dataloader.py\", line 1516, in _next_data",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/dataloader.py\", line 1551, in _process_data",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_utils.py\", line 769, in reraise",
+      "TypeError: Caught TypeError in DataLoader worker process 0.",
+      "Original Traceback (most recent call last):",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py\", line 349, in _worker_loop",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\", line 52, in fetch",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\", line 52, in <listcomp>",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_psc_20261106/framework/dataset/scannetv2.py\", line 376, in __getitem__",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_psc_20261106/framework/dataset/scannetv2.py\", line 346, in get_sp_label",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_tensor.py\", line 1069, in unique",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_jit_internal.py\", line 627, in fn",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_jit_internal.py\", line 627, in fn",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/functional.py\", line 1102, in _return_output",
+      "TypeError: 'NoneType' object is not callable"
+    ],
+    "early_stop_marker": false,
+    "tail_sha256": "ad926bb8fde9b2a828eedbe60089f04f1f722150fd39c6e46f7dbe9473059edb",
+    "signals_sent": false,
+    "GPU_or_model_execution": false
+  }
+}

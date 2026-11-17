@@ -1,0 +1,35 @@
+{
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "scope": "Prospective post-training evaluation, frozen before any candidate optimizer step; no admission waiver.",
+  "training": {
+    "seed": 1999,
+    "epochs": 50,
+    "max_iters": 70,
+    "batch_size": 2,
+    "workers": 4,
+    "initialization": "Original configured sp_unet_backbone.pth; frozen M95 diagnostic weights are not candidate training initialization.",
+    "schedule_and_early_stop": "Existing project and queue policy unchanged; no seed, schedule or hyperparameter search."
+  },
+  "primary": {
+    "dataset": "ScanRefer",
+    "split": "Existing fixed native validation split; no test-set mechanism selection.",
+    "metric": "Native mIoU, same evaluator and checkpoint rule as project baseline/champion.",
+    "target": 0.51,
+    "historical_baseline": 0.4894,
+    "historical_M95": 0.5020,
+    "comparability": "Historical scalar results alone do not produce paired uncertainty. Re-evaluate matched reference predictions when available; otherwise mark pairwise uncertainty unknown."
+  },
+  "uncertainty": {
+    "sampling_unit": "scene, not expression",
+    "interval": "Scene-clustered paired interval on full validation predictions, with actual expression and independent-scene denominators; insufficient or degenerate support remains inconclusive.",
+    "noise_floor": "UNKNOWN until independent repeats or an appropriate paired reference are available; do not invent a fixed numerical noise threshold."
+  },
+  "subgroups": [
+    "Native official unique/multiple labels only where evaluator metadata is available; otherwise unknown.",
+    "Target has versus lacks a cross-fine-leaf physical contact, defined from fixed geometry and evaluation GT only; never used for inference routing or candidate selection."
+  ],
+  "material_harm_rule": "For a supported subgroup, investigate paired mIoU degradation of at least 0.002 with scene-clustered interval wholly below zero and larger than an independently estimated noise floor. If the floor, paired reference or adequate scenes are unavailable, harm is inconclusive, not PASS. A single adverse scene triggers diagnosis, not automatic rejection.",
+  "resources": "Original uniform counted FLOPs<=10G; report matched latency median/P90 and allocated/reserved peaks. Peak memory +15% requires at least +0.003 trained mIoU under the existing rule. Full optimizer peak is unknown until measured.",
+  "claims": "Pre-training controls establish implementation and causal path, not trained efficacy, publication novelty or generalization.",
+  "forbidden_changes": "No gate, precision, tolerance, operator, data, seed, schedule, scheduler, historical evidence or permission waiver."
+}

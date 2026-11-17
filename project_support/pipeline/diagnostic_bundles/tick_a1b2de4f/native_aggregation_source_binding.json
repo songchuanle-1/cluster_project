@@ -1,0 +1,21 @@
+{
+  "started_at": "2026-10-19T20:32:45.452656+00:00",
+  "finished_at": "2026-10-19T20:32:48.585156+00:00",
+  "returncode": 0,
+  "stdout": "{\"observed_at\": \"2026-10-19T20:32:48.705358+00:00\", \"torch_version\": \"2.8.0+cu128\", \"torch_scatter_version\": \"2.1.2\", \"scatter_source_path\": \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/scatter.py\", \"scatter_source_sha256\": \"ff6a3fc29e3461675986fb73a3a82f6a76c264adc4dd3e6d1dbd01e8d0f11be2\", \"atomic_nondeterminism_documented\": true, \"source_excerpt\": \"\\n        This operation is implemented via atomic operations on the GPU and is\\n        therefore **non-deterministic** since the order of parallel operations\\n        to the same value is undetermined.\\n        For floating-point variables, this results in a source of variance in\\n        the result.\\n        This operation is implemented via atomic operations on the GPU and is\\n        therefore **non-deterministic** since the order of parallel operations\\n        to the same value is undetermined.\\n        For floating-point variables, this results in a source of variance in\\n        the result.\\n\", \"model_source_sha256\": \"7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f\", \"actual_aggregate_cluster\": \"def aggregate_cluster(feats, cluster_ids, pool_type='mean'):\\n    if cluster_ids.numel() == 0:\\n        return feats\\n    K = int(cluster_ids.max().item()) + 1\\n    if pool_type == 'max':\\n        return scatter_max(feats, cluster_ids, dim=0, dim_size=K)[0]\\n    return scatter_mean(feats, cluster_ids, dim=0, dim_size=K)\", \"cuda_initialized\": false, \"gpu_kernel_replays\": 0, \"scope\": \"Installed native source documents atomic nondeterminism;consistent with observed1.907e-6 reaggregation mismatch,but does NOT isolate or prove its cause. Original1e-6gate remains FAILED;no numerical threshold or native model changed.\"}\n",
+  "stderr": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "data": {
+    "observed_at": "2026-10-19T20:32:48.705358+00:00",
+    "torch_version": "2.8.0+cu128",
+    "torch_scatter_version": "2.1.2",
+    "scatter_source_path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch_scatter/scatter.py",
+    "scatter_source_sha256": "ff6a3fc29e3461675986fb73a3a82f6a76c264adc4dd3e6d1dbd01e8d0f11be2",
+    "atomic_nondeterminism_documented": true,
+    "source_excerpt": "\n        This operation is implemented via atomic operations on the GPU and is\n        therefore **non-deterministic** since the order of parallel operations\n        to the same value is undetermined.\n        For floating-point variables, this results in a source of variance in\n        the result.\n        This operation is implemented via atomic operations on the GPU and is\n        therefore **non-deterministic** since the order of parallel operations\n        to the same value is undetermined.\n        For floating-point variables, this results in a source of variance in\n        the result.\n",
+    "model_source_sha256": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f",
+    "actual_aggregate_cluster": "def aggregate_cluster(feats, cluster_ids, pool_type='mean'):\n    if cluster_ids.numel() == 0:\n        return feats\n    K = int(cluster_ids.max().item()) + 1\n    if pool_type == 'max':\n        return scatter_max(feats, cluster_ids, dim=0, dim_size=K)[0]\n    return scatter_mean(feats, cluster_ids, dim=0, dim_size=K)",
+    "cuda_initialized": false,
+    "gpu_kernel_replays": 0,
+    "scope": "Installed native source documents atomic nondeterminism;consistent with observed1.907e-6 reaggregation mismatch,but does NOT isolate or prove its cause. Original1e-6gate remains FAILED;no numerical threshold or native model changed."
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "owner": {
+    "token": "c1fe217800894083b65baac45f79aa83",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-14T01:52:47.538159+00:00",
+    "deadline_at": "2026-11-14T02:52:47.538159+00:00",
+    "context_sha256": "e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4",
+    "pending_sha256": "3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6"
+  },
+  "recorded_at": "2026-11-14T02:11:34.558747+00:00",
+  "kind": "LOCAL_CHECKER_REPRODUCTION_OF_ROOT_REPORTED_GENERATION_FAILURE",
+  "generator": {
+    "path": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_c1fe2178\\cso_version_binding\\generate_version_binding.py",
+    "sha256": "4ca3209184c9efbba14b4ced40f2bfb80eb1a6894607a1f6ef9034e821f3ea63"
+  },
+  "actual": {
+    "path": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_c1fe2178\\cso_native_execution\\run_smoke_candidate_actual.json",
+    "sha256": "5742aefcb821789ec3778b56f82ffe9a970808c51d45875f71ba9e58995e6753"
+  },
+  "error_type": "KeyError",
+  "error": "'forward'",
+  "traceback": "Traceback (most recent call last):\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_c1fe2178\\cso_version_binding\\prepare_version_binding_v2.py\", line 56, in <module>\n    v1_code['check_smoke'](smoke)\n    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_c1fe2178\\cso_version_binding\\generate_version_binding.py\", line 143, in check_smoke\n    require(len(r[key]) == 2 and [v['forward'] for v in r[key]] == [1, 2], 'Missing two natural observations: ' + key)\n                                  ~^^^^^^^^^^^\nKeyError: 'forward'\n",
+  "root_reported_execute_result": "FAIL_CLOSED_NO_ADMISSION KeyError:forward; no derived outputs",
+  "reproduction_scope": "Direct check_smoke on immutable saved real actual; no generate/SSH/Torch/model replay",
+  "root_execute_returncode_reported": 1,
+  "scientific_admission": false,
+  "derived_outputs_present": []
+}

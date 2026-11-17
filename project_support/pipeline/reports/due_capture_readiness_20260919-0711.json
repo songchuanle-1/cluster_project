@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "scope": "Capacity-only retry plus CPU-side dual-balance matched-control derivation; no model forward, native capture, training, queue mutation, or efficacy claim",
+  "timestamp": "2026-09-19T07:12:00+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T07:10:43+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_snapshot_progress": {
+    "observed_at": "2026-09-19T07:07:11+08:00",
+    "source": ".tick_context preflight",
+    "epoch": 21,
+    "total_epochs": 50,
+    "best_miou": 0.491,
+    "no_improve": 0,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T07:10:43+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. The frozen registry, object-capture adapter, native-expression producer, query-coverage control, and dual-balance contract are implemented, but native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T08:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "attempted_alternatives": [
+    "Queried the live GPU7 process table and memory without touching any process.",
+    "Identified object extent as a second plausible best-of-k confounder not controlled by query-count matching alone.",
+    "Persisted each object's native support size in the frozen object-rank capture contract.",
+    "Predeclared a descriptive dual-balanced subset requiring exact query-count and object-support-size matches.",
+    "Ran all 40 producer, object-rank, evaluator, coverage, and dual-balance tests; kept native capture unlaunched."
+  ],
+  "native_capture_launched": false,
+  "static_research_progress": {
+    "status": "implemented_and_tested_this_tick",
+    "finding": "Exact query-count matching controls the number of scores available to each object, but it does not control object extent. The frozen capture now records support size, and the audit predeclares a stricter dual-balanced subset before native scores exist.",
+    "coverage_gate": {
+      "min_exact_match_rate": 0.75,
+      "max_mean_abs_coverage_delta": 1.0,
+      "min_matched_scenes": 2,
+      "consequence_if_not_met": "Do not promote the all-candidate rank contrast; retain the exact-coverage matched contrast as diagnostic evidence."
+    },
+    "support_balance_control": {
+      "status": "secondary_sensitivity_control_not_admission_gate",
+      "match_fields": [
+        "native_query_count",
+        "object_support_size"
+      ],
+      "consequence": "Report the dual-balanced subset and paired contrast; never replace or promote it over the primary exact-coverage result."
+    },
+    "source_hashes": [
+      {
+        "path": "scripts/referent_object_rank_capture_20260919.py",
+        "sha256": "a955fde13ffc08e6ffe0b856061702fa8f376d296fd1f375bcdc7c969aca77d7"
+      },
+      {
+        "path": "scripts/referent_query_coverage_control_20260919.py",
+        "sha256": "6ee89fe7493b448cdd67d65c3a3164b1ea1658dbcd5a5a7c67e67c2cb453ce95"
+      },
+      {
+        "path": "scripts/test_referent_object_rank_capture_20260919.py",
+        "sha256": "f779348734b2395aec5c0a70814a85b38471fe295ec78d724fec8b459dd04d7f"
+      },
+      {
+        "path": "scripts/test_referent_query_coverage_control_20260919.py",
+        "sha256": "62cc28f5e6e8af76bda2d94a36b695f975e53426088e1e336f7c0b8f892e6220"
+      }
+    ]
+  },
+  "cpu_validation": {
+    "status": "passed_this_tick",
+    "command": "python -m unittest test_referent_native_expression_producer_20260919 test_referent_object_rank_capture_20260919 test_referent_target_rank_evaluator_20260919 test_referent_query_coverage_control_20260919",
+    "tests_passed": 40,
+    "tests_failed": 0,
+    "suites": [
+      {
+        "path": "scripts/test_referent_native_expression_producer_20260919.py",
+        "sha256": "ab7bced707570737594000a2f8748bff8103d1549f508e30a8a7dfca194ce73d"
+      },
+      {
+        "path": "scripts/test_referent_object_rank_capture_20260919.py",
+        "sha256": "f779348734b2395aec5c0a70814a85b38471fe295ec78d724fec8b459dd04d7f"
+      },
+      {
+        "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+        "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f"
+      },
+      {
+        "path": "scripts/test_referent_query_coverage_control_20260919.py",
+        "sha256": "62cc28f5e6e8af76bda2d94a36b695f975e53426088e1e336f7c0b8f892e6220"
+      }
+    ]
+  }
+}

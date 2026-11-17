@@ -1,0 +1,18 @@
+{
+  "recorded_at": "2026-10-16T10:14:50.269217+00:00",
+  "hypothesis": "Native current-run validation and checkpoint artifacts preserve enough identity, best/patience, model/optimizer/scheduler state for the frozen evaluation and native end-of-epoch resume; absent fields are evidence gaps, not zeros or efficacy failures.",
+  "matched_control": "Frozen evaluation plan plus actual native saver/resume source; positive schema fixture versus one-required-field-deleted controls. Compare completed native metrics to stable checkpoint meta without rerunning prediction or changing training.",
+  "tests": [
+    "Strict host/GPU UUID/PID/flock and increasing native progress",
+    "Parse only this run native scalar validation records and current artifacts",
+    "Read only stable current-run checkpoint on CPU and inspect resume fields against actual provider",
+    "AST audit native persistence sinks for per-expression/scene-level evaluation readiness",
+    "Positive/negative schema fixtures detect missing state/scene identity"
+  ],
+  "no_authorized_change": "No training restart/stop, code/config/environment/goal/scheduler modification, extra GPU allocation, model revision or effect-based selection. Checkpoint tensor arrays stay remote, no GPU deserialization.",
+  "plan": {
+    "path": "pipeline/designs/exp_design_20261016_hier_support_admitted.md",
+    "sha256": "e03b138638da520f1a873e81e2ee501a2f3b18bc5545c98aed9fc9c4127f1fca"
+  },
+  "scope": "Operational/scientific-evidence readiness diagnosis; not a new model or queue variant."
+}

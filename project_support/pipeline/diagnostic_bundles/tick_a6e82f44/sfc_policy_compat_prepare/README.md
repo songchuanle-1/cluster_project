@@ -1,0 +1,11 @@
+# SFC resource-policy compatibility copy
+
+Only this new private operational origin changes. Original SFC native173e, worker edbe, source9/protocolc651, runtime1d635 and prior op packet remain byte-identical. Selected compute capability is still physicalGPU0. Global live whitelist is now exact[0,1], currentSERVERS19b and new human resourcegrant6529; old GPU0 grant940 remains immutable history.
+
+The adapter distinguishes POLICY_GPU_UUIDS0+1 from compute GPU_UUIDS0. It validates both live policy UUIDs and exact[0,1]/max_tasks_per_gpu1, but every probe/prepare/binding/remote selected-card predicate still permits only0. Original native runtime already knows UUID0+1 and separately hardasserts physical0, so unchanged prepare/binding places liveallowed[0,1] into manifest/lease/server_binding. No native modification or artificial diagnostic-subset rewrite occurs.
+
+The only changed method ASTs are Adapter.guard (new resourcegrant/SERVERS hash and exact live policy) and Adapter._local_idle (recognize a legitimate active GPU1 assignment without treating it as selectedGPU0 occupancy; unknown/bool/malformed assignments still refuse). All other adapter functions and entire remote_ops bytes remain unchanged: original owner/thread/context/deadline, exact source/native assets, genuine FCB parent technical receipt, UUID+idle checks, three locks, four arms, durable requests, no blind replay and readonly reconciliation remain intact. No FCB training completion/accuracy gate exists.
+
+release_template is a new static source catalogue, not a lease/grant. adapter_release is not created; root must independently review and externally anchor the new preparation/release before any entry can transport. Current actual raw/native/resources are NOT_RUN. No active directory/binding/lease/request or GPU/remote/Git/shared action was created. Initial private guard-only WIP/source/release/provenance bytes are retained before the necessary other-card reservation parsing addition; original frozen files were never edited.
+
+Static validation uses only AST/hash/compile and isolated actual policy predicate/queue-loop fragments with local dictionaries. It does not import/call Adapter/native entries, Torch, old software suites or remote code. Original native fullhashmap is checked for byte preservation; no model/protocol/function body is rewritten.

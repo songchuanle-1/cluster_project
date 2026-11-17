@@ -1,0 +1,342 @@
+"""Current-owner stdlib supervisor for one no-write CPU dataset constructor."""
+from datetime import datetime, timezone
+from pathlib import Path
+import ast
+import hashlib
+import json
+import os
+import socket
+import shutil
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {'token': '51fe22452ecf43a390b8cfa6fddbc733', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-09T23:11:05.069988+00:00', 'deadline_at': '2026-11-10T00:11:05.069988+00:00', 'context_sha256': '482c41f2754c8b9c3b32d723704c68b51226b580d9df3580089980943a2a9b8b', 'pending_sha256': 'f5c034a4857e02d924d8af70181e8cbc3a7326853317a733843068a2f96993d4'}
+GLOBAL_STOP = None
+ROOT = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+PYTHON = Path("/home/songcl/.conda/envs/project_cluster/bin/python")
+CARRIER_SHA256 = "996d2ce8f80c99f5dd8fe0805b4f99461d28b76bdc11736ee64a8c68d98f4aa5"
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+    if GLOBAL_STOP is not None:
+        assert time.monotonic() < GLOBAL_STOP, "GLOBAL_SOFT_BUDGET_BEFORE_NEXT_OPERATION"
+
+
+def hash_file(path):
+    info = os.lstat(path)
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001 and info.st_size <= 256 * 1024 * 1024
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for value in iter(lambda: stream.read(65536), b""):
+            pin()
+            digest.update(value)
+    after = os.lstat(path)
+    assert (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) == (
+        after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+    return digest.hexdigest()
+
+
+def identity(pid):
+    try:
+        return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return None
+
+
+def tail(fd, maximum):
+    size = os.fstat(fd).st_size
+    return os.pread(fd, min(size, maximum), max(0, size - maximum)).decode("utf-8", "replace")
+
+
+def observe(argv, environment, payload, seconds, global_stop, label, pass_fds=(), capture_pair=None):
+    pin()
+    if capture_pair is None:
+        out = os.memfd_create("constructor_supervisor_stdout", os.MFD_CLOEXEC)
+        err = os.memfd_create("constructor_supervisor_stderr", os.MFD_CLOEXEC)
+    else:
+        out, err = capture_pair
+    process = subprocess.Popen(argv, cwd=str(ROOT), env=environment,
+                               stdin=subprocess.PIPE, stdout=out, stderr=err, pass_fds=pass_fds)
+    PROCESSES.append(process)
+    start = identity(process.pid)
+    if payload is not None:
+        encoded = json.dumps(payload).encode()
+        assert len(encoded) <= 16384
+        process.stdin.write(encoded)
+    process.stdin.close()
+    until = min(global_stop, time.monotonic() + seconds)
+    while process.poll() is None and time.monotonic() < until:
+        time.sleep(0.02)
+    returncode = process.poll()
+    stdout = tail(out, 65536)
+    records = []
+    for line in stdout.splitlines():
+        try:
+            records.append(json.loads(line))
+        except ValueError:
+            pass
+    result = {"label": label, "pid": process.pid, "start_ticks": start,
+              "certainty": "terminal" if returncode is not None else "uncertain",
+              "returncode": returncode, "stdout_bytes": os.fstat(out).st_size,
+              "stderr_bytes": os.fstat(err).st_size,
+              "records": records[-32:], "faulthandler_stderr_tail": tail(err, 3072),
+              "stderr_truncated": os.fstat(err).st_size > 3072, "signals_sent": False}
+    if returncode is None:
+        result["reason"] = "SOFT_TIMEOUT_PRESERVE_PID_NO_RETRY"
+        result["output_FDs_if_process_remains"] = [f"/proc/{process.pid}/fd/1", f"/proc/{process.pid}/fd/2"]
+    else:
+        os.close(out)
+        os.close(err)
+    return result, stdout
+
+
+def small(path):
+    pin()
+    try:
+        with Path(path).open("r") as stream:
+            value = stream.read(8193)
+        assert len(value) <= 8192
+        return value.strip()
+    except FileNotFoundError:
+        return None
+
+
+def host_snapshot():
+    meminfo = small("/proc/meminfo")
+    available = next(int(row.split()[1]) * 1024 for row in meminfo.splitlines()
+                     if row.startswith("MemAvailable:"))
+    membership = small("/proc/self/cgroup")
+    group = next((row.split(":", 2)[2] for row in membership.splitlines() if row.startswith("0::")), None)
+    result = {"mem_available_bytes": available, "loadavg": small("/proc/loadavg"),
+              "cpu_affinity": sorted(os.sched_getaffinity(0)), "cgroup_membership": membership,
+              "constructor_minimum_headroom_bytes": 4 * 1024 ** 3,
+              "four_worker_budget_PASS": False, "GPU_resource_admission": False}
+    shm = os.statvfs("/dev/shm")
+    result["dev_shm_available_bytes"] = shm.f_bavail * shm.f_frsize
+    result["cgroup_ancestors"] = []
+    adequate = available >= 4 * 1024 ** 3 and bool(result["cpu_affinity"])
+    if group is None:
+        result["capacity_ambiguity"] = "NO_CGROUP_V2_MEMBERSHIP"
+        adequate = False
+    else:
+        root = Path("/sys/fs/cgroup")
+        current = (root / group.lstrip("/")).resolve()
+        assert current.is_relative_to(root)
+        for _ in range(16):
+            row = {"path": str(current), **{name: small(current / name) for name in (
+                "memory.max", "memory.high", "memory.current", "cpu.max", "pids.max", "pids.current",
+                "cpuset.cpus.effective")}}
+            usage = row["memory.current"]
+            if row["memory.max"] is None and current == root:
+                row["root_limit_note"] = "NO_ROOT_MEMORY_MAX_FILE; PHYSICAL_HOST_MEMAVAILABLE_GATE_RETAINED"
+            elif row["memory.max"] is None or usage is None:
+                adequate = False
+                row["capacity_ambiguity"] = "MEMORY_CONTROLLER_LIMIT_OR_USAGE_NOT_EXPOSED"
+            else:
+                for key in ("memory.max", "memory.high"):
+                    value = row[key]
+                    if value is not None and value != "max":
+                        adequate = adequate and int(value) - int(usage) >= 4 * 1024 ** 3
+            result["cgroup_ancestors"].append(row)
+            if current == root:
+                break
+            current = current.parent
+        else:
+            raise AssertionError("CGROUP_ANCESTOR_COUNT_BOUND")
+    result["single_constructor_headroom_snapshot_sufficient"] = adequate
+    return result
+
+
+def read_source(path, maximum=262144):
+    pin()
+    with Path(path).open("rb") as stream:
+        raw = stream.read(maximum + 1)
+    assert len(raw) <= maximum
+    return raw, ast.parse(raw.decode("utf-8"), filename=str(path))
+
+
+def readonly_helper_preflight(environment, observation):
+    platform = Path("/home/songcl/.conda/envs/project_cluster/lib/python3.10/platform.py")
+    raw, tree = read_source(platform)
+    functions = [node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "from_subprocess"]
+    assert len(functions) == 1
+    node = functions[0]
+    observation["platform_from_subprocess_source_before_validation"] = {
+        "path": str(platform), "sha256": hashlib.sha256(raw).hexdigest(),
+        "start": node.lineno, "end": node.end_lineno,
+        "complete_source": "\n".join(raw.decode("utf-8").splitlines()[node.lineno-1:node.end_lineno])}
+    calls = [call for call in ast.walk(node) if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute)
+             and isinstance(call.func.value, ast.Name) and call.func.value.id == "subprocess"
+             and call.func.attr == "check_output"]
+    assert len(calls) == 1 and ast.literal_eval(calls[0].args[0]) == ["uname", "-p"]
+    keywords = {item.arg: item.value for item in calls[0].keywords}
+    assert set(keywords) <= {"stderr", "text", "encoding"}
+    assert isinstance(keywords.get("stderr"), ast.Attribute) and keywords["stderr"].attr == "DEVNULL"
+    assert isinstance(keywords["stderr"].value, ast.Name) and keywords["stderr"].value.id == "subprocess"
+    assert ast.literal_eval(keywords["text"]) is True
+    assert "encoding" not in keywords or ast.literal_eval(keywords["encoding"]) in ("utf8", "utf-8")
+    assert node.end_lineno - node.lineno < 80
+    binary = Path(shutil.which("uname", path=environment.get("PATH")))
+    assert binary.resolve() == Path("/usr/bin/uname")
+    binary = binary.resolve()
+    info = os.lstat(binary)
+    assert stat.S_ISREG(info.st_mode) and info.st_uid == 0 and not info.st_mode & 0o6022 and info.st_size <= 1048576
+    with binary.open("rb") as stream:
+        digest = hashlib.sha256(stream.read(1048577)).hexdigest()
+    null = os.lstat("/dev/null")
+    assert stat.S_ISCHR(null.st_mode) and null.st_rdev == os.makedev(1, 3)
+    policy = {"path": str(binary), "sha256": digest,
+              "identity": [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns],
+              "platform_path": str(platform), "platform_sha256": hashlib.sha256(raw).hexdigest()}
+    sections = []
+    site = Path("/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages")
+    for relative in ("gorilla/__init__.py", "gorilla/core/__init__.py", "gorilla/config.py",
+                     "gorilla/core/config.py", "gorilla/utils/config.py", "mmcv/utils/config.py"):
+        path = site / relative
+        try:
+            content, syntax = read_source(path)
+        except FileNotFoundError:
+            sections.append({"path": str(path), "outcome": "NOT_PRESENT_CANDIDATE"})
+            continue
+        lines = content.decode("utf-8").splitlines()
+        selected = [(i + 1, line) for i, line in enumerate(lines) if any(term in line for term in (
+            "Config", "fromfile", "_file2dict", "tempfile", "Temporary", "copy", "yaml", "safe_load", "mmcv", "import "))]
+        methods = []
+        for cls in [item for item in syntax.body if isinstance(item, ast.ClassDef) and "Config" in item.name]:
+            for method in cls.body:
+                if isinstance(method, ast.FunctionDef) and method.name in ("__init__", "fromfile", "_file2dict"):
+                    methods.append({"class": cls.name, "method": method.name, "start": method.lineno,
+                        "end": method.end_lineno, "complete": method.end_lineno - method.lineno < 220,
+                        "text": "\n".join(lines[method.lineno-1:min(method.end_lineno, method.lineno+219)])})
+        sections.append({"path": str(path), "sha256": hashlib.sha256(content).hexdigest(),
+                         "selected_lines": [{"line": i, "text": line[:320]} for i, line in selected[:120]],
+                         "selected_lines_truncated": len(selected) > 120, "methods": methods,
+                         "temporary_IO_terms_present": any(term in content.decode("utf-8") for term in (
+                             "TemporaryDirectory", "NamedTemporaryFile", "mkdtemp", "copyfile"))})
+    proof = {"policy": policy, "platform_from_subprocess_source": "\n".join(raw.decode("utf-8").splitlines()[node.lineno-1:node.end_lineno]),
+             "platform_source_start": node.lineno, "dev_null_character_device_rdev": [1, 3],
+             "config_adapter_source_readonly": sections, "config_loading_route": "UNCHANGED_gorilla.Config.fromfile_NO_ADAPTER_OR_MONKEYPATCH"}
+    pinfo = platform.stat()
+    guarded = [{"path": str(binary), "resolved": str(binary), "identity": policy["identity"]},
+               {"path": str(platform), "resolved": str(platform.resolve()),
+                "identity": [pinfo.st_dev, pinfo.st_ino, pinfo.st_size, pinfo.st_mtime_ns]}]
+    return policy, proof, guarded
+
+
+def main():
+    global GLOBAL_STOP
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NO_IMPORTS_OR_HELPERS"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    assert (datetime.fromisoformat(OWNER["deadline_at"]) - datetime.now(timezone.utc)).total_seconds() > 100
+    GLOBAL_STOP = time.monotonic() + 80
+    result = {"owner": OWNER, "kind": "CPU_READONLY_ORIGINAL_DATASET_CONSTRUCTOR_CACHE_COVERAGE",
+              "recorded_at": datetime.now(timezone.utc).isoformat(), "pid": os.getpid(),
+              "start_ticks": identity(os.getpid()), "signals_sent": False, "automatic_retry": False,
+              "workers_started": 0, "training_or_GPU_test": False, "maximum_soft_wall_seconds": 80,
+              "historical_fault_reproduced": False, "root_cause": "UNKNOWN"}
+    print(json.dumps({"stage": "supervisor_boot", "pid": os.getpid(),
+                      "start_ticks": result["start_ticks"]}), file=sys.stderr, flush=True)
+    try:
+        assert ROOT.resolve() == ROOT
+        source = payload["carrier_source"]
+        assert hashlib.sha256(source.encode()).hexdigest() == CARRIER_SHA256
+        pins = payload["pins"]
+        assert 1 <= len(pins) <= 24
+        lineage = payload["lineage"]
+        assert lineage["owner"] == OWNER and lineage["prior_actual_sha256"] == "7edcdca75ff567f30bbdd9b66e4e51eba8b571ef25d506377708d27e2ef6e8ed"
+        assert lineage["prior_pid_terminal"] is True and lineage["prior_guarded_identities_unchanged"] is True
+        prior = {item["path"]: item for item in lineage["prior_provenance"]}
+        result["prior_actual_sha256"] = lineage["prior_actual_sha256"]
+        assert lineage["v2_terminal_preflight_actual_sha256"] == "fa5a117073402596bab13c110e7ecb4f64d4127058ec10fab2356d442a38c0ff"
+        result["v2_terminal_preflight_actual_sha256"] = lineage["v2_terminal_preflight_actual_sha256"]
+        env = dict(os.environ)
+        env.update(CUDA_VISIBLE_DEVICES="", TOKENIZERS_PARALLELISM="false", PYTHONDONTWRITEBYTECODE="1",
+                   GIT_OPTIONAL_LOCKS="0", GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL="/dev/null",
+                   GIT_CONFIG_SYSTEM="/dev/null", HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1",
+                   HF_DATASETS_OFFLINE="1")
+        git, stdout = observe(["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+                               "-C", str(ROOT), "rev-parse", "HEAD"], env, None, 3, GLOBAL_STOP, "runtime_HEAD")
+        result["git"] = git
+        if git["certainty"] != "terminal" or git["returncode"] != 0:
+            result["status"] = "GIT_UNCERTAIN_OR_FAILED_NO_CARRIER"
+            return
+        assert stdout.strip() == "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e"
+        result["host_before_data"] = host_snapshot()
+        if not result["host_before_data"]["single_constructor_headroom_snapshot_sufficient"]:
+            result["status"] = "SINGLE_CONSTRUCTOR_RESOURCE_PREREQUISITE_BLOCKED"
+            return
+        guarded, proof = [], []
+        for item in pins:
+            path = Path(item["path"])
+            assert str(path.resolve()) == item["resolved"]
+            info = path.stat()
+            assert item["path"] in prior and prior[item["path"]]["sha256"] == item["sha256"]
+            assert [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns] == prior[item["path"]]["stat_identity"], "PRIOR_PROOF_STAT_CHANGED_NO_AUTOMATIC_REHASH"
+            digest = prior[item["path"]]["sha256"]
+            guarded.append({"path": str(path), "resolved": str(path.resolve()),
+                            "identity": [info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns]})
+            proof.append({"path": str(path), "sha256_reused_from_prior_actual": digest, "fresh_content_hash_computed": False, "stat_identity": guarded[-1]["identity"]})
+        result["current_source_cache_asset_provenance"] = proof
+        assert str(PYTHON.resolve()) == "/home/songcl/.conda/envs/project_cluster/bin/python3.10"
+        gpu, stdout = observe(["/usr/bin/nvidia-smi", "-i", "0", "--query-gpu=index,uuid",
+                               "--format=csv,noheader,nounits"], env, None, 5, GLOBAL_STOP, "GPU0_IDENTITY_INFORMATION_ONLY")
+        result["GPU0_identity_only"] = gpu
+        if gpu["certainty"] != "terminal" or gpu["returncode"] != 0:
+            result["status"] = "IDENTITY_UNCERTAIN_OR_FAILED_NO_CARRIER"
+            return
+        assert stdout.strip() == "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+        locks = []
+        for kind, inode in (("training", 92537152), ("diagnostic", 92537153), ("exclusive", 92537154)):
+            path = Path("/tmp/cluster_project_gpu0_" + kind + ".lock")
+            info = os.lstat(path)
+            assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001 and (info.st_dev, info.st_ino) == (66308, inode)
+            locks.append({"kind": kind, "dev": info.st_dev, "ino": info.st_ino, "stat_only": True})
+        result["original_lock_identity_stat_only"] = locks
+        helper_policy, helper_proof, helper_guards = readonly_helper_preflight(env, result)
+        result["readonly_helper_and_config_source_preflight"] = helper_proof
+        guarded.extend(helper_guards)
+        pair = [os.memfd_create("constructor_v1_" + kind, os.MFD_CLOEXEC) for kind in ("stdout", "stderr")]
+        carrier, _ = observe([str(PYTHON), "-B", "-c", source], env,
+                              {"role": "DATASET_CONSTRUCTOR_AND_CACHE_COVERAGE_ONLY", "capture_fds": pair,
+                               "guarded_files": guarded, "helper_policy": helper_policy,
+                               "config_path": str(ROOT / "configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml"),
+                               "stop_monotonic": min(GLOBAL_STOP, time.monotonic() + 60)},
+                              60, GLOBAL_STOP, "readonly_constructor_carrier", pass_fds=tuple(pair), capture_pair=pair)
+        result["carrier"] = carrier
+        completed = next((row for row in carrier["records"] if row.get("stage") == "constructor_result"), None)
+        blocked = next((row for row in carrier["records"] if row.get("stage") in (
+            "audit_blocked", "constructor_blocked", "forbidden_operation", "readonly_helper_uncertain")), None)
+        result["status"] = ("CARRIER_UNCERTAIN_NO_RETRY" if carrier["certainty"] != "terminal"
+                            else completed["status"] if completed else blocked["status"] if blocked
+                            else "CARRIER_FAILED_BEFORE_RESULT")
+        result["constructor_complete"] = bool(completed and carrier["returncode"] == 0)
+        result["readonly_helper_uncertain"] = any(row.get("stage") == "readonly_helper_uncertain" for row in carrier["records"])
+        after = []
+        for record in guarded:
+            info = os.stat(record["path"])
+            after.append({"path": record["path"], "identity_unchanged": record["identity"] == [
+                info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns]})
+        result["guarded_file_identity_after_observation"] = after
+        result["cache_semantics_sample_loading_and_historical_worker_fault_not_tested"] = True
+    except BaseException as error:
+        result.update(status="SUPERVISOR_BLOCKED_NO_RETRY", error_type=type(error).__name__, error=str(error)[:800])
+    finally:
+        result["finished_at"] = datetime.now(timezone.utc).isoformat()
+        encoded = json.dumps(result, ensure_ascii=True)
+        assert len(encoded.encode()) <= 1048576
+        print(encoded)
+
+
+if __name__ == "__main__":
+    main()
+
+

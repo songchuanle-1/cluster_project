@@ -1,0 +1,15 @@
+{
+  "origin_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/bfc_native_prepare/preparation.json",
+    "sha256": "727b89a23dedd97f152a557755133c73ce338c311689a716cc32c336e39259f4"
+  },
+  "origin_runtime_sha256": "13203cf2aa39fd91738296523f41327806e850e192dd419551f6e06148dd03aa",
+  "runtime_sha256": "f7cdf6e707723272d419b1e1e0047607613aa73db3f2342d049406df1c7f0d9d",
+  "worker_sha256": "8839251920577921493b0b663df123c330b850b08779c9841d1d98bbe26e813e",
+  "native_preparation_sha256": "0c50b957129c44367d63ade6984d997fa1e0a22c59469a2355542095d0f25cf5",
+  "manifest_template_sha256": "4d9caaab1e857fda73e9c2ef863ec815c2a81f26f128d614cb1368826e21ddb5",
+  "runtime_exact_diff": "--- \n+++ \n@@ -4,7 +4,7 @@\n The preparation bundle deliberately does not include native_manifest.json/lease.\n \"\"\"\n import re\n-DRAFT_EXECUTION_DISABLED = True\n+DRAFT_EXECUTION_DISABLED = False\n \n def require_promoted_version():\n     if DRAFT_EXECUTION_DISABLED or not isinstance(CANDIDATE_COMMIT, str) or re.fullmatch(r'[0-9a-f]{40}', CANDIDATE_COMMIT) is None or not isinstance(SOURCE_PREPARATION_SHA256,str) or re.fullmatch(r'[0-9a-f]{64}', SOURCE_PREPARATION_SHA256) is None:\n",
+  "only_runtime_literal_changed": true,
+  "actual_execution": "NOT_RUN",
+  "active_binding_lease": "NOT_CREATED"
+}

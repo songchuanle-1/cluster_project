@@ -1,0 +1,14 @@
+{
+  "actions": [
+    "上海2026-10-21 14:05 begin已查询进展并尝试派发已有队列；仅server4 GPU0容量1，running1、waiting1/ready1，无终态或运维问题，reserve_budget0/creation0。M205 Best=.4833、第13/50轮、no_improve0/10，仍为正常训练。",
+    "优先已有M206：独立只读复核原admission、两份resume证据hash及本地resume validator均通过；同M206 waiting/GPU0、无当前PID/launch_verified=false，固定epoch8完整checkpoint等待第9轮续训，没有冷启动。",
+    "14:07:04 pinned server4及GPU0 UUID核验，GPU0显存20510MiB/util80%，M205同PID3842306/cwd/argv/starttime全部一致；原生tqdm第13轮3843→3844/4686步递增，日志更新距查询0.10秒。还有CUDA context PID1858745，归属未核验，不干预。GPU0未空闲，M206不能启动。",
+    "首个只读观察脚本误把原生tools/train.py写成tools.train，断言停止且未做任何训练或资源变更；读取真实argv后在新v2证据中按精确路径修正并通过，原失败保留。M206固定checkpoint存在936269892bytes；本轮未重hash/载入，启动前仍须复核。",
+    "本轮resource_check/blocked绑定M206及当前tick；0新候选、0native诊断、0准入、0队列新增、0启动。HAP已备储备继续等待合法GPU0空槽，无新native结果。"
+  ],
+  "decisions": [
+    "仅GPU0的最新人类资源范围不变。保留M205和其他context，GPU0真正全空闲后优先同M206 native --resume epoch9，核验新PID/log/原生步数，严禁冷启动或转用GPU1。",
+    "当前正常训练与既有资源等待未发生需处理的变化，按通知约定静默；Best上升仍是早期训练观察，不宣称最终收益或超过历史champion。",
+    "准备预算0，不新建变体或重复HAP诊断，不重开旧hold、不改goal/资源/禁用项/调度。完整审计收尾以实际finish/receipt为准。"
+  ]
+}

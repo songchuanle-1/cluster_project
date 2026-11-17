@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T18:12:24.641570+00:00",
+  "reviewer": "/root/pce_audit",
+  "status": "EXISTING_RUN_DISPATCH_AND_PAUSE_BOUNDARIES_PRESERVED",
+  "owner": {
+    "token": "d6b400e39d1445bfbf165ca916876e5c",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-22T18:09:34.835902+00:00",
+    "deadline_at": "2026-10-22T19:09:34.835902+00:00"
+  },
+  "baseline": {
+    "path": "pipeline/diagnostic_bundles/tick_e2742b06/continuation_boundary_check.json",
+    "sha256": "76b2d108592dc9b703eafd8ea66dc0b3be536b51d59a7fd3fd1d76a43fa40e7f"
+  },
+  "current_four_records": {
+    "M206-CGCA": {
+      "candidate_stage": "blocked",
+      "training_status": "paused_by_user",
+      "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335"
+    },
+    "M207-HAP": {
+      "candidate_stage": "complete",
+      "training_status": "done_earlystop",
+      "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0"
+    },
+    "M208-HRC": {
+      "candidate_stage": "training",
+      "training_status": "running",
+      "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604"
+    },
+    "M209-PSBR": {
+      "candidate_stage": "deployment",
+      "training_status": "waiting",
+      "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604"
+    }
+  },
+  "HRC": {
+    "queue_status": "running",
+    "pid": 2780804,
+    "gpu": "0",
+    "launch_verified": true,
+    "root_actual_progress": {
+      "path": "pipeline/diagnostic_bundles/tick_d6b400e3/hrc_training_progress_observation.json",
+      "sha256": "58e73f3224afd3ad414e8ac231ff677a6dca071659f305bf28fbc955379480c9"
+    },
+    "root_reported_progress": "epoch8/50 steps3233-to3244; exact original PID/start/HEAD/GPU0 checked by root",
+    "reviewer_remote_query": "NOT_PERFORMED"
+  },
+  "PSBR": {
+    "status": "waiting",
+    "gpu": "0",
+    "pid": null,
+    "dispatch_hold": null,
+    "receipt": {
+      "path": "pipeline/admissions/M209-PSBR.json",
+      "sha256": "c85ae4fe82f83720330ca5b1bca176492bcc8fa82f9c2ddad98d49712c6416a2"
+    },
+    "standard_artifacts": [
+      {
+        "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_native_smoke.json",
+        "sha256": "72d5107a656caeb63091858c487f4ba25a61fa4f0f9e9625c9d85d5d0389936e"
+      },
+      {
+        "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_resource_comparison.json",
+        "sha256": "f36b64f1f71a023318af5655203c6d1d048dfe6920f5c5c92446c9e31ef6ef61"
+      },
+      {
+        "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_constraints_independence.json",
+        "sha256": "eb86ab81722a41a2b6142c56c8445b4a84a096bd460a0cbfe9a510ca65b4ab7f"
+      }
+    ],
+    "canonical_admission_readonly": true,
+    "canonical_error": null
+  },
+  "PSNC": {
+    "experiment_id": "M210-PSNC",
+    "code_commit": null,
+    "preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_e2742b06/psnc_prepare/preparation.json",
+      "sha256": "302432f1e2ba136576c4eb8a814a7ab3fb9596272304924b2a9db356074b49de"
+    },
+    "source_promotion": "NOT_DONE",
+    "native_backward": "NOT_RUN",
+    "resources": "NOT_RUN",
+    "external_worker_preparation_boundary": "Draft only; no executable commit may be inferred from baseline74f."
+  },
+  "local_source": {
+    "HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "index_empty": true,
+    "protected_status_count": 28,
+    "small_byte_hashed_count": 28,
+    "small_byte_hashed_total_bytes": 356497,
+    "larger_byte_checks_reused": 0,
+    "larger_paths": [],
+    "byte_scope": "Bounded fresh hashes of protected files<=64KiB. All28 protected files happen to satisfy this bound, so all28 bytes were verified; no larger-content scan."
+  },
+  "M206_manual_pause_unchanged": true,
+  "running_snapshot": {
+    "server-6": {},
+    "server-4": {
+      "0": "M208-HRC"
+    }
+  },
+  "checks": {
+    "current_owner_and_deadline": true,
+    "M206_exact_pause_task_preserved": true,
+    "HAP_archived_earlystop_not_resumed": true,
+    "HRC_registered_running_contract": true,
+    "PSBR_ready_waiting_not_started": true,
+    "PSBR_queue_task_exact_admitted_task": true,
+    "PSBR_receipt_unchanged": true,
+    "PSBR_summary:smoke": true,
+    "PSBR_summary_identity:smoke": true,
+    "PSBR_summary:resources": true,
+    "PSBR_summary_identity:resources": true,
+    "PSBR_summary:constraints": true,
+    "PSBR_summary_identity:constraints": true,
+    "PSBR_canonical_admission_readonly": true,
+    "readonly_admission_protected_records_unmodified": true,
+    "28_statuses_preserved": true,
+    "small_protected_byte_hashes_preserved": true,
+    "HEAD74f_index_empty": true,
+    "PSNC_remains_external_uncommitted": true,
+    "root_fresh_HRC_progress_proof_hash": true
+  },
+  "material_concerns": [],
+  "executed": {
+    "canonical_readonly_admission": true,
+    "SSH": false,
+    "torch": false,
+    "GPU": false,
+    "native_rerun": false,
+    "tests": false,
+    "old655_scan": false,
+    "shared_state_write": false
+  },
+  "write_scope": "Only this new report."
+}

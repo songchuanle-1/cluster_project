@@ -1,0 +1,594 @@
+arXiv:2103.01128v2 [cs.CV] 29 Jul 2021   InstanceRefer: Cooperative Holistic Understanding for Visual Grounding on
+                                                 Point Clouds through Instance Multi-level Contextual Referring
+
+                                        Zhihao Yuan1,, Xu Yan1,, Yinghong Liao1, Ruimao Zhang1, Sheng Wang2, Zhen Li1,*, Shuguang Cui1
+
+                                              1The Chinese University of Hong Kong (Shenzhen), Shenzhen Research Institute of Big Data
+                                                              2CryoEM Center, Southern University of Science and Technology
+
+                                                                            {zhihaoyuan@link., xuyan1@link., lizhen@}cuhk.edu.cn
+
+                                                                Abstract                               Input 3D Scan:  Instance-level candidate
+
+                                           Compared with the visual grounding on 2D images, the        Input Query:
+                                        natural-language-guided 3D object localization on point
+                                        clouds is more challenging. In this paper, we propose a        There is a gray and blue leather chair in the side of the wall. It is one of
+                                        new model, named InstanceRefer1, to achieve a superior         three next to each other and it the first on the left.
+                                        3D visual grounding through the grounding-by-matching
+                                        strategy. In practice, our model first predicts the target     Candidate only      Candidate and      Localization    Confident
+                                        category from the language descriptions using a simple                         neighboring instances   prediction       score
+                                        language classification model. Then based on the cate-
+                                        gory, our model sifts out a small number of instance candi-               +                        +                  = 95%
+                                        dates (usually less than 20) from the panoptic segmentation
+                                        on point clouds. Thus, the non-trivial 3D visual ground-        Attribute       Relation              Localization
+                                        ing task has been effectively re-formulated as a simpli-       Perception      Perception              Perception
+                                        fied instance-matching problem, considering that instance-
+                                        level candidates are more rational than the redundant 3D        gray, blue,    one of the three,      in the side of
+                                        object proposals. Subsequently, for each candidate, we           leather?      first on the left?       the wall?
+                                        perform the multi-level contextual inference, i.e., referring
+                                        from instance attribute perception, instance-to-instance re-   Figure 1. Multi-level contextual referring. For each instance-
+                                        lation perception, and instance-to-background global local-    level candidate, we match it with linguistic query from attribute,
+                                        ization perception, respectively. Eventually, the most rele-   local relation and global localization. The attribute, relation and
+                                        vant candidate is selected and localized by ranking confi-     localization descriptions are in orange, blue and green boxes.
+                                        dence scores, which are obtained by the cooperative holis-
+                                        tic visual-language feature matching. Experiments confirm      3D data. Unlike 2D images with regular and well-organized
+                                        that our method outperforms previous state-of-the-arts on      pixels, 3D data mostly comes in the form of point clouds,
+                                        ScanRefer online benchmark and Nr3D/Sr3D datasets.             which is sparse, irregular, and unordered. Therefore, pre-
+                                                                                                       vious 2D-based schemes are usually deficient for real 3D
+                                        1. Introduction                                                scenarios.
+
+                                           Visual grounding (VG), which aims at localizing the de-        Chen et al. [2] is the pioneer for visual grounding on
+                                        sired objects or areas in an image or a video based on an      point clouds. They propose the first dataset ScanRefer
+                                        object-related linguistic query, has achieved great progress   and solve the problem by extending the 2D grounding-by-
+                                        in the 2D computer vision community [12, 18, 29, 17, 19].      detection pipeline to 3D. Specifically, it first uses a 3D ob-
+                                        With the rapid development of 3D sensor and 3D represen-       ject detector [24] to generate hundreds of proposals. Then
+                                        tation, the VG task has gradually merged more informative      the feature of each proposal is merged with a global repre-
+                                                                                                       sentation of the linguistic query to predict a matching score.
+                                            * Corresponding author: Zhen Li.  Equal first authorship.  The proposal with the maximal score is considered as the
+                                            1 https://github.com/CurryYuan/InstanceRefer
+object we are looking for. However, it suffers from sev-         didate from attributes, local relations, and global localiza-
+eral issues when transferring the 2D method to 3D VG as          tion aspects jointly. 3) Experimental results on ScanRe-
+follows: 1) The object proposals in the large 3D scene are       fer and Sr3D/Nr3D datasets confirm the superiority of In-
+usually redundant. Compared with the actual instances, the       stanceRefer, which achieves state-of-the-arts on ScanRefer
+number of proposals is large and the inter-proposal relation-    benchmark and Nr3D/Sr3D dataset.
+ship is complex, which inevitably introduces noise and am-
+biguity. 2) The appearance and attribute information is not      2. Related Work
+sufficiently captured. Due to the noise and occlusion, the
+obtained point clouds are usually sparse and incomplete,         Visual Grounding on 2D Images. The task of visual
+leading to missing geometric details in object-aware pro-        grounding on images is to localize a specific area of the
+posals. Conventional point cloud-based methods fail to ef-       image described by a natural language query. Depending
+fectively extract the attribute information, e.g., red, gray,    on the type of language query, it can be further divided
+and wooden, which might ignore some vital linguistic cues        into phrase localization [12, 23, 29] and referring expres-
+for referring. 3) The relations among proposals and the ones     sion comprehension [20, 16, 30]. Most approaches conduct
+between proposals and background are not fully studied.          localization in the bounding box level and a two-stage man-
+                                                                 ner. The first stage is to generate candidate proposals with
+   To address the above issues, this paper investigates a        either unsupervised methods or a pre-trained object detec-
+novel framework, namely InstanceRefer, to achieve a su-          tion network. In the second stage, the best matching pro-
+perior visual grounding on point clouds with grounding-          posal is selected according to the language query. Such
+by-matching strategy. Specifically, via the global panop-        methods mainly focus on improving the ranking accuracy
+tic segmentation, our proposed model extracts several in-        of the second stage. MAttNet [35] proposes a modular at-
+stance point clouds from the original scene. These in-           tention network to decompose the language query to dif-
+stances are subsequently filtered by the predicted category      ferent components (i.e., subject appearance, location, and
+from the natural language descriptions, obtaining the candi-     relationship to other objects) and process them in different
+dates set. Compared with the object-proposal based candi-        modular networks separately. Inspired but different from
+dates [2], these filtered instance point clouds contain more     MAttNet, our work delves specifically into the characteris-
+original geometric and attribute details (i.e., color, texture,  tics of 3D point clouds, and each proposed module differs
+etc.) while maintaining a smaller number. We notice that         greatly from those in MAttNet.
+the recent work TGNN [10] also employs instance segmen-          Visual Grounding on 3D Point Clouds. Chen et al. [2]
+tation to reduce the difficulty of referring. However, they      releases the first 3D VG dataset ScanRefer, in which the
+directly exploit the learned semantic scores from the seg-       object bounding boxes are referred by their correspond-
+mentation backbone as the instance features, which suffer        ing language queries in an indoor scene. ReferIt3D [1]
+from the lossy geometric and attribute information. By           also proposes two datasets for 3D VG, Sr3D (labeled by
+comparison, our InstanceRefer applied filtered candidates        machine) and Nr3D (labeled by human). Different from
+and their original information for further referring. Thus,      ScanRefer, ReferIt3D assumes that all objects are well-
+it can not only reduce the number of the candidates, but         segmented, thus localization is not required. Very recently,
+also maintain each candidate's original information. Be-         TGNN [10] proposes a similar task called referring 3D in-
+sides, to fully comprehend the whole scene, multi-level con-     stance segmentation, which aims to segment out the target
+textual learning modules are further proposed, i.e., explic-     instance. It first extracts per-point features and predicts off-
+itly capturing the context of each candidate from instance       sets for object clustering. Then a Text-Guided Graph Neu-
+attributes, instance-to-instance relationships, and instance-    ral Network is applied to achieve more accurate referring.
+to-background global localization, respectively. Eventually,     However, TGNN fails to capture the attribute of instances
+with the well-designed matching module and contrastive           and instance-to-background relations. Goyal et al. [6] also
+strategy, InstanceRefer can efficiently and effectively select   presents a dataset named Rel3D for only grounding object
+and localize the target. In consequence, our model outper-       spatial relations. In this paper, we focus on the task of vi-
+forms previous methods by a large margin regardless of any       sual grounding on raw point clouds, which is extended from
+settings, i.e., exploiting any segmentation backbone.            ScanRefer and ReferIt3D.
+                                                                 3D Representation Learning on Point Clouds. Unlike 2D
+   In summary, the key contributions of this paper are as        images with regular grids, point clouds are irregular and of-
+follows: 1) We propose a new framework InstanceRefer for         ten sparsely-scattered. Recently, point-based models lever-
+visual grounding on point clouds, which exploits panop-          age the permutation invariant nature of raw point cloud for
+tic segmentation and language cues to select the instance        enhanced 3D processing [25, 26]. Specifically, most point-
+point clouds as candidates and re-formulates the task in         based models first sample sub-points from the initial point
+a grounding-by-matching manner. 2) Three novel compo-            clouds, then apply a feature aggregation function on each
+nents are proposed to select the most relevant instance can-
+       Description                 Word Embedding W                 Word Features E                             Attention                                (0.95)
+There is a gray and blue                                                                                        Pooling
+leather chair. Placed in a  GloVE                    BiGRU                                   Target                                         E^           (0.31)
+raw with other chairs in                                                                   Prediction                             Visual-language         ... ...
+
+   the side of the wall.                  Instance Mask I                                                                              matching          (0.03)
+                                                                                                                                                       Similarity
+   Input Point Cloud P                                              (Table)                                                                 F^ A       Score Q
+                                                                                                                                            F^ R
+                                                                                       "Chair"                                              F^ G
+
+                                                                    (Chair)                                                      RP GLP
+
+                               Panoptic                    extract  ... ...
+                            Segmentation
+                                                                                           filter                          AP
+                                                                    (Chair)            (chair only)    ... ...
+
+                                                                              (Chair)                                      P^ I  P^ I, PI P^ I, P, E^
+
+                                          Semantics S               Instances PI       Candidates P^ I                            Multi-Level
+                                                                                                                                 Visual Context
+
+Figure 2. The pipeline of InstanceRefer. It firstly uses the panoptic segmentation model to extract all the instance point clouds in the large
+
+3D scene. Under the guidance of target prediction from language description, the instances belonging to the target category are filtered out
+to form the initial candidates P^I . In parallel, the summarized language encoding E^ is achieved through attention pooling. Subsequently, a
+visual-language matching module outputs the similarity score Q through comparing multi-level visual perceptions (i.e., F^A, F^R, and F^G)
+against E^. Eventually, 3D bonding-box of the instance with the highest score is regarded as the final grounding result.
+
+sub-point in a local point cloud cluster after the grouping.        tion and the instance segmentation jointly. Taking a point
+The representatives of the point-based methods are graph-           cloud P  RN×3 and its features F  RN×D as in-
+based learning [31, 38, 15, 14] and convolution-like opera-         put, InstanceRefer returns two prediction sets, semantics
+tions [37, 28, 32, 8, 33]. With the development of the rep-         S  RN×1 and instance masks I  RN×1, recording the
+resentation learning on point clouds, various downstream            semantic class and the instance index of each point, respec-
+tasks related to visual grounding on point clouds have been         tively. Through the instance masks, InstanceRefer extracts
+explored rapidly, e.g., 3D object detection [24] and instance       instance point clouds from the original scene point clouds.
+segmentation [11].                                                  All instance point clouds in the foreground are represented
+                                                                    as P I = {PiI }iM=0, where PiI means the points of the i-th
+3. Method                                                           instance within the total M instances. Similarly, features
+                                                                    and semantics of all instances are denoted as F I and SI ,
+   InstanceRefer is a novel framework for point cloud VG,           respectively.
+which conducts the multi-level contextual referring to se-
+lect the most relevant instance-level object. As shown in           3.2. Description Encoding
+Figure 2, by exploiting point cloud panoptic segmentation,
+InstanceRefer first extracts instances with their semantic la-         Each token of the language description is first mapped
+bels from the whole scene (Sec. 3.1). Following that, the           into the 300d-vector via the pre-trained GloVE word em-
+sentences are embedded into a high-dimensional feature              bedding [22]. Then the whole sequence is fed into Bidirec-
+space, and a text classification is conducted as the linguistic     tional GRU layers [3] to extract the contextual word features
+guidance (Sec. 3.2). Finally, after filtering out the candi-        E = {ei}  RNw×D, where Nw is the query length and D
+dates from all instances, the three-level progressive refer-        is the feature dimension. The final language encoding is
+ring modules, i.e., attribute perception (AP) module, rela-         achieved through attention pooling. In practice, the atten-
+tion perception (RP) module, and global localization per-           tion pooling updates each word feature and aggregate them
+ception (GLP) module (Sec. 3.3), are employed to select             to a global representation by
+the optimal candidate.
+                                                                    e^i = AvgPool({Rel(ei, ej) ej,  ej  E}), (1)
+3.1. Instance Set Generation
+                                                                    E^ = MaxPool({e^i}Ni=w1),                                                                      (2)
+   Unlike ScanRefer [2] that selects the candidates from all
+object proposals, our framework first extracts all foreground       where the aggregation function AvgPool(·) and
+instances from the input point cloud to generate a set of           MaxPool(·) are set as average pooling and max pooling
+instances. Then, we re-formulate the 3D visual grounding            and a pairwise relationship function Rel(·) is the normal-
+problem as an instance-matching problem.                            ized dot-product similarity between features of two tokens,
+                                                                    and the sign represents the element-wise multiplication.
+   For this purpose, panoptic segmentation [13] is adopted          The feature of each token ei  E is first updated to e^i via
+in our model, which aims to tackle the semantic segmenta-           the aggregation of all token features weighted by relation.
+Then, the global representation of the query is obtained,                     ,P^iI F^iI                P^i I  N (P^iI , K )
+i.e., E^  R1×D. Furthermore, by appending an additional
+GRU layer and linear layer, InstanceRefer predicts the                     Voxelize               k-NN
+target category of the query by language features. This                                         instances
+output aids the model in subsequently filtering out the            SparseConv
+candidates from all instances.                                        Layers                              Graph
+                                                                                                      Construction
+3.3. Multi-Level Visual Context                                                  Average
+                                                                                  Pooling                    Edge rik
+   Before feeding the instances into the following modules,
+InstanceRefer first uses the predicted target category from                              F^i A     {'chair', 'tabel', relative position}
+the language encoder to filter candidates. For example, as           (a) AP module
+shown in Figure 2, regarding all instances extracted from                                             GCN and Max
+the original point cloud, we only keep the remaining in-                                                  Pooling
+stances belonging to the target category `chair'. Subse-
+quently, the corresponding point clouds and features of can-                                                           F^i R
+didates P^ I and F^ I are attained. Note that the target clas-                                  (b) RP module
+sification accuracy of language query is over 97%. Hence,
+the exploited filtering operation will not introduce obvious       Figure 3. The inner structure of AP and RP modules. Part (a)
+noise for further referring, while it can greatly boost the        illustrates the attribute perception (AP) module, which uses a four-
+grounding performance for the unique instance candidate            layer SparseConv to extract the global features of each candidate.
+scenario. Then, the filtered instances are compared with the       In part (b), the relation perception (RP) module aggregates the in-
+following multi-level visual context modules.                      formation of the candidate with its neighboring instances.
+AP Module. Considering there are many adjectives in
+a sentence (e.g., "a long bookshelf " for scale, "a brown          where C(·) is to choose center coordinates of instances, SiI
+chair" for color, "a square table" for shape, etc.), the at-       and SkI represent the semantic instance masks for the i-th
+tribute perception (AP) module is designed to explicitly           and k-th instances, respectively. MLP(·) denotes the multi-
+capture such information from attribute phrases. Con-
+cretely, the AP module takes the information of the i-th can-      layer perceptrons. The sign [·; ·] means the channel-wise
+didate, i.e., point cloud P^iI and its attribute features F^iI as
+input and generates a global representation vector FiA of the      concatenation. Through Eq. (3), the RP module considers
+candidate. As shown in Figure 3 (a), our model constructs a
+four-layer Sparse Convolution (SparseConv) [7] as the fea-         not only the relative positions but also the semantic relation-
+ture extractor. The extractor firstly voxelizes the point cloud
+into 3D voxels and then conducts the convolution operation         ships between the candidate and its neighbors. Eventually,
+only on non-empty voxels in a more efficient way. Subse-           the enhanced feature F^iR  R1×D for the i-th candidate can
+quently, through an average pooling, the feature representa-       be obtained by
+tion F^A  R1×D is obtained.
+                                                                   hik = MLP([PkI ; SkI ]),  PkI  N (P^iI , K), (4)
+RP Module. Since there are many descriptions about the
+relations between different instances, e.g., "The desk is be-      F^iR = MaxPool({rik hik}Kk=1),                                         (5)
+tween a black chair and bed", using only the attribute-
+related manner fails to capture such information. Therefore,       where N (P^iI , K) denotes the K nearest neighboring in-
+a relation perception (RP) module is proposed for the rela-        stances for P^iI , and hik is the unified representation of the
+tion encoding between the candidate and its surrounding in-        coordinate and the semantic instance mask for the k-th in-
+stances. Figure 3 (b) illustrates the design of the RP module.     stance. Note that the above MLP(·) have the same output
+Given the i-th candidate point cloud P^iI , the RP module first    dimensions with that in Eq. (3).
+searches K instance-level neighborhoods that have the clos-
+est Euclidean distance to the center of instance P^iI . Follow-    GLP Module. The global localization perception (GLP)
+ing that, a graph-based aggregation is employed to fuse the        module aims to supplement the background information
+features of local neighborhoods. To define the edge-relation       neglected by the two aforementioned modules. There are
+rij between the i-th candidate and the k-th neighboring in-        other descriptions about global localization information,
+stance, the RP module adopts the DGCNN [31]:                       e.g., "in the corner" and "next to the wall", but such infor-
+                                                                   mation cannot be included in the AP and RP modules. As
+rik = MLP([C(P^iI ) - C(PkI ); SiI ; SkI ]),  (3)                  shown in Figure 4, the GLP module takes the entire point
+                                                                   cloud as the input. By employing another SparseConv en-
+                                                                   coder, the module first extracts the point-wise features of
+                                                                   the entire scene. An average pooling in the height axis is
+                                                                   then performed to generate the bird-eyes-view (BEV) fea-
+                                                                   tures. Note that each input point cloud is divided into 3 × 3
+                                                                   areas in the BEV plane. By repeatedly concatenating the
+                                                                   language features E^ and then flowing through the MLPs,
+                      P      P^i I                                            3.5. Contrastive Objective
+
+               Voxelize                                            F^iG          For the objective function, we adopt a contrastive man-
+                                                                              ner to train our network. Here, we define an instance as a
+                                                       Attention              positive example for a query if its IoU with the GT object
+                                                       Pooling                bounding box exceeds the threshold , otherwise a negative
+                                                                              example. If there is no positive example for a query, we
+               SparseConv                           +                         do not compute its loss. Intuitively, the matching score of
+                  Layers                                                      positive pairs should be higher than negative pairs. Thus we
+                                        Candidate      Interpolated           derive our matching loss from [27] with the consideration
+        Pooling in                       features        features             of multiple positive examples as follows:
+          height
+                                    MLPs                 Interpolate
+               BEV features
+                                                   Localization               Lmat = -log       L         exp(Qi+)            ,  (7)
+                                                                                                i=1
+
+                                    E^              Prediction                             L    exp(Q+i ) +  M      exp(Qi-)
+                                                                                           i=1               i=L+1
+
+Figure 4. Illustration of GLP module. GLP module firstly pre-                 where Q+ and Q- denote the scores of positive and nega-
+                                                                              tive pairs, L and M are the numbers of positive candidates
+dicts the localization of the target in a 3 × 3 bird-eyes-view (BEV)          and total candidates in a scene, respectively. All candidates
+                                                                              are introduced to the optimization process.
+plane. It then uses the interpolated features and candidate features
+to generate the aggregated feature F^iG.                                         The language classification loss Lcls and the BEV local-
+                                                                              ization loss Lbev are also included for the joint target cat-
+the GLP module predicts the object candidate's location in                    egorization and localization prediction. The final loss is a
+                                                                              weighted sum of matching loss, including the object clas-
+one of the nine areas. Moreover, the probability of each area                 sification loss on the linguistic queries and the localization
+is interpolated into point clouds of the i-th candidate P^iI by               loss, L = Lmat + 1Lcls + 2Lbev, where 1 = 2 = 0.1
+                                                                              are the weights to adjust the ratios of each loss, respectively.
+                             n                                                The IoU threshold  is set as 0.3.
+
+               f^i,k = ||p^iI,k - acj ||2-1 · ajp,                       (6)
+
+                             j=1
+
+where p^iI,k  P^iI and f^i,k are the coordinates and interpo-                 4. Experiments
+lated features of the k-th point in the i-th candidate. n = 9
+represents the total number of areas, apj and ajc are the prob-                  In this section, we present the experimental procedures
+abilities of localization and center coordinates of j-th area                 and analysis in detail to demonstrate the effectiveness of our
+                                                                              InstanceRefer in 3D visual grounding.
+in the total nine areas, respectively. Finally, after concate-
+                                                                              4.1. Implementation
+nating interpolated features with candidate features, another
+                                                                                 In our experiment, we adopt the official pre-trained
+MLPs with max-pooling aggregates the features of the i-th                     PointGroup [11] as the backbone to perform the panop-
+candidate to a global representation F^iG.                                    tic segmentation. For language encoding, we employ the
+                                                                              same GloVE and BiGRU used in ScanRefer [2] to gener-
+3.4. Visual-Language Matching                                                 ate the word features in channel D = 256. The output
+                                                                              of self-attention preserves the identical 256 channels. The
+    With multi-level visual features of the candidates (i.e.,                 AP module consists of four 3D sparse convolution blocks,
+                                                                              each of which has two 3D sparse convolutions inside. Going
+F^  A   F^ R,  F^ G)  and    language     features  E^,  we     perform  a    deeper, we gradually increase the number of channels (i.e.,
+                                                                              32, 64, 128, 256). The GLP module applies the same struc-
+     ,                                                                        ture of the sparse convolution block but with fewer blocks
+                                                                              (i.e., 3 blocks with channel 32, 128, 256). In the RP module,
+matching operation to obtain the confidence score for each                    the kNN instance number K is 8, and the channel numbers
+                                                                              of two MLPs are (256, 256) and (256), respectively.
+instance. Considering the obtained multiple features, a sim-
+                                                                                 We train the network for 30 epochs by using the Adam
+ple scheme of pinpointing the referred target is to find the                  optimizer with a batch size of 32. The learning rate of the
+                                                                              network is initialized as 0.0005 with the decay as 0.9 for
+most relevant visual features to the linguistic ones through                  every 10 epochs. All experiments are implemented on Py-
+                                                                              Torch and a single NVIDIA 1080Ti GPU. We will release
+their similarities. However, this approach ignores the vary-                  our code and pre-trained model for future research.
+
+ing proportions for three perception modules. To tackle this
+
+issue, we utilize the modular co-attention from MCAN [36]
+
+to perform adaptive visual-language matching. For the i-th
+
+instance, we concatenate three visual features to the merged
+features F^i  R1×(D×3). Then, we further employ three co-
+
+attention layers to aggregate the language features to update
+
+the instance feature. Finally, the sigmoid activation function
+
+is exploited to output the instance score.
+Table 1. Comparison of localization results. TGNN replaces the original GRU layers with pre-trained BERT to extract language features.
+Our method follows TGNN's strategy of only taking coordinates (Geo) and color information (RGB) as input, while results of ScanRefer
+on benchmark are obtained by using additional normals (Nor) and multi-view features from a pre-trained 2D feature extractor. Scores for
+the test set are obtained from the online evaluation. Only the published methods are compared. Accessed on March 18, 2021.
+
+                                Unique                                 Multiple        Overall
+
+Method               Input      Acc@0.25 Acc@0.5 Acc@0.25 Acc@0.5 Acc@0.25 Acc@0.5
+
+                                Validation results
+
+SCRC [9]             RGB image  24.03                           9.22   17.77     5.97  18.70    6.45
+One-stage [34]       RGB image
+                                29.32                           22.82  18.72     6.49  20.38    9.04
+
+ScanRefer [2]        Geo + RGB  65.00                           43.31  30.63  19.75    37.30    24.32
+TGNN [10]            Geo + RGB  64.50                           53.01  27.01  21.88    34.29    27.92
+TGNN[10]+BERT [5]    Geo + RGB  68.61                           56.80  29.84  23.18    37.37    29.70
+IntanceRefer (Ours)  Geo + RGB  77.45                           66.83  31.27  24.77    40.23    32.93
+
+                                Test results (ScanRefer benchmark)
+
+ScanRefer [2]        Geo+Nor+Multiview 68.59                    43.53  34.88  20.97    42.44    26.03
+
+TGNN [10]            Geo + RGB  62.40                           53.30  28.20  21.30    35.90    28.50
+TGNN [10]+BERT [5]   Geo + RGB  68.34                           58.94  33.12  25.26    41.02    32.81
+IntanceRefer (Ours)  Geo + RGB  77.82                           66.69  34.57  26.88    44.27    35.80
+
+4.2. Dataset and Metrics                                        We empirically validate AP and RP modules on ReferIt3D
+                                                                to verify the effectiveness of our proposed modules. We use
+ScanRefer. The ScanRefer dataset is a newly proposed 3D         the same evaluation strategies and metrics with their paper.
+scene visual grounding dataset, to the best of our knowl-
+edge, which consists of 51,538 descriptions for ScanNet         4.3. Quantitative Comparisons
+scenes [4]. The dataset is split into 36,655 samples for
+training, 9,508 samples for validation, and 5,410 samples          We first compare IntanceRefer with the state-of-the-art
+for testing, respectively.                                      methods on the ScanRefer dataset, where the results are dis-
+                                                                played in Table 1. Among these methods, SCRC [9] and
+   For the evaluation metrics, it calculates the 3D intersec-   One-stage [34] are image-based methods with the RGB im-
+tion over union (IoU) between the predicted bounding box        ages as input. Specifically, they select the 2D bounding box
+and ground truth. The Acc@mIoU is adopted as the evalu-         with the highest confidence score and project it to the 3D
+ation metric, where m  {0.25, 0.5}. Accuracy is reported        space using the depth map of that frame. ScanRefer [2] and
+in "unique" and "multiple" categories, respectively. If only    TGNN [10] are point cloud based methods that take coor-
+a single object of its class exists in the scene, we regard it  dinates and other features of point clouds as input. In this
+as "unique", otherwise "multiple". Moreover, to fully eval-     paper, we follow the input modality of TGNN [10], which
+uate our model, we conduct a fair comparison on both the        only exploits geometric coordinates (XYZ) and color infor-
+validation set and test set. ScanRefer benchmark2 conducts      mation (RGB) as input.
+online testing and every method is allowed to submit results
+for only twice.                                                    As shown in Table 1, our model gains the highest scores
+                                                                on both validation set and online benchmark. Note that
+Nr3D and Sr3D. ReferIt3D [1] dataset uses the same              the image-based methods (i.e., SCRC and One-stage) fail
+train/valid split with ScanRefer on ScanNet but exploits        to achieve satisfactory results since they are limited by the
+manually extracted instances as input, i.e., object masks for   view of a single frame. Though TGNN also applies Point-
+each scene are provided, and aims to choose the solely re-      Group to perform instance segmentation, our method out-
+ferred object. Specifically, it contains two datasets, where    performs it by large margins, especially in the "unique"
+Sr3D (Spatial Reference in 3D) has 83.5K synthetic expres-      case, which mainly benefits from the rational strategy of
+sions generated by templates and Nr3D (Natural Reference        filtering candidates. Furthermore, the improvements of our
+in 3D) consists of 41.5K human expressions collected in a       model are apparent, reporting 11.8% in "unique" and 6.7%
+similar manner as ReferItGame [12]. Since ReferIt3D di-         "multiple" in Acc@0.5 when employing both the GloVE
+rectly uses point clouds of instances as input, it can be seen  and GRU as the language encoder. Our improvements
+as the instance-matching stage of our InstanceRefer with-       originate from the well-designed pipeline and three novel
+out interaction with the environment, i.e., wall and floor.     models, whereas the improvements of TGNN are largely
+                                                                based on the pre-trained BERT embeddings. More impor-
+    2http://kaldir.vc.in.tum.de/scanrefer_benchmark
+Table 2. Comparison of referring object identification on Nr3D and Sr3D datasets. Here `easy' and `hard' determined by whether there
+are more than two instances of the same object class in the scene. `view-dependent' and `view-independent' determined by whether the
+referring expression depending on camera view.
+
+Dataset  Method                       Easy             Hard          View-dep.       View-indep.         Overall
+Nr3D
+Sr3D     ReferIt3DNet [1]      43.6 % ± 0.8 %   27.9 % ± 0.7 %   32.5 % ± 0.7 %   37.1 % ± 0.8 %   35.6 % ± 0.7 %
+         TGNN [10]             44.2 % ± 0.4 %   30.6 % ± 0.2 %  35.8 % ± 0.2 %    38.0 % ± 0.3 %   37.3 % ± 0.3 %
+         IntanceRefer (Ours)  46.0 % ± 0.5 %   31.8 % ± 0.4 %    34.5 % ± 0.6 %  41.9 % ± 0.4 %   38.8 % ± 0.4 %
+
+         ReferIt3DNet [1]      44.7 % ± 0.1 %   31.5 % ± 0.4 %   39.2 % ± 1.0 %   40.8 % ± 0.1 %   40.8 % ± 0.2 %
+         TGNN [10]             48.5 % ± 0.2 %   36.9 % ± 0.5 %  45.8 % ± 1.1 %    45.0 % ± 0.2 %   45.0 % ± 0.2 %
+         IntanceRefer (Ours)  51.1 % ± 0.2 %   40.5 % ± 0.3 %    45.4 % ± 0.9 %  48.1 % ± 0.3 %   48.0 % ± 0.3 %
+
+Figure 5. Qualitative results from ScanRefer and our InstanceRefer. Predicted boxes are marked green if they have an IoU score higher
+than 0.5, otherwise they are marked red. The ground truth boxes are displayed in yellow.
+
+tantly, even if ScanRefer utilizes additional multiview fea-    pure instance-matching performances significantly. As a re-
+tures from the pre-trained ENet [21] on the benchmark, the      sult, our InstanceRefer manifests a stronger capacity than
+overall result of ours still achieves 10% improvement on        ScanRefer and TGNN on the 3D point cloud VG task.
+Acc@0.5. Also, since we employ a pre-trained panoptic
+segmentation model and stores the segmentation results of-         Visualization results produced by ScanRefer and by our
+fline, our method has a much shorter training time and lower    method are displayed in Figure 5. Predicted boxes are
+memory consumption than others.                                 marked green if they have an IoU score higher than 0.5,
+                                                                otherwise, they are marked red. Failure cases of ScanRefer
+   The results in Table 2 illustrate the instance-matching ac-  illustrate that its architecture cannot distinguish ambiguous
+curacy on the Nr3D and Sr3D datasets. Our proposed In-          objects according to their spatial relations. On the contrary,
+stanceRefer achieves top-ranked results on both the Nr3D        InstanceRefer can accurately localize the described objects
+and Sr3D datasets. The experiments prove that our pro-          even in the complex scenarios with the long textual descrip-
+posed perception modules are effective components for ac-       tions, e.g., the results in the first and second columns show
+curate grounding on the scenes of point clouds and boost the    our accurate instance selection and the fifth columns illus-
+Table 3. The ablated results for different network architecture on  Table 4. The instance-matching results with same panoptic seg-
+ScanRefer validation set, where Acc@0.5 is used as metrics. Here    mentation backbone on ScanRefer validation set, where Acc@0.5
+MAT. means matching module.                                         is used as metrics. denotes using GT language classification.
+
+AP RP GLP MAT. Unique Multiple Overall                              Backbone & Method        Unique  Multiple  Overall
+                                                                    ScanRefer                 43.31   19.75     24.32
+        66.43 20.32 29.46                                           PG [11] + ScanRefer       60.05   21.61     29.07
+                                                                    PG [11] + ReferIt3DNet    60.22   21.41     28.94
+        62.66 19.67 28.01                                           InstanceRefer             66.83   24.77     32.93
+                                                                    InstanceRefer             68.78   24.82     33.35
+        62.85 16.21 25.29                                           GT Box + ScanRefer        73.55   32.00     40.06
+                                                                    GT Inst + ScanRefer       79.35   36.08     44.48
+        66.59 21.56 30.49                                           GT Inst + ReferIt3DNet    79.04   37.19     45.38
+                                                                    GT Inst + InstanceRefer   90.24   39.32     49.20
+        66.80 22.18 31.04
+
+        66.83 24.77 32.93
+
+trates our method can generate bounding box more finely.            ground-truth target is limited since the language classifi-
+                                                                    cation is high enough (over 97%). From the bottom part
+4.4. Comprehensive Analysis                                         of Table 4, we compare different methods using ground
+                                                                    truth instances as input. Experimental results reveal that
+Ablation Studies. Table 3 presents the effectiveness of dif-        using GT instance point clouds is better than using points in
+ferent modules. On the one hand, if only a single percep-           GT bounding boxes, which partly owes to the interference
+tion module is employed, the AP module can achieve the              of occlusion in 3D bounding boxes. Also, InstanceRefer
+best results. On the other hand, when the additional RP and         achieves state-of-the-art performances over ReferIt3DNet
+GLP modules are utilized, a remarkable improvement can              and ScanRefer, which credits to the instance-matching strat-
+be seen over the AP module's result. Specifically, the gain         egy. In summary, our proposed framework can effectively
+of the RP module is slightly larger than that of the GLP            boost the performances.
+module. The reason is that the descriptions of the corre-
+lation among instances in the scene are more commonly               5. Conclusion
+compared with the localization. Furthermore, the visual-
+language matching method we apply is better than simple                In this paper, we proposed a novel framework, named
+ranking by cosine similarity.                                       InstanceRefer, for 3D visual grounding. Our model per-
+                                                                    forms more accurate localization via unifying instance at-
+Instance-matching with Same Backbone. To further il-                tribute, relation, and localization perceptions. Specifically,
+lustrate the effectiveness of the proposed modules, we com-         InstanceRefer innovatively predicts the target category from
+pare instance-matching results when using instances ex-             linguistic queries and filters out a small number of candi-
+tracted by the same panoptic segmentation backbone or               dates by panoptic segmentation. Moreover, we propose the
+ground truth instances. For the ScanRefer [2], we use Point-        concept of cooperative holistic scene-language understand-
+Net++ [26] to extract features of each instance and replace         ing for each candidate, i.e., multi-level contextual refer-
+its proposal features. Also, we evaluate ScanRefer using            ring to instance attribute, instance-to-instance relation, and
+points in ground truths bounding boxes as input. For the            instance-to-background global localization. Experimental
+ReferIt3DNet [1], since its original framework is applied on        results demonstrate that InstanceRefer outperforms the pre-
+manually segmented instances, we use its original model di-         vious methods by a large margin. We believe our work for-
+rectly. Both of them are trained using the same strategies of       mulates a new strategy for 3D visual grounding.
+our model for the fair comparison. Since TGNN [10] orig-
+inally used PointGroup to conduct instance segmentation,            Acknowledgment
+we will not discuss it in this section.
+                                                                    This work was supported in part by NSFC-Youth 61902335,
+   The experimental results are summarized in Table 4.              by Key Area R&D Program of Guangdong Province with
+From the upper part of Table 4, we can find that panop-             grant No.2018B030338001, by the National Key R&D
+tic segmentation by PointGroup [11] can boost the per-              Program of China with grant No.2018YFB1800800, by
+formances of ScanRefer, especially on the "unique" case.            Shenzhen Outstanding Talents Training Fund, by Guang-
+Besides, ReferIt3DNet achieves similar performances with            dong Research Project No.2017ZT07X152, by Guangdong
+ScanRefer when using the extracted instances by Point-              Regional Joint Fund-Key Projects 2019B1515120039, by
+Group. Note that InstanceRefer still surpasses them by a            the NSFC 61931024&81922046, by helixon biotechnology
+significant improvement on Acc@0.5, achieving 6.6% in               company Fund and CCF-Tencent Open Fund.
+for "unique" and 3.1% for "multiple". It confirms that
+our gains not only come from the filtering strategy based
+on panoptic segmentation but also the well-designed multi-
+level perception modules. Besides, the improvement using
+References                                                           point grouping for 3d instance segmentation. In IEEE
+                                                                     Conf. Comput. Vis. Pattern Recog., pages 4867­4876,
+ [1] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mo-               2020. 3, 5, 8
+      hamed Elhoseiny, and Leonidas Guibas. Referit3d:
+      Neural listeners for fine-grained 3d object identifica-  [12] Sahar Kazemzadeh, Vicente Ordonez, Mark Matten,
+      tion in real-world scenes. In European Conference on           and Tamara Berg. Referitgame: Referring to objects
+      Computer Vision, pages 422­440. Springer, 2020. 2,             in photographs of natural scenes. In Proceedings of
+      6, 7, 8                                                        the 2014 conference on empirical methods in natural
+                                                                     language processing (EMNLP), pages 787­798, 2014.
+ [2] Dave Zhenyu Chen, Angel X Chang, and Matthias                   1, 2, 6
+      Nießner. Scanrefer: 3d object localization in rgb-d
+      scans using natural language. 16th European Confer-      [13] Alexander Kirillov, Kaiming He, Ross Girshick,
+      ence on Computer Vision (ECCV), 2020. 1, 2, 3, 5, 6,           Carsten Rother, and Piotr Dolla´r. Panoptic segmen-
+      8                                                              tation. In IEEE Conf. Comput. Vis. Pattern Recog.,
+                                                                     pages 9404­9413, 2019. 3
+ [3] Junyoung Chung, Caglar Gulcehre, KyungHyun Cho,
+      and Yoshua Bengio. Empirical evaluation of gated re-     [14] Loic Landrieu and Mohamed Boussaha. Point cloud
+      current neural networks on sequence modeling. arXiv            oversegmentation with graph-structured deep metric
+      preprint arXiv:1412.3555, 2014. 3                              learning. In IEEE Conf. Comput. Vis. Pattern Recog.,
+                                                                     pages 7440­7449, 2019. 3
+ [4] Angela Dai, Angel X Chang, Manolis Savva, Maciej
+      Halber, Thomas Funkhouser, and Matthias Nießner.         [15] Loic Landrieu and Martin Simonovsky. Large-scale
+      Scannet: Richly-annotated 3d reconstructions of in-            point cloud semantic segmentation with superpoint
+      door scenes. In IEEE Conf. Comput. Vis. Pattern                graphs. In IEEE Conf. Comput. Vis. Pattern Recog.,
+      Recog., pages 5828­5839, 2017. 6                               pages 4558­4567, 2018. 3
+
+ [5] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and             [16] Jianan Li, Yunchao Wei, Xiaodan Liang, Fang Zhao,
+      Kristina Toutanova. Bert: Pre-training of deep bidirec-        Jianshu Li, Tingfa Xu, and Jiashi Feng. Deep attribute-
+      tional transformers for language understanding, 2018.          preserving metric learning for natural language object
+      6                                                              retrieval. In ACM Int. Conf. Multimedia, pages 181­
+                                                                     189, 2017. 2
+ [6] Ankit Goyal, Kaiyu Yang, Dawei Yang, and Jia
+      Deng. Rel3d: A minimally contrastive benchmark for       [17] Xihui Liu, Zihao Wang, Jing Shao, Xiaogang Wang,
+      grounding spatial relations in 3d. Advances in Neural          and Hongsheng Li. Improving referring expression
+      Information Processing Systems, 33, 2020. 2                    grounding with cross-modal attention-guided erasing.
+                                                                     In IEEE Conf. Comput. Vis. Pattern Recog., pages
+ [7] Benjamin Graham, Martin Engelcke, and Laurens Van               1950­1959, 2019. 1
+      Der Maaten. 3d semantic segmentation with submani-
+      fold sparse convolutional networks. In Proceedings of    [18] Junhua Mao, Jonathan Huang, Alexander Toshev,
+      the IEEE conference on computer vision and pattern             Oana Camburu, Alan L Yuille, and Kevin Murphy.
+      recognition, pages 9224­9232, 2018. 4                          Generation and comprehension of unambiguous ob-
+                                                                     ject descriptions. In IEEE Conf. Comput. Vis. Pattern
+ [8] Qingyong Hu, Bo Yang, Linhai Xie, Stefano Rosa,                 Recog., pages 11­20, 2016. 1
+      Yulan Guo, Zhihua Wang, Niki Trigoni, and Andrew
+      Markham. RandLA-Net: Efficient semantic segmen-          [19] Aditya Mogadala, Marimuthu Kalimuthu, and Diet-
+      tation of large-scale point clouds. IEEE Conf. Comput.         rich Klakow. Trends in integration of vision and lan-
+      Vis. Pattern Recog., pages 11108­11117, 2020. 3                guage research: A survey of tasks, datasets, and meth-
+                                                                     ods. arXiv preprint arXiv:1907.09358, 2019. 1
+ [9] Ronghang Hu, Huazhe Xu, Marcus Rohrbach, Jiashi
+      Feng, Kate Saenko, and Trevor Darrell. Natural lan-      [20] Varun K Nagaraja, Vlad I Morariu, and Larry S Davis.
+      guage object retrieval. In IEEE Conf. Comput. Vis.             Modeling context between objects for referring ex-
+      Pattern Recog., pages 4555­4564, 2016. 6                       pression understanding. In Eur. Conf. Comput. Vis.,
+                                                                     pages 792­807. Springer, 2016. 2
+[10] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen,
+      and Tyng-Luh Liu. Text-guided graph neural networks      [21] Adam Paszke, Abhishek Chaurasia, Sangpil Kim, and
+      for referring 3d instance segmentation. 35th AAAI              Eugenio Culurciello. Enet: A deep neural network ar-
+      Conference on Artificial Intelligence, 2021. 2, 6, 7,          chitecture for real-time semantic segmentation. arXiv
+      8                                                              preprint arXiv:1606.02147, 2016. 7
+
+[11] Li Jiang, Hengshuang Zhao, Shaoshuai Shi, Shu Liu,        [22] Jeffrey Pennington, Richard Socher, and Christo-
+      Chi-Wing Fu, and Jiaya Jia. Pointgroup: Dual-set               pher D Manning. Glove: Global vectors for word rep-
+                                                                     resentation. In Proceedings of the 2014 conference
+      on empirical methods in natural language processing       [34] Zhengyuan Yang, Boqing Gong, Liwei Wang, Wen-
+      (EMNLP), pages 1532­1543, 2014. 3                               bing Huang, Dong Yu, and Jiebo Luo. A fast and ac-
+                                                                      curate one-stage approach to visual grounding. In Int.
+[23] Bryan A Plummer, Liwei Wang, Chris M Cervantes,                  Conf. Comput. Vis., pages 4683­4693, 2019. 6
+      Juan C Caicedo, Julia Hockenmaier, and Svetlana
+      Lazebnik. Flickr30k entities: Collecting region-to-       [35] Licheng Yu, Zhe Lin, Xiaohui Shen, Jimei Yang, Xin
+      phrase correspondences for richer image-to-sentence             Lu, Mohit Bansal, and Tamara L Berg. Mattnet:
+      models. In Int. Conf. Comput. Vis., pages 2641­2649,            Modular attention network for referring expression
+      2015. 2                                                         comprehension. In IEEE Conf. Comput. Vis. Pattern
+                                                                      Recog., pages 1307­1315, 2018. 2
+[24] Charles R Qi, Or Litany, Kaiming He, and Leonidas J
+      Guibas. Deep hough voting for 3d object detection in      [36] Zhou Yu, Jun Yu, Yuhao Cui, Dacheng Tao, and Qi
+      point clouds. In Int. Conf. Comput. Vis., pages 9277­           Tian. Deep modular co-attention networks for visual
+      9286, 2019. 1, 3                                                question answering. In Proceedings of the IEEE Con-
+                                                                      ference on Computer Vision and Pattern Recognition
+[25] Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J                 (CVPR), pages 6281­6290, 2019. 5
+      Guibas. Pointnet: Deep learning on point sets for 3d
+      classification and segmentation. In IEEE Conf. Com-       [37] Hengshuang Zhao, Li Jiang, Chi-Wing Fu, and Jiaya
+      put. Vis. Pattern Recog., pages 652­660, 2017. 2                Jia. Pointweb: Enhancing local neighborhood features
+                                                                      for point cloud processing. In IEEE Conf. Comput.
+[26] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J            Vis. Pattern Recog., pages 5565­5573, 2019. 3
+      Guibas. Pointnet++: Deep hierarchical feature learn-
+      ing on point sets in a metric space. In Adv. Neural       [38] Kang Zhiheng and Li Ning. Pyramnet: Point cloud
+      Inform. Process. Syst., pages 5099­5108, 2017. 2, 8             pyramid attention network and graph embedding mod-
+                                                                      ule for classification and segmentation. arXiv preprint
+[27] Kihyuk Sohn. Improved deep metric learning with                  arXiv:1906.03299, 2019. 3
+      multi-class n-pair loss objective. In Proceedings of the
+      30th International Conference on Neural Information
+      Processing Systems, pages 1857­1865, 2016. 5
+
+[28] Hugues Thomas, Charles R. Qi, Jean-Emmanuel De-
+      schaud, Beatriz Marcotegui, Francois Goulette, and
+      Leonidas J. Guibas. Kpconv: Flexible and deformable
+      convolution for point clouds. In Int. Conf. Comput.
+      Vis., October 2019. 3
+
+[29] Liwei Wang, Yin Li, Jing Huang, and Svetlana Lazeb-
+      nik. Learning two-branch neural networks for image-
+      text matching tasks. IEEE Trans. Pattern Anal. Mach.
+      Intell., 41(2):394­407, 2018. 1, 2
+
+[30] Peng Wang, Qi Wu, Jiewei Cao, Chunhua Shen,
+      Lianli Gao, and Anton van den Hengel. Neighbour-
+      hood watch: Referring expression comprehension via
+      language-guided graph attention networks. In IEEE
+      Conf. Comput. Vis. Pattern Recog., pages 1960­1968,
+      2019. 2
+
+[31] Yue Wang, Yongbin Sun, Ziwei Liu, Sanjay E Sarma,
+      Michael M Bronstein, and Justin M Solomon. Dy-
+      namic graph cnn for learning on point clouds. ACM
+      Trans. Graph., 38(5):1­12, 2019. 3, 4
+
+[32] Wenxuan Wu, Zhongang Qi, and Li Fuxin. Pointconv:
+      Deep convolutional networks on 3d point clouds. In
+      IEEE Conf. Comput. Vis. Pattern Recog., pages 9621­
+      9630, 2019. 3
+
+[33] Xu Yan, Chaoda Zheng, Zhen Li, Sheng Wang, and
+      Shuguang Cui. Pointasnl: Robust point clouds pro-
+      cessing using nonlocal neural networks with adaptive
+      sampling. 2020. 3
+

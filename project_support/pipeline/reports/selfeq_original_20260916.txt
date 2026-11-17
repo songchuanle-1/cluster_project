@@ -1,0 +1,1302 @@
+                                                   Improved Visual Grounding through Self-Consistent Explanations
+
+                                         Ruozhen He1         Paola Cascante-Bonilla1          Ziyan Yang1 Alexander C. Berg2                      Vicente Ordonez1
+                                                                    1                         2
+                                                                      Rice University           University of California, Irvine
+                                          catherine.he@rice.edu, pc51@rice.edu, zy47@rice.edu, bergac@uci.edu, vicenteor@rice.edu
+arXiv:2312.04554v1 [cs.CV] 7 Dec 2023
+
+
+
+
+                                                               Abstract                                    Text: “frisbee”
+
+
+                                           Vision-and-language models trained to match images
+                                        with text can be combined with visual explanation meth-
+                                        ods to point to the locations of specific objects in an im-
+                                        age. Our work shows that the localization –“grounding”–
+                                        abilities of these models can be further improved by fine-                    ALBEF                AMC               SelfEQ (Ours)
+
+                                        tuning for self-consistent visual explanations. We propose         Equivalent Paraphrase: “disc”
+                                        a strategy for augmenting existing text-image datasets with
+                                        paraphrases using a large language model, and SelfEQ,
+                                        a weakly-supervised strategy on visual explanation maps
+                                        for paraphrases that encourages self-consistency. Specifi-
+                                        cally, for an input textual phrase, we attempt to generate
+                                                                                                                      ALBEF                AMC               SelfEQ (Ours)
+                                        a paraphrase and finetune the model so that the phrase
+                                        and paraphrase map to the same region in the image. We
+                                                                                                          Figure 1. Previous models can localize the word frisbee, but strug-
+                                        posit that this both expands the vocabulary that the model        gle with equivalent but more uncommon referents such as disc. A
+                                        is able to handle, and improves the quality of the object         model tuned with our proposed SelfEQ objective encourages con-
+                                        locations highlighted by gradient-based visual explanation        sistent visual explanations for paraphrased prompts and performs
+                                        methods (e.g. GradCAM). We demonstrate that SelfEQ im-            well on both examples. SelfEQ not only enables a larger working
+                                        proves performance on Flickr30k, ReferIt, and RefCOCO+            vocabulary but also improves overall localization performance.
+                                        over a strong baseline method and several prior works. Par-
+                                        ticularly, comparing to other methods that do not use any
+                                                                                                          “grounding” – or in other words – the ability to localize
+                                        type of box annotations, we obtain 84.07% on Flickr30k
+                                                                                                          objects in images by simply using it in conjunction with a
+                                        (an absolute improvement of 4.69%), 67.40% on ReferIt (an
+                                                                                                          visual explanation method such as GradCAM [45]. This ca-
+                                        absolute improvement of 7.68%), and 75.10%, 55.49% on
+                                                                                                          pability is particularly remarkable given that this model was
+                                        RefCOCO+ test sets A and B respectively (an absolute im-
+                                                                                                          only supervised with images and text but no object location
+                                        provement of 3.74% on average).
+                                                                                                          annotations of any type.
+                                                                                                              In order to improve the ability of vision-and-language
+                                        1. Introduction                                                   models to perform localization, many methods have in-
+                                                                                                          corporated further finetuning with either box or segment
+                                        Vision-and-language models that are trained to associate          annotations, or rely on pretrained object detectors or box
+                                        images with text have shown to be effective for many tasks        proposal networks [6, 13, 20, 24, 32, 53]. Our work in-
+                                        and benchmarks [22, 28, 33, 43], including object detec-          stead aims to improve the localization capabilities of models
+                                        tion [19, 56] and image segmentation [16, 38, 52]. Since          trained only on image-text pairs through weak supervision.
+                                        these models are typically trained with in-the-wild data          But, how can we improve the ability of a model to localize
+                                        from the web, they can handle a wide range of vocab-              objects without access to object location annotations? Con-
+                                        ulary for objects as long as they are well represented in         sider the example in Figure 1 where a model is tasked with
+                                        the training data. These models are often remarkably ac-          pointing to the location of the object frisbee in this image.
+                                        curate [17, 23, 29, 49] even without tuning them to per-          The baseline model succeeds at finding the object but is un-
+                                        form well in any particular downstream task [15, 34, 54].         successful at locating the object when prompted with the
+                                        The ALBEF model [28] was particularly capable of visual           equivalent but more generic name disc. Regardless of the
+
+
+                                                                                                      1
+ability for the base model to find either of these, the visual       Visual grounding consists of localizing an input textual
+explanations for these two prompts should be the same since          description in an image. Supervised methods are pro-
+the query refers to the very same object in both cases. Our          vided with text-image pairs and corresponding bounding
+work exploits this property by first generating paraphrases          boxes [9, 10, 13, 24, 53]. Other supervised methods lever-
+using a large language model and then proposing a weakly-            age pretrained object detectors to obtain a region of interest
+supervised Self-consistency EQuivalence Tuning (SelfEQ)              and then identify the region that aligns most closely under
+objective that encourages consistent visual explanations be-         their textual representations [6, 8, 18, 20, 37, 50]. In both
+tween paraphrased input text pairs that refer to the same            cases, these methods use some form of box supervision dur-
+object or region in a given image.                                   ing pre-training or at test time by relying on a pre-trained
+    Given a base pre-trained vision-and-language model               object detector. In contrast, our work focuses exclusively in
+purely trained on image-text pairs such as ALBEF [28],               the scenario where no bounding boxes or segment annota-
+SelfEQ tunes the model so that for a given input image               tions are available at any stage.
+and text pair, the visual attention map extracted using Grad-        Weakly-Supervised Grounding. Our setup is similar to that
+CAM [45] produces a similar visual attention map when                of Arbelle et al [3] where no box annotations or object de-
+provided with the same image and a text paraphrase. Fig-             tectors are used for grounding. This work proposes Ground-
+ure 2 provides an overview of our method. Another contri-            ing by Separation (GbS) where a model is trained on ran-
+bution of our work consists in exploiting a large language           domly alpha-blended pairs of images and the goal is to sep-
+model (LLM) to automatically generate paraphrases for ex-            arate them conditioned on text prompts. Our method instead
+isting datasets such as Visual Genome [27] that contains             relies on data augmentation on the text side and while our
+textual descriptions of individual objects and regions, or           method shows favorable results, our contribution is orthog-
+MS-COCO [35] and CC3M [48] that contain global im-                   onal. Shaharabany et al [47] builds a weakly-supervised
+age descriptions. We find that SelfEQ not only expands               phrase grounding model by creating a large amount of data
+the vocabulary of objects that the base model is able to lo-         by combining region boxes with a BLIP captioning model.
+calize but more importantly, improves the visual grounding           Later work by Shaharabany and Wolf [46] employs layer-
+capabilities of the model on standard benchmarks such as             wise relevance propagation [40] to integrate relevancy and
+referring expression comprehension on the ReferIt bench-             gradient information with the scores computed from each
+mark [25] and region-phrase grounding in the Flickr30K               attention head in the transformer layers [5], or residual con-
+Entities benchmark [42]. In summary, our key contributions           nections [1]. Our work compares favorably or on par with
+are as follows:                                                      these methods but since we rely on gradient-based explana-
+• We design a novel objective, SelfEQ, to encourage vision-          tions, our work does not require making any modifications
+  and-language models to generate self-consistent visual             to the base network.
+  explanations for equivalent text phrases, thereby improv-          Visual Explanation Tuning. Related to our method is the
+  ing grounding capabilities while expanding the working             strategy used by ALBEF [28] where the model is only
+  vocabulary of the model.                                           supervised on image-text pairs and performs grounding
+• We propose to prompt large language models for generat-            through GradCAM [45], a gradient-based visual explana-
+  ing paraphrased image descriptions of individual objects           tion method that outputs a heatmap indicating spatial rele-
+  or regions. Particularly, we adopt Vicuna-13B [7] and de-          vance. Earlier, Xiao et al [51] used a similar strategy but fur-
+  sign text prompts to obtain high quality paraphrases.              ther optimized gradient-based explanations using structural
+• We demonstrate the effectiveness of our method by out-             constraints derived from text. Recently, AMC [53] follows
+  performing previous methods, leading to 4.69% improve-             this strategy but further adds box supervision on the output
+  ment on Flickr30k, 7.68% improvement on ReferIt, and               maps using a margin-based loss. We adopt ALBEF [28] as
+  3.74% improvement on RefCOCO+.                                     our base model and also adopt a gradient-based explanation
+   Finally, we plan to release our code, generated para-             strategy but unlike AMC [53] we do not rely on box anno-
+phrases and model checkpoints upon publication.                      tations for tuning this model and use our proposed SelfEQ
+                                                                     objective instead. Javed et al [21] proposed an objective
+2. Related Work                                                      function that encourages consistent representations in em-
+                                                                     bedding space for the same input prompt on different im-
+Our work is related to previous methods on visual ground-            ages. In contrast SelfEQ encourages consistent visual ex-
+ing, especially those that are trained under weak supervision        planations for different prompts on the same image by rely-
+understood as without the use of bounding box or segment             ing on automatically generated paraphrases. Akbari et al [2]
+annotations and relying only on image-text pairs. From a             also optimizes attention maps but in their formulation the
+technical perspective our work is related to methods that op-        model backbone is modified to explicitly incorporate atten-
+timize visual explanations to improve the underlying model.          tion instead of relying on gradient-based attention maps.
+
+                                                                 2
+                                                                        Masking Language Modeling Loss (MLM). This loss
+T    “a train”      𝜙𝑡
+                              𝐺                                         has been applied for various vision-language pretraining
+                         𝜙𝑓
+                                                                        models [6, 28, 31, 36]. It integrates the contextual text and
+V                   𝜙𝑣
+                                                                        the input image to infer masked words in the input text. Af-
+                                                                        ter utilizing a linear layer and a softmax activation function
+                                   𝑳𝒔𝒊𝒎   ≥𝑘                 𝑳𝒄𝒔𝒕
+                                                                        ϕmf to individual output embeddings, the objective is ex-
+𝑇 𝑒 “a choo choo”   𝜙𝑡
+                                                  RoI Mask              pressed as:
+                              𝐺𝑒                                                                                       −m
+                                                                         Lmlm = E(V,T −m )∼D H ⃗tm , ϕm
+                                                                                                                                    
+                         𝜙𝑓
+                                                                                                      f ϕv (V ) , ϕt T                    , (2)
+V                   𝜙𝑣
+
+                                                                        where the one-hot vector ⃗tm denotes the masked token, and
+                                                                        T −m represents the input masked text.
+Figure 2. Overview of our proposed weakly-supervised Self-
+consistency EQuivalence tuning objective. We input image-text           Image-Text Contrastive Loss (ITC). It improves the
+and image-paraphrase pairs ⟨V, T ⟩ and ⟨V, T e ⟩ to our base pre-       alignment between visual and textual representations by
+trained vision-and-language model. We then obtain gradient-
+                                                                        bringing closer the representations for corresponding text-
+based visual explanations ⟨G, Ge ⟩ and compute a similarity loss
+                                                                        image pairs relative to text-image pairs that do not corre-
+between them. We also define an overlapping region of inter-
+est mask and encourage the model to predict consistently high           spond. This objective can be defined as follows:
+saliency scores within this mask for each input pair.                                         1
+                                                                                                 
+                                                                                                         exp (ϕv (V ) · ϕt (T )) /τ
+                                                                                                                                    
+                                                                            Litc = E(V,T )∼D     H ⃗  y,     PB
+                                                                                              2                 b=1 s (V, Tb )
+3. Method                                                                                                                                (3)
+                                                                                                       exp (ϕt (T ) · ϕv (V )) /τ
+                                                                                             +H ⃗  y,      PB                        ,
+We start from a base vision-language model composed of a                                                      b=1 s (T, Vb )
+
+text decoder ϕt , an image encoder ϕv , and a multimodal                where B is the number of negative sample pairs, and τ is a
+fusion encoder ϕf , along with a dataset D to finetune this             temperature parameter for the softmax function.
+model consisting of image-text pairs ⟨T, V ⟩. Section 3.1,                 The training objective for the base model is a combina-
+introduces the training objectives for the base model which             tion of the previous three loss functions:
+we also adopt for finetuning our baseline and are also used
+in conjunction with SelfEQ to finetune our final model. Sec-                              Lvl = Litm + Lmlm + Litc .                        (4)
+tion 3.2 introduces in detail SelfEQ, our self-consistency
+equivalence tuning objective that assumes the existence of              This loss Lvl will also be used to tune our baseline model.
+paraphrases T e for each input image-text pair ⟨T, V ⟩, and
+                                                                        3.2. Self-Consistency Equivalence Tuning
+Section 3.3 describes our approach for automatically gen-
+erating paraphrases T e using LLM-prompting. Figure 2                   SelfEQ assumes that the model has access to paraphrases
+presents an overview of our proposed method.                            T e for each input image-text pair ⟨V, T ⟩ or, in practice, for a
+                                                                        subset of those samples. Therefore we assume a finetuning
+3.1. Base Model: Preliminaries                                          dataset D′ with triplets ⟨V, T, T e ⟩ such that Te exists for
+                                                                        a corresponding input text T . The first step to define our
+Our base vision-and-language model is ALBEF [28] which
+                                                                        SelfEQ objective is to generate the explanation heatmaps
+relies on three widely used objectives for visual and textual
+                                                                        (i.e., attention maps) through GradCAM [45] conditioned
+representation learning: image-text matching, masked lan-
+                                                                        on the input text. We extract intermediate feature maps from
+guage modeling and a contrastive loss. We describe them
+                                                                        the multimodal interactive encoder ϕf for input pairs ⟨V, T ⟩
+here briefly as they are also re-used during fine-tuning.
+                                                                        and ⟨V, T e ⟩ as follows:
+Image-Text Matching Loss (ITM). This loss is calcu-
+lated using the output of the [CLS] token to predict if the                   F = ϕ (ϕv (V ), ϕt (T )) , F e = ϕ (ϕv (V ), ϕt (T e )) ,     (5)
+input image and the input text are matching or not and is               where ϕ denotes the feature map extraction operation. We
+defined as follows:                                                     then proceed to calculate the gradient of F and F e related
+                                                                      to the image-text matching score Litm . This computation
+         Litm = E(V,T )∼D H ⃗y , ϕcls
+                                  f (ϕv (V ) , ϕt (T )) ,     (1)
+                                                                        yields the attention maps for the original text and para-
+                                                                        phrased text, referred to as G and Ge , respectively:
+where ⃗y denotes a two-dimensional one-hot vector, indicat-
+ing whether the sample ⟨V, T ⟩ constitutes a match, ϕcls
+                                                                                                                       
+                                                     f rep-                 G = ReLU F ⊙ ▽H ⃗  y , ϕcls
+                                                                                                    f (ϕv (V ), ϕt (T ))    ,
+resents a linear layer followed by a softmax function, and                                                                              (6)
+H is the cross entropy loss function.                                      Ge = ReLU F e ⊙ ▽H ⃗ y , ϕcls               e
+                                                                                                     f (ϕv (V ), ϕt (T ))     .
+
+
+                                                                    3
+   Our SelfEQ tuning is based on the premise that if a                          We propose a consistency loss (Lcst ), expecting the
+vision-language model is identified as self-consistent, the                  RoI regions of attention maps to achieve consistently high
+attention maps produced for both the text and its equivalent                 scores, further reinforcing self-consistency, accuracy, and
+paraphrase should yield nearly identical results. To achieve                 potential vocabulary expansion. This objective is formu-
+this, we first apply a simple mean squared error loss over the               lated as follows:
+produced heatmaps so that their ℓ2 distance is minimized                                           
+                                                                                                            e
+and thus become more similar.                                                  Lcst =E(V,T,T e )∼D′ σRoI + σRoI +
+                                                                                                                                      (12)
+                                       1 X
+                                                                                                                                
+                                                      e 2
+        Lsim = E(V,T,T e )∼D′                (Gi,j − Gi,j ) .      (7)                max(0, k/2 − µRoI ) + max(0, k/2 − µeRoI ) .
+                                       N i,j
+
+    Nevertheless, while minimizing a sum of pixel-wise dis-                     Finally, the objective of our self-consistency equivalence
+tances contributes to self-consistency, without a regulariza-                tuning is expressed as:
+tion term this loss can easily fall into a trivial solution. For
+instance, it could lead to attention maps with uniformly                                       LSelfEQ = Lsim + λ · Lcst ,              (13)
+negative or positive predictions, or just really small val-                  where λ is a hyperparameter to control the relative influence
+ues. To address this limitation, we propose to integrate                     of each loss.
+these heatmaps by defining a Region of Interest (RoI) mask.
+This mask is designed to preserve regions within the atten-                  3.3. Self-Consistency Data Augmentation
+tion maps that possibly contain correct predictions. Our ap-
+proach hinges on the observation that, despite the predic-                   In this section we define a function F that can automatically
+tions of equivalent textual inputs being inconsistent, some-                 map input textual phrases T as paraphrases T e without the
+times regions with large values or regions that overlap be-                  need to rely on human annotations such that T e ∼ F(T ).
+tween the two heatmaps tend to be correct. As such, we as-                   We achieve this goal through a two-level prompting ap-
+sume that if the sum of attention scores at a given position                 proach using a large language model which we describe in
+(i, j) exceeds a certain threshold k, it is likely indicative of             detail below.
+a correct prediction. We formalize the condition as follows:                 Phrase Chunking: Using our first-level prompts, we aim
+                       (                                                     to augment the original text using phrase chunking to en-
+                           1, (Gi,j + Gei,j ) ≥ k                            courage global captions to concentrate on more specific re-
+              Mi,j =                                  .            (8)
+                           0, (Gi,j + Gei,j ) < k                            gions. Visual grounding seeks to localize objects in images
+                                                                             based on textual inputs. In contrast, global captions usually
+The attention maps within RoI masks are obtained by                          describe the entire image, typically describing several ob-
+element-wise multiplication as follows:                                      jects. While training on global captions could be beneficial
+                R = G ⊙ M,             Re = Ge ⊙ M.                (9)       for learning cross-modal information, it may lead the model
+                                                                             to predict a broader region (i.e., global context) rather than a
+   The integration of RoI masks allows us to use equiva-                     specific region. Phrase chunking (i.e., shallow parsing [57])
+lent texts for mutual supervision, refining and improving                    aims to identify continuous sequences of tokens represent-
+the accuracy and providing regularization for the previously                 ing syntactic units, enabling the extraction of phrases from
+defined distance-based loss. Moreover, it could potentially                  unstructured text. We leverage an LLM to segment global
+address errors owing to unknown or less common words by                      captions into object-centric short phrases. During training,
+vocabulary expansion. Presuming one of the textual expres-                   we use these image-chunk pairs instead of global captions,
+sions is known and correctly understood, the model could                     effectively guiding the model attention toward localized re-
+extrapolate the meaning of the other equivalent expression                   gions of interest. We refer the reader to the supplementary
+via weak supervision. To implement it, we first compute                      material for prompting details and generated examples.
+                                                         e
+the mean µRoI , µeRoI and the standard deviation σRoI , σRoI                 Paraphrase Generation: Our SelfEQ approach involves
+within the RoI as follows:                                                   feeding the model with pairs of textual descriptions that re-
+                     P                   P      e                            fer to the same underlying concept, with the expectation that
+                    i,j     Ri,j   e       i,j Ri,j
+           µRoI = P             , µRoI = P          ,             (10)       the model can make similar predictions for these equivalent
+                       i,j Mi,j           i,j Mi,j                           description pairs ⟨T, T e ⟩. We augment our dataset by trans-
+                                                                             forming the region-based captions (i.e., text that only refers
+                     sP
+                            i,j Mi,j · (Ri,j − µRoI )
+                                                          2
+            σRoI =                     P                      ,              to a region in the image) and the object-centric short phrases
+                                         i,j Mi,j
+                     sP                                           (11)       we obtained from phrase chunking into equivalent para-
+                                         e      e
+                            i,j Mi,j · (Ri,j − µRoI )
+                                                      2
+             e                                                               phrases referring to the same concept through our second-
+            σRoI =                                            .
+                                                                             level LLM-prompts.
+                                       P
+                                         i,j Mi,j
+
+
+
+                                                                         4
+Q: "a smiling, holding something and standing man"
+A: {"group": "man",                                                                                              Method             Training   Flickr30k   ReferIt
+    "synonym": ["adult male","gentleman"],
+    "antonym": ["woman"],
+    "hypernym": ["adult","grownup","male","male person","human being","human"],                                  Align2Ground [8]   VG-boxes     71.00       -
+
+
+
+
+                                                                                       Box Supervision
+    "meronym": ["man body","man head","man arms","man legs"]}
+Q: "a desk"                                                                                                      12-in-1 [37]       VG-boxes     76.40       -
+A: {"group": "desk",
+    "synonym": ["table","writing desk"],                                                                         InfoGround [20]    VG-boxes     76.74       -
+    "antonym": [],
+    "hypernym": ["writer tool","furniture"],                                                                     VMRM [13]          VG-boxes     81.11       -
+    "meronym": ["desktop","desk leg"]}
+                                                                                                                 AMC [53]           VG-boxes     86.59     73.17
+Figure 3. Two samples from our LLM-prompt for paraphrase gen-
+                                                                                                                 TD [58]              VG         42.40     31.97
+eration. The first set showcases an example of a region-based cap-
+tion, and the second set shows a non-sentence phrase. Q is the                                                   SSS [21]             VG         49.10     39.98
+query text and A is the expected answer.                                                                         MG-BiLSTM [2]        VG         57.91     62.76
+                                                                                                                 MG-ELMo [2]          VG         60.08     60.01
+    There are many ways to paraphrase, including substi-
+                                                                                                                 GbS [3]              VG         73.39     62.24
+
+
+
+
+                                                                                       Without Box Supervision
+tuting words, altering sentence structures, and rewriting
+                                                                                                                 g [47]               VG         75.63     65.95
+sentences based on semantics. However, considering that
+                                                                                                                 g++ [46]             VG         79.95     70.25
+self-consistency in vision and language is relatively under-
+explored, we adopt a straightforward strategy: Replacing                                                         SelfEQ (ours)        VG         81.90     67.40
+the primary object in the sentence while retaining all other                                                     FCVC [14]          MS-COCO      29.03     33.52
+attributes. This strategy yields several benefits. First, it pro-                                                MG-BiLSTM [2]      MS-COCO      53.29     47.89
+vides a consistent context, which serves as a reference for
+                                                                                                                 MG-ELMo [2]        MS-COCO      61.66     47.52
+the model to identify equivalent descriptions. This enables
+                                                                                                                 GbS [3]            MS-COCO      74.50     49.26
+the equivalent relationships of paraphrases to be learned in-
+                                                                                                                 g [47]             MS-COCO      75.43     61.03
+tuitively. Second, it simplifies prompt designing and post-
+processing by detecting the primary object and generating                                                        g++ [46]           MS-COCO      78.10     61.53
+its synonym.                                                                                                     SelfEQ (ours)      MS-COCO      84.07     62.75
+    To generate paraphrases for the dataset consisting of
+region-based captions, we select four textual descriptions                            Table 1. Visual Grounding results on two benchmarks using point-
+in which the primary noun plays different syntactic roles.                            ing game accuracy with two training datasets. SelfEQ yields
+                                                                                      generally the best overall performance among weakly-supervised
+We further select two non-sentence phrases as examples
+                                                                                      methods, and comes second to g++ on the ReferIt benchmark
+of query texts in our prompts. We show an example of
+                                                                                      when trained using VG. We also show at the top the results of
+a region-based caption and a non-sentence phrase in Fig-                              methods using additional box supervision from Visual Genome
+ure 3. To design our prompt, we identify the primary ob-                              (VG) either directly or through an object detector.
+ject in the query text Q. Then we use WordNet [39] to ob-
+tain synonyms automatically and further remove inaccurate                             Visual Genome (VG) [27] excluding box annotations. We
+or invalid words. We add A to indicate the expected an-                               finetune ALBEF with image-text pairs from VG and MS-
+swer and include other relationships such as antonym, hy-                             COCO without any type of box supervision (i.e., no bound-
+pernym and meronym to provide richer contexts for LLM                                 ing boxes or object detectors), following prior work [2].
+in-context learning. Additional prompting details and para-                           We further leverage Vicuna-13B [7] as our LLM-prompting
+phrase samples are provided in the supplementary material.                            model to generate the object-centric short phrases (via shal-
+    This two-level prompt-based LLM augmentation ap-                                  low parsing or chunking) and the equivalent paraphrases
+proach ensures that our model is exposed to textual inputs                            for our self-consistency data augmentation. Additionally,
+that share the same concept while varying in linguistic rep-                          we validate the effectiveness of our SelfEQ tuning and self-
+resentation, thereby promoting self-consistency and work-                             consistency data augmentation method by training on a pre-
+ing vocabulary expansion.                                                             processed subset of the Conceptual Captions 3M (CC3M)
+                                                                                      dataset [48], which contains many noisy or unaligned web-
+4. Experimental Settings                                                              crawled AltText-image pairs. With this subset, we achieve
+                                                                                      an absolute improvement of 2.15% on Flickr30k, 3.32% on
+Training. We use ALBEF [28] as our base model in
+                                                                                      ReferIt, and 1.33% on RefCOCO+; refer to the supplemen-
+all our experiments, given its reported off-the-shelf visual
+                                                                                      tary material for detailed CC3M experiments.
+grounding performance via GradCAM [45]. ALBEF com-
+bines a ViT-B [12] model for encoding images and a BERT-                              Evaluation. We conduct evaluations using Flickr30k [42]
+base [11] model for encoding text. It is pre-trained on a                             and ReferIt [25] under pointing game accuracy following
+range of datasets, including ImageNet-1K [44], Conceptual                             previous weakly-supervised visual grounding works [2, 3].
+Captions [48], SBU Captions [41], MS-COCO [35], and                                   To underscore the competitive edge of our method, we also
+
+
+                                                                                  5
+                                          RefCOCO+                   Text: “trees on the right”
+   Method            Box Supervision
+                                        Test A    Test B
+
+   InfoGround [20]          Yes          39.80    41.11
+   VMRM [13]                Yes          58.87    50.32                   Image             ALBEF            AMC          Ours
+   AMC [53]                 Yes          80.34    64.55              Text: “blue thermos very bottom”
+
+   ALBEF [28]               No           69.35    53.77
+   SelfEQ (ours)            No           75.10    55.49
+
+Table 2. Results on RefCOCO+ pointing game accuracy. SelfEQ               Image              ALBEF           AMC          Ours
+
+shows significant improvements over off-the-shelf ALBEF and         Text: “person right corner”
+competitive results compared to box-supervised methods.
+
+present its performance on RefCOCO+ [55], a challenging
+benchmark more commonly used for testing box-supervised
+methods [8, 13, 20, 37, 53].                                              Image              ALBEF           AMC          Ours
+
+                                                                    Text: “kangaroo furthest away facing right”
+4.1. Implementation Details
+Our experiments are conducted on a single computing node
+with 8 NVIDIA A40 GPUs. During the training phase, in-
+put images are resized to 256×256 and augmented with hor-                 Image              ALBEF           AMC          Ours
+izontal flipping, color jittering, and random grayscale con-        Text: “white bldg”
+version. We set up an Adam optimizer [26] with a learning
+rate of 1e-5 and a batch size of 448 across all experiments.
+We empirically set the RoI threshold k to 0.8 and the hy-
+perparameter λ to 1.0. For training with raw image-text
+pairs from the datasets, we employ the vision-language ob-
+jective Lvl (Sec. 3.1), while for the subset with equivalent
+                                                                          Image              ALBEF           AMC          Ours
+paraphrases, we use our self-consistency equivalence tun-
+ing objective LSelfEQ (Sec. 3.2) and corresponding vision-         Figure 4. Qualitative results of our method in challenging visual
+language objective Levl . The composite objective function         grounding scenarios compared to prior works. On top of each row
+is given by L = α · Lvl + (1 − α) · (LSelfEQ + Levl ), where       we show the reference text, the first column shows the image, then
+α is initially set to 0 and increments to 1, remaining con-        we show our base model ALBEF, the SotA box-supervised method
+                                                                   AMC, and finally we show results with our method SelfEQ.
+stant after the second epoch. Our hyperparameter values
+and schedules were determined empirically on a small vali-
+                                                                   our base model ALBEF (see first row in Table 3). Notably,
+dation subset.
+                                                                   our method outperforms almost all box-supervised meth-
+                                                                   ods on Flickr30k [8, 13, 20, 37]. In the weakly-supervised
+5. Experimental Results
+                                                                   setting, our method only comes second on ReferIt com-
+Our resulting model obtains the best performance on the            pared to g++[46] when trained on Visual Genome image-
+task of weakly-supervised visual grounding compared to             text pairs. This method leverages a custom architecture
+most methods under this setting and is comparable to sev-          to produce a mask and uses heatmap supervision from a
+eral prior works that rely on some of box supervision.             CLIP [43] model as pseudo-labels during training. We
+Moreover, our qualitative results show that our method can         posit that our contribution is orthogonal and our approach
+handle paraphrases and a larger vocabulary without the             would likely also benefit from similar supervision, since
+needed to increment the training dataset significantly.            CLIP is trained in a much larger image-text pair dataset.
+Flickr30k and ReferIt. We evaluate the effectiveness of            Despite differences, our method still obtains higher per-
+our proposed SelfEQ method in Table 1, demonstrating its           formance when trained on MS-COCO and the best per-
+substantial lead over GradCAM-based weakly-supervised              formance compared to all weakly-supervised methods on
+approaches. Our self-consistency equivalent tuning adapts          Flickr30K region-phrase grounding.
+well for both region-based (i.e.,, VG) and global-based            RefCOCO+. RefCOCO+ [55] serves as a rigorous bench-
+(i.e.,, COCO) image-text pairs, yielding a performance gain        mark for visual grounding, typically used to evaluate box-
+of 4.69% on Flickr30k and 7.68% on ReferIt, compared to            supervised techniques. In Table 2, we present the per-
+
+
+                                                               6
+                          RefCOCO+                                                         Text: “water”
+  Data      Objective                      Flickr30k ReferIt
+                         Test A Test B
+  -             Lvl      69.35    53.77      79.38       59.72
+                                                                                                   ALBEF                 AMC                   Ours
+  T             Lvl      72.30    54.22      78.75       65.86                              Equivalent Paraphrase: “H2O”
+  T + Te        Lvl      71.55    53.51      78.05       64.57
+  T + Te     LSelfEQ     75.10    55.49      81.90       67.40                  Image
+
+
+Table 3. Ablation studies on different ways to utilize extra equiv-                                ALBEF                 AMC                   Ours
+
+alent paraphrased data. The first row is off-the-shelf ALBEF per-                           Text: “right light”
+formance before tuning. T denotes the textual captions from the
+dataset, and T e corresponds to the associated equivalent para-
+phrases. Lvl is the vision-language objective, and LSelfEQ is our
+self-consistency equivalence tuning objective.                                                     ALBEF                 AMC                   Ours
+                                                                                            Equivalent Paraphrase: “right illuminator”
+
+formance of our weakly-supervised method (VG trained)
+                                                                                Image
+against box-supervised methods. Our results indicate that
+our approach is competitive without reliance on any form
+                                                                                                   ALBEF                 AMC                   Ours
+of box annotations and significantly improves over the base
+                                                                                           Text: “an umbrella”
+ALBEF model.
+Visual Grounding Analysis. Figure 4 provides qualita-
+tive results of our method in challenging scenarios, includ-
+ing occluded objects (row 1), small objects within complex                                         ALBEF                 AMC                   Ours
+                                                                                            Equivalent Paraphrase: “there is a brolly in the image”
+scenes (row 2), objects partially shown in the corner of the
+image (row 3), multiple similar objects (row 4), and abbre-                     Image
+viated text inputs (row 5). Our self-consistency equivalency
+tuning approach exhibits substantial improvements in the                                           ALBEF                 AMC                   Ours
+grounding capability of the base ALBEF [28] model. Re-
+markably, our approach even outperforms the state-of-the-                 Figure 5. Qualitative results of self-consistency across different
+art box-supervised method AMC [53] in multiple scenarios.                 equivalent paraphrases among different methods. For each image,
+                                                                          we show a text caption referring to an object in the first row and
+Self-Consistency Analysis. Figure 5 demonstrates qualita-                 an equivalent paraphrase in the second row. Each column shows
+tive results for the self-consistency capability across differ-           the results of our base model ALBEF, the SotA box-supervised
+ent equivalent paraphrases, encompassing terminology (row                 method AMC, and our SelfEQ method.
+1), synonym substitutions (row 2), and regional slang com-
+bining with different sentence structures (row 3). Although               exhibit a steady improvement with more text-image pairs.
+other methods succeed in localizing certain phrases, they                 Although ReferIt performance increases, the performance
+demonstrate inconsistencies for the equivalent paraphrases.               on RefCOCO+ Test A remains mostly unchanged. Addi-
+In contrast, our model finetuned with SelfEQ effectively                  tionally, the performance on Flickr30k notably decreases,
+establishes connections between semantically equivalent                   and there is a mixed effect on RefCOCO+ Test B, with half
+paraphrases, thereby enhancing the model self-consistency                 of the accuracy falling below the off-the-shelf ALBEF per-
+ability and potentially expanding its vocabulary.                         formance of 53.77%.
+5.1. Ablation Studies                                                         In contrast, SelfEQ consistently leads to performance en-
+                                                                          hancements with more equivalent paraphrases. Clear up-
+Data Quantity. We conduct experiments to investigate the                  ward trends are observed on Flickr30k, ReferIt, and Ref-
+impact of the data quantity of our generated equivalent para-             COCO+ Test A as more data with corresponding equiva-
+phrases and compare our self-consistency equivalence tun-                 lent paraphrases are added, meanwhile the gaps between the
+ing strategy against vision-language objectives. We ran-                  baselines generally widen. Notably, SelfEQ tuning main-
+domly sample portions of data from VG by 10% associated                   tains performance gains on Flickr30k, whereas the base-
+with our augmented equivalent paraphrases three times. To                 lines performances drop. Although the trend on RefCOCO+
+compare, we use the vision-language objective with VG                     Test B is not consistently increasing, it is essential to em-
+text-image pairs as baselines. In Figure 6, we show the                   phasize that RefCOCO+ Test B is only a subset, and SelfEQ
+mean and standard deviation pointing game accuracy. The                   illustrates more stable and effective tuning performance on
+performance of the base vision-language objective does not                it, compared to the base vision-language objective.
+
+
+                                                                      7
+                                                Flickr30k                                                          ReferIt                                                  RefCOCO+ Test A                                                         RefCOCO+ Test B
+ Pointing Game Accuracy (%)
+
+
+
+
+                                                                   Pointing Game Accuracy (%)
+
+
+
+
+                                                                                                                                    Pointing Game Accuracy (%)
+
+
+
+
+                                                                                                                                                                                                            Pointing Game Accuracy (%)
+                              82.0                                                              68.0                                                                                                                                     56.0
+                                                                                                         Baseline                                                75.0
+                              81.5                                                              67.5                                                                                                                                     55.5
+                                                                                                         SelfEQ (ours)
+                                                                                                                                                                 74.5
+                              81.0                                                              67.0                                                                                                                                     55.0
+                                                                                                                                                                 74.0
+                                                                                                66.5                                                             73.5
+                              80.5                                                                                                                                                         Baseline                                      54.5
+                                                                                                66.0                                                             73.0                      SelfEQ (ours)
+                              80.0                                                                                                                                                                                                       54.0
+                                                                                                65.5                                                             72.5
+                              79.5     Baseline                                                 65.0                                                                                                                                     53.5                      Baseline
+                                                                                                                                                                 72.0
+                              79.0     SelfEQ (ours)                                            64.5                                                             71.5                                                                    53.0                      SelfEQ (ours)
+                              78.5                                                              64.0                                                                                                                                     52.5
+                                 10 20 30 40 50 60 70 80 90 100                                    10 20 30 40 50 60 70 80 90 100                                   10 20 30 40 50 60 70 80 90 100                                          10 20 30 40 50 60 70 80 90 100
+                                            Data Amount (%)                                                   Data Amount (%)                                                Data Amount (%)                                                         Data Amount (%)
+
+Figure 6. Tuning performance with different data quantities on Flickr30k, ReferIt, RefCOCO+ Test A and Test B. The purple and cyan
+lines represent SelfEQ (ours) and ALBEF baseline losses (vision-language objective), respectively. We show the impact of progressively
+augmenting captions via LLM-prompting for generating equivalent paraphrases tuned with our SelfEQ objective. Best viewed in color.
+
+
+                                    Format      Objective         Flickr30k                                ReferIt                                                                            RefCOCO+
+                                                                                                                                                                       Lsim      Lcst                                                             Flickr30k        ReferIt
+                                    -               Lvl                             79.38                   59.72                                                                          Test A          Test B
+                                    C             Lvl                               79.90                   60.64                                                       ✓                   66.42          47.21                                     68.26           55.96
+                                    C            LSelfEQ                            81.28                   62.04                                                                  ✓        73.33          55.88                                     80.94           66.57
+                                                                                                                                                                        ✓          ✓        75.10          55.49                                     81.90           67.40
+                                    P               Lvl                             81.18                   61.18
+                                    P            LSelfEQ                            84.07                   62.75                                                 Table 5. Ablation studies on objective components of self-
+                                                                                                                                                                  consistency equivalence tuning objective LSelfEQ .
+Table 4. Comparisons on data augmentation strategy for global-
+based captions in MS-COCO with or without the paraphrases. C is
+the global-based captions from MS-COCO, and P is our Vicuna-                                                                                                      indicating the important role of equivalent paraphrases in
+13B processed object-centric phrases separately. The first row is                                                                                                 promoting self-consistency and grounding ability.
+the off-the-shelf ALBEF performance before tuning.                                                                                                                Objective. Table 5 evaluates each component within our
+    These observations indicate that more equivalent para-                                                                                                        self-consistency equivalence tuning objective. The Lsim
+phrases connecting with associated text phrases enable the                                                                                                        loss targets pixel-wise similarity, ensuring that maps for a
+model to acquire more valuable information during tuning.                                                                                                         caption and its equivalent paraphrase are identical. How-
+SelfEQ proves to be an effective and robust strategy for con-                                                                                                     ever, focusing solely on pixel-level similarity may neglect
+sistently improving performance with our generated para-                                                                                                          the precise spatial positioning of objects. To address this,
+phrases. With increased self-consistency augmented data,                                                                                                          the Lcst loss is proposed to identify the most likely cor-
+SelfEQ guides the model toward better grounding perfor-                                                                                                           rect object positions within the two maps (i.e., RoI). It
+mance by enhancing its self-consistency capabilities.                                                                                                             then encourages the model to yield consistently high atten-
+    Our method generates equivalent paraphrases for self-                                                                                                         tion scores within the RoI. By integrating both Lsim and
+consistency enhancement, but it also contributes additional                                                                                                       Lcst , self-consistency equivalence tuning objective fosters
+data for training. To ascertain the specific impact of our                                                                                                        the model to not only align global similarities but also to
+SelfEQ tuning strategy, we run a control experiment on                                                                                                            pinpoint accurate object locations through the mutual su-
+this variable. As shown in Table 3, we assess the model’s                                                                                                         pervision provided by a caption and its paraphrase, thereby
+performance when equivalent paraphrases are integrated                                                                                                            enhancing self-consistency and accuracy.
+as regular image-text pairs with vision-language objectives
+(Sec. 3.1). This comparison reveals that merely augment-                                                                                                          6. Conclusion
+ing the dataset with extra image-paraphrase pairs, without                                                                                                        In this paper, we propose a novel weakly-supervised tun-
+forming explicit linkages between the original text and its                                                                                                       ing approach coupled with a data augmentation strategy
+paraphrases, does not yield performance improvements.                                                                                                             to enhance the localization capabilities of a purely image-
+Data Augmentation. For global-based captions in MS-                                                                                                               text pair supervised model through self-consistency. Us-
+COCO, we preprocess the captions C to object-centric short                                                                                                        ing an open-source LLM, we expand a dataset with equiv-
+phrases P via LLM-prompting. As shown in Table 4, tuning                                                                                                          alent paraphrases tailored to be object-centric. The aug-
+with phrases P leads to better performance, benefiting both                                                                                                       mented data is used to finetune a base model employ-
+the vision-language objective (Lvl ) and our self-consistency                                                                                                     ing our novel self-consistency equivalence tuning objec-
+equivalence tuning objective (LSelfEQ ). This improvement                                                                                                         tive. Our approach has been rigorously validated across
+is probably attributed to short phrases allowing the model to                                                                                                     pretraining on diverse datasets, ranging from region-based
+focus on a specific region rather than the entire scene, align-                                                                                                   captions (i.e., VG) to global-based captions (i.e., COCO).
+ing more closely with the objective of visual grounding. By                                                                                                       Our method achieves superior and self-consistent perfor-
+utilizing equivalent paraphrases with our SelfEQ objective                                                                                                        mance on three benchmarks and is even competitive with
+(row 3 and 5), phrase chunking helps SelfEQ even more,                                                                                                            some box-supervised methods.
+
+
+                                                                                                                                    8
+References                                                                    Mostafa Dehghani, Matthias Minderer, Georg Heigold, Syl-
+                                                                              vain Gelly, et al. An image is worth 16x16 words: Trans-
+ [1] Samira Abnar and Willem Zuidema. Quantifying atten-                      formers for image recognition at scale. arXiv preprint
+     tion flow in transformers. arXiv preprint arXiv:2005.00928,              arXiv:2010.11929, 2020. 5
+     2020. 2                                                             [13] Zi-Yi Dou and Nanyun Peng. Improving pre-trained vision-
+ [2] Hassan Akbari, Svebor Karaman, Surabhi Bhargava, Brian                   and-language embeddings for phrase grounding. In Proceed-
+     Chen, Carl Vondrick, and Shih-Fu Chang. Multi-level multi-               ings of the 2021 Conference on Empirical Methods in Natu-
+     modal common semantic space for image-phrase grounding.                  ral Language Processing, pages 6362–6371, 2021. 1, 2, 5,
+     In Proceedings of the IEEE/CVF conference on computer vi-                6
+     sion and pattern recognition, pages 12476–12486, 2019. 2,           [14] Hao Fang, Saurabh Gupta, Forrest Iandola, Rupesh K Sri-
+     5                                                                        vastava, Li Deng, Piotr Dollár, Jianfeng Gao, Xiaodong He,
+ [3] Assaf Arbelle, Sivan Doveh, Amit Alfassy, Joseph Shtok,                  Margaret Mitchell, John C Platt, et al. From captions to vi-
+     Guy Lev, Eli Schwartz, Hilde Kuehne, Hila Barak Levi,                    sual concepts and back. In Proceedings of the IEEE con-
+     Prasanna Sattigeri, Rameswar Panda, et al. Detector-free                 ference on computer vision and pattern recognition, pages
+     weakly supervised grounding by separation. In Proceedings                1473–1482, 2015. 5
+     of the IEEE/CVF International Conference on Computer Vi-            [15] Yuting Gao, Jinfeng Liu, Zihan Xu, Jun Zhang, Ke Li, and
+     sion, pages 1801–1812, 2021. 2, 5                                        Chunhua Shen. Pyramidclip: Hierarchical feature align-
+ [4] Tom Brown, Benjamin Mann, Nick Ryder, Melanie Sub-                       ment for vision-language model pretraining. arXiv preprint
+     biah, Jared D Kaplan, Prafulla Dhariwal, Arvind Neelakan-                arXiv:2204.14095, 2022. 1
+     tan, Pranav Shyam, Girish Sastry, Amanda Askell, et al. Lan-        [16] Golnaz Ghiasi, Xiuye Gu, Yin Cui, and Tsung-Yi Lin. Scal-
+     guage models are few-shot learners. Advances in neural in-               ing open-vocabulary image segmentation with image-level
+     formation processing systems, 33:1877–1901, 2020. 12                     labels. In European Conference on Computer Vision, pages
+ [5] Hila Chefer, Shir Gur, and Lior Wolf. Transformer inter-                 540–557. Springer, 2022. 1
+     pretability beyond attention visualization. In Proceedings of       [17] Shashank Goel, Hritik Bansal, Sumit Bhatia, Ryan A
+     the IEEE/CVF conference on computer vision and pattern                   Rossi, Vishwa Vinay, and Aditya Grover. Cyclip: Cyclic
+     recognition, pages 782–791, 2021. 2                                      contrastive language-image pretraining. arXiv preprint
+ [6] Yen-Chun Chen, Linjie Li, Licheng Yu, Ahmed El Kholy,                    arXiv:2205.14459, 2022. 1
+     Faisal Ahmed, Zhe Gan, Yu Cheng, and Jingjing Liu. Uniter:          [18] Eyal Gomel, Tal Shaharbany, and Lior Wolf. Box-based re-
+     Universal image-text representation learning. In European                finement for weakly supervised and unsupervised localiza-
+     conference on computer vision, pages 104–120. Springer,                  tion tasks. In Proceedings of the IEEE/CVF International
+     2020. 1, 2, 3                                                            Conference on Computer Vision, pages 16044–16054, 2023.
+ [7] Wei-Lin Chiang, Zhuohan Li, Zi Lin, Ying Sheng, Zhang-                   2
+     hao Wu, Hao Zhang, Lianmin Zheng, Siyuan Zhuang, Yong-              [19] Xiuye Gu, Tsung-Yi Lin, Weicheng Kuo, and Yin Cui.
+     hao Zhuang, Joseph E. Gonzalez, Ion Stoica, and Eric P.                  Open-vocabulary object detection via vision and language
+     Xing. Vicuna: An open-source chatbot impressing gpt-4                    knowledge distillation. arXiv preprint arXiv:2104.13921,
+     with 90%* chatgpt quality, 2023. 2, 5                                    2021. 1
+                                                                         [20] Tanmay Gupta, Arash Vahdat, Gal Chechik, Xiaodong Yang,
+ [8] Samyak Datta, Karan Sikka, Anirban Roy, Karuna Ahuja,
+                                                                              Jan Kautz, and Derek Hoiem. Contrastive learning for
+     Devi Parikh, and Ajay Divakaran. Align2ground: Weakly
+                                                                              weakly supervised phrase grounding. In European Confer-
+     supervised phrase grounding guided by image-caption align-
+                                                                              ence on Computer Vision, pages 752–768. Springer, 2020. 1,
+     ment. In Proceedings of the IEEE/CVF international con-
+                                                                              2, 5, 6
+     ference on computer vision, pages 2601–2610, 2019. 2, 5,
+                                                                         [21] Syed Ashar Javed, Shreyas Saxena, and Vineet Gandhi.
+     6
+                                                                              Learning unsupervised visual grounding through semantic
+ [9] Chaorui Deng, Qi Wu, Qingyao Wu, Fuyuan Hu, Fan Lyu,                     self-supervision. Twenty-Eighth International Joint Confer-
+     and Mingkui Tan. Visual grounding via accumulated atten-                 ence on Artificial Intelligence (IJCAI), 2019. 2, 5
+     tion. In Proceedings of the IEEE conference on computer
+                                                                         [22] Chao Jia, Yinfei Yang, Ye Xia, Yi-Ting Chen, Zarana Parekh,
+     vision and pattern recognition, pages 7746–7755, 2018. 2
+                                                                              Hieu Pham, Quoc Le, Yun-Hsuan Sung, Zhen Li, and Tom
+[10] Jiajun Deng, Zhengyuan Yang, Tianlang Chen, Wengang                      Duerig. Scaling up visual and vision-language representa-
+     Zhou, and Houqiang Li. Transvg: End-to-end visual ground-                tion learning with noisy text supervision. In International
+     ing with transformers. In Proceedings of the IEEE/CVF                    conference on machine learning, pages 4904–4916. PMLR,
+     International Conference on Computer Vision, pages 1769–                 2021. 1
+     1779, 2021. 2                                                       [23] Chao Jia, Yinfei Yang, Ye Xia, Yi-Ting Chen, Zarana Parekh,
+[11] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina                   Hieu Pham, Quoc V. Le, Yun-Hsuan Sung, Zhen Li, and Tom
+     Toutanova.       Bert: Pre-training of deep bidirectional                Duerig. Scaling up visual and vision-language representation
+     transformers for language understanding. arXiv preprint                  learning with noisy text supervision. In International Con-
+     arXiv:1810.04805, 2018. 5                                                ference on Machine Learning, 2021. 1
+[12] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov,              [24] Aishwarya Kamath, Mannat Singh, Yann LeCun, Gabriel
+     Dirk Weissenborn, Xiaohua Zhai, Thomas Unterthiner,                      Synnaeve, Ishan Misra, and Nicolas Carion.           Mdetr-
+
+
+                                                                     9
+     modulated detection for end-to-end multi-modal understand-          [36] Jiasen Lu, Dhruv Batra, Devi Parikh, and Stefan Lee. Vilbert:
+     ing. In Proceedings of the IEEE/CVF International Confer-                Pretraining task-agnostic visiolinguistic representations for
+     ence on Computer Vision, pages 1780–1790, 2021. 1, 2                     vision-and-language tasks. Advances in neural information
+[25] Sahar Kazemzadeh, Vicente Ordonez, Mark Matten, and                      processing systems, 32, 2019. 3
+     Tamara Berg. Referitgame: Referring to objects in pho-              [37] Jiasen Lu, Vedanuj Goswami, Marcus Rohrbach, Devi
+     tographs of natural scenes. In Proceedings of the 2014 con-              Parikh, and Stefan Lee. 12-in-1: Multi-task vision and
+     ference on empirical methods in natural language processing              language representation learning. In Proceedings of the
+     (EMNLP), pages 787–798, 2014. 2, 5                                       IEEE/CVF conference on computer vision and pattern
+[26] Diederik P Kingma and Jimmy Ba. Adam: A method for                       recognition, pages 10437–10446, 2020. 2, 5, 6
+     stochastic optimization. arXiv preprint arXiv:1412.6980,            [38] Timo Lüddecke and Alexander Ecker. Image segmenta-
+     2014. 6                                                                  tion using text and image prompts. In Proceedings of
+[27] Ranjay Krishna, Yuke Zhu, Oliver Groth, Justin Johnson,                  the IEEE/CVF Conference on Computer Vision and Pattern
+     Kenji Hata, Joshua Kravitz, Stephanie Chen, Yannis Kalan-                Recognition, pages 7086–7096, 2022. 1
+     tidis, Li-Jia Li, David A Shamma, et al. Visual genome:             [39] George A Miller. Wordnet: a lexical database for english.
+     Connecting language and vision using crowdsourced dense                  Communications of the ACM, 38(11):39–41, 1995. 5, 12
+     image annotations. International journal of computer vision,        [40] Grégoire Montavon, Sebastian Lapuschkin, Alexander
+     123:32–73, 2017. 2, 5, 12                                                Binder, Wojciech Samek, and Klaus-Robert Müller. Ex-
+[28] Junnan Li, Ramprasaath Selvaraju, Akhilesh Gotmare,                      plaining nonlinear classification decisions with deep taylor
+     Shafiq Joty, Caiming Xiong, and Steven Chu Hong Hoi.                     decomposition. Pattern recognition, 65:211–222, 2017. 2
+     Align before fuse: Vision and language representation learn-        [41] Vicente Ordonez, Girish Kulkarni, and Tamara Berg.
+     ing with momentum distillation. Advances in Neural Infor-                Im2text: Describing images using 1 million captioned pho-
+     mation Processing Systems, 34, 2021. 1, 2, 3, 5, 6, 7, 17                tographs. Advances in neural information processing sys-
+[29] Junnan Li, Dongxu Li, Caiming Xiong, and Steven Hoi.                     tems, 24, 2011. 5
+     Blip: Bootstrapping language-image pre-training for uni-            [42] Bryan A Plummer, Liwei Wang, Chris M Cervantes,
+     fied vision-language understanding and generation. arXiv                 Juan C Caicedo, Julia Hockenmaier, and Svetlana Lazeb-
+     preprint arXiv:2201.12086, 2022. 1, 17                                   nik. Flickr30k entities: Collecting region-to-phrase corre-
+[30] Junnan Li, Dongxu Li, Silvio Savarese, and Steven Hoi.                   spondences for richer image-to-sentence models. In Pro-
+     Blip-2: Bootstrapping language-image pre-training with                   ceedings of the IEEE international conference on computer
+     frozen image encoders and large language models. arXiv                   vision, pages 2641–2649, 2015. 2, 5
+     preprint arXiv:2301.12597, 2023. 17                                 [43] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya
+[31] Liunian Harold Li, Mark Yatskar, Da Yin, Cho-Jui Hsieh,                  Ramesh, Gabriel Goh, Sandhini Agarwal, Girish Sastry,
+     and Kai-Wei Chang. Visualbert: A simple and perfor-                      Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen
+     mant baseline for vision and language. arXiv preprint                    Krueger, and Ilya Sutskever. Learning transferable visual
+     arXiv:1908.03557, 2019. 3                                                models from natural language supervision. In Proceedings
+[32] Liunian Harold Li, Pengchuan Zhang, Haotian Zhang, Jian-                 of the 38th International Conference on Machine Learning,
+     wei Yang, Chunyuan Li, Yiwu Zhong, Lijuan Wang, Lu                       pages 8748–8763. PMLR, 2021. 1, 6
+     Yuan, Lei Zhang, Jenq-Neng Hwang, et al. Grounded                   [44] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, San-
+     language-image pre-training.       In Proceedings of the                 jeev Satheesh, Sean Ma, Zhiheng Huang, Andrej Karpathy,
+     IEEE/CVF Conference on Computer Vision and Pattern                       Aditya Khosla, Michael Bernstein, et al. Imagenet large
+     Recognition, pages 10965–10975, 2022. 1                                  scale visual recognition challenge. International journal of
+[33] Liunian Harold Li, Pengchuan Zhang, Haotian Zhang, Jian-                 computer vision, 115:211–252, 2015. 5
+     wei Yang, Chunyuan Li, Yiwu Zhong, Lijuan Wang, Lu                  [45] Ramprasaath R Selvaraju, Michael Cogswell, Abhishek Das,
+     Yuan, Lei Zhang, Jenq-Neng Hwang, et al. Grounded                        Ramakrishna Vedantam, Devi Parikh, and Dhruv Batra.
+     language-image pre-training.       In Proceedings of the                 Grad-cam: Visual explanations from deep networks via
+     IEEE/CVF Conference on Computer Vision and Pattern                       gradient-based localization. In Proceedings of the IEEE in-
+     Recognition, pages 10965–10975, 2022. 1                                  ternational conference on computer vision, pages 618–626,
+[34] Yangguang Li, Feng Liang, Lichen Zhao, Yufeng Cui, Wanli                 2017. 1, 2, 3, 5
+     Ouyang, Jing Shao, Fengwei Yu, and Junjie Yan. Su-                  [46] Tal Shaharabany and Lior Wolf. Similarity maps for self-
+     pervision exists everywhere: A data efficient contrastive                training weakly-supervised phrase grounding. In Proceed-
+     language-image pre-training paradigm.        arXiv preprint              ings of the IEEE/CVF Conference on Computer Vision and
+     arXiv:2110.05208, 2021. 1                                                Pattern Recognition, pages 6925–6934, 2023. 2, 5, 6
+[35] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays,            [47] Tal Shaharabany, Yoad Tewel, and Lior Wolf. What is
+     Pietro Perona, Deva Ramanan, Piotr Dollár, and C Lawrence               where by looking: Weakly-supervised open-world phrase-
+     Zitnick. Microsoft coco: Common objects in context. In                   grounding without text inputs. Advances in Neural Informa-
+     Computer Vision–ECCV 2014: 13th European Conference,                     tion Processing Systems, 35:28222–28237, 2022. 2, 5
+     Zurich, Switzerland, September 6-12, 2014, Proceedings,             [48] Piyush Sharma, Nan Ding, Sebastian Goodman, and Radu
+     Part V 13, pages 740–755. Springer, 2014. 2, 5, 12                       Soricut. Conceptual captions: A cleaned, hypernymed, im-
+
+
+                                                                    10
+     age alt-text dataset for automatic image captioning. In Pro-
+     ceedings of the 56th Annual Meeting of the Association for
+     Computational Linguistics (Volume 1: Long Papers), pages
+     2556–2565, 2018. 2, 5, 12
+[49] Amanpreet Singh, Ronghang Hu, Vedanuj Goswami, Guil-
+     laume Couairon, Wojciech Galuba, Marcus Rohrbach, and
+     Douwe Kiela. Flava: A foundational language and vision
+     alignment model. In Proceedings of the IEEE/CVF Con-
+     ference on Computer Vision and Pattern Recognition, pages
+     15638–15650, 2022. 1
+[50] Josiah Wang and Lucia Specia. Phrase localization without
+     paired training examples. In Proceedings of the IEEE/CVF
+     International Conference on Computer Vision, pages 4663–
+     4672, 2019. 2
+[51] Fanyi Xiao, Leonid Sigal, and Yong Jae Lee. Weakly-
+     supervised visual grounding of phrases with linguistic struc-
+     tures. In Proceedings of the IEEE Conference on Computer
+     Vision and Pattern Recognition, pages 5945–5954, 2017. 2
+[52] Jiarui Xu, Shalini De Mello, Sifei Liu, Wonmin Byeon,
+     Thomas Breuel, Jan Kautz, and Xiaolong Wang. Groupvit:
+     Semantic segmentation emerges from text supervision. In
+     Proceedings of the IEEE/CVF Conference on Computer Vi-
+     sion and Pattern Recognition, pages 18134–18144, 2022. 1
+[53] Ziyan Yang, Kushal Kafle, Franck Dernoncourt, and Vi-
+     cente Ordonez. Improving visual grounding by encouraging
+     consistent gradient-based explanations. In Proceedings of
+     the IEEE/CVF Conference on Computer Vision and Pattern
+     Recognition, pages 19165–19174, 2023. 1, 2, 5, 6, 7
+[54] Lewei Yao, Runhui Huang, Lu Hou, Guansong Lu, Minzhe
+     Niu, Hang Xu, Xiaodan Liang, Zhenguo Li, Xin Jiang, and
+     Chunjing Xu. Filip: Fine-grained interactive language-image
+     pre-training. arXiv preprint arXiv:2111.07783, 2021. 1
+[55] Licheng Yu, Patrick Poirson, Shan Yang, Alexander C Berg,
+     and Tamara L Berg. Modeling context in referring expres-
+     sions. In Computer Vision–ECCV 2016: 14th European
+     Conference, Amsterdam, The Netherlands, October 11-14,
+     2016, Proceedings, Part II 14, pages 69–85. Springer, 2016.
+     6
+[56] Alireza Zareian, Kevin Dela Rosa, Derek Hao Hu, and Shih-
+     Fu Chang. Open-vocabulary object detection using captions.
+     In Proceedings of the IEEE/CVF Conference on Computer
+     Vision and Pattern Recognition, pages 14393–14402, 2021.
+     1
+[57] Feifei Zhai, Saloni Potdar, Bing Xiang, and Bowen Zhou.
+     Neural models for sequence chunking. In Proceedings of the
+     AAAI conference on artificial intelligence, 2017. 4, 12
+[58] Jianming Zhang, Sarah Adel Bargal, Zhe Lin, Jonathan
+     Brandt, Xiaohui Shen, and Stan Sclaroff. Top-down neu-
+     ral attention by excitation backprop. International Journal
+     of Computer Vision, 126(10):1084–1102, 2018. 5
+
+
+
+
+                                                                     11
+Appendix                                                                   Q: "a group of sheep with in grassy area next to trees"
+                                                                           A: ["a group of sheep", "grassy area", "trees"]
+                                                                           Q: "a train is on going down the track while people watch"
+We present details about our two-level LLM prompts to                      A: ["a train", "the track", "people"]
+
+obtain high-quality paraphrases for region-centric phrases,                Q: "street sign in front of a clear glass building"
+                                                                           A: ["street sign", "a clear glass building"]
+provide examples of such extracted paraphrases, conduct                    Q: "a woman sitting on a bus with a green purse looking at her cell phone"
+                                                                           A: ["a woman", "a bus", "a green purse", "her cell phone"]
+additional evaluations on in-the-wild captions on CC3M,
+                                                                           Q: "a photo of a bus that is boarding passengers"
+justify our selection of ALBEF as our base model, evalu-                   A: ["a bus", "boarding passengers"]
+ate in more detail the choice of object-centric captions, and              Q: "this is an image of a bathroom which is empty"
+                                                                           A: ["a bathroom"]
+provide additional qualitative results.                                    Q: "an individual covers himself under an umbrella on a rainy day"
+                                                                           A: ["an individual", "an umbrella"]
+                                                                           Q: "a city street scene with cars and a person crossing the street"
+A. LLM-Prompting Details                                                   A: ["cars", "a person", "the street"]
+                                                                           Q: [𝑻]
+                                                                           A:
+This section presents prompting details and generated ex-
+amples of our proposed two-level self-consistency data aug-                Figure 8. In-context few-shot LLM-Prompt for our first-level self-
+mentation method (refer to Sec. 3.3). As shown in Figure 7,                consistency data augmentation. We leverage an LLM for phrase
+we classify textual annotations from existing datasets into                chunking to obtain object-centric captions from captions that de-
+global-based captions that describe the entire image, and                  scribe images globally. [T ] is the query text. A in the last row is
+region-based captions that describe a specific region within               followed by the output.
+the image. In our experiments, we identify captions from
+Visual Genome (VG) [27] as region-based captions, while                    ing, the output chunks include nouns, verbs, and preposi-
+captions from MS-COCO [35] and Conceptual Captions                         tional phrases. However, our SelfEQ method focuses on
+3M (CC3M) [48] are referred to as global-based captions.                   object-centric phrases rather than verbs or prepositions. Ad-
+                                                                           ditionally, there are some abstract nouns such as “photo”,
+                       Equivalent Paraphrase 𝑻𝒆                            “image” and “scene” that are commonly used in annotations
+                                                                           but do not benefit visual grounding. We select several cap-
+                                                                           tions containing abstract nouns, verbs, and prepositions as
+                                   LLM
+                                                                           our query texts in our prompts to guide the LLM to generate
+                                                                           the chunks in a task-specific way.
+       Object-centric Phrase                   Region-based Caption
+                                    T
+
+    LLM                                                                    Paraphrase Generation. Our second-level prompts aim
+                                                                           to generate paraphrased captions through substitute words
+                               Region-based?
+                                                  Yes                      and for this purpose we use an in-context few-shot prompt
+                  No
+                                                                           with an LLM. Figure 9 shows the specific prompt we use
+                                 Caption
+                                                                           for input region-based captions. As in-context examples,
+                                                                           we select four captions with different sentence structures
+Figure 7. An overview of our two-level self-consistency data aug-          or where the primary object is playing different syntactic
+mentation approach. For global-based captions, we use an LLM               roles: A complex noun phrase (set 1), an existential struc-
+to chunk object-centric phrases T with our first-level prompting.          ture (set 3), a subject followed by a passive verb phrase (set
+The obtained phrases or region-based captions T are further in-            4), and a noun phrase modified by a prepositional phrase
+put to an LLM in the second-level prompting to obtain equivalent
+                                                                           (set 6). We also add two short noun phrases (sets 2, 5) to
+paraphrases T e .
+                                                                           represent relevant captions. For the expected output A, we
+                                                                           first detect the primary object (i.e., the “group” field) in the
+A.1. Prompt Design                                                         query text, then use WordNet synsets [39] to generate re-
+We adopt an in-context learning [4] strategy in our LLM-                   lationships (i.e., the “synonym”, “antonym”, “hypernym”,
+prompt design. Each pair of our prompts encompasses a                      and “meronym” fields) for the primary object. We further
+query text Q and an expected answer A. The query texts Q                   remove inaccurate words as the final expected output A in
+were selected and modified based on generation quality and                 our LLM-prompt.
+successful rate on a small validation subset.                                  Figure 10 shows our in-context few-shot LLM-prompt
+                                                                           for object-centric phrases obtained from our first-level data
+Phrase Chunking. To obtain object-centric phrases, we                      augmentation. It is based on our LLM-prompt for region-
+prompt an LLM for global-based captions as shown in                        based captions (Figure 9), but we further chunk the query
+Figure 8. Compared to previous phrase chunking meth-                       texts into object-centric phrases for adaption and modify
+ods [57], this LLM-prompt-based approach aligns more                       them (e.g., articles, pronouns) empirically on a small val-
+closely with our objective. In conventional phrase chunk-                  idation subset.
+
+
+                                                                      12
+Q: "a smiling, holding something and standing man"                                       Q: "two men"
+A: {"group": "man",                                                                      A: {"group": "men",
+    "synonym": ["adult male","gentleman"],                                                   "synonym": ["adult males","gentlemen"],
+    "antonym": ["woman"],                                                                    "antonym": ["women"],
+    "hypernym": ["adult","grownup","male","male person","human being","human"],              "hypernym": ["adults","grownups","males","male people","human beings","humans"],
+    "meronym": ["man body","man head","man arms","man legs"]}                                "meronym": ["men bodies","men heads","men arms","men legs"]}
+Q: "a desk"                                                                              Q: "a desk"
+A: {"group": "desk",                                                                     A: {"group": "desk",
+    "synonym": ["table","writing desk"],                                                     "synonym": ["table","writing desk"],
+    "antonym": [],                                                                           "antonym": [],
+                                                                                             "hypernym": ["writer tool","furniture"],
+    "hypernym": ["writer tool","furniture"],
+                                                                                             "meronym": ["desktop","desk leg"]}
+    "meronym": ["desktop","desk leg"]}
+                                                                                         Q: "this dark grey carpet"
+Q: "there is dark grey carpet on the floor"
+                                                                                         A: {"group": "carpet",
+A: {"group": "carpet",                                                                       "synonym": ["rug","carpeting"],
+    "synonym": ["rug","carpeting"],                                                          "antonym": ["wall"],
+    "antonym": ["wall"],                                                                     "hypernym": ["floor cover","floor covering","furnishing"],
+    "hypernym": ["floor cover","floor covering","furnishing"],                               "meronym": ["carpet edging"]}
+    "meronym": ["carpet edging"]}                                                        Q: "street"
+Q: "street is covered with snow"                                                         A: {"group": "street",
+A: {"group": "street",                                                                       "synonym": [],
+    "synonym": [],                                                                           "antonym": ["sky"],
+    "antonym": ["sky"],                                                                      "hypernym": ["thoroughfare","road","path","way"],
+    "hypernym": ["thoroughfare","road","path","way"],                                        "meronym": []}
+    "meronym": []}                                                                       Q: "the white books"
+Q: "white books"                                                                         A: {"group": "books",
+A: {"group": "books",                                                                        "synonym": [],
+    "synonym": [],                                                                           "antonym": ["computers", "pens"],
+    "antonym": ["computer", "pen"],                                                          "hypernym": ["publications","paper"],
+    "hypernym": ["publication","paper"],                                                     "meronym": ["book cover"]}
+    "meronym": ["book cover"]}                                                           Q: "tree with sparse leaves"
+Q: "tree with sparse leaves"                                                             A: {"group": "tree",
+A: {"group": "tree",                                                                         "synonym": [],
+    "synonym": [],                                                                           "antonym": [],
+    "antonym": [],                                                                           "hypernym": ["ligneous plant","woody plant","plant","vegetation"],
+                                                                                             "meronym": ["tree bole","tree burl","tree crown","tree limb","tree stump",
+    "hypernym": ["ligneous plant","woody plant","plant","vegetation"],
+                                                                                                         "tree branch","tree stump","tree trunk","treetop","tree trunk"]}
+    "meronym": ["tree bole","tree burl","tree crown","tree limb","tree stump",
+                 "tree branch","tree stump","tree trunk","treetop","tree trunk"]}        Q: [𝑻]
+                                                                                         A:
+Q: [𝑻]
+A:
+                                                                                         Figure 10. In-context few-shot LLM-Prompt for our second-level
+Figure 9. In-context few-shot LLM-Prompt for our second-level                            self-consistency data augmentation on MS-COCO. We leverage
+self-consistency data augmentation on Visual Genome (VG). We                             an LLM to generate paraphrases for the given textual descriptions
+leverage an LLM to generate paraphrases for the given textual de-                        (object-centric phrases). [T ] is the object-centric phrase obtained
+scriptions (region-based captions). [T ] is the regional-based cap-                      from the first-level phrase chunking. A in the last row is followed
+tion, and A in the last row is followed by the expected output.                          by the expected output.
+
+A.2. Generated Data Examples                                                             generate object-centric phrases A1. In this way, we sepa-
+                                                                                         rate a broad descriptive region into several specific object-
+This section presents generated examples from our two-
+                                                                                         centric regions in a scenario, aligning more closely with
+level self-consistency augmentation approach. We apply
+                                                                                         the objective of visual grounding. Additionally, it may
+paraphrase generation for VG and both phrase chunking and
+                                                                                         fix small issues with grammar and typos (e.g., “siting at
+paraphrase generation for MS-COCO and CC3M.
+                                                                                         there desks”), potentially providing higher quality textual
+                                                                                         descriptions. Similar to VG, the second level prompting
+Visual Genome. Figure 11 shows generated example
+                                                                                         leads to equivalent paraphrases A2, including diverse types
+paraphrases for VG. Since our LLM-prompt contains var-
+                                                                                         for 84.47% of object-centric phrases.
+ious sentence structures in the provided in-context exam-
+ples, the generated data showcases the successful detection                              CC3M. Figure 13 showcases generated data from two-
+of primary objects (“group”) for a variety of input captions.                            level self-consistency data augmentation for CC3M. Com-
+To ensure the quality of equivalent paraphrases, we allow                                pared to manually annotated data from VG and MS-COCO
+the LLM to leave blanks in relevant fields if no appropriate                             (See Figures 11 and 12), web-crawled Alt-Text-image pairs
+words are available. In total, the LLM generates equivalent                              in CC3M are noisier and potentially unaligned. We apply
+paraphrases for 74.56% of captions for VG. The different                                 our first-level augmentation, phrase chunking A1, not only
+types of equivalent paraphrases include general synonyms                                 for object-centric phrases, but also as a filtering strategy to
+(e.g., “bicycle”, “sofa”), formal or technical terms (e.g.,                              extract meaningful words from likely ambiguous sentences.
+“pedal cycle”), colloquial or regional variants (e.g., “push-                            The second-level augmentation further generates equivalent
+bike”, “settee”) and descriptive synonyms (e.g., “scattered                              paraphrases A2 for our SelfEQ tuning.
+trees”).
+                                                                                         B. Effectiveness on Noisy Web-Crawled Data
+MS-COCO. Generated examples for MS-COCO are
+shown in Figure 12. Captions in MS-COCO describe the                                     We run additional experiments using two different subsets
+entire images, so we augment them with our two-level                                     of data from the CC3M dataset, each containing ∼200k
+phrase augmentation: Phrase chunking and equivalent para-                                image-text pairs. The first subset, which we refer to as
+phrase generation. In the first level, we prompt an LLM to                               ranked, corresponds to a set of high-quality image-text pairs
+
+
+                                                                                    13
+       Q: "a stadium"                                                                              Q: "hills are behind the people"
+       A: { "group": "stadium",                                                                    A: { "group": "hill",
+            "synonym": ["arena", "sports stadium"],                                                     "synonym": ["mountain", "rising ground"],
+            "antonym": [],                                                                              "antonym": ["valley", "low land"],
+            "hypernym": ["sports facility", "outdoor sports venue", "place of sporting events"],        "hypernym": ["landform", "terrain", "elevation"],
+            "meronym": ["stadium seating", "stadium lights", "stadium sound system"]}                   "meronym": ["hill crest", "hill top", "hill summit", "hillside", "hill foot"]}
+
+
+
+
+       Q: "a brown and wooden podium"                                                              Q: "a grey couch"
+       A: { "group": "podium",                                                                     A: { "group": "couch",
+            "synonym": ["platform", "lectern", "speakers platform"],                                    "synonym": ["sofa", "settee"],
+            "antonym": ["desk"],                                                                        "antonym": [],
+            "hypernym": ["stage", "platform", "speaking platform"],                                     "hypernym": ["furniture", "seating"],
+            "meronym": ["podium step", "podium base"]}                                                  "meronym": ["couch cushion", "couch cover", "couch pillow"]}
+
+
+
+
+       Q: "two bikes side by side"                                                                 Q: "sparse trees"
+       A: { "group": "bike",                                                                       A: { "group": "trees",
+            "synonym" : ["bicycle", "pushbike", "pedal cycle"],                                         "synonym": ["scattered trees"],
+            "antonym" : ["car"],                                                                        "antonym": ["dense forest"],
+            "hypernym" : ["vehicle", "transport", "two wheeler"],                                       "hypernym": ["group of trees"],
+            "meronym" : ["bike frame", "bike pedal", "bike tire", "bike handlebar"]}                    "meronym": ["tree", "tree trunk"]}
+
+
+
+
+      Q: "palm trees near building"                                                                Q: "an orange fruit"
+      A: { "group": "palm tree",                                                                   A: { "group": "orange fruit",
+           "synonym": [],                                                                               "synonym": ["citrus fruit", "orange"],
+           "antonym": [],                                                                               "antonym": [],
+           "hypernym": ["tree", "plant"],                                                               "hypernym": ["citrus fruit", "fruit"],
+           "meronym": ["palm frond"]}                                                                   "meronym": ["orange peel", "orange juice", "orange segments"]}
+
+
+
+
+Figure 11. LLM generated examples for VG. Q represents the query text associated with the image. A corresponds to the output of our
+second-level self-consistency data augmentation. “group” denotes the detected primary object, and it further generates relationships such
+as “synonym,” “antonym,” “meronym,” and “hypernym” regarding with the identified “group.”
+                                                                                               14
+          Q: "People all siting at there desks with drinks ."                                        Q: "Many colorful cupcakes are stacked below a similar cake."
+          A1: "object-centric phrases": ["people", "desks", "drinks"]                                A1: "object-centric phrases": ["many colorful cupcakes", "a similar cake"]
+          A2: {"group": "people",                                                                    A2: {"group": "cupcakes",
+               "synonym": ["human beings", "humans"],                                                     "synonym": [],
+               "antonym": ["machine"],                                                                    "antonym": ["cake"],
+               "hypernym": ["living organism", "mankind", "humanity", "person", "creatures"],             "hypernym": ["sweet", "baked goods", "dessert", "pastry", "food"],
+               "meronym": ["people body", "people head", "people arms", "people legs"]}                   "meronym": ["cupcake wrapper", "cupcake liner", "cupcake filling",
+              {"group": "desks",                                                                                       "cupcake frosting", "cupcake decoration"]}
+               "synonym": ["tables", "writing desks"],                                                   {"group": "cake",
+               "antonym": [],                                                                             "synonym": ["dessert", "sweet"],
+               "hypernym": ["writer tool", "furniture"],                                                  "antonym": ["salad"],
+               "meronym": ["desk top", "desk leg"]}                                                       "hypernym": ["food", "edible", "baked goods"],
+              {"group": "drinks",                                                                         "meronym": ["cake ingredients", "cake decorations", "cake icing", "cake recipe",
+               "synonym": ["beverages", "refreshments"],                                                               "cake mix", "cake baking", "cake layers", "cake pan", "cake recipes",
+               "antonym": ["food"],                                                                                    "cake ingredients"]}
+               "hypernym": ["nonalcoholic beverages", "alcoholic beverages", "beverage",
+                              "drink"],
+               "meronym": ["drink container", "drink cup"]}
+
+
+
+
+          Q: "A white and gray cat laying underneath an umbrella."                                   Q: "A group of people that are standing near a tennis net."
+          A1: "object-centric phrases": ["a white and gray cat", "an umbrella"]                      A1: "object-centric phrases": ["a group of people", "a tennis net"]
+          A2: {"group": "cat",                                                                       A2: {"group": "group of people",
+               "synonym": ["feline", "cat animal", "cat creature"],                                       "synonym": ["crowd", "assembly", "multitude"],
+               "antonym": [],                                                                             "antonym": ["solitude", "loneliness"],
+               "hypernym": ["mammal", "animal", "pet"],                                                   "hypernym": ["collective noun", "noun", "group", "mob", "crowd", "assembly"],
+               "meronym": ["cat fur", "cat eyes", "cat nose", "cat paws", "cat tail", "cat body",         "meronym": ["people in the group"]}
+                            "cat head", "cat ears"]}                                                     {"group": "tennis net",
+              {"group": "umbrella",                                                                       "synonym": ["tennis court net", "nets for tennis"],
+               "synonym": ["parasol", "brolly"],                                                          "antonym": [],
+               "antonym": ["sun"],                                                                        "hypernym": ["tennis court", "tennis netting"],
+               "hypernym": ["covering", "shelter", "protection", "canopy"],                               "meronym": ["tennis court net post", "tennis net mesh"]}
+               "meronym": ["umbrella handle", "umbrella frame", "umbrella fabric",
+                            "umbrella spike"]}
+
+
+
+
+         Q: "A white clock mounted to a white wall next to a curtain."                               Q: "In this scene we see a person flying a kite with a flag attached."
+         A1: "object-centric phrases": ["a white clock", "a white wall", "a curtain"]                A1: "object-centric phrases": ["a person", "flying a kite", "a flag"]
+         A2: {"group": "clock",                                                                      A2: {"group": "person",
+              "synonym": ["timepiece", "clockwork"],                                                      "synonym": ["human being", "individual", "someone"],
+              "antonym": ["stopwatch"],                                                                   "antonym": ["non person", "thing"],
+              "hypernym": ["timekeeper", "time measuring instrument"],                                    "hypernym": ["human", "man", "woman", "personhood", "life form"],
+              "meronym": ["clock face", "clock hands", "clock numbers"]}                                  "meronym": ["person body", "person head"]}
+             {"group": "wall",                                                                           {"group": "kite",
+              "synonym": [],                                                                              "synonym": ["flying a kite", "kite flying"],
+              "antonym": ["light"],                                                                       "antonym": ["not flying a kite"],
+              "hypernym": ["partition", "divider", "architecture"],                                       "hypernym": ["sport", "recreation", "hobby"],
+              "meronym": ["wall hanging"]}                                                                "meronym": ["kite string", "kite tail", "kite stick"]}
+             {"group": "curtain",                                                                        {"group": "flag",
+              "synonym": ["drape", "curtains"],                                                           "synonym": ["banner", "standard"],
+              "antonym": [],                                                                              "antonym": ["country"],
+              "hypernym": ["window treatment", "window covering", "home furnishing",                      "hypernym": ["national symbol", "emblem", "sign"],
+                            "textile"],                                                                   "meronym": ["flag pole", "flag halyard"]}
+              "meronym": ["curtain rod", "curtain tieback"]}
+
+
+
+
+Figure 12. LLM generated examples for MS-COCO. Q represents the query text associated with the image. A1 is the object-centric phrase
+obtained from the first-level self-consistency data augmentation, while A2 corresponds to the second level. For each object-centric phrase
+in A1, LLM detects primary objects “group” and generates relevant relationships in A2.
+                                                                                                    15
+          Q: "golden vintage greeting card on a black background"                                     Q: "if we remove any side of the triangle the fire can not happen"
+          A1: "object-centric phrases": ["golden vintage greeting card"]                              A1: "object-centric phrases": ["triangle"]
+          A2: {"group": "greeting card",                                                              A2: {"group": "triangle",
+               "synonym": ["greeting", "postcard", "holiday card"],                                        "synonym": ["3 sided shape", "triangle shape"],
+               "antonym": [],                                                                              "antonym": ["circle"],
+               "hypernym": ["communication", "message", "note"],                                           "hypernym": ["polygon", "2 dimensional shape", "geometric shape"],
+               "meronym": ["card base", "card front", "card back"]}                                        "meronym": ["triangle sides", "triangle angles"]}
+
+
+
+
+          Q: "front view of passenger airplane flying in the sky vector art illustration"             Q: "dry corn or maize plants in a farm field during harvesting with rows of uncut plants
+          A1: "object-centric phrases": ["passenger airplane"]                                            alongside stubble in a receding"
+          A2: {"group": "passenger airplane",                                                         A1: "object-centric phrases": ["farm field"]
+               "synonym": ["airliner", "commercial airplane", "jet"],                                 A2: {"group": "field",
+               "antonym": ["cargo airplane"],                                                              "synonym": ["paddock", "meadow", "garden", "crop"],
+               "hypernym": ["aircraft", "aeroplane", "airship", "airboat", "airplane", "jetplane",         "antonym": ["city"],
+                             "airliner", "jetliner"],                                                      "hypernym": ["agricultural land", "growing area", "cultivated land", "arable land",
+               "meronym": ["passenger cabin", "cockpit", "wings", "tail", "undercarriage",                               "tillable land"],
+                            "landing gear"]}                                                               "meronym": ["crop rows", "crop circles", "crop fields", "crop land"]}
+
+
+
+
+          Q: "an illustration of a gold genie lamp stock vector"                                      Q: "person is pictured on his bicycle on a street that appears similar"
+          A1: "object-centric phrases": ["gold genie lamp"]                                           A1: "object-centric phrases": ["his bicycle"]
+          A2: {"group": "genie lamp",                                                                 A2: {"group": "bicycle",
+               "synonym": ["magic lamp", "wishing lamp"],                                                  "synonym": ["bike", "pedal cycle"],
+               "antonym": [],                                                                              "antonym": ["car"],
+               "hypernym": ["light source", "illuminant", "luminous object", "shining object"],            "hypernym": ["means of transport", "vehicle", "two wheeled vehicle"],
+               "meronym": ["genies lamp", "lamp base", "lamp shade"]}                                      "meronym": ["bicycle pedal", "bicycle tire", "bicycle chain", "bicycle saddle"]}
+
+
+
+
+         Q: "close up side portrait of the joyful afro american girl texting via the mobile phone     Q: "sad homeless puppy falls asleep on a piece of burlap"
+             while sitting under umbrella"                                                            A1: "object-centric phrases": ["sad homeless puppy"]
+         A1: "object-centric phrases": ["joyful afro american girl"]                                  A2: {"group": "puppy",
+         A2: {"group": "girl",                                                                             "synonym": ["pup", "puppy", "canine"],
+              "synonym": ["young lady", "miss"],                                                           "antonym": ["happy", "wealthy"],
+              "antonym": ["boy"],                                                                          "hypernym": ["animal", "mammal", "dog"],
+              "hypernym": ["female", "woman", "young woman"],                                              "meronym": ["puppy paws", "puppy eyes", "puppy nose"]}
+              "meronym": ["teen girl", "preteen girl"]}
+
+
+
+
+Figure 13. LLM generated examples for CC3M. Q represents the query text associated with the image. A1 is the object-centric phrase
+obtained from the first-level self-consistency data augmentation, while A2 corresponds to the second level. For each object-centric phrase
+in A1, LLM detects primary objects “group” and generates relevant relationships in A2.
+                                                                                                     16
+                                                                           Q: "a group of sheep with in grassy area next to trees"
+             Data             RefCOCO+                                     A: ["a group of sheep with in grassy area"]
+ Objective Selection                         Flickr30k ReferIt
+                                                                           Q: "a train is on going down the track while people watch"
+                          Test A Test B                                    A: ["a train is on going down the track"]
+                                                                           Q: "a laptop sitting on a wooden table with a cord plugged in"
+ Lvl              -       69.35     53.77      79.38      59.72            A: ["a laptop sitting on a wooden table"]
+                                                                           Q: "a woman sitting on a bus with a green purse looking at her cell phone"
+ Lvl           ranked     68.51     52.23      78.61      59.48            A: ["a woman sitting on a bus"]
+ Lvl           random     69.40     52.83      79.76      60.78            Q: "a photo of a bus that is boarding passengers"
+                                                                           A: ["a photo of a bus"]
+ LSelfEQ       ranked     70.21     53.75      80.91      61.00            Q: "this is an image of a bathroom which is empty"
+ LSelfEQ       random     71.59     54.19      81.53      63.04            A: ["this is an image of a bathroom"]
+                                                                           Q: "an individual covers himself under an umbrella on a rainy day"
+                                                                           A: ["an individual covers himself under an umbrella"]
+Table 6. Visual Grounding results when training with a subset of           Q: "a city street scene with cars and a person crossing the street"
+                                                                           A: ["a person crossing the street"]
+Conceptual Captions 3M (CC3M). The ranked subset corresponds
+                                                                           Q: [𝑻]
+to a set of image-text pairs filtered using the image-text matching        A:
+score yielded by the base ALBEF. The random subset corresponds
+to a randomly selected subset. Applying SelfEQ on a random but             Figure 14. LLM-Prompt for an alternative first-level self-
+relatively more noisy subset yields the best results.                      consistency data augmentation (i.e., phrase chunking) strategy. In
+                                                                           contrast to object-centric phrases, the expected answer A further
+                       RefCOCO+                                            includes simple compositions.
+   Method                               Flickr30k ReferIt
+                      Test A Test B
+   BLIP [29]          61.23    41.07        60.56      45.81                        Format       Objective       Flickr30k           ReferIt
+   BLIP-2 [30]        50.09    42.26        64.86      45.34                        -                Lvl             79.38           59.72
+   ALBEF [28]         69.35    53.77        79.38      59.72                        C              Lvl               79.90           60.64
+                                                                                    C             LSelfEQ            81.28           62.04
+Table 7. Pointing game accuracy comparisons with other pre-
+                                                                                    P′             Lvl               80.42           60.83
+trained vision-language models on off-the-shelf visual grounding
+via GradCAM.
+                                                                                    P′            LSelfEQ            82.09           62.12
+                                                                                    P              Lvl               81.18           61.18
+                                                                                    P             LSelfEQ            84.07           62.75
+filtered using the image-text matching score yield by the
+base ALBEF model. The second subset, which we refer to                     Table 8. Trade-off between object-centric and rich context. The
+as random, corresponds to a randomly selected set of arbi-                 first row is the off-the-shelf base model performance. C is the cap-
+trary image-text pairs. We further generate paraphrases for                tion, P is the object-centric phrase. P ′ is the long phrase, which
+each text caption using our two-level LLM-based augmen-                    can be defined as a shortened caption or an object-centric phrase
+tation and train our base model using the ALBEF baseline                   with simple compositions.
+losses and our SelfEQ approach. Table 6 shows the effec-
+tiveness of our method with noisy web-crawled data.
+                                                                           C, showing the benefits of gradually using shorter captions
+C. Base Model Selection                                                    that are more likely to be object-centric. Specifically, we
+                                                                           compare MS-COCO captions C and object-centric phrases
+We choose ALBEF [28] as our base model based on the off-                   P with long phrases P ′ whose length is between global cap-
+the-shelf visual grounding ability through GradCAM under                   tions and object-centric phrases. As shown in Figure 14,
+the pointing game setting as reported in the original work.                long phrases P ′ shorten the captions C by removing com-
+We further compare it with the off-the-shelf performance of                pound or descriptive sentences, while they still remain sim-
+BLIP [29] and BLIP-2 [30] for reference. As shown in Ta-                   ple compositions compared to object-centric phrases P .
+ble 7, ALBEF outperforms other methods by a large margin                   Rows 4 and 5 in Table 8 supplement experiments in Ta-
+on visual grounding.                                                       ble Tab. 4, demonstrating an increasing trend when more
+                                                                           object-centric (i.e., shorter). Notably, SelfEQ improves all
+D. Object-Centric vs. Global-Based Captions                                formats of input text (C, P ′ , P ) compared to the base model
+                                                                           and the vision-and-language objective (Lvl ).
+Table 8 shows the effect of different ways of chunking
+global-based captions. In our main paper, we demonstrate
+                                                                           D.1. Qualitative Results
+that shorter captions that are more object-specific lead to
+better results. Here we provide an additional chunking strat-              Visual Grounding. Figure 15 presents more qualitative
+egy that leads to captions that have a length between our                  results for visual grounding than those shown in the main
+short object-centric phrases P and the original long captions              paper. SelfEQ excels in localizing input textual descriptions
+
+
+                                                                      17
+  Text: “dark corner on bottom right”                                                        Text: “chair”
+
+
+
+
+        Image                    ALBEF   AMC             Ours                                       ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “seat”
+  Text: “hill on the right middle”
+
+                                                                                 Image
+
+
+                                                                                                    ALBEF                      AMC              Ours
+
+        Image                    ALBEF   AMC             Ours                                Text: “black bag on the right”
+ Text: “ground bottom right”
+
+
+
+
+                                                                                                    ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “black backpack on the right”
+        Image                    ALBEF   AMC             Ours
+
+ Text: “tree above left truck”                                                   Image
+
+
+                                                                                                    ALBEF                      AMC              Ours
+
+                                                                                             Text: “cactus”
+
+        Image                    ALBEF   AMC             Ours
+
+  Text: “food”
+
+                                                                                                    ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “there is an opuntia in the picture”
+
+
+                                                                                 Image
+        Image                    ALBEF   AMC            Ours
+
+  Text: “21”
+                                                                                                    ALBEF                      AMC              Ours
+
+                                                                                             Text: “flowing water”
+
+
+
+        Image                    ALBEF   AMC             Ours
+
+
+  Text: “red half bus”
+                                                                                                    ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “running aqua”
+
+
+                                                                                 Image
+        Image                    ALBEF   AMC             Ours
+
+  Text: “skier wearing backpack”                                                                    ALBEF                      AMC              Ours
+
+                                                                                             Text: “biggest bottle on table”
+
+
+
+
+        Image                    ALBEF   AMC             Ours
+
+  Text: “man”                                                                                       ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “biggest container on coffee table”
+
+
+                                                                                 Image
+
+
+                                                                                                    ALBEF                      AMC              Ours
+
+                                                                                             Text: “a group of people”
+        Image                    ALBEF   AMC             Ours
+
+  Text: “wheel”
+
+
+                                                                                                    ALBEF                      AMC              Ours
+                                                                                             Equivalent Paraphrase: “mankind”
+
+
+                                                                                 Image
+
+
+
+        Image                    ALBEF   AMC             Ours                                       ALBEF                      AMC              Ours
+
+
+Figure 15. Qualitative comparisons on visual grounding. The ref-          Figure 16. Qualitative comparisons on self-consistency. For each
+erence text is on the top of each row. From left to right, it presents    image, the first row is the reference text, and the second row is the
+the image, our base model ALBEF, SotA box-supervised method               equivalent paraphrase. Each column presents our base model AL-
+AMC, and our method SelfEQ.                                            18 BEF, SotA box-supervised method AMC, and our method SelfEQ.
+across a variety of challenging scenarios, including objects
+with prepositions (rows 1 to 4), intricate background con-
+text (row 5), numerical answers (row 6), distinguishing a
+single descriptive object from multiple similar ones (rows
+7 and 8), dealing with occluded objects (row 9), and han-
+dling tiny objects (row 10). SelfEQ improves visual ground-
+ing through self-consistency tuning without any bounding
+boxes, while still achieving competitive performance com-
+pared to the state-of-the-art box-supervised method AMC.
+
+Self-Consistency. Figure 16 shows more qualitative re-
+sults, showcasing that our method generates more consis-
+tent results for paraphrases. SelfEQ leads to consistent
+results for various challenging scenarios such as handling
+general synonyms (row 1), synonym substitution (row 2),
+terminology and sentence extension (row 3), attributive and
+head noun substitution (row 4), multiple synonym sub-
+stitution (row 5), and phrase-to-word transformation (row
+6). Although our self-consistency data augmentation con-
+centrates on synonym substitution, SelfEQ shows robust
+self-consistency in dealing with some non-trivial equivalent
+paraphrases.
+
+E. Limitations and Future Work
+We demonstrate that generating paraphrases based on noun
+substitutions leads to relatively reliable paraphrases. How-
+ever, paraphrases generated in this way can be limited in
+terms of their diversity and complexity. Although our work
+shows encouraging results even for more complex forms of
+paraphrases at test time, investigating more reliable ways
+of generating visual paraphrases could lead to further gains.
+In addition, consistency can be imposed based on relations
+other than equivalence but also inclusion and exclusion re-
+lations. Generating automatic phrases that describe objects
+or regions with superordinate referring expressions or refer-
+ring expressions that exclude content are possible paths for
+future work.
+
+
+
+
+                                                                19
+

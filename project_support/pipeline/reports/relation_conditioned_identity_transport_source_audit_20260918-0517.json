@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "candidate_id": "relation-conditioned-identity-transport",
+  "evaluated_at": "2026-09-18T05:17:00+08:00",
+  "proposal": "Use relation-bearing language tokens to route raw paired-2D identity evidence through candidate masks into the referent decision.",
+  "disposition": "rejected_before_design",
+  "rejection_reasons": [
+    {
+      "gate": "diagnosis",
+      "finding": "The raw 2D modality has a measured identity-separability advantage, but its same-forward referent-language alignment is at chance: top-5 is 6.1% for mean and max pooling, and prefers-target is 51.5%/57.6% on 33 recoverable failures. The proposed transport would route a signal whose referential identity is not established.",
+      "evidence": [
+        "pipeline/reports/modality_identity_separability_20260916.json",
+        "pipeline/reports/modality_language_alignment_20260916.json"
+      ]
+    },
+    {
+      "gate": "literature",
+      "finding": "RefMask3D already performs Geometry-Enhanced Group-Word Attention between language and geometrically coherent sub-clouds, constructs linguistic primitives, and uses an Object Cluster Module to identify the referred target. Replacing sub-clouds with predicted masks and calling the route relation-conditioned does not define a new causal unit.",
+      "evidence": [
+        "pipeline/reports/refmask3d_original_20260916.txt"
+      ]
+    },
+    {
+      "gate": "mechanism",
+      "finding": "Generic target-supervised latent relations are recorded prior art in NS3D/CoT3DRef comparisons. This proposal recombines already-present language, mask, and 2D features; it adds neither a new supervision unit nor a new information source.",
+      "evidence": [
+        "pipeline/reports/ns3d_original_20260916.html",
+        "pipeline/reports/target_supervised_relation_contract_20260916.json",
+        "pipeline/decisions/20260916-051919_next_batch.md"
+      ]
+    },
+    {
+      "gate": "constraints",
+      "finding": "The proposal is a modality-fusion/readback mechanism on the closed selector/fusion axis and risks query-by-superpoint cross-modal attention. It has no admissible label or causal falsifier beyond prior mask-aware matching.",
+      "evidence": [
+        "pipeline/goal.json"
+      ]
+    }
+  ],
+  "resource_testing": {
+    "implemented": false,
+    "native_flops": null,
+    "latency": null,
+    "memory": null,
+    "reason": "Rejected at diagnosis, novelty, mechanism, and constraint gates before implementation."
+  },
+  "queue_action": "none",
+  "next_action": "Do not reopen under relation-conditioned transport, mask-mediated identity fusion, compact relational attention, or similar names. Continue the blocked native referent diagnostics when GPU capacity opens.",
+  "sources": [
+    {
+      "path": "pipeline/reports/modality_language_alignment_20260916.json",
+      "sha256": "09d20bfbef97d32ac70add2e9355dad4f0486fc9e0b0cbf45ec0ddbc61a5977c"
+    },
+    {
+      "path": "pipeline/reports/modality_identity_separability_20260916.json",
+      "sha256": "61660620a3f00116fb02c0ed4f8199db4ae624c291d0aca4e5b3005abd63ba6a"
+    },
+    {
+      "path": "pipeline/reports/refmask3d_original_20260916.txt",
+      "sha256": "1e6bb114ff036246a5af8539e9b4838b06bd5b4690d8afc690e3a6c60c169c89"
+    },
+    {
+      "path": "pipeline/reports/ns3d_original_20260916.html",
+      "sha256": "1b5a5868a4b352cbe059374ecab244981633052d83fdd071211b11d3638018e6"
+    },
+    {
+      "path": "pipeline/reports/target_supervised_relation_contract_20260916.json",
+      "sha256": "4c20597540001b772dbbd96effbcbb8196162c3e8526e58defa4f29c0b68533a"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "9ca0ceab49311eca448dd5e9efdd02a62f72de7b93ac214728e4dc0027218700"
+    }
+  ]
+}

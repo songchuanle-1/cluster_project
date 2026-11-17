@@ -1,0 +1,9 @@
+{
+  "tick_token": "f38daa9ab2914c97a74bd716613388f8",
+  "exit_code": 1,
+  "failure": "AssertionError: len(masks) == len(indicators) == 1",
+  "log": "pipeline/reports/native_role_task_f38daa9ab2914c97a74bd716613388f8.log",
+  "cause": "Original Criterion.forward applies masked_select to remove mask padding before loss_masks; object identity with raw final pred masks is not preserved.",
+  "repair": "Version2 constructs original final unpadded masks exactly and requires one unique native loss_masks call with identical shapes and values; final indicator tensor identity remains required.",
+  "scope": "Adapter interface failure, not a scientific negative result. Preserve v1 source/log; no new cohort, output filtering, original-model edits or threshold change."
+}

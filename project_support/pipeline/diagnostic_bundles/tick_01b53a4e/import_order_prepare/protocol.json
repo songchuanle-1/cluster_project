@@ -1,0 +1,55 @@
+{
+  "status": "PREPARED_FIXED_CPU_DEPENDENCY_ORDER_CONTROL_NOT_EXECUTED",
+  "conditions": [
+    {
+      "id": "PCCM_FIRST",
+      "order": [
+        "complete original pccm/core.parsers with its real AttrArgTransformer",
+        "gorilla",
+        "torch_explicit"
+      ]
+    },
+    {
+      "id": "GORILLA_FIRST",
+      "order": [
+        "gorilla",
+        "torch_explicit",
+        "complete original pccm/core.parsers with its real AttrArgTransformer"
+      ]
+    }
+  ],
+  "shared_conditions": {
+    "fresh_processes": true,
+    "same_conda_python": "/home/songcl/.conda/envs/project_cluster/bin/python",
+    "write_bytecode": false,
+    "CUDA_VISIBLE_DEVICES": "",
+    "startup_hashseed": "1999 fixed on both CPU arms only, no sweep or native model seed modification",
+    "private_cache_paths": "Each condition has separate project-only TMPDIR/MPLCONFIGDIR/XDG_CACHE_HOME/XDG_CONFIG_HOME directories; no global environment/cache deletion or dependency installation.",
+    "environment_observation_only": [
+      "PYTHONPATH",
+      "PYTHONPYCACHEPREFIX",
+      "TORCH_COMPILE_DISABLE",
+      "TORCHDYNAMO_DISABLE",
+      "PYDEVD_USE_FRAME_EVAL"
+    ],
+    "callbacks": "sys.gettrace/sys.getprofile/sys.flags captured without changing them",
+    "writes": "Single generic resolved private-directory boundary, no repeated per-case fence loosening; existing/devnull IO and known uname-p platform helper only. Outside-write/build/network barriers => INCONCLUSIVE, not candidate failure."
+  },
+  "readiness_interpretation": {
+    "A_PASS_B_FAIL": "Evidence only for order sensitivity under these fixed CPU/cache/hashseed conditions; original native complete prefix/GPU setup not tested and no automatic fix/PASS.",
+    "both_PASS": "Current bounded CPU prefix readiness observed; original failure root cause remains UNKNOWN, not a proved fix.",
+    "B_PASS": "Root may separately authorize at most one new original-source/worker native first-control readiness test under this fresh owner/stage/idleGPU0 and original gates; preserve0f failed request, do not replay, change model/dependencies/data/seed or call it a model revision. Actual TRAIN2 result controls continuation.",
+    "B_FAIL_or_policy_collector_failure": "No blind native retest or iterative fence expansion. Preserve exact evidence; root cause/complete import readiness unproven."
+  },
+  "scope_limits": [
+    "No tools.train full prefix, native model construction, CUDA memory-fraction setup, data, checkpoint, optimizer or resource measurement.",
+    "Original source parser and real transformer must be observed, not omitted as in earlier bare grammar control.",
+    "If pccm transitively imports torch before the declared block, report the loss of clean order separation; do not infer causal independence.",
+    "No standard PASS, receipt, queue, scientific efficacy or novelty conclusion."
+  ],
+  "file_hashes": {
+    "cpu_order_child.py": "c7c54a557b1f072fd8aca02a8b808720755ef5d49c59f5a7a8e9ce497851a6e3",
+    "remote_order_controller.py": "6bf6d33df64e5aff6c1755652998a6fa11501cc6f82460c1ae029d8d0683f4ba",
+    "run_import_order.py": "3f5e967ddb5781cab8244d9f0d27b8a6168212f6333f3e4fe12c2dabf24a6dbe"
+  }
+}

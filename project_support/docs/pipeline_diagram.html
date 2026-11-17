@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超点 → 体素化 → Backbone 流程图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0f1117;
+    color: #e1e4e8;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #58a6ff, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: #8b949e;
+    font-size: 14px;
+    margin-bottom: 48px;
+  }
+  .subtitle code { color: #79c0ff; background: #161b22; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+
+  /* Flow sections */
+  .flow { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+  /* Stage header */
+  .stage-header {
+    display: flex; align-items: center; gap: 12px;
+    margin: 40px 0 20px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .stage-header:hover { filter: brightness(1.2); }
+  .stage-header .num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #fff;
+  }
+  .stage-superpoint .stage-header { background: #1a2a1a; color: #7ee787; }
+  .stage-superpoint .num { background: #238636; }
+  .stage-voxel .stage-header { background: #1a1a2e; color: #79c0ff; }
+  .stage-voxel .num { background: #1f6feb; }
+  .stage-backbone .stage-header { background: #2a1a2a; color: #d2a8ff; }
+  .stage-backbone .num { background: #8957e5; }
+
+  /* Nodes */
+  .node {
+    position: relative;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px 28px;
+    min-width: 480px;
+    max-width: 640px;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .node:hover {
+    border-color: #58a6ff;
+    box-shadow: 0 0 20px rgba(88,166,255,0.1);
+    transform: translateY(-2px);
+  }
+  .node-title {
+    font-size: 15px; font-weight: 600; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .node-title .icon { font-size: 18px; }
+  .node-desc { font-size: 13px; color: #8b949e; line-height: 1.6; margin-bottom: 12px; }
+  .node-code {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #c9d1d9;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  /* Tensor badge */
+  .tensor {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #1c2128; border: 1px solid #30363d;
+    border-radius: 6px; padding: 3px 10px;
+    font-family: 'SF Mono', monospace; font-size: 12px;
+    color: #f0883e; margin: 2px 0;
+  }
+  .tensor .dim { color: #79c0ff; }
+  .tensor .label { color: #8b949e; font-size: 11px; }
+
+  /* Arrows */
+  .arrow {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 6px 0;
+    color: #484f58;
+  }
+  .arrow .line {
+    width: 2px; height: 32px;
+    background: linear-gradient(180deg, #30363d, #484f58);
+  }
+  .arrow .head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #484f58;
+  }
+  .arrow .arrow-label {
+    font-size: 11px; color: #6e7681;
+    background: #161b22;
+    padding: 2px 10px;
+    border-radius: 10px;
+    border: 1px solid #21262d;
+    margin: 4px 0;
+    white-space: nowrap;
+  }
+
+  /* UBlock diagram */
+  .ublock-container {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 12px;
+  }
+  .ublock-level {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .ublock-level:hover { filter: brightness(1.3); }
+  .ublock-level .ch {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .level-enc { background: #1a1f2e; }
+  .level-enc .ch { background: #1f3a5f; color: #79c0ff; }
+  .level-bottleneck { background: #2a1f1a; }
+  .level-bottleneck .ch { background: #5f3a1f; color: #f0883e; }
+  .level-dec { background: #1a2a1a; }
+  .level-dec .ch { background: #1f5f3a; color: #7ee787; }
+  .level-skip {
+    color: #6e7681; font-size: 12px;
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 12px;
+  }
+  .level-skip .skip-arrow { color: #484f58; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 24px; justify-content: center;
+    margin: 48px 0 0;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #8b949e;
+  }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+
+  /* Tooltip */
+  .tooltip-box {
+    position: fixed;
+    background: #1c2128;
+    border: 1px solid #444c56;
+    border-radius: 10px;
+    padding: 16px 20px;
+    max-width: 400px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c9d1d9;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+  .tooltip-box.visible { opacity: 1; }
+  .tooltip-box .tt-title { font-weight: 600; color: #58a6ff; margin-bottom: 6px; }
+  .tooltip-box code { background: #0d1117; padding: 1px 5px; border-radius: 3px; font-size: 12px; color: #f0883e; }
+
+  /* Collapsible detail */
+  .detail-toggle {
+    font-size: 12px; color: #58a6ff; cursor: pointer;
+    margin-top: 8px; display: inline-flex; align-items: center; gap: 4px;
+  }
+  .detail-toggle:hover { text-decoration: underline; }
+  .detail-content {
+    display: none; margin-top: 12px;
+    border-top: 1px solid #21262d; padding-top: 12px;
+  }
+  .detail-content.open { display: block; }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .node { min-width: 90vw; padding: 16px; }
+    .ublock-container { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>超点 → 体素化 → Backbone 处理流程</h1>
+  <p class="subtitle">ScanNet 点云特征提取管线 &nbsp;|&nbsp; <code>(N,3)</code> → <code>(V,32)</code> → <code>(B*M, 32)</code></p>
+
+  <div class="flow">
+
+    <!-- ═══════ STAGE 1: SUPERPOINT ═══════ -->
+    <div class="stage-superpoint" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+      <div class="stage-header" onclick="toggleStage(this)">
+        <div class="num">1</div>
+        <span>超点（Superpoint）</span>
+      </div>
+
+      <!-- Node: Mesh Segmentation -->
+      <div class="node" data-tooltip="sp-gen">
+        <div class="node-title"><span class="icon">🔺</span> Mesh 分割生成超点</div>
+        <div class="node-desc">
+          使用 <strong>Felzenszwalb 图分割算法</strong> 对 3D mesh 进行分割。根据面片法线夹角和凸凹性计算边权重，自适应合并相似面片。
+        </div>
+        <div class="node-code">segmentator.segment_mesh(vertices, faces)
+<span class="token comment">// kThresh=0.01, segMinVerts=20</span>
+<span class="token comment">// 边权重: w = (1 - n₁·n₂)²  (凸边)</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="label">输入</span> vertices <span class="dim">(N,3)</span> faces <span class="dim">(F,3)</span></span>
+          <span class="tensor"><span class="label">输出</span> superpoint <span class="dim">(N,)</span> <span class="label">int</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">保存为 _refer.pth</div><div class="head"></div></div>
+
+      <!-- Node: Dataset Transform -->
+      <div class="node" data-tooltip="sp-transform">
+        <div class="node-title"><span class="icon">🔄</span> Dataset Transform</div>
+        <div class="node-desc">
+          随机采样（最多 max_npoint 个点）后，对超点 ID 进行<strong>连续重编号</strong>，确保 scatter 操作正确。
+        </div>
+        <div class="node-code">unique, superpoint = np.unique(superpoint[valid_idxs], return_inverse=True)
+<span class="token comment">// unique: 原始 ID (索引 CLIP 特征)</span>
+<span class="token comment">// superpoint: 连续 [0, S'-1]</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="label">输出</span> superpoint <span class="dim">(N',)</span></span>
+          <span class="tensor">unique <span class="dim">(S',)</span></span>
+        </div>
+        <div class="detail-toggle" onclick="toggleDetail(this)">▸ 展开：超点标签生成</div>
+        <div class="detail-content">
+          <div class="node-code">sp_ins_label: 多数投票
+scatter_mean(ref_lbl.float(), superpoint) > 0.5
+<span class="token comment">// 超过半数的点属于某实例 → 该超点归属该实例</span></div>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">collate_fn 批处理</div><div class="head"></div></div>
+
+      <!-- Node: Collate -->
+      <div class="node" data-tooltip="sp-collate">
+        <div class="node-title"><span class="icon">📦</span> Collate：批处理偏移</div>
+        <div class="node-desc">
+          不同 scene 的超点 ID 加上偏移量，确保<strong>全局唯一</strong>。
+        </div>
+        <div class="node-code">superpoint = src_superpoint + superpoint_bias
+superpoint_bias = superpoint.max().item() + 1</div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="label">输出</span> superpoints <span class="dim">(B*N,)</span> <span class="label">全局唯一 [0, ΣS-1]</span></span>
+          <span class="tensor">feats <span class="dim">(B*N, 6)</span> <span class="label">[RGB, XYZ]</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ STAGE 2: VOXELIZATION ═══════ -->
+    <div class="stage-voxel" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+      <div class="stage-header" onclick="toggleStage(this)">
+        <div class="num">2</div>
+        <span>体素化（Voxelization）</span>
+      </div>
+
+      <!-- Node: Coordinate Prep -->
+      <div class="node" data-tooltip="vox-prep">
+        <div class="node-title"><span class="icon">📐</span> 坐标准备</div>
+        <div class="node-desc">
+          将原始坐标缩放为整数体素坐标。scale=50 意味着 1 个体素单位 = 2cm。
+        </div>
+        <div class="node-code">xyz = xyz_middle * scale  <span class="token comment">// ×50</span>
+xyz = xyz - xyz.min(0)    <span class="token comment">// 平移到非负</span>
+coord = torch.from_numpy(xyz).long()
+coords = cat([batch_idx_col, coord], dim=1)
+<span class="token comment">// 结果: (N, 4) [batch_idx, x, y, z]</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="label">输入</span> xyz_middle <span class="dim">(N,3)</span> <span class="label">float, 米</span></span>
+          <span class="tensor"><span class="label">输出</span> coords <span class="dim">(N,4)</span> <span class="label">long, 体素单位</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">pointgroup_ops.voxelization_idx</div><div class="head"></div></div>
+
+      <!-- Node: Voxelize Index -->
+      <div class="node" data-tooltip="vox-idx">
+        <div class="node-title"><span class="icon">🗂️</span> 体素化索引</div>
+        <div class="node-desc">
+          通过哈希表将点映射到体素格子，建立<strong>双向映射</strong>。mode=4 表示取均值。
+        </div>
+        <div class="node-code">voxel_coords, p2v_map, v2p_map = pointgroup_ops.voxelization_idx(coords, B, mode=4)
+
+<span class="token comment">// 遍历每个点 → 查哈希表 → 分配/复用 voxel_idx</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor">voxel_coords <span class="dim">(V,4)</span> <span class="label">非空体素坐标</span></span><br>
+          <span class="tensor">p2v_map <span class="dim">(B*N,)</span> <span class="label">点→体素</span></span>
+          <span class="tensor">v2p_map <span class="dim">(V, max+1)</span> <span class="label">体素→点列表</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">pointgroup_ops.voxelization</div><div class="head"></div></div>
+
+      <!-- Node: Feature Voxelization -->
+      <div class="node" data-tooltip="vox-feat">
+        <div class="node-title"><span class="icon">⚡</span> 特征体素化 (CUDA)</div>
+        <div class="node-desc">
+          对每个体素内的所有点特征取<strong>均值</strong>，由 CUDA kernel 并行执行。
+        </div>
+        <div class="node-code">voxel_feats = pointgroup_ops.voxelization(feats, v2p_map)
+<span class="token comment">// V_v = (1/|P_v|) × Σ F_i   for i ∈ P_v</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="label">输入</span> feats <span class="dim">(B*N, 6)</span></span>
+          <span class="tensor"><span class="label">输出</span> voxel_feats <span class="dim">(V, 6)</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">SparseConvTensor</div><div class="head"></div></div>
+
+      <!-- Node: Sparse Tensor -->
+      <div class="node" data-tooltip="vox-sparse">
+        <div class="node-title"><span class="icon">🧊</span> 构建稀疏张量</div>
+        <div class="node-desc">
+          只存储非空体素，大幅减少计算量。spatial_shape 根据数据自适应计算。
+        </div>
+        <div class="node-code">input = spconv.SparseConvTensor(voxel_feats, voxel_coords.int(), spatial_shape, batch_size)</div>
+        <div style="margin-top:10px;">
+          <span class="tensor">SparseConvTensor <span class="dim">(V, 6)</span> <span class="label">稀疏, 仅非空体素</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ STAGE 3: BACKBONE ═══════ -->
+    <div class="stage-backbone" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+      <div class="stage-header" onclick="toggleStage(this)">
+        <div class="num">3</div>
+        <span>Backbone（稀疏卷积 U-Net）</span>
+      </div>
+
+      <!-- Node: Input Conv -->
+      <div class="node" data-tooltip="bb-input">
+        <div class="node-title"><span class="icon">📥</span> 输入卷积</div>
+        <div class="node-desc">
+          <strong>SubMConv3d</strong>（子流形稀疏卷积）：只在已激活体素上计算，不改变稀疏结构。
+        </div>
+        <div class="node-code">input_conv = SubMConv3d(6 → 32, kernel=3, padding=1)</div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="dim">(V, 6)</span> → <span class="dim">(V, 32)</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">UBlock U-Net</div><div class="head"></div></div>
+
+      <!-- Node: UBlock -->
+      <div class="node" data-tooltip="bb-unet" style="min-width:560px;">
+        <div class="node-title"><span class="icon">🏗️</span> UBlock 编码器-解码器（5 层递归）</div>
+        <div class="node-desc">
+          递归 U-Net 结构，5 层通道数 <code>32→64→96→128→160</code>，每层含 2 个 ResidualBlock + skip connection。
+        </div>
+
+        <div class="ublock-container">
+          <div class="ublock-level level-enc" data-tooltip="ub-l1">
+            <span style="width:20px;">↓</span>
+            <span class="ch">32</span>
+            <span>Level 1: 2× ResBlock → <span style="color:#f0883e;">SparseConv3d(32→64, s=2)</span></span>
+          </div>
+          <div class="ublock-level level-enc" data-tooltip="ub-l2" style="margin-left:24px;">
+            <span style="width:20px;">↓</span>
+            <span class="ch">64</span>
+            <span>Level 2: 2× ResBlock → <span style="color:#f0883e;">SparseConv3d(64→96, s=2)</span></span>
+          </div>
+          <div class="ublock-level level-enc" data-tooltip="ub-l3" style="margin-left:48px;">
+            <span style="width:20px;">↓</span>
+            <span class="ch">96</span>
+            <span>Level 3: 2× ResBlock → <span style="color:#f0883e;">SparseConv3d(96→128, s=2)</span></span>
+          </div>
+          <div class="ublock-level level-enc" data-tooltip="ub-l4" style="margin-left:72px;">
+            <span style="width:20px;">↓</span>
+            <span class="ch">128</span>
+            <span>Level 4: 2× ResBlock → <span style="color:#f0883e;">SparseConv3d(128→160, s=2)</span></span>
+          </div>
+          <div class="ublock-level level-bottleneck" data-tooltip="ub-l5" style="margin-left:96px;">
+            <span style="width:20px;">■</span>
+            <span class="ch">160</span>
+            <span>Level 5 (Bottleneck): 2× ResBlock</span>
+          </div>
+          <div class="ublock-level level-dec" data-tooltip="ub-l4d" style="margin-left:72px;">
+            <span style="width:20px;">↑</span>
+            <span class="ch">128</span>
+            <span><span style="color:#7ee787;">SparseInverseConv3d(160→128)</span> + cat(skip) → 2× ResBlock</span>
+          </div>
+          <div class="ublock-level level-dec" data-tooltip="ub-l3d" style="margin-left:48px;">
+            <span style="width:20px;">↑</span>
+            <span class="ch">96</span>
+            <span><span style="color:#7ee787;">SparseInverseConv3d(128→96)</span> + cat(skip) → 2× ResBlock</span>
+          </div>
+          <div class="ublock-level level-dec" data-tooltip="ub-l2d" style="margin-left:24px;">
+            <span style="width:20px;">↑</span>
+            <span class="ch">64</span>
+            <span><span style="color:#7ee787;">SparseInverseConv3d(96→64)</span> + cat(skip) → 2× ResBlock</span>
+          </div>
+          <div class="ublock-level level-dec" data-tooltip="ub-l1d">
+            <span style="width:20px;">↑</span>
+            <span class="ch">32</span>
+            <span><span style="color:#7ee787;">SparseInverseConv3d(64→32)</span> + cat(skip) → 2× ResBlock</span>
+          </div>
+        </div>
+
+        <div class="detail-toggle" onclick="toggleDetail(this)">▸ 展开：ResidualBlock 结构</div>
+        <div class="detail-content">
+          <div class="node-code">conv_branch: BN → ReLU → SubMConv3d(3×3) → BN → ReLU → SubMConv3d(3×3)
+i_branch:    Identity (通道相同) 或 SubMConv3d(1×1) (通道不同)
+
+output = conv_branch(input) + i_branch(input)   <span class="token comment">// 残差连接</span></div>
+          <div style="margin-top:8px; font-size:12px; color:#8b949e;">
+            <strong style="color:#79c0ff;">SubMConv3d</strong>：子流形稀疏卷积，只在已激活体素上计算，不膨胀激活区域<br>
+            <strong style="color:#f0883e;">SparseConv3d(s=2)</strong>：标准稀疏卷积 + 下采样<br>
+            <strong style="color:#7ee787;">SparseInverseConv3d</strong>：转置稀疏卷积，上采样恢复分辨率
+          </div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="dim">(V, 32)</span> → UBlock → <span class="dim">(V, 32)</span> <span class="label">分辨率不变</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">output_layer: BN + ReLU</div><div class="head"></div></div>
+
+      <!-- Node: Voxel to Point -->
+      <div class="node" data-tooltip="bb-v2p">
+        <div class="node-title"><span class="icon">🔙</span> 体素 → 点 映射</div>
+        <div class="node-desc">
+          通过 <code>p2v_map</code> 将体素特征广播回每个点。
+        </div>
+        <div class="node-code">x = x.features[p2v_map.long()]
+<span class="token comment">// p2v_map[i] = 点 i 所属的体素索引</span>
+<span class="token comment">// 每个点获得其所在体素的特征</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="dim">(V, 32)</span> → <span class="dim">(B*N, 32)</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">scatter_mean 超点池化</div><div class="head"></div></div>
+
+      <!-- Node: Superpoint Pooling -->
+      <div class="node" data-tooltip="bb-pool">
+        <div class="node-title"><span class="icon">🎯</span> 超点均值池化</div>
+        <div class="node-desc">
+          对同一超点内的所有点特征取均值，得到最终的<strong>超点特征 sp_feats</strong>。
+        </div>
+        <div class="node-code">sp_feats = scatter_mean(x, superpoints, dim=0)
+sp_coords_float = scatter_mean(coords_float, superpoints, dim=0)
+
+<span class="token comment">// f_s = (1/|P_s|) × Σ f_i   for i ∈ superpoint_s</span></div>
+        <div style="margin-top:10px;">
+          <span class="tensor"><span class="dim">(B*N, 32)</span> → <span class="dim" style="color:#7ee787;font-weight:600;">(B*M, 32)</span> <span class="label">sp_feats</span></span>
+          <span class="tensor">(B*N, 3) → <span class="dim">(B*M, 3)</span> <span class="label">sp_coords</span></span>
+        </div>
+      </div>
+
+      <div class="arrow"><div class="line"></div><div class="arrow-label">expand + FPS → DEC</div><div class="head"></div></div>
+
+      <!-- Final Output -->
+      <div class="node" style="border-color:#7ee787; background:#121a12;">
+        <div class="node-title"><span class="icon">✅</span> 输出：超点特征</div>
+        <div class="node-desc">
+          sp_feats 经过 FPS 采样 512 个种子超点后，传入 DEC 解码器生成 <code>inst_feat</code>。
+        </div>
+        <div style="margin-top:8px;">
+          <span class="tensor" style="border-color:#238636;">sp_feats <span class="dim" style="color:#7ee787;">(B*M, 32)</span></span>
+          <span class="tensor" style="border-color:#238636;">fps_seed_sp <span class="dim">(B, 512)</span></span>
+          <span class="tensor" style="border-color:#238636;">feats_2d <span class="dim">(B*M, 1024)</span> <span class="label">CLIP</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#238636;"></div> 超点阶段</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#1f6feb;"></div> 体素化阶段</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8957e5;"></div> Backbone 阶段</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f0883e;"></div> 张量形状</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#30363d;border:1px solid #484f58;"></div> 悬停查看详情</div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip-box" id="tooltip"></div>
+
+<script>
+const tooltips = {
+  'sp-gen': {
+    title: 'Felzenszwalb 图分割',
+    body: '1. 计算面片法线 & 顶点法线（LERP 插值）<br>2. 边权重: <code>w = (1 - n₁·n₂)²</code>（凸边）或 <code>w = (1 - n₁·n₂)</code>（凹边）<br>3. 按权重排序，自适应合并: <code>τ(C) = last_weight + k/|C|</code><br>4. 合并小片段（< 20 个顶点）<br><br>源文件: <code>segmentator/csrc/segmentator.cpp</code>'
+  },
+  'sp-transform': {
+    title: '超点重编号',
+    body: '随机采样后部分超点消失，ID 不连续。<code>np.unique(return_inverse=True)</code> 将其重新映射为 <code>[0, S\')</code>。<br><br><code>unique</code> 保存原始 ID，用于索引预计算的 CLIP 2D 特征。'
+  },
+  'sp-collate': {
+    title: '批处理偏移',
+    body: '每个 scene 的超点 ID 加上累积偏移量 <code>superpoint_bias</code>，确保不同 scene 的超点在全局不重叠。<br><br><code>batch_offsets</code> 记录每个 scene 的起始偏移，供后续 <code>get_batches</code> 使用。'
+  },
+  'vox-prep': {
+    title: '坐标缩放',
+    body: '<code>scale=50</code> 将原始坐标（米）乘以 50，转为体素空间整数坐标。<br><br>1 个体素单位 = 1/50 米 = 2 厘米<br><code>spatial_shape</code> 根据数据动态计算，最小值 clip 到 128。'
+  },
+  'vox-idx': {
+    title: '体素化索引（C++ / CUDA）',
+    body: '为每个 batch 维护一个 <code>SparseGrid</code> 哈希表：<br>• 新坐标 → 分配新 <code>voxel_idx</code><br>• 已有坐标 → 复用 <code>voxel_idx</code><br><br><code>v2p_map</code> 格式: <code>[count, idx₁, idx₂, ...]</code>，填充到 <code>maxActive+1</code> 对齐。'
+  },
+  'vox-feat': {
+    title: '特征体素化（CUDA kernel）',
+    body: 'CUDA kernel 并行计算每个体素的特征均值：<br><code>V_v[c] = (1/|P_v|) × Σ F_i[c]</code><br><br>使用 <code>atomicAdd</code> 累加，<code>mode=4</code> 时取均值。'
+  },
+  'vox-sparse': {
+    title: 'SparseConvTensor',
+    body: 'spconv 库的稀疏张量，只存储非空体素。<br><br>包含: <code>features (V,C)</code>, <code>indices (V,4)</code>, <code>spatial_shape (3,)</code>, <code>batch_size</code>。'
+  },
+  'bb-input': {
+    title: 'SubMConv3d 子流形稀疏卷积',
+    body: '只在已激活体素位置上计算 3×3×3 卷积。<br><br>与普通稀疏卷积不同，<strong>不会膨胀激活区域</strong>——输出的稀疏结构与输入完全相同。'
+  },
+  'bb-unet': {
+    title: '递归 UBlock',
+    body: '5 层递归 U-Net：<br>• 编码器: <code>SparseConv3d(stride=2)</code> 下采样<br>• 解码器: <code>SparseInverseConv3d</code> 上采样<br>• Skip connection: <code>cat(encoder, decoder)</code><br>• 每层 2 个 ResidualBlock<br><br>通道数: 32→64→96→128→160→128→96→64→32'
+  },
+  'ub-l1': { title: 'Level 1 编码器', body: '2× ResidualBlock(32→32) + SparseConv3d(32→64, stride=2)<br>体素数量减少 ~8 倍' },
+  'ub-l2': { title: 'Level 2 编码器', body: '2× ResidualBlock(64→64) + SparseConv3d(64→96, stride=2)' },
+  'ub-l3': { title: 'Level 3 编码器', body: '2× ResidualBlock(96→96) + SparseConv3d(96→128, stride=2)' },
+  'ub-l4': { title: 'Level 4 编码器', body: '2× ResidualBlock(128→128) + SparseConv3d(128→160, stride=2)' },
+  'ub-l5': { title: 'Level 5 Bottleneck', body: '最深层，2× ResidualBlock(160→160)<br>不再下采样，直接传递给解码器' },
+  'ub-l4d': { title: 'Level 4 解码器', body: 'SparseInverseConv3d(160→128) 上采样<br>cat(skip_128, upsampled_128) → 256 维<br>2× ResidualBlock(256→128, 128→128)' },
+  'ub-l3d': { title: 'Level 3 解码器', body: 'SparseInverseConv3d(128→96) 上采样<br>cat(skip_96, upsampled_96) → 192 维<br>2× ResidualBlock(192→96)' },
+  'ub-l2d': { title: 'Level 2 解码器', body: 'SparseInverseConv3d(96→64) 上采样<br>cat(skip_64, upsampled_64) → 128 维<br>2× ResidualBlock(128→64)' },
+  'ub-l1d': { title: 'Level 1 解码器', body: 'SparseInverseConv3d(64→32) 上采样<br>cat(skip_32, upsampled_32) → 64 维<br>2× ResidualBlock(64→32, 32→32)' },
+  'bb-v2p': { title: '体素→点映射', body: 'Backbone 输出为体素级特征 <code>(V, 32)</code>。<br><br>通过 <code>p2v_map</code>（每个点对应的体素索引）做索引查找，将体素特征广播回每个点。' },
+  'bb-pool': { title: '超点均值池化', body: '<code>scatter_mean</code> 按超点 ID 分组，对组内所有点特征取均值。<br><br>结果: 每个超点一个 32 维特征向量。<br>同时对原始坐标也做均值池化，得到超点质心坐标。' }
+};
+
+const tooltip = document.getElementById('tooltip');
+let tooltipTimeout;
+
+document.querySelectorAll('[data-tooltip]').forEach(el => {
+  el.addEventListener('mouseenter', e => {
+    const key = el.dataset.tooltip;
+    const data = tooltips[key];
+    if (!data) return;
+    tooltip.innerHTML = `<div class="tt-title">${data.title}</div>${data.body}`;
+    clearTimeout(tooltipTimeout);
+    tooltipTimeout = setTimeout(() => {
+      const rect = el.getBoundingClientRect();
+      let left = rect.right + 16;
+      let top = rect.top;
+      if (left + 400 > window.innerWidth) {
+        left = rect.left - 416;
+      }
+      if (top + 200 > window.innerHeight) {
+        top = window.innerHeight - 220;
+      }
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = Math.max(8, top) + 'px';
+      tooltip.classList.add('visible');
+    }, 300);
+  });
+  el.addEventListener('mouseleave', () => {
+    clearTimeout(tooltipTimeout);
+    tooltip.classList.remove('visible');
+  });
+});
+
+function toggleDetail(el) {
+  const content = el.nextElementSibling;
+  const isOpen = content.classList.toggle('open');
+  el.textContent = (isOpen ? '▾ 收起：' : '▸ 展开：') + el.textContent.slice(5);
+}
+
+function toggleStage(header) {
+  const stage = header.parentElement;
+  const nodes = stage.querySelectorAll('.node, .arrow');
+  const isHidden = nodes[0].style.display === 'none';
+  nodes.forEach(n => n.style.display = isHidden ? '' : 'none');
+}
+</script>
+</body>
+</html>

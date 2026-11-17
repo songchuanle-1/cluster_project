@@ -1,0 +1,31 @@
+{
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "passed": true,
+  "native_yaml_equal_to_parent": true,
+  "new_parameters": 0,
+  "new_graph": "Coarse refined scene tokens generate dense offdiagonal within-group channel affinity; the operator mixes each fine token own channels before original HCG point readback. Coarse-to-fine information dependency absent in baseline independent token FFNs. Not a norm/scaling-only change, diagonal gate, token pooling, token QKV routing or point N² attention.",
+  "configuration": "Separate8source+1nativeYAML; seed1999/50epochs/maxiters70/data/optimizer/headcount/numeric settings inherited unchanged. No old candidate code import and no champion modification.",
+  "finite_history_review": "XCA concatenates scales for token selfattention; CSF fine-query/coarse-keyvalue token crossattention; CGA feature-cosine top8 token graph with large QKVO; WCA Linear(C,1) weighted pooling. Finite review found no exact coarseGram channel operator; novelty/task benefit remain unverified.",
+  "bounds": "Channel group count from inherited nhead8, width32; occupied coarse IDs only; no sweep/extra dataset/seed/schedule/annotation. Current GPU1 pinned and locks; existing M205 GPU0 untouched.",
+  "native_path_proof": "Zero new parameters require actual fine/coarse input-edge and output gradient proof using full_backward_hook, plus native two-step finite model gradients and existing FFN updates. Actual result pending.",
+  "limitations": [
+    "Can blur useful channel distinctions",
+    "Coarse correlations may encode scene/large-object bias",
+    "Resource benchmark runs with M205 training on separate GPU0; shared host contention remains possible",
+    "No scientific efficacy or complete literature novelty conclusion"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_preregistration.json",
+      "sha256": "52cca77a1333b86f5f4a7363f0f18ee36caa2c294aad8b2d9113918c937fb003"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_version_native.json",
+      "sha256": "aa0df3982a54dc3a3a23a5e937570468ef1bfc5762fe700ba994983147d672b9"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native_preregistration.json",
+      "sha256": "acd36f3d2b98c71524b33078308d687a8bfd7c006503102224b36a7b99f50b09"
+    }
+  ]
+}

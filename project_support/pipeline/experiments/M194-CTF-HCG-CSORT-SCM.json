@@ -1,0 +1,48 @@
+{
+  "id": "M194-CTF-HCG-CSORT-SCM",
+  "config": "configs/Quard/ctf_hcg_csort_scm/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm.yaml",
+  "server": "server-4",
+  "gpu": 1,
+  "status": "stopped_unknown",
+  "label": "M194 Selection-Conditioned Spatial Mask Transport",
+  "depends_on": [],
+  "patience": 10,
+  "measured_flops_g": 9.762532428,
+  "validation_report": "pipeline/reports/scm_admission_20260914-1405.md",
+  "design": "pipeline/designs/exp_design_20260914-1405.md",
+  "code_commit": "13357d22af5c94b23599cee1f05c89624565f8ec",
+  "created_at": "2026-09-14T14:07:51",
+  "history": [
+    {
+      "ts": "2026-09-14T14:07:51",
+      "action": "enqueued_and_claimed",
+      "gpu": 1,
+      "decision": "20260914-140538_next_batch.md"
+    },
+    {
+      "ts": "2026-09-14T14:08:16",
+      "action": "launch_failed",
+      "error": "Command '['ssh', '-o', 'BatchMode=yes', 'songcl@192.168.1.137', \"cd /data/songcl/Project/Cluster_project/Cluster && source /home/dl04/anaconda3/etc/profile.d/conda.sh && conda activate project_cluster && export PYTHONPATH=/data/songcl/Project/Cluster_project/Cluster:/data/songcl/Project/Cluster_project/Cluster/framework/lib:${PYTHONPATH:-} && export LD_LIBRARY_PATH=$(python -c 'import torch,os;print(os.path.dirname(torch.__file__))')/lib:$(find ${CONDA_PREFIX}/lib/python*/site-packages/nvidia/cuda_runtime/lib -maxdepth 0 2>/dev/null):${LD_LIBRARY_PATH:-} && mkdir -p logs && nohup python tools/train.py configs/Quard/ctf_hcg_csort_scm/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm.yaml --gpu_ids 1 --num_gpus 1 > /data/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm_20260914_140751.log 2>&1 < /dev/null & pid=$!; echo $pid > logs/.pid_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm; echo PID=$pid; echo LOG=/da"
+    },
+    {
+      "ts": "2026-09-14T14:09:26",
+      "action": "launch_verified_after_ssh_timeout",
+      "gpu": 1,
+      "pid": 2172354,
+      "log": "/data/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm_20260914_140751.log"
+    },
+    {
+      "ts": "2026-09-15T16:16:47.322619",
+      "status": "stopped_unknown",
+      "best_miou": "0.4920",
+      "epochs": "30/50"
+    }
+  ],
+  "pid": 2172354,
+  "log": "/data/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_scm_20260914_140751.log",
+  "launched": "2026-09-14T14:07:51",
+  "final_best": "0.4920",
+  "finished_at": "2026-09-15T16:16:47",
+  "log_local": "",
+  "epochs_final": "30/50"
+}

@@ -1,0 +1,101 @@
+{
+  "id": "M204-CPA",
+  "candidate_id": "coarse-semantic-point-cross-attention",
+  "config": "configs/Quard/ctf_hcg_csort_cpa_r1/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1.yaml",
+  "server": "server-4",
+  "gpu": "0",
+  "status": "stopped_unknown",
+  "label": "CPA-R1 coarse point attention (human-authorized exploration)",
+  "code_commit": "c31f45994f8d68b78dfe8bb4fef3f9aaefabe86e",
+  "manual_exploratory_authorization": {
+    "path": "pipeline/authorizations/cpa_exploratory_20261019_72695a5d.json",
+    "sha256": "2b139af1820c167dbb0a044518acbfa6a441543bb4b559b706439099583dd2ee"
+  },
+  "scientific_admission": false,
+  "launch_authorization_mode": "human_exploratory_exception",
+  "automatic_restart": false,
+  "requires_exclusive_ownership": true,
+  "launch_verified": true,
+  "launch_verification": "training_progress",
+  "depends_on": [],
+  "patience": 10,
+  "note": "One explicitly authorized exploration;diagnosis/semantic controls remain unpassed,revision1 remains inconclusive. No scientific PASS. Original launch interrupted by host reboot;partial validation only. No restart or migration authorized;preserve same stable experiment and await scoped resume consent.",
+  "pid": 141278,
+  "log": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1_manual_72695a5d.log",
+  "launched": "2026-10-19T01:29:58.532973+00:00",
+  "history": [
+    {
+      "ts": "2026-10-19T01:29:58.532973+00:00",
+      "action": "human_authorized_exploratory_launch",
+      "gpu": "0"
+    },
+    {
+      "ts": "2026-10-19T01:30:53.755461+00:00",
+      "action": "native_training_steps_verified",
+      "steps": [
+        [
+          1,
+          105
+        ],
+        [
+          1,
+          106
+        ],
+        [
+          1,
+          106
+        ],
+        [
+          1,
+          107
+        ]
+      ]
+    },
+    {
+      "ts": "2026-10-19T06:39:41.543402+00:00",
+      "action": "reconciled_host_reboot_interruption",
+      "status": "stopped_unknown",
+      "observed_stopped_at": "2026-10-19T06:18:18.983759+00:00",
+      "host_boot_at": "2026-10-19T04:17:42+00:00",
+      "best_miou": 0.43399661779403687,
+      "best_epoch": 5,
+      "checkpoint_epoch": 5,
+      "original_launch_retained": true,
+      "restarted": false
+    }
+  ],
+  "launch_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_72695a5d/progress_verification.json",
+    "sha256": "c284c1621d588f4df5ac7e89081d33550fb7888aad52ddc33651b320b6869a15"
+  },
+  "latest_training_observation": {
+    "path": "pipeline/diagnostic_bundles/tick_92463b56/original_run_reconciliation.json",
+    "sha256": "b16bb910a432fad9df896193742b7371671398f55476d043b6ad4b2358d4f47b"
+  },
+  "observed_native_step": [
+    6,
+    1587
+  ],
+  "observed_native_best_miou": 0.43399661779403687,
+  "observed_native_best_epoch": 5,
+  "observed_validation_count": 5,
+  "finished_at": "2026-10-19T06:39:41.543402+00:00",
+  "final_best": "0.4340",
+  "epochs_final": "6/50",
+  "partial_result_only": true,
+  "last_completed_epoch": 5,
+  "process_live": false,
+  "observed_stopped_at": "2026-10-19T06:18:18.983759+00:00",
+  "host_boot_at": "2026-10-19T04:17:42+00:00",
+  "interruption_reason": "host reboot after original launch;exact process absent in two fresh probes;native exit code unavailable",
+  "requires_resume_authorization": true,
+  "checkpoint_inspection": {
+    "path": "pipeline/diagnostic_bundles/tick_92463b56/checkpoint_cpu.json",
+    "sha256": "15060d78163a1f51f2e43467f0d8a8cb656e4558537bb0092e0affb4dc9bac5f"
+  },
+  "checkpoint_resume_contract": {
+    "path": "pipeline/diagnostic_bundles/tick_92463b56/resume_contract_cpu.json",
+    "sha256": "f380ad6a7486e9c935c3a1b4199348860e41c89ffc6f92cf02cf4406dc73082b"
+  },
+  "log_local": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_92463b56\\native_training.log"
+}

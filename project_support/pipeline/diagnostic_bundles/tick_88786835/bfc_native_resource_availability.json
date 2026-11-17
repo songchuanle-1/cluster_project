@@ -1,0 +1,78 @@
+{
+  "recorded_at": "2026-10-25T12:08:04.212172+00:00",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "owner_token": "88786835ee7344aea8e08c68612733f6",
+  "kind": "resource_check",
+  "result": "blocked",
+  "status": "ACTUAL_AUTHORIZED_CARDS_BUSY_WITH_PROTECTED_NATIVE_TRAINING",
+  "observed_cards": [
+    {
+      "physical_gpu": 0,
+      "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+      "protected_experiment": "M211-BTC",
+      "pid": 2784474,
+      "original_start_ticks": "47557208",
+      "observed_native_train_progress": [
+        [
+          27,
+          50,
+          3419,
+          4686
+        ],
+        [
+          27,
+          50,
+          3425,
+          4686
+        ]
+      ],
+      "safe_native_diagnostic_slot_available": false,
+      "reason": "Original protected training process occupies this physical card; one task per GPU."
+    },
+    {
+      "physical_gpu": 1,
+      "uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+      "protected_experiment": "M212-BCR",
+      "pid": 1215422,
+      "original_start_ticks": "51717921",
+      "observed_native_train_progress": [
+        [
+          10,
+          50,
+          2189,
+          4686
+        ],
+        [
+          10,
+          50,
+          2194,
+          4686
+        ]
+      ],
+      "safe_native_diagnostic_slot_available": false,
+      "reason": "Original protected training process occupies this physical card; one task per GPU."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_88786835/btc_progress_observation.json",
+      "sha256": "143a6cae8d32ff05890d5c1efc872e1fc9339dc820c6e8c7b45a0f75014cb9b6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_88786835/bcr_progress_observation.json",
+      "sha256": "986b4350b64560de5bff05d0e31984cc517ed52c015cbdcb52b217741f7a0d0f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_88786835/bfc_actual_local_guard_integration.json",
+      "sha256": "58703cb171360fd085c2e1e85a509806e71991bf9b2c830bc3f672656f6af0c6"
+    }
+  ],
+  "new_GPU_queries": 0,
+  "diagnostic_compute": "NOT_RUN",
+  "native_backward": "NOT_RUN",
+  "native_resources_profile": "NOT_RUN",
+  "execution_binding_manifest_or_lease_created": false,
+  "next_action": "After natural completion, archive the actual outcome and freshly verify owner, source, assets, whitelist, physical UUID, idle contexts and three locks before BFC original native checks. CTS follows; M206 stays paused.",
+  "scope": "Real current resource availability only; not candidate FLOPs, accuracy or a native PASS. No additional polling, preemption, shared-GPU overlay or old-lease reuse."
+}

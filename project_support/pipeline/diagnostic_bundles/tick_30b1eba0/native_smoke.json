@@ -1,0 +1,57 @@
+{
+  "id": "M205-MDC",
+  "candidate_id": "hierarchy-middle-directional-token-convolution",
+  "config": "configs/Quard/ctf_hcg_csort_mdc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mdc.yaml",
+  "code_commit": "59013e132241322054f1906e771aa78b81c48da6",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    15.884071350097656,
+    5.843664646148682
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "diagnostic_invocation": "python -B pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/control.py smoke",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "observed_at": "2026-10-20T17:07:49.836157+00:00",
+  "native_training_initialization": {
+    "kind": "native_train_pretrain",
+    "path": "/home/songcl/data/data/sp_unet_backbone.pth",
+    "sha256": "a6f400bcf9bd722230d16ea7c3424b0d7658730126df604f67b4cccf42e25c1f",
+    "loader": "gorilla.load_checkpoint(strict=False,map_location=cpu)",
+    "trained_m95_checkpoint_loaded": false,
+    "seed": 1999
+  },
+  "new_module_parameter_updated": true,
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/smoke_candidate_result.json",
+      "sha256": "9db8c00ce4252b60a9c308bab69b2b71b0557653e1544d1549c81e7dd63f45a2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/smoke_candidate_execution.json",
+      "sha256": "14180360321e941a8112992c299176b9cf48140bad1e09cd1c87cb694b593399"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/worker.py",
+      "sha256": "bfe9143da8e38e9c54790d5fb2c6ee6231e434684e77730a9919252481fa0d98"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/native_manifest.json",
+      "sha256": "6e7856d23ed783f77459c9b325905d16510e6b8c23add3f964b60d941f304488"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/version_native.json",
+      "sha256": "4a694eaf832101187ea3f67ae98d63c3c82b63f949671b105eefe4344ab19f4b"
+    }
+  ],
+  "scope": "Two real native batches with original optimizer/seed/augmentation; execution smoke only, not formal run, efficacy/generalization unknown. Prior diagnostic failures preserved; shape[1] is native and finite."
+}

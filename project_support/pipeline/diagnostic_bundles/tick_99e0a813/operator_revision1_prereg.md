@@ -1,0 +1,7 @@
+# Independent Operator Implementation Revision1
+
+- Same fine-leaf-local-point-exchange ID, not M202-HDS or its forbidden third model revision. Preserve the original operator and equal-coordinate counterexample0.0269659085 unchanged.
+- Real32TRAIN scenes128expressions had0exactK32cutoff ties,0adjacency-set changes under reversal,max identical-coordinate multiplicity1. This limits observed prevalence; it does NOT excuse the universal counterexample.
+- One bounded local change: when a recipient has an exact tie across its within-leafK/K+1distance boundary, replace its ambiguous indexed neighbor result by the permutation-invariant mean of ALL members of that same leaf. Untied rows remain bitwise the original operator. This is an explicit conservative degeneracy fallback, not arbitrary tie-breaking, K expansion, feature/language routing, learned gate, new projection or normal-case architecture change.
+- Prediction: original six controls still pass; no-tie outputs remain exactly original; the40node tied fixture now yields the leaf mean and is permutation-equivariant<=1e-12; tied-row gradients equal the analytic leaf-mean gradients. Keep all controls,original failures and full-model/native novelty/resource gaps.
+- Complexity: retain O(NKC)attention; leaf means add O(NC),not globalN-squared attention. The CPU tree and GPU-transfer/full-model latency/memory/FLOPs remain unmeasured. No admission or efficacy claim from this repair.

@@ -1,0 +1,25 @@
+{
+  "owner": {
+    "token": "12e364dc14cd4e1195532c7fd295b834",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T11:09:29.664423+00:00",
+    "deadline_at": "2026-11-06T12:09:29.664423+00:00",
+    "context_sha256": "bf1e90947d091f4e8fe53f8876d130ac0d5493d8ff0a82e1547eb900459588a1",
+    "pending_sha256": "6877a9553b1a86ab70fe0e29c1442ff1e70b52c875adc38549034c975f87f162"
+  },
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "stdin_program": "import socket;assert socket.gethostname()=='dl04-MS-7E06'\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport json,base64,subprocess,time,os,hashlib\nb=P['b'];assert datetime.now(timezone.utc)<datetime.fromisoformat(b['owner']['deadline_at']);proc=Path('/proc/2829477');s=(proc/'stat').read_text();assert s[s.rfind(')')+2:].split()[19]=='158248846';assert os.readlink(proc/'cwd')==b['runtime_root'] and os.readlink(proc/'fd/1')==b['trainer_log'];assert proc.stat().st_uid==os.getuid()==1001\nstage=Path('/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m230_12e364dc');stage.mkdir(exist_ok=False);raw=base64.b64decode(P['code']);assert hashlib.sha256(raw).hexdigest()==b['guardian_script_sha256'];(stage/'guardian.py').write_bytes(raw);(stage/'binding.json').write_text(json.dumps(b))\nwith (stage/'stdout.log').open('ab',buffering=0) as f:c=subprocess.Popen(['/usr/bin/python3','-B',str(stage/'guardian.py'),str(stage/'binding.json')],cwd=stage,stdin=subprocess.DEVNULL,stdout=f,stderr=subprocess.STDOUT,start_new_session=True,env=dict(os.environ,PYTHONDONTWRITEBYTECODE='1'))\n(stage/'spawn.json').write_text(json.dumps({'pid':c.pid}));state=None\nfor _ in range(30):\n if (stage/'state.json').exists():state=json.loads((stage/'state.json').read_text());break\n time.sleep(.1)\nassert state and state['status']=='HOLDING' and len(state['locks'])==3 and c.poll() is None\nprint(json.dumps({'stage':str(stage),'state':state,'training_restarted':False,'signals_sent':False}))\n",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<stdin>\", line 6, in <module>\nAssertionError\n"
+}

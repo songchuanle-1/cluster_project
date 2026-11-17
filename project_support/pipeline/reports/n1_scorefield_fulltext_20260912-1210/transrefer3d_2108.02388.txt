@@ -1,0 +1,610 @@
+                                        TransRefer3D: Entity-and-Relation Aware Transformer
+                                                   for Fine-Grained 3D Visual Grounding
+
+                                                  Dailan He                           Yusheng Zhao                                            Junyu Luo
+
+                                              hedailan@buaa.edu.cn                zhaoyusheng@buaa.edu.cn                                 luojunyu@buaa.edu.cn
+                                        School of Computer Science and         School of Computer Science and                        School of Computer Science and
+                                        Engineering, Beihang University        Engineering, Beihang University                       Engineering, Beihang University
+
+                                                   Beijing, China                         Beijing, China                                        Beijing, China
+
+arXiv:2108.02388v2 [cs.CV] 11 Aug 2021             Tianrui Hui                          Shaofei Huang                                      Aixi Zhang
+
+                                                  huitianrui@iie.ac.cn                 huangshaofei@iie.ac.cn                        aixi.zhax@alibaba-inc.com
+                                        Institute of Information Engineering,  Institute of Information Engineering,                        Alibaba Group
+                                                                                                                                            Beijing, China
+                                            Chinese Academy of Sciences            Chinese Academy of Sciences
+                                                     Beijing, China                         Beijing, China
+
+                                                                                           Si Liu
+
+                                                                                       liusi@buaa.edu.cn
+                                                                               Institute of Artificial Intelligence
+
+                                                                                          Beijing, China
+
+                                        ABSTRACT                                                                                     outperforms existing approaches by up to 10.6% and claims the
+                                                                                                                                     new state-of-the-art performance. To the best of our knowledge,
+                                        Recently proposed fine-grained 3D visual grounding is an essen-                              this is the first work investigating Transformer architecture for
+                                        tial and challenging task, whose goal is to identify the 3D object                           fine-grained 3D visual grounding task.
+                                        referred by a natural language sentence from other distractive ob-
+                                        jects of the same category. Existing works usually adopt dynamic                             CCS CONCEPTS
+                                        graph networks to indirectly model the intra/inter-modal interac-
+                                        tions, making the model difficult to distinguish the referred object                         · Computing methodologies  Artificial intelligence; Com-
+                                        from distractors due to the monolithic representations of visual                             puter vision; Computer vision tasks;
+                                        and linguistic contents. In this work, we exploit Transformer for
+                                        its natural suitability on permutation-invariant 3D point clouds                             KEYWORDS
+                                        data and propose a TransRefer3D network to extract entity-and-
+                                        relation aware multimodal context among objects for more discrim-                            3D visual grounding, transformer, entity attention, relation atten-
+                                        inative feature learning. Concretely, we devise an Entity-aware                              tion
+                                        Attention (EA) module and a Relation-aware Attention (RA) mod-
+                                        ule to conduct fine-grained cross-modal feature matching. Facil-                             ACM Reference Format:
+                                        itated by co-attention operation, our EA module matches visual                               Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei Huang, Aixi
+                                        entity features with linguistic entity features while RA module                              Zhang, and Si Liu. 2021. TransRefer3D: Entity-and-Relation Aware Trans-
+                                        matches pair-wise visual relation features with linguistic relation                          former for Fine-Grained 3D Visual Grounding. In Proceedings of the 29th
+                                        features, respectively. We further integrate EA and RA modules into                          ACM International Conference on Multimedia (MM '21), October 20­24, 2021,
+                                        an Entity-and-Relation aware Contextual Block (ERCB) and stack                               Virtual Event, China. ACM, New York, NY, USA, 9 pages. https://doi.org/10.
+                                        several ERCBs to form our TransRefer3D for hierarchical multi-                               1145/3474085.3475397
+                                        modal context modeling. Extensive experiments on both Nr3D and
+                                        Sr3D datasets demonstrate that our proposed model significantly                              1 INTRODUCTION
+
+                                        Equal contribution.                                                                          Visual-linguistic modeling, which aims to connect vision and lan-
+                                        Corresponding author.                                                                        guage, is an essential task in multimedia understanding and em-
+                                                                                                                                     bodied AI. Specific tasks like visual question answering [24, 32, 33],
+                                        Permission to make digital or hard copies of all or part of this work for personal or        image captioning [2, 9, 14], image-text matching [20, 21, 29], visual
+                                        classroom use is granted without fee provided that copies are not made or distributed        relation detection [8] and scene graph generation [36] have been
+                                        for profit or commercial advantage and that copies bear this notice and the full citation    widely studied in the past few years. In this paper, we focus on
+                                        on the first page. Copyrights for components of this work owned by others than ACM           another important task named visual grounding, which aims to
+                                        must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,      locate referred objects (referents) given the input referring expres-
+                                        to post on servers or to redistribute to lists, requires prior specific permission and/or a  sions. However, most of the existing works on visual grounding
+                                        fee. Request permissions from permissions@acm.org.                                           have been conducted on 2D images, which might fail to capture the
+                                        MM '21, October 20-21, 2021, Chengdu, China                                                  full information in our 3D reality.
+                                        © 2021 Association for Computing Machinery.
+                                        ACM ISBN 978-1-4503-8651-7/21/10. . . $15.00                                                    Recently, approaches and benchmarks for 3D visual-linguistic
+                                        https://doi.org/10.1145/3474085.3475397                                                      tasks emerge and attract attention [12, 25­27]. As an essential 3D
+Figure 1: An example of 3D visual grounding (a). According to the input sentence (referring expression) the model is required
+to locate the referred object (the chair in the given case) from the 3D scene. To perform that, the model needs to identify the
+entity (b) and relation (c) mentioned in the referring expression and match them with the corresponding visual elements to
+obtain a multimodal context in an explicit or implicit way.
+
+visual-linguistic task, 3D visual grounding is to locate objects in 3D     Another observation is the importance of combining entity
+point cloud scenes. Two important benchmarks, ScanRefer [5] and         and relation information in visual-linguistic modeling. Entity
+ReferIt3D [1], have been proposed based on ScanNet dataset [10].        information refers to the feature within an instance, like the cate-
+While the goal of ScanRefer is to predict 3D bounding boxes for the     gory, color, or size. Relation information refers to the feature among
+referents given natural language description, ReferIt3D are more        objects, including spatial relation, comparative relation, etc. Con-
+focused on the following two aspects: (1) The objects in the scenes     sider the scene "The chair next to the black backpack" (shown in
+are annotated with fine-grained labels and referring expressions.       Figure 1), "the chair" and "the black backpack" are linguistic entities,
+For instance, given the description "choose the armchair in the         and the corresponding objects are visual entities. Similarly, "next
+center of the room", the model is required to locate only armchairs     to" is a linguistic relation, and the corresponding spatial relation
+but not other types of chairs like folded chairs or office-chairs;      is implied in the scene. As we can see, the entity or relation infor-
+(2) Each scene contains multiple objects of the same fine-grained       mation alone is not enough for modeling the multimodal context.
+category as the referent. As a result, the model cannot simply rely     Therefore, combining two types of information is essential in our
+on object classification. Therefore, ReferIt3D requires more fine-      3D visual grounding task.
+grained reasoning of 3D objects and referring expressions, which
+is more challenging than ScanRefer. In this work, we mainly focus          Based on these two observations, we propose a Transformer
+on this fine-grained visual grounding benchmark.                        architecture named TransRefer3D to better comprehend the entity-
+                                                                        and-relation multimodal context for fine-grained 3D visual ground-
+   Based on the above benchmarks, researchers have proposed             ing. Concretely, we utilize Self-Attention modules (SA) to capture
+a few 3D visual grounding methods. ReferIt3DNet [1] adopts a            intra-modal contextual information. For inter-modal context, we
+dynamic graph network (DGCNN [25]) to model the multimodal              propose an Entity-aware Attention (EA) module and a Relation-
+context. InstanceRefer [34] utilizes three parallel modules to match    aware Attention (RA) module to match entity and relation features
+visual and linguistic features from different aspects. However, all     in both modalities. The EA module performs matching between ob-
+of these methods fall short of explicit modeling of entities and        ject features and linguistic entity features via co-attention. The RA
+their relationships in the cross-modality context. Moreover, some       module first extracts visual relation features of object-object pairs
+of the previous methods adopt simple fusion of visual feature and       via an asymmetric operator. It then performs cross-modal atten-
+linguistic feature. Consequently, the performance of these methods      tion between visual relation features and linguistic relation features.
+is relatively weak on ReferIt3D benchmark.                              With SA, EA and RA, we integrate them into a unified module called
+                                                                        Entity-and-Relation aware Contextual Block (ERCB) for multimodal
+   We have two observations with a deeper analysis of previous          context modeling. Finally, several ERCBs are stacked together to
+works and the 3D visual grounding task. The first is the similarity     form our TransRefer3D model that captures the hierarchical feature
+between point cloud encoders and Transformers [28, 38]. In              in the cross-modality context.
+the 3D visual grounding task, the scene is represented by a set
+of point cloud features. These features are permutation-invariant,         To summarize, we contribute to the research on 3D visual ground-
+and preserving this property has been a basic guidance of design-       ing from three aspects:
+ing point cloud encoders. On the other side, the multi-head self-
+attention in Transformers preserves this property by its nature.             · To the best of our knowledge, we are the first to introduce
+Since Transformers have achieved phenomenal success in both                     the Transformer architecture to achieve a better cross-modal
+natural language processing [11] and computer vision [13], we are               feature representation for the 3D visual grounding task.
+highly motivated to introduce Transformers in our task.
+     · We propose entity-and-relation aware attention for multi-           R× , keys and values ,   R× , a single-head self-
+        modal context comprehension and use it for fine-grained 3D
+        visual grounding task.                                           attention is formulated as:
+
+     · The proposed TransRefer3D model achieves state-of-the-art                                                                  
+        performance on ReferIt3D. Compared with existing cutting-                           Attn(, ,  ) = softmax  
+        edge approaches, the test accuracy improves up to 10.4% on                                                                       (1)
+        Nr3D (with Sr3D+ augmentation).
+                                                                                                                                
+2 RELATED WORKS
+                                                                         introducing  parallel attention layers as different transformation
+2.1 2D Visual Grounding                                                  heads to enlarge the model capacity, we can further obtain a multi-
+                                                                         head attention:
+Visual grounding, also known as phrase grounding, aims to lo-
+calize descriptive words in images. It has been widely studied in                           MSA(, ,  ) =  [1, 2, . . . ,  ]
+the past several years[17, 30, 31, 37]. Karpathy et al. [18] proposed
+to map image fragments and sentence fragments into a common                                             = Attn     ( )  ( )       ( )    (2)
+space to match images and sentences. Chen et al. [7] proposed a
+Query-guided Regression Network with Context policy (QRC net)                                                            ,       ,     
+and introduce reinforcement learning techniques to achieve better
+localization. Huang et al. [16], proposed a Cross-Modal Progres-                                                              
+sive Comprehension module (CMPC) and a Text-Guided Feature
+Exchange module (TGFE) to segment referred entities in the image.        where      ( )  ,      ( )  ,      ( )    R× are linear transformation that
+Though researchers have made significant progress on 2D visual
+grounding, the research on 3D visual grounding is still relatively                                      
+preliminary. In this work, we mainly focus on fine-grained 3D visual
+grounding task.                                                                                
+
+2.2 3D Visual Grounding                                                  projects , ,  for the -th head and   R× for the output.
+
+3D visual grounding is an emerging research topic. Chen et al. [5]       After the multi-head attention follows a feed forward network,
+released a new benchmark of 3D object localization with natural
+language descriptions. They proposed ScanRefer to combine visual         which is a multi-layer perceptron (MLP). Moreover, the Transformer
+detection and language encoder for joint inference. Achlioptas et
+al. [1] released another benchmark called ReferIt3D consisting of        also utilize Layer Normalization and residual connections.
+Nr3D, Sr3D and Sr3D+ datasets, which assumes the segmented
+object instances are already given. However, its task is more fine-      2.4 Co-Attention for Multimodal Learning
+grained where each referred object has distractors of the same
+category. Text-guided Graph Neural Network (TGNN [15]) are pro-          Multimodal learning requires a full understanding of the contents
+posed for referring instance segmentation on point cloud. Yuan et        in each modality and, more importantly, learning the interactions
+al. [34] proposed InstanceRefer which utilizes instance attribute,       between modalities. Co-attention mechanism [24] is proposed to
+relation and localization perceptions for 3d visual grounding. Differ-   modeling the image attention and question attention in VQA. Yu
+ent from previous works, we exploit the Transformer architecture         et al. [32] proposed a dense co-attention model to make full in-
+and propose Entity-aware Attention (EA) module and Relation-             teractions between modalities and address the previous issue that
+aware Attention (RA) module to build the basic blocks of Trans-          each modality learns separate attention distributions. In 3D visual
+former to achieve a finer matching between visual and linguistic         grounding tasks, the context of entity-and-relation has not been
+features.                                                                fully researched yet. In this paper, we expand the co-attention mech-
+                                                                         anism to guide context modeling in 3D visual grounding task. This
+2.3 Attention Mechanism and Transformer                                  is the first work investigating the co-attention mechanism on the
+                                                                         3D visual-linguistic tasks to the best of our knowledge.
+Transformers have been widely used in natural language process-
+ing [11, 23, 28]. Recently a lot of works also apply them on high-level  3 METHODOLOGY
+vision tasks [4, 13], low-level vision tasks [6] and graph tasks [35]
+because of its strong ability to recognize long-term dependency.         3.1 Overview
+
+   A Transformer is composed of several Transformer layers stacked       According to the above sections, scenes contain two types of infor-
+together. Each Transformer layer consists of a multi-head self-          mation: entities' attributes and relations among entities. To better
+attention (MSA) and a feed forward network. MSA is based on              model the multimodal context for fine-grained 3D visual grounding,
+the self-attention mechanism. Given three feature matrices: queries      we propose two cross-modal attention mechanism: Entity-aware
+                                                                         Attention (EA) and Relation-aware Attention (RA). Furthermore,
+                                                                         we develop an Entity-and-Relation aware Contextual Block (ERCB)
+                                                                         that integrate those attention mechanisms as a multimodal en-
+                                                                         coding unit. By stacking multiple ERCBs, we obtain the proposed
+                                                                         TransRefer3D model.
+
+                                                                            Figure 2 shows the framework of our model. Following previ-
+                                                                         ous work [1], we first extract object features with a shared Point-
+                                                                         Net++ [27] and vectorize the input words with an embedding layer.
+                                                                         After that, we fuse position information to both visual and linguistic
+                                                                         features and feed them into the proposed TransRefer3D.
+
+                                                                            We use the same training objective as ReferIt3D [1] consisting of
+                                                                         a main task and two auxiliary tasks. For  input objects, the main
+                                                                         training task is a  -classification supervised by a cross-entropy
+                                                                         loss Lmain. To obtain the features well embedded to represent 
+                                                                         categories, we also adopt -classification on object features and
+                                                                         aggregated linguistic features, supervised by cross entropy loss
+                                                                         Lobj and Llang. The total loss function is L = Lmain + objLobj +
+                                                                         langLlang where we set obj = lang = 0.5 in all of our experiments.
+                       Position Information
+
+                       Objects                                   ERCB                             ERCB             ...                                                               MLP Auxiliary Task 1
+                       PointNet++                                            EA                                EA                                                                    MLP Main Task
+                                                                                                                                                                                     MLP Auxiliary Task 2
+                                     Visual Features  SA                               SA
+                                                                                                              RA
+                                                                             RA
+                                                                                       SA
+                                                      SA                                                       EA
+                                                                             EA
+                                                                                 L blocks
+ The chair closest to      Word                                                                                                                                                Fuse
+the computer monitor.  Embedding
+                                                         Entity-aware
+                       Words Linguistic Features      Attention
+
+                       Position Encoding
+
+Figure 2: Architecture of the proposed TransRefer3D. The model is composed of several Entity-and-Relation aware Contextual
+Blocks (ERCBs) stacked together. Each block contains self-attention (SA), Entity-aware Attention (EA) and Relation-aware At-
+tention (RA). The model predicts the referred object (Main Task) as well as an utterance classification of the referent (Auxiliary
+Task 1) and an object classification (Auxiliary Task 2) for better feature extraction. The blue arrows indicates the flow of visual
+features, while the red arrows showcases the flow of linguistic features.
+
+                              Visual Features V                                  EA module to match those features to model an entity aware mul-
+                                                                                 timodal context. In a 3D scene, the  objects are represented by
+                                                 Q                               -dimension features. And the referring expression is handled to
+                                                                                  word-level features. Given two feature sets in different modality
+                                                 K                                 R× and   R× , the EA module matches  to  :
+
+                                                 V                                                                                                                                    
+                                                                                 EA(,  ) = Attn(, ,  ) = softmax  
+                           Linguistic Features L                                                                                                                                                           (3)
+
+Figure 3: The Entity-aware Attention module (EA). The fig-                                                                                                                           
+ure illustrates the language-guided visual entity-aware at-
+tention, where visual features serve as queries and linguis-                     which is a multimodal generalization of attention. Like self-attention,
+tic features are keys and values of multi-head attention.                        we further extend EA to a multi-head form by replacing (·)
+The vision-guided linguistic entity-aware attention is simi-                     with a multi-head version.
+lar, with linguistic features as the queries and visual features
+as keys and values.                                                                 The proposed EA module does symmetrical matchings to visual
+                                                                                 and word-level linguistic features for better modeling entities in
+3.2 EA: Entity-aware Attention Module                                            both modals.
+
+Our goal is to find out the referent according to the referring ex-              3.3 RA: Relation-aware Attention Module
+pression. Usually, the referent and other objects in the scene get
+mentioned in the referring expression as some keywords. We name                  The EA module can match entity information in word features and
+all objects appearing in the scene and their corresponding key-                  3D object features. However, only focusing on the entities is in-
+words as the entities in each modality. First of all, we establish an            sufficient for complicated visual-linguistic reasoning. For example,
+Entity-aware Attention (EA) module for finely understanding the                  consider the scene with multiple objects of the same category as
+multimodal context.                                                              the referent. All of them match the corresponding word feature, so
+                                                                                 their corresponding Entity-aware Attention scores can be similar.
+   The importance of each entity for locating the referent is dif-               Consequently, it can be challenging for the model to distinguish
+ferent. In a ScanNet indoor scene, often there are more than 20                  the referent from others.
+objects, but most of them make a limited contribution to the visual
+grounding task. To better understand the referring expression, a                    To address this problem, it is important to let model recognize
+strategy is adapt to match the entity objects with corresponding                 those relational words (e.g. "next to") that appear in the referring
+words and suppress relatively useless features. By this, the model               expression and enhance entity features according to their relations.
+can finely identify and establish correlations on those important                We establish a representation of abstract entity-to-entity relation
+entities.                                                                        for visual modality and develop a cross-modal Relation-aware At-
+                                                                                 tention (RA) for finer context modeling.
+   Inspired by self-attention mechanism and co-attention widely
+adopted in 2D vision-language approaches [16, 32], we propose                       Inspired by DGCNN, we define the relation representation be-
+                                                                                 tween two entity features ,  as an asymmetric form:
+
+                                                                                                                     =  (,  ) =  ( -  )                                                                    (4)
+
+                                                                                 where  denotes a nonlinear layer.
+                 Relations R
+
+                                     Q                     R'
+           R     r11 r12 r13                                                 Aggregationr1n                                               Add & Norm                                              Add & Norm
+              1                                                                                                                          Feed-Forward                                            Feed-Forward
+                                                                                               ...
+           R     r21  r22  r23  r2n                        r11' r12' r13' r1n'                          f1R                                                                                       Add & Norm
+              2                                   Relation Aware                                                                                                                                 Entity-aware
+                                              GGuuAiiddteteedd-n-AAttittoteennnttiioonn
+           R     r31 r32 r33    r3n                        r21' r22' r23' r2n'                          f2R                                                                                         Attention
+              3        ...      ...                                                                                                                                                              QK V
+
+           R     rn1 rn2 rn3    rnn                        r31' r32' r33' r3n'                          f3R                                                                                                                        EA
+              n                                                 ...                                     ...
+                                         K                                                                                                              Add & Norm                                             L
+                                                           rn1' rn2' rn3' rnn'                          fnR                       Add & Norm            Aggregation
+                                                                                                                                                                                                 Self-Attention
+                                     V                                                                                            Entity-aware        Relation-aware                                  Module
+                                                                                                                                    Attention             Attention
+           Linguistic Features L
+                                                                                                                                                      QK V
+                                                                                                                                  QK     V
+                                                                                                                                                                                         RA
+Figure 4: The Relation-aware Attention module (RA). In                                                                                      EA
+RA, the visual features are first extracted and then matched
+with the language feature. The relation features serve as                                                                         V                      R
+queries, and the linguistic features are keys and values. Af-
+ter the cross-modal attention, the language-guided relation                                                                                      Asym. Relation
+features are then aggregated.
+                                                                                                                                  Self-Attention
+                                                                                                                                       Module
+
+   Like entity features, each relation features    R can also get                                                   Figure 5: The architecture of the proposed ERCB. The in-
+matched with corresponding linguistic features. For each entity fea-                                                put visual and linguistic features are first fed into two self-
+ture  , we calculate its relation features and introduce co-attention                                               attention modules. Then visual entity features and linguis-
+on them to obtain an enhanced cross-modal context of  :                                                             tic entity features are matched through Entity-aware Atten-
+                                                                                                                    tion (EA). The visual relation features are first extracted
+                                      = [1, 2, . . . , ]                                                            and then matched with linguistic features through Relation-
+                                                                                                                    aware Attention. Finally, the enhanced features are fused
+                                                                                                                    and processed by feed-forward networks.
+
+                                         =  Attn ( ,    ,  )
+
+                                                                                                                    parallel and fuse them to obtain the joint features   :
+
+                                       
+
+                                         =  Agg  ( )                                                         (5)
+
+                                                                                                                                                                       
+
+                                                                                                                                                                      
+
+                                         =  [ 1 ,                    ]                                                                                   =       LN(     +                    )
+
+                                                   2 ,  .  ..,  
+
+                                                                                                                                                                       
+
+                                                                                                                                                         =       LN(     +                    )                                        (6)
+
+                                                                                                                                                                       
+
+where  is the linguistic feature vector and Agg(·) denotes a channel-                                                                                 =  FFN(    [ ,                         ])
+
+                                                                                                                                                                         
+
+                                                                                                                                                                          
+
+wise aggregation operator gathering the  fused -dimension fea-                                                      where           R .     and          are     the  -th                    feature  of      and  , re-
+
+tures  in        to             R .  Figure  4     shows   the       diagram                        of  RA.  Hence                                                                                        
+                                                                                                                                                    
+                                                                                                                                          
+
+                                                                                                                    spectively. FFN is a feed-forward network and LN denotes layer
+
+for  each      we     can       obtain   a  corresponding               as      its                 relation-aware  normalization [3]. Further performing an add-and-norm transfor-
+                                                                                                                    mation, we can obtain the enhanced multimodal feature  :
+                                                                      
+                                                                                                                                                                                                           
+multimodal context representation.
+
+We adopt a binary relation representation calculated on each pair
+
+of entities (eq. 4). Assuming that those more complicated relations                                                                                   =  LN(          +                      )                                         (7)
+
+                                                                                                                                                                         
+                                                                                                                                                                         
+                                                                                                                                                  
+
+among multiple entities can be described as a set of binary rela-                                                      We also enhance linguistic features with EA guided by visual fea-
+                                                                                                                    tures. For each attention layer, a feed-forward network is followed
+tions, we stack RA modules in our model to achieve a hierarchical                                                   to introduce non-linearity. By stacking those ERCBs, we finally ob-
+                                                                                                                    tain a hierarchical Transformer for fine-grained multimodal context
+and progressive context comprehension with respect to relation                                                      comprehension.
+
+information.                                                                                                           In Section 4.3, we will discuss the ability of each module and
+                                                                                                                    the structure of our model. Experiments show that TransRefer3D
+3.4 ERCB: Entity-and-Relation Aware                                                                                 and its component EACB are much more powerful in modeling
+       Contextual Block                                                                                             multimodal context than other methods.
+
+EA and RA can model two essential information in scenes: entities                                                   4 EXPERIMENTS
+and relations. By composing EA and RA, we propose an Entity-
+and-relation Aware Contextual Block (ERCB), as shown in Figure 5.                                                   In this section, we present experiments to demonstrate the effective-
+ERCB can form a cross-modal context comprehension with respect                                                      ness of the proposed TransRefer3D compared with other methods.
+to both entity and relation information for visual grounding.                                                       We also conduct quantitative/qualitative studies to analyze our
+                                                                                                                    method in details.
+   In each block, we first feed the visual and linguistic features to
+self-attention layers. Self-attention layers can effectively extract                                                4.1 Implementation details and Datasets
+features in each modality and enhance the performance of cross-
+modal transformations.                                                                                              For a fair comparison, we follow the same settings as ReferIt3D [1].
+                                                                                                                    We train the model until convergence with Adam optimizer [19]
+   Then, we match the visual features with word-level features
+with respect to both entity information and relation information.
+We calculate two types of attention representation   and   in
+Arch.                Overall       Easy                                Hard          View-dep. View-indep.
+
+  ReferIt3DNet [1]   35.6% ± 0.7%          Nr3D                        27.9% ± 0.7%  32.5% ± 0.7%  37.1% ± 0.8%
+     TGNN [15]       37.3% ± 0.3%  43.6% ± 0.8%                        30.6% ± 0.2%  35.8% ± 0.2%  38.0% ± 0.3%
+                     38.8% ± 0.4%  44.2% ± 0.4%                        31.8% ± 0.4%  34.5% ± 0.6%  41.9% ± 0.4%
+ InstanceRefer [34]  42.1% ± 0.2%  46.0% ± 0.5%                        36.0% ± 0.4%  36.5% ± 0.6%  44.9% ± 0.3%
+TransRefer3D (ours)                48.5% ± 0.2%
+
+                                   Nr3D w/ Sr3D
+
+ReferIt3DNet         37.2% ± 0.3% 44.0% ± 0.6% 30.6% ± 0.3% 33.3% ± 0.6% 39.1% ± 0.2%
+
+TransRefer3D (ours) 47.2% ± 0.3% 55.4% ± 0.5% 39.3% ± 0.5% 40.3% ± 0.4% 50.6% ± 0.2%
+
+                                   Nr3D w/ Sr3D+
+
+ReferIt3DNet         37.6% ± 0.4% 45.4% ± 0.6% 30.0% ± 0.4% 33.1% ± 0.5% 39.8% ± 0.4%
+
+TransRefer3D (ours) 48.0% ± 0.2% 56.7% ± 0.4% 39.6% ± 0.2% 42.5% ± 0.2% 50.7% ± 0.4%
+
+Table 1: The performance of TransRefer3D on Nr3D trained with or without Sr3D/Sr3D+, compared with previous works.
+
+and a learning rate of 0.0005. The default feature dimension () is             the referent itself) and hard cases are those having multiple
+128 and the default batch size is 32. We set the depth of ERCBs ()             distractors.
+to 4 and use 4-head attentions if not particularly indicated.               · View dependency: view dependent cases (View-dep.) are
+                                                                               those whose descriptions ask the viewers to place themselves
+   We conduct our experiments on three datasets, Nr3D, Sr3D and                facing certain objects, and other cases are view independent
+Sr3D+ [1]. The details of these datasets are listed as follows:                (View-indep.) .
+
+     · Nr3D: Nr3D (Natural Reference in 3D) consists of 41.5K          The results show that TransRefer3D performs especially well in
+        human descriptions collected using a referring game (ReferIt   hard cases, suggesting that our model can better understand the
+        Game). It describes objects in 707 ScanNet scenes. In each     complicated referring context.
+        scene, there are multiple objects of the same category as the
+        referent.                                                         Then, we also train our model on Nr3D jointly with Sr3D/Sr3D+,
+                                                                       and test the model on Nr3D test set. The results are shown in
+     · Sr3D: Sr3D (Spatial Reference in 3D) contains 83.5K syn-        Table 1 (middle part and bottom part). The results indicate that
+        thetic descriptions. It categorizes spatial relations into 5   TransRefer3D may perform even better on larger datasets. Com-
+        types: horizontal proximity, vertical proximity, between, al-  pared with training only on Nr3D, the performance of ReferIt3DNet
+        locentric and support [1], and then generates descriptions     improves by 1.6% by joint training on Nr3D and Sr3D. However,
+        using language templates. Similar with Nr3D, there are al-     we find that this improvement enlarges to 5.1% on TransRefer3D.
+        ways more than one objects of the same category as the         A similar trend is also observed on our model by joint training
+        referred object.                                               with Sr3D+. One possible explanation for this phenomenon is that
+                                                                       training Transformers require relatively more data. Recent studies
+     · Sr3D+: Sr3D+ is an augmentation of Sr3D. It uses the same       on Transformers designed for other tasks also report similar conclu-
+        method as Sr3D to generate synthetic descriptions. The dif-    sions [11, 13]. Therefore, TransRefer3D may have the potential to
+        ference is the referent could be the only object belonging to  achieve better performance on visual grounding if a larger dataset
+        a fine-grained category in each scene.                         is available in the future.
+
+   Sr3D and Sr3D+ are designed to enhance the performance of the       4.2.2 Evaluation on Sr3D.
+model on Nr3D [1]. The model is first jointly trained on both Nr3D     We also train and test the proposed model only on Sr3D, and the
+training set and Sr3D/Sr3D+ and then evaluated on Nr3D test set.       results are shown in Table 2. The results show that our model
+Nevertheless, for the completeness of experiments, we also train       outperforms all the previous works with more than 9.4% accuracy
+and test our model only on Sr3D.                                       improvement. Since the data in Sr3D is generated from language
+                                                                       templates that describe spatial relations, it is relatively easy for
+4.2 Quantitative Performance on Nr3D and                               TransRefer3D that can explicitly model entity and relation in a
+      Sr3D/Sr3D+                                                       cross-modality context.
+
+In this section, we report the quantitative performance of our model   4.3 Ablation Study
+on Nr3D, Sr3D and Sr3D+.
+                                                                       In this subsection, we further discuss the effectiveness of each
+4.2.1 Evaluation on Nr3D.                                              module in TransRefer3D and the architecture design.
+Firstly, we train our model on Nr3D training set and test the model
+on Nr3D test set. As shown in Table 1 (upper part), TransRefer3D          To verify the effectiveness of each module in the proposed model,
+outperforms previous models by a large margin. Besides, we also        we train and test TransRefer3D without each of the modules: self-
+measure our performance on different types of scenarios, defined       attention (SA), vision-guided linguistic entity aware attention (EA,
+in [1]:                                                                VL), language-guided visual entity aware attention (EA, LV)
+
+     · Easy vs. Hard: easy cases are those having only one dis-
+        tractor (the object of the same class as the referent but not
+Arch.                Overall                     Easy               Hard          View-dep. View-indep.
+
+  ReferIt3DNet [1]   40.8% ± 0.2%                44.7% ± 0.1%       31.5% ± 0.4%  39.2% ± 1.0%  40.8% ± 0.1%
+     TGNN [15]       45.0% ± 0.2%                48.5% ± 0.2%       36.9% ± 0.5%  45.0% ± 1.1%  45.0% ± 0.2%
+                     48.0% ± 0.3%                51.1% ± 0.2%       40.5% ± 0.3%  45.4% ± 0.9%  48.1% ± 0.3%
+ InstanceRefer [34]  57.4% ± 0.2%                60.5% ± 0.2%       50.2% ± 0.2%  49.9% ± 0.6%  57.7% ± 0.2%
+TransRefer3D (ours)
+
+Table 2: The performance of TransRefer3D trained and evaluated on Sr3D only, compared with previous works.
+
+Arch.                Overall                     Easy               Hard          View-dep. View-indep.
+
+    w/o SA           38.6% ± 0.2%                45.5% ± 0.6%       32.0% ± 0.4%  33.3% ± 0.7%  41.3% ± 0.3%
+w/o EA (VL)          41.7% ± 0.2%                48.7% ± 0.5%       34.9% ± 0.1%  37.7% ± 0.5%  43.7% ± 0.2%
+w/o EA (LV)          41.1% ± 0.4%                48.9% ± 0.6%       33.6% ± 0.4%  37.9% ± 0.2%  42.7% ± 0.5%
+                     40.8% ± 0.1%                47.9% ± 0.2%       34.0% ± 0.1%  36.7% ± 0.5%  42.9% ± 0.1%
+    w/o RA
+
+EA + RA (stacked)    41.4% ± 0.4% 47.7% ± 0.6% 35.3% ± 0.3% 37.0% ± 0.6% 43.5% ± 0.4%
+
+EA + RA (TransRefer3D) 42.1% ± 0.2% 48.5% ± 0.2% 36.0% ± 0.4% 36.5% ± 0.6% 44.9% ± 0.3%
+
+Table 3: Ablation study of our model. We train and test the proposed models without self-attention (SA) and the proposed
+
+modules (vision-guided EA, language guided EA and RA). We also try different module architectures EA and RA modules
+
+stacked together or in parallel (TransRefer3D).
+
+Figure 6: Referring Accuracy with different depth of ERCB.             Moreover, we train and test our model with different architec-
+                                                                    tures. By default, the proposed ERCB consists of an EA module
+Figure 7: Visualization of the visual grounding results com-        and a RA module in parallel. We have also tried stacking EA and
+pared with ReferIt3DNet. The blue bounding boxes are the            RA modules, in which the data is first fed into EA module and
+targets, the red ones are misclassifications, and the green         then RA module. A possible explanation for this is that the entity
+ones are the correct classifications.                               information and relation information are relatively independent,
+                                                                    and a parallel structure might be more reasonable.
+and relation aware attention (RA). The results are shown in Ta-
+ble 3. The model without SA performs worst in all the experiments.     As for the depth of our model, we tested TransRefer3D with dif-
+This indicates that the Transformer architecture is suitable for    ferent depth of ERCB layers on Nr3D dataset. As shown in Figure 6,
+our 3D visual grounding task and that the contextual awareness      4 layers of ERCB achieve the best performance. Shallow models
+within a single modal is the basis of cross-modal understanding.    with fewer layers might fail to represent the complicated relations
+Furthermore, removing all of the proposed modules hinders the       as analyzed in Section 3.3. Simultaneously, deeper Transformers
+performance, demonstrating the effectiveness of the proposed EA     have been observed hard to train because of unbalanced gradients
+and RA modules.                                                     and amplification effect [22].
+
+                                                                    4.4 Qualitative Analysis
+
+                                                                    4.4.1 Case Study. We render the 3D scenes sampled from Nr3D
+                                                                    test set and visualize the visual grounding results of our model.
+                                                                    Figure 7 shows part of the results. Compared with ReferIt3DNet,
+                                                                    our TransRefer3D performs better on both simple and hard cases
+                                                                    because of a finely multi-modal context modeling. The first column
+                                                                    in the figure indicates that, even in a complicated scene with a great
+                                                                    number of distractors (5 monitors are replaced closely on a table),
+                                                                    our model can still identify the referent from the context.
+
+                                                                    4.4.2 Attention visualization of EA and RA. Figure 8 shows the
+                                                                    visualization of our proposed attention modules enhancing visual
+                                                                    features. In this case, the referring expression is "Middle part of
+                                                                    couch, seams end in between the 2 beige cocktail tables". For both
+                                                                    EA and RA, we visualize the attention maps extracted from the first
+                                                                    and the last ERCB (represented as EA/RA-1/4 in the figure).
+
+                                                                       According to the EA-4 maps showed in Figure 8(c) and Figure 8(d),
+                                                                    it is very clear that in the last layer, EA matches the entity words
+                                                                    with corresponding visual features (the couches and the tables
+                                                                    in this case). We also observe that another EA head in the last
+(a) EA-1 head 1     (b) EA-1 head 2                                          (c) EA-4 head 1    (d) EA-4 head 2
+
+(e) RA-1 "between"  (f) RA-4 "between"                                       (g) RA-1 "middle"  (h) RA-4 "middle"
+
+Figure 8: Visualization of EA and RA. The attention maps are titled EA/RA- with  denoting the layer depth. The third word
+"couch" marked with an asterisk denotes the referent. (a-d) Attention maps of EA. For each EA module, we report attention
+maps from 2 of the 4 heads. (e-h) Attention maps of RA responding to the words "between" and "middle".
+
+layer matches the visual and linguistic features for couches and             5 CONCLUSION
+tables across. This behavior of EA perhaps helps establish a more
+expressive entity aware feature for the later grounding. See EA-1            We propose TransRefer3D consisting of ERCBs which integrate EA
+maps in Figure 8(a) and Figure 8(b), EA behaviour in the first layer         and RA modules for entity-and-relation aware multimodal context
+also maps tables and couches to different modality but not such              modeling. The proposed model performs effectively on fine-grained
+obviously, compared with the EA-4 maps.                                      3D visual grounding. On both Nr3D and Sr3D, the model signif-
+                                                                             icantly achieves superior performance compared with previous
+   In this case, we investigate RA responding to two relational              approaches. This proves that Transformer is suitable to connect
+words, "between" and "middle". The attention maps of RA show a               language and 3D vision and demonstrates the effectiveness of our
+similar phenomenon that the maps from the last layer are more un-            entity-and-relation aware modeling. Hence, the proposed EA and
+derstandable than ones from the first layer. See Figure 8(f), the            RA modules and ERCB may have a positive influence to future
+0.table-4.ottoman and 0.table-5.ottoman relation representations             works on 3D multimodal machine learning. In the future, we will
+strongly respond to the word feature "between". This makes sense             further dig into Transformers for 3D modal tasks. As 3D vision is
+since the table is exactly located between the two ottomans in the           rapidly developing today, we believe that the proposed TransRe-
+scene. Notice that "between" is a ternary relation describing a spa-         fer3D will become an important reference.
+tial state of an entity relative to the other two entities. In Figure 8(h),
+the referred part of couch (id. 3) is located in the "middle" of most        6 ACKNOWLEDGEMENT
+of strongly responded object pairs (e.g. 7.table-2.table, 9.wall-2.table,
+9.wall-4.ottoman). The model learns to find objects surrounding the          This research is supported in part by National Natural Science
+referent. This instances imply that the proposed RA module can               Foundation of China (Grant 61876177), Beijing Natural Science
+also capture relations more complicated than binary relations.               Foundation (4202034), Fundamental Research Funds for the Central
+                                                                             Universities.
+REFERENCES                                                                               [20] Kunpeng Li, Yulun Zhang, Kai Li, Yuanyuan Li, and Yun Fu. 2019. Visual semantic
+                                                                                               reasoning for image-text matching. In ICCV.
+ [1] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed Elhoseiny, and
+      Leonidas Guibas. 2020. Referit3d: Neural listeners for fine-grained 3d object      [21] Chunxiao Liu, Zhendong Mao, Tianzhu Zhang, Hongtao Xie, Bin Wang, and
+      identification in real-world scenes. In ECCV.                                            Yongdong Zhang. 2020. Graph structured network for image-text matching. In
+                                                                                               CVPR.
+ [2] Peter Anderson, Xiaodong He, Chris Buehler, Damien Teney, Mark Johnson,
+      Stephen Gould, and Lei Zhang. 2018. Bottom-up and top-down attention for           [22] Liyuan Liu, Xiaodong Liu, Jianfeng Gao, Weizhu Chen, and Jiawei Han. 2020. Un-
+      image captioning and visual question answering. In CVPR.                                 derstanding the difficulty of training transformers. arXiv preprint arXiv:2004.08249
+                                                                                               (2020).
+ [3] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton. 2016. Layer normaliza-
+      tion. arXiv preprint arXiv:1607.06450 (2016).                                      [23] Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer
+                                                                                               Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. 2019. Roberta: A
+ [4] Nicolas Carion, Francisco Massa, Gabriel Synnaeve, Nicolas Usunier, Alexan-               robustly optimized bert pretraining approach. arXiv preprint arXiv:1907.11692
+      der Kirillov, and Sergey Zagoruyko. 2020. End-to-end object detection with               (2019).
+      transformers. In ECCV.
+                                                                                         [24] Jiasen Lu, Jianwei Yang, Dhruv Batra, and Devi Parikh. 2016. Hierarchical
+ [5] Dave Zhenyu Chen, Angel X Chang, and Matthias Nießner. 2019. Scanrefer:                   question-image co-attention for visual question answering. arXiv preprint
+      3d object localization in rgb-d scans using natural language. arXiv preprint             arXiv:1606.00061 (2016).
+      arXiv:1912.08830 (2019).
+                                                                                         [25] Anh Viet Phan, Minh Le Nguyen, Yen Lam Hoang Nguyen, and Lam Thu Bui.
+ [6] Hanting Chen, Yunhe Wang, Tianyu Guo, Chang Xu, Yiping Deng, Zhenhua                      2018. Dgcnn: A convolutional neural network over large-scale labeled graphs.
+      Liu, Siwei Ma, Chunjing Xu, Chao Xu, and Wen Gao. 2020. Pre-trained image                Neural Networks (2018).
+      processing transformer. arXiv preprint arXiv:2012.00364 (2020).
+                                                                                         [26] Charles R Qi, Hao Su, Kaichun Mo, and Leonidas J Guibas. 2017. Pointnet: Deep
+ [7] Kan Chen, Rama Kovvuri, and Ram Nevatia. 2017. Query-guided regression                    learning on point sets for 3d classification and segmentation. In CVPR.
+      network with context policy for phrase grounding. In ICCV.
+                                                                                         [27] Charles R Qi, Li Yi, Hao Su, and Leonidas J Guibas. 2017. Pointnet++: Deep
+ [8] Meng-Jiun Chiou, Roger Zimmermann, and Jiashi Feng. 2021. Visual Relationship             hierarchical feature learning on point sets in a metric space. arXiv preprint
+      Detection With Visual-Linguistic Knowledge From Multimodal Representations.              arXiv:1706.02413 (2017).
+      IEEE Access 9 (2021), 50441­50451.
+                                                                                         [28] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+ [9] Marcella Cornia, Matteo Stefanini, Lorenzo Baraldi, and Rita Cucchiara. 2020.             Aidan N Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017. Attention is all
+      Meshed-memory transformer for image captioning. In CVPR.                                 you need. arXiv preprint arXiv:1706.03762 (2017).
+
+[10] Angela Dai, Angel X Chang, Manolis Savva, Maciej Halber, Thomas Funkhouser,         [29] Haoran Wang, Ying Zhang, Zhong Ji, Yanwei Pang, and Lin Ma. 2020. Consensus-
+      and Matthias Nießner. 2017. Scannet: Richly-annotated 3d reconstructions of              aware visual-semantic embedding for image-text matching. In ECCV.
+      indoor scenes. In CVPR.
+                                                                                         [30] Zhengyuan Yang, Boqing Gong, Liwei Wang, Wenbing Huang, Dong Yu, and
+[11] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2018. Bert:             Jiebo Luo. 2019. A fast and accurate one-stage approach to visual grounding. In
+      Pre-training of deep bidirectional transformers for language understanding. arXiv        ICCV.
+      preprint arXiv:1810.04805 (2018).
+                                                                                         [31] Tianyu Yu, Tianrui Hui, Zhihao Yu, Yue Liao, Sansi Yu, Faxi Zhang, and Si Liu.
+[12] Zhipeng Ding, Xu Han, and Marc Niethammer. 2019. VoteNet: A deep learning                 2020. Cross-Modal Omni Interaction Modeling for Phrase Grounding. In ACM
+      label fusion method for multi-atlas segmentation. In MICCAI.                             MM.
+
+[13] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xi-        [32] Zhou Yu, Jun Yu, Yuhao Cui, Dacheng Tao, and Qi Tian. 2019. Deep modular
+      aohua Zhai, Thomas Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg               co-attention networks for visual question answering. In CVPR.
+      Heigold, Sylvain Gelly, et al. 2020. An image is worth 16x16 words: Transformers
+      for image recognition at scale. arXiv preprint arXiv:2010.11929 (2020).            [33] Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, and Dacheng Tao. 2018. Be-
+                                                                                               yond bilinear: Generalized multimodal factorized high-order pooling for visual
+[14] Lun Huang, Wenmin Wang, Jie Chen, and Xiao-Yong Wei. 2019. Attention on                   question answering. TNNLS (2018).
+      attention for image captioning. In ICCV.
+                                                                                         [34] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang, Zhen Li, and Shuguang Cui.
+[15] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and Tyng-Luh Liu. 2021.                    2021. InstanceRefer: Cooperative Holistic Understanding for Visual Grounding on
+      Text-Guided Graph Neural Networks for Referring 3D Instance Segmentation. In             Point Clouds through Instance Multi-level Contextual Referring. arXiv preprint
+      AAAI.                                                                                    arXiv:2103.01128 (2021).
+
+[16] Shaofei Huang, Tianrui Hui, Si Liu, Guanbin Li, Yunchao Wei, Jizhong Han, Luoqi     [35] Seongjun Yun, Minbyul Jeong, Raehyun Kim, Jaewoo Kang, and Hyunwoo J Kim.
+      Liu, and Bo Li. 2020. Referring image segmentation via cross-modal progressive           2019. Graph transformer networks. arXiv preprint arXiv:1911.06455 (2019).
+      comprehension. In CVPR.
+                                                                                         [36] Rowan Zellers, Mark Yatskar, Sam Thomson, and Yejin Choi. 2018. Neural motifs:
+[17] Chenchen Jing, Yuwei Wu, Mingtao Pei, Yao Hu, Yunde Jia, and Qi Wu. 2020.                 Scene graph parsing with global context. In Proceedings of the IEEE Conference
+      Visual-Semantic Graph Matching for Visual Grounding. In ACM MM.                          on Computer Vision and Pattern Recognition. 5831­5840.
+
+[18] Andrej Karpathy, Armand Joulin, and Li Fei-Fei. 2014. Deep fragment embeddings      [37] Chao Zhang, Weiming Li, Wanli Ouyang, Qiang Wang, Woo-Shik Kim, and
+      for bidirectional image sentence mapping. arXiv preprint arXiv:1406.5679 (2014).         Sunghoon Hong. 2019. Referring Expression Comprehension with Semantic
+                                                                                               Visual Relationship and Word Mapping. In ACM MM.
+[19] Diederik P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic opti-
+      mization. arXiv preprint arXiv:1412.6980 (2014).                                   [38] Hengshuang Zhao, Li Jiang, Jiaya Jia, Philip Torr, and Vladlen Koltun. 2020. Point
+                                                                                               transformer. arXiv preprint arXiv:2012.09164 (2020).
+

@@ -1,0 +1,59 @@
+{
+  "id": "M185-CTF-HCG-CSORT-MQPP-TR",
+  "config": "configs/Quard/ctf_hcg_csort_mqpp_tr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqpp_tr.yaml",
+  "status": "done_earlystop",
+  "gpu": "7",
+  "depends_on": [],
+  "label": "M185 MQPP terminal-readout structural ablation",
+  "note": "Independent original topology with intermediate feedback removed; one context read before final decoder; identical numerical config. CUDA topology/padding/batch-isolation/gradients and exact boundary hooks passed after padding repair1. Full-model measured <=10G. Codecda808c synced both servers preserving deployment diffs.",
+  "measured_flops_g": 9.845844524,
+  "validation_report": "pipeline/reports/tr_validation_20260908-1924/resource_audit.json",
+  "design": "pipeline/designs/exp_design_20260908-1917.md",
+  "code_commit": "cda808cbbf1e87c98e7e3cb9461405856a2e1aba",
+  "server": "server-6",
+  "created_at": "2026-09-08T19:32:45",
+  "history": [
+    {
+      "ts": "2026-09-08T19:32:45",
+      "action": "enqueued",
+      "decision": "20260908-193039_next_batch.md"
+    },
+    {
+      "ts": "2026-09-10T08:08:53",
+      "action": "manual_placement",
+      "from_server": "server-4",
+      "server": "server-6",
+      "gpu": "7",
+      "reason": "User requested push; H100 admission passed"
+    },
+    {
+      "ts": "2026-09-10T08:09:15.646285",
+      "action": "launched",
+      "gpu": "7"
+    },
+    {
+      "ts": "2026-09-12T16:15:26.643716",
+      "status": "done_earlystop",
+      "best_miou": "0.4884",
+      "epochs": "23/50"
+    }
+  ],
+  "admission_report": "pipeline/reports/h100_admission_20260910-0803/resource_audit.json",
+  "launched": "2026-09-10T08:09:15",
+  "pid": 1640196,
+  "stdout_log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqpp_tr_20260910_080907.log",
+  "final_best": "0.4884",
+  "finished_at": "2026-09-12T16:15:26",
+  "log_local": "D:\\project\\cluster_project\\Checkpoints\\server-6\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqpp_tr\\20260910_001203\\20260910_001203.log",
+  "epochs_final": "23/50",
+  "best_miou_exact": 0.4884226322174072,
+  "best_epoch": 13,
+  "best_acc50": 0.539,
+  "best_spmiou": 0.453,
+  "validations_completed": 23,
+  "no_improve_final": 10,
+  "ended_at_remote": "2026-09-12 07:17:18,661",
+  "log_sha256": "64a6ba960b50d971b57ecf2d4eb6fb193eecea526b4322f3f943b1d138a37ada",
+  "analysis": "D:\\project\\cluster_project\\pipeline\\analyses\\M185-CTF-HCG-CSORT-MQPP-TR_done_earlystop_20260912-161500.md",
+  "terminal_evidence": "Explicit trainer marker, 23 contiguous validations, absent process, and matching remote/local hash"
+}

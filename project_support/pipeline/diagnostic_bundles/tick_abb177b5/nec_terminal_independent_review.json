@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "owner": {
+    "token": "abb177b593654188aa78ca4196688dc5",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-05T11:05:11.386845+00:00",
+    "deadline_at": "2026-11-05T12:05:11.386845+00:00",
+    "context_sha256": "2f8cbe9b50330d57dbaaddb2698777f393d51171fd9c496c9834402cec876768",
+    "pending_sha256": "b56a0651b5b633a042808e3a029e71a5e54d094ebb4cd6c28aedb65fb56cc47a"
+  },
+  "reviewer": "/root/tick_audit",
+  "recorded_at": "2026-11-05T11:22:42.481795+00:00",
+  "scope": "Local independent read/recomputation from the two current-owner remote-observation JSON records plus exact source6bc tools/train.py. This reviewer performed no SSH/GPU/shared lifecycle mutation.",
+  "actual_read_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_abb177b5/nec_terminal_observation.json",
+      "sha256": "3ab15a934ea0bb12976dab3b750eb602538838517487f41e5197a08cafe33881"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_abb177b5/nec_native_terminal_metrics.json",
+      "sha256": "0ca147c16846033ada9baf0ddd5d4d3e00d8e9c69f08632d1f8760c38a3d6c32"
+    },
+    {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    }
+  ],
+  "decision": "PASS_OBSERVED_TERMINAL_LINEAGE",
+  "result": {
+    "classification": "done_earlystop",
+    "source_commit": "6bc36adfe42764aac2209e6600fb3a783e2fa374",
+    "pid": 7603,
+    "pid_absent_as_recorded": true,
+    "terminal_epoch": 23,
+    "validation_steps": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "exact_validation_values": [
+      0.3395748734474182,
+      0.3770325481891632,
+      0.40816253423690796,
+      0.41563719511032104,
+      0.44448450207710266,
+      0.4551730155944824,
+      0.46909099817276,
+      0.47708529233932495,
+      0.4762686491012573,
+      0.4830094873905182,
+      0.4817197024822235,
+      0.4834546744823456,
+      0.49454113841056824,
+      0.48800843954086304,
+      0.48979559540748596,
+      0.4905620217323303,
+      0.4904783070087433,
+      0.4924916625022888,
+      0.4821659326553345,
+      0.4915447533130646,
+      0.48691296577453613,
+      0.4916473627090454,
+      0.48924651741981506
+    ],
+    "completed_validation_count": 23,
+    "exact_final_best_miou": 0.49454113841056824,
+    "best_epoch": 13,
+    "last_validation_miou": 0.48924651741981506,
+    "no_improve": 10,
+    "patience": 10,
+    "full_train_progress_in_observed_tail": [
+      23,
+      4686
+    ],
+    "full_validation_progress_in_observed_tail": [
+      23,
+      363
+    ],
+    "earlystop_marker_observed_in_stdout_and_native_log": true,
+    "champion_m95": 0.502,
+    "champion_improved": false
+  },
+  "source_review": {
+    "path": "Cluster/tools/train.py",
+    "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+    "local_file_equals_commit6bc_blob": true,
+    "earlystop_break_precedes_checkpoint_save": true
+  },
+  "evidence_limits": [
+    "The remote full stdout SHA is an observed field, not a full local-byte hash independently recomputed by this reviewer.",
+    "val/mIOU scalar values/steps are actual recorded observations; this review does not assert an unobserved whole TensorBoard-event-file SHA.",
+    "Checkpoint names/sizes were listed, but checkpoint metadata/body were not read; do not label last.pth as epoch23. Native early-stop break occurs before checkpoint save.",
+    "No causal mechanism benefit, novelty, generalized efficacy or live GPU availability is established by this terminal review."
+  ],
+  "derived_record_repair": [
+    "Preserve archive_id, code_commit, canonical finished_at/history and original evidence.",
+    "Set derived final_best/best_miou to exact0.49454113841056824; last validation0.48924651741981506; best_epoch13; terminal_epoch23/no_improve10.",
+    "Normalize archived training_status to done_earlystop; research candidate training->complete with actual terminal evidence and next_action preserving holds/no automatic restart.",
+    "A real local log path may be filled only when the corresponding log artifact exists; otherwise keep the missing-log limitation explicit."
+  ]
+}

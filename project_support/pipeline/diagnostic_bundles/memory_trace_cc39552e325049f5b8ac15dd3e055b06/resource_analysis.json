@@ -1,0 +1,66 @@
+{
+  "token": "cc39552e325049f5b8ac15dd3e055b06",
+  "observed_at": "2026-10-16T02:33:51.151960+00:00",
+  "goal_sha256": "3b96e04fae2945649ce42ce65674ff5dbf6c7ce24e19123093ecdebc71d4c102",
+  "standard_same_input": true,
+  "baseline_counted_flops": 9762532428.0,
+  "candidate_counted_flops": 10034588748.0,
+  "delta_counted_flops": 272056320.0,
+  "limit_flops": 10000000000.0,
+  "excess_flops": 34588748.0,
+  "resource_gate_passed": false,
+  "relative_flops_increase": 0.027867392196282204,
+  "relative_median_latency_increase": 0.006614292835851909,
+  "relative_inference_peak_memory_increase": 0.0,
+  "training_baseline_peak_bytes": 4293406720,
+  "training_candidate_peak_bytes": 4499342848,
+  "relative_matched_training_peak_increase": 0.047965669555760204,
+  "module_delta": {
+    "": 272056320.0,
+    "dec": 272056320.0,
+    "dec.cluster_att": 272056320
+  },
+  "inferred_standard_valid_points": 1620.0,
+  "source_arithmetic_explanation": "Delta272056320 equals2*N1620*C256*K328 counted dense query-key/value matrix work. Existing projections/FFNs and parameter count unchanged; full-bank arithmetic restored strict numerical controls but computes masked edges.",
+  "counterfactual_not_tested": {
+    "half_attention_counted_work": 136028160.0,
+    "required_attention_work_reduction_fraction": 0.1271381896219136,
+    "potential_direction": "Retain canonical QK and softmax axes; investigate genuinely reduced masked value aggregation. This is ONLY arithmetic feasibility, not an implemented/tested/authorized third revision or a PASS."
+  },
+  "effective_revision_limit": 2,
+  "revisions_used": 2,
+  "no_unilateral_revision3": true,
+  "no_goal_or_gate_change": true,
+  "branch_support": {
+    "expressions": 16,
+    "scenes": 4,
+    "mean_ancestor_missed_leaf_fraction": 0.8657643563785044,
+    "mean_ancestor_multiply_covered_leaf_fraction": 0.020350362370332466,
+    "all_disjoint_exact_cover": true,
+    "scope": "Branch value supports only; does not mean all-model context is missing or duplicate information is harmful."
+  },
+  "banned_family_source_review": {
+    "attnpool": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_attnpool/hier_postprocess.py",
+      "sha256": "ce4e6690b86c83a33940b071bb384dcbda61d3655cb783a361728018dc71ba49",
+      "source_summary": "quard2_c2f_enc_lite_attnpool: Attention Pooling 替代 scatter_mean.\n\n在 lite 基础上，将 SharedClusterBank 中的 scatter_mean 聚合替换为\n可学习 attention pooling，让每个 cluster token 关注簇内最重要的点。\n\n改动:\n  1. PointCloudPartitioner 存储每簇的点索引列表 (同 qcond)\n  2. SharedClusterBank 新增 attn_pool_q (可学习 cluster query) + attn_pool_proj\n  3. build_cluster_feats 中用 cross-attention 替代 scatter_mean\n\n动机:\n  scatter_mean 对所有点一视同仁，丢失了簇内结构。\n  attention pooling 让 cluster token 自适应关注重要子区域。\n\n计算量: 每簇 ~16 个点做 attention → ~40M FLOPs/层 (+210%)\n参数量: +262K (+99%)"
+    },
+    "qcond": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_qcond/hier_postprocess.py",
+      "sha256": "a0e6150aa33407685ce712bcd24c9f2e7d08ef0e4a4867a6f488c87e1710f52f",
+      "source_summary": "quard2_c2f_enc_lite_qcond: Query-Conditioned Cluster Aggregation (v2).\n\n相比 lite 的改动:\n  1. SharedClusterBank 存储每簇的点索引列表 (cluster_point_lists)\n  2. C2F 路由后，用 batched cross-attention 对选中 clusters 做 query→points\n     重聚合 (per-query refined tokens)\n  3. _qcond_gather_blend: 将 per-query refined tokens 映射回点，\n     与 mean-aggregated tokens 做 per-point learned gate 混合\n\nv2 修复 (相比 v1):\n  - 去掉 ctx.mean(dim=0): 保留 per-query 语义\n  - batched cross-attention: 替代 Python 三重循环\n  - per-point gate: nn.Linear(C,1) 替代全局 scalar\n  - 去掉 if gate > 0.01: 始终 blend，不 break autograd\n\n计算量: batched cross-attn ~25M FLOPs/层 (+130%)\n参数量: qcond_q/k/v_proj + qcond_gate_proj ~197K (+74%)"
+    },
+    "agg": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_agg/hier_postprocess.py",
+      "sha256": "3edec55f847787b87118795edd04def261204d0b8dca872241620176e6c47d62",
+      "source_summary": "quard2_c2f_enc_lite: 轻量版 Coarse-to-Fine Cluster Attention.\n\n相比 c2f_enc 的三项优化 (P0: A+B+D):\n  A. 去掉 _route_points (N×Q 全注意力), 改用 cluster_ids 直接 gather 回读 → O(N)\n  B. 不再修改 query (只增强 inst_feats), 避免与 decoder 的 query 更新路径冲突\n  D. Cluster Attention 仅在后 N 层使用 (由 dec.py 中 Encoder_layer 控制)"
+    },
+    "multi": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_multi/hier_postprocess.py",
+      "sha256": "89aa7f6cde0cf68af76b43cc479d5511b97b3a6b0b4eada6f2968f3002e81615",
+      "source_summary": "quard2_c2f_enc_lite_multi: 每簇多 cluster token.\n\n在 lite 基础上，每簇生成 2 个 cluster token (而非 1 个 mean token)。\n两个 token 分别用不同的可学习 query attention pool 簇内点，\n捕获簇内不同的子区域特征。\n\n改动:\n  1. SharedClusterBank 新增 multi_q (2个可学习 query/簇) + multi_proj\n  2. build_cluster_feats 中每簇生成 2 token: [B, K_lvl*2, C]\n  3. _cluster_to_points 中每点 gather 2 token 后 mean 回 [C]\n\n参数量: +131K (+50%)\n计算量: +20M FLOPs (+105%)"
+    }
+  },
+  "new_training": 0,
+  "hypothesis_falsified": false
+}

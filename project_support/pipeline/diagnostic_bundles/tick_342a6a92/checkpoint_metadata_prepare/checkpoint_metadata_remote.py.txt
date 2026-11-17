@@ -1,0 +1,127 @@
+"""Root diagnostic body only: bounded ZIP metadata; never execute pickle code."""
+from pathlib import Path
+from datetime import datetime, timezone
+import hashlib
+import json
+import math
+import os
+import pickletools
+import socket
+import stat
+import sys
+import zipfile
+
+WORK = "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/20261109_175800"
+PREFIX_LIMIT = 64 * 1024
+MEMBER_LIMIT = 8 * 1024 * 1024
+
+
+def primitive_meta(raw):
+    """Recognize only root-dict, first-key meta, primitive-dict pickle prefix."""
+    operations = pickletools.genops(raw)
+    trace = []
+    skip = {"PROTO", "FRAME", "BINPUT", "LONG_BINPUT", "PUT", "MEMOIZE"}
+    strings = {"BINUNICODE", "SHORT_BINUNICODE", "BINUNICODE8", "UNICODE"}
+    scalars = {"BININT", "BININT1", "BININT2", "INT", "LONG", "LONG1", "LONG4",
+               "BINFLOAT", "FLOAT", "NONE", "NEWTRUE", "NEWFALSE"} | strings
+
+    def take():
+        for operation, argument, position in operations:
+            if len(trace) >= 256:
+                raise ValueError("Metadata prefix operation limit")
+            trace.append({"op": operation.name, "arg": repr(argument)[:100], "pos": position})
+            if operation.name not in skip:
+                return operation.name, argument
+        raise ValueError("Incomplete metadata prefix")
+
+    try:
+        assert take()[0] == "EMPTY_DICT"
+        assert take()[0] == "MARK"
+        operation, argument = take()
+        assert operation in strings and argument == "meta"
+        assert take()[0] == "EMPTY_DICT"
+        operation, _ = take()
+        assert operation == "MARK"
+        result = {}
+        while True:
+            operation, key = take()
+            if operation == "SETITEMS":
+                break
+            assert operation in strings and isinstance(key, str) and key not in result
+            operation, value = take()
+            assert operation in scalars, "Nonprimitive metadata value: " + operation
+            if operation == "NONE":
+                value = None
+            elif operation == "NEWTRUE":
+                value = True
+            elif operation == "NEWFALSE":
+                value = False
+            assert value is None or type(value) in (str, int, float, bool)
+            if isinstance(value, float):
+                assert math.isfinite(value)
+            result[key] = value
+        assert type(result.get("epoch")) is int and result["epoch"] >= 0
+        assert type(result.get("best_miou")) in (int, float)
+        assert 0 <= result["best_miou"] <= 1
+        if "epochs_no_improve" in result:
+            assert type(result["epochs_no_improve"]) is int and result["epochs_no_improve"] >= 0
+        return {"status": "PRIMITIVE_METADATA_PREFIX_PARSED",
+                "meta": result, "pickle_opcodes_executed": False}
+    except (AssertionError, ValueError, EOFError, IndexError) as error:
+        return {"status": "UNSUPPORTED_OR_INCOMPLETE_METADATA_UNKNOWN",
+                "meta": None, "error": str(error), "opcode_prefix": trace[:80],
+                "pickle_opcodes_executed": False}
+
+
+def inspect_checkpoint(path):
+    fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+    try:
+        before = os.fstat(fd)
+        named = os.lstat(path)
+        assert stat.S_ISREG(before.st_mode) and before.st_uid == 1001
+        assert (before.st_dev, before.st_ino) == (named.st_dev, named.st_ino)
+        with os.fdopen(os.dup(fd), "rb") as stream:
+            with zipfile.ZipFile(stream) as archive:
+                members = archive.infolist()
+                assert len(members) <= 50000
+                candidates = [item for item in members if item.filename.endswith("/data.pkl")]
+                assert len(candidates) == 1
+                member = candidates[0]
+                assert 0 < member.file_size <= MEMBER_LIMIT and member.compress_size <= MEMBER_LIMIT
+                assert not member.flag_bits & 1
+                with archive.open(member, "r") as metadata:
+                    raw = metadata.read(min(PREFIX_LIMIT, member.file_size))
+                parsed = primitive_meta(raw)
+        after = os.fstat(fd)
+        current = os.lstat(path)
+        assert (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) == (
+            after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+        assert (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns) == (
+            current.st_dev, current.st_ino, current.st_size, current.st_mtime_ns)
+        return {"path": str(path), "bytes": before.st_size, "mtime_ns": before.st_mtime_ns,
+                "zip_metadata_member": member.filename, "metadata_member_bytes": member.file_size,
+                "metadata_prefix_bytes_read": len(raw),
+                "metadata_prefix_sha256": hashlib.sha256(raw).hexdigest(),
+                "full_checkpoint_read_or_hashed": False, "tensor_storage_read": False,
+                "checkpoint_contents_fully_validated": False, **parsed}
+    finally:
+        os.close(fd)
+
+
+def main():
+    payload = json.load(sys.stdin)
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert payload["owner"]["token"].startswith("342a6a92")
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(payload["owner"]["deadline_at"])
+    root = Path(payload["work_dir"])
+    assert str(root) == WORK and root.resolve() == root
+    rows = [inspect_checkpoint(root / name) for name in ("last.pth", "best.pth")]
+    print(json.dumps({"owner": payload["owner"], "observed_at": datetime.now(timezone.utc).isoformat(),
+                      "kind": "BOUNDED_STDLIB_CHECKPOINT_PRIMITIVE_METADATA_ONLY",
+                      "work_dir": str(root), "checkpoints": rows, "Torch_imported": False,
+                      "unpickling_or_code_execution": False, "GPU_compute": False,
+                      "signals_sent": False, "remote_files_written": False}))
+
+
+if __name__ == "__main__":
+    main()

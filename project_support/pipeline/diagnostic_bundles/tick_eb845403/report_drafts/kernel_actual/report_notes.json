@@ -1,0 +1,14 @@
+{
+  "actions": [
+    "继续M234 worker段错误取证，保留历史owner和已完成诊断。本轮精确PID限定的kern.log/syslog后缀路线已取得真实actual：4122f16f1a798b019a207b8276a6124d7e1d2fa841f0e2a1ae05215f2814ea66，观测时间2026-11-09T15:36:53Z，主机dl04-MS-7E06/UID1001绑定正确。",
+    "实际SSH/body返回0且transport_passed=true；kern.log、kern.log.1、syslog、syslog.1四个文件均存在但当前账户无读权限，均未尝试打开，合计读取0字节。诊断路线实际结果为BLOCKED，不是已搜索后无匹配。",
+    "复用已安装SIGCHLD源码与原trace：父进程hier_postprocess赋值帧是worker失败通知位置，不能代替worker3815203的原生fault stack。本轮静态设计保留有效输入体素化分配放大问题，同时确认原源码已配置file_system sharing和TOKENIZERS_PARALLELISM=false。",
+    "截至本稿未读取到本轮CPU矩阵actual；fresh/fork有效输入诊断仍为准备/待执行，不计作native通过。报告草稿作者仅写本轮report_drafts，未执行SSH、Torch/native、数据/模型测试或GPU操作，未改共享work/memory/正式report。"
+  ],
+  "decisions": [
+    "以真实权限受阻结果记录本轮检查，保持worker SIGSEGV根因UNKNOWN。0字节和不可读不能证明没有内核记录、没有OOM或不存在故障；不推断原故障窗口已被日志覆盖。",
+    "不因权限受阻提升权限、修改系统/训练配置、重试已拒绝路线或读取外部任务日志；不重启、resume、重新准入或新建机制变体。保留原失败、immutable修订与M206/M227人工暂停。",
+    "CPU矩阵只有真实执行与独审后才可另记结果。全部通过仅限声明的合成有效输入/上下文；不等于历史故障复现、全面ABI正确、修复或效力通过。矩阵若未就绪，root可用本轮真实BLOCKED检查完成合规记录，不补写预计成功。",
+    "下一项有信息量的证据仍是worker原生fault frame/object或可归属的输入/阶段。未建立原因前，不提出原因特定的生产修复；传输成功与诊断结论始终分开。"
+  ]
+}

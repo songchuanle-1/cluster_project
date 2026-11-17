@@ -1,0 +1,15 @@
+import os,socket,sys
+assert socket.gethostname()=='dl04-MS-7E06' and os.getuid()==os.geteuid()==1001
+assert sys.flags.isolated and sys.dont_write_bytecode
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,re,stat
+root=Path('/data/songcl/Project/Cluster_project/Cluster_nsd_20261107')
+p=root/'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc_20261110_194721.log'
+a=p.stat();assert stat.S_ISREG(a.st_mode) and a.st_uid==1001 and p.resolve()==p
+with p.open('rb') as f:f.seek(max(0,a.st_size-65536));raw=f.read(65536)
+text=raw.decode('utf-8','replace').replace('\r','\n');start=text.find('Traceback (most recent call last):')
+trace=text[start:] if start>=0 else ''
+trace=trace[-20000:]
+lines=[line for line in text.splitlines() if re.search(r'^[\w.]+(?:Error|Exception):|terminated by signal|Segmentation fault|Fatal Python error|SIGSEGV|SIGKILL',line)]
+print(json.dumps({'hostname':socket.gethostname(),'uid':os.getuid(),'observed_at':datetime.now(timezone.utc).isoformat(),'pid_exists':Path('/proc/2248650').exists(),'log':str(p),'log_bytes':a.st_size,'read_bytes':len(raw),'tail_sha256':hashlib.sha256(raw).hexdigest(),'traceback_text':trace,'exception_lines':lines[-8:],'signals_sent':False,'Torch_imported':False,'remote_mutations':False}))

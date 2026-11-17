@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "scope": "Capacity-only retry for the frozen referent native-capture path; no model forward, capture, training, queue mutation, or efficacy claim",
+  "timestamp": "2026-09-19T03:16:00+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T03:15:57+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 42,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_live_progress": {
+    "observed_at": "2026-09-19T03:15:57+08:00",
+    "source": "unique M197 log tail",
+    "epoch": 20,
+    "total_epochs": 50,
+    "step": 1050,
+    "total_steps": 4686,
+    "best_miou": 0.4859,
+    "no_improve": 0,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T03:15:57+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. The frozen registry, object-capture adapter, and native-expression producer are implemented, but native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T04:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "attempted_alternatives": [
+    "Waited until the recorded retry time before rechecking capacity.",
+    "Queried the live GPU7 process table and memory without touching any process.",
+    "Read the unique M197 log tail to verify native step progress.",
+    "Kept the capture unlaunched because the two-process cap remained closed."
+  ],
+  "native_capture_launched": false,
+  "cpu_validation": {
+    "status": "not_rerun_this_tick",
+    "last_verified_static_contract_tests_passed": 30,
+    "last_verified_report": "pipeline/reports/referent_native_expression_producer_20260919.json"
+  }
+}

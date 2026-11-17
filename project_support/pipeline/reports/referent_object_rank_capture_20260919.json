@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only static implementation and tests for the missing object-level capture adapter between native M95 query observations and the frozen referent target-rank evaluator; no model forward, native score, GPU execution, queue mutation, admission, or efficacy claim",
+  "timestamp": "2026-09-19T01:17:28+08:00",
+  "candidate_id": "referent-causality-audit",
+  "registry": {
+    "path": "pipeline/reports/referent_outcome_independent_registry_20260918-2311.json",
+    "sha256": "83fbef96307b184443ae790e54815474a03efa4f29301cb4623653daf3cbb6ff"
+  },
+  "implementation": {
+    "path": "scripts/referent_object_rank_capture_20260919.py",
+    "sha256": "5e4046b350e5d6ff1405cc7ebc5e7530f2b566c151339e928294fe71fc96d3da"
+  },
+  "tests": {
+    "new_suite": {
+      "path": "scripts/test_referent_object_rank_capture_20260919.py",
+      "sha256": "e38d7623e67c49d01926ad2ac6d88bb78b99ddee858572e6017e6d7b6cdfe05b",
+      "tests_passed": 12,
+      "tests_failed": 0
+    },
+    "frozen_evaluator_suite": {
+      "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+      "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f",
+      "tests_passed": 10,
+      "tests_failed": 0
+    },
+    "total_passed": 22,
+    "total_failed": 0
+  },
+  "capture_contract": {
+    "query_assignment_policy": "seed_superpoint_instance_membership",
+    "score_semantics": "negative_confidence_lower_is_better",
+    "referent_axis": "minimum native referent cost among queries whose sampled seed superpoint belongs to the object",
+    "objectness_axis": "minimum native mask-quality cost among queries whose sampled seed superpoint belongs to the object",
+    "candidate_mask": "all sampled superpoints whose native instance label equals the declared object ID",
+    "required_fail_closed_checks": [
+      "exact rank-eligible expression coverage",
+      "exact target and same-class candidate coverage",
+      "nonempty native instance mask for every target and candidate",
+      "at least one native query seed for every target and candidate",
+      "query seed indices inside the exact native support",
+      "finite lower-is-better costs on both score axes",
+      "exact input and hierarchical-partition hashes",
+      "binding hashes and full code commit"
+    ],
+    "rejected_without_imputation": [
+      "missing expression",
+      "missing candidate instance or query seed",
+      "out-of-range seed",
+      "nonfinite cost",
+      "binding or identity mismatch"
+    ]
+  },
+  "remote_observation": {
+    "timestamp": "2026-09-19T01:07:00+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 98,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "native_capture_launched": false
+  },
+  "status": {
+    "stage_completed": "Static object-level capture adapter and fail-closed contract tests",
+    "native_execution_completed": false,
+    "scientific_validation_complete": false,
+    "next_action": "When GPU7 capacity opens, emit the native query seed indices, referent costs, mask-quality costs, instance labels, exact input hashes, and hierarchical-partition hashes for all 123 frozen expressions, pass them through this builder, then evaluate without imputation."
+  },
+  "limitations": [
+    "Unit tests validate adapter behavior, not model quality or scientific validity.",
+    "No native capture, candidate coverage, target rank, or efficacy result exists.",
+    "The fixed TRAIN cohort is diagnostic and not a held-out population sample.",
+    "Metadata same-class equality does not establish geometric confusability.",
+    "The producer must preserve query order between seed indices and both score axes.",
+    "The foreign GPU7 workload and M197-PIRS were observed only and were not touched."
+  ]
+}

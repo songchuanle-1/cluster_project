@@ -1,0 +1,18 @@
+{
+  "candidate_id": "hierarchy-middle-directional-token-convolution",
+  "failure_scope": "diagnostic_implementation",
+  "correction": "Prior native smoke assertion conflated loss.ndim==0 with finite check. Native criterion can return finite shape[1] loss, so prior wording Native loss is nonfinite does not prove nonfinite loss. Prior outputs preserved; no hypothesis failure concluded.",
+  "native_compatible_check": "loss.numel()==1 and torch.isfinite(loss).all(); preserve original native train/backward. Record actual tensor shape/finite/value and all log_vars.",
+  "same_model_commit": "59013e132241322054f1906e771aa78b81c48da6",
+  "additional_observation": "Record fine ID holes and propagated true support without changing model output.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_corrected/worker.py",
+      "sha256": "bfe9143da8e38e9c54790d5fb2c6ee6231e434684e77730a9919252481fa0d98"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_v2/smoke_candidate_result.json",
+      "sha256": "d713ed94fb6c26a3c57abdcd982b31553fc120b703d2ef20022e35a72456ce69"
+    }
+  ]
+}

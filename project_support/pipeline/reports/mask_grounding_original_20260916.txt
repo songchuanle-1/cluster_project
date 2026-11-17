@@ -1,0 +1,747 @@
+                                                                 Mask Grounding for Referring Image Segmentation
+
+                                                  Yong Xien Chng1,2 Henry Zheng1 Yizeng Han1 Xuchong Qiu2† Gao Huang1B
+                                                 1
+                                                   Department of Automation, BNRist, Tsinghua University 2 Bosch Corporate Research
+
+
+                                                                      Abstract                                    Correct
+arXiv:2312.12198v2 [cs.CV] 25 Mar 2024
+
+
+
+
+                                                                                                                                                Wrong                        Wrong
+                                                                                                          third remote from the left   third remote from the left   third remote from the left
+                                            Referring Image Segmentation (RIS) is a challenging
+                                         task that requires an algorithm to segment objects referred
+                                         by free-form language expressions. Despite significant
+                                         progress in recent years, most state-of-the-art (SOTA) meth-
+                                         ods still suffer from considerable language-image modality
+                                                                                                         (a) Fine-grained visual grounding is required to reason over
+                                         gap at the pixel and word level. These methods generally
+                                                                                                         complicated relationships among multiple objects.
+                                         1) rely on sentence-level language features for language-
+                                                                                                                   Correct                      Correct                      Wrong
+                                         image alignment and 2) lack explicit training supervision
+                                                                                                                 diving man                   diving man                   diving man
+                                         for fine-grained visual grounding. Consequently, they ex-
+                                         hibit weak object-level correspondence between visual and
+                                         language features. Without well-grounded features, prior
+                                         methods struggle to understand complex expressions that
+                                         require strong reasoning over relationships among multiple
+                                         objects, especially when dealing with rarely used or am-        (b) Fine-grained visual grounding is required to understand
+                                         biguous clauses. To tackle this challenge, we introduce a       expressions used in uncommon or ambiguous contexts.
+                                         novel Mask Grounding auxiliary task that significantly im-
+                                                                                                         Figure 1. Importance of Fine-grained Visual Grounding for RIS.
+                                         proves visual grounding within language features, by ex-
+                                                                                                         Most RIS algorithms lack well-grounded text features. As a result,
+                                         plicitly teaching the model to learn fine-grained correspon-
+                                                                                                         they struggle in difficult cases illustrated in (a) and (b). Red mask
+                                         dence between masked textual tokens and their matching
+                                                                                                         are predictions of LAVT, one of the recent SOTA RIS methods.
+                                         visual objects. Mask Grounding can be directly used on
+                                                                                                          Yellow dotted boxes are the ground truths.
+                                         prior RIS methods and consistently bring improvements.
+                                         Furthermore, to holistically address the modality gap, we
+                                         also design a cross-modal alignment loss and an accom-          tasks require grouping of image pixels under a fixed set of
+                                         panying alignment module. These additions work syner-           pre-defined categories and mainly differ in the granularity
+                                         gistically with Mask Grounding. With all these techniques,      of grouping semantics required. In contrast to these uni-
+                                         our comprehensive approach culminates in MagNet (Mask-          modal segmentation tasks, Referring Image Segmentation
+                                         grounded Network), an architecture that significantly out-      (RIS) [9, 28] is a challenging multi-modal task that requires
+                                         performs prior arts on three key benchmarks (RefCOCO,           an algorithm to simultaneously understand fine-grained hu-
+                                         RefCOCO+ and G-Ref), demonstrating our method’s effec-          man language expression and make correct pixel-level cor-
+                                         tiveness in addressing current limitations of RIS algorithms.   respondence to the referred object. Recently, it has gained
+                                         Our code and pre-trained weights will be released.              widespread research attention due to its potential to im-
+                                                                                                         prove human-robot interaction [1], interactive image editing
+                                                                                                         [43, 52] and advanced driver-assistance systems [29].
+                                         1. Introduction                                                     The key challenge in RIS lies in how to reduce the
+                                                                                                         modality gap between language and image features [14, 64,
+                                         Deep learning has greatly improved the performance of vi-       71]. To tackle this challenge, we need to have an effective
+                                         sion algorithms on many image segmentation tasks, such          alignment between a given language expression and the cor-
+                                         as semantic segmentation [5, 48], instance segmentation         responding image pixels for highlighting the referred target.
+                                         [2, 12, 24, 42] and panoptic segmentation [8, 36]. These        Ideally, with robust pixel-wise language-image alignment,
+                                            † Project lead.                                              language and image features should have high feature simi-
+                                            B Corresponding author.                                      larity when referring to the same object and low feature sim-
+                    Image Encoder
+                                                                                                                              0.01          oranges
+
+
+
+
+                                      Multi-modal Decoder
+                                                            implicit
+                                                            supervision                                                       0.03          grapes
+                                                              Mask                                                            0.95          apples
+                      Alignment                                                       Weak Fine-grained
+                                                            Prediction                                                        0.02          bananas
+                     Loss/Module                                                      Visual Grounding
+                                                              Loss
+    sentence-level features
+
+                  Language Encoder                                                                                                   Masked
+                                                                                                                                      Token
+                                                                                                                                     Predictor
+                    Image Encoder
+
+
+
+
+                                                                Multi-modal Decoder
+                                      explicit                                                                       Image            Mask             Language
+                                      supervision                                                                   Encoder          Encoder           Encoder
+                                       Mask
+                     Alignment                                                        Strong Fine-grained
+                                     Grounding
+                    Auxiliary Task                                                     Visual Grounding
+                                       Loss                                                                                                              Piles of
+       word-level features                                                                                                                            <mask> behind
+                                                                                                                                                        the grapes
+                  Language Encoder
+
+                (a) Comparison between our method and pervious methods                                                  (b) Our proposed Mask Grounding
+
+
+Figure 2. (a) Current SOTA RIS methods mainly focus on designing and improving multi-modal alignment modules and/or alignment
+losses. These methods generally 1) do not have explicit training supervision for fine-grained visual grounding and 2) use sentence-
+level language features or image/pixel-level image features for alignment. As a result, their language features lack precise visual-textual
+object correspondence. (b) Our proposed Mask Grounding remedies this problem by explicitly teaching our model to learn fine-grained
+correspondence between masked word tokens and their matching visual objects through an auxiliary alignment task.
+
+ilarity when referring to different objects. However, achiev-                                    so ensures that our model acquires a profound proficiency
+ing such alignment is non-trivial because the language ex-                                       in the highly-coveted fine-grained visual grounding. The
+pression can be highly complex and diverse.                                                      efficacy of Mask Grounding is empirically validated with
+    As depicted in Fig. 2, prevailing methods primarily fo-                                      extensive ablation experiments. Moreover, we also show
+cus on devising innovative losses [61, 71] or introducing                                        that Mask Grounding is universal and can be directly used
+new network architectures/modules [14, 45, 63, 64, 72] to                                        on prior RIS methods to bring significant improvements.
+bolster language-image alignment. Despite their advance-                                            In addition to Mask Grounding, we also design a cross-
+ments, two overarching limitations persist. First, these ap-                                     modal alignment loss and an alignment module to holis-
+proaches tend to rely on sentence-level language features                                        tically bridge the modality gap. With all these enhance-
+for language-image alignment. Second, they often lack ex-                                        ments, our resulting MagNet (Mask-grounded Network)
+plicit training supervision for fine-grained visual ground-                                      sets new records by significantly outperforming previous
+ing. These oversights result in their language features be-                                      SOTA methods across all key datasets (RefCOCO [67], Re-
+coming noisy anchors for RIS prediction [63, 69], inhibit-                                       fCOCO+ [67] and G-Ref [49, 50]). Notably, our method
+ing the effective learning of fine-grained visual grounding.                                     consistently outperforms these SOTA methods by large
+Consequently, such models face challenges when interpret-                                        margins of up to 2.48 points in overall IoU. Visual exam-
+ing referring expressions that require intricate reasoning                                       ination of MagNet’s predictions reinforces our claim and
+across complex inter-object relationships or contain clauses                                     shows that our method works well in complex scenarios.
+used in rare or ambiguous contexts, as exemplified in Fig. 1.
+                                                                                                     Our main contributions are summarized as follows:
+    To address this challenge, we introduce a novel Mask
+Grounding auxiliary task to explicitly teach our model to                                        1. We highlight the shortcomings in recent state-of-the-art
+make fine-grained correspondence between masked textual                                             (SOTA) RIS algorithms, pinpointing the lack of fine-
+tokens and their matching visual objects. Specifically, dur-                                        grained visual grounding.
+ing training, our model encounters randomly masked tex-                                          2. We introduce the Mask Grounding auxiliary task, a novel
+tual tokens and has to predict their identities. Instead of                                         method aimed at enhancing fine-grained visual ground-
+relying solely on the surrounding textual context to predict                                        ing in existing RIS algorithms. Its effectiveness is vali-
+these tokens, our model integrates both visual and segmen-                                          dated through rigorous ablation studies.
+tation information. This integrated approach is pivotal for                                      3. Using Mask Grounding, together with our specially de-
+the model to make accurate prediction, as it must discern                                           signed cross-modal alignment loss and an accompanying
+and establish the correct linkage between the masked to-                                            alignment module, we present MagNet (Mask-grounded
+kens and their corresponding visual objects. Learning to do                                         Network), a new SOTA network for RIS.
+2. Related works                                                 3. Method
+Architecture Design for RIS. Early works [28, 41, 44, 54]        In this section, we first describe our architecture overview
+follow a concatenate-then-convolve pipeline, where lan-          (Sec. 3.1). Then, we explain our proposed Mask Ground-
+guage and image features are fused by concatenation. Sub-        ing (Sec. 3.2) auxiliary task, cross-modal alignment module
+sequent works [4, 41, 44, 65] improve upon this pipeline by      (Sec. 3.3) and alignment loss (Sec. 3.4). Finally, we give the
+using RNN or dynamic networks [19–21, 23] to progres-            overall loss function Sec. 3.5 for our model.
+sively refine the segmentation mask. Other works [16, 64]
+                                                                 3.1. Architecture Overview
+investigate the position to perform language-image fusion
+and conclude that early fusion performs the best. Apart          MagNet (Mask-grounded Network) adopts a unified ap-
+from designing novel fusion mechanisms, some works               proach that integrates three inter-linked modules to enhance
+[31, 32, 68] exploit known linguistic structures or ob-          visual-textual object correspondence and segmentation ac-
+ject relationships to enhance language-image fusion. Rid-        curacy. Mask Grounding is the first of these integrated
+ing on the success of attention architecture [15, 22, 58],       modules, designed to improve fine-grained visual ground-
+current works mostly use unidirectional [54, 64, 66] or          ing in language features. It accomplishes this by teach-
+bidirectional [30, 71] cross-attention modules to perform        ing the model to predict masked textual tokens, using a
+language-image fusion. To improve model performance on           combination of visual cues, linguistic context, and segmen-
+novel composition of learned concepts, a recent work [62]        tation information. Building upon Mask Grounding’s en-
+uses meta learning [17]. Driven by the success of large lan-     riched language features, Cross-modal Alignment Module
+guage models [3, 57], newer works [10, 46, 74] explore for-      (CAM) steps in to fine-tune the bi-directional interaction
+mulating RIS as an auto-regressive vertex generation prob-       between the refined language and image features. By incor-
+lem. Lately, VPD [72] attempts to exploit semantic infor-        porating global contextual information from multiple im-
+mation in diffusion models [27, 51, 55] for RIS, whereas         age scales, CAM ensures that the multi-modal features are
+ReLA [45] and DMMI [29] generalize RIS to support an             in sync, addressing the granularity discrepancies between
+arbitrary number of targets. Despite huge progress in RIS        textual descriptions and visual information. Finally, Cross-
+architecture design, prior studies often expect language-        modal Alignment Loss (CAL) cohesively weaves together
+image alignment to be performed implicitly through mask          pixel-to-pixel and pixel-to-text alignments. By simultane-
+prediction. We enhance this by introducing an auxiliary task     ously considering these alignments, CAL ensures that seg-
+for explicit language-image feature alignment.                   ments created by the model are not only accurate in shape
+Loss Design for RIS. Early works train RIS models with           but also correctly match their referring textual descriptions.
+simple binary cross entropy loss. Inspired by the suc-
+                                                                 3.2. Mask Grounding
+cess of prior works [59, 73] in adopting contrastive loss
+[6, 18, 25, 53] for semantic segmentation tasks, recent          Inspired by prior works [13, 26, 60] that have shown the
+works [14, 71] start to use contrastive loss in order to regu-   effectiveness of using masked input modeling to learn good
+larize the segmentation embedding space and achieve good         feature representation, we propose a novel Mask Grounding
+results. Contrary to prior works that use global-pooled lan-     auxiliary task to improve the learning of fine-grained visual
+guage features for loss computation, we focus on learning        grounding information in language features. As shown in
+fine-grained object correspondence at the pixel-word level.      Fig. 3, given an input image, its corresponding referring
+Masked Language Modeling. Masked language modeling               expression and segmentation mask, we randomly replace
+(MLM) is a powerful technique for natural language pro-          some tokens in the tokenized referring expression with a
+cessing that trains a model to restore missing or corrupted      special learnable mask token and train our model to predict
+tokens in an input text. It was introduced by BERT [13] and      the actual tokens being masked. By successfully predicting
+has become a popular technique for pre-training language         the identities of masked tokens, our model will acquire the
+[11, 70] and visual language [35, 39, 56] models. Recently,      ability to understand which parts of the text correspond to
+it has been shown to scale excellently [3, 33] and generalize    which parts of the image, thus learning fine-grained visual
+well to various downstream tasks [3, 57]. A work closely         grounding in the process. Specifically, to perform this auxil-
+related to ours is MaskedVLM [37], which is a multi-modal        iary task, we first encode the segmentation mask into a mask
+adaptation of MLM that jointly performs masked vision            embedding by first extracting the center coordinates of the
+and language modeling. It does so by reconstructing the          mask region and passing it through a 2-layer MLP. At the
+masked signal of one modality with the help from the an-         same time, we use a linear layer to project the language em-
+other modality. Mask Grounding differs from MaskedVLM            bedding into the same dimension as the image embedding.
+by using extra mask signals that directly match the missing      Then, we employ the proposed Masked Token Predictor to
+words to ensure clear and meaningful reconstructions, so         jointly process all these concatenated embeddings with at-
+that fine-grained visual grounding can be effectively learnt.    tention mechanism for masked token prediction. Finally, a
+                                                                                                                                                                                            Mask Encoder
+                                              extract                                                                                                                                                                                                                                                                                                                        Masked Token Predictor                Add
+                                               center
+                                                                                                                                                                                                                                                                                                                                                                                                                M Learnable Masked Tokens
+
+
+
+
+                                                                                                                                                                                                              LayerNorm
+                                            coordinates
+
+
+
+
+                                                                                                                                                                                                                                                       Linear
+                                                                                                                                                                     Linear
+
+
+
+
+                                                                                                                                                                                                                                                                                                 GELU
+                                                                                                                                                                                                                                                                                                                                                                                                                   Image Type Embed
+
+                                                                                                                                                                                                                                                                                                                                                                                        Add & Norm                 Language Type Embed
+                                                                                                                                                                                                                                                                                                                                                                                                                   Mask Type Embed
+                                                                                                                                                                                                                   Language Encoder
+                                                                                                    mask                                                                                                                                                                                                                                                                                Feed Forward               Positional Embed
+                            Tokenizer
+
+
+
+
+Piles of apples
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                            Concat
+                                                                                                    tokens                                     M
+  behind the                                                                                                                                                                                             1                                         2                                         3                                         4                                                                          Cross Entropy Loss
+    grapes
+
+                                                                                                                                              cross-modal                                                                                                                                                                                                                               Add & Norm              0.01            oranges
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                          CAM
+                                                                                                                                                                                                                             CAM
+
+
+                                                                                                                                                                                                                                                                      CAM
+
+
+                                                                                                                                                                                                                                                                                                                CAM
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                       Linear
+                                                                                                                                               alignment                                                                                                                                                                                                                                                                        grapes
+                                                                                                                                                module                                                                                                                                                                                                                                                          0.03
+                                                                                                                                                                                                                                                                                                                                                                                         Multi-Head
+                                                                                                                                                                                                                                                                                                                                                                                                                0.95            apples
+                                                                                                                                                                                                                                                                                                                                                                                         Attention
+                                                                                                                                                                                                                                                                                                                                                                                                                0.02            bananas
+                                                                                                                                                                                                         1                                         2                                         3                                         4
+
+                                                                                                                                                                                                                             Image Encoder
+
+
+Figure 3. Overview of Mask Grounding. This task enriches fine-grained visual grounding in language features by guiding the model to
+learn detailed textual-visual associations. To perform this task, we first use an MLP-based Mask Encoder to encode center-coordinates
+of segmentation masks. Then, we randomly mask textual tokens in language inputs before extracting their features. Finally, we pass the
+encoded language, image and mask features to a Transformer-based Masked Token Predictor to perform masked token prediction.
+
+cross-entropy loss Lgrounding is used to compare the final pre-                                                                                                                                                                                                                                                                                                       MaskedVLM is multi-modal, Mask Grounding surpasses
+dicted distribution with the target distribution. The large-                                                                                                                                                                                                                                                                                                          it by introducing an additional masking signal that aligns
+scale BERT [13] vocabulary is adopted as our word class                                                                                                                                                                                                                                                                                                               with the masked words and their matching visual objects,
+list, as it is generally accepted to have open-vocabulary ca-                                                                                                                                                                                                                                                                                                         enabling a more coherent reconstruction. This approach ex-
+pability. Although additional forward pass through the lan-                                                                                                                                                                                                                                                                                                           poses word-object correspondence and allows fine-grained
+guage encoder is required to process the masked expres-                                                                                                                                                                                                                                                                                                               visual grounding to be learnt. 2) Task Nature: MLM and
+sion, overall computational cost only increase by 4.76% as                                                                                                                                                                                                                                                                                                            MaskedVLM serve as general pre-training tasks and require
+the language encoder is very small. We believe this slight                                                                                                                                                                                                                                                                                                            fine-tuning for specific downstream applications. In con-
+increase in computational cost is an acceptable trade-off to                                                                                                                                                                                                                                                                                                          trast, Mask Grounding is designed as a specialized auxil-
+improve visual grounding in language features.                                                                                                                                                                                                                                                                                                                        iary task for RIS, enhancing fine-grained visual grounding
+    A brief mathematical formulation for Mask Grounding                                                                                                                                                                                                                                                                                                               within language features right from the training phase. Con-
+can be given as follows: Let T, I, M be the input to the                                                                                                                                                                                                                                                                                                              sequently, there is no need for additional fine-tuning. 3)
+language encoder, image encoder and mask encoder,                                                                                                                                                                                                                                                                                                                     Prediction Context: While MLM and MaskedVLM predict
+                                                                                                                                                                                                                                                                                                                                                                      using textual or textual-visual contexts, Mask Grounding in-
+                   \textbf {O} = \text {LanguageEncoder}(\text {Mask}(\textbf {T})), \\ \textbf {P}= \text {ImageEncoder}(\textbf {I}), \\ \textbf {C}=\text {MaskEncoder}(\textbf {M}), \\ \mathcal {L}_{\text {grounding}} = \mathcal {L}_\text {CE}(\textbf {y}_{\text {gt}}, \text {Predictor}(\text {Concat}([\textbf {O}, \textbf {P}, \textbf {C}]),           corporates both with additional segmentation information.
+                                                                                                                                                                                                                                                                                                                                                                      By leveraging this additional information, our model can
+                                                                                                                                                                                                                                                                                                                                                                      outperform prior methods in complex scenarios where text
+                                                                                                                                                                                                                                                                                                                                                                      and visual elements are closely intertwined. For instance,
+                                                                                                                                                                                                                                                                                                                                                                (4)   consider the scenario illustrated in Fig. 3. When the term
+                                                                                                                                                                                                                                                                                                                                                                      “apples” in “piles of apples behind the grapes” is masked,
+where Predictor is a BERT [13]-like encoder, M is the cen-
+                                                                                                                                                                                                                                                                                                                                                                      a model lacking precise word-object correlation might fal-
+ter coordinates of ground truth masks, ygt is the label of the
+                                                                                                                                                                                                                                                                                                                                                                      ter in predicting the appropriate term. Several other words
+masked token and LCE is the cross entropy loss. In our ex-
+                                                                                                                                                                                                                                                                                                                                                                      might yield a semantically consistent sentence, but they
+periments, we use Swin-B [47] as our image encoder, and
+                                                                                                                                                                                                                                                                                                                                                                      would not be accurate in the given visual context.
+BERT-base [13] as our language encoder, but our approach
+is not specifically bound to these encoders.
+                                                                                                                                                                                                                                                                                                                                                                      3.3. Cross-modal Alignment Module
+Discussion. In Tab. 3(a), we demonstrate Mask Ground-
+ing’s superiority over both the standard masked language                                                                                                                                                                                                                                                                                                              To further improve the performance of our model, we
+modeling (MLM) [3, 13, 33, 57] and masked-vision lan-                                                                                                                                                                                                                                                                                                                 also make a meaningful improvement to the popular cross-
+guage modeling (MaskedVLM) [37], highlighting our ap-                                                                                                                                                                                                                                                                                                                 modal alignment mechanism proposed by prior work [64].
+proach’s effectiveness. Our advantages over these tech-                                                                                                                                                                                                                                                                                                               As depicted in Fig. 4, our cross-modal alignment module
+niques include: 1) Modality Integration: Traditional MLM                                                                                                                                                                                                                                                                                                              (CAM) improves language-image alignment by injecting
+is uni-modal and lacks correspondence between referring                                                                                                                                                                                                                                                                                                               global contextual prior into image features before perform-
+expressions and their matching visual objects.. While                                                                                                                                                                                                                                                                                                                 ing language-image fusion. CAM first uses pooling oper-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         over, CAM adopts a pyramid pooling technique to utilize
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         multi-scale average-pooled image features. This technique
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         adeptly resolves the granularity mismatch issue by captur-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           tanh          ing image features at multiple scales, allowing our network
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Concat
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         MLP
+                                                                                                                                                                                                                                                                                                                                               Up
+                                        Pool                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             to handle the varied levels of detail present in language de-
+                                      MLP                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                scriptions. This is particularly beneficial for RIS, where the
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         model must accurately interpret and segment according to a
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Concat
+                      X-MHA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                tanh
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       MLP
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         diverse range of descriptive queries.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         3.4. Cross-modal Alignment Loss
+Figure 4. Cross-modal Alignment Module. This module enables                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              On top of that, similar to previous works [61, 71], we also
+bidirectional language-image interaction and addresses granular-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         use cross-modal alignment loss to explicitly align language
+ity mismatches between language and image features, thereby                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              and image features. Our cross-modal alignment loss (CAL)
+enhancing segmentation accuracy for RIS. X-MHA denotes bi-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               is holistic and consider both pixel-to-pixel (LP2P ) and pixel-
+directional cross-modal multi-head attention. Pi and Pi+1 denote
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         to-text (LP2T ) consistency.
+input and output image features, whereas Oi and Oi+1 denote in-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             Mathematically, CAL is computed as follows: Given
+put and output language features. Up denotes upsampling.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         language feature T ∈ RM ×D produced by the lan-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         guage encoder and final pixel decoder mask feature I ∈
+ations with different window sizes to generate K feature                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 RCL ×HL ×WL with |P| positive pixel features, |N | negative
+maps of different pyramid scales. Then, each of these fea-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               pixel features, let I+          th
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              i be the i    pixel feature in the positive
+ture maps passes through a 3-layer MLP to better extract                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          −          th
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         set P, Ij be the j pixel feature in the background set N
+global information, before cross-attending with the opposite
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         and Tk be the k th language token, then
+modality. After that, all the output features are upsampled to
+the original feature map via bilinear interpolation and con-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  \mathcal {L_{\text {CAL}}} = \mathcal {L}_{\text {P2P}} + \mathcal {L}_{\text {P2T}} \\ \begin {aligned} \mathcal {L}_{\text {P2P}} &= -\frac {1}{|\mathcal {P}|} \sum _i^{|\mathcal {P}|} \frac {e^{\textbf {I}^+_i \cdot \textbf {I}_\text {avg}^+/\tau _1}}{e^{\textbf {I}^+_i \cdot \textbf {I}_\text {avg}^+/\tau _1} + \sum _j^{|\mathcal {N}|} e^{\textbf {I}^+_i \cdot \textbf {I}^-_j / \tau _1}} \\ &+ -\frac {1}{|\mathcal {N}|} \sum _j^{|\mathcal {N}|} \frac {e^{\textbf {I}^-_j \cdot \textbf {I}_\text {avg}^- / \tau _1}}{e^{\textbf {I}^-_j \cdot \textbf {I}_\text {avg}^-/\tau _1} + \sum _i^{|\mathcal {P}|} e^{\textbf {I}^-_j \cdot \textbf {I}^+_i/\tau _1}}, \end {aligned} \\ \begin {aligned} \mathcal {L}_{\text {P2T}} &= -\frac {1}{|\mathcal {P}|} \sum _i^{|\mathcal {P}|} \frac {e^{\textbf {I}^+_i \cdot \textbf {T}_\text {avg}/\tau _2}}{e^{\textbf {I}^+_i \cdot \textbf {T}_\text {avg}/\tau _2} + \sum _j^{|\mathcal {N}|} e^{\textbf {I}^+_i \cdot \textbf {I}^-_j/\tau _2}}, \end {aligned}
+catenated along the channel dimension. A 2-layer MLP is
+subsequently used to to reduce the channel dimension of
+this concatenated feature back to the original one. To pre-
+vent the multi-modal signal from overwhelming the original
+signal, a gate with Tanh nonlinearity is used to modulate the
+final output. Finally, this post-gate feature is added back to
+the input feature before being passed to the next stage of the
+image or language encoder. We split language encoder into
+4 stages with an equal number of layers and add CAM to                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               (14)
+the end of every stage of image and language encoder.
+   Mathematically, CAM can be represented as follows:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         P|P| +                       P|N | −
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              −
+Let Ti and Ii be the text/image input to each stage of the                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               where I+          1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   avg = |P|     i Ii and Iavg = |N |
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             j   Ij are
+language and image encoder. At each stage,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               the average pooled
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          PM    positive and  negative   pixel features,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        1
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Tavg = proj( M      m Tk ) is the average pooled and linearly
+    \textbf {O}_i = \text {LanguageStage}(\textbf {T}_i),\, \textbf {P}_i = \text {ImageStage}(\textbf {I}_i), \\ \textbf {P}_i^k = \text {MLP}_k(\text {Pool}_k(\textbf {P}_i)), \\ \textbf {O}^K_{i,p2t}, \textbf {P}^k_{i,t2p} = \text {X-MHA}_k(\textbf {O}_i, \textbf {P}^k_n), \\ \textbf {O}_{i,p2t} = \text {Concat}([\textbf {O}^i_{i,p2t},...,\textbf {O}^N_{i,p2t}], \\ \textbf {P}_{i,t2p} = \text {Concat}([\text {Up}(\textbf {P}^1_{i,t2p},...,\text {Up}(\textbf {P}^N_{i,t2p})], \\ \textbf {O}_{i+1} = \textbf {O}_i + \text {tanh}(\text {MLP}(\textbf {O}_{i,p2t})), \\ \textbf {P}_{i+1} = \textbf {P}_i + \text {tanh}(\text {MLP}(\textbf {P}_{i,t2p})),          projected word feature and τ1 , τ2 are hyper-parameters that
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         affect the sharpness of the probability distribution. Note
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         that all language and image features are L2-normalized be-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         fore any dot product computation, but not explicitly shown
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         in the equations above for brevity.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             CAL differs from alignment losses used in prior works
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [61, 71] by holistically integrating both pixel-to-pixel and
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         pixel-to-text alignments within a single cohesive system.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  (11)   Precise pixel-to-pixel alignment ensures that segmentation
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         outputs have accurate shapes and boundaries, whereas pre-
+where Up denotes upsampling and X-MHA [40] denotes bi-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   cise pixel-to-text alignment enables our model to correctly
+directional cross-modal multi-head attention.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            associate textual descriptions with their matching image re-
+   CAM enhances cross-modal alignment by enabling bi-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    gions. This dual alignment mechanism allows our model
+directional language-image interaction, which stands in                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  to effectively parse and interpret the nuanced interplay be-
+contrast to the widely-used one-way language to im-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      tween image details and language cues, leading to more ac-
+age alignment module proposed by LAVT [64]. More-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        curate and contextually relevant segmentation outputs.
+                                                                                                                                                                                                                                                                                                          RefCOCO (easy)         RefCOCO+ (medium)                      G-Ref (hard)
+                                                                                                              Method                                                                                                                         Backbone
+                                                                                                                                                                                                                                                                                                         val  test A test B       val  test A test B          val (U)     test (U) val (G)
+                                                                                  VLT [14]                                                                                                                                            Darknet-53                                                        65.65   68.29    62.73   55.50    59.20     49.36     52.99        56.65     49.76
+                                                                                ReSTR [34]                                                                                                                                             ViT-B-16                                                         67.22   69.30    64.45   55.78    60.44     48.27       -            -       54.48
+                                                                                 CRIS [61]                                                                                                                                            ResNet-101                                                        70.47   73.18    66.10   62.27    68.08     53.68     59.87        60.36       -
+                                                                                 LAVT [64]                                                                                                                                              Swin-B                                                          72.73   75.82    68.79   62.14    68.38     55.10     61.24        62.09     60.50
+        Single                                                                   VPD [72]                                                                                                                                               Swin-B                                                          73.46     -        -     63.93      -         -       63.12          -         -
+        Dataset                                                                CoupAlign [71]                                                                                                                                           Swin-B                                                          74.70   77.76    70.58   62.92    68.34     56.69     62.84        62.22       -
+                                                                                 PVD [10]                                                                                                                                               Swin-B                                                          74.82   77.11    69.52   63.38    68.60     56.92     63.13        63.62     61.33
+                                                                                SADLR [65]                                                                                                                                              Swin-B                                                          74.24   76.25    70.06   64.28    69.09     55.19     63.60        63.56     61.16
+                                                                                MCRES [62]                                                                                                                                              Swin-B                                                          74.92   76.98    70.84   64.32    69.68     56.64     63.51        64.90     61.63
+                                                                                 ReLA [45]                                                                                                                                              Swin-B                                                          73.82   76.48    70.18   66.04    71.02     57.65     65.00        65.97     62.70
+                                                                                 MagNet (Ours)                                                                                                                                                        Swin-B                                            75.24   78.24    71.05   66.16    71.32     58.14     65.36        66.03     63.13
+                                                                                                                                              †
+                                                                          SEEM [75]                                                                                                                                                                 Focal-T                                               -       -        -       -        -         -       65.7           -         -
+    Multiple / Extra                                                     LISA-7B† [38]                                                                                                                                                              SAM-H                                                74.1   76.5      71.1    62.4     67.4      56.5     66.4         68.5        -
+      Datasets                                                          PolyFormer† [46]                                                                                                                                                            Swin-B                                              74.82   76.64    71.06   67.64    72.89     59.33     67.76        69.05       -
+                                                                             MagNet‡ (Ours)                                                                                                                                                           Swin-B                                            76.55   78.27    72.15   68.10    73.64     61.81     67.79        69.29       -
+
+Table 1. Comparison with SOTA methods using the oIoU metric. Single dataset refers to strictly following the predefined train/test splits
+of the original RefCOCO, RefCOCO+ and G-Ref datasets. Multiple datasets refers to combining the train splits from these 3 datasets with
+test images removed to prevent data leakage. Extra datasets refers to using additional data beyond RefCOCO, RefCOCO+ and G-Ref. †
+indicates models that use extra datasets. ‡ indicates that our model only uses multiple datasets. Bold indicates best.
+
+3.5. Loss Function                                                                                                                                                                                                                                                                                                      setting, MagNet is the first method that consistently out-
+                                                                                                                                                                                                                                                                                                                        performs all previous methods on all evaluation subsets of
+Our loss function is a weighted combination of the follow-
+                                                                                                                                                                                                                                                                                                                        these datasets. Previous methods usually overfit to one of
+ing 4 different losses:
+                                                                                                                                                                                                                                                                                                                        these benchmarks and perform worse in others. Remark-
+                    \begin {gathered} \mathcal {L} = \lambda _{\text {BCE}} \mathcal {L}_{\text {BCE}} + \lambda _{\text {Dice}} \mathcal {L}_{\text {Dice}} + \\ \lambda _{\text {CAL}} \mathcal {L}_{\text {CAL}} + \lambda _{\text {grounding}} \mathcal {L}_{\text {grounding}}, \end {gathered}                    ably, on RefCOCO, MagNet outperforms the very recent
+                                                                                                                                                                                                                                                                                                           (15)         SOTA RIS method ReLA [45] by considerable margins of
+                                                                                                                                                                                                                                                                                                                        1.42, 1.76, and 0.87 points on the validation, testA, and
+with λBCE = 2.0, λDice = 2.0, λCAL = 0.5, and λgrounding =                                                                                                                                                                                                                                                              testB subsets, respectively. To have a more comprehen-
+1.0 for all our experiments.                                                                                                                                                                                                                                                                                            sive evaluation of our method, we also assess MagNet using
+                                                                                                                                                                                                                                                                                                                        other metrics and display the results on Tab. 2. As shown,
+4. Experiments                                                                                                                                                                                                                                                                                                          MagNet has much better mIoU and P@X performance than
+                                                                                                                                                                                                                                                                                                                        all previous SOTA methods. In particular, our method sur-
+In this section, we first describe the datasets and evalua-                                                                                                                                                                                                                                                             passes previous SOTA methods by 0.32 points on the oIoU
+tion metrics (Sec. 4.1). Then, we compare our method with                                                                                                                                                                                                                                                               metric, 0.91 points on the mIoU metric and 0.89, 1.25, 1.41
+SOTA RIS methods (Sec. 4.2). Finally, we show some visu-                                                                                                                                                                                                                                                                points on the precision metric at 0.5, 0.7 and 0.9 IoU thresh-
+alization results (Sec. 4.3) and ablate our proposed method                                                                                                                                                                                                                                                             old levels. Under the multiple / extra datasets setting, our
+(Sec. 4.4). Due to space limitation, exact implementation                                                                                                                                                                                                                                                               method also surpasses recent SOTA methods [38, 46] that
+details of our method are relegated to the Supplementary.                                                                                                                                                                                                                                                               use large language models [57] or has much slower infer-
+4.1. Datasets and Evaluation Metrics                                                                                                                                                                                                                                                                                    ence speed, by large margins of up to 2.48 points.
+
+We evaluate our proposed method on three standard bench-                                                                                                                                                                                                                                                                                                      RefCOCO val
+                                                                                                                                                                                                                                                                                                                             Method
+mark datasets: RefCOCO [67], RefCOCO+ [67], and G-                                                                                                                                                                                                                                                                                          oIoU      mIoU      P@0.5 P@0.7           P@0.9
+Ref [49, 50] using three commonly used metrics: over-                                                                                                                                                                                                                                                                      LAVT [64]        72.73     74.46      84.46       75.28    34.30
+all intersection-over-union (oIoU), mean intersection-over-                                                                                                                                                                                                                                                                ReLA [45]        73.82     75.61      85.82       77.71    34.99
+union (mIoU), and precision values at 0.5, 0.7, and 0.9                                                                                                                                                                                                                                                                  CoupAlign [71]     74.70     75.49      86.40       77.59    32.40
+IoU threshold levels (P@X). More details regarding these                                                                                                                                                                                                                                                                  MCRES [62]        74.92       -        86.23       77.25    35.61
+datasets and metrics can be found in the Supplementary.                                                                                                                                                                                                                                                                   SADLR [65]        74.24     76.52      86.90       78.76    37.36
+                                                                                                                                                                                                                                                                                                                          MagNet (ours)     75.24     77.43      87.79       80.01    38.77
+4.2. Main Results
+In Tab. 1, we evaluate MagNet against other SOTA meth-                                                                                                                                                                                                                                                                  Table 2. Comparison with SOTA methods on RefCOCO val using
+ods on RefCOCO [67], RefCOCO+,[67] and G-Ref [49, 50]                                                                                                                                                                                                                                                                   oIoU, mIoU and P@X (Precision at IoU threshold value X). Bold
+datasets using the oIoU metric. Under the single dataset                                                                                                                                                                                                                                                                indicates best and underline indicates second best.
+                    fourth remote from left       2nd remote from right        4th remote from left              player 4            officer on the right           diving man
+
+
+
+
+            LAVT
+
+
+
+
+          MagNet
+           (Ours)
+
+
+                         (a) Cases involving complex visual object relationships                          (b) Cases involving expressions used under uncommon context
+                    left half of right sandwich     left half of the burrito      phone reflection    elephant with baby under it     running man            plane leading the pack
+
+
+
+
+            LAVT
+
+
+
+
+          MagNet
+           (Ours)
+
+
+                                                       (c) General cases where strong visual grounding in text features are important
+
+
+Figure 5. Visualization of MagNet’s predictions. Compared to one of the state-of-the-art method, LAVT, our method performs much better
+in various complex scenerios, suggesting its impressive capability to reason about various complex visual-object relationships.
+
+4.3. Visualizations                                                                                   tion information. When added to LAVT, Mask Grounding
+                                                                                                      yields a significant performance gains of 1.44 points on Re-
+In Fig. 5, we show some representative mask predictions of
+                                                                                                      fCOCO and 1.28 points on RefCOCO+.
+MagNet and LAVT [64] on RefCOCO validation set. Here,
+we only compare with LAVT because it is a SOTA method
+                                                                                                       LAVT      0.567                                      LAVT    -0.331
+that provides reproducible codes and pre-trained weights.
+                                                                                                       + MG      0.729              +0.162                  + MG    -0.859            -0.528
+MagNet outperforms LAVT in scenes that involve complex
+                                                                                                         (a) Average cosine similarity between             (b) Average cosine similarity between
+visual-object relationships, contain uncommon expressions                                             positive language-image pairs on RefCOCO          negative language-image pairs on RefCOCO
+or require strong visual grounding information. Impres-
+                                                                                                      Figure 6. Mask Grounding Improves Language-Image Alignment.
+sively, MagNet demonstrates ability to grasp complex vi-
+sual cues such as reflection, leading and running.
+                                                                                                      Effect on Language-Image Alignment. Next, we check
+4.4. Ablation Studies                                                                                 if Mask Grounding can help to improve language-image
+                                                                                                      alignment in RIS models. Effective alignment is indicated
+In this section, we investigate the effectiveness of all core
+                                                                                                      by high feature similarity for matching language-image
+components of our model. For experimental efficiency, we
+                                                                                                      pairs and low similarity for non-matching pairs. To ver-
+use a shorter training schedule of 10 epochs and smaller in-
+                                                                                                      ify this property, we compare the average normalized cosine
+put images of 224 × 224, causing the results to be different
+                                                                                                      similarity for all language-image pairs in the RefCOCO val-
+from Tab. 1. Other experimental settings are kept the same.
+                                                                                                      idation dataset before and after Mask Grounding is added to
+We reproduce the numbers for LAVT [64], ReLA [45] and
+                                                                                                      LAVT. Since language and image features have different di-
+CRIS [61] using their official codes. All ablations are per-
+                                                                                                      mensions, we first train a linear layer with contrastive loss
+formed on validation splits of RefCOCO and RefCOCO+.
+                                                                                                      to project language features to the same dimension as image
+                                                                                                      features before computing this metric. This method is simi-
+4.4.1   Ablating Different Aspects of Mask Grounding
+                                                                                                      lar to linear-probing widely used in self-supervised learning
+Effect on RIS Performance. In Tab. 3(a), we show                                                      [7, 25]. All other weights are frozen in the process. As il-
+that both masked language modeling (MLM) and masked                                                   lustrated in Fig. 6, Mask Grounding can indeed significantly
+vision-language modeling (MaskedVLM) fail to deliver                                                  improve language-image alignment in existing RIS models.
+meaningful performance gains. In contrast, our proposed                                               Mask Encoder Design. In Tab. 3(b), we compare passing
+Mask Grounding improves over MLM by encouraging our                                                   two different types of mask input to the mask encoder in
+model to learn fine-grained visual grounding in language                                              Mask Grounding. As shown, using center coordinates of
+features through usage of additional visual and segmenta-                                             masked region gives slightly better performance.
+                                                             Type          RefCOCO          RefCOCO+                   MLP layers        RefCOCO           RefCOCO+
+        Model            RefCOCO         RefCOCO+
+ Baseline                   67.08            55.98                                                                         None            67.08              55.98
+                                                            None             67.08              55.98
+ Baseline + MLM         67.31 (+0.23)    55.69 (-0.29)                                                                      4          67.14 (+0.06)      57.19 (+1.21)
+ Baseline + MaskedVLM   67.33 (+0.25)    56.13 (+0.15)     Average       68.19 (+1.11)      56.98 (+1.00)                   8          68.52 (+1.44)      57.26 (+1.28)
+ Baseline + MG          68.52 (+1.44)    57.26 (+1.28)     Center        68.52 (+1.44)      57.26 (+1.28)                   12         66.92 (-0.16)      55.95 (-0.03)
+ (a) Effectiveness of Mask Grounding over                 (b) Comparing different mask encoder input in
+  masked language modeling (MLM) and                                                                                   (c) Sensitivity of Mask Grounding’s masked
+                                                          Mask Grounding. Center denotes center co-                      token predictor to different MLP layers.
+     masked vision-language modeling                      ordinates of masked region. Average denotes
+               (MaskedVLM).                               average visual features within masked region.
+    Model          RefCOCO              RefCOCO+
+                                                          Pyramid scales     RefCOCO          RefCOCO+            LP2P       LP2T       RefCOCO            RefCOCO+
+  LAVT [64]          67.08              55.98
+ LAVT + MG       68.52 (+1.44)      57.26 (+1.28)              None             67.08            55.98
+                                                                                                                       ✗       ✗           67.08              55.98
+                                                                {1}         67.18 (+0.10)    56.20 (+0.22)
+  ReLA [45]          66.23              53.69                                                                          ✓       ✗       67.63 (+0.55)      56.87 (+0.89)
+                                                               {1,2}        67.44 (+0.36)    56.46 (+0.48)
+ ReLA + MG       67.33 (+1.10)      55.21 (+1.52)                                                                      ✗       ✓       68.27 (+1.19)      57.22 (+1.24)
+                                                              {1,2,3}       67.79 (+0.71)    56.74 (+0.76)
+  CRIS [61]          64.67              54.84                {1,2,3,6}      68.06 (+0.98)    57.04 (+1.06)             ✓       ✓       68.44 (+1.36)      57.61 (+1.63)
+ CRIS + MG       65.56 (+0.89)      56.23 (+1.39)                                                                          (f) Effectiveness of language-image
+                                                         (e) Effectiveness of language-image Cross-
+    (d) Universality of Mask Grounding.                  modal Alignment Module at different scales.                           Cross-modal Alignment Loss.
+
+Table 3. Ablation Experiments. All experiments are run with a shorter training schedule of 10 epochs, causing the results here to be
+different from the main results. Rows marked in gray indicate options that are used in the main results. MG denotes Mask Grounding.
+
+Mask Token Predictor Design. In Tab. 3(c), we evaluate                               can improve LAVT by 3.15 points on RefCOCO+.
+the sensitivity of Mask Grounding’s masked token predictor
+to different MLP layers. We observe that a sufficiently deep                                          LAVT     55.98
+masked token predictor is important for good performance.                                            +         56.87           +0.89
+As shown, performance is the best when 8 layers are used.                                            +         57.61                   +0.74 (+1.63)
+When more layers are added, performance slightly drops,                                              +CAM      58.33                          +0.72 (+2.35)
+as the model starts to overfit to the auxiliary task.
+                                                                                                         +MG   59.13                                   +0.80 (+3.15)
+Universality of Mask Grounding. In Tab. 3(d), we show
+that Mask Grounding is also compatible with other repre-                                    RefCOCO+ oIoU          56          57        58       59
+sentative RIS methods. As shown, when Mask Grounding                                             Figure 7. Compatibility of MagNet components.
+is added, on RefCOCO and RefCOCO+, we can obtain a
+performance gain of 0.89 and 1.29 points for CRIS and a
+performance gain of of 1.10 and 1.52 points for ReLA.                                5. Conclusion
+                                                                                     In this paper, we present Mask Grounding, an novel method
+4.4.2    Ablating Other Components of Our Method
+                                                                                     designed to enhance RIS by teaching our model to predict
+Effectiveness of CAM. Cross-modal Alignment Module                                   randomly masked textual tokens based on their surround-
+(CAM) improves language-image alignment by injecting                                 ing textual, visual and segmentation information. This task
+global contextual prior into image features. As shown in                             requires our model to learn fine-grained visual-textual ob-
+Tab. 3(e), when CAM is used, we can improve RefCOCO’s                                ject correspondence, thus learning visual grounding in the
+and RefCOCO+’s oIoU by 0.98 and 1.06 points respec-                                  process. When plugged into existing RIS algorithms, Mask
+tively. Additionally, Tab. 3(e) also shows that using more                           Grounding can improve their performance consistently. To
+pyramid scales is helpful in boosting performance.                                   holistically address the modality gap, we also design a
+Effectiveness of CAL. Cross-modal Alignment Loss                                     cross-modal alignment loss and an accompanying align-
+(CAL) provides additional pixel-to-pixel (LP2P ) and pixel-                          ment module. When all these techniques are used together,
+to-text (LP2T ) alignment supervision to further reduce                              our newly proposed MagNet achieves SOTA performance
+language-image modality gap. As shown in Tab. 3(f), both                             in all RIS benchmarks. We believe that Mask Grounding
+LP2P and LP2T alone can bring noticeable oIoU improve-                               can also be used in other multi-modal dense prediction tasks
+ment on RefCOCO and RefCOCO+. When the both are                                      and will explore that in future work.
+added together, we can surpass the baseline by 1.36 points                           Acknowledgements. We thank Wan Ding and Kai Ding for
+on RefCOCO and 1.63 points on RefCOCO+.                                              their kind support in this project. This work is supported
+Compatibility of all MagNet components. As shown in                                  in part by the National Key R&D Program of China under
+Fig. 7, all components of MagNet are highly compatible as                            Grant 2021ZD0140407, the National Natural Science Foun-
+they progressively improves the LAVT’s performance when                              dation of China under Grants 62321005 and 62276150, and
+added incrementally. When all components are added, we                               the THU-Bosch JCML.
+References                                                            [16] G. Feng, Z. Hu, L. Zhang, and H. Lu. Encoder fusion net-
+                                                                           work with co-attention embedding for referring image seg-
+ [1] H. Ahn, S. Choi, N. Kim, G. Cha, and S. Oh. Interactive               mentation. In CVPR, 2021. 3
+     text2pickup networks for natural language-based human–
+                                                                      [17] C. Finn, P. Abbeel, and S. Levine. Model-agnostic meta-
+     robot collaboration. IEEE Robotics and Automation Letters,
+                                                                           learning for fast adaptation of deep networks. In ICML,
+     2018. 1
+                                                                           2017. 3
+ [2] D. Bolya, C. Zhou, F. Xiao, and Y. J. Lee. Yolact: Real-time     [18] R. Hadsell, S. Chopra, and Y. LeCun. Dimensionality re-
+     instance segmentation. In ICCV, 2019. 1                               duction by learning an invariant mapping. In CVPR, 2006.
+ [3] T. B. Brown, B. Mann, N. Ryder, M. Subbiah, J. Kaplan, P.             3
+     Dhariwal, A. Neelakantan, P. Shyam, G. Sastry, A. Askell,        [19] Y. Han, G. Huang, S. Song, L. Yang, H. Wang, and Y. Wang.
+     S. Agarwal, A. Herbert-Voss, G. Krueger, T. Henighan, R.              Dynamic neural networks: A survey. IEEE TPAMI, 2021. 3
+     Child, A. Ramesh, D. M. Ziegler, J. Wu, C. Winter, C. Hesse,     [20] Y. Han, Gao. Huang, S. Song, L. Yang, Y. Zhang, and H.
+     M. Chen, E. Sigler, M. Litwin, S. Gray, B. Chess, J. Clark,           Jiang. Spatially adaptive feature refinement for efficient in-
+     C. Berner, S. McCandlish, A. Radford, I. Sutskever, and               ference. IEEE TIP, 2021.
+     D. Amodei. Language models are few-shot learners. In             [21] Y. Han, Z. Yuan, Y. Pu, C. Xue, S. Song, G. Sun, and
+     NeurIPS, 2020. 3, 4                                                   G. Huang. Latency-aware spatial-wise dynamic networks.
+ [4] D. Chen, S. Jia, Y. Lo, H. Chen, and T. Liu. See-through-text         NeurIPS, 2022. 3
+     grouping for referring image segmentation. In ICCV, 2019.        [22] Y. Han, D. Han, Z. Liu, Y. Wang, X. Pan, Y. Pu, C. Deng,
+     3                                                                     J. Feng, S. Song, and G. Huang. Dynamic perceiver for effi-
+ [5] L. Chen, G. Papandreou, I. Kokkinos, K. Murphy, and A.                cient visual recognition. In ICCV, 2023. 3
+     Yuille. Deeplab: Semantic image segmentation with deep           [23] Y. Han, Z. Liu, Z. Yuan, Y. Pu, C. Wang, S. Song, and G.
+     convolutional nets, atrous convolution, and fully connected           Huang. Latency-aware unified dynamic networks for effi-
+     crfs. IEEE TPAMI, 2017. 1                                             cient image recognition. arXiv:2308.15949, 2023. 3
+ [6] T. Chen, S. Kornblith, M. Norouzi, and G. Hinton. A simple       [24] K. He, G. Gkioxari, P. Dollár, and R. Girshick. Mask r-cnn.
+     framework for contrastive learning of visual representations.         In ICCV, 2017. 1
+     In ICML, 2020. 3                                                 [25] K. He, H. Fan, Y. Wu, S. Xie, and R. Girshick. Momentum
+ [7] X. Chen and K. He. Exploring simple siamese representation            contrast for unsupervised visual representation learning. In
+     learning. In CVPR, 2021. 7                                            CVPR, 2020. 3, 7
+ [8] B. Cheng, M. Collins, Y. Zhu, T. Liu, T. Huang, A. Hartwig,      [26] K. He, X. Chen, S. Xie, Y. Li, P. Dollár, and R. Girshick.
+     and L. Chen. Panoptic-deeplab: A simple, strong, and fast             Masked autoencoders are scalable vision learners. In CVPR,
+     baseline for bottom-up panoptic segmentation. In CVPR,                2022. 3
+     2020. 1                                                          [27] J. Ho, A. Jain, and P. Abbeel. Denoising diffusion proba-
+ [9] M. Cheng, S. Zheng, W. Lin, V. Vineet, P. Sturgess, N.                bilistic models. In NeurIPS, 2020. 3
+     Crook, N. J. Mitra, and P. H. Torr. Imagespirit: Verbal guided   [28] R. Hu, M. Rohrbach, and T. Darrell. Segmentation from
+     image parsing. ACM Transactions on Graphics (ToG), 2014.              natural language expressions. In ECCV, 2016. 1, 3
+     1                                                                [29] Y. Hu, Qi Wang, W. Shao, E. Xie, Z. Li, J. Han, and P. Luo.
+                                                                           Beyond one-to-one: Rethinking the referring image segmen-
+[10] Z. Cheng, K. Li, P. Jin, X. Ji, L. Yuan, C. Liu, and J. Chen.
+                                                                           tation. In ICCV, 2023. 1, 3
+     Parallel vertex diffusion for unified visual grounding. In
+     AAAI, 2024. 3, 6                                                 [30] Z. Hu, G. Feng, J. Sun, L. Zhang, and H. Lu. Bidirectional
+                                                                           relationship inferring network for referring image localiza-
+[11] H. W. Chung, L. Hou, S. Longpre, B. Zoph, Y. Tay, W. Fe-
+                                                                           tion and segmentation. In CVPR, 2020. 3
+     dus, E. Li, X. Wang, M. Dehghani, S. Brahma, et al. Scaling
+                                                                      [31] S. Huang, T. Hui, S. Liu, G. Li, Y. Wei, J. Han, L. Liu, and
+     instruction-finetuned language models. arXiv:2210.11416,
+                                                                           B. Li. Referring image segmentation via cross-modal pro-
+     2022. 3
+                                                                           gressive comprehension. In CVPR, 2020. 3
+[12] J. Dai, K. He, and J. Sun. Instance-aware semantic segmen-       [32] T. Hui, S. Liu, S. Huang, G. Li, S. Yu, F. Zhang, and J.
+     tation via multi-task network cascades. In CVPR, 2016. 1              Han. Linguistic structure guided context modeling for re-
+[13] J. Devlin, M. Chang, K. Lee, and K. Toutanova. Bert: Pre-             ferring image segmentation. In ECCV, 2020. 3
+     training of deep bidirectional transformers for language un-     [33] C. Jia, Y. Yang, Y. Xia, Y. Chen, Z. Parekh, H. Pham, Q. V.
+     derstanding. In NACL: HLT, 2019. 3, 4                                 Le, Y. Sung, Z. Li, and T. Duerig. Scaling up visual and
+[14] H. Ding, C. Liu, S. Wang, and X. Jiang. Vision-language               vision-language representation learning with noisy text su-
+     transformer and query generation for referring segmentation.          pervision. In ICML, 2021. 3, 4
+     In CVPR, 2021. 1, 2, 3, 6                                        [34] N. Kim, D. Kim, C. Lan, W. Zeng, and S. Kwak. Restr:
+[15] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X.           Convolution-free referring image segmentation using trans-
+     Zhai, T. Unterthiner, M. Dehghani, M. Minderer, G. Heigold,           formers. In CVPR, 2022. 6
+     S. Gelly, J. Uszkoreit, and N. Houlsby. An image is worth        [35] W. Kim, B. Son, and I. Kim. Vilt: Vision-and-language
+     16x16 words: Transformers for image recognition at scale.             transformer without convolution or region supervision. In
+     In ICLR, 2021. 3                                                      ICML, 2021. 3
+[36] A. Kirillov, K. He, R. Girshick, C. Rother, and P. Dollár.    [55] Y. Song, J. Sohl-Dickstein, D. P. Kingma, A. Kumar, S.
+     Panoptic segmentation. In CVPR, 2019. 1                             Ermon, and B. Poole. Score-based generative modeling
+[37] G. Kwon, Z. Cai, A. Ravichandran, E. Bas, R. Bhotika, and           through stochastic differential equations. In ICLR, 2021. 3
+     S. Soatto. Masked vision and language modeling for multi-      [56] W. Su, X. Zhu, Y. Cao, B. Li, L. Lu, F. Wei, and J. Dai.
+     modal representation learning. ICLR, 2023. 3, 4                     Vl-bert: Pre-training of generic visual-linguistic representa-
+[38] Xin Lai, Zhuotao Tian, Yukang Chen, Yanwei Li, Yuhui                tions. In ICLR, 2020. 3
+     Yuan, Shu Liu, and Jiaya Jia. Lisa: Reasoning segmenta-        [57] H. Touvron, T. Lavril, G. Izacard, X. Martinet, M. Lachaux,
+     tion via large language model. arXiv:2308.00692, 2023. 6            T. Lacroix, B. Rozière, N. Goyal, E. Hambro, F. Azhar,
+[39] J. Li, D. Li, S. Savarese, and S. Hoi. Blip-2: Bootstrapping        et al. Llama: Open and efficient foundation language mod-
+     language-image pre-training with frozen image encoders and          els. arXiv:2302.13971, 2023. 3, 4, 6
+     large language models. In ICML, 2023. 3                        [58] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones,
+                                                                         A. N. Gomez, L. Kaiser, and I. Polosukhin. Attention is all
+[40] L. Li, P. Zhang, H. Zhang, J. Yang, C. Li, Y. Zhong, L.
+                                                                         you need. In NeurIPS, 2017. 3
+     Wang, L. Yuan, L. Zhang, J. Hwang, K. Chang, and J. Gao.
+                                                                    [59] W. Wang, T. Zhou, F. Yu, J. Dai, E. Konukoglu, and L. V.
+     Grounded language-image pre-training. In CVPR, 2022. 5
+                                                                         Gool. Exploring cross-image pixel contrast for semantic seg-
+[41] R. Li, K. Li, Y. Kuo, M. Shu, X. Qi, X. Shen, and J. Jia.
+                                                                         mentation. In ICCV, 2021. 3
+     Referring image segmentation via recurrent refinement net-
+                                                                    [60] W. Wang, H. Bao, L. Dong, J. Bjorck, Z. Peng, Q. Liu, K.
+     works. In CVPR, 2018. 3
+                                                                         Aggarwal, O. K. Mohammed, S. Singhal, S. Som, and F.
+[42] T. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ra-           Wei. Image as a foreign language: Beit pretraining for all
+     manan, P. Dollár, and C. L. Zitnick. Microsoft coco: Com-          vision and vision-language tasks. In CVPR, 2023. 3
+     mon objects in context. In ECCV, 2014. 1                       [61] Z. Wang, Y. Lu, Q. Li, X. Tao, Y. Guo, M. Gong, and T. Liu.
+[43] H. Ling, K. Kreis, D. Li, S. W. Kim, A. Torralba, and S.            Cris: Clip-driven referring image segmentation. In CVPR,
+     Fidler. Editgan: High-precision semantic image editing. In          2022. 2, 5, 6, 7, 8
+     NeurIPS, 2021. 1                                               [62] L. Xu, M. H. Huang, X. Shang, Z. Yuan, Y. Sun, and J. Liu.
+[44] C. Liu, Z. Lin, X. Shen, J. Yang, X. Lu, and A. Yuille. Re-         Meta compositional referring expression segmentation. In
+     current multimodal interaction for referring image segmen-          CVPR, 2023. 3, 6
+     tation. In ICCV, 2017. 3                                       [63] Y. Yan, X. He, W. Wan, and J. Liu. Mmnet: Multi-mask
+[45] C. Liu, H. Ding, and X. Jiang. Gres: Generalized referring          network for referring image segmentation. ACM MM, 2023.
+     expression segmentation. In CVPR, 2023. 2, 3, 6, 7, 8               2
+[46] J. Liu, H. Ding, Z. Cai, Y. Zhang, R. K. Satzoda, V. Ma-       [64] Z. Yang, J. Wang, Y. Tang, K. Chen, H. Zhao, and P. H.
+     hadevan, and R. Manmatha. Polyformer: Referring image               Torr. Lavt: Language-aware vision transformer for referring
+     segmentation as sequential polygon generation. In CVPR,             image segmentation. In CVPR, 2022. 1, 2, 3, 4, 5, 6, 7, 8
+     2023. 3, 6                                                     [65] Z. Yang, J. Wang, Y. Tang, K. Chen, H. Zhao, and P. H.
+[47] Z. Liu, Y. Lin, Y. Cao, H. Hu, Y. Wei, Z. Zhang, S. Lin, and        Torr. Semantics-aware dynamic localization and refinement
+     B. Guo. Swin transformer: Hierarchical vision transformer           for referring image segmentation. In AAAI, 2023. 3, 6
+     using shifted windows. In ICCV, 2021. 4                        [66] L. Ye, M. Rochan, Z. Liu, and Y. Wang. Cross-modal
+[48] J. Long, E. Shelhamer, and T. Darrell. Fully convolutional          self-attention network for referring image segmentation. In
+     networks for semantic segmentation. In CVPR, 2015. 1                CVPR, 2019. 3
+                                                                    [67] L. Yu, P. Poirson, S. Yang, A. C. Berg, and T. L. Berg. Mod-
+[49] J. Mao, J. Huang, A. Toshev, O. Camburu, A. Yuille, and
+                                                                         eling context in referring expressions. In ECCV, 2016. 2,
+     K. Murphy. Generation and comprehension of unambiguous
+                                                                         6
+     object descriptions. In CVPR, 2016. 2, 6
+                                                                    [68] L. Yu, Z. Lin, X. Shen, J. Yang, X. Lu, M. Bansal, and T. L.
+[50] V. K. Nagaraja, V. I. Morariu, and L. S. Davis. Modeling
+                                                                         Berg. Mattnet: Modular attention network for referring ex-
+     context between objects for referring expression understand-
+                                                                         pression comprehension. In CVPR, 2018. 3
+     ing. In ECCV, 2016. 2, 6
+                                                                    [69] A. Zareian, K. D. Rosa, D. Hu, and S. Chang. Open-
+[51] Z. Ni, Y. Wang, R. Zhou, J. Guo, J. Hu, Z. Liu, S. Song,            vocabulary object detection using captions. In CVPR, 2021.
+     Y. Yao, and G. Huang. Revisiting non-autoregressive trans-          2
+     formers for efficient image synthesis. In CVPR, 2024. 3        [70] S. Zhang, S. Roller, N. Goyal, M. Artetxe, M. Chen, S. Chen,
+[52] O. Patashnik, Z. Wu, E. Shechtman, D. Cohen-Or, and D.              C. Dewan, M. Diab, X. Li, X. V. Lin, et al. Opt: Open pre-
+     Lischinski. Styleclip: Text-driven manipulation of stylegan         trained transformer language models. arXiv:2205.01068,
+     imagery. In CVPR, 2021. 1                                           2022. 3
+[53] A. Radford, J. W. Kim, C. Hallacy, A. Ramesh, G. Goh,          [71] Z. Zhang, Y. Zhu, J. Liu, X. Liang, and W. Ke. Coupalign:
+     S. Agarwal, G. Sastry, A. Askell, P. Mishkin, J. Clark, G.          Coupling word-pixel with sentence-mask alignments for re-
+     Krueger, and I. Sutskever. Learning transferable visual mod-        ferring image segmentation. In NeurIPS, 2022. 1, 2, 3, 5,
+     els from natural language supervision. In ICML, 2021. 3             6
+[54] H. Shi, H. Li, F. Meng, and Q. Wu. Key-word-aware net-         [72] W. Zhao, Y. Rao, Z. Liu, B. Liu, J. Zhou, and J. Lu. Unleash-
+     work for referring expression image segmentation. In ECCV,          ing text-to-image diffusion models for visual perception. In
+     2018. 3                                                             ICCV, 2023. 2, 3, 6
+[73] X. Zhao, R. Vemulapalli, P. A. Mansfield, B.Gong, B. Green,
+     L. Shapira, and Y. Wu. Contrastive learning for label efficient
+     semantic segmentation. In ICCV, 2021. 3
+[74] C. Zhu, Y. Zhou, Y. Shen, G. Luo, X. Pan, M. Lin, C. Chen,
+     L. Cao, X. Sun, and R. Ji. Seqtr: A simple yet universal
+     network for visual grounding. In ECCV, 2022. 3
+[75] X. Zou, J. Yang, H. Zhang, F. Li, L. Li, J. Gao, and Y. Lee.
+     Segment everything everywhere all at once. NeurIPS, 2023.
+     6
+

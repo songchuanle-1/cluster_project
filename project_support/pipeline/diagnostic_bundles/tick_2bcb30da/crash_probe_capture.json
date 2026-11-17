@@ -1,0 +1,22 @@
+{
+  "command": [
+    "C:\\song_data\\app\\miniconda\\root\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2bcb30da\\nde_crash_probe_bound_operation\\run_crash_probe_operation.py",
+    "--execute-root",
+    "--operation",
+    "run"
+  ],
+  "returncode": 1,
+  "started_at": "2026-11-08T07:55:43.123660+00:00",
+  "finished_at": "2026-11-08T07:55:48.754592+00:00",
+  "stdout_bytes": 0,
+  "stderr_bytes": 1291,
+  "review_sha256": "1d7b10640ff4224a26dc4fa3179723c775ce3ccba327503700420cbc19125e2f",
+  "fault_localization_only": true,
+  "admission_evidence": false,
+  "stdout_json_parsed": false,
+  "stderr_tail": "bundles\\tick_2bcb30da\\nde_crash_probe_bound_operation\\run_crash_probe_operation.py\", line 144, in <module>\r\n    main()\r\n    ~~~~^^\r\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2bcb30da\\nde_crash_probe_bound_operation\\run_crash_probe_operation.py\", line 119, in main\r\n    result = transport.call('run_crash_probe', {**payload, 'request': request, 'files': files},\r\n                            current['server'], timeout=900, conda=True)\r\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2bcb30da\\nde_crash_operational_active\\adapter.py\", line 117, in call\r\n    raise Uncertain('SSH/remote nonzero; reconcile exact request before any further mutation: '+process.stderr[-3000:])\r\nreviewed_current_NDE_adapter_for_crash_probe.Uncertain: SSH/remote nonzero; reconcile exact request before any further mutation: Traceback (most recent call last):\r\n  File \"<stdin>\", line 5, in <module>\r\n  File \"nde_remote_ops\", line 193, in dispatch\r\n  File \"nde_remote_ops\", line 108, in run\r\n  File \"unchanged_reviewed_remote_ops\", line 99, in require_fresh\r\n  File \"unchanged_reviewed_remote_ops\", line 30, in check\r\nRuntimeError: Insufficient unchanged execution deadline\r\n\r\n"
+}

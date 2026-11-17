@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "scope": "Validation contract only, not an actual result report or admission outcome",
+  "actual_results": "PENDING_REAL_FOUR_RESULTS",
+  "identity": {
+    "id": "M213-BFC",
+    "candidate_id": "hierarchy-parent-butterfly-token-composition",
+    "code_commit": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+    "source_parent_commit": "11a811618179ab1ddc0cee299194667413b7fdb9",
+    "config": "configs/Quard/ctf_hcg_csort_bfc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc.yaml",
+    "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+  },
+  "execution_directory": "<actual-current-tick>/bfc_execution",
+  "arms": [
+    {
+      "mode": "smoke",
+      "target": "champion",
+      "execution_file": "smoke_champion_execution.json",
+      "request_file": "smoke_champion_request.json"
+    },
+    {
+      "mode": "smoke",
+      "target": "candidate",
+      "execution_file": "smoke_candidate_execution.json",
+      "request_file": "smoke_candidate_request.json"
+    },
+    {
+      "mode": "resources",
+      "target": "champion",
+      "execution_file": "resources_champion_execution.json",
+      "request_file": "resources_champion_request.json"
+    },
+    {
+      "mode": "resources",
+      "target": "candidate",
+      "execution_file": "resources_candidate_execution.json",
+      "request_file": "resources_candidate_request.json"
+    }
+  ],
+  "binding": {
+    "physical_gpu": "Selected actual0or1; no fallback or auto-switch",
+    "stage": "/data/songcl/Project/Cluster_project/pipeline/bfc_<original-token8>_gpu<selected>",
+    "owner_fields": [
+      "token",
+      "thread_id",
+      "generated_at",
+      "deadline_at",
+      "context_sha256",
+      "pending_sha256"
+    ],
+    "runtime_code_commit": "Separate actual original checkout identity; not inferred from candidate source48fc"
+  },
+  "native": {
+    "steps": 2,
+    "data": "Original real TRAIN loader, both original paired batches, seed1999/native pretrain/YAML/schedule unchanged",
+    "coverage": [
+      "actual_n_ge3_supported_parent_groups",
+      "actual_nonpower2_supported_parent_groups",
+      "actual_multistage_supported_parent_groups"
+    ],
+    "missing_coverage": "INCONCLUSIVE, no replacement sample/seed",
+    "four_weight_quadrants": [
+      "left_output_from_left_input",
+      "left_output_from_right_input",
+      "right_output_from_left_input",
+      "right_output_from_right_input"
+    ],
+    "quadrant_requirements": "Each actual optimizer step: all four finite nonzero original-loss gradient summaries and changed actual slice hashes",
+    "per_call_or_half_zero_gradient": "LEGAL with finite original hook records; no same-call simultaneous nonzero gate",
+    "paired_common_exclusions": [
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.middle_butterfly."
+    ],
+    "actual_observer_chain": [
+      "original production plan/true occupied IDs",
+      "both inputs from same old stage",
+      "original Linear/GELU once",
+      "both actual halves/functional writeback/carry/inverse-ID",
+      "original cf skip/LN/fine-coarse FFNs/rawCSORT/HCG/single inst-to-mask path"
+    ]
+  },
+  "resources": {
+    "batch_size": 1,
+    "lang_num_max": 1,
+    "warmup": 20,
+    "repeat": 100,
+    "counted_flops_limit": 10000000000,
+    "unsupported_operators": "Retain full actual dictionaries; nonzero unsupported operators are not a new rejection gate",
+    "memory": "Retain existing+15% conditional retention rule; observer smoke is not pure TRAIN",
+    "latency": "Actual median/P90 reported, no new acceptance threshold"
+  },
+  "independent_report": {
+    "status": "FOUR_ACTUAL_BFC_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED",
+    "top_fields": [
+      "candidate_id",
+      "code_commit",
+      "goal_sha256",
+      "material_concerns",
+      "raw_results"
+    ],
+    "raw_result_fields": [
+      "mode",
+      "target",
+      "execution_path",
+      "execution_sha256",
+      "result_sha256",
+      "request_id"
+    ]
+  },
+  "local_report": {
+    "review_status": "RAW_SEMANTICS_VALIDATED_NOT_ADMISSION only after actual four pass",
+    "observations_flags": [
+      "native_semantics_and_pairing_checked",
+      "resource_protocol_checked"
+    ],
+    "standard_PASS_receipt_queue_written": "Always false in reviewer"
+  },
+  "actual_operation_history_inputs": [
+    "status_after_four_console.json",
+    "reconcile_smoke_champion_console.json",
+    "reconcile_smoke_candidate_console.json",
+    "reconcile_resources_champion_console.json",
+    "reconcile_resources_candidate_console.json"
+  ],
+  "root_only_formal_writes": "admit_bfc_draft.py --execute-root only after actual local/independent review, foreground six-field owner/context/deadline, main48fc/8blobs/originalYAML/protected28, authorization/currentSERVERS, original status/reconcile and canonical admission/budget all validate. Queue gpu from actual binding. Never dispatch.",
+  "unknowns": [
+    "efficacy",
+    "pure TRAIN memory",
+    "full buffer/RNG/common state equality",
+    "offdiagonal probe",
+    "unexercised singleton/empty/padding boundaries"
+  ]
+}

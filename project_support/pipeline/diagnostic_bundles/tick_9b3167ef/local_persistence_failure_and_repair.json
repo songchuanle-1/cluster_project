@@ -1,0 +1,33 @@
+{
+  "owner": {
+    "token": "9b3167ef1230458fb100246456862e11",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-01T00:09:46.259911+00:00",
+    "deadline_at": "2026-11-01T01:09:46.259911+00:00",
+    "context_sha256": "1a3e6b5fb76de179ebc646f671144c13d180006bbff9b50c32053002b0e18919",
+    "pending_sha256": "cf399269569179ab25192e67d20121ebbd248574793f7fab21e7fb90355b021d"
+  },
+  "scope": "Local audit-document formatting only, not native/algorithm/resource failure.",
+  "failed_original": {
+    "path": "pipeline/diagnostic_bundles/tick_9b3167ef/persist_routine_wait.py",
+    "sha256": "a280d3dbaf88ef46e15c83b28b44cda16de75e6824ea826ef6c869f03e41ac44"
+  },
+  "failures": [
+    {
+      "operation": "persist_routine_wait",
+      "error": "AssertionError: ^- WFC \\..*LFT \\..*$",
+      "reason": "Previous writer printed decimal with leading zero; reader expected a dot immediately after WFC/LFT."
+    },
+    {
+      "operation": "foreground report",
+      "error": "FileNotFoundError final_report_notes.json",
+      "reason": "Dependent report was invoked after failed persistence; notes did not exist, report failed before writing."
+    }
+  ],
+  "actual_protection_verification": "Main/index/user28/running18/lifecycle38 plus current work/memory SHA all remain identical to baseline; no shared mutation before the assertion.",
+  "corrected_copy": {
+    "path": "pipeline/diagnostic_bundles/tick_9b3167ef/persist_routine_wait_v2.py",
+    "sha256": "31089707b520a332473bc88dc94c1527bba64be9780a4c34d3b6f70d7e237b5a"
+  },
+  "change": "Allow both 0.x and .x text forms; retain exact-one-line match and all actual-source/resource/owner/protection conditions. No source model/worker/skill/global policy changes."
+}

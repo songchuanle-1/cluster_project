@@ -1,0 +1,105 @@
+{
+  "scope": "Static implementation and archived evidence only",
+  "tests_passed": 71,
+  "new_tests_passed": 11,
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "capture_contract": {
+    "entry_fps_field": "fps_superpoints",
+    "hierarchical_fps_field": "hierarchical_fps_positions",
+    "hierarchical_cluster_field": "hierarchical_cluster_ids",
+    "hierarchical_child_map_field": "hierarchical_child_maps",
+    "partition_hash_field": "hierarchical_partition_sha256",
+    "model_class_argument": "--model-class",
+    "config_argument": "--config",
+    "checkpoint_identity": "checkpoint_sha256"
+  },
+  "bound_models": [
+    "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort",
+    "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs"
+  ],
+  "config_evidence": [
+    {
+      "path": "Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    {
+      "path": "Cluster/configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    }
+  ],
+  "model_source_audit": {
+    "report": "pipeline/reports/model_pair_audit_20260916-2211.json",
+    "sha256": "2e689400f4cfc117bffcc6348601ee016353377b35434e501e0077dba29f55fa",
+    "matcher_ast_equal": true,
+    "source_equal": {
+      "__init__.py": true,
+      "backbone.py": true,
+      "dec.py": true,
+      "hier_postprocess.py": true,
+      "loss.py": false,
+      "network.py": true,
+      "sample_model.py": true
+    }
+  },
+  "remote_observation": {
+    "gpu": 7,
+    "used_mib": 62473,
+    "free_mib": 18607,
+    "utilization_percent": 100,
+    "pids": [
+      1134192,
+      3827570
+    ],
+    "epoch": 9,
+    "best_miou": 0.4621,
+    "capture_launched": false
+  },
+  "blocker": {
+    "blocker": "GPU7 has two processes, PIRS1134192 and foreign3827570.",
+    "retry_after": "2026-09-17T00:07:00+08:00",
+    "unblock_condition": "Fewer than two GPU7 processes and sufficient measured free memory.",
+    "alternatives_attempted": "Implemented and tested exact hierarchical partition capture and PIRS model/config binding; no native capture or training launched."
+  },
+  "next_action": "After terminal PIRS and a later capacity check with fewer than two GPU7 processes, capture the frozen TRAIN/control sample for both bound model classes. Require identical native input hashes and hierarchical partition hashes before strict scene-balanced pairing.",
+  "limitations": [
+    "Source equality does not imply checkpoint or native-output equality.",
+    "The external CUDA FPS kernel and runtime nondeterminism are not audited.",
+    "No expanded semantic sample, terminal PIRS comparison or efficacy result.",
+    "The static suite is not native validation or admission evidence."
+  ],
+  "evidence": [
+    {
+      "path": "scripts/hierarchical_partition_contract_20260916.py",
+      "sha256": "de637435512abe1ba7297442377adb7b62d01eb8a3f0b6e3afe091f24d6b4144"
+    },
+    {
+      "path": "scripts/test_hierarchical_partition_contract_20260916.py",
+      "sha256": "fcb239295320827cb85fa1b9876b9df988165f9b7782cd88961e9e55dff9dfee"
+    },
+    {
+      "path": "scripts/native_support_capture_v2_20260916.py",
+      "sha256": "a488b5cd0ed66a560fc8dc8a5c161853a39a7babc98ceb4795c3e3b241e68445"
+    },
+    {
+      "path": "scripts/native_frozen_capture_20260916.py",
+      "sha256": "d85791b08754ce9d53213deb479c946234eddd7c347592eda90adbd6fed1bff3"
+    },
+    {
+      "path": "scripts/sampling_pair_contract_20260916.py",
+      "sha256": "a197d8c2f7f857cde7e17afc2bf155ee2334a138bd560ede51c3c963fa6e6eb0"
+    },
+    {
+      "path": "scripts/test_sampling_pair_contract_20260916.py",
+      "sha256": "5f5f55ee227dc520e19a43869e6d537ce33a0a275a732645fd43b2f16865914f"
+    },
+    {
+      "path": "scripts/persist_hierarchical_partition_20260916.py",
+      "sha256": "d26113eaf03d594718302387f7f2fc78af9bd3fe6e2f3d27c6eb6f4c45c8c07c"
+    },
+    {
+      "path": "pipeline/decisions/20260916-231350_other.md",
+      "sha256": "4be326be91e3720d82749763ca3a278767cf27cd7902f8dc8f2933e90b5e8376"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "owner": {
+    "token": "ee0a986c9cef46cb9c1af2adb85b3bc9",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T07:12:40.563873+00:00",
+    "deadline_at": "2026-11-06T08:12:40.563873+00:00",
+    "context_sha256": "49bc653f65389954a405d1187caa6084934c45fa5fb10836407851fbda0f8388",
+    "pending_sha256": "6c9b71b918e5c51b2e01d1a3b57d0268264e054994ada8e7914d074bf03f3e26"
+  },
+  "recorded_at": "2026-11-06T07:22:17.992832+00:00",
+  "observed_at": "2026-11-06T07:14:56.367090+00:00",
+  "candidate_id": "hierarchy-native-variance-decomposition-composition",
+  "experiment_id": "M230-HVD",
+  "result": "blocked",
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "stdin_program_sha256": "defdace0cc3f852c9415a06e30ee00eb4405a076d3609c4078f5ebb4f5b3a53b",
+  "server": "server-4",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "max_project_tasks_per_gpu": 1,
+  "active_project_task": {
+    "id": "M229-MIC",
+    "status": "running",
+    "gpu": "0",
+    "pid": 2881795,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+    "code_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "launch_verified": true,
+    "launch_verification": "training_progress"
+  },
+  "trainer_starttime": "152216088",
+  "native_progress": [
+    25,
+    3276,
+    4686
+  ],
+  "native_progress_samples": [
+    [
+      25,
+      3272,
+      4686
+    ],
+    [
+      25,
+      3273,
+      4686
+    ],
+    [
+      25,
+      3274,
+      4686
+    ],
+    [
+      25,
+      3275,
+      4686
+    ],
+    [
+      25,
+      3276,
+      4686
+    ]
+  ],
+  "cooperative_guardian_pid": 3033165,
+  "current_three_kernel_locks": [
+    "34: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF",
+    "33: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF",
+    "32: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+  ],
+  "GPU0_contexts_raw": "2881795, 19752",
+  "postlaunch_memory_free_mib": 12802,
+  "original_new_task_budget_mib": 20000,
+  "allow_external_overlay": true,
+  "observation": {
+    "path": "pipeline/diagnostic_bundles/tick_ee0a986c/mic_current_run_and_guardian_observation.json",
+    "sha256": "7abdbb6dd3f0670f30a8b374469f71eb5e6c7959d73f027d8b1d9adab02a4305"
+  },
+  "native_model_or_resource_test": "NOT_RUN",
+  "new_stage_lease_manifest_release_created": false,
+  "blocker": "Same healthy MIC occupies sole authorized projectGPU0 slot and existing3 cooperative locks. Postlaunchfree12802MiB below originalnewtask20000MiB. External sharing does not permit second projecttask; no empty-card/context/utilization requirement.",
+  "next_action": "Observe same MIC natural terminal and existingguardian natural release, then verify actual slot/free-memory/source/runtime/grant/locks. Preserve HVDsame9 d20 and old frozen packages; separately review fresh owner/source/runtime/root/UUID/producer execution binding before original YAML TRAIN2 and complete resources."
+}

@@ -1,0 +1,9 @@
+# Current-owner CSO native packet
+
+Prepared under the current six-field foreground owner for root execution only after a distinct current caller-integration review. No SSH, Torch, resource query or GPU/native execution was performed by the packet author. Historical source, CPU and protocol evidence retain their original owners; old tick7caf stage/lease/attempts must never be renewed, rewritten or replayed.
+
+Worker, eight model source files, native YAML, data/seed1999/epochs50/max_iters70, loss, optimizer, common841 and nine-core update checks, and the original resources function remain byte-exact. Native source af45707d on d214 is privately loaded over unchanged runtime b1e639b3. Retained integration5413102c remains separate and was not recreated or deployed.
+
+Runtime observe(True) calls the byte-exact reviewed direct-free helper before locks, after the three original inode locks, and again after source/asset verification immediately before permitting Torch. It requires physical GPU0 UUID GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c with directly queried memory.free >=20000 MiB. Postrun observe(False) directly records memory.free without imposing that prelaunch threshold on the worker's own allocated memory. Overlay remains allowed; no idle/utilization gate is added. Native BOOTSTRAP conservatively consumes its one-shot attempt before worker guards, as in the reviewed protocol; a refusal is terminal and must not be replayed. Production marker integration is outside this packet.
+
+The default packet entry is NOP. Actual source_binding/native_manifest/execution_lease are created exclusively by the reviewed root transport upon explicit --execute-root. The draft template is never an actual lease. Current root must independently verify server identity, runtime/environment/source/assets/producer, cap1 and three original locks, and preserve every existing external context without signals. Actual TRAIN2/resources and trained efficacy remain unmeasured.

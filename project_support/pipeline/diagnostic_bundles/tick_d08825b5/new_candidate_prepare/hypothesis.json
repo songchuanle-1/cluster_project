@@ -1,0 +1,50 @@
+{
+  "candidate_id": "hierarchy-tree-resolvent-nonlinear-composition",
+  "experiment_id": "M218-HPC",
+  "status": "STRUCTURAL_HYPOTHESIS_NOT_EFFICACY_OR_NOVELTY",
+  "motivation": "Original M95 applies three independent per-token FFNs after hierarchical aggregation. This source graph fact permits an explicit alternative: retain three scale-specific nonlinearities but jointly compose information through the actual three-level support forest. No measured task deficit or diagnosed accuracy cause is asserted.",
+  "variables": {
+    "X_l": "original LayerNorm_l(raw cluster bank_l)",
+    "L": "unweighted combinatorial Laplacian on original true-supported fine->middle->coarse membership edges, component per original coarse root",
+    "A": "I+L, exactly unit identity and unit original edges, no selectable diffusion coefficient",
+    "S": "A inverse applied by scalar metadata Schur elimination and feature Tensor back-substitution",
+    "Z": "S X",
+    "U_l": "original FFN_l(Z_l), exactly once per full original bank",
+    "D": "S U",
+    "refined_l": "original raw_l + D_l"
+  },
+  "hypothesis": "Whole-forest linear analysis and synthesis around scale-specific nonlinear FFNs may change the quality of the original hierarchy message delivered to native inst_feats/masks. Efficacy and causal benefit UNKNOWN.",
+  "boundary": "Only point-supported original nodes are in the forest. Unsupported/batch-pad rows use identity during both solves and retain original per-row FFN/skip semantics; they are never graph nodes or fake parents. No point-level transport or root-to-root edges.",
+  "matched_control": "Original M95 entire graph under exact original YAML/data/pretrain/seed/optimizer/precision/two TRAIN batches and unchanged resource handlers. Whole-graph alternative, not an isolated causal attribution.",
+  "degeneracies": [
+    "If the analysis/synthesis graph has no edges, S=I and supported rows reduce to original M95 exactly in real arithmetic; the production three-level forest usually contains edges even for one real point. This is a mathematical control, not a newly run native arm.",
+    "Three scale-specific FFNs remain distinct. If every feature and FFN response is constant across a component, the solver preserves that constant; this does not mean the nonlinear whole graph preserves original input means."
+  ],
+  "near_neighbors": {
+    "HRC": "One-way bottom-up child means and updated banks; HPC solves a fixed bidirectional SPD tree system both before and after original nonlinearities.",
+    "BEC": "Learned nonlinear two-way membership-edge maps with private upward means and downward branches; HPC keeps all original FFNs and adds no learned edge map.",
+    "PSNC": "Same-parent middle-only orthonormal DCT conjugation; HPC nonorthogonal resolvent acts jointly across fine/middle/coarse and synthesis is S, not S inverse.",
+    "CRE": "Directed supported-root joint messages then ancestor decode, with explicit root-to-root interactions; HPC has disconnected original coarse-root components and no new maps.",
+    "AEF": "Same-parent middle MST signed edge fluxes; HPC uses original adjacent-scale membership edges with non-antisymmetric resolvent composition.",
+    "RSTR_PCE": "Neither fixed point-mass reversible sibling transport nor physical contact point exchange; all failed/held routes, revisions and numerical gates remain intact. No mean gate inherited."
+  },
+  "bounded_history_scope": "143 current IDs/hypothesis summaries searched locally for diffusion/solve/implicit/covariance/Gram/channel/polynomial terms and direct recent graph source facts. Not a full-history proof or literature novelty audit.",
+  "family": "Fixed graph propagation / resolvent filtering family acknowledged; original-paper novelty NOT_VERIFIED.",
+  "smell_check": {
+    "structural_information_flow_changed": true,
+    "parameter_change": 0,
+    "no_hyperparameter_search": true,
+    "not_activation_scale_gate_QKV_residual_addition": true,
+    "new_outer_residual": false,
+    "original_outer_skips_retained": true
+  },
+  "predefined_disposition": [
+    "Missing actual native core support/path coverage => INCONCLUSIVE, no resampling to force it.",
+    "Any native nonfinite loss/backward or failed required original parameter update => fail closed with evidence, not automatic new numerical tolerance.",
+    "Original <=10G uniform resource threshold and relative memory condition remain; no unregistered exception.",
+    "No effect or novelty claim before actual training and appropriate controls."
+  ],
+  "efficacy": "UNKNOWN",
+  "resources": "NOT_RUN",
+  "native": "NOT_RUN"
+}

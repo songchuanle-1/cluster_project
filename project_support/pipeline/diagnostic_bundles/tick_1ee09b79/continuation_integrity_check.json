@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T06:14:33.938613+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "1ee09b795e7d4145a7b52242a7d16bbe",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "deadline_at": "2026-10-22T07:12:43.645733+00:00"
+  },
+  "status": "BOUNDED_CONTINUATION_INTEGRITY_VERIFIED_NO_NEW_BOUND_AUTHORIZATION_OR_QUEUE_CHANGE",
+  "prior_audits": {
+    "final_lifecycle": {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/final_lifecycle_audit.json",
+      "sha256": "16fbe98e0645c7fcbb400820077c38db446e52c96d05967efaf47f6a3f845394"
+    },
+    "source_pause_reuse": {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/source_and_pause_reuse_check.json",
+      "sha256": "2bcf71bb75b27cba98ccd63ed28eadb94199402fcf713f14ce368cad3f37142e"
+    }
+  },
+  "current_four_dispositions": {
+    "M206-CGCA": {
+      "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+      "stage": "blocked",
+      "resume_stage": "training",
+      "blocker_kind": "human_authorization",
+      "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335",
+      "training_status": "paused_by_user",
+      "resume_authorized": false,
+      "retry_after": "2026-10-22T05:25:35.102880+00:00"
+    },
+    "M207-HAP": {
+      "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+      "stage": "blocked",
+      "resume_stage": "training",
+      "blocker_kind": "human_authorization",
+      "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+      "training_status": "crashed",
+      "resume_authorized": false,
+      "retry_after": "2026-10-22T05:25:35.102880+00:00"
+    },
+    "M208-HRC": {
+      "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "live_external_gpu_occupation",
+      "code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+      "retry_after": "2026-10-22T07:14:08.916325+00:00"
+    },
+    "M209-PSBR": {
+      "candidate_id": "hierarchy-parent-segmented-bidirectional-token-state",
+      "stage": "blocked",
+      "resume_stage": "validation",
+      "blocker_kind": "live_external_gpu_occupation",
+      "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+      "retry_after": "2026-10-22T07:14:08.916325+00:00"
+    }
+  },
+  "source_reuse": {
+    "M208-HRC": {
+      "source_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+      "nine_live_source_config_and_Git_hashes_match": true,
+      "candidate_external_artifact_bindings": {
+        "worker_preparation": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/preparation.json",
+            "sha256": "4754db1a1c550c869596e0ca57cee99834239e8ed78e87ec65f68142f48c812a"
+          },
+          "worker": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+            "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+          },
+          "runtime": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py",
+            "sha256": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4"
+          },
+          "manifest_template": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json",
+            "sha256": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509"
+          },
+          "root_static_validation": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_static_validation.json",
+            "sha256": "0bb36dff74003c4b5e330365297e1345ee76fdd9048c821607e70338d4662276"
+          },
+          "independent_review": {
+            "path": "pipeline/diagnostic_bundles/tick_86e41faa/worker_independent_review.json",
+            "sha256": "4a1b906dc3b89673f84c04df2b4264e7e4ff822b425983232386fe65b6655189"
+          }
+        },
+        "execution_adapter": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/preparation.json",
+            "sha256": "1ab29434e5a1e4f0144fd38e22d83f1ae561813973ed0468e64f65aac6c9a568"
+          },
+          "release": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter_release.json",
+            "sha256": "f2b3cdfe7a63cacf65e0d38837c4df1211715a31320f4d808d569c855a9e6d83"
+          },
+          "adapter": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/adapter.py",
+            "sha256": "0f0663ec37e8b58ea72e3be39a193bf5b2860bf7fdb2ed51bd611c123a6b63a9"
+          },
+          "remote_ops": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/remote_ops.py",
+            "sha256": "3b9147010d2580423930110807862391cf5814ab846b1770b934d784503416e8"
+          },
+          "README": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/README.md",
+            "sha256": "6be4563f0aa19940f97aff61a9d63930f5ae9d3f8b52bf1163fd37e6f31dfd9e"
+          },
+          "independent_tests": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/hrc_execution_adapter/independent_review/final_validation_r2.json",
+            "sha256": "14fb3aa82bdb0c5c0ed3f395c1289f933498b104523a2437a1e250b6bbe88413"
+          },
+          "root_review": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_independent_review.json",
+            "sha256": "5f5084265439ca6433328e34d4a6d4e9685bf3e7b8aa49376f4fb43dd82d413d"
+          },
+          "actual_local_guard_integration": {
+            "path": "pipeline/diagnostic_bundles/tick_9b40ab74/adapter_actual_guard_integration.json",
+            "sha256": "dcd6137ba9d56108d9940e1a1883b1d0b32c68604884637e2aacecbd0d6cce98"
+          }
+        }
+      },
+      "prepared_file_counts": {
+        "worker_preparation": 15,
+        "execution_adapter": 22
+      },
+      "all_prepared_and_11_diagnostic_hashes_match": true,
+      "release_native_identity_hash_links_match": true,
+      "native_resources": "NOT_RUN",
+      "actual_pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN",
+      "no_active_binding_manifest_or_lease_in_preparations": true
+    },
+    "M209-PSBR": {
+      "source_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+      "nine_live_source_config_and_Git_hashes_match": true,
+      "candidate_external_artifact_bindings": {
+        "worker_preparation": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/preparation.json",
+            "sha256": "1e1de105f34ce4f6f87fe862bf35ee2c7c0bf26bf7404b0550559534a0e7472e"
+          },
+          "worker": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/worker.py",
+            "sha256": "05ab6ac1f72f804bf9799e6b6a95127057d330d13302686740cb1acb94343385"
+          },
+          "runtime": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/native_runtime.py",
+            "sha256": "b6698c77ef9956c2d7381fb99164cdbf1d1f4905c13f59d04c6b9778e2bf8e67"
+          },
+          "manifest_template": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/manifest_template.json",
+            "sha256": "f90e2662cb188b838ff7e6d6b60179529a983d91a32cb06187262aee70267263"
+          }
+        },
+        "execution_adapter": {
+          "preparation": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/preparation.json",
+            "sha256": "9d6c98a4c406d052c5ae1d420053103b0ec08bf71fb0ce5c32de88dd49b5bb4b"
+          },
+          "release": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/adapter_release.json",
+            "sha256": "b17d424e493bcd49e1858bc6fc4b897d6fab5970a25240cea143e826f40e20d7"
+          },
+          "adapter": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/adapter.py",
+            "sha256": "c8aee02bc75986972b28b43e30b5333ca2ef30b75bdfc622ec5192e9b195b3a3"
+          },
+          "remote_ops": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/remote_ops.py",
+            "sha256": "9ea6f90d6027b83e92da24dcf0fd85cca548cb9b0aab726d9dd3ace52d1907cd"
+          },
+          "README": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/README.md",
+            "sha256": "5a153c999aa19180bc1cdd97c59bd890429a648377cf08c783f5392980ca1ef0"
+          },
+          "independent_tests": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/fixture_validation_run1.json",
+            "sha256": "971e77d8dc952c4caed993007f531746870b03e0e1d992318877f3a65e40422d"
+          },
+          "independent_review": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/independent_adapter_review.json",
+            "sha256": "7293e9cb23482c1e5ec6b6bd1b2d33a3b906b4d771cf14cfb92452fb86ac64b1"
+          },
+          "result_boundary_review": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_execution_adapter/source_result_boundary_review.json",
+            "sha256": "c1338156432db67a903d1ce204e62334fb9d1b2a0f1787103cea9fa0aa56a476"
+          },
+          "actual_local_guard_integration": {
+            "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_actual_guard_integration.json",
+            "sha256": "41041fc8e0728ccac4376e74b7c453fc9a4248095e2736cc9db51e1ee552a2ef"
+          }
+        }
+      },
+      "prepared_file_counts": {
+        "worker_preparation": 15,
+        "execution_adapter": 10
+      },
+      "all_prepared_and_11_diagnostic_hashes_match": true,
+      "release_native_identity_hash_links_match": true,
+      "native_resources": "NOT_RUN",
+      "actual_pairing": "NOT_RUN",
+      "efficacy": "UNKNOWN",
+      "no_active_binding_manifest_or_lease_in_preparations": true
+    }
+  },
+  "queue_and_authorization": {
+    "queue_bytes_unchanged_from_final_lifecycle_audit": true,
+    "running_bytes_unchanged": true,
+    "running": {
+      "server-6": {}
+    },
+    "M206_waiting_userhold_resume_false_no_activePID": true,
+    "HAP_no_queue_and_resume_grant_missing": true,
+    "HAP_plan_and_checkpoint_proof_receipt_archive_log_evidence_hashes_unchanged": true,
+    "latest_resource_authorization": {
+      "path": "pipeline/authorizations/server4_gpu0_only_20261022_gpu1_pause_105409.json",
+      "sha256": "1871f8c9777c548acfda87b9e91b72c2d5fc94ac78920430c52bdceea1cbd51e"
+    },
+    "SERVERS_bytes_unchanged": true,
+    "server4_allowed_gpus": [
+      0
+    ],
+    "max_tasks_per_gpu": 1,
+    "authorization_scope": "Only current bound candidate/queue/plan/latest-resource records checked. No new effective resume authorization is present there; no directory-wide claim about unrelated/unbound files or user messages. Human response is still pending per parent; no repeated question or invented grant."
+  },
+  "worktree": {
+    "HEAD": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "index_empty": true,
+    "protected_baseline": {
+      "path": "pipeline/diagnostic_bundles/tick_16b87793/protected_worktree_before.json",
+      "sha256": "deb2f6e1093be710fbbae886b4008c187b2e6b63d63276bfb47706b36b4be142"
+    },
+    "exact_28_protected_bytes_and_dirty_untracked_path_status_set_unchanged": true,
+    "status_count": 28
+  },
+  "material_changes_since_tick5c_audits": [
+    "Root added fresh GPU0-only busy evidence (context PID716389/16248MiB, UUID unchanged), preserving the same external-resource block; HRC and PSBR evidence hashes match and retry timestamps are refreshed.",
+    "HAP next_action now accurately states its one human resume question was already asked and is PENDING; no new permission, queue or source change."
+  ],
+  "real_reuse_boundary": {
+    "HRC_PSBR": "Immutable source and prepared execution tools only; native/resources/actual pairing remain NOT_RUN, efficacy UNKNOWN. Future current owner must freshly verify external anchors, original deadline and authorized physicalGPU0 idleness/leases before execution. Prepared capability maps do not authorize GPU1.",
+    "HAP": "Original native/resources PASS and crash archive stay historical; exact epoch18-to19 resume plan remains unexecuted and requires the missing human grant plus fresh GPU0/source/checkpoint checks.",
+    "M206": "Still explicitly user-paused. No GPU1 use or automatic migration/resume/cold start.",
+    "live_GPU0_availability": "Root fresh saved evidence hash checked locally: physical GPU0 still has compute context716389. This reviewer performed no SSH/NVML query. No experiment-ready opening is established.",
+    "old_held_routes": "Not enumerated, rescanned or reopened; no 655-history traversal."
+  },
+  "execution": {
+    "SSH_GPU_torch_tests_resume_or_shared_state_mutation": false,
+    "authorization_question_repeated": false
+  },
+  "blocking_findings": [],
+  "write_scope": "Only this new tick continuation_integrity_check.json.",
+  "refreshed_at": "2026-10-22T06:15:12.886827+00:00",
+  "first_local_check_snapshot_sha256": "c5c40e87575e9c7081ced9d9fa85873d2a62639db8fc91b9717fe761058a7690",
+  "root_fresh_resource_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_1ee09b79/gpu0_slot_final.json",
+    "sha256": "3ece5057fab7f0d0a4533c7208bc4d7183ffa1215119524f352dd72443b8bd70",
+    "root_observed_at": "2026-10-22T06:13:19.928495+00:00",
+    "physical_gpu": 0,
+    "context_pid": 716389,
+    "context_memory_MiB": 16248,
+    "inventory_memory_MiB": 16297,
+    "utilization_percent": 0,
+    "still_compute_context_present": true,
+    "GPU1": "NOT_QUERIED_RELEASED_TO_OTHERS",
+    "reviewer_remote_query_performed": false
+  },
+  "HAP_question": "ALREADY_ASKED_ONCE_PENDING_NO_REPEAT_NO_MANUFACTURED_GRANT",
+  "retry_deadline_boundary": "HRC/PSBR retry_after is future availability scheduling only; it does not renew or extend this tick deadline07:12:43.645733UTC."
+}

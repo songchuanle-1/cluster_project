@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-29T14:11:05.926705+00:00",
+  "status": "crashed",
+  "review_status": "ACTUAL_ORIGINAL_PES_ABNORMAL_TERMINAL_INDEPENDENTLY_VERIFIED",
+  "candidate_id": "hierarchy-palindromic-euler-state-composition",
+  "experiment_id": "M221-PES",
+  "code_commit": "9c42fdc4e9168acec18980d782ee9c163e043bb7",
+  "failure_scope": "inconclusive",
+  "cause": "UNKNOWN",
+  "material_concerns": [
+    {
+      "kind": "original_native_training_runtime_crash",
+      "observed_error": "ValueError: too many values to unpack (expected 0)",
+      "reported_path": "Original tools.train gradient clipping -> PyTorch clip_grad_norm_(model.parameters()) -> parameters/named_parameters/_named_members iteration",
+      "scope": "Real original training run ended abnormally during TRAIN5; exact underlying cause and relationship to the PES graph are unestablished. This is not normal early stopping or an efficacy/mechanism rejection."
+    }
+  ],
+  "anchors": {
+    "end_and_slot_observation": {
+      "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/pes_end_and_slot_observation.json",
+      "sha256": "dbd4717dd46c4274106118b6b97a8e12fa2a4715bf7d6bde48274cb2ffc15195"
+    },
+    "exact_log_evidence": {
+      "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/pes_exact_terminal_archive/exact_log_evidence.json",
+      "sha256": "d4eea5f778f106f6334e6b4f8cb759b635513cba66690c2b900684c7babe660f"
+    },
+    "exact_full_original_log": {
+      "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/pes_exact_terminal_archive/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pes_20261029_175027.log",
+      "sha256": "358d479d5122c895434dda14c8afdbc921e3e7cb6d8f38030f62b5d314c81e0c"
+    },
+    "failed_initial_observer": {
+      "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/pes_progress_observer/pes_training_progress_observation.json",
+      "sha256": "1bd2cb39e162911c520664551d63fb63a93447a4b2ea5eef3ca66acf2c3d184e"
+    },
+    "original_receipt": {
+      "path": "pipeline/admissions/M221-PES.json",
+      "sha256": "6fcee3f5bbfb865b9902ff04e0b019c464f8911c600906de07577608a930f2b1"
+    },
+    "protected_baseline": {
+      "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/protected_assets_before.json",
+      "sha256": "0b7a3510c20ee3e23ebc37f8790bc50b9620f15049f3a801b9e7e23adaf19f14"
+    }
+  },
+  "original_identity_and_preservation": {
+    "pid": 2265073,
+    "expected_start_ticks": "88396735",
+    "original_pid_absent_before_after_full_log_read": true,
+    "same_config_own_processes": [],
+    "original_log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pes_20261029_175027.log",
+    "complete_log_bytes": 5731527,
+    "complete_local_remote_sha256_equal": "358d479d5122c895434dda14c8afdbc921e3e7cb6d8f38030f62b5d314c81e0c",
+    "original_source_model8_and_deployed_yaml_verified": true,
+    "receipt6fce_unchanged": true,
+    "current26_lifecycle_hashes_before_archive_unchanged": true,
+    "no_signals_or_checkpoint_body_read": true
+  },
+  "actual_terminal": {
+    "last_native_TRAIN": [
+      5,
+      529
+    ],
+    "epoch_denominator": 50,
+    "step_denominator": 4686,
+    "completed_validation_epochs": 4,
+    "precise_native_validation": {
+      "values": [
+        0.2965591251850128,
+        0.3763071894645691,
+        0.41243723034858704,
+        0.4211066663265228
+      ],
+      "best": 0.4211066663265228,
+      "no_improve": 0
+    },
+    "explicit_early_stop": false,
+    "exception_trace_verified_against_bounded_tail": true,
+    "normal_termination": false,
+    "scientific_result": "INCONCLUSIVE_CRASH_CAUSE_UNKNOWN; four completed validation values are partial, not completed50-epoch performance or accuracy evidence"
+  },
+  "observer_failure_separation": "The first strict observer failed at original proc existence/UID assertion and produced no TRAIN observation. It is retained as a read-only observation failure; actual crash classification instead follows exact own-log exception plus independent process absence/full-copy evidence.",
+  "actual_gpu0_slot": {
+    "server_id": "server-4",
+    "hostname": "dl04-MS-7E06",
+    "root": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+    "runtime_code_commit": "9c42fdc4e9168acec18980d782ee9c163e043bb7",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "memory_used_mib": 41,
+    "utilization_percent": 0,
+    "contexts": [],
+    "locks": {
+      "training": "available",
+      "diagnostic": "available",
+      "exclusive": "available"
+    },
+    "idle": true,
+    "observed_at": "2026-10-29T14:09:10.009638+00:00"
+  },
+  "canonical_next_step": "Root may once finalize exact original M221-PES as crashed using existing canonical finalize_task API and the verified complete log, original receipt/source/PID identity; preserve checkpoint metadata and all history. Do not fabricate deathwatch checks, hand-edit queue, restart/resume/cold-start or invalidate prior technical raw by relabeling this terminal.",
+  "AOC_boundary": "After canonical original PES cleanup and fresh current owner/resource checks, existing AOC0314 native control may proceed on authorized idle GPU0 against runtime9c. Original PES technical receipt/source still anchors this technical code dependency; it does not require PES training completion or benefit. Earlier PES raw remains historical true, this crash remains separate. No AOC native PASS is pre-signed.",
+  "not_performed": "Independent local hash/metadata and bounded exact own-log tail reads only; no SSH/GPU/Git, root helper/monitor/Adapter entry, shared or lifecycle mutation, software suite, new native/reproduction test, checkpoint body or old655/grant scan."
+}

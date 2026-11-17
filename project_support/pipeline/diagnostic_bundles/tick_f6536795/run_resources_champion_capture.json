@@ -1,0 +1,26 @@
+{
+  "operation": "run",
+  "mode": "resources",
+  "target": "champion",
+  "started_at": "2026-11-08T03:37:04.780010+00:00",
+  "finished_at": "2026-11-08T03:37:06.714316+00:00",
+  "returncode": 1,
+  "command": [
+    "C:\\song_data\\app\\miniconda\\root\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_f6536795\\nde_operational_active\\run_nde_operation.py",
+    "--execute-root",
+    "--operation",
+    "run",
+    "--mode",
+    "resources",
+    "--target",
+    "champion"
+  ],
+  "stdout_bytes": 0,
+  "stderr_bytes": 1799,
+  "stdout_json_parsed": false,
+  "stderr_tail": "lif a.operation=='run':result=adapter.run(a.mode,a.target)\r\n                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^\r\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_f6536795\\nde_operational_active\\adapter.py\", line 571, in run\r\n    self._previous_complete(current,directory,binding)\r\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_f6536795\\nde_operational_active\\adapter.py\", line 563, in _previous_complete\r\n    require(prior.get('identity')==self._identity(binding,request['request_id'],'run')\r\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n        and prior.get('returncode')==0 and self._raw_result_identity(prior.get('result'),binding,mode,target)\r\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n        and prior['result'].get('execution_completed') is True,'Prior request failed/identity unknown; no further run')\r\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r\n  File \"D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_f6536795\\nde_operational_active\\adapter.py\", line 85, in require\r\n    raise Refused(reason)\r\nnde_reviewed_adapter.Refused: Prior request failed/identity unknown; no further run\r\n"
+}

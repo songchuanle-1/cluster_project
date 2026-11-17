@@ -1,0 +1,652 @@
+diff --git a/configs/Quard/ctf_hcg_csort_nde/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde.yaml b/configs/Quard/ctf_hcg_csort_nde/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde.yaml
+index 4fecdc5..ede3233 100644
+--- a/configs/Quard/ctf_hcg_csort_nde/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde.yaml
++++ b/configs/Quard/ctf_hcg_csort_nde/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde.yaml
+@@ -1,4 +1,4 @@
+-work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints
++work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+ train:
+   seed: 1999
+   epochs: 50
+@@ -6,27 +6,24 @@ train:
+   pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+   save_epoch: 100
+   grad_clip: 0.1
+-
+ test:
+   seed: 1999
+   test_topk_per_scene: 100
+   test_score_thresh: 0.0
+   test_npoint_thresh: 100
+-
+ dataloader:
+   train:
+     batch_size: 2
+     num_workers: 4
+-    persistent_workers: True
++    persistent_workers: true
+   val:
+     batch_size: 1
+     num_workers: 2
+-    persistent_workers: True
++    persistent_workers: true
+   test:
+     batch_size: 1
+     num_workers: 1
+-    persistent_workers: True
+-
++    persistent_workers: true
+ data:
+   train:
+     type: scannetv2_sample_graph_edge
+@@ -34,14 +31,16 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: train
+     suffix: .pth
+-    training: True
++    training: true
+     mode: 4
+-    aug: True
+-    with_elastic: True
+-    use_xyz: True
++    aug: true
++    with_elastic: true
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 4
+@@ -51,26 +50,27 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: val
+     suffix: .pth
+-    training: False
++    training: false
+     mode: 4
+-    aug: False
+-    with_elastic: False
+-    use_xyz: True
++    aug: false
++    with_elastic: false
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 32
+-
+ model:
+   data_root: /home/songcl/data/data/
+   input_channel: 6
+   blocks: 5
+   block_reps: 2
+   media: 32
+-  normalize_before: True
+-  return_blocks: True
++  normalize_before: true
++  return_blocks: true
+   pool: mean
+   infer_mode: sem
+   fps_num: 256
+@@ -89,28 +89,43 @@ model:
+     hidden_dim: 1024
+     dropout: 0.0
+     activation_fn: gelu
+-    iter_pred: True
+-    contrastive_align_loss: True
++    iter_pred: true
++    contrastive_align_loss: true
+     num_proposal_fine: 512
+-    cluster_layer_nums: [256, 64, 8]
+-    per_layer_topk_list: [32, 16, 8]
+-    # PosA ordering with cluster refinement enabled only on encoder layer 6.
++    cluster_layer_nums:
++    - 256
++    - 64
++    - 8
++    per_layer_topk_list:
++    - 32
++    - 16
++    - 8
+     cluster_att_num_layers: 1
+     cluster_att_init: 0.1
+   criterion:
+-    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+-    cost_weight: [1.0, 1.0, 0.1]
++    loss_weight:
++    - 1.0
++    - 1.0
++    - 0.5
++    - 5.0
++    - 0.1
++    - 0.1
++    - 0.1
++    - 1.0
++    cost_weight:
++    - 1.0
++    - 1.0
++    - 0.1
+     loss_fun: focal
+-    match_last_layer: True
+-    layer_differ_weight: True
++    match_last_layer: true
++    layer_differ_weight: true
+   test_cfg:
+     topk_insts: 100
+     score_thr: 0.0
+     npoint_thr: 100
+-  norm_eval: False
++  norm_eval: false
+   fix_module:
+-    - text_encoder
+-
++  - text_encoder
+ optimizer:
+   type: AdamW
+   lr: 0.0001
+@@ -126,7 +141,6 @@ optimizer:
+       lr_mult: 0.01
+     dec:
+       lr_mult: 1.0
+-
+ lr_scheduler:
+   type: PolyLR
+   max_iters: 70
+diff --git a/configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml b/configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml
+index 4fecdc5..ede3233 100644
+--- a/configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml
++++ b/configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml
+@@ -1,4 +1,4 @@
+-work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints
++work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+ train:
+   seed: 1999
+   epochs: 50
+@@ -6,27 +6,24 @@ train:
+   pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+   save_epoch: 100
+   grad_clip: 0.1
+-
+ test:
+   seed: 1999
+   test_topk_per_scene: 100
+   test_score_thresh: 0.0
+   test_npoint_thresh: 100
+-
+ dataloader:
+   train:
+     batch_size: 2
+     num_workers: 4
+-    persistent_workers: True
++    persistent_workers: true
+   val:
+     batch_size: 1
+     num_workers: 2
+-    persistent_workers: True
++    persistent_workers: true
+   test:
+     batch_size: 1
+     num_workers: 1
+-    persistent_workers: True
+-
++    persistent_workers: true
+ data:
+   train:
+     type: scannetv2_sample_graph_edge
+@@ -34,14 +31,16 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: train
+     suffix: .pth
+-    training: True
++    training: true
+     mode: 4
+-    aug: True
+-    with_elastic: True
+-    use_xyz: True
++    aug: true
++    with_elastic: true
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 4
+@@ -51,26 +50,27 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: val
+     suffix: .pth
+-    training: False
++    training: false
+     mode: 4
+-    aug: False
+-    with_elastic: False
+-    use_xyz: True
++    aug: false
++    with_elastic: false
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 32
+-
+ model:
+   data_root: /home/songcl/data/data/
+   input_channel: 6
+   blocks: 5
+   block_reps: 2
+   media: 32
+-  normalize_before: True
+-  return_blocks: True
++  normalize_before: true
++  return_blocks: true
+   pool: mean
+   infer_mode: sem
+   fps_num: 256
+@@ -89,28 +89,43 @@ model:
+     hidden_dim: 1024
+     dropout: 0.0
+     activation_fn: gelu
+-    iter_pred: True
+-    contrastive_align_loss: True
++    iter_pred: true
++    contrastive_align_loss: true
+     num_proposal_fine: 512
+-    cluster_layer_nums: [256, 64, 8]
+-    per_layer_topk_list: [32, 16, 8]
+-    # PosA ordering with cluster refinement enabled only on encoder layer 6.
++    cluster_layer_nums:
++    - 256
++    - 64
++    - 8
++    per_layer_topk_list:
++    - 32
++    - 16
++    - 8
+     cluster_att_num_layers: 1
+     cluster_att_init: 0.1
+   criterion:
+-    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+-    cost_weight: [1.0, 1.0, 0.1]
++    loss_weight:
++    - 1.0
++    - 1.0
++    - 0.5
++    - 5.0
++    - 0.1
++    - 0.1
++    - 0.1
++    - 1.0
++    cost_weight:
++    - 1.0
++    - 1.0
++    - 0.1
+     loss_fun: focal
+-    match_last_layer: True
+-    layer_differ_weight: True
++    match_last_layer: true
++    layer_differ_weight: true
+   test_cfg:
+     topk_insts: 100
+     score_thr: 0.0
+     npoint_thr: 100
+-  norm_eval: False
++  norm_eval: false
+   fix_module:
+-    - text_encoder
+-
++  - text_encoder
+ optimizer:
+   type: AdamW
+   lr: 0.0001
+@@ -126,7 +141,6 @@ optimizer:
+       lr_mult: 0.01
+     dec:
+       lr_mult: 1.0
+-
+ lr_scheduler:
+   type: PolyLR
+   max_iters: 70
+diff --git a/configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml b/configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml
+index 16c315e..3d67a83 100644
+--- a/configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml
++++ b/configs/Quard/ctf_hcg_csort_rvec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec.yaml
+@@ -1,4 +1,4 @@
+-work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints
++work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+ train:
+   seed: 1999
+   epochs: 50
+@@ -6,27 +6,24 @@ train:
+   pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+   save_epoch: 100
+   grad_clip: 0.1
+-
+ test:
+   seed: 1999
+   test_topk_per_scene: 100
+   test_score_thresh: 0.0
+   test_npoint_thresh: 100
+-
+ dataloader:
+   train:
+     batch_size: 2
+     num_workers: 4
+-    persistent_workers: True
++    persistent_workers: true
+   val:
+     batch_size: 1
+     num_workers: 2
+-    persistent_workers: True
++    persistent_workers: true
+   test:
+     batch_size: 1
+     num_workers: 1
+-    persistent_workers: True
+-
++    persistent_workers: true
+ data:
+   train:
+     type: scannetv2_sample_graph_edge
+@@ -34,14 +31,16 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: train
+     suffix: .pth
+-    training: True
++    training: true
+     mode: 4
+-    aug: True
+-    with_elastic: True
+-    use_xyz: True
++    aug: true
++    with_elastic: true
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 4
+@@ -51,26 +50,27 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: val
+     suffix: .pth
+-    training: False
++    training: false
+     mode: 4
+-    aug: False
+-    with_elastic: False
+-    use_xyz: True
++    aug: false
++    with_elastic: false
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 32
+-
+ model:
+   data_root: /home/songcl/data/data/
+   input_channel: 6
+   blocks: 5
+   block_reps: 2
+   media: 32
+-  normalize_before: True
+-  return_blocks: True
++  normalize_before: true
++  return_blocks: true
+   pool: mean
+   infer_mode: sem
+   fps_num: 256
+@@ -89,28 +89,43 @@ model:
+     hidden_dim: 1024
+     dropout: 0.0
+     activation_fn: gelu
+-    iter_pred: True
+-    contrastive_align_loss: True
++    iter_pred: true
++    contrastive_align_loss: true
+     num_proposal_fine: 512
+-    cluster_layer_nums: [256, 64, 8]
+-    per_layer_topk_list: [32, 16, 8]
+-    # PosA ordering with cluster refinement enabled only on encoder layer 6.
++    cluster_layer_nums:
++    - 256
++    - 64
++    - 8
++    per_layer_topk_list:
++    - 32
++    - 16
++    - 8
+     cluster_att_num_layers: 1
+     cluster_att_init: 0.1
+   criterion:
+-    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+-    cost_weight: [1.0, 1.0, 0.1]
++    loss_weight:
++    - 1.0
++    - 1.0
++    - 0.5
++    - 5.0
++    - 0.1
++    - 0.1
++    - 0.1
++    - 1.0
++    cost_weight:
++    - 1.0
++    - 1.0
++    - 0.1
+     loss_fun: focal
+-    match_last_layer: True
+-    layer_differ_weight: True
++    match_last_layer: true
++    layer_differ_weight: true
+   test_cfg:
+     topk_insts: 100
+     score_thr: 0.0
+     npoint_thr: 100
+-  norm_eval: False
++  norm_eval: false
+   fix_module:
+-    - text_encoder
+-
++  - text_encoder
+ optimizer:
+   type: AdamW
+   lr: 0.0001
+@@ -126,7 +141,6 @@ optimizer:
+       lr_mult: 0.01
+     dec:
+       lr_mult: 1.0
+-
+ lr_scheduler:
+   type: PolyLR
+   max_iters: 70
+diff --git a/configs/Quard/ctf_hcg_csort_sinc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc.yaml b/configs/Quard/ctf_hcg_csort_sinc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc.yaml
+index 1ec6cec..0eb3813 100644
+--- a/configs/Quard/ctf_hcg_csort_sinc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc.yaml
++++ b/configs/Quard/ctf_hcg_csort_sinc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc.yaml
+@@ -1,4 +1,4 @@
+-work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints
++work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+ train:
+   seed: 1999
+   epochs: 50
+@@ -6,27 +6,24 @@ train:
+   pretrain: /home/songcl/data/data/sp_unet_backbone.pth
+   save_epoch: 100
+   grad_clip: 0.1
+-
+ test:
+   seed: 1999
+   test_topk_per_scene: 100
+   test_score_thresh: 0.0
+   test_npoint_thresh: 100
+-
+ dataloader:
+   train:
+     batch_size: 2
+     num_workers: 4
+-    persistent_workers: True
++    persistent_workers: true
+   val:
+     batch_size: 1
+     num_workers: 2
+-    persistent_workers: True
++    persistent_workers: true
+   test:
+     batch_size: 1
+     num_workers: 1
+-    persistent_workers: True
+-
++    persistent_workers: true
+ data:
+   train:
+     type: scannetv2_sample_graph_edge
+@@ -34,14 +31,16 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: train
+     suffix: .pth
+-    training: True
++    training: true
+     mode: 4
+-    aug: True
+-    with_elastic: True
+-    use_xyz: True
++    aug: true
++    with_elastic: true
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 4
+@@ -51,26 +50,27 @@ data:
+     data_root: /home/songcl/data/data/
+     prefix: val
+     suffix: .pth
+-    training: False
++    training: false
+     mode: 4
+-    aug: False
+-    with_elastic: False
+-    use_xyz: True
++    aug: false
++    with_elastic: false
++    use_xyz: true
+     voxel_cfg:
+       scale: 50
+-      spatial_shape: [128, 512]
++      spatial_shape:
++      - 128
++      - 512
+       max_npoint: 2500000
+     max_des_len: 78
+     lang_num_max: 32
+-
+ model:
+   data_root: /home/songcl/data/data/
+   input_channel: 6
+   blocks: 5
+   block_reps: 2
+   media: 32
+-  normalize_before: True
+-  return_blocks: True
++  normalize_before: true
++  return_blocks: true
+   pool: mean
+   infer_mode: sem
+   fps_num: 256
+@@ -89,28 +89,43 @@ model:
+     hidden_dim: 1024
+     dropout: 0.0
+     activation_fn: gelu
+-    iter_pred: True
+-    contrastive_align_loss: True
++    iter_pred: true
++    contrastive_align_loss: true
+     num_proposal_fine: 512
+-    cluster_layer_nums: [256, 64, 8]
+-    per_layer_topk_list: [32, 16, 8]
+-    # PosA ordering with cluster refinement enabled only on encoder layer 6.
++    cluster_layer_nums:
++    - 256
++    - 64
++    - 8
++    per_layer_topk_list:
++    - 32
++    - 16
++    - 8
+     cluster_att_num_layers: 1
+     cluster_att_init: 0.1
+   criterion:
+-    loss_weight: [1.0, 1.0, 0.5, 5.0, 0.1, 0.1, 0.1, 1.0]
+-    cost_weight: [1.0, 1.0, 0.1]
++    loss_weight:
++    - 1.0
++    - 1.0
++    - 0.5
++    - 5.0
++    - 0.1
++    - 0.1
++    - 0.1
++    - 1.0
++    cost_weight:
++    - 1.0
++    - 1.0
++    - 0.1
+     loss_fun: focal
+-    match_last_layer: True
+-    layer_differ_weight: True
++    match_last_layer: true
++    layer_differ_weight: true
+   test_cfg:
+     topk_insts: 100
+     score_thr: 0.0
+     npoint_thr: 100
+-  norm_eval: False
++  norm_eval: false
+   fix_module:
+-    - text_encoder
+-
++  - text_encoder
+ optimizer:
+   type: AdamW
+   lr: 0.0001
+@@ -126,7 +141,6 @@ optimizer:
+       lr_mult: 0.01
+     dec:
+       lr_mult: 1.0
+-
+ lr_scheduler:
+   type: PolyLR
+   max_iters: 70

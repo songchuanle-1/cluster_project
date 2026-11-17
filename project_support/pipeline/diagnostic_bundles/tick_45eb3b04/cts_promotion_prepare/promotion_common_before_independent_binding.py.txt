@@ -1,0 +1,278 @@
+"""Private disabled promotion draft. No effect on import; no authority is created."""
+from datetime import datetime, timezone
+import hashlib
+import copy
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+
+ROOT = Path('D:/project/cluster_project')
+PRIVATE = Path(__file__).resolve().parent
+TICK = PRIVATE.parent
+CODE = ROOT / 'Cluster'
+BASE = '48fc302c3c02ffef0b241be3593c386b6b65a72e'
+TESTED = '4e80006047d5cb3dcdfb9c1102e02c33f354a07d'
+EXP = 'M214-CTS'
+CID = 'hierarchy-parent-cyclic-triadic-state-composition'
+GOAL = '0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85'
+NAME = 'model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cts'
+CONFIG = 'configs/Quard/ctf_hcg_csort_cts/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cts.yaml'
+TOKEN = '45eb3b045c6243518d56eade38d5cd17'
+EXPECTED_OWNER = {'token': '45eb3b045c6243518d56eade38d5cd17', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-10-26T04:52:30.746713+00:00', 'deadline_at': '2026-10-26T05:52:30.746713+00:00', 'context_sha256': '4e63c8bb12f2e9573fd51d46fb0d585743728517ad3b506cbc97a36cdd0025c3', 'pending_sha256': 'b4cc5fc4dd9fd75f8396fc6a13965c537ee21a860bf2b8529e2077acc2067b2c'}
+# Root must review this draft and bind actual reviewed evidence; never invent hashes.
+DRAFT_EXECUTION_ENABLED = False
+SEMANTIC_REVIEW_PATH = 'pipeline/diagnostic_bundles/tick_45eb3b04/cts_actual_four_result_review.json'
+SEMANTIC_REVIEW_SHA = 'a33c0fe74f0e2860aa2f9fb0b7fe066aad27a4ee34e7937c06c7b62001a33121'
+INDEPENDENT_REVIEW_PATH = None
+INDEPENDENT_REVIEW_SHA = None
+INDEPENDENT_STATUS = None
+PAIRS = [('smoke', 'champion'), ('smoke', 'candidate'),
+         ('resources', 'champion'), ('resources', 'candidate')]
+PROTECTED_BASELINE = ROOT / 'pipeline/diagnostic_bundles/tick_16b87793/protected_worktree_before.json'
+PROTECTED_BASELINE_SHA = 'deb2f6e1093be710fbbae886b4008c187b2e6b63d63276bfb47706b36b4be142'
+
+
+def require(value, message):
+    if not value:
+        raise RuntimeError(message)
+
+
+def read(path):
+    return json.loads(Path(path).read_text('utf-8'))
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def ref(path):
+    path = Path(path).resolve()
+    require(path.is_relative_to(ROOT), 'Evidence outside project')
+    return {'path': path.relative_to(ROOT).as_posix(), 'sha256': sha(path)}
+
+
+def execution_enabled(execute_root):
+    require(execute_root and DRAFT_EXECUTION_ENABLED is True,
+            'DRAFT_DISABLED: no ff/dispatch or shared/remote action is enabled')
+    for path, expected in [(SEMANTIC_REVIEW_PATH, SEMANTIC_REVIEW_SHA),
+                           (INDEPENDENT_REVIEW_PATH, INDEPENDENT_REVIEW_SHA)]:
+        require(path is not None and isinstance(expected, str) and
+                re.fullmatch(r'[0-9a-f]{64}', expected), 'Actual review path/SHA must be bound by root')
+    require(isinstance(INDEPENDENT_STATUS,str) and INDEPENDENT_STATUS,'Actual independent status schema must be bound by root')
+
+
+def owner_guard():
+    owner = read(ROOT / 'pipeline/headless/.foreground.lockdir/owner.json')
+    require({k: owner.get(k) for k in EXPECTED_OWNER} == EXPECTED_OWNER,
+            'Original six-field owner binding changed; never extend this draft')
+    mode = read(ROOT / 'pipeline/execution_mode.json')
+    require(mode.get('mode') == 'foreground' and
+            owner['thread_id'] == mode.get('target_thread_id') == os.environ.get('CODEX_THREAD_ID'),
+            'Actual root/environment/mode mismatch; do not override identity')
+    require(datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at']), 'Original deadline expired')
+    require(sha(ROOT / 'pipeline/headless/.tick_context.json') == owner['context_sha256'] and
+            sha(ROOT / 'pipeline/headless/.tick_context_state.next.json') == owner['pending_sha256'],
+            'Original context/pending changed')
+    require(sha(ROOT / 'pipeline/goal.json') == GOAL, 'Goal changed')
+    require(sha(ROOT / 'SERVERS.yaml') == 'd5277972e80b6fe184a3e07f0fff34f7e1e7950b558d60905416ced302b206a2', 'Resource registry changed')
+    require(sha(ROOT / 'pipeline/authorizations/server4_gpu1_20261025.json') == '90f8820a60ef4d4e277904815b025658f7b8b457b0711a4d0ef5f7395fdd23f8', 'Human GPU1 resource grant changed')
+    policy = read(ROOT / 'pipeline/closure_policy.json')
+    auth = {'path':'pipeline/authorizations/experiment_first_20261021.json','sha256':'2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8'}
+    require(policy['enabled'] is True and policy['experiment_first']['enabled'] is True and policy['experiment_first']['authorization'] == auth and sha(ROOT / auth['path']) == auth['sha256'], 'Original experiment-first authorization changed')
+    return owner
+
+
+def git_bytes(*args):
+    return subprocess.check_output(['git', '--no-optional-locks', '-C', str(CODE), *args],
+                                   env=dict(os.environ, GIT_OPTIONAL_LOCKS='0'))
+
+
+def git(*args):
+    return git_bytes(*args).decode('utf-8').strip()
+
+
+def protected():
+    require(sha(PROTECTED_BASELINE) == PROTECTED_BASELINE_SHA, 'Protected baseline changed')
+    rows = read(PROTECTED_BASELINE)['protected_existing_worktree']
+    require(len(rows) == 28, 'Wrong protected inventory')
+    status = [x for x in git_bytes('status', '--porcelain=v1', '-z', '-uall').split(b'\0') if x]
+    actual = {(x[:2].decode(), x[3:].decode()) for x in status}
+    require(actual == {(r['status'], r['path']) for r in rows}, 'Protected28 status set changed')
+    require(all(sha(CODE / r['path']) == r['sha256'] for r in rows), 'Protected28 bytes changed')
+    require(not git_bytes('diff', '--cached', '--name-only', '-z'), 'Index is not empty')
+    return rows
+
+
+def reviewed_four_raw():
+    execution_enabled(True)
+    owner_guard()
+    local_path = (ROOT / SEMANTIC_REVIEW_PATH).resolve()
+    independent_path = (ROOT / INDEPENDENT_REVIEW_PATH).resolve()
+    require(local_path.is_relative_to(ROOT) and independent_path.is_relative_to(ROOT), 'Review path escapes project')
+    require(sha(local_path) == SEMANTIC_REVIEW_SHA and sha(independent_path) == INDEPENDENT_REVIEW_SHA,
+            'Actual frozen review changed')
+    local, independent = read(local_path), read(independent_path)
+    observations = local.get('observations') or {}
+    require(local.get('review_status') == 'RAW_SEMANTICS_VALIDATED_NOT_ADMISSION' and
+            observations.get('native_semantics_and_pairing_checked') is True and
+            observations.get('resource_protocol_checked') is True and
+            local.get('standard_PASS_receipt_queue_written') is False,
+            'Actual local raw semantic review did not pass its recorded schema')
+    require(independent.get('status') == INDEPENDENT_STATUS and
+            independent.get('material_concerns') == [], 'Actual independent semantic review did not pass')
+    for review in (local, independent):
+        require((review.get('candidate_id'), review.get('code_commit'), review.get('goal_sha256')) ==
+                (CID, TESTED, GOAL), 'Review candidate/version/goal mismatch')
+    require(local.get('id') == EXP, 'Local review experiment mismatch')
+    raw_refs = independent.get('raw_results', [])
+    require(len(raw_refs) == 4, 'Independent review must bind all four original results')
+    hashes = {}
+    for mode, target in PAIRS:
+        path = TICK / 'cts_execution' / (mode + '_' + target + '_execution.json')
+        matches = [r for r in raw_refs if r.get('mode') == mode and r.get('target') == target]
+        require(len(matches) == 1, 'Missing/ambiguous independently reviewed pair')
+        item = matches[0]
+        require((ROOT / item['execution_path']).resolve() == path.resolve() and
+                sha(path) == item['execution_sha256'], 'Original independently reviewed raw artifact drift')
+        envelope = read(path)
+        require(envelope.get('certainty') == 'terminal' and envelope.get('returncode') == 0,
+                'A real original execution is not complete/rc0')
+        result = envelope.get('result') or {}
+        package = 'framework.model.Quard_model.model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort'
+        if target == 'candidate':
+            package += '_cts'
+        require(result.get('execution_completed') is True and
+                (result.get('candidate_id'), result.get('code_commit'), result.get('goal_sha256'),
+                 result.get('mode'), result.get('target'), result.get('model_package')) ==
+                (CID, TESTED, GOAL, mode, target, package), 'Raw result identity/completion mismatch')
+        require(item['result_sha256'] == envelope.get('result_sha256') and
+                item['request_id'] == envelope['identity']['request_id'], 'Original request/result proof mismatch')
+        hashes[mode + '_' + target] = sha(path)
+    manifest = read(TICK / 'cts_execution/native_manifest.json')
+    require(manifest['candidate_id'] == CID and manifest['code_commit'] == TESTED and
+            manifest['goal_sha256'] == GOAL and manifest['current_token'] == TOKEN,
+            'Actual manifest candidate/version/original token mismatch')
+    binding = read(TICK / 'cts_execution/execution_binding.json')
+    gpu = binding['physical_gpu']
+    require(type(gpu) is int and gpu in UUIDS and binding['gpu_uuid'] == UUIDS[gpu], 'Wrong actual selected0or1 binding/UUID')
+    require(binding['owner'] == EXPECTED_OWNER and manifest['physical_gpu'] == gpu and manifest['gpu_uuid'] == UUIDS[gpu] and
+            binding['native_manifest_sha256'] == sha(TICK / 'cts_execution/native_manifest.json'),
+            'Original fresh binding/GPU/manifest mismatch')
+    require(binding['stage'] == '/data/songcl/Project/Cluster_project/pipeline/cts_' + TOKEN[:8] + '_gpu' + str(gpu), 'Wrong selected-device stage')
+    require(manifest['candidate_config_sha256'] == 'a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a' and
+            manifest['source_preparation_sha256'] == 'bfab01a31a0fc7a0d679156d5e0e6fcfa987e56e5f3bb1bdf6bded9e2208f76e' and
+            manifest['diagnostic_files']['worker.py'] == '03329ec50fba63d67330342052ec34262f772aee6cc16d3d8d2978d58628c27c', 'Original CTS source/YAML/observer lineage mismatch')
+    checker = load_checker()
+    fresh = checker.review_directory(ROOT, TICK/'cts_execution')
+    require(fresh['review_status']==local['review_status'] and fresh['observations']==local['observations'], 'Current raw semantics differ from frozen local report')
+    require(not observations.get('existing_memory_condition_needs_separate_retention_decision'), 'Existing memory-retention condition needs a separate actual root decision')
+    return manifest, hashes, [ref(local_path), ref(independent_path)]
+
+
+def source_paths(manifest):
+    require(manifest['candidate_name'] == NAME and manifest['config'] == CONFIG, 'Wrong tested package/config')
+    names = {'__init__.py', 'backbone.py', 'dec.py', 'hier_postprocess.py', 'loss.py',
+             'middle_triad.py', 'network.py', 'sample_model.py'}
+    require(set(manifest['candidate_source_hashes']) == names, 'Expected exact eight independent sources')
+    paths = {'framework/model/Quard_model/' + NAME + '/' + n: h
+             for n, h in manifest['candidate_source_hashes'].items()}
+    paths[CONFIG] = manifest['candidate_config_sha256']
+    require(all(isinstance(h, str) and re.fullmatch(r'[0-9a-f]{64}', h) for h in paths.values()),
+            'Unknown tested source hash')
+    return paths
+
+
+UUIDS={0:'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c',1:'GPU-7f82edb9-f620-8045-caea-a75232265cd1'}
+
+def physical_gpu(value):
+    """Accept only explicit physical0or1 integer/string, never bool/coercion."""
+    if type(value) is int and value in (0,1):return value
+    if type(value) is str and value in ('0','1'):return int(value)
+    raise RuntimeError('Unknown or malformed physical GPU assignment; no bool/string coercion')
+
+
+def running_assignments():
+    running=read(ROOT/'pipeline/running.json')
+    require(type(running) is dict,'Malformed running registry')
+    assignments=[];seen=set();known={'M211-BTC','M212-BCR',EXP}
+    for server,gpus in running.items():
+        require(type(server) is str and type(gpus) is dict,'Malformed server/GPU running map')
+        for raw_gpu,eid in gpus.items():
+            require(server=='server-4','Unknown nonempty running server; reconcile first')
+            gpu=physical_gpu(raw_gpu)
+            require((server,gpu) not in seen and type(eid) is str and eid in known,'Unknown/duplicate/malformed active running assignment')
+            seen.add((server,gpu));assignments.append((server,gpu,eid))
+    require(len({eid for _,_,eid in assignments})==len(assignments),'Same experiment reserved on multiple cards')
+    return sorted(assignments)
+
+
+def protected_lifecycle(queue=None):
+    """Protect exact canonical crash/earlystop archives, pausedM206 and all nontarget rows."""
+    queue=read(ROOT/'pipeline/queue.json') if queue is None else queue
+    assignments=running_assignments()
+    expected={
+      'M213-BFC':('crashed','48fc302c3c02ffef0b241be3593c386b6b65a72e',219369,'b91b3ba11671451bb28f39dc3cc3f2c7'),
+      'M212-BCR':('done_earlystop','11a811618179ab1ddc0cee299194667413b7fdb9',1215422,'5d060afca23d43deb4ae63525c00ff3d')}
+    result={}
+    require(sha(TICK/'exact_terminal_archive_result.json')=='7b5dbb556499fa0c85b0c91686caa69ba890a8535a0445f5bc3a96d6ee1f3bdc','Canonical original archive proof changed')
+    require(sha(TICK/'exact_terminal_archive_review.json')=='c9e68e73ffb0c17e21a9059e7bfb157c811affb8c8d3fc850cb6be9d8cfb4cf8','Canonical archive independent review changed')
+    for eid,(state,commit,pid,archive_id) in expected.items():
+        rows=[x for ts in queue['gpu_queues'].values() for x in ts if x.get('id')==eid]
+        require(not rows and not any(x[2]==eid for x in assignments),'Archived original task must not be reintroduced/reserved')
+        p=ROOT/'pipeline/experiments'/(eid+'.json');e=read(p)
+        require((e.get('status'),e.get('code_commit'),e.get('pid'),e.get('archive_id'))==(state,commit,pid,archive_id),'Original canonical terminal identity changed')
+        require(sha(p)==PROTECTED_TERMINAL_HASHES[eid]['experiment_sha256'],'Original canonical terminal experiment changed')
+        rp=ROOT/'pipeline/admissions'/(eid+'.json');require(sha(rp)==PROTECTED_TERMINAL_HASHES[eid]['receipt_sha256'],'Original admitted receipt changed')
+        result[eid]={'experiment_sha256':sha(p),'receipt_sha256':sha(rp),'archive_id':archive_id,'state':state}
+    paused=[x for ts in queue['gpu_queues'].values() for x in ts if x.get('id')=='M206-CGCA']
+    require(len(paused)==1 and paused[0].get('dispatch_hold') and paused[0].get('resume_authorized') is False,'M206 user pause cannot be resumed')
+    require(not any(x[2]=='M206-CGCA' for x in assignments),'PausedM206 cannot reserve a GPU')
+    require(sha(ROOT/'pipeline/experiments/M206-CGCA.json')==PROTECTED_TERMINAL_HASHES['M206-CGCA']['experiment_sha256'],'PausedM206 experiment changed')
+    result['M206-CGCA']={'rows':copy.deepcopy(paused),'experiment_sha256':sha(ROOT/'pipeline/experiments/M206-CGCA.json')}
+    result['all_other_queue_rows']={server:[copy.deepcopy(t) for t in rows if t.get('id')!=EXP] for server,rows in queue['gpu_queues'].items()}
+    result['other_running_mappings']=[(server,str(gpu),eid) for server,gpu,eid in assignments if eid!=EXP]
+    require(not result['other_running_mappings'],'Unknown registered work must be reconciled before this CTS-only promotion')
+    return result
+
+PROTECTED_TERMINAL_HASHES = {'M213-BFC': {'experiment_sha256': '67452b2881fca53ff6289a870be80d04f09e842b02c9cb92510ec7ec7ffe61d5', 'receipt_sha256': '812454a819702e8f4d53080c1b479617d605f2175bf44a3422905688253ca01c'}, 'M212-BCR': {'experiment_sha256': '174a5c566b7783b86a331ee6e23e71026f6a66e46fcf376f32f5512e29d22260', 'receipt_sha256': 'b8532405ba05101355898016aeeb45e1776217bc95a64a2ae449c1ff02ef60ac'}, 'M206-CGCA': {'experiment_sha256': '9921211c288f9df842ecaf8a13d160825fd34809816a2c0550a41f9cacb9dc89'}}
+
+CHECKER_PATH=ROOT/'pipeline/diagnostic_bundles/tick_f86d1cfa/cts_execution_review_prepare/review_cts.py'
+CHECKER_SHA='101d66e4dd2a81753ba240122cce8100987c5057c3b18f322fdb03c25f559b28'
+def load_checker():
+    import importlib.util
+    require(sha(CHECKER_PATH)==CHECKER_SHA,'Frozen CTS reviewer changed')
+    spec=importlib.util.spec_from_file_location('current_actual_cts_reviewer',CHECKER_PATH)
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    return module
+
+def begin_phase(name,payload):
+    owner_guard();path=TICK/('cts_'+name+'_intent.json')
+    require(not path.exists(),'Existing durable phase intent requires read-only reconciliation; never rerun')
+    require(not (TICK/('cts_'+name+'_result.json')).exists(),'Existing phase result cannot be replayed')
+    record={'recorded_at':datetime.now(timezone.utc).isoformat(),'owner':EXPECTED_OWNER,'id':EXP,'code_commit':TESTED,'phase':name,'status':'INTENT_NO_RESULT_YET',**payload}
+    with path.open('x',encoding='utf-8') as stream:json.dump(record,stream,ensure_ascii=False,indent=2);stream.write('\n');stream.flush();os.fsync(stream.fileno())
+    return ref(path)
+
+def phase_result(name,result):
+    owner_guard();path=TICK/('cts_'+name+'_result.json')
+    with path.open('x',encoding='utf-8') as stream:json.dump(result,stream,ensure_ascii=False,indent=2);stream.write('\n');stream.flush();os.fsync(stream.fileno())
+    return ref(path)
+
+def require_bec_runtime_settled(explicit_root_declaration):
+    """Operational settlement only; BEC returncode/coverage/efficacy is NOT a CTS gate."""
+    require(explicit_root_declaration,'Root must explicitly settle this round BEC native plan before shared-runtime promotion')
+    d=TICK/'bec_execution';require(d.is_dir(),'Current BEC execution directory missing; do not guess current operational phase')
+    b=read(d/'execution_binding.json');require(b['owner']==EXPECTED_OWNER and b['code_commit']=='9b6782f44ca7f2c8ac35baea01dfd070314b5701' and b['runtime_code_commit']==BASE,'BEC original runtime/version/owner differs')
+    observations=[]
+    for mode,target in PAIRS:
+        q=d/(mode+'_'+target+'_request.json')
+        if not q.exists():continue
+        request=read(q);p=d/(mode+'_'+target+'_execution.json')
+        require(p.exists(),'BEC original request has no terminal envelope; read-only reconcile first')
+        e=read(p);expected={k:request[k] for k in ('project','candidate_id','code_commit','stage','token','request_id','operation','physical_gpu','gpu_uuid','native_manifest_sha256')}
+        require(e.get('identity')==expected and e.get('certainty')=='terminal' and type(e.get('returncode')) is int,'BEC request remains uncertain or does not bind original terminal process')
+        observations.append({'mode':mode,'target':target,'request':ref(q),'envelope':ref(p),'returncode':e['returncode'],'scientific_result_not_a_CTS_gate':True})
+    require(observations,'No actual BEC request identities to settle')
+    return {'root_declared_planned_round_finished_or_explicitly_concluded':True,'existing_requests_terminal':observations,'BEC_unstarted_remainder_not_implicitly_executed':True}

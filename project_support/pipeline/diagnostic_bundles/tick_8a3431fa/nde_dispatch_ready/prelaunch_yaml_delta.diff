@@ -1,0 +1,21 @@
+--- pipeline/diagnostic_bundles/tick_8a3431fa/nde_dispatch_active/dispatch_nde_once.py
++++ pipeline/diagnostic_bundles/tick_8a3431fa/nde_dispatch_ready/dispatch_nde_once.py
+@@ -156,7 +156,9 @@
+ for relative,expected in P["files"].items():
+  assert hashlib.sha256((Path(P["stage"])/relative).read_bytes()).hexdigest()==expected
+ assert not Path(P["marker"]).exists()
+-assert hashlib.sha256((root/P["config"]).read_bytes()).hexdigest()==P["config_sha256"]
++source_config=subprocess.check_output(["git","--no-optional-locks","-C",str(root),"show",P["source"]+":"+P["config"]])
++assert hashlib.sha256(source_config).hexdigest()==P["source_config_sha256"]
++assert hashlib.sha256((root/P["config"]).read_bytes()).hexdigest() in (P["source_config_sha256"],P["config_sha256"])
+ row=subprocess.check_output(["nvidia-smi","-i","0","--query-gpu=index,uuid,memory.used,memory.total,utilization.gpu","--format=csv,noheader,nounits"],text=True).strip()
+ v=[s.strip() for s in row.split(",")]
+ assert v[:2]==["0",P["uuid"]]
+@@ -187,6 +189,7 @@
+                       "marker": production["binding"]["one_shot_marker"],
+                       "config": task["config"],
+                       "config_sha256": production["binding"]["runtime_config_sha256"],
++                      "source_config_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+                       "locks": production["binding"]["lock_files"]}
+             observation = json.loads(ssh(server["host"], server["user"],
+                 "/usr/bin/python3 -B -c " + shlex.quote("P=" + repr(params) + "\n" + program)))

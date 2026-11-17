@@ -1,0 +1,11 @@
+--- frozen_v1/source_resolver.py
++++ fresh_v2/source_resolver.py
+@@ -54,7 +54,7 @@
+     def load_servers(project):
+         values = original_servers(project)
+         if Path(project).resolve() == ROOT.resolve() and production_shim is not None:
+-            assert production_shim == "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178/conda_source.sh"
++            assert production_shim == "/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178_v2/conda_source.sh"
+             values = {name: dict(value) for name,value in values.items()}
+             server = values["server-4"]
+             assert server["host"] == "192.168.1.115" and server["expected_hostname"] == "dl04-MS-7E06"

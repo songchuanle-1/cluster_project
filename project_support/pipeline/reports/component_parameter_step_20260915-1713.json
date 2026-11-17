@@ -1,0 +1,18 @@
+{
+  "candidate": "boundary-component-conditioning",
+  "status": "validation_failed_pairing_control",
+  "date": "2026-09-15T17:13:00+08:00",
+  "execution": "server-6 GPU7 FP32 fixed TRAIN batches",
+  "attempts": [
+    {"error": "numpy.ndarray contacts lack detach", "repair": "torch.as_tensor; rerun"},
+    {"error": "bitwise pre-step logits mismatch after model restore, empty AdamW and seed1999", "mismatched": 51268, "elements": 56064, "max_absolute_difference": 0.00005435943603515625, "max_relative_difference": 0.0037664808332920074}
+  ],
+  "completed": "Batch0 global full-loss finite parameter backward, native AdamW parameter groups, clipping and parameter-change assertions passed; tensor saved. Component branch stopped before backward.",
+  "interpretation": "Forward reproducibility control failed; CUDA nondeterminism possible but not established. No paired efficacy result or scientific rejection.",
+  "next_action": "Compute both complete-loss parameter gradients from ONE shared forward graph; save CPU gradients, restore same parameters/buffers and empty native AdamW for updates. Bound post-step forward noise with identical-gradient repeated-update control. Then FP32/AMP comparison and source novelty gates; no enqueue.",
+  "evidence": [
+    {"path": "pipeline/reports/component_parameter_step_20260915-1715_batch_0_global.pth", "sha256": "1cd75467115f4030a3d3d53d839ae276321e67776902fb8c82e4c319304a3c99"},
+    {"path": "scripts/component_parameter_step_20260915.py", "sha256": "dc7dc4dac4f8b1a14bb22d3c3a20fa9b98eb326f35881a18f9d3e01cd2c002bb"}
+  ],
+  "scope": "Failed diagnostic, not production training. 1715 suffix is run label, not completion time. AMP, paired update, literature and admission incomplete."
+}

@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-11-07T11:11:52.992633+00:00",
+  "review_kind": "independent_local_resource_consistency",
+  "review_outcome": "resource_hold_supported",
+  "blocker_kind": "resource",
+  "owner_provenance": {
+    "token": "195e468ab222437d9a742dcc2f3d973f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T11:09:16.891482+00:00",
+    "deadline_at": "2026-11-07T12:09:16.891482+00:00",
+    "context_sha256": "814fca239167c1cdefe925d1d47468049ab1d21148eb69f30042ca5bc8619902",
+    "pending_sha256": "0ee52baadc51998b0665e2f718dc7e1950401ad68843a9b55e86b5f2b993b217"
+  },
+  "files": {
+    "bundle_owner": {
+      "path": "pipeline/diagnostic_bundles/tick_195e468a/owner.json",
+      "sha256": "8e02bfe62fadd24f33d9ea84149694309ca803c923c7115c2d2de86656eef23d"
+    },
+    "resource": {
+      "path": "pipeline/diagnostic_bundles/tick_195e468a/resources_initial.json",
+      "sha256": "8b077c73828f7b8f6129713faba95d7d7cc0251d65192b66f00c39f929aede6c"
+    },
+    "foreground_owner": {
+      "path": "pipeline/headless/.foreground.lockdir/owner.json",
+      "sha256": "934735398960c44846e429cccb128096ee6226ce8c7bd75d34cc9c0845801706"
+    },
+    "execution_mode": {
+      "path": "pipeline/execution_mode.json",
+      "sha256": "9eee762e94931ad0788895edd5b80641919069583d5d4e96681260300f85fa51"
+    },
+    "servers": {
+      "path": "SERVERS.yaml",
+      "sha256": "1f1ba94e90c6f44e2e9cb0e6f1e746568e38cc1e92f398ee49efc5e8c40232bf"
+    }
+  },
+  "checks": {
+    "six_field_three_way_agreement": {
+      "token": true,
+      "thread_id": true,
+      "generated_at": true,
+      "deadline_at": true,
+      "context_sha256": true,
+      "pending_sha256": true
+    },
+    "expected_lease_token": true,
+    "expected_root_thread": true,
+    "foreground_execution_owner_agreement": true,
+    "ordered_timestamps": true,
+    "expected_deadline": true,
+    "one_hour_budget": true,
+    "observation_success": true,
+    "hostname_identity": true,
+    "gpu_identity": true,
+    "runtime_root_identity": true,
+    "runtime_source_identity": true,
+    "policy_overlay_authorized": true,
+    "policy_dispatch_enabled": true,
+    "original_memory_budget": true,
+    "single_project_task_policy": true,
+    "memory_accounting": true,
+    "insufficient_free_memory": true,
+    "no_project_trainers": true,
+    "original_three_locks_available": true,
+    "external_pid_expected": true,
+    "observation_reports_no_signals_or_gpu_launch": true,
+    "overlay_usability_correctly_false": true,
+    "no_exclusive_performance_claim": true
+  },
+  "observation": {
+    "observed_at": "2026-11-07T11:10:51.004962+00:00",
+    "hostname": "dl04-MS-7E06",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_psc_20261106",
+    "runtime_source": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "memory_used_mib": 15801,
+    "memory_total_mib": 32607,
+    "memory_free_mib": 16806,
+    "utilization_percent": 92,
+    "external_or_other_contexts": [
+      {
+        "pid": 669505,
+        "used_memory_mib": "15694"
+      }
+    ],
+    "project_trainers": [],
+    "locks": [
+      {
+        "kind": "training",
+        "inode": 92537152,
+        "available": true
+      },
+      {
+        "kind": "diagnostic",
+        "inode": 92537153,
+        "available": true
+      },
+      {
+        "kind": "exclusive",
+        "inode": 92537154,
+        "available": true
+      }
+    ],
+    "usable_under_authorized_overlay": false,
+    "exclusive_performance_claimed": false,
+    "signals_sent": false,
+    "training_or_GPU_diagnostic_launched": false
+  },
+  "server4_policy": {
+    "host": "192.168.1.115",
+    "user": "songcl",
+    "allowed_gpus": "[0]",
+    "max_tasks_per_gpu": "1",
+    "dispatch_enabled": "true",
+    "allow_external_overlay": "true",
+    "task_memory_mb": "20000",
+    "registered_pid_probe": "true",
+    "expected_hostname": "dl04-MS-7E06",
+    "expected_gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "remote_code_root": "/data/songcl/Project/Cluster_project/Cluster_psc_20261106"
+  },
+  "time_budget_seconds": 3600.0,
+  "memory_required_mib": 20000,
+  "memory_shortfall_mib": 3194,
+  "reason": "Free GPU memory is below the unchanged 20000 MiB budget. External overlay is authorized; context presence and utilization are not independent blockers.",
+  "scope": {
+    "read_only_local_inputs": true,
+    "ssh_performed": false,
+    "gpu_operations_performed": false,
+    "torch_imported": false,
+    "software_suite_rerun": false,
+    "history_inspected": false,
+    "work_before_printed": false,
+    "only_created_file": "pipeline/diagnostic_bundles/tick_195e468a/resource_independent_review.json"
+  },
+  "authorization": {
+    "new_operational_grant": false,
+    "native_pass": false,
+    "model_pass": false,
+    "resource_pass": false
+  }
+}

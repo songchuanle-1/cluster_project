@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-10-22T00:12:37.560702+00:00",
+  "reviewer": "/root/pce_audit",
+  "status": "STATIC_BOUNDARY_REVIEW_ONLY",
+  "scope": "Pure-data result/admission boundary; no SSH, native execution, torch import, queue or implementation modification",
+  "adapter_sha256": "8f960efdbb32cd4ba5758780cfb15ccec45d4c60de52ebaf950372dbc8e6ec15",
+  "formatter_implemented": false,
+  "standard_native_smoke_generated": false,
+  "admission_or_queue_mutation_paths_observed": false,
+  "admission_ready_from_adapter_alone": false,
+  "blocking_issue_for_execution_adapter_preparation": false,
+  "observed_result_handling": [
+    "run saves exact request and raw execution response only",
+    "response identity must match exact request",
+    "success return requires terminal certainty, returncode zero, raw execution_completed exactly True",
+    "no missing native observation defaults to True",
+    "prior completion checks prevent continuing after failed or uncertain requests; they are not four-result semantic validation"
+  ],
+  "remaining_actual_validation": [
+    "Exact candidate identity, config, tested 9e543af commit, goal and source/config hashes against fresh manifest",
+    "Two real finite native losses, two native loss/backward/optimizer steps, exercised HRC path, observer and restoration assertions",
+    "Candidate/champion same two TRAIN batch fingerprints and initialization",
+    "Resource input, original handler hashes, bs1/warmup20/repeat100, all 100 finite timings and median/P90 recomputation",
+    "Standard FLOPs budget with unsupported operations disclosed; predict peaks distinct from observer/probe-inclusive smoke peaks; pure TRAIN peak remains unknown",
+    "Bind all four raw results, execution responses, fresh manifest and tested worker before generating standard smoke/resource summaries",
+    "Separate owner-reviewed admission and queue mutation only after original required gates are actually satisfied"
+  ],
+  "actual_native_results_reviewed": false,
+  "scientific_effect_efficacy": "UNKNOWN; no benefit inferred from preparation or finite execution"
+}

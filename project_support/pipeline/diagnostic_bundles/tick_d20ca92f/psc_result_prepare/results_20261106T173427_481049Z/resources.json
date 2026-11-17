@@ -1,0 +1,430 @@
+{
+  "id": "M231-PSC",
+  "candidate_id": "hierarchy-native-position-feature-cross-scatter-composition",
+  "config": "configs/Quard/ctf_hcg_csort_psc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psc.yaml",
+  "code_commit": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "recorded_at": "2026-11-06T17:34:27.510959+00:00",
+  "schema_version": 1,
+  "experiment_id": "M231-PSC",
+  "passed": true,
+  "decision": "ORIGINAL_RESOURCE_GATE_PASSED_ACTUAL_MATCHED_SAME_OWNER_FIXTURE",
+  "champion_actual": {
+    "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_champion_execution.json",
+    "sha256": "2d45a0b5f2fb33663380065d05e8b40098a3783d88b4aad4904785b3a199a347"
+  },
+  "candidate_actual": {
+    "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_candidate_execution.json",
+    "sha256": "2630c5d2c52590b0f77c117b99070b257a897cfbde3248652a3262bc9a348e3b"
+  },
+  "pairing": {
+    "input_sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+    "scan_ids": [
+      "scene0011_00"
+    ],
+    "ann_ids": [
+      0
+    ],
+    "batch_size": 1,
+    "lang_num_max": 1,
+    "warmup": 20,
+    "repeat": 100
+  },
+  "owner_provenance": {
+    "owner": {
+      "token": "d20ca92f1b654e24ba9cf29f634307b7",
+      "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+      "generated_at": "2026-11-06T17:08:14.169854+00:00",
+      "deadline_at": "2026-11-06T18:08:14.169854+00:00",
+      "context_sha256": "49d043861d2ca6b8e27b5629f68864d3bbb9cd7858578abfb7f8b6f698788fab",
+      "pending_sha256": "9e5ab349ce9c857473b55d81f86179f0b489ba4148a1bec95cdb1eb49a8ba0d8"
+    },
+    "execution_directory": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution",
+    "reuse": "Fresh same-current-owner resource pair required"
+  },
+  "runtime_code_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+  "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "measured": {
+    "flops_g": {
+      "champion": 9.762532428,
+      "candidate": 9.827019852
+    },
+    "median_ms": {
+      "champion": 35.91423109173775,
+      "candidate": 37.66247443854809
+    },
+    "p90_ms": {
+      "champion": 36.629052250646055,
+      "candidate": 81.02534853387624
+    },
+    "peak_allocated_bytes": {
+      "champion": 936763392,
+      "candidate": 932597248
+    },
+    "peak_reserved_bytes": {
+      "champion": 1191182336,
+      "candidate": 1184890880
+    },
+    "parameters": {
+      "champion": 157484090,
+      "candidate": 156628794
+    }
+  },
+  "delta": {
+    "flops_g": {
+      "absolute": 0.0644874239999993,
+      "percent": 0.6605604076155736
+    },
+    "median_ms": {
+      "absolute": 1.7482433468103409,
+      "percent": 4.8678289738257385
+    },
+    "p90_ms": {
+      "absolute": 44.396296283230186,
+      "percent": 121.20514606666389
+    },
+    "peak_allocated_bytes": {
+      "absolute": -4166144,
+      "percent": -0.4447381308427589
+    },
+    "peak_reserved_bytes": {
+      "absolute": -6291456,
+      "percent": -0.5281690140845119
+    },
+    "parameters": {
+      "absolute": -855296,
+      "percent": -0.543099941079761
+    }
+  },
+  "full_profile": {
+    "champion": {
+      "flops": 9762532428.0,
+      "flops_g": 9.762532428,
+      "within10G": true,
+      "fvcore_version": "0.1.5.post20221221",
+      "profiler_file_sha256": {
+        "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+        "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+        "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+      },
+      "by_operator": {
+        "mm": 337393664.0,
+        "batch_norm": 10543552.0,
+        "layer_norm": 27256320.0,
+        "linear": 8362490368.0,
+        "matmul": 9750528.0,
+        "bmm": 960490496.0,
+        "einsum": 54607500.0
+      },
+      "unsupported_ops": {
+        "prim::PythonOp.Voxelization": 1,
+        "aten::add": 110,
+        "aten::zero_": 1,
+        "aten::scatter_add_": 14,
+        "aten::lt": 7,
+        "aten::div_": 7,
+        "aten::repeat": 10,
+        "prim::PythonOp.FurthestPointSampling": 4,
+        "aten::rsub": 1,
+        "aten::mul": 152,
+        "aten::ne": 1,
+        "aten::cumsum": 1,
+        "aten::embedding": 3,
+        "aten::add_": 31,
+        "aten::div": 89,
+        "aten::softmax": 52,
+        "aten::gelu": 27,
+        "aten::fill_": 1,
+        "aten::cdist": 3,
+        "aten::min": 3,
+        "aten::sort": 3,
+        "aten::sub": 6,
+        "aten::pow": 1,
+        "aten::sum": 9,
+        "aten::exp": 1,
+        "aten::sigmoid": 5,
+        "aten::topk": 1,
+        "aten::masked_fill_": 30,
+        "aten::mean": 1,
+        "aten::expand_as": 1,
+        "aten::argmax": 1
+      }
+    },
+    "candidate": {
+      "flops": 9827019852.0,
+      "flops_g": 9.827019852,
+      "within10G": true,
+      "fvcore_version": "0.1.5.post20221221",
+      "profiler_file_sha256": {
+        "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+        "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+        "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+      },
+      "by_operator": {
+        "mm": 337393664.0,
+        "batch_norm": 10543552.0,
+        "layer_norm": 27256320.0,
+        "linear": 8426977792.0,
+        "matmul": 9750528.0,
+        "bmm": 960490496.0,
+        "einsum": 54607500.0
+      },
+      "unsupported_ops": {
+        "prim::PythonOp.Voxelization": 1,
+        "aten::add": 111,
+        "aten::zero_": 1,
+        "aten::scatter_add_": 14,
+        "aten::lt": 7,
+        "aten::div_": 7,
+        "aten::repeat": 10,
+        "prim::PythonOp.FurthestPointSampling": 4,
+        "aten::rsub": 1,
+        "aten::mul": 155,
+        "aten::ne": 1,
+        "aten::cumsum": 1,
+        "aten::embedding": 3,
+        "aten::add_": 31,
+        "aten::div": 100,
+        "aten::softmax": 52,
+        "aten::gelu": 25,
+        "aten::fill_": 1,
+        "aten::cdist": 3,
+        "aten::min": 3,
+        "aten::sort": 3,
+        "aten::sub": 12,
+        "aten::pow": 1,
+        "aten::sum": 9,
+        "aten::exp": 1,
+        "aten::sigmoid": 5,
+        "aten::topk": 1,
+        "aten::masked_fill_": 30,
+        "aten::resolve_conj": 3,
+        "aten::resolve_neg": 3,
+        "aten::index_add": 22,
+        "aten::new_ones": 11,
+        "aten::clamp_min": 11,
+        "aten::index_select": 12,
+        "aten::index_copy": 3,
+        "aten::mean": 1,
+        "aten::expand_as": 1,
+        "aten::argmax": 1
+      }
+    }
+  },
+  "all100_times_each_and_statistics_recomputed": true,
+  "original_gates": {
+    "whole_model_counted_FLOPs_at_most10G": true,
+    "peak_prediction_allocated_memory_increase_above15percent": false,
+    "conditional_retention_gain_requirement_triggered": false,
+    "trained_mIoU_gain_measured": false,
+    "new_latency_cutoff_added": false
+  },
+  "resource_boundary_observations": {
+    "champion": {
+      "before": {
+        "observed_at": "2026-11-06T17:28:51.204362+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 98, 32607, 0",
+        "contexts": "",
+        "external_contexts": [],
+        "memory_used_mib": 98,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 32509,
+        "utilization_percent": 0,
+        "idle": true,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 0,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "after": {
+        "observed_at": "2026-11-06T17:29:11.196159+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1837, 32607, 59",
+        "contexts": "4181476, 1730",
+        "external_contexts": [],
+        "memory_used_mib": 1837,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 30770,
+        "utilization_percent": 59,
+        "idle": false,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 3,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+      "exclusive_measurement_claimed": false
+    },
+    "candidate": {
+      "before": {
+        "observed_at": "2026-11-06T17:24:10.679529+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 98, 32607, 0",
+        "contexts": "",
+        "external_contexts": [],
+        "memory_used_mib": 98,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 32509,
+        "utilization_percent": 0,
+        "idle": true,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 0,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "after": {
+        "observed_at": "2026-11-06T17:24:31.046279+00:00",
+        "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1831, 32607, 26",
+        "contexts": "4159608, 1724",
+        "external_contexts": [],
+        "memory_used_mib": 1831,
+        "memory_total_mib": 32607,
+        "memory_free_mib": 30776,
+        "utilization_percent": 26,
+        "idle": false,
+        "usable_under_current_overlay_policy": true,
+        "resource_authorization": {
+          "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+          "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+        },
+        "resource_memory_policy": {
+          "allow_external_overlay": true,
+          "minimum_free_mib_before_launch": 20000,
+          "max_project_tasks_per_gpu": 1,
+          "cooperative_lock_kinds": [
+            "training",
+            "diagnostic",
+            "exclusive"
+          ],
+          "external_contexts": "record_preserve_no_signals",
+          "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+        },
+        "cooperative_project_locks_held": 3,
+        "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+        "exclusive_measurement_claimed": false
+      },
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+      "exclusive_measurement_claimed": false
+    }
+  },
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/smoke_champion_execution.json",
+      "sha256": "69b53092a479612040648778ce43157c9ced264618e02ce6f8ad3ae6e8443a42"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/smoke_candidate_execution.json",
+      "sha256": "26c3c9fdab9b4a0500ad287d530ec9ace3c412c9650d15898c5df627ca21cbfe"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_champion_execution.json",
+      "sha256": "2d45a0b5f2fb33663380065d05e8b40098a3783d88b4aad4904785b3a199a347"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/resources_candidate_execution.json",
+      "sha256": "2630c5d2c52590b0f77c117b99070b257a897cfbde3248652a3262bc9a348e3b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/native_manifest.json",
+      "sha256": "b346033a4d10266f40cf47ac4e4311593792ed1fb167cf802c4dd122fe7eef85"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/execution_binding.json",
+      "sha256": "09a194a73fe95b020422f119937783ab6bc3ff09ced8b26489a8e2bcbd062c9b"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_execution/execution_lease.json",
+      "sha256": "bb3b0b920c755fc24e2d8acd29ab5407c16a285852e10c0fcc55e3aba79c00ed"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/native_manifest.json",
+      "sha256": "c4cde3d1d58ab1112cd7ba17415e8c4abb2d716e62e006b5c37228eadcec9718"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/execution_binding.json",
+      "sha256": "c0c8b9e7c91c6f19363a4a1d4b4a76f4ed6acb1fae7015edb6d1c4c7bb91ef31"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_execution/execution_lease.json",
+      "sha256": "424b4bdffe113590d904633cb1b9d6f6bf2c65a956f1e90b50bbb6afa7082f68"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/psc_partial_actual_independent_review.json",
+      "sha256": "371d6354e24c8db8806b518e279b293341f36ee457fcdf8d92b4b9400088168c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_12e364dc/psc_compatible_source/compatible_source_version.json",
+      "sha256": "9c6308fe6d166216123ef23e871eeacec5e8e3b2b3b9c02fb448364a44d13083"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_12e364dc/psc_compatible_source_independent_review.json",
+      "sha256": "7098b020bc414f34eab9013f6f3b94a72ad0d842249ceff7c30a1310cd2bf6d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_0f3c54ec/reserve_candidate_prepare/native_protocol.md",
+      "sha256": "98b12c011260550efd1a87a10dc834d80468ee3523cb3301ddb18c2a4671976a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_current_activation/native/worker.py",
+      "sha256": "530a5230021fad8d880c37a34c18973b4c556e7dc1536b6c4faaffdd6d6f93d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_d20ca92f/psc_current_activation/native/native_runtime.py",
+      "sha256": "2468966c25ef12b0c1d06907b39c9f341daa07e2771c026c8920899f8acb72a7"
+    }
+  ],
+  "limitations": [
+    "Sequential authorized-overlay measurements; not exclusive timing or a causal speed claim.",
+    "Complete original profiler unsupported-op counts are retained; counted FLOPs use the original standard.",
+    "Full optimizer TRAIN peak and no-cluster baseline delta remain UNKNOWN.",
+    "Memory increase is below15%; no trained +0.003 mIoU condition is triggered. Efficacy/novelty remain UNKNOWN."
+  ]
+}

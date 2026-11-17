@@ -1,0 +1,82 @@
+{
+  "owner": {
+    "token": "eb84540382834ffd88f5a83a0b797ee3",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T15:16:05.075512+00:00",
+    "deadline_at": "2026-11-09T16:16:05.075512+00:00",
+    "context_sha256": "5fc4b32a051066c9ae26d4ae02d77e48175687907a4501b0279a708b16270308",
+    "pending_sha256": "801708609a3df72ccd311cd45604bf534a09998c6cdb9cc1795244021d01238f"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "recorded_at": "2026-11-09T16:10:28.019096+00:00",
+  "passed": true,
+  "material_concerns": [],
+  "review_scope": "ACTUAL_RECORD_INTEGRITY_AND_LIMITED_INTERPRETATION_ONLY_NOT_MATRIX_SUCCESS",
+  "actual_sha256": "d8a5b0d97479b20d31c58015a1cbd58023187294b8299436108be68f5f0186bc",
+  "intent_sha256": "af2502b0435d5420fac708b7b3e21bd80429cba92573e3878c6ff7b82d03f94f",
+  "frozen_sha256": "1591e114af99c5f23133ae6211c111af5b7c10fb46879409d0358172e7b0188e",
+  "source_review_sha256": "0e6138a8f905fc13eff01b67b4d72797fa81cf3b9df76f76246dac9c4797da34",
+  "classification": "PARTIAL_FRESH_CPU_PASS_FORK_HARNESS_PORTABILITY_FAILURE",
+  "transport_terminal_rc": 0,
+  "fresh_native_calls_passed": 32,
+  "fresh_cells": [
+    {
+      "case": "unique",
+      "pid": 1257237,
+      "start_ticks": "185634104",
+      "native_calls": 8,
+      "valid_output_digest": "c1f523364f22846bb6a30e46c79b67d37162eefa99556c19725501d1bb967d8e",
+      "passed": true
+    },
+    {
+      "case": "balanced",
+      "pid": 1257396,
+      "start_ticks": "185634218",
+      "native_calls": 8,
+      "valid_output_digest": "9f48508c51fb0ffe92d64b9f6088750fe5a6822f9a5e8c5ed4496af4d40b7342",
+      "passed": true
+    },
+    {
+      "case": "mixed",
+      "pid": 1257483,
+      "start_ticks": "185634303",
+      "native_calls": 8,
+      "valid_output_digest": "08614bda8ed4b8c4c38d2dfec1abb69deb22b2e56ef7bf30eebc76a55afa0d02",
+      "passed": true
+    },
+    {
+      "case": "asymmetric",
+      "pid": 1257678,
+      "start_ticks": "185634407",
+      "native_calls": 8,
+      "valid_output_digest": "b421102b79c79f4aa27f2f33901f3fd48267533ec45cc031f96e65360bf543e7",
+      "passed": true
+    }
+  ],
+  "fork_carrier": {
+    "pid": 1257734,
+    "start_ticks": "185634488",
+    "certainty": "terminal",
+    "returncode": 1,
+    "error_type": "AttributeError",
+    "error": "module 'os' has no attribute 'memfd_create'",
+    "failure_site": "cell_program.py.txt:159 before os.fork at line162",
+    "fork_children_created": 0,
+    "fork_native_calls": 0
+  },
+  "matrix_complete_with_equal_outputs": false,
+  "source_and_binary_unchanged_after": true,
+  "interpretation": [
+    "Four exact valid synthetic CPU contracts completed eight native calls each with coverage, coordinates, map/count/shape/dtype and repeat determinism invariants passing; CUDA stayed uninitialized.",
+    "Carrier imported the CPU modules, then failed before fork because project Python3.10 lacks os.memfd_create. This is a harness portability failure; there is no fork-context operator outcome.",
+    "Outer transport success is distinct from matrix completeness. Comparisons are empty; all-context equality was not established. Tick implementation_test may be failed only with harness scope, not as model/operator falsification.",
+    "Original worker crash not reproduced and rootcause remainsUNKNOWN. No training restart, GPU/CUDA context, production packet, native clearance or cause-specific repair follows."
+  ],
+  "limits": [
+    "Synthetic CPU inputs do not reproduce CUDA-initialized parent, actual failed data/augmentation/tokenizer, persistent-worker history or DataLoader torch.set_num_threads(1).",
+    "Selected source/binary after hashes passed; gitHEAD is only recorded before import."
+  ],
+  "reviewer_actions": "LOCAL_JSON_AND_SOURCE_REVIEW_ONLY_NO_SSH_NATIVE_TORCH_GPU_EXECUTION",
+  "v2_status": "NOT_RUN_NO_SOURCE_REVIEW_REQUEST_AFTER_ROOT_CLOSE_PARTIAL"
+}

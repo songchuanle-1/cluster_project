@@ -1,0 +1,132 @@
+{
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "passed": true,
+  "observed_at": "2026-10-20T21:14:39.633707+00:00",
+  "input_sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+  "GPU": "server4physicalGPU1 UUID7f82edb9, sameGPU matched processes; M205 training simultaneously on separateGPU0",
+  "batch_size": 1,
+  "warmup": 20,
+  "repeat": 100,
+  "champion": {
+    "parameters": 157484090,
+    "median_ms": 86.69445100531448,
+    "p90_ms": 99.89967380533926,
+    "peak_allocated_bytes": 936763392,
+    "peak_reserved_bytes": 1191182336,
+    "flops_g": 9.762532428,
+    "unsupported_ops": {
+      "prim::PythonOp.Voxelization": 1,
+      "aten::add": 110,
+      "aten::zero_": 1,
+      "aten::scatter_add_": 14,
+      "aten::lt": 7,
+      "aten::div_": 7,
+      "aten::repeat": 10,
+      "prim::PythonOp.FurthestPointSampling": 4,
+      "aten::rsub": 1,
+      "aten::mul": 152,
+      "aten::ne": 1,
+      "aten::cumsum": 1,
+      "aten::embedding": 3,
+      "aten::add_": 31,
+      "aten::div": 89,
+      "aten::softmax": 52,
+      "aten::gelu": 27,
+      "aten::fill_": 1,
+      "aten::cdist": 3,
+      "aten::min": 3,
+      "aten::sort": 3,
+      "aten::sub": 6,
+      "aten::pow": 1,
+      "aten::sum": 9,
+      "aten::exp": 1,
+      "aten::sigmoid": 5,
+      "aten::topk": 1,
+      "aten::masked_fill_": 30,
+      "aten::mean": 1,
+      "aten::expand_as": 1,
+      "aten::argmax": 1
+    }
+  },
+  "candidate": {
+    "parameters": 157484090,
+    "median_ms": 88.50282499042805,
+    "p90_ms": 100.29806139937136,
+    "peak_allocated_bytes": 936763392,
+    "peak_reserved_bytes": 1191182336,
+    "flops_g": 9.764703308,
+    "unsupported_ops": {
+      "prim::PythonOp.Voxelization": 1,
+      "aten::add": 110,
+      "aten::zero_": 1,
+      "aten::scatter_add_": 14,
+      "aten::lt": 7,
+      "aten::div_": 7,
+      "aten::repeat": 10,
+      "prim::PythonOp.FurthestPointSampling": 4,
+      "aten::rsub": 1,
+      "aten::mul": 152,
+      "aten::ne": 1,
+      "aten::cumsum": 1,
+      "aten::embedding": 3,
+      "aten::add_": 31,
+      "aten::div": 90,
+      "aten::softmax": 53,
+      "aten::gelu": 27,
+      "aten::fill_": 1,
+      "aten::cdist": 3,
+      "aten::min": 3,
+      "aten::sort": 3,
+      "aten::sub": 7,
+      "aten::pow": 1,
+      "aten::sum": 9,
+      "aten::exp": 1,
+      "aten::sigmoid": 5,
+      "aten::topk": 1,
+      "aten::masked_fill_": 30,
+      "aten::numel": 2,
+      "aten::_unique2": 1,
+      "aten::mean": 1,
+      "aten::expand_as": 1,
+      "aten::argmax": 1
+    }
+  },
+  "latency_median_ratio": 1.0208591664650224,
+  "latency_p90_ratio": 1.0039878768253876,
+  "inference_peak_allocated_ratio": 1.0,
+  "native_training_two_step_memory": {
+    "matched_actual_batch_sha256": [
+      "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c"
+    ],
+    "same_batches": true,
+    "champion_peak_allocated_bytes": 7418908672,
+    "candidate_peak_allocated_bytes": 7421422080,
+    "ratio": 1.0003387840599098,
+    "scope": "Two native train optimizer steps, not a whole-training worst-case proof. Candidate includes monitoring hooks."
+  },
+  "counter": "Original fvcore handlers unchanged; unsupported operators listed, not assumed free. Full repeated native timings include the operator.",
+  "limitations": "M205 onGPU0 causes shared-host contention; absolute timings not directly comparable to prior idle-host MDC timings. No validation accuracy selection or efficacy claim.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/resources_champion_result.json",
+      "sha256": "e09663a0276dec667143f9411cd885d2d19817763c8c1dfc0ffe72f9473ee75c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/resources_candidate_result.json",
+      "sha256": "bdbcb38f3f51e99f80bc14090c6ea34cb4853d7532ca55f47a3b8003e181f03d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_baseline_native_retry/smoke_champion_result.json",
+      "sha256": "ea6803df5bd8028d2c984bd8444dd92a034d29cba7658fe2e5783c6ae34a30cc"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/smoke_candidate_result.json",
+      "sha256": "d2fe096bf2e353006f71b46e4fa595dfc743a45ac764750bd2ea9d4e106df6c2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/native_manifest.json",
+      "sha256": "454a097734919bf8bc3c4bf0426092300aea53cef9add9df06718b1abe2502b6"
+    }
+  ]
+}

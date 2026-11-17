@@ -1,0 +1,71 @@
+
+from pathlib import Path
+from datetime import datetime,timezone
+import base64,hashlib,json,os,socket,stat,subprocess,sys
+assert socket.gethostname()=='dl04-MS-7E06' and os.getuid()==os.geteuid()==1001
+packet=json.load(sys.stdin)
+stage=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prepare_c1fe2178_v2')
+assert packet['stage']==str(stage)
+owner=packet['owner']
+assert owner=={'token': 'c1fe217800894083b65baac45f79aa83', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-14T01:52:47.538159+00:00', 'deadline_at': '2026-11-14T02:52:47.538159+00:00', 'context_sha256': 'e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4', 'pending_sha256': '3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6'}
+assert owner['token']=='c1fe217800894083b65baac45f79aa83' and owner['thread_id']=='01a159c5-29ab-7a22-ba7f-e79174757253'
+assert owner['deadline_at']=='2026-11-14T02:52:47.538159+00:00'
+assert datetime.now(timezone.utc)<datetime.fromisoformat(owner['deadline_at'])
+assert packet['training_launch_authorized'] is False
+action=packet['action'];assert action in ('stage','collect','render')
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def regular(path):
+ s=os.lstat(path);assert stat.S_ISREG(s.st_mode) and s.st_uid==1001 and s.st_nlink==1
+ assert not stat.S_ISLNK(s.st_mode)
+if action=='stage':
+ assert not stage.exists(),'Existing stage: preserve and reconcile, never replay'
+ parent=os.lstat(stage.parent);assert stat.S_ISDIR(parent.st_mode) and parent.st_uid==1001
+ assert set(packet['files'])=={'production_controller.py','lock_core.py','entry_factory.py'}
+ for name,item in packet['files'].items():
+  raw=base64.b64decode(item['bytes_base64'],validate=True)
+  assert hashlib.sha256(raw).hexdigest()==item['sha256'];compile(raw,name,'exec')
+ stage.mkdir(mode=0o700)
+ for name,item in packet['files'].items():
+  with (stage/name).open('xb') as stream:stream.write(base64.b64decode(item['bytes_base64'],validate=True))
+  (stage/name).chmod(0o600);regular(stage/name);assert sha(stage/name)==item['sha256']
+ print(json.dumps({'certainty':'terminal','action':'stage','owner':owner,'stage':str(stage),
+  'files':{name:sha(stage/name) for name in packet['files']},'training_launch_or_GPU_use':False}));sys.exit(0)
+assert stage.is_dir() and stage.resolve()==stage
+s=os.lstat(stage);assert s.st_uid==1001 and stat.S_IMODE(s.st_mode)==0o700
+for name,expected in packet['files'].items():regular(stage/name);assert sha(stage/name)==expected
+request_raw=base64.b64decode(packet['request_bytes_base64'],validate=True)
+assert hashlib.sha256(request_raw).hexdigest()==packet['request_sha256']
+request=json.loads(request_raw);assert request['owner']==owner and request['action']==action
+assert request['execution_authorized'] is True and request['training_launch_authorized'] is False
+request_path=stage/(action+'_request.json')
+assert not request_path.exists(),'Existing request: preserve and reconcile, never replay'
+if action=='render':
+ regular(stage/'actual_observation.json')
+ assert sha(stage/'actual_observation.json')==request['actual_observation_sha256']
+ assert not Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178_v2').exists()
+else:assert not (stage/'actual_observation.json').exists()
+with request_path.open('xb') as stream:stream.write(request_raw)
+request_path.chmod(0o600)
+command=['/usr/bin/python3','-I','-B',str(stage/'production_controller.py'),action,'--request',str(request_path),'--request-sha256',packet['request_sha256']]
+environment=dict(os.environ,PYTHONDONTWRITEBYTECODE='1',CUDA_VISIBLE_DEVICES='')
+outpath,errpath=stage/(action+'_stdout.partial'),stage/(action+'_stderr.partial')
+outfile,errfile=outpath.open('xb'),errpath.open('xb')
+process=subprocess.Popen(command,stdout=outfile,stderr=errfile,env=environment)
+try:
+ process.wait(timeout=240)
+ outfile.flush();errfile.flush()
+ def tail(path,limit):
+  with path.open('rb') as stream:
+   stream.seek(0,2);stream.seek(max(0,stream.tell()-limit));return stream.read(limit).decode('utf8','replace')
+ stdout,stderr=tail(outpath,65536),tail(errpath,16384)
+except subprocess.TimeoutExpired:
+ print(json.dumps({'certainty':'uncertain','pid':process.pid,'action':action,'owner':owner,'stage':str(stage),
+  'reason':'CPU controller timeout; no signal or replay','training_launch_or_GPU_use':False}));sys.exit(0)
+name='actual_observation.json' if action=='collect' else 'production_render_result.json'
+result_path=stage/name;result=None;result_sha=None;result_bytes=None
+if result_path.exists():
+ regular(result_path);result_sha=sha(result_path);raw=result_path.read_bytes()
+ result=json.loads(raw);result_bytes=base64.b64encode(raw).decode()
+print(json.dumps({'certainty':'terminal','returncode':process.returncode,'pid':process.pid,'action':action,
+ 'owner':owner,'stage':str(stage),'command':command,'stdout':stdout,'stderr':stderr,
+ 'result':result,'remote_result_sha256':result_sha,'remote_result_bytes_base64':result_bytes,'training_launch_or_GPU_use':False}))

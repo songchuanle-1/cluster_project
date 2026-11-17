@@ -1,0 +1,132 @@
+{
+  "label": "scm",
+  "torch": "2.8.0+cu128",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "train_scenes": [
+    "scene0000_00",
+    "scene0001_00"
+  ],
+  "train_expressions": 8,
+  "eval_loss": 0.9326014518737793,
+  "parity": {
+    "masks": {
+      "exact": false,
+      "max_difference": 35.71965789794922
+    },
+    "indis": {
+      "exact": false,
+      "max_difference": 2.791332721710205
+    },
+    "sample_inds": {
+      "exact": false,
+      "max_difference": 101.0
+    }
+  },
+  "same_process_parity": {
+    "masks": {
+      "exact": false,
+      "max_difference": 35.71965789794922
+    },
+    "indis": {
+      "exact": false,
+      "max_difference": 2.7913334369659424
+    },
+    "sample_inds": {
+      "exact": false,
+      "max_difference": 101.0
+    }
+  },
+  "real_batch": {
+    "loss": 0.868338942527771,
+    "finite_backward": true,
+    "peak_mib": 3440.2861328125,
+    "details": {
+      "score_loss": 0.0007314695976674557,
+      "mask_bce_loss": 0.0032264136243611574,
+      "mask_dice_loss": 0.009168583899736404,
+      "sem_loss": -0.47952622175216675,
+      "indi_loss": 0.5621727705001831,
+      "sample_loss": 0.14309817552566528,
+      "layer_0_score_loss": 0.002682431833818555,
+      "layer_0_mask_bce_loss": 0.006767202168703079,
+      "layer_0_mask_dice_loss": 0.03925442695617676,
+      "layer_0_sem_loss": 0.4652431905269623,
+      "layer_0_indi_loss": 0.5128796696662903,
+      "layer_1_score_loss": 0.001745919929817319,
+      "layer_1_mask_bce_loss": 0.005203730426728725,
+      "layer_1_mask_dice_loss": 0.03707258030772209,
+      "layer_1_sem_loss": -0.48091399669647217,
+      "layer_1_indi_loss": 0.5518167018890381,
+      "layer_2_score_loss": 0.0015683297533541918,
+      "layer_2_mask_bce_loss": 0.0045174490660429,
+      "layer_2_mask_dice_loss": 0.03323474898934364,
+      "layer_2_sem_loss": -0.5161575078964233,
+      "layer_2_indi_loss": 0.5466298460960388,
+      "layer_3_score_loss": 0.0037256216164678335,
+      "layer_3_mask_bce_loss": 0.003742701606824994,
+      "layer_3_mask_dice_loss": 0.02905084192752838,
+      "layer_3_sem_loss": -0.4951125979423523,
+      "layer_3_indi_loss": 0.5449457764625549,
+      "layer_4_score_loss": 0.0006328487652353942,
+      "layer_4_mask_bce_loss": 0.00349990907125175,
+      "layer_4_mask_dice_loss": 0.03017732873558998,
+      "layer_4_sem_loss": -0.49238112568855286,
+      "layer_4_indi_loss": 0.5576602816581726,
+      "parent_final_dice": 0.02696589007973671,
+      "scm_global_valid": 8.0,
+      "scm_count_valid": 8.0,
+      "orth_reg_loss": 0.009894096292555332,
+      "loss": 0.868338942527771
+    }
+  },
+  "full_cuda_amp": {
+    "finite_loss": true,
+    "finite_backward": true
+  },
+  "timing_input": {
+    "identity": [
+      [
+        "scene0000_00",
+        "10",
+        "136"
+      ]
+    ],
+    "batch_size": 1,
+    "expressions": 1
+  },
+  "timing": {
+    "warmup": 20,
+    "repeat": 100,
+    "median_ms": 51.31164658814669,
+    "p90_ms": 53.0028160661459,
+    "peak_allocated_mib": 882.05322265625,
+    "peak_reserved_mib": 3750.0
+  },
+  "flops": {
+    "counted_g": 14.073542358,
+    "operators": [
+      [
+        "aten::add",
+        43845077
+      ],
+      [
+        "aten::mm",
+        2895504896
+      ],
+      [
+        "aten::mul",
+        1275649
+      ],
+      [
+        "aten::addmm",
+        10010958848
+      ],
+      [
+        "aten::bmm",
+        1121957888
+      ]
+    ],
+    "complete": false,
+    "note": "Torch profiler excludes custom sparse/point ops; lower bound only"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "contract": "m95_identity_capture_progress_v1",
+  "generated_at": "2026-09-22T23:24:11+08:00",
+  "scope": "Progress-only observation of the existing frozen M95 identity-control capture. This receipt is not a completed capture, analysis, admission, efficacy, population-effect, or novelty result.",
+  "transport": {
+    "host": "server-6",
+    "state": "reachable",
+    "check": "One BatchMode SSH query with an 8-second connection timeout completed successfully."
+  },
+  "existing_job": {
+    "pid": 1578754,
+    "process_state": "Rl",
+    "started_at": "2026-09-22T18:13:00+08:00",
+    "elapsed": "05:10:48",
+    "output_dir": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_runs/m95_identity_capture_20260922-1813",
+    "log_path": "/data3/songcl/Project/Cluster_project/pipeline/logs/m95_identity_capture_20260922-1813.log",
+    "previous_durable_sample": {
+      "step": 3747,
+      "expressions": 206
+    },
+    "current_log_sample": {
+      "step": 4533,
+      "expressions": 246,
+      "matching_expressions": 0,
+      "loss": 0.7212300896644592
+    },
+    "expected_expressions": 256,
+    "expressions_remaining": 10,
+    "progress_advanced": true,
+    "capture_json_present": false,
+    "native_capture_completed": false
+  },
+  "gpu_gate": {
+    "gpu": 7,
+    "project_pid": 1578754,
+    "project_memory_used_mib": 4070,
+    "foreign_pid": 3694608,
+    "foreign_memory_used_mib": 41996,
+    "foreign_process_touched": false,
+    "launch_attempted": false,
+    "decision_basis": "The existing producer remains alive and advanced monotonically; no GPU allocation or process mutation was attempted."
+  },
+  "state": "pending_progress",
+  "next_action": "Continue monitoring the same PID and log until capture.json exists. Then verify all 256 frozen manifest rows remain hash-bound before running analyze_m95_manifest_identity_controls_20260922.py. Do not start a replacement capture, admission, rejection, queue mutation, or new design while this shared validation is incomplete.",
+  "not_evidence_of": [
+    "completed native capture",
+    "identity-specific causal support",
+    "candidate admission",
+    "candidate rejection",
+    "deployable efficacy",
+    "population effect",
+    "novelty"
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "format": "HRC adapter directory semantic contract; implementation is authoritative",
+  "project": "cluster_project",
+  "id": "M208-HRC",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "candidate_code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "runtime_code_commit": "Read separately from execution_binding; actual runtime f518 is not relabeled74f.",
+  "input_files": [
+    "execution_binding.json",
+    "native_manifest.json",
+    "execution_lease.json",
+    "smoke_champion_request.json",
+    "smoke_champion_execution.json",
+    "smoke_candidate_request.json",
+    "smoke_candidate_execution.json",
+    "resources_champion_request.json",
+    "resources_champion_execution.json",
+    "resources_candidate_request.json",
+    "resources_candidate_execution.json"
+  ],
+  "execution_envelope_required": [
+    "identity",
+    "certainty",
+    "returncode",
+    "pid",
+    "original_process_identity",
+    "command",
+    "result_sha256",
+    "result",
+    "stdout_sha256",
+    "stderr_sha256"
+  ],
+  "frozen_binding_requirements": [
+    "Exact74f native preparation/template/adapter release SHA anchors",
+    "All prepared-file and core source hashes preserved",
+    "Manifest reconstructed exactly from frozen template and original binding",
+    "Lease reconstructed exactly; expired evidence may be reviewed without renewal",
+    "GPU0 UUID/stage/token and exact request identity plus actual argv/PID/startticks"
+  ],
+  "required_raw_top_level_fields": {
+    "common": [
+      "candidate_id",
+      "code_commit",
+      "config_sha256",
+      "config_source",
+      "configuration_adaptations",
+      "data_source",
+      "execution_completed",
+      "goal_sha256",
+      "initialization",
+      "mode",
+      "model_package",
+      "native_model_and_yaml_unchanged",
+      "native_train_source_sha256",
+      "new_training",
+      "original_config_sha256",
+      "runtime_config_path",
+      "runtime_config_sha256",
+      "source_hashes",
+      "target"
+    ],
+    "smoke": [
+      "actual_train_command",
+      "batches",
+      "coarse_dependency_probes",
+      "csort_raw_input_observations",
+      "ffn_calls",
+      "hcg_readbacks",
+      "intended_path_observed",
+      "losses",
+      "native_dataloader_config",
+      "native_ffn_after_hash_by_level",
+      "native_ffn_initial_hash_by_level",
+      "pure_training_peak_memory",
+      "raw_bank_observations",
+      "refined_parent_mean_calls",
+      "smoke_memory_scope",
+      "smoke_peak_allocated_bytes",
+      "smoke_peak_reserved_bytes",
+      "steps",
+      "training_checkpoint_saved"
+    ],
+    "resources": [
+      "ann_ids",
+      "batch_size",
+      "full_optimizer_training_peak",
+      "input_sha256",
+      "lang_num_max",
+      "measurements_ms",
+      "median_ms",
+      "native_criterion_backwards",
+      "native_loss_forwards",
+      "native_predict_calls",
+      "optimizer_steps",
+      "p90_ms",
+      "parameter_flags_preserved",
+      "profile",
+      "repeat",
+      "scan_ids",
+      "source_body_executed_without_replacement",
+      "validation_accuracy_evaluated_for_selection",
+      "warmup"
+    ]
+  },
+  "semantic_requirements": {
+    "smoke": [
+      "Exactly2 native losses/criterion backwards/optimizer steps with real TRAIN batches",
+      "All observed grads finite; each original FFN has nonzero weight gradient and step changes",
+      "6 FFN calls,2 rawbanks,4 CSORT raw-object calls,2 HCG readbacks",
+      "Candidate4 fixed-mean calls, levels1/2 each forward, reference<=1e-6; original-call-once/empty/padding semantics",
+      "Candidate fine/mid-to-coarse probe gradients finite nonzero; control both structurally None",
+      "Probe leaves native grad/optimizer/scheduler/CPU+CUDA RNG unchanged; hooks/methods restored",
+      "Within each forward raw bank/IDs/maps unchanged and original fine residual exactly preserved"
+    ],
+    "pairing": [
+      "Exact2 TRAIN batch/input fingerprints equal",
+      "Native pretrain/seed/data/loader and3 FFN initial parameter hashes equal; full common-state fingerprint NOT_RECORDED",
+      "Resources exact sample/hash/ann/scan/data/init and original handlers equal"
+    ],
+    "resources": [
+      "bs1/lang1/warm20/repeat100;121 original predict calls;100 finite actual times, recompute median/P90",
+      "No optimizer/loss/backward in resources; preserve flags/source/validation boundary",
+      "Historical countedFLOPs<=10G; original fvcore handler checksums; unsupported lists retained",
+      "Report timing, allocated/reserved and FLOPs deltas; no invented latency threshold",
+      "Existing15% observed allocated memory condition is reported for separate retention decision, not erased by a generic validation status",
+      "Smoke memory includes observer/probe; pure TRAIN UNKNOWN; no-cluster baseline UNKNOWN"
+    ]
+  },
+  "standard_smoke_mapping": {
+    "id": "M208-HRC",
+    "config": "Native _hrc.yaml relative path",
+    "code_commit": "Candidate74f, not runtime f518",
+    "goal_sha256": "Exact current goal SHA",
+    "steps": "Raw optimizer_steps integer2 after consistency checks; raw steps itself is a list",
+    "losses": "Candidate actual two losses",
+    "native_data_loaded": "Only after actual true observation",
+    "backward_finite": "Only after observed2 finite native backwards",
+    "intended_path_observed": "Candidate true; control false expected",
+    "split": "train",
+    "command": "Candidate actual_train_command",
+    "data_source": "Candidate raw data_source.train",
+    "evidence": "Real project-relative artifact SHA refs"
+  },
+  "non_gates": [
+    "Whole raw output digest equality was not preregistered; differences are reported without claiming cause or magnitude.",
+    "Pure training memory/new efficacy/common full-state initialization remain unknown, not fabricated."
+  ],
+  "output_boundary": "Only review JSON. No standard PASS, admission receipt, gate pass object, queue, candidate or dispatcher writes."
+}

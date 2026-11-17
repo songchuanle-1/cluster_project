@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T00:14:55.402413+00:00",
+  "status": "ORIGINAL_JOB_PROGRESS_AND_CURRENT_CTS_BUSY_GUARDS_INDEPENDENTLY_REVIEWED_EXTRA_CONTEXT_RETAINED",
+  "anchors": {
+    "actual_progress": {
+      "path": "pipeline/diagnostic_bundles/tick_521a6f59/active_runs_progress_observation.json",
+      "sha256": "7f364ffa0c29d5ab463b69b6d2284a5c67b36815236474eb341c91290c782b24"
+    },
+    "actual_CTS_guard": {
+      "path": "pipeline/diagnostic_bundles/tick_521a6f59/cts_actual_local_guard_integration.json",
+      "sha256": "57a7bd01792731619fc0a9660bec955b1615c70568cb926bd16d64fa138dc8f8"
+    },
+    "prior_unknown_context_owner_limit": {
+      "path": "pipeline/diagnostic_bundles/tick_b5dc39b4/additional_gpu_context_probe.json",
+      "sha256": "3eb859cd4be49b516f36576df29d50455719096470ca37dc4aeb1c63ae7f0552"
+    }
+  },
+  "material_concerns": [
+    {
+      "code": "PERSISTING_ADDITIONAL_UNKNOWN_GPU_CONTEXT",
+      "pid": 1565126,
+      "physical_GPUs": [
+        0,
+        1
+      ],
+      "owner": "UNKNOWN_PERMISSION_ERROR_FROM_PREVIOUS_BOUNDED_PROBE",
+      "new_issue": false,
+      "boundary": "Preserve this process and both original jobs. New native work remains blocked; no re-probe, privilege bypass, eviction or signal is authorized."
+    }
+  ],
+  "new_proof_integrity_concerns": [],
+  "check_count": 25,
+  "checks_passed": [
+    "new_private_output",
+    "actual_progress_exact_root_anchor",
+    "actual_CTS_guard_exact_root_anchor",
+    "actual_owner_six_fields_and_original_deadline",
+    "actual_target_thread_matches_root",
+    "actual_context_and_pending_hashes_match_owner",
+    "two_actual_samples_distinct_ordered_times",
+    "M213-BFC_original_PID_start_GPU_UUID_and_exact_provenance",
+    "M213-BFC_actual_TRAIN_cursor_increases_without_best_claim",
+    "M213-BFC_readonly_no_error_or_signal",
+    "M213-BFC_additional_unknown_PID_preserved_no_uniqueness",
+    "M212-BCR_original_PID_start_GPU_UUID_and_exact_provenance",
+    "M212-BCR_actual_TRAIN_cursor_increases_without_best_claim",
+    "M212-BCR_readonly_no_error_or_signal",
+    "M212-BCR_additional_unknown_PID_preserved_no_uniqueness",
+    "shared_runtime48fc_BCR_scientific11a_separate",
+    "guard_registered_busy_both_before_transport",
+    "guard_14_explicit_invalid_selected_entries_rejected",
+    "guard_original_deadline_refusal_unchanged",
+    "guard_zero_transport_process_network_torch_and_active",
+    "guard_five_protected_current_hashes_match",
+    "queue_two_original_running_exactPID_GPU_code",
+    "running_registry_maps_original_two_devices",
+    "M206_remains_paused_no_PID_no_resume",
+    "unknown_ownership_prior_PermissionError_anchor_retained"
+  ],
+  "original_jobs_verified": true,
+  "resource_block_verified": true,
+  "actual_owner_six_fields": {
+    "token": "521a6f59f2a74a69b41144aa6a8b6153",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-26T00:11:01.066237+00:00",
+    "deadline_at": "2026-10-26T01:11:01.066237+00:00",
+    "context_sha256": "0a031307be98484490bf98bff04e5d5a69c55a6438259ed529b85ef0d120b8a4",
+    "pending_sha256": "88733c0d6724be1bb7369cdbbfb7a679e5f4fb957dd9a20a8e4a76362ca76d35"
+  },
+  "root_observed_runs": [
+    {
+      "id": "M213-BFC",
+      "pid": 219369,
+      "start_ticks": "56265957",
+      "gpu": 0,
+      "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+      "train_cursor_before": [
+        13,
+        50,
+        1537,
+        4686
+      ],
+      "train_cursor_after": [
+        13,
+        50,
+        1544,
+        4686
+      ],
+      "extra_context_pid": 1565126,
+      "extra_context_memory_MiB": [
+        10776,
+        10776
+      ],
+      "original_context_memory_MiB": [
+        19722,
+        19722
+      ],
+      "best_metric_current": "NOT_MEASURED"
+    },
+    {
+      "id": "M212-BCR",
+      "pid": 1215422,
+      "start_ticks": "51717921",
+      "gpu": 1,
+      "uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+      "train_cursor_before": [
+        23,
+        50,
+        3459,
+        4686
+      ],
+      "train_cursor_after": [
+        23,
+        50,
+        3464,
+        4686
+      ],
+      "extra_context_pid": 1565126,
+      "extra_context_memory_MiB": [
+        10464,
+        10464
+      ],
+      "original_context_memory_MiB": [
+        19724,
+        19724
+      ],
+      "best_metric_current": "NOT_MEASURED"
+    }
+  ],
+  "GPU_total_used_MiB": {
+    "0": 30556,
+    "1": 30223
+  },
+  "current_context_uniqueness": false,
+  "new_action": false,
+  "user_decision": false,
+  "notification_recommendation": "DONT_NOTIFY_ROUTINE_TRAIN_PROGRESS_AND_MEMORY_USAGE_VARIATION_OF_ALREADY_REPORTED_CONTEXT",
+  "actual_native_resources_for_CTS_BEC": "NOT_RUN",
+  "limits": [
+    "Reviewer only read saved root observations and local guard proof/current selected metadata; no fresh remote check, no SSH/GPU/Torch/Git/native/test-suite or shared write.",
+    "TRAIN cursor progression is not a current best/validation/accuracy improvement. Additional context owner remains unknown; no repeat ownership inquiry was made.",
+    "Local CTS refusal proves registered busy pre-transport and unchanged fresh guards, not live idle/assets/native admission. Current software packet preparation is handled by separate final reviews."
+  ]
+}

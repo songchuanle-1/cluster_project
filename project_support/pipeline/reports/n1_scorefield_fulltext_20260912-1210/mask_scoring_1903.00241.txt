@@ -1,0 +1,576 @@
+                                       Mask Scoring R-CNN
+
+                                          Zhaojin Huang Lichao Huang Yongchao Gong Chang Huang Xinggang Wang
+                                               Institute of AI, School of EIC, Huazhong University of Science and Technology
+                                                                                  Horizon Robotics Inc.
+
+                                       {zhaojinhuang,xgwang}@hust.edu.cn {lichao.huang,yongchao.gong,chang.huang}@horizon.ai
+
+arXiv:1903.00241v1 [cs.CV] 1 Mar 2019                          Abstract                                        quires not only more detailed labels but also more delicate
+                                                                                                               network designing.
+                                          Letting a deep network be aware of the quality of its own
+                                       predictions is an interesting yet important problem. In the                In this paper, we focus on the problem of instance seg-
+                                       task of instance segmentation, the confidence of instance               mentation, which is a natural next step of object detec-
+                                       classification is used as mask quality score in most in-                tion to move from coarse box-level instance recognition
+                                       stance segmentation frameworks. However, the mask qual-                 to precise pixel-level classification. Specifically, this work
+                                       ity, quantified as the IoU between the instance mask and its            presents a novel method to score the instance segmentation
+                                       ground truth, is usually not well correlated with classifica-           hypotheses, which is quite important for instance segmen-
+                                       tion score. In this paper, we study this problem and pro-               tation evaluation. The reason lies in that most evaluation
+                                       pose Mask Scoring R-CNN which contains a network block                  metrics are defined according to the hypothesis scores, and
+                                       to learn the quality of the predicted instance masks. The               more precise scores help to better characterize the model
+                                       proposed network block takes the instance feature and the               performance. For example, precision-recall curves and av-
+                                       corresponding predicted mask together to regress the mask               erage precision (AP) are often used for the challenging in-
+                                       IoU. The mask scoring strategy calibrates the misalignment              stance segmentation dataset COCO [26]. If one instance
+                                       between mask quality and mask score, and improves in-                   segmentation hypothesis is not properly scored, it might be
+                                       stance segmentation performance by prioritizing more ac-                wrongly regarded as false positive or false negative, result-
+                                       curate mask predictions during COCO AP evaluation. By                   ing in a decrease of AP.
+                                       extensive evaluations on the COCO dataset, Mask Scoring
+                                       R-CNN brings consistent and noticeable gain with differ-                   However, in most instance segmentation pipelines, such
+                                       ent models, and outperforms the state-of-the-art Mask R-                as Mask R-CNN [15] and MaskLab [3], the score of the
+                                       CNN. We hope our simple and effective approach will pro-                instance mask is shared with box-level classification confi-
+                                       vide a new direction for improving instance segmentation.               dence, which is predicted by a classifier applied on the pro-
+                                       The source code of our method is available at https://                  posal feature. It is inappropriate to use classification confi-
+                                       github.com/zjhuang22/maskscoring_rcnn.                                  dence to measure the mask quality since it only serves for
+                                                                                                               distinguishing the semantic categories of proposals, and is
+                                       1. Introduction                                                         not aware of the actual quality and completeness of the in-
+                                                                                                               stance mask. The misalignment between classification con-
+                                          Deep networks are dramatically driving the develop-                  fidence and mask quality is illustrated in Fig. 1, where in-
+                                       ment of computer vision, leading to a series of state-of-               stance segmentation hypotheses get accurate box-level lo-
+                                       the-art in tasks including classification [22, 16, 35], ob-             calization results and high classification score, but the cor-
+                                       ject detection [12, 17, 32, 27, 33, 34], semantic segmen-               responding masks are inaccurate. Obviously, scoring the
+                                       tation [28, 4, 37, 18] etc. From the development of deep                masks using such classification score tends to degrade the
+                                       learning in computer vision, we can observe that the ability            evaluation results.
+                                       of deep networks is gradually growing from making image-
+                                       level prediction [22] to region/box-level prediction [12],                 Unlike the previous methods that aim to obtain more
+                                       pixel-level prediction [28] and instance/mask-level predic-             accurate instance localization or segmentation mask, our
+                                       tion [15]. The ability of making fine-grained predictions re-           method focuses on scoring the masks. To achieve this goal,
+                                                                                                               our model learns a score for each mask instead of using its
+                                             The work was done when Zhaojin Huang was an intern in Horizon     classification score. For clarity, we call the learned score
+                                       Robotics Inc.                                                           mask score.
+
+                                                                                                                  Inspired by the AP metric of instance segmentation that
+
+                                                                                                            1
+Figure 1. Demonstrative cases of instance segmentation in which bounding box has a high overlap with ground truth and a high classification
+score while the mask is not good enough. The scores predicted by both Mask R-CNN and our proposed MS R-CNN are attached above
+their corresponding bounding boxes. The left four images show good detection results with high classification scores but low mask quality.
+Our method aims at solving this problem. The rightmost image shows the case of a good mask with a high classification score. Our method
+will retrain the high score. As can be seen, scores predicted by our model can better interpret the actual mask quality.
+
+uses pixel-level Intersection-over-Union (IoU) between the          AP improves consistently by about 1.5% with various
+predicted mask and its ground truth mask to describe in-            backbone networks.
+stance segmentation quality, we propose a network to learn
+the IoU directly. In this paper, this IoU is denoted as       2. Related Work
+MaskIoU. Once we obtain the predicted MaskIoU in test-
+ing phase, mask score is reevaluated by multiplying the pre-  2.1. Instance Segmentation
+dicted MaskIoU and classification score. Thus, mask score
+is aware of both semantic categories and the instance mask       Current instance segmentation methods can be roughly
+completeness.                                                 categorized into two classes. One is detection based meth-
+                                                              ods and the other is segmentation based methods. Detec-
+   Learning MaskIoU is quite different from proposal clas-    tion based methods exploit the state-of-the-art detectors,
+sification or mask prediction, as it needs to "compare" the   such as Faster R-CNN [33], R-FCN [8], to get the region
+predicted mask with object feature. Within the Mask R-        of each instance, and then predict the mask for each re-
+CNN framework, we implement a MaskIoU prediction net-         gion. Pinheiro et al. [31] proposed DeepMask to segment
+work named MaskIoU head. It takes both the output of the      and classify the center object in a sliding window fashion.
+mask head and RoI feature as input, and is trained using      Dai et al. [6] proposed instance-sensitive FCNs to generate
+a simple regression loss. We name the proposed model,         the position-sensitive maps and assembled them to obtain
+namely Mask R-CNN with MaskIoU head, as Mask Scoring          the final masks. FCIS [23] takes position-sensitive maps
+R-CNN (MS R-CNN). Extensive experiments with our MS           with inside/outside scores to generate the instance segmen-
+R-CNN have been conducted, and the results demonstrate        tation results. He et al. [15] proposed Mask R-CNN that is
+that our method provides consistent and noticeable perfor-    built on the top of Faster R-CNN by adding an instance-
+mance improvement attributing to the alignment between        level semantic segmentation branch. Based on Mask R-
+mask quality and score.                                       CNN, Chen et al. [3] proposed MaskLab that used position-
+                                                              sensitive scores to obtain better results. However, an under-
+   In summary, the main contributions of this work are        lying drawback in these methods is that mask quality is only
+highlighted as follows:                                       measured by the classification scores, thus resulting in the
+                                                              issues discussed above.
+  1. We present Mask Scoring R-CNN, the first framework
+      that addresses the problem of scoring instance seg-        Segmentation based methods predict the category labels
+      mentation hypothesis. It explores a new direction for   of each pixel first and then group them together to form in-
+      improving the performance of instance segmentation      stance segmentation results. Liang et al. [24] used spec-
+      models. By considering the completeness of instance     tral clustering to cluster the pixels. Other works, such as
+      mask, the score of instance mask can be penalized if    [20, 21], add boundary detection information during the
+      it has high classification score while the mask is not  clustering procedure. Bai et al. [1] predicted pixel-level
+      good enough.                                            energy values and used watershed algorithms for group-
+                                                              ing. Recently, there are some works [30, 11, 14, 10] us-
+  2. Our MaskIoU head is very simple and effective. Ex-       ing metric learning to learn the embedding. Specifically,
+      perimental results on the challenging COCO bench-       these methods learn an embedding for each pixel to ensure
+      mark show that when using mask score from our MS        that pixels from the same instance have similar embedding.
+      R-CNN rather than only classification confidence, the   Afterwards, clustering is performed on the learned embed-
+                                                                    Score      Mask R-CNN MS R-CNN
+
+                                                                         1
+
+                                                                    0.9
+
+                                                                    0.8
+
+                                                                    0.7
+
+                                                                    0.6
+
+                                                                    0.5
+
+                                                                    0.4
+
+                                                                    0.3
+
+                                                                    0.2
+
+                                                                    0.1
+
+                                                                         0               0.6-0.7  0.7-0.8  0.8-0.9  0.9-1.0
+                                                                                0.5-0.6
+
+                                                                                                  MaskIoU
+
+(a)                                                            (b)                                (c)
+
+Figure 2. Comparisons of Mask R-CNN and our proposed MS R-CNN. (a) shows the results of Mask R-CNN, the mask score has less
+relationship with MaskIoU. (b) shows the results of MS R-CNN, we penalize the detection with high score and low MaskIoU, and the mask
+score can correlate with MaskIoU better. (c) shows the quantitative results, where we average the score between each MaskIoU interval,
+we can see that our method can have a better correspondence between score and MaskIoU.
+
+ding to obtain the final instance labels. As these methods do       It is a new direction for improving the performance of in-
+not have explicit scores to measure the instance mask qual-         stance segmentation.
+ity, they have to use the averaged pixel-level classification
+scores as an alternative.                                           3. Method
+
+   Both classes of the above methods do not take into con-          3.1. Motivation
+sideration the alignment between mask score and mask
+quality. Due to the unreliability of mask score, a mask hy-            In the current Mask R-CNN framework, the score of a
+pothesis with higher IoU against ground truth is vulnerable         detection (i.e., instance segmentation) hypothesis is deter-
+to be ranked with low priority if it has a low mask score. In       mined by the largest element in its classification scores.
+this case, the final AP is consequently degraded.                   Due to the problems of background clutter, occlusion etc.,
+                                                                    it is possible that the classification score is high but the
+2.2. Detection Score Correction                                     mask quality is low, as the examples shown in Fig. 1. To
+                                                                    quantitatively analyze this problem, we compare the vanilla
+   There are several methods focusing on correcting the             mask score from Mask R-CNN with the actual IoU between
+classification score for the detection box, which have a sim-       the predicted mask and its ground truth mask (MaskIoU).
+ilar goal to our method. Tychsen-Smith et al. [36] proposed         Specifically, we conduct experiments using Mask R-CNN
+Fitness NMS that corrected the detection score using the            with ResNet-18 FPN on COCO 2017 validation dataset.
+IoU between the detected bounding boxes and their ground            Then we select the detection hypotheses after Soft-NMS
+truth. It formulates box IoU prediction as a classification         with both MaskIoU and classification scores larger than
+task. Our method differs from this method in that we for-           0.5. The distribution of MaskIoU over classification score
+mulate mask IoU estimation as a regression task. Jiang et           is shown in Fig. 2 (a) and the average classification score in
+al. [19] proposed IoU-Net that regressed box IoU directly,          each MaskIoU interval is shown in blue in Fig. 2 (c). These
+and the predicted IoU was used for both NMS and bounding            figures show that classification score and MaskIoU is not
+box refinement. In [5], Cheng et al. discussed the false pos-       well correlated in Mask R-CNN.
+itive samples and used a separated network for correcting
+the score of such samples. SoftNMS [2] uses the overlap                In most instance segmentation evaluation protocols, such
+between two boxes to correct the low score box. Neumann             as COCO, a detection hypothesis with a low MaskIoU and
+et al. [29] proposed Relaxed Softmax to predict temperature         a high score is harmful. In many practical applications, it
+scaling factor value in standard softmax for safety-critical        is important to determine when the detection results can
+pedestrian detection.                                               be trusted and when they cannot [29]. This motivates us
+                                                                    to learn a calibrated mask score according to MaskIoU
+   Unlike these methods that focus on bounding box level            for every detection hypothesis. Without loss of general-
+detection, our method is designed for instance segmenta-            ity, we work on the Mask R-CNN framework, and propose
+tion. The instance mask is further processed in our Mask-           Mask Scoring R-CNN (MS R-CNN), a Mask R-CNN with
+IoU head so that the network can be aware of the complete-          an additional MaskIoU head module that learns the Mask-
+ness of instance mask, and the final mask score can reflect         IoU aligned mask score. The predicted mask scores of our
+the actual quality of the instance segmentation hypothesis.
+framework are shown in Fig. 2 (b) and the orange histogram       Mask head and set the kernel size and filter number to 3 and
+in Fig. 2 (c).                                                   256 respectively for all the convolution layers. For the 3
+                                                                 fully connected (FC) layers, we follow the RCNN head and
+3.2. Mask scoring in Mask R-CNN                                  set the outputs of the first two FC layers to 1024 and the
+                                                                 output of the final FC to the number of classes.
+   Mask Scoring R-CNN is conceptually simple: Mask R-
+CNN with MaskIoU Head, which takes the instance feature          Training: For training the MaskIoU head, we use the
+and the predicted mask together as input, and predicts the       RPN proposals as training samples. The training samples
+IoU between input mask and ground truth mask, as shown           are required to have a IoU between proposal box and the
+in Fig. 3. We will present the details of our framework in       matched ground truth box larger than 0.5, which are the
+the following sections.                                          same with the training samples of the Mask head of Mask
+                                                                 R-CNN. For generating the regression target for each train-
+Mask R-CNN: We begin by briefly reviewing the Mask               ing sample, we firstly get the predicted mask of the target
+R-CNN [15]. Following Faster R-CNN [33], Mask R-CNN              class and binarize the predicted mask using a threshold of
+consists of two stages. The first stage is the Region Pro-       0.5
+posal Network (RPN). It proposes candidate object bound-
+ing boxes regardless of object categories. The second stage         Then we use the MaskIoU between the binary mask and
+is termed as the R-CNN stage, which extracts features using      its matched ground truth as the MaskIoU target. We use the
+RoIAlign for each proposal and performs proposal classifi-        2 loss for regressing MaskIoU, and the loss weight is set
+cation, bounding box regression and mask predicting.             to 1. The proposed MaskIoU head is integrated into Mask
+                                                                 R-CNN, and the whole network is end to end trained.
+Mask scoring: We define smask as the score of the pre-
+dicted mask. The ideal smask is equal to the pixel-level IoU     Inference: During inference, we just use MaskIoU head
+between predicted mask and its matched ground truth mask,        to calibrate classification score generated from R-CNN.
+which is termed as MaskIoU before. The ideal smask also          Specifically, suppose the R-CNN stage of Mask R-CNN
+should only have positive value for ground truth category,       outputs N bounding boxes, and among them top-k (i.e.
+and be zero for other classes, since a mask only belong to       k = 100) scoring boxes after SoftNMS [2] are selected.
+one class. This requires the mask score to works well on two     Then the top-k boxes are fed into the Mask head to gen-
+task: classifying the mask to right category and regressing      erate multi-class masks. This is the standard Mask R-CNN
+the proposal's MaskIoU for foreground object category.           inference procedure. We follow this procedure as well, and
+                                                                 feed the top-k target masks to predict the MaskIoU. The
+   It is hard to train the two tasks only using a single ob-     predicted MaskIoU are multiplied with classification score,
+jective function. For simplify, we can decompose the mask        to get the new calibrated mask score as the final mask con-
+score learning task into mask classification and IoU regres-     fidence.
+sion, denoted as smask = scls · siou for all object categories.
+scls focuses on classifying the proposal belong to which         4. Experiments
+class and siou focuses on regressing the MaskIoU.
+                                                                    All experiments are conducted on the COCO dataset [26]
+   As for scls, the goal of scls is to classify the proposal     with 80 object categories. We follow COCO 2017 settings,
+belonging to which class, which has been done in the clas-       using the 115k images train split for training, 5k valida-
+sification task in the R-CNN stage. So we can directly take      tion split for validation, 20k test-dev split for test. We use
+the corresponding classification score. Regressing siou is       COCO evaluation metrics AP (averaged over IoU thresh-
+the target of this paper, which is discussed in the following    olds) to report the results, including AP@0.5, AP@0.75,
+paragraph.                                                       and APS, APM, APL (AP at different scales). AP@0.5 (or
+                                                                 AP@0.75) means using an IoU threshold 0.5 (or 0.75) to
+MaskIoU head: The MaskIoU head aims to regress the               identify whether a predicted bounding box or mask is posi-
+IoU between the predicted mask and its ground truth mask.        tive in the evaluation. Unless noted, AP is evaluated using
+We use the concatenation of feature from RoIAlign layer          mask IoU.
+and the predicted mask as the input of MaskIoU head.
+When concatenating, we use a max pooing layer with ker-          4.1. Implementation Details
+nel size of 2 and stride of 2 to make the predicted mask have
+the same spatial size with RoI feature. We only choose to           We use our reproduced Mask R-CNN for all experi-
+regress the MaskIoU for the ground truth class (for testing,     ments. We use ResNet-18 based FPN network for ab-
+we choose the predicted class) instead of all classes. Our       lation study and ResNet-18/50/101 based on Faster R-
+MaskIoU head consists of 4 convolution layers and 3 fully        CNN/FPN/DCN+FPN [9] for comparing our method with
+connected layers. For the 4 convolution layers, we follow        other baseline results. For ResNet-18 FPN, input images
+Backbone network                                                     RCNN Head
+
+                  RoIAlign      7x7                                        class
+                               x256                                        box
+                                           1024         1024
+
+                  RoIAlign     14x14   x4  14x14              28x28        28x28           28x28
+                               x256        x256               x256           xC               x1
+
+                               Concat                                     Mask Head
+                                                              MaxPooling
+
+                               14x14 x3    14x14         7x7         1024         1024     MaskIoU
+                                           x256         x256
+                               x257                                                             C
+
+                  Input Image                                                     MaskIoU Head
+
+Figure 3. Network architecture of Mask Scoring R-CNN. The input image is fed into a backbone network to generate RoIs via RPN and
+RoI features via RoIAlign. The RCNN head and Mask head are standard components of Mask R-CNN. For predicting MaskIoU, we use
+the predicted mask and RoI feature as input. The MaskIoU head has 4 convolution layers (all have kernel=3 and the final one uses stride=2
+for downsampling) and 3 fully connected layers (the final one outputs C classes MaskIoU.)
+
+Table 1. COCO 2017 validation results. We report both detection and instance segmentation results. APm denotes instance segmentation
+results and APb denotes detection results. The results without are those of Mask R-CNN, while with are those of our MS R-CNN. The
+results show that our method is insensitive to different backbone networks.
+
+Backbone          MaskIoU head APm APm@0.5 APm@0.75 APb APb@0.5 APb@0.75
+ResNet-18 FPN
+                               27.7 46.9          29.0        31.2 50.4              33.2
+                               29.3 46.9
+                                                  31.3        31.5 50.8              33.5
+
+ResNet-50 FPN                  34.5 55.8          36.7        38.6 59.2              42.5
+                               36.0 55.8
+                                                  38.8        38.6 59.2              42.5
+
+ResNet-101 FPN                 36.6 58.6          39.0        41.3 61.7              45.9
+                               38.2 58.4
+                                                  41.5        41.4 61.8              46.3
+
+Table 2. COCO 2017 validation results. We report detection and instance segmentation results. APm denotes instance segmentation results
+and APb denotes detection results. In the results area, rows 1&2 use the Faster R-CNN framework; rows 3&4 additionally use FPN
+framework; rows 5&6 additionally use the DCN+FPN. The results show that consistent improvement of the proposed MaskIoU head.
+
+Backbone MaskIoU head FPN DCN APm APm@0.5 APm@0.75 APb APb@0.5 APb@0.75
+
+                               33.9 53.9                36.2 38.6 57.3                     42.8
+                               35.0 54.0
+                               36.6 58.6                37.7 38.7 57.4                     43.0
+                               38.2 58.4
+ResNet-101                     37.7 60.3                39.0 41.3 61.7                     45.9
+                               39.1 60.0
+                                                        41.5 41.4 61.8                     46.3
+
+                                                        40.0 42.9 63.4                     47.8
+
+                                                        42.4 43.1 63.5                     47.7
+Table 3. Comparing different instance segmentation methods on COCO 2017 test-dev.
+
+Method                Backbone                                  AP AP@0.5 AP@0.75 APS APM APL
+
+MNC [7]              ResNet-101                                 24.6 44.3   24.8 4.7 25.9 43.6
+FCIS [23]            ResNet-101                                 29.2 49.5
+FCIS+++ [23]         ResNet-101                                 33.6 54.5   -  -   -  -
+Mask R-CNN [15]      ResNet-101                                 33.1 54.9
+Mask R-CNN [15]   ResNet-101 FPN                                35.7 58.0   -  -   -  -
+Mask R-CNN [15]  ResNeXt-101 FPN                                37.1 60.0
+MaskLab [3]          ResNet-101                                 35.4 57.4   34.8 12.1 35.6 51.1
+MaskLab+ [3]         ResNet-101                                 37.3 59.8
+MaskLab+ [3]     ResNet-101 (JET)                               38.1 61.1   37.8 15.5 38.1 52.4
+
+                                                                            39.4 16.9 39.9 53.5
+
+                                                                            37.4 16.9 38.3 49.2
+
+                                                                            36.6 19.1 40.5 50.6
+
+                                                                            40.4 19.6 41.6 51.4
+
+Mask R-CNN       ResNet-101                                     34.3 55.0   36.6 13.2 36.4 52.2
+MS R-CNN                                                        35.4 54.9   38.1 13.7 37.6 53.3
+
+Mask R-CNN       ResNet-101 FPN                                 37.0 59.2   39.5 17.1 39.3 52.9
+MS R-CNN                                                        38.3 58.8   41.5 17.8 40.4 54.4
+
+Mask R-CNN       ResNet-101 DCN+FPN                             38.4  61.2  41.2 18.0 40.5 55.2
+MS R-CNN                                                        39.6  60.7  43.1 18.8 41.5 56.2
+
+are resized to have 600px along the short axis and a max-             segmentation results are reported.
+imum of 1000px along the long axis for training and test-
+ing. Different from the standard FPN [25], we only use C4,            4.3. Ablation Study
+C5 for RPN proposal and feature extractor in ResNet-18.
+For ResNet-50/101, input images are resized to 800 px for                We comprehensively evaluate our method on COCO
+the short axis and 1333px for the long axis for training and          2017 validation set. We use ResNet-18 FPN for all the ab-
+testing. The rest configurations for ResNet-50/101 follow             lation study experiments.
+Detectron [13]. We train all the networks for 18 epochs, de-
+creasing the learning rate by a factor of 0.1 after 14 epochs         The design choices of MaskIoU head input: We first
+and 17 epochs. Synchronized SGD with momentum 0.9 is                  study the design choices of the MaskIoU head input, which
+used as optimizer. For testing, we use SoftNMS and retain             is the fusion of predicted mask score map (28×28×C) from
+the top-100 score detection for each image.                           the mask head and the RoI features. There are a few design
+                                                                      choices shown in Fig. 4 and explained as follows:
+4.2. Quantitative Results
+                                                                       (a) Target mask concatenates RoI feature: The score map
+   We report our results on different backbone networks in-                 of the target class is taken, max-pooled and concate-
+cluding ResNet-18/50/101 and different framework includ-                    nated with RoI feature.
+ing Faster R-CNN/FPN/DCN+FPN [9] to prove the effec-
+tiveness of our method. Results are shown in Table 1 and               (b) Target mask multiplies RoI feature: The score map of
+Table 2. We use APm to report instance segmentation re-                     the target class is taken, max-pooled and multiplied
+sults and APb to report detection results. We report our                    with RoI feature.
+reproduced Mask R-CNN results and our MS R-CNN re-
+sults. As Table 1 shows, comparing with Mask R-CNN, our                (c) All masks concatenates RoI feature: All the C classes
+MS R-CNN is not sensitive to the backbone network and                       mask score map are max-pooled and concatenated with
+can achieve stable improvement on all backbone networks:                    RoI feature.
+Our MS R-CNN can get a remarkable improvement (about
+1.5 AP). Especially for AP@0.75, our method can improve                (d) Target mask concatenates High-resolution RoI feature:
+baseline by about 2 points. Table 2 indicates that our MS                   The score map of the target class is taken and concate-
+R-CNN is robust to different framework including Faster                     nated with 28 ×28 RoI features.
+R-CNN/FPN/DCN+FPN. Beside, our MS R-CNN does not
+harm bounding box detection performance; in fact, it im-                 The results are shown in Table 4. We can see that the
+proves bounding box detection performance slightly. The               performance of MaskIoU head is robust to different ways of
+results of test-dev are reported in Table 3, only the instance        fusing mask prediction and RoI feature. Performance gain
+                                                                      is observed in all kinds of design. Since concatenating the
+                                                                      target score map and RoI feature obtains the best results, we
+                                                                      use it as our default choice.
+         28×28×C 28×28×1     28×28×C             28×28×1              28×28×C                  28×28×C 28×28×1
+
+masks                        masks                                    masks                    masks
+
+        14×14×256         P                                        P                        P  28×28×256
+
+  RoI                                 14×14×256                       14×14×256
+feature
+                          +    RoI                                 ×    RoI                 +    RoI            +
+                             feature                                  feature                  feature
+
+                     a                           (b)                           (c)                        (d)
+
+                             selecting P max pooling                  + concatenate × multiply
+
+                          Figure 4. Different design choices of the MaskIoU head input.
+
+Table 4. Results of different design choices of the MaskIoU head      Table 5. Results of using different training targets.
+input.
+
+                                                                      Setting                  AP AP@0.5 AP@0.75
+
+Setting                 AP AP@0.5 AP@0.75                             Mask R-CNN baseline 27.7 46.9             29.0
+
+Mask R-CNN baseline 27.7 46.9                    29.0                 Setting #1: Target ins. 29.3 46.9         31.3
+
+(a) Target mask + RoI   29.3 46.9                31.3                 Setting #2: All cls.     24.5 41.6        25.6
+
+(b) Target mask × RoI   29.1 46.6                30.9                 Setting #3: Positive ins. 28.2 45.5       30.2
+
+(c) All masks + RoI     29.1 46.6                30.8
+
+(d) Target mask + HR RoI 29.1 46.7               31.1
+
+The choices of the training target: As mentioned before,           comparing setting #1 with setting #2, we can find that train-
+we decompose the mask score learning task as mask classi-          ing MaskIoU of all categories (regression only based Mask-
+fication and MaskIoU regression. Is it possible to learn the       IoU prediction) will degrade the performance drastically,
+mask score directly? In addition, a RoI may contain multi-         which verifies our opinion that training classification and
+ple categories of objects. Should we learn MaskIoU for all         regression using a single objective function is difficult.
+categories? How to set the training target for MaskIoU head
+still need exploration. There are many different choices of           It is reasonable that the performance of setting #3 is infe-
+training target:                                                   rior to setting #1, since regressing MaskIoU for all positive
+                                                                   categories increases the burden of MaskIoU head. Thus,
+  1. Learning the MaskIoU of the target category, mean-            learning the MaskIoU of the target category is used as our
+      while the other categories in the proposal are ignored.      default choice.
+      This is also the default training target in this paper, and
+      the control group for all experiments in this paragraph.     How to select training samples: Since the proposed
+                                                                   MaskIoU head is built on top of the Mask R-CNN frame-
+  2. Learning the MaskIoU for all categories. If a category        work, all the training samples for the MaskIoU head have a
+      does not appear in the RoI, its target MaskIoU is set to     box-level IoU larger than 0.5 with its ground truth bounding
+      0. This setting denotes using regression only to predict     box according to the setting in the Mask R-CNN. However,
+      MaskIoU, which requires the regressor to be aware of         their MaskIoU may not exceed 0.5.
+      the absence of unrelated categories.
+                                                                      Given a threshold  , we use the samples whose Mask-
+  3. Learning the MaskIoU of all the positive categories,          IoU are larger than  to train the MaskIoU head. Table 6
+      where a positive category means the category appears         shows the results. The results show that training using all
+      in the RoI region. And the rest categories in the pro-       the examples obtains the best performance.
+      posal are ignored. This setting is used to see whether
+      perform regression for more categories in the RoI re-        4.4. Discussion
+      gion could be better.
+                                                                      In this section, we will first discuss the quality of the
+   Table 5 shows the results for above training targets. By        predicted MaskIoU, and then investigate the upper bound
+                                                                   performance of Mask Scoring R-CNN if the prediction of
+                                                                   MaskIoU is perfect, and analyze the computational com-
+                                                                   plexity of MaskIoU head at last. In the discussions, all
+Table 6. Results of selecting different training samples for the
+MaskIoU head.
+
+Threshold AP AP@0.5 AP@0.75
+
+ = 0.0 29.3 46.9  31.3
+
+ = 0.3 29.2 46.6  31.1
+
+ = 0.5 29.0 46.5  30.9
+
+ = 0.7 28.8 46.9  30.5
+
+the results are obtained on COCO 2017 validation set using        Figure 5. Visualizations of MaskIoU predictions and their ground
+both a weak backbone network, i.e., ResNet-18 FPN and a           truth. (a) Results with ResNet-18 FPN backbone and (b) results
+strong backbone network, i.e., ResNet-101 DCN+FPN.                with ResNet-101 DCN+FPN backbone. The x-axis presents the
+                                                                  ground truth MaskIoU and the y-axis presents the predicted Mask-
+The quality of the predicted MaskIoU: We use correla-             IoU of the proposed MaskIoU head.
+tion coefficient between ground truth and predicted Mask-
+IoU to measure the quality of our prediction. Reviewing our       Table 7. Results of Mask R-CNN, MS R-CNN and the ideal case
+testing procedure, we choose the top 100 scoring boxes af-        of MS R-CNN (MS R-CNN ) using ResNet-18 FPN and ResNet-
+ter SoftNMS according to the classification scores, fed the       101 DCN+FPN as backbones on COCO 2017 validation set.
+detected boxes to Mask head and get the predicted mask,
+then use the predicted mask and RoI feature as the input of       Method      Backbone       AP
+MaskIoU head. The output of MaskIoU head and classifi-
+cation score are further integrated into final mask score.        Mask R-CNN                 27.7
+
+   We keep 100 predicted MaskIoU for each image in the            MS R-CNN    ResNet-18 FPN  29.3
+COCO 2017 validation dataset, collecting 500, 000 predic-
+tions from all 5, 000 images. We plot each predictions and        MS R-CNN                   31.5
+their corresponding ground truth in Fig. 5. We can see
+that the MaskIoU predictions have good correlation with           Mask R-CNN                 37.7
+their ground truth, especially for those prediction with high
+MaskIoU. The correlation coefficient between predictions          MS R-CNN ResNet-101 DCN+FPN 39.1
+and their ground truth is around 0.74 for both ResNet-18
+FPN and ResNet-101 DCN+FPN backbone networks. It in-              MS R-CNN                   41.7
+dicates that the quality of the prediction is not sensitive to
+the change of backbone networks. This conclusion is also          Model size and running time: Our MaskIoU head has
+consistent with Table 1. Since there is no method works           about 0.39G FLOPs while Mask head has about 0.53G
+on predicting MaskIoU before, we refer to a previous work         FLOPs for each proposal. We use one TITAN V GPU to test
+[19] on predicting bounding box IoU. [19] obtains a 0.617         the speed (sec./image). As for ResNet-18 FPN, the speed is
+correlation coefficient, which is inferior to ours.               about 0.132 for both Mask R-CNN and MS R-CNN. As for
+                                                                  ResNet-101 DCN+FPN, the speed is about 0.202 for both
+The upper bound performance of MS R-CNN: Here                     Mask R-CNN and MS R-CNN. The computation cost of
+we will discuss the upper bound performance of our                MaskIoU head in Mask Scoring R-CNN is negligible.
+method. For each predicted mask, we can find its matched
+ground truth mask; then we just use the ground truth Mask-        5. Conclusion
+IoU to replace the predicted MaskIoU when the ground
+truth MaskIoU larger than 0. The results are shown in Ta-            In this paper, we investigate the problem of scoring in-
+ble 7. The results show that Mask Scoring R-CNN con-              stance segmentation masks and propose Mask Scoring R-
+sistently outperforms Mask R-CNN. Compared to the ideal           CNN. By adding a MaskIoU head in Mask R-CNN, scores
+prediction of Mask Scoring R-CNN, there is still a room           of the masks are aligned with MaskIoU, which is usually ig-
+to improve the practical Mask Scoring R-CNN, which are            nored in most instance segmentation frameworks. The pro-
+2.2% AP for ResNet-18 FPN backbone and 2.6% AP for                posed MaskIoU head is extremely effective and easy to im-
+ResNet-101 DCN+FPN backbone.                                      plement. On the COCO benchmark, extensive results show
+                                                                  that Mask Scoring R-CNN consistently and obviously out-
+                                                                  performs Mask R-CNN. It also can be applied to other in-
+                                                                  stance segmentation networks to obtain more reliable mask
+                                                                  scores. We hope our simple and effective approach will
+                                                                  serve as a baseline and help the future research in instance
+                                                                  segmentation task.
+References                                                           [16] K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning
+                                                                           for image recognition. In IEEE Conference on Computer
+ [1] M. Bai and R. Urtasun. Deep watershed transform for in-               Vision and Pattern Recognition, pages 770­778, 2016. 1
+      stance segmentation. In IEEE Conference on Computer Vi-
+      sion and Pattern Recognition, pages 2858­2866, 2017. 2         [17] L. Huang, Y. Yang, Y. Deng, and Y. Yu. Densebox: Unifying
+                                                                           landmark localization with end to end object detection. arXiv
+ [2] N. Bodla, B. Singh, R. Chellappa, and L. S. Davis. Soft-              preprint arXiv:1509.04874, 2015. 1
+      nmsimproving object detection with one line of code. In
+      IEEE International Conference on Computer Vision, pages        [18] Z. Huang, X. Wang, L. Huang, C. Huang, Y. Wei, and
+      5562­5570, 2017. 3, 4                                                W. Liu. Ccnet: Criss-cross attention for semantic segmen-
+                                                                           tation. arXiv preprint arXiv:1811.11721, 2018. 1
+ [3] L.-C. Chen, A. Hermans, G. Papandreou, F. Schroff,
+      P. Wang, and H. Adam. Masklab: Instance segmentation           [19] B. Jiang, R. Luo, J. Mao, T. Xiao, and Y. Jiang. Acquisition
+      by refining object detection with semantic and direction fea-        of localization confidence for accurate object detection. In
+      tures. arXiv preprint arXiv:1712.04837, 2017. 1, 2, 6                European Conference on Computer Vision, pages 816­832,
+                                                                           2018. 3, 8
+ [4] L.-C. Chen, G. Papandreou, I. Kokkinos, K. Murphy, and
+      A. L. Yuille. Deeplab: Semantic image segmentation with        [20] L. Jin, Z. Chen, and Z. Tu. Object detection free instance
+      deep convolutional nets, atrous convolution, and fully con-          segmentation with labeling transformations. arXiv preprint
+      nected crfs. IEEE transactions on Pattern Analysis and Ma-           arXiv:1611.08991, 2016. 2
+      chine Intelligence, pages 834­848, 2018. 1
+                                                                     [21] A. Kirillov, E. Levinkov, B. Andres, B. Savchynskyy, and
+ [5] B. Cheng, Y. Wei, H. Shi, R. Feris, J. Xiong, and T. Huang.           C. Rother. Instancecut: from edges to instances with mul-
+      Revisiting rcnn: On awakening the classification power of            ticut. In IEEE Conference on Computer Vision and Pattern
+      faster rcnn. In European Conference on Computer Vision,              Recognition, pages 7322­7331, 2017. 2
+      pages 473­490, 2018. 3
+                                                                     [22] A. Krizhevsky, I. Sutskever, and G. E. Hinton. Imagenet
+ [6] J. Dai, K. He, Y. Li, S. Ren, and J. Sun. Instance-sensitive          classification with deep convolutional neural networks. In
+      fully convolutional networks. In European Conference on              Advances in Neural Information Processing Systems, pages
+      Computer Vision, pages 534­549, 2016. 2                              1097­1105, 2012. 1
+
+ [7] J. Dai, K. He, and J. Sun. Instance-aware semantic segmen-      [23] Y. Li, H. Qi, J. Dai, X. Ji, and Y. Wei. Fully convolu-
+      tation via multi-task network cascades. In IEEE Conference           tional instance-aware semantic segmentation. In IEEE Inter-
+      on Computer Vision and Pattern Recognition, pages 3150­              national Conference on Computer Vision, pages 4438­4446,
+      3158, 2016. 6                                                        2017. 2, 6
+
+ [8] J. Dai, Y. Li, K. He, and J. Sun. R-fcn: Object detection       [24] X. Liang, Y. Wei, X. Shen, J. Yang, L. Lin, and S. Yan.
+      via region-based fully convolutional networks. In Advances           Proposal-free network for instance-level object segmenta-
+      in Neural Information Processing Systems, pages 379­387,             tion. arXiv preprint arXiv:1509.02636, 2015. 2
+      2016. 2
+                                                                     [25] T.-Y. Lin, P. Dolla´r, R. B. Girshick, K. He, B. Hariharan, and
+ [9] J. Dai, H. Qi, Y. Xiong, Y. Li, G. Zhang, H. Hu, and Y. Wei.          S. J. Belongie. Feature pyramid networks for object detec-
+      Deformable convolutional networks. In IEEE International             tion. In IEEE Conference on Computer Vision and Pattern
+      Conference on Computer Vision, pages 764­773, 2017. 4, 6             Recognition, pages 936­944, 2017. 6
+
+[10] B. De Brabandere, D. Neven, and L. Van Gool. Semantic           [26] T.-Y. Lin, M. Maire, S. Belongie, J. Hays, P. Perona, D. Ra-
+      instance segmentation with a discriminative loss function.           manan, P. Dolla´r, and C. L. Zitnick. Microsoft coco: Com-
+      arXiv preprint arXiv:1708.02551, 2017. 2                             mon objects in context. In European Conference on Com-
+                                                                           puter Vision, pages 740­755, 2014. 1, 4
+[11] A. Fathi, Z. Wojna, V. Rathod, P. Wang, H. O. Song,
+      S. Guadarrama, and K. P. Murphy. Semantic instance             [27] W. Liu, D. Anguelov, D. Erhan, C. Szegedy, S. Reed, C.-
+      segmentation via deep metric learning. arXiv preprint                Y. Fu, and A. C. Berg. Ssd: Single shot multibox detector.
+      arXiv:1703.10277, 2017. 2                                            In European Conference on Computer Vision, pages 21­37,
+                                                                           2016. 1
+[12] R. Girshick, J. Donahue, T. Darrell, and J. Malik. Rich fea-
+      ture hierarchies for accurate object detection and semantic    [28] J. Long, E. Shelhamer, and T. Darrell. Fully convolutional
+      segmentation. In IEEE Conference on Computer Vision and              networks for semantic segmentation. In IEEE Conference
+      Pattern Recognition, pages 580­587, 2014. 1                          on Computer Vision and Pattern Recognition, pages 3431­
+                                                                           3440, 2015. 1
+[13] R. Girshick, I. Radosavovic, G. Gkioxari, P. Dolla´r,
+      and K. He. Detectron. https://github.com/                      [29] L. Neumann, A. Zisserman, and A. Vedaldi. Relaxed soft-
+      facebookresearch/detectron, 2018. 6                                  max: Efficient confidence auto-calibration for safe pedes-
+                                                                           trian detection. 2018. 3
+[14] A. W. Harley, K. G. Derpanis, and I. Kokkinos.
+      Segmentation-aware convolutional networks using local at-      [30] A. Newell, Z. Huang, and J. Deng. Associative embedding:
+      tention masks. In IEEE International Conference on Com-              End-to-end learning for joint detection and grouping. In
+      puter Vision, pages 5048­5057, 2017. 2                               Advances in Neural Information Processing Systems, pages
+                                                                           2277­2287, 2017. 2
+[15] K. He, G. Gkioxari, P. Dolla´r, and R. Girshick. Mask r-
+      cnn. In IEEE International Conference on Computer Vision,      [31] P. O. Pinheiro, R. Collobert, and P. Dolla´r. Learning to seg-
+      pages 2980­2988, 2017. 1, 2, 4, 6                                    ment object candidates. In Advances in Neural Information
+                                                                           Processing Systems, pages 1990­1998, 2015. 2
+[32] J. Redmon, S. Divvala, R. Girshick, and A. Farhadi. You
+      only look once: Unified, real-time object detection. In IEEE
+      Conference on Computer Vision and Pattern Recognition,
+      pages 779­788, 2016. 1
+
+[33] S. Ren, K. He, R. Girshick, and J. Sun. Faster r-cnn: Towards
+      real-time object detection with region proposal networks. In
+      Advances in Neural Information Processing Systems, pages
+      91­99, 2015. 1, 2, 4
+
+[34] P. Tang, C. Wang, X. Wang, W. Liu, W. Zeng, and J. Wang.
+      Object detection in videos by high quality object linking.
+      arXiv preprint arXiv:1801.09823, 2018. 1
+
+[35] P. Tang, X. Wang, Z. Huang, X. Bai, and W. Liu. Deep patch
+      learning for weakly supervised object classification and dis-
+      covery. Pattern Recognition, 71:446­459, 2017. 1
+
+[36] L. Tychsen-Smith and L. Petersson. Improving object local-
+      ization with fitness nms and bounded iou loss. arXiv preprint
+      arXiv:1711.00164, 2017. 3
+
+[37] H. Zhao, J. Shi, X. Qi, X. Wang, and J. Jia. Pyramid scene
+      parsing network. In IEEE Conference on Computer Vision
+      and Pattern Recognition, pages 2881­2890, 2017. 1
+

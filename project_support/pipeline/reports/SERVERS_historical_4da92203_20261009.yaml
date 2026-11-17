@@ -1,0 +1,99 @@
+# ============================================================
+# SERVERS.yaml — Cluster 项目服务器与数据集注册表
+# ============================================================
+# 用法:
+#   同步代码:    bash scripts/sync.sh <server>
+#   远程训练:    bash scripts/remote_train.sh <server> <config> <gpu_ids>
+#   查看状态:    bash scripts/remote_status.sh <server>
+# ============================================================
+
+# ----- 服务器列表 -----
+servers:
+  # ---- 本地开发机 ----
+  local:
+    host: 192.168.1.175
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 0
+      type: RTX3090
+    remote_code_root: /home/songcl/3dres/project/cluster_project/Cluster
+    conda_source: /home/songcl/.conda/etc/profile.d/conda.sh
+    conda_env: prject_cluster
+    data_root: /home/songcl/data/data/
+    work_dir: /home/songcl/3dres/project/cluster_project/Checkpoints
+
+  # ---- 二号服务器 (192.168.1.163, 2x RTX 3090) ----
+  server-2:
+    host: 192.168.1.163
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX3090
+    allowed_gpus: []   # 流水线跳过该机
+    remote_code_root: /bak_home/songcl/Project/Cluster_project/Cluster
+    conda_source: /home/dl01/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /bak_home/songcl/3D_visual_grounding/data/ipdn_data/data/
+    work_dir: /bak_home/songcl/Project/Cluster_project/Cluster_checkpoints
+
+  # ---- 三号服务器 (192.168.1.194, 2x RTX 3090) ----
+  server-3:
+    host: 192.168.1.194
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX3090
+    allowed_gpus: []   # 流水线跳过该机
+    remote_code_root: /sdc1/songcl/Project/Cluster_project/Cluster
+    conda_source: /home/sysu311/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /sdc1/songcl/IPDN/data/
+    work_dir: /sdc1/songcl/Project/Cluster_project/Cluster_checkpoints
+
+  # ---- 四号服务器 (192.168.1.137, 2x RTX 5090) ----
+  server-4:
+    host: 192.168.1.137
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 2
+      type: RTX5090
+    allowed_gpus: []   # 用户 2026-09-21：server-4 不再接收新任务，流水线跳过该机
+    max_tasks_per_gpu: 1
+    dispatch_enabled: false
+    remote_code_root: /data/songcl/Project/Cluster_project/Cluster
+    conda_source: /home/dl04/anaconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /home/songcl/data/data/
+    work_dir: /data/songcl/Project/Cluster_project/Cluster_checkpoints
+
+  # ---- 六号服务器 (100.64.3.28, 8x H100 80GB) ----
+  server-6:
+    host: 100.64.3.28
+    user: songcl
+    role: gpu_server
+    gpu:
+      count: 8
+      type: H100
+    allowed_gpus: [7]   # 用户 2026-09-21：所有新任务只在 server-6 GPU7，每卡 2 槽
+    max_tasks_per_gpu: 2
+    dispatch_enabled: true
+    remote_code_root: /data3/songcl/Project/Cluster_project/Cluster
+    conda_source: /data3/songcl/miniconda3/etc/profile.d/conda.sh
+    conda_env: project_cluster
+    data_root: /data3/songcl/data/data_cluster/
+    work_dir: /data3/songcl/Project/Cluster_project/Cluster_checkpoints
+
+# ----- 数据集注册表 -----
+datasets:
+  scanrefer:
+    path: scanrefer/
+  scannetv2:
+    path: scannetv2/
+  multi3drefer:
+    path: multi3drefer/
+  pretrain_backbone:
+    path: sp_unet_backbone.pth

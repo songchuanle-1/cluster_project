@@ -1,0 +1,135 @@
+{
+  "observed_at": "2026-10-20T07:13:32.092854+00:00",
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "revision": 2,
+  "previous_tick": {
+    "token": "fefdcc2a82294674927257b9c68f7b47",
+    "status": "INCOMPLETE",
+    "receipt": {
+      "path": "pipeline/tick_receipts/fefdcc2a82294674927257b9c68f7b47.json",
+      "sha256": "3b8f09d19a312d66cf963202770da670fe95debeaf6118ea8dddd581656a00c1"
+    },
+    "release_verified": "2026-10-20T14:56:19.6655331+08:00; no owned lease/pending remained"
+  },
+  "same_resource_input_sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+  "resource_table": [
+    {
+      "name": "M95_reference",
+      "flops_g": 9.762532428,
+      "median_ms": 33.78997899562819,
+      "p90_ms": 35.15462539799046,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336
+    },
+    {
+      "name": "PCE_original",
+      "flops_g": 9.762532428,
+      "median_ms": 901.2896704953164,
+      "p90_ms": 950.1011555927108,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336
+    },
+    {
+      "name": "PCE_R1_failed",
+      "flops_g": 9.762532428,
+      "median_ms": 833.8441605010303,
+      "p90_ms": 895.3067739086691,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336
+    },
+    {
+      "name": "PCE_R2",
+      "flops_g": 9.762532428,
+      "median_ms": 588.4055944989086,
+      "p90_ms": 614.8738476957078,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336
+    }
+  ],
+  "speedup_vs_original": 1.5317489822014059,
+  "latency_reduction_fraction_vs_original": 0.34715151658673504,
+  "latency_ratio_vs_M95": 17.413612319055826,
+  "peak_allocated_ratio_vs_M95": 1.0,
+  "flops_caveat": "Historical FVCore handlers unchanged; added elementwise/sum/softmax work is unsupported, so equal counted total does not mean zero added work.",
+  "graph_controls": [
+    {
+      "case": "native_resource_geometry",
+      "exact_edge_arrays_equal": true,
+      "edges": [
+        4272
+      ],
+      "original_ms": 870.9245609934442,
+      "revised_ms": 477.70722799759824
+    },
+    {
+      "case": "cooccupied_multimembership_and_two_scenes",
+      "exact_edge_arrays_equal": true,
+      "edges": [
+        5,
+        3
+      ],
+      "original_ms": 0.12412400974426419,
+      "revised_ms": 0.2075039956253022
+    }
+  ],
+  "operator_equivalence": {
+    "passed": true,
+    "maximum_error": 0.0,
+    "expressions": 8,
+    "scope": "Same old2TRAINscenes/8expressions, outputs/input gradients/row/deleted/rotated controls; not new population samples."
+  },
+  "full_source_controls": {
+    "full_source_identity_repeats": [
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 2.86102294921875e-06
+      },
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 2.86102294921875e-06
+      },
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 2.86102294921875e-06
+      }
+    ],
+    "full_source_row_permutation": {
+      "language_max_abs": 1.9073486328125e-06,
+      "inst_feats_max_abs": 2.86102294921875e-06
+    },
+    "deleted_contacts_vs_original_parent_gather": {
+      "language_max_abs": 0.0,
+      "inst_feats_max_abs": 1.9073486328125e-06
+    }
+  },
+  "full_source_passed": false,
+  "full_source_max_error": 2.86102294921875e-06,
+  "frozen_tolerance": 1e-06,
+  "source_scope": "Full original hierarchy-bank reduction plus complete active encoder; upstream backbone not relabeled and FPS membership transported, not recomputed.",
+  "native_backward": {
+    "completed": true,
+    "parameter_gradients": 642,
+    "all_finite": true,
+    "real_inst_feats_change_vs_deleted": 0.5668866038322449,
+    "optimizer_steps": 0,
+    "native_loss_forwards_this_tick": 2,
+    "native_criterion_backwards_this_tick": 1
+  },
+  "gate_review": {
+    "diagnosis": "Prior physical cross-leaf information gap remains; task benefit unproved.",
+    "controls": "FAIL full-source1e-6 despite exact graph/operator controls.",
+    "native_backward": "Finite native loss/backward and active inst_feats path verified.",
+    "resources": "Counted10G and matched inference memory met; full latency17.4xM95 remains costly and Pareto review unresolved.",
+    "independence": "Independent source/config checked and native body executed; production deployment not attempted.",
+    "constraints": "All existing bans/seed/schedule/gates retained; no scientific admission."
+  },
+  "scientific_admission": false,
+  "new_training": 0,
+  "unknown": [
+    "Trained efficacy/novelty/generalization",
+    "Full optimizer-state training peak",
+    "Original no-cluster baseline resource delta",
+    "Population harm and evaluation noise floor"
+  ],
+  "next_action": "Ask once for a scoped extra implementation revision; keep original numerical threshold and all failures. No automatic revision3 or training."
+}

@@ -1,0 +1,62 @@
+{
+  "observed_at": "2026-11-08T01:45:30.888313+00:00",
+  "hostname": "dl04-MS-7E06",
+  "gpu": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 32607, 98, 32012, 0",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "memory_free_mib": 32012,
+  "utilization_percent": 0,
+  "external_contexts": [],
+  "cooperative_locks": [
+    {
+      "kind": "training",
+      "dev": 66308,
+      "inode": 92537152,
+      "available_at_probe": true
+    },
+    {
+      "kind": "diagnostic",
+      "dev": 66308,
+      "inode": 92537153,
+      "available_at_probe": true
+    },
+    {
+      "kind": "exclusive",
+      "dev": 66308,
+      "inode": 92537154,
+      "available_at_probe": true
+    }
+  ],
+  "project_train_processes": [
+    {
+      "pid": 4024964,
+      "command": "/home/songcl/.conda/envs/project_cluster/bin/python -B -c import os,sys,socket,json,subprocess,fcntl\nfrom datetime import datetime,timezone\nassert sys.dont_write_bytecode\nassert socket.gethostname()==\"dl04-MS-7E06\"\ndef run(args):\n p=subprocess.run(args,capture_output=True,text=True,timeout=15);asser"
+    }
+  ],
+  "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive",
+  "exclusive_claimed": false,
+  "owner": {
+    "token": "4fa1481eb5e14bd1a0637720635b6410",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T01:13:04.022567+00:00",
+    "deadline_at": "2026-11-08T02:13:04.022567+00:00",
+    "context_sha256": "42c2500fe791101c49d2362c2f065aaa9503d51b47eb45a010e4fc757f4b8f10",
+    "pending_sha256": "2904930b5f9780b193cf4ee7a3c94b1bfc1cfaa87aca083b7d670e9aabedd0ba"
+  },
+  "raw_sha256": "b0a5de2610e0ad2194619c678fb2432028425fd66e8bda2d7493ab853a76eeb3",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "/home/songcl/.conda/envs/project_cluster/bin/python -B -c 'import os,sys,socket,json,subprocess,fcntl\nfrom datetime import datetime,timezone\nassert sys.dont_write_bytecode\nassert socket.gethostname()==\"dl04-MS-7E06\"\ndef run(args):\n p=subprocess.run(args,capture_output=True,text=True,timeout=15);assert p.returncode==0,p.stderr[:200];return p.stdout.strip()\ngpu=run([\"nvidia-smi\",\"--id=0\",\"--query-gpu=index,uuid,memory.total,memory.used,memory.free,utilization.gpu\",\"--format=csv,noheader,nounits\"])\nrow=[x.strip() for x in gpu.split(\",\")];assert row[:2]==[\"0\",\"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\"]\ncontexts=run([\"nvidia-smi\",\"--query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory\",\"--format=csv,noheader,nounits\"])\ncontexts=[x for x in contexts.splitlines() if row[1] in x]\nlocks=[]\nfor kind in (\"training\",\"diagnostic\",\"exclusive\"):\n path=\"/tmp/cluster_project_gpu0_\"+kind+\".lock\";fd=os.open(path,os.O_RDONLY);s=os.fstat(fd);assert s.st_dev==66308 and s.st_ino=={\"training\":92537152,\"diagnostic\":92537153,\"exclusive\":92537154}[kind]\n try:\n  fcntl.flock(fd,fcntl.LOCK_EX|fcntl.LOCK_NB);available=True;fcntl.flock(fd,fcntl.LOCK_UN)\n except BlockingIOError:available=False\n finally:os.close(fd)\n locks.append(dict(kind=kind,dev=s.st_dev,inode=s.st_ino,available_at_probe=available))\nproject=[]\nfor p in os.listdir(\"/proc\"):\n if not p.isdigit():continue\n try:\n  cmd=open(\"/proc/\"+p+\"/cmdline\",\"rb\").read(8192).replace(b\"\\x00\",b\" \").decode(errors=\"replace\")\n  if \"tools/train.py\" in cmd and (\"Cluster_\" in cmd or \"cluster_project\" in cmd):project.append(dict(pid=int(p),command=cmd[:300]))\n except (OSError,PermissionError):pass\nprint(json.dumps(dict(observed_at=datetime.now(timezone.utc).isoformat(),hostname=socket.gethostname(),gpu=gpu,physical_gpu=0,gpu_uuid=row[1],memory_free_mib=int(row[4]),utilization_percent=int(row[5]),external_contexts=contexts,cooperative_locks=locks,project_train_processes=project,measurement_scope=\"authorized_overlay_potentially_contended_not_exclusive\",exclusive_claimed=False)))\n'"
+  ],
+  "resource_authorization": {
+    "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+    "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+  }
+}

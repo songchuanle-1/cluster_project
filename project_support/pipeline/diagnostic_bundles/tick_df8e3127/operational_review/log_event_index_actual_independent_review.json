@@ -1,0 +1,68 @@
+{
+  "owner": {
+    "token": "df8e31277a3644ffb73d674a6d58f4c6",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T19:08:49.914440+00:00",
+    "deadline_at": "2026-11-09T20:08:49.914440+00:00",
+    "context_sha256": "39f6521cdc7e6b7f1db79a6dfd0fb9bc310db06faf25060cdecfb5f3aaf3d99d",
+    "pending_sha256": "0328f4d3c4865bef20d41b9124d936cf6dc28cd12920d77cff26a29e96640c24"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "recorded_at": "2026-11-09T19:47:24.455132+00:00",
+  "passed": true,
+  "material_concerns": [],
+  "scope": "LOCAL_DECLARED_PATTERN_FULL_ARCHIVE_COVERAGE_AND_INTERPRETATION_ONLY_NOT_NATIVE_GATE",
+  "actual_sha256": "ffaa339538689a4647b25c5f6f185763afbf292beb5263a11b16bdd41f36cf45",
+  "source_sha256": "09c139645fc6cea3190e355d60691991bf0aa198da091c8060231c3d2fc1ca83",
+  "findings_sha256": "7877b22f8973f9852396be7b11cc3ddf865f17f6950867d279e1cbc8690d8ae8",
+  "classification": "FULL_ARCHIVE_PATTERN_COVERAGE_PASS_NO_NEW_WORKER_FAULT_SITE",
+  "total_bytes_scanned": 3601799,
+  "files": [
+    {
+      "label": "registered_stdout",
+      "bytes_scanned": 2671896,
+      "sha256": "6e967f30ff9987c390cf4f2c0ba2ed5004b64b8a14a060a054209725dc76c3dd",
+      "complete": true,
+      "events_stored": 2,
+      "event_counts": {
+        "worker_failure": 2,
+        "segmentation_fault": 2,
+        "matching_lines": 2
+      },
+      "events_truncated": false
+    },
+    {
+      "label": "actual_native_logger",
+      "bytes_scanned": 929903,
+      "sha256": "03129676316e429d90ced73ebe3c290782e1c932904e40e228733dac2bba9c6a",
+      "complete": true,
+      "events_stored": 0,
+      "event_counts": {},
+      "events_truncated": false
+    }
+  ],
+  "coverage_checks": [
+    "Both two exact archive paths and complete bytecounts independently matched immutable archive receipt; current fullfileSHA hashes match scanned and receiptSHA; scan ranges are byte0 toEOF.8MiB/file16MiBtotal caps did not truncate.",
+    "Scanner source reviewed and ASTparsed only; byte-regex declared patterns match actual pattern map. CR/LF/CRLF framing handles chunkboundaryCR; patterns search complete raw records before display truncation. Two stored matching lines, no overflow and no event/context text truncation.",
+    "Terse workerSIGSEGV notification is at stdout byte2666942, line18378, attached to progress4295. Parent RuntimeError worker3815203 is at byte2671645,line18422. Both were within previously observed final128KiB; two matching lines are not evidence of two crashes. Native logger has zero declared-pattern matching lines.",
+    "Historical receipt/reconcile/source/owner remain original; current owner applies only to new local analysis. No training/native/GPU/data execution or configuration modification was performed."
+  ],
+  "guard_scope": [
+    "Scanner itself validates cached current_owner_binding token and interval; it does not independently validate live foreground lock/context/pending/session. Root controller owns dispatch/post-binding checks. This review independently matched currently active owner and context/pending hashes before writing; do not attribute those stronger guards to scanner source."
+  ],
+  "interpretation": [
+    "The parent hier_postprocess frame followed by signal_handling.py/_error_if_any_worker_fails is asynchronous worker-death notification, not the worker native fault frame. Terse worker notification supplies no failed sample, augmentation/tokenizer/collation stage or faulting instruction.",
+    "No additional declared-pattern matches were found in earlier bytes of these two hashverified archived files. This does not exclude unlogged native fault, memory pressure, OOM, tokenizer/shared-memory conditions, unmatched message formats or kernel events. Pattern set does not cover every possible failure message.",
+    "Canonicalarchive analysis previously read full stdout for spAcc_50/spmIOU metrics. New result closes wholefile fault-pattern coverage, not a first-ever fullfile-read claim; targeted duplicate search is not exhaustive unrelated-history certification."
+  ],
+  "prior_128_correction": {
+    "artifact": "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_0bb87433\\hvd_cpu_failure_diagnosis\\diagnosis.json",
+    "sha256": "d12697a06c26acd34c36ca2091edcaa40be3d6f8912f46bcc4e651433e318e91",
+    "scope": "HVD six-level model/Module parameter traversal andclip_norm(no-grad)128iterations; notM234dataset-worker128scenes. Preserve missing actual worker input/stage/history evidence; do not repeat old128 parameter check or assert dataset coverage from it."
+  },
+  "historical_worker_fault": "UNKNOWN",
+  "historical_repair_verified": false,
+  "CPU_GPU_or_dataworker_clearance": false,
+  "reviewer_actions": "LOCAL_JSON_HASH_AST_AND_BOUNDED_EVENT_SLICE_VERIFICATION_ONLY; scanner not rerun; noSSH/native/Torch/GPU."
+}

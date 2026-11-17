@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T03:32:01.955280+00:00",
+  "origin_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_41eb62fa/bcr_operational_prepare/native/preparation.json",
+    "sha256": "a7ba73ba7610fa3e0dbac6f4a496f1657e8cf09f725d2b88f24df1d97ecff604"
+  },
+  "origin_runtime_sha256": "f60030ee04dbec7e22e809dc70e550a480ee970ad2cf8b49d77fb6a8bc20dcc9",
+  "GPU1_disabled_runtime_sha256": "1648c2e1b7e447fba59e4bddca96fd5b36b137668996cc99114ef243944bf222",
+  "worker_original_sha256": "a3b10169a9edee14b7943626934abbe46662e366268dcd4919320c86aefd6538",
+  "literal_substitutions": [
+    {
+      "from": "DRAFT_EXECUTION_DISABLED = False",
+      "to": "DRAFT_EXECUTION_DISABLED = True"
+    },
+    {
+      "from": "STAGE.name == 'bcr_'",
+      "to": "STAGE.name == 'bcr_gpu1_'"
+    },
+    {
+      "from": "PHYSICAL_GPU == 0",
+      "to": "PHYSICAL_GPU == 1"
+    }
+  ],
+  "runtime_changes_exactly_listed": true,
+  "all_model_config_worker_versionbinding_bytes_identical": true,
+  "selected_physical_gpu": 1,
+  "selected_gpu_uuid": "GPU-7f82edb9-f620-8045-caea-a75232265cd1",
+  "logical_cuda_device": 0,
+  "stage_prefix": "bcr_gpu1_",
+  "native_resources_transport": "NOT_RUN",
+  "grant_or_hardware_proof_created": false,
+  "active_binding_created": false
+}

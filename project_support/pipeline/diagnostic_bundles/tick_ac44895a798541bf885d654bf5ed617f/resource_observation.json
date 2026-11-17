@@ -1,0 +1,44 @@
+{
+  "token": "ac44895a798541bf885d654bf5ed617f",
+  "observed_at": "2026-10-15T12:09:21.855950+08:00",
+  "hostname": "dl04-MS-7E06",
+  "gpu": "0, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 32607, 31987, 115, 100",
+  "compute": "2634704, 20016\n1404754, 11486",
+  "registered_pid": {"pid": 2634704, "exists": false},
+  "locks": {
+    "/tmp/cluster_project_gpu0_m201_migration.lock": "held",
+    "/tmp/cluster_project_gpu0_exclusive.lock": "available",
+    "/tmp/cluster_project_gpu0_parameter_transport.lock": "available"
+  },
+  "kernel_lock_lines": ["9: FLOCK  ADVISORY  WRITE 2634697 103:04:92543777 0 EOF"],
+  "exact_lock_holders": [{"pid": 2634697, "exists": false}],
+  "execution": {
+    "ssh_returncode": 0,
+    "frozen_launcher_status": "BLOCKED",
+    "gpu_launches": 0,
+    "native_forwards": 0,
+    "optimizer_steps": 0,
+    "recovery_launches": 0
+  },
+  "scope": "Actual pinned-key SSH tool observation. Hostname and GPU UUID verified. Read-only GPU inventory and temporary nonblocking exact flocks, handles closed. No CUDA initialization, signals, lock deletion, reset, password access or foreign process scans. New PID1404754 ownership and command were not inspected; preserve it as unowned. Residual context/lock cause and cleanup authority remain unknown.",
+  "comparison": {
+    "previous_actual_observed_at": "2026-10-15T10:09:51.376763+08:00",
+    "previous_used_mib": 20107,
+    "previous_free_mib": 11994,
+    "previous_utilization_percent": 0,
+    "current_used_mib": 31987,
+    "current_free_mib": 115,
+    "current_utilization_percent": 100,
+    "new_unattributed_nvml_pid": 1404754,
+    "new_unattributed_nvml_memory_mib": 11486,
+    "unchanged": "Original NVML PID2634704/20016MiB, its absent visible proc entry, held training flock, absent kernel holder2634697, and two available diagnostic flocks.",
+    "scope": "Material resource change, not a new project training launch. The11:09steady tick did not make a fresh GPU resource observation."
+  },
+  "current_budget": {
+    "admission_budget": 1,
+    "research_reserve_target": 2,
+    "research_reserve_count": 4,
+    "research_reserve_budget": 0,
+    "reserve_only": false
+  }
+}

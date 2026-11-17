@@ -1,0 +1,31 @@
+{
+  "recorded_at": "2026-10-21T18:16:49.635824+00:00",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "code_commit": "9e543af623acd7fa9bd4a3f81ce79c932e98774a",
+  "kind": "resource_check",
+  "result": "blocked",
+  "actual_command": [
+    "python",
+    "-B",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_16b87793\\observe_running.py",
+    "--output",
+    "hrc_native_resource_check.json"
+  ],
+  "resource_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_16b87793/hrc_native_resource_check.json",
+    "sha256": "8db2c5ccfbd83ba8f44bc38deea31a4abeae976aec8f61bda11799bf84a31605"
+  },
+  "observed_at": "2026-10-21T18:15:16.268530+00:00",
+  "authorized_server": "server-4",
+  "authorized_gpus": [
+    0,
+    1
+  ],
+  "max_tasks_per_gpu": 1,
+  "physical_gpu_slots_available": false,
+  "reason": "GPU0 exact existing M207-HAP PID979955 and GPU1 exact full-resumed M206-CGCA PID732137 occupy both authorized single-task slots; NVML contexts match both UUIDs.",
+  "native_execution_started": false,
+  "no_stop_restart_sync_or_queue_mutation": true,
+  "next_action": "When one currently authorized GPU is actually idle and exclusive lease is verified, construct a fresh current-tick HRC native worker/controller for exact9e543af source/native YAML; execute real two-step train/backward and matched original-resource checks, then admit/dispatch only on actual PASS. Never replay expired HAP/CGCA diagnostic leases."
+}

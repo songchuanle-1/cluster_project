@@ -1,0 +1,85 @@
+{
+  "scope": "Static AST/source dependency verification and finite countermodel only.",
+  "checks_passed": 6,
+  "code_locations": {
+    "text_encoder": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py:124",
+    "decoder": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py:126",
+    "language_to_visual": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/dec.py:206"
+  },
+  "bypass_edges": [
+    [
+      "unmasked_tokens",
+      "language_encoder"
+    ],
+    [
+      "language_encoder",
+      "lang_feats"
+    ],
+    [
+      "lang_feats",
+      "ila"
+    ],
+    [
+      "ila",
+      "conditioned_visual"
+    ],
+    [
+      "conditioned_visual",
+      "hypothetical_reconstruction_head"
+    ],
+    [
+      "unmasked_tokens",
+      "late_mask"
+    ],
+    [
+      "late_mask",
+      "hypothetical_reconstruction_head"
+    ]
+  ],
+  "late_mask_bypass": true,
+  "countermodel": [
+    {
+      "hidden": 0,
+      "image": 0,
+      "conditioned_visual": 0,
+      "prediction": 0
+    },
+    {
+      "hidden": 1,
+      "image": 0,
+      "conditioned_visual": 1,
+      "prediction": 1
+    }
+  ],
+  "mask_before_encoder_removes_direct_bypass": true,
+  "limitations": [
+    "No reconstruction head currently exists;not a demonstrated bug in native grounding.",
+    "Graph reachability allows information transfer;does not prove trained features encode a word.",
+    "Removing direct leakage does not remove textual priors or establish visual dependence.",
+    "Masked conditional categorical prediction is not invalidated by diverse same-object captions.",
+    "Mask Grounding Eq4 already masks before language encoding and uses image-only features.",
+    "No novelty,resource,nativebackward,efficacy or admission claim."
+  ],
+  "evidence": [
+    {
+      "path": "scripts/reconstruction_dependency_audit_20260916.py",
+      "sha256": "467bc8ca8916a232b1f6257570293960371ebc946d4e321812b1dd19fa6d0979"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/network.py",
+      "sha256": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/dec.py",
+      "sha256": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a"
+    },
+    {
+      "path": "pipeline/reports/mask_grounding_original_20260916.pdf",
+      "sha256": "bfbcdfbc03116028a14a7126dc54ece10a68c8126f6926a2489ac724215b19f7"
+    },
+    {
+      "path": "pipeline/reports/3dwg_original_20260916.pdf",
+      "sha256": "033eee9aa64c24127c768907a4e5f7bf58d1b8b4554e1b0f5530fd3d08f3d02f"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "summary": {
+    "success": {
+      "denominator": 85,
+      "expressions": 0,
+      "cues": 0,
+      "covered": 0
+    },
+    "confident_wrong": {
+      "denominator": 31,
+      "expressions": 1,
+      "cues": 1,
+      "covered": 0
+    },
+    "other_failure": {
+      "denominator": 7,
+      "expressions": 0,
+      "cues": 0,
+      "covered": 0
+    }
+  },
+  "rows": [
+    {
+      "scene": "scene0320_00",
+      "ann_id": 19,
+      "caption": "this is an apple computer on a long desk . it is an all - in - one . it has no chair before it .",
+      "success": false,
+      "confident_wrong": true,
+      "cues": [
+        {
+          "text": "no",
+          "span": [
+            76,
+            78
+          ],
+          "coverage": []
+        }
+      ],
+      "edges": [
+        {
+          "obj_idx": 0,
+          "object": "apple computer",
+          "relation": "on",
+          "relation_idx": [
+            5
+          ],
+          "sub_idx": 1,
+          "subject": "desk"
+        },
+        {
+          "obj_idx": 0,
+          "object": "it",
+          "relation": "has",
+          "relation_idx": [
+            20
+          ],
+          "sub_idx": 2,
+          "subject": "chair"
+        },
+        {
+          "obj_idx": 2,
+          "object": "chair",
+          "relation": "before",
+          "relation_idx": [
+            23
+          ],
+          "sub_idx": 0,
+          "subject": "it"
+        }
+      ]
+    }
+  ],
+  "limitations": "Lexical cue detection only, not negation scope or predicate truth. Saved entity audit contains target/modifier/relation spans, NOT pronoun spans. No claim that cue is absent from full contextual encoder or all losses. No causal explanation from cue incidence, no extra annotations or model change.",
+  "sources": {
+    "pipeline\\reports\\entity_binding_20260916.json": "344921f3ca7285312238225ce5ee8d529a3e7c38f023f0e0864efbf4548533a8",
+    "scripts\\negation_span_audit_20260916.py": "67b3f28a4fc9adbe4956b1cabc8abc5ef812cedf5d04deee46124bfee597fdaf"
+  }
+}

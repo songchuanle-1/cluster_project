@@ -1,0 +1,21 @@
+{
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335",
+  "native_contract": "Same true TRAIN native loader, original train.train two steps, native backbone pretrain not trainedM95 checkpoint, original YAMLseed1999/epochs50/maxiters70. Accept original one-element loss tensor only if finite.",
+  "zero_new_parameter_proof": "Observe full module backward input edges fine/coarse plus output finite/nonzero; both are positional inputs. Observe finite model grads and existing fine/coarse FFN optimizer updates. Do not claim new parameter update.",
+  "resources": "GPU1 isolated process per target, pinned UUID/idle/context/training+diagnostic+exclusiveflocks. M205 GPU0 untouched. Same native val sample bs1warmup20repeat100 original fvcore.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/worker.py",
+      "sha256": "aad44f6846614a054df6ce94d61a3a9f4788a4cb0dffa5e12191d5fc9b84be0d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/control.py",
+      "sha256": "105146ddd270c328fece51b3ce95d7da23e3de83843514a61a03151d18a1af77"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_version_native.json",
+      "sha256": "aa0df3982a54dc3a3a23a5e937570468ef1bfc5762fe700ba994983147d672b9"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+--- frozen_v1/remote_receiver.py.txt
++++ fresh_v2/remote_receiver.py.txt
+@@ -4,7 +4,7 @@
+ import base64,hashlib,json,os,socket,stat,subprocess,sys
+ assert socket.gethostname()=='dl04-MS-7E06' and os.getuid()==os.geteuid()==1001
+ packet=json.load(sys.stdin)
+-stage=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prepare_c1fe2178')
++stage=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prepare_c1fe2178_v2')
+ assert packet['stage']==str(stage)
+ owner=packet['owner']
+ assert owner=={'token': 'c1fe217800894083b65baac45f79aa83', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-14T01:52:47.538159+00:00', 'deadline_at': '2026-11-14T02:52:47.538159+00:00', 'context_sha256': 'e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4', 'pending_sha256': '3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6'}
+@@ -42,7 +42,7 @@
+ if action=='render':
+  regular(stage/'actual_observation.json')
+  assert sha(stage/'actual_observation.json')==request['actual_observation_sha256']
+- assert not Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178').exists()
++ assert not Path('/data/songcl/Project/Cluster_project/pipeline/runtime/cso_path_prod_c1fe2178_v2').exists()
+ else:assert not (stage/'actual_observation.json').exists()
+ with request_path.open('xb') as stream:stream.write(request_raw)
+ request_path.chmod(0o600)

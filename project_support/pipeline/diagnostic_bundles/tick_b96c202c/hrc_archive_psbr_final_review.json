@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-23T06:15:28.009267+00:00",
+  "token": "b96c202c871a4a1889d47e1fdc75e16e",
+  "status": "LOCAL_LIFECYCLE_REVIEW_NO_MATERIAL_CONCERN",
+  "material_concerns": [],
+  "checks": {
+    "archive_JSON_exact_SHA": true,
+    "paired_observation_exact_SHA": true,
+    "experiment_archive_hash_matches": true,
+    "log_evidence_hash_matches": true,
+    "HRC_terminal_and_full_epoch_metadata": true,
+    "HRC_natural_terminal_double_observation": true,
+    "HRC_exact_log_binding_metadata": true,
+    "HRC_receipt_commit_launch_proof_preserved": true,
+    "HRC_admission_launch_history_retained": true,
+    "HRC_removed_queue_and_research_complete": true,
+    "PSBR_three_accounts_original_launch_running": true,
+    "PSBR_unique_GPU0_mapping": true,
+    "PSBR_exact_progress_increasing": true,
+    "PSBR_single_recorded_launch": true,
+    "M206_still_user_paused_no_resume": true,
+    "no_signal_deathwatch_source_or_GPU1_action_metadata": true
+  },
+  "source_artifacts": {
+    "hrc_terminal_archive.json": {
+      "path": "pipeline/diagnostic_bundles/tick_b96c202c/hrc_terminal_archive.json",
+      "sha256": "107ef6213f492198d46b75319958f85125464b7801d304730feffe5a2f2fdcd5"
+    },
+    "hrc_terminal_psbr_live_observation.json": {
+      "path": "pipeline/diagnostic_bundles/tick_b96c202c/hrc_terminal_psbr_live_observation.json",
+      "sha256": "32b5b6ae795c531138789b597e28d8b5d1e2fcec6a68325112983c53cd9b8f73"
+    },
+    "hrc_native_earlystop_log_evidence.json": {
+      "path": "pipeline/diagnostic_bundles/tick_b96c202c/hrc_native_earlystop_log_evidence.json",
+      "sha256": "2e2002fcf5677c5384566bef20e0df6fc908e9fbed83ff54dca44053b10220ab"
+    }
+  },
+  "HRC": {
+    "status": "done_earlystop",
+    "best_mIoU_4dp": 0.4901,
+    "epoch": 31,
+    "max_epochs": 50,
+    "earlystop_no_improve": 10,
+    "original_pid": 2780804,
+    "original_receipt_preserved": true,
+    "original_commit_preserved": true,
+    "history": [
+      "admitted_waiting",
+      "launched",
+      "done_earlystop"
+    ],
+    "scope": "Single realized run below M95 .5020 by .0119; no whole-mechanism rejection or automatic rerun."
+  },
+  "PSBR": {
+    "status": "running",
+    "pid": 2372658,
+    "starttime_from_root_observations": "35234267",
+    "gpu": 0,
+    "launch_verified": true,
+    "native_epoch": 1,
+    "observed_steps": [
+      207,
+      215
+    ],
+    "max_epochs": 50,
+    "efficacy": "UNKNOWN"
+  },
+  "M206": {
+    "status": "paused_by_user",
+    "dispatch_hold_retained": true,
+    "resume_authorized": false
+  },
+  "limitations": [
+    "This independent reviewer read only local bound JSON and current lifecycle records; no remote query was executed.",
+    "The full log was not read or rehashed. Exact local/remote full-log equality is the hash-bound root evidence assertion, with archived log identity independently matched across the small metadata.",
+    "Protected PSBR/M206 queue equality and prior_runs equality during finalization are supported by hash-bound helper execution assertions plus current metadata. No independent persisted pre-archive full-record snapshot was required by this bounded review."
+  ],
+  "executed": {
+    "SSH": false,
+    "GPU": false,
+    "torch": false,
+    "monitor": false,
+    "signal": false,
+    "dispatch": false,
+    "shared_state_write": false,
+    "full_log_read_or_hash": false,
+    "standard_artifact_body_read": false,
+    "old655_or_packet_read": false
+  },
+  "write_scope": "Only this new hrc_archive_psbr_final_review.json"
+}

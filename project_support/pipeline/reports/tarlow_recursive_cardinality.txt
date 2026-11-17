@@ -1,0 +1,944 @@
+            Fast Exact Inference for Recursive Cardinality Models
+
+
+
+Daniel Tarlow, Kevin Swersky, Richard S. Zemel, Ryan P. Adams,                             Brendan J. Frey
+            Dept. of Computer Science         Sch. of Eng. & Appl. Sci.                 Prob. & Stat. Inf. Group
+              University of Toronto              Harvard University                      University of Toronto
+   {dtarlow,kswersky,zemel}@cs.toronto.edu     rpa@seas.harvard.edu                     frey@psi.toronto.edu
+
+
+
+                     Abstract                              celebrated result is the ability of the “graph cuts” algo-
+                                                           rithm to exactly find the maximum a posteriori (MAP)
+    Cardinality potentials are a generally use-            assignment in any pairwise graphical model with bi-
+    ful class of high order potential that affect          nary variables, where the internal potential structure
+    probabilities based on how many of D bi-               is restricted to be submodular. Along similar lines,
+    nary variables are active. Maximum a poste-            polynomial-time algorithms can exactly compute the
+    riori (MAP) inference for cardinality poten-           partition function in an Ising model if the underlying
+    tial models is well-understood, with efficient         graph is planar (Fisher, 1961).
+    computations taking O(D log D) time. Yet               Extensions of these results have been a topic of much
+    efficient marginalization and sampling have            recent interest, particularly for the case of MAP in-
+    not been addressed as thoroughly in the ma-            ference. Gould (2011) shows how to do exact MAP
+    chine learning community. We show that                 inference in models with certain higher order terms
+    there exists a simple algorithm for comput-            via graph cut-like algorithms, and Ramalingham et al.
+    ing marginal probabilities and drawing ex-             (2008) give results for multilabel submodular models.
+    act joint samples that runs in O(D log2 D)             Tarlow et al. (2010) provide efficient algorithms for a
+    time, and we show how to frame the algo-               number of other high-order potentials.
+    rithm as efficient belief propagation in a low
+    order tree-structured model that includes ad-          Despite these successes in finding the optimal config-
+    ditional auxiliary variables. We then develop          uration, there has been relatively less progress in effi-
+    a new, more general class of models, termed            cient high order marginalization and sampling. This
+    Recursive Cardinality models, which take ad-           partially stems from the difficulty of some of the com-
+    vantage of this efficiency. Finally, we show           putations associated with summation in these models.
+    how to do efficient exact inference in mod-            For example, computing the partition function for bi-
+    els composed of a tree structure and a car-            nary pairwise submodular models (where graph cuts
+    dinality potential. We explore the expressive          can find the MAP) is #P-complete, so we do not ex-
+    power of Recursive Cardinality models and              pect to find an efficient exact algorithm.
+    empirically demonstrate their utility.                 One important high-order potential where such hard-
+                                                           ness results do not exist is the cardinality potential,
+                                                           which expresses constraints over the number of vari-
+1   Introduction                                           ables that take on a particular value. Such potentials
+                                                           come up in natural language processing, where they
+Probabilistic graphical models are widely used in ma-
+                                                           may express a constraint on the number of occurrences
+chine learning due to their representational power and
+                                                           of a part-of-speech, e.g., that each sentence contains at
+the existence of efficient algorithms for inference and
+                                                           least one verb. In computer vision, a cardinality po-
+learning. Typically, however, the model structure
+                                                           tential might encode a prior distribution over the re-
+must be restricted to ensure tractability. To enable
+                                                           lationships between size of an object in an image and
+efficient exact inference, the most common restriction
+                                                           distance from camera. In a conference paper matching
+is that the model have low tree-width.
+                                                           system, cardinality potentials could enforce a require-
+A natural question to ask is if there are other, differ-   ment that e.g. each paper have 3-4 reviews and each
+ent restrictions that we can place on models to ensure     reviewer receive 8-10 papers.
+tractable exact or approximate inference. Indeed, a
+A simple form of model containing a cardinality poten-      ing a balanced tree, exact inference can be done in the
+tial is a model over binary variables, where the model      same O(D log2 D) time (for non-balanced trees, the
+probability is a Gibbs distribution based on an energy      runtime is O(D2 )). This leads to a model class that
+function consisting of unary potentials θd and one car-     strictly generalizes standard tree structures, which is
+dinality potential f (·):                                   also able to model high order cardinality structure.
+                        X              X
+             −E(y) =       θ d yd + f (  yd )       (1)     2     Related Work
+                        d               d
+                            exp {−E(y)}                     2.1   Applications of Cardinality Potentials
+               p(y) = P                      ,       (2)
+                            y 0 exp {−E(y )}
+                                         0
+                                                            Cardinality potentials have seen many applications, in
+where no restrictions are placed on f (·). We call this     diverse areas. For example, in worker scheduling pro-
+the standard cardinality potential model. Perhaps the       grams in the constraint programming literature, they
+best-known algorithm in machine learning for comput-        have been used to express regulations such “each se-
+ing marginal probabilities is due to Potetz and Lee         quence of 7 days must contain at least 2 days off” and
+(2008); however, the runtime is O(D3 log D), which is       “a worker cannot work more than 3 night shifts every
+impractical for larger problems.                            8 days” (Régin, 1996). Milch et al. (2008) develop car-
+                                                            dinality terms in a relational modeling framework, us-
+We observe in this paper that there are lesser-known        ing a motivating example of modeling how many peo-
+algorithms from the statistics and reliability engineer-    ple will attend a workshop. In error correcting codes,
+ing literature that are applicable to this task. Though     message passing-based decoders often use constraints
+these earlier algorithms were not presented in terms        on a sum of binary variables modulus 2 (Gallager,
+of a graphical modeling framework, we will present          1963). Another application is in graph problems, such
+them as such, introducing an interpretation as a two        as finding the maximum-weight b-matching, in which
+step procedure: (i) create auxiliary variables so that      the cardinality parameter b constrains the degree of
+the high order cardinality terms can be re-expressed        each node in the matching (Huang & Jebara, 2007),
+as unary potentials on auxiliary variables, then (ii)       or to encode priors over sizes of partitions in graph
+pass messages on a tree-structured model that includes      partitioning problems (Mezuman & Weiss, 2012).
+original and auxiliary variables, using a known efficient
+message computation procedure to compute individual         More recently, cardinality potentials have become pop-
+messages. The runtime for computing marginal prob-          ular in language and vision applications. In part-of-
+abilities with this procedure will be O(D log2 D). This     speech tagging, cardinalities can encode the constraint
+significant efficiency improvement over the Potetz and      that each sentence contains at least one verb and noun
+Lee (2008) approach makes the application of cardinal-      (Ganchev et al., 2010). In image segmentation prob-
+ity potentials practical in many cases where it other-      lems from computer vision, they have been utilized
+wise would not be. For example, exact maximum like-         to encourage smoothness over large blocks of pixels
+lihood learning can be done efficiently in the standard     (Kohli et al., 2009), and Vicente et al. (2009) show that
+cardinality potential model using this formulation.         optimizing out a histogram-based appearance model
+                                                            leads to an energy function that contains cardinality
+We then go further and introduce a new high or-             terms.
+der class of potential that generalizes cardinality po-
+tentials, termed Recursive Cardinality (RC) poten-          2.2   Maximization Algorithms
+tials, and show that for balanced RC structures, ex-
+                                                            As noted previously, there is substantial work on per-
+act marginal computations can be done in the same
+                                                            forming MAP inference in models containing one or
+O(D log2 D) time. Additionally, we show how the
+                                                            more cardinality potentials. In these works, there is
+algorithm can be slightly modified to draw an exact
+                                                            a division between methods for restricted classes of
+sample with the same runtime. We follow this up by
+                                                            cardinality-based potential, and those that work for
+developing several new application formulations that
+                                                            arbitrary cardinality potentials. When the form of the
+use cardinality and RC potentials, and we demonstrate
+                                                            cardinality potential is restricted, tractable exact max-
+their empirical utility. The algorithms are equally ap-
+                                                            imization can sometimes be performed in models that
+plicable within an approximate inference algorithm,
+                                                            contain many such potentials, e.g., Kohli et al. (2009);
+like loopy BP, variational message passing, or tree-
+                                                            Ramalingham et al. (2008); Stobbe and Krause (2010);
+based schemes. This also allows fast approximate in-
+                                                            Gould (2011). A related case, where maximization
+ference in multi-label models that contain cardinality
+                                                            can only be done approximately is the “pattern poten-
+potentials separately over each label.
+                                                            tials” of Rother et al. (2009). For arbitrary functions
+Finally, we show that cardinality models can be com-        of counts, the main approaches are that of Gupta et
+bined with a tree-structured model, and again assum-        al. (2007) and Tarlow et al. (2010). The former gives
+a simple O(D log D) algorithm for performing MAP             variables similar to that of P L, dates back at least to
+inference, and the latter gives an algorithm with the        Gail et al. (1981). In this work, the algorithmic chal-
+same complexity for computing messages necessary for         lenge is to compute the probability that exactly k of D
+max-product belief propagation.                              elements are chosen to be on, given that elements turn
+                                                             on independently and with non-uniform probabilities.
+2.3       Summation Algorithms                               Naively, this would require summing over D    k config-
+                                                                                                            
+
+Relatively less work in the machine learning commu-          urations, but Gail et al. shows that it can be done in
+nity has examined efficient inference of marginal prob-      O(Dk) time using dynamic programming.
+abilities in models containing cardinality potentials.
+                                                             A similar task is considered by Barlow and Heidtmann
+The best-known approach is by Potetz and Lee (2008)
+                                                             (1984) and Belfore (1995) in the context of reliability
+(here PL). Also related is the line of work including de
+                                                             engineering. The task considered computing the prob-
+Salvo Braz et al. (2005) and Milch et al. (2008), but
+                                                             ability that exactly k elements are chosen to be on,
+these works assume restrictions on unary potentials,
+                                                             or the probability that between k and l elements are
+and it is not clear that they are efficient in the case
+                                                             chosen to be on. Belfore gives a divide-and-conquer
+where there are many distinct unary potentials.
+                                                             algorithm that recursively calls an FFT routine, lead-
+PL works with potentials θ(y; w) = f (y · w), where y        ing to an O(D log2 D) algorithm. This algorithm is
+and w are real-valued vectors. This is a general case        very similar to the approach we take in this work, and
+that is more involved than cardinality potentials, re-       in the case of ordinary cardinality potentials (i.e. not
+quiring a clever strategy for representing messages,         RC potentials), it is equivalent to the upward pass of
+e.g., with adaptive histograms. However, if y is binary      message passing that we will present in Section 5.
+and w is the all-ones vector, then f (·) is a standard
+                                                             Finally, there is work in statistics on Poisson-Binomial
+cardinality potential.
+                                                             (PB) distributions, which are the marginal distribu-
+The starting point for PL is to to write down the ex-        tions over cardinalities that arise if we have a model
+pression for a sum-product message from f to, say, the       that contains only unary potentials. These distribu-
+last variable yD :                                           tions have been used in several applications in the
+                                                           statistics literature. We refer the reader to Chen and
+                 X      X       Y                            Liu (1997) and references therein for more details on
+   mf D (yD ) =     f (   yd )     md0 f (yd0 ) . (3)      applications.
+                  y\{yD }     d      d0 6=D
+                                                             One algorithm for computing the cumulative distri-
+Next, PL defines a change of variables into a new set        bution function (CDF) of the PB distribution that
+of integer-valued variables, z, as follows:                  uses an FFT was proposed in Fernandez and Williams
+                                                             (2010) and analyzed by Hong (2011). The idea is to
+z1 = y1        z2 = z1 + y2    ...    zD−1 = zD−2 + yD−1 .   first compute the characteristic function of the distri-
+Eq. (3)h can then be expressed in terms ofi z as             bution, and then directly apply the inverse FFT in or-
+                                                             der to recover the CDF. The benefit of this approach
+   z\{zd } f (yD + zD−1 )  d0 6=d md f (zd − zd −1 ) . Fi-
+                                                      1
+P                         Q
+                                                             is that the FFT only needs to be applied once, how-
+                                    0     0    0
+
+nally, the sums can be pushed inwards as in variable         ever computing the characteristic function still takes
+elimination, and the internal sums can be computed           O(D2 ) time.
+from inside outwards naively in time O(D2 ). There
+are D summations to perform, so computing one mes-           For further discussion of other algorithms similar to
+sage takes O(D3 ) time. As observed by Felzenszwalb          the ones discussed above, we recommend Hong (2011)
+and Huttenlocher (2004) and noted by PL, the inter-          and references therein.
+nal sums can be performed via FFTs in O(D log D)
+time. Computing all D messages or marginals, then,           4     Recursive Cardinality Potentials
+requires O(D3 log D) time.                                   4.1   Model Structure
+
+3       Other Summation Algorithms                           The first contribution in this paper is to generalize the
+                                                             structure of the cardinality potential to the Recursive
+Here, we review lesser-known work from the statistics        Cardinality potential. Recursive Cardinality poten-
+and reliability engineering literature, where efficient      tials are defined in terms of a set of subsets S of a
+algorithms for very similar tasks have been developed.       set of D binary variables. The joint probability over
+                                                             vector y is defined as
+The idea of a recursive procedure that sums configura-
+tions in a chain-structure i.e. by using a definition of z
+                                                                                     Y        X
+                                                                             p(y) ∝      fk (     yd ),            (4)
+    1                                                                               sk ∈S   yd ∈sk
+        For notational convenience, assume we have z0 = 0.
+                                                                       of `0 and `1 priors, as well as their group counterparts
+      y1    y2        y3    y4     y1    y2          y3     y4         that are commonly used in structured sparsity (Zhao
+                                                                       et al., 2006).
+                           y7                             y7
+            y5   y6                      y5   y6
+                                                                       Hierarchical CRFs: A common approach to image
+                                                                       segmentation in the computer vision literature is to
+            (a) Nested                  (b) Not nested
+                                                                       construct a hierarchy of increasingly coarse segmen-
+                                                                       tations, then to perform the segmentation jointly at
+Figure 1: Examples of nested and non-nested subsets.
+                                                                       the different levels of coarseness. To enforce consis-
+                                                                       tency across levels of coarseness, a widely-used form
+where the only constraint is that S is nested, as illus-
+                                                                       of potential is the P n (Kohli et al., 2009) potential,
+trated in Fig. 1. We call a set of subsets S nested if for
+                                                                       which encourages sets of variables to all take on the
+every pair of subsets in S, either they are disjoint or
+                                                                       same label. If the segmentations at different levels of
+one is a subset of the other. Each fk can be arbitrary,
+                                                                       granularity have a nested structure, then this model
+and different per k. By defining subsets over single
+                                                                       can be represented using an RC potential, and thus
+variables, we can represent unary potentials, so we do
+                                                                       exact marginal inference (and therefore learning) can
+not explicitly separate them out here.
+                                                                       be done efficiently.
+This new construction extends the standard cardinal-
+ity potential to handle multiple scales, ranging from                  5     Fast Sum-Product Formulation
+purely local (e.g., for a pair of variables) to global,
+and potentially including all scales in between.                       Overview. Here, we present the fast FFT algorithm
+                                                                       as an auxiliary variable method, where auxiliary vari-
+4.2        Example Cardinality Potentials                              ables are invented in such a way that the distribution
+Cardinality potentials can be applied in diverse ways                  over y remains unchanged, but inference in the ex-
+in order to capture a variety of interesting properties.               panded model can be done very efficiently. In other
+Here we give some examples, and note that this list is                 words, we are defining an augmented      model q(y, z)
+far from exhaustive.                                                   that has the property that                = p(y), but
+                                                                                                    P
+                                                                                                      z q(y, z)
+                                                                       where computing all marginals in q (for both y and
+4.2.1       Ordinary Cardinality Potentials                            z variables) can be done more efficiently than directly
+Noisy-OR: Consider a set of D binary variables y                       computing marginals for each y in the original p(y) (at
+along with a single binary                                             least by using any existing method).
+                        QDvariable t that depends on y:
+P (t = 1|y) = 1−(1−) d=1 (1−λd )yd . For the special                  More specifically, the algorithm can be described as
+case where each λd is equal, we can represent this as                  follows: auxiliary variables z will be integer-valued
+a conditional model with a cardinality potential:                      variables that represent the count over subsets of origi-
+                                              PD                       nal variables y. The auxiliary variables are structured
+            P (t = 1|y) =1 − (1 − )(1 − λ)        d=1 yd        (5)   into a binary tree, as illustrated in Fig. 2, with orig-
+                                                                       inal y variables at leaves of the tree, so z variables
+This is simply a function of d yd , and can therefore
+                            P
+                                                                       at higher levels of the tree represent sums of increas-
+be viewed as a cardinality potential.
+                                                                       ingly large subsets of y. There is one auxiliary variable
+Smoothness and Competition: Note that even                             at every internal binary tree node, so with a balanced
+unimodal cardinality potentials have interesting prop-                 tree structure, the joint model over y and z is a tree of
+erties. A convex cardinality potential is related to                   depth log D. The utility of this formulation is that we
+smoothness: it will tend to favor configurations where                 can now represent cardinality potentials over subsets
+all of the variables are either on together or off to-                 of y variables as unary potentials over z variables.
+gether. In a similar manner, a concave function will
+                                                                       Having constructed the auxiliary variable model, the
+cause competition amongst the binary variables.
+                                                                       algorithm will be simply to run an inwards and out-
+4.2.2       Recursive Cardinality Potentials                           wards pass of sum-product belief propagation. The
+                                                                       key computational point is that due to the structure of
+Group and structured sparsity: By placing a car-
+                                                                       potentials over auxiliary variables, sum-product mes-
+dinality potential over subsets of variables consisting
+                                                                       sages can be computed efficiently even when z vari-
+of a uniform distribution over counts (or any general
+                                                                       ables have large cardinality, by using FFTs.
+distribution) along with a spike at 0, one can repre-
+sent the preference that variables should tend to turn
+                                                                       5.1   Detailed Description
+off together in groups. Indeed, one can represent hi-
+erarchical sparsity using a recursive model. This gives                The algorithm takes as input a binary tree T with
+an interesting alternative to the traditional approaches               D leaf nodes, where each leaf corresponds to one yd
+                                                     f7                                  see this, observe that given a setting of y, the one and
+                                           z7
+                                                                    f6                   only setting of z that satisfies all the deterministic re-
+                 f5
+                                                                                         lationships is for each zp to set zp = yd ∈sp yd . The
+                                                                                                                                  P
+                        z5                                 z6                 f2
+                                     z1                             z2                   proposition then follows directly.
+       f3
+                  z3                                 z4
+                            y1            y2                   y3        y4
+                                                                                         5.2     Aligning Nested Subsets with T
+                                                                                         We have shown how adding auxiliary variables z en-
+            y5         y6                       y7        y8
+                                                                                             P us to convert high order cardinality potentials
+                                                                                         ables
+                                                                                         fk ( yd ∈sk yd ) into a unary potential on an individual
+                                                                                         zk variable. However, this transformation only works
+                                                                                         if there is an internal z variable for each subset sk that
+Figure 2: Each internal node z represents the count
+                                                                                         we wish to put a cardinality potential over. This re-
+over the subset of original y variables that are descen-
+                                                                                         striction is what leads to the nested property that we
+dants of the internal node. Cardinality potentials on
+                                                                                         require of sets of subsets S. For any nested set of sub-
+the subset then can trivially be added as unary poten-
+                                                                                         sets S, however, it is possible to construct a binary tree
+tials on internal nodes. Here, in addition to a standard
+                                                                                         T such that an internal node in the tree is created for
+cardinality potential f7 , we add subset cardinality po-
+                                                                                         every subset sk . A question for future work is whether
+tentials f2 , f3 , f5 , and f6 .
+                                                                                         a weaker condition than nestedness can be enforced
+                                                                                         while still guaranteeing efficient exact inference.
+variable. To instantiate latent variables z, traverse up
+                                                                                         Finally, all that remains is to show how sum-product
+the tree from leaves to root, associating a z variable
+                                                                                         messages can be computed efficiently.
+with each internal node. When instantiating a new
+variable zp , set a deterministic relationship between                                   5.2.1    Upward Messages
+it and its two children, zl and zr , as zp = zl + zr . In
+                                                                                         Let g(zp , zl , zr ) be a factor that enforces the determin-
+graphical model terms, for each parent in the tree, add
+                                                                                         istic relationship zp = zl + zr between parent zp and
+a deterministic potential gp (zp , zl , zr ) = 1{zp =zl +zr } to
+                                                                                         children zl and zr . The upward message vectors that
+the model. With these definitions, we can define the
+                                                                                         we need to compute take the following form:
+distribution q as,
+                          Y                                                                                cl X
+                                                                                                              cr
+          q(y, z) ∝ p(y)      1{zp =zl(p) +zr(p) } ,         (6)                                           X
+                                                                                           mg,zp (zp ) =                 g(zp , zl , zr )mzl ,g (zl )mzr ,g (zr )
+                                          p∈P
+                                                                                                           zl =0 zr =0
+where P is the set of parent nodes in T , and l(p) and                                                      X cl
+
+r(p) are indices of the left and right children of zp .                                               =             mzl ,g (zl )mzr ,g (zp − zl ).
+                                                                                                       zl =zp −zr
+Define the set of leaf node descendants of zp as sp =
+{yd | zp is an ancestor of yd }. For any setting of z to                                 Expressed in this way, it becomes clear that the entire
+have nonzero P probability, it clearly must be the case                                  message vector (the above quantity, for all values of
+that zp =      yd ∈sp yd . Thus, a high order potential                                  zp ∈ {0, . . . , cp }) can be computed as a 1D discrete
+over subset sp can equivalently be represented as a                                      convolution. Since 1D discrete convolutions of vectors
+unary potential on zp . Expanding the definition of                                      of length N can be computed in O(N log N ) time us-
+p from within Eq. (6), the computational benefit be-                                     ing FFTs, these message vectors can be computed in
+comes clear, as we can rewrite all high order potentials                                 O(cp log cp ) time.
+as unary potentials:
+          Y       X         Y          Y                                                 5.2.2    Downward Messages
+q(y, z) ∝    fk (      yd )   θd (yd )   1{zp =zl(p) +zr(p) }
+                                                                                         Let g(zp , zl , zr ) be a factor that enforces the deter-
+         k|sk ∈S       yd ∈sk              d              p∈P
+            Y                Y                   Y                                       ministic relationship zp = zl + zr between parent zp
+        =         fk (zk )            θd (yd )        1{zp =zl(p) +zr(p) }         (7)   and children zl and zr . The downward message vec-
+         k|sk ∈S                 d              p∈P                                      tors that we need to compute take the following form
+                                                                                         (assume w.l.o.g. that the message is to zl ):
+The following proposition justifies correctness and
+makes the relationship between p and q precise:                                                                  cr
+                                                                                                                 X
+                                                                                                 mg,zl (zl ) =           mzp ,g (zl + zr )mzr ,g (zr ).
+Proposition 1. For all y, p(y) = z q(y, z).
+                                  P
+                                                                                                                 zr =0
+
+Proof. There is exactly one joint setting of z with                                      This also can be computed as a 1D discrete convolu-
+nonzero probability for each joint setting of y. To                                      tion, after reversing the message vector mzr ,g .
+5.2.3    Asymptotics                                                       similar to the base algorithm, but it involves construct-
+Assuming balanced binary trees, the algorithm runs                         ing a junction tree that has separator sets involving
+in O(D log2 D) time.       This can be seen by us-                         one y variable and one z variable. We give details in
+ing the Master theorem to solve the recurrence                             the Appendix.
+T (n) = 2T (n/2) + n log n. If binary trees are not bal-
+anced, the worst case runtime can be O(D2 ). The                           6     Experiments
+algorithm uses O(D log D) space.
+                                                                           In this section, we empirically explore the properties
+5.3     Minor Extensions                                                   of the RC model, and demonstrate its usage in sev-
+                                                                           eral interesting scenarios. Code will be made available
+We argue that a main benefit of the auxiliary variable                     implementing the convolution tree algorithm for com-
+formulation is that it allows for several variants and                     puting marginals over y and z, and for joint sampling.
+elaborations. We discuss some of them in this section,
+to illustrate the range of other similar models models                     6.1   Chain vs Tree as D grows
+where learning and inference can be done tractably.
+                                                                           The version of the RC algorithm that we presented in
+Drawing a Joint Sample. Given the auxiliary                                Section 5 is the most efficient that we have discovered.
+variable formulation, drawing a joint sample from a                        There are, however, other approaches that are more
+RC model is straightforward: pass messages inward to                       efficient than O(D3 log D), but which are less efficient
+the root as before; compute the belief at the root,                        than the algorithm with the best asymptotic runtime.
+which is a distribution over global counts, and draw                       In this section, we compare the runtime of our algo-
+the value for the root variable from that distribu-                        rithm (the “FFT Tree”) against two baselines, both
+tion; now proceed outwards from the root towards the                       of which are improvements over the PL algorithm re-
+leaves. The one non-triviality is that values for the two                  viewed in Section 2.3.
+children given a parent must be drawn simultaneously.
+To do this, first construct the belief at the trinary fac-                 The first baseline introduces auxiliary variables in a
+tor f (zp , zl , zr ) conditioned on the value of zp , which               chain rather than tree structure. If we then follow
+has been sampled already. Given zp , there is a diago-                     the approach as in Section 5, this would lead to a
+nal along the belief matrix corresponding to the values                    O(D2 log D) algorithm. It turns out that in this case,
+of zl and zr such that zl + zr = zp . To draw the joint                    messages can be computed via a summation of two
+sample for zl and zr , normalize this diagonal to sum                      arrays, so using FFTs is unnecessary. This yields a
+to 1, then draw a value from that distribution. This                       O(D2 ) algorithm equivalent to that of Barlow and Hei-
+gives the values for zl and zr . Recurse downwards.                        dtmann (1984), which we term the “Chain” algorithm.
+                                                                           A drawback of this algorithm is that it also requires
+Other minor extensions appear in the Appendix.                             O(D2 ) space. However, we note that if cardinalities
+                                                                           greater than k are disallowed by the cardinality poten-
+5.4     Major Extension
+                                                                           tial, then this algorithm can be made to run in O(Dk)
+Up until now, we have presented RC models as if                            time, and it is perhaps the best choice.
+the modeler who desires efficient exact inference must
+                                                                           The second baseline is the fast algorithm where FFTs
+choose between standard pairwise trees or RC models.
+                                                                           are not used to compute messages, and instead we use
+In fact, this is not necessary. It is possible to do exact
+                                                                           an efficient but brute-force computation of the 1D con-
+inference in the following model in O(D log2 D) time:
+                                                                           volutions required inside the message computations.
+               Y                        Y               X                  We refer to this as the “Tree” algorithm. Solving the
+      p(y) ∝       θdd0 (yd , yd0 )              fk (        yd ),   (8)   recurrence T (n) = 2T (n/2) + n2 using the Master the-
+           (d,d0 )∈E                                yd ∈sk
+                                      sk ∈S(E)
+                                                                           orem, we see that the runtime is again O(D2 ). The
+                                                                           space usage is O(D log D).
+where E is an acyclic set of edges over variables y,
+and S(E) is a set of nested subsets with subset struc-                     We run these algorithms on problems of size up to 219
+ture that is “compatible” with E. In other words, the                      variables with a single random cardinality potential.
+modeler can choose the structure of either E or S(E)                       The runtimes are reported in Fig. 3. The Chain al-
+arbitrarily, and there is some non-degenerate choice of                    gorithm fails after D = 16000 due to memory limits.
+the other that allows for efficient inference, but not all                 The Tree algorithm is faster than the chain algorithm
+combinations of trees and subset structures are com-                       for larger D, but its quadratic time usage causes it to
+patible. Note that this structure cannot be represented                    become quite slow once D nears 100k. The FFT Tree
+by a standard Recursive Cardinality potential, because                     algorithm behaves nearly linearly in practice, running
+having e.g., edges (d, d0 ) and (d0 , d00 ) would violate the              on problems with half a million variables in less than
+nested subset structure requirement. The approach is                       100 seconds. We note that in practice, for large values
+                                                                  (a) 3x6 Grid                       (b) 20x40 Grid
+Figure 3: Runtimes of the different algorithms versus
+problem size. For very small D, the Chain algorithm is     Figure 4: Mean absolute error between inferred
+slightly faster, but it runs out of memory after around    marginals and ground truth marginals.
+D = 15000, due to its quadratic memory usage. The
+FFT Tree algorithm runtime grows near linearly up
+through all experiments.                                   node potentials. The second is to find the exact MAP
+                                                           solution to the problem using a linear program (LP)
+                                                           and assume that the marginals are 0 or 1. The final
+of D, care must be taken to avoid numerical issues for     baseline, which we take as the ground truth for the
+certain settings of model parameters.                      intractable medium-sized problem, is to use a block
+6.2   Generalized Bipartite Matching                       Gibbs sampler where blocks are chosen as the four vari-
+                                                           ables yi1 ,j1 , yi1 ,j2 , yi2 ,j1 , yi2 ,j2 for some choice of rows
+We have variables y = {yij }(i,j)∈DI ×DJ , where DI is     i1 and i2 and columns j1 and j2 . To find a valid initial
+the number of rows, and DJ is the number of columns.       configuration, we initialize the sampler with the LP
+Here, we consider the Gibbs distribution defined by the    solution. We attempted multiple runs using random
+following energy function:                                 parameter settings. The results in Fig. 4 show that
+         X             X X              X X                LBP achieves a low bias in a relatively short amount
+ E(y) =      θij yij +   fc (   yij ) +    fr (   yij ),   of time. For small problems, the constraints do not
+          ij           i      j         j      i           always greatly influence the marginals, as exhibited
+                                                           by the low bias of the naive approach in some runs;
+where fr and fc are functions of row and column
+                                                           however, they clearly influence the larger problems.
+counts. Note that if a constraint is placed on each row,
+                                                           Finally, the LP method tends to be slower than LBP,
+saying that exactly one binary variable in each col-
+                                                           becomes relatively slower on larger problems, and ex-
+umn can be on, then this formulation can also be used
+                                                           hibits significant bias. We have run our algorithm on
+to represent cardinality potentials for multilabel prob-
+                                                           larger problems, and it converges quickly even on e.g.,
+lems. One motivation for this model comes from the
+                                                           100x100 problems, but we are unable to measure accu-
+problem of paper-to-reviewer matching, where yij rep-
+                                                           racy, because accurate baselines are prohibitively slow.
+resents the event that paper i is matched to reviewer j.
+The row and column functions can then be used to en-       It is worth mentioning that this is a hard problem, and
+force the constraints that each paper should be given      designing sampling schemes for many cases is nontriv-
+to e.g., 3 to 4 reviewers, and each reviewer should be     ial. Indeed, the Gibbs sampler we used will not be
+assigned e.g., 6 to 8 papers. Note that the energy func-   ergodic for disjoint cardinality constraints (e.g. only
+tion can clearly represent the bipartite matching prob-    3 or 10). By contrast, our method is relatively fast,
+lem (by constraining row and column counts to be ex-       accurate, and applies to a wide variety of constraints.
+actly 1), so computing marginals is #P-complete. Our
+approach will be to perform approximate inference us-      6.3    Multiple Instance Learning
+ing loopy belief propagation (LBP), where messages
+                                                           In multiple instance learning (MIL), we are given
+are computed using the FFT tree algorithm.
+                                                           “bags” of instances, which are labeled as either “pos-
+We compare against several baselines on small and          itive” (at least one instance in the bag is positive) or
+medium-sized problems where we constrain columns           “negative” (all instances in the bag are negative). This
+to have 1 or 2 variables labeled 1, and rows are con-      can be framed as a problem of learning with weak la-
+strained to have 2 or 3 variables labeled 1. The first,    bels, where the weak labels take the form of a cardinal-
+“Node Marginals” is a naive approximation that sim-        ity potential over individual instance labels. Indeed,
+ply ignores the constraints and computes marginals         MIL models where bag labels are modeled as noisy-
+under the factorized distribution consisting of just the   OR can be seen as exactly this formulation, using the
+form of noisy-OR from Eq. (5). However, given the fast
+algorithms for Recursive Cardinality potentials devel-
+oped in this work, it becomes tractable to assert other
+forms of the distribution over within-bag counts. In
+this section, we experiment with this alternative.
+More formally, for variables y appearing in a bag la-
+beled as t = 0 (negative) or t = 1 P  (positive), we can
+rewrite the likelihood of a label as y p(t, y), where
+                          X      Y
+         p(t, y) ∝ f (t) (  yd )   exp{θd · yd },    (9)
+                                                                     (a) Error             (b) # on in Positive Bags
+                         d      d
+
+where f (t) is some cardinality function that imposes a            Figure 5: Multiple instance learning results.
+preference on the number of binary variables turned on
+for bags labeled as t, and θd is a unary potential. All of
+the required quantities for learning can be computed         cardinality potential affects the expected number of
+in two calls to our algorithm (corresponding to t = 0        instances labeled as “on” within positive bags. The
+and t = 1).                                                  trend in this plot shows that varying f does indeed
+                                                             affect how many instances within a positive bag that
+The standard data set for evaluating MIL learners is         the model chooses to label as positive examples.
+the Musk dataset from Dietterich et al. (1997). In the
+data, bags molecules are labeled as to whether they are      6.4    Generative Image Models
+“musks.” A molecule is considered to be a musk if any
+                                                             In this set of experiments, we attempt to distinguish
+low energy conformations of the molecule is a musk.
+                                                             between the representational abilities of pairwise tree-
+The bags in this data set correspond to molecules, and
+                                                             structured graphical models, and the RC model. We
+the instances are features of many different low en-
+                                                             consider a synthetic dataset that has been sampled
+ergy conformations. We compared two methods on
+                                                             from an Ising model near the critical temperature re-
+the musk1 version of the dataset: a standard Noisy-
+                                                             sulting in images with highly correlated regions. The
+OR model, and a “Normal” model, where f (0) (c) =
+                                                             pairwise edges form a grid structure, and the result-
+exp{−( Dc )/2σ 2 } and f (1) (c) = exp{−(µ − Dc )/2σ 2 }.
+                                                             ing data consists of 1000 16 × 16 images. In order to
+As is common in the MIL literature, we divide the            compare the pairwise tree and the RC models we first
+data into 10 evenly-sized folds and run 10-fold cross-       learn their parameters on each dataset using nonlin-
+validation. We use 20% of bags for validation, and           ear conjugate gradients to minimize the negative log-
+10% for testing in each split. To set an L1 regulariza-      likelihood. After learning each model, we generate the
+tion parameter, and to choose the σ and  parameters         same number of samples as the original dataset and
+in the Normal and Noisy-OR models, respectively, we          use these to compare statistics. After learning, the
+do a grid search and choose the setting that produced        log-likelihoods for the pairwise tree model was 145.22,
+the best average validation error across folds. Fig. 5       while the log-likelihoods for the RC model was 146.78.
+(a) reports results showing how error varies as a func-      We hypothesize that this difference is because the pair-
+tion of the µ and λ parameters for Normal and Noisy-         wise tree model is able to do a better job at directly
+OR, respectively. We note that the musk1 dataset has         capturing pairwise statistics, however the RC model is
+only 92 instances, and the standard deviation of errors      better at capturing long-range, higher-order statistics.
+across validation folds was high, so these results are       We demonstrate this in our experiments below.
+not statistically significant. However, we do see a trend
+                                                             Heuristic choice of transformation structure.
+where varying the f functions can affect performance,
+                                                             For each dataset, in order to determine the structure
+and that a Normal cardinality potential out-performs
+                                                             of the nested cardinality potential, we run hierarchical
+the standard Noisy-OR. For this problem, it appears
+                                                             agglomerative clustering on images, where the simi-
+that setting the µ parameter to be large is beneficial
+                                                             larity between pixels is determined by how often they
+for learning, but in general this should be a parame-
+                                                             take the same label. This gives us a full tree struc-
+ter that is set via prior knowledge or cross validation.
+                                                             ture over the pixels, which we then directly use to give
+Also note that Gehler and Chapelle (2007) enforced a
+                                                             the nested subset structure. We leave a study of other
+similar bias on bag counts within an SVM formulation,
+                                                             ways for choosing trees to future work.
+and their results also suggested that encouraging the
+model to turn on more binary variables within posi-          Pairwise statistics. We analyze the pairwise statis-
+tive bags improved performance on the musk1 data.            tics of the learned distributions in comparison to the
+In Fig. 5 (b), we show how parameter values in the           original datasets. Fig. 6 shows the pairwise correla-
+                                                                             180                                                           180
+                                                                                                               Pairwise                                                      Pairwise
+                                                                             160                               RC                          160                               RC
+
+
+
+
+                                                            RMSE from empirical
+
+
+
+
+                                                                                                                          RMSE from empirical
+                                                                             140                                                           140
+                                                                             120                                                           120
+                                                                             100                                                           100
+                                                                                  80                                                            80
+ (a) Actual data    (b) Pairwise tree       (c) RC
+                                                                                  60                                                            60
+                                                                                  40                                                            40
+Figure 6: Zoomed pairwise correlation matrices from
+                                                                                  20 0                                                          20 0
+the Ising dataset.                                                                 10            101          102
+                                                                                         Number of pixels in subset
+                                                                                                                                                 10            101          102
+                                                                                                                                                       Number of pixels in subset
+                                                                                   (a) Adaptive clustering                                             (b) Anti-clustering
+
+                                                            Figure 7: Error in higher-order count statistics be-
+                                                            tween the empirical and model distributions as a func-
+tions between each pixel, with lighter shading corre-       tion of the number of variables in a subset.
+sponding to stronger correlation. The Ising model en-
+forces strong correlation between neighbouring pixels,
+and this is reflected in the banded nature of the corre-    7                          Discussion
+lation matrix. Visually, we can see that the RC model
+does a better job of capturing long range correlations      We have presented a new class of high order model
+corresponding to the more faded bands away from the         where exact inference can be done very efficiently. This
+main diagonal.                                              model can be used on its own, and it is already able to
+Higher-order statistics. As a final comparison, we          capture a mix of high and low order statistics that
+analyze the ability of both models to capture higher-       would be difficult for other tractable models. The
+order statistics in the data. Specifically, we test the     model can also be used as a subcomponent within
+ability of the RC model to capture higher-order count       outer approximate inference procedures, allowing ef-
+statistics over subsets that it does not directly encode.   ficient approximate marginal inference for hard prob-
+To do this, we first build a nested tree over the vari-     lems that few other approaches are able to tackle.
+ables using hierarchical clustering. Using this tree, we    The general approach—of adding a set of auxiliary
+look at the count distributions of subsets and compare      variables with highly structured interactions so as to
+the empirical and model distributions. In Fig. 7, we        guarantee efficient message passing inference—leads to
+show the root mean squared error between the empiri-        efficient exact inference in other extended models such
+cal and model distributions as a function of the number     as tree structured models augmented with a cardinal-
+of variables in a subset for the Ising dataset. We com-     ity potential, and we believe the approach to extend
+pare both models on nested trees constructed from two       even beyond that.
+heuristics: the first is the same scheme we use to pa-
+rameterize the RC model, which we call adaptive clus-       Finally, we have presented a diverse set of applications
+tering. For the second, we attempt to create a “worst       and shown how many problems that are not naturally
+case” clustering by taking the distance values used for     thought of in terms of cardinality potentials can be
+the adaptive method and negating them before clus-          cast as such. We believe that the highly efficient algo-
+tering; we call this scheme anti-clustering. We also        rithms discussed here will only increase the number of
+tried random clusterings, however the results were not      applications where cardinality potentials are useful.
+qualitatively different from the anti-clustering scheme.
+Our results show that the RC model does a better            References
+job than the pairwise tree model at capturing higher-
+order count statistics, even if it does not encode them     Barlow, R. E., & Heidtmann, K. D. (1984). Computing
+directly. Particularly interesting is that for the adap-          k-out-of-n system reliability. IEEE Transactions
+tive tree, the pairwise model does significantly worse            on Reliability, 33 , 322-323.
+than the RC model. This is due to the confluence of         Belfore, L. (1995). An O(n) log2(n) algorithm for
+two effects: first, the hierarchical clustering that de-          computing the reliability of k-out-of-n:G and k-
+termines the RC structure seeks to choose subsets of              to-l-out-of-n:G systems. IEEE Transactions on
+variables that are highly correlated to merge into a              Reliability, 44 (1).
+subset; second, the spanning tree is unable to model        Chen, S. X., & Liu, J. S. (1997). Statistical appli-
+this “all-or-none” effect, and instead tends towards a            cations of the Poisson-Binomial and conditional
+binomial-like distribution with mode near the 50% full            Bernoulli distributions. Statistica Sinica, 7 (4).
+point. This leads to large errors.                          de Salvo Braz, R., Amir, E., & Roth, D. (2005). Lifted
+      first-order probabilistic inference. In In proceed-         M., & Kaelbling, L. P. (2008). Lifted probabilis-
+      ings of ijcai-05, 19th international joint confer-          tic inference with counting formulas. In D. Fox &
+      ence on artificial intelligence (pp. 1319–1325).            C. P. Gomes (Eds.), Aaai (p. 1062-1068). AAAI
+      Morgan Kaufmann.                                            Press.
+Dietterich, T. G., Lathrop, R. H., Lozano-Perez, T., &      Potetz, B., & Lee, T. S. (2008, Oct). Efficient belief
+      Pharmaceutical, A. (1997). Solving the multiple-            propagation for higher order cliques using linear
+      instance problem with axis-parallel rectangles.             constraint nodes. Computer Vision and Image
+      Artificial Intelligence, 89 , 31–71.                        Understanding, 112 (1), 39–54.
+Felzenszwalb, P. F., & Huttenlocher, D. P. (2004).          Ramalingham, S., Kohli, P., Alahari, K., & Torr, P.
+      Efficient belief propagation for early vision. In           (2008). Exact inference in multi-label CRFs with
+      CVPR (pp. 261–268).                                         higher order cliques. In CVPR.
+Fernandez, M., & Williams, S. (2010). Closed-               Régin, J.-C. (1996). Generalized arc consistency for
+      form expression for the poisson-binomial prob-              global cardinality constraint. In AAAI/IAAI
+      ability density function. IEEE Transactions on              (p. 209-215).
+      Aerospace Electronic Systems, 46 , 803-81.            Rother, C., Kohli, P., Feng, W., & Jia, J. (2009).
+Fisher, M. E. (1961, Dec). Statistical mechanics of               Minimizing sparse higher order energy functions
+      dimers on a plane lattice. Phys. Rev., 124 , 1664–          of discrete variables. In CVPR (p. 1382-1389).
+      1672. Available from http://link.aps.org/             Stobbe, P., & Krause, A. (2010). Efficient minimiza-
+      doi/10.1103/PhysRev.124.1664                                tion of decomposable submodular functions. In
+Gail, M. H., Lubin, J. H., & Rubinstein, L. V. (1981).            NIPS.
+      Likelihood calculations for matched case-control      Tarlow, D., Givoni, I., & Zemel, R. (2010). HOP-
+      studies and survival studies with tied death                MAP: Efficient message passing for high order
+      times. Biometrika.                                          potentials. In AISTATS.
+Gallager, R. (1963). Low-density parity-check codes.        Vicente, S., Kolmogorov, V., & Rother, C. (2009).
+      MIT Press.                                                  Joint optimization of segmentation and appear-
+Ganchev, K., Graça, J., Gillenwater, J., & Taskar, B.            ance models. In ICCV.
+      (2010). Posterior regularization for structured la-   Zhao, P., Rocha, G., & Yu, B. (2006). Grouped and
+      tent variable models. Journal of Machine Learn-             hierarchical model selection through composite
+      ing Research, 11 , 2001-2049.                               absolute penalties. Department of Statistics, UC
+                                                                  Berkeley, Tech. Rep, 703 .
+Gehler, P., & Chapelle, O. (2007, March). Determin-
+      istic annealing for multiple-instance learning. In
+      Meila, M., & X. Shen (Eds.), ICML (p. 123-130).
+Gould, S. (2011). Max-margin learning for lower lin-
+      ear envelope potentials in binary markov random
+      fields. In ICML.
+Gupta, R., Diwan, A., & Sarawagi, S. (2007). Effi-
+      cient inference with cardinality-based clique po-
+      tentials. In ICML (Vol. 227, p. 329-336).
+Hong, Y. (2011). On computing the distribution
+      function for the sum of independent and non-
+      identical random indicators.
+Huang, B., & Jebara, T. (2007). Loopy belief propaga-
+      tion for bipartite maximum weight b-matching.
+      In AISTATS.
+Kohli, P., Ladicky, L., & Torr, P. H. S. (2009). Ro-
+      bust higher order potentials for enforcing label
+      consistency. International Journal of Computer
+      Vision, 82 (3), 302-324.
+Marlin, B., Swersky, K., Chen, B., & Freitas, N. de.
+      (2010). Inductive principles for restricted boltz-
+      mann machine learning. In AISTATS.
+Mezuman, E., & Weiss, Y. (2012). Globally optimiz-
+      ing graph partitioning problems using message
+      passing. In AISTATS.
+Milch, B., Zettlemoyer, L. S., Kersting, K., Haimes,
+Appendix for Fast Exact Inference for
+Recursive Cardinality Models
+
+More Minor Extensions
+Minus Signs. In some cases, we may wish to express
+a function over binary variables in terms of the Hamming
+distance between an assignment and a given reference as-
+signment. This sort of interaction arises e.g., in pattern
+potentials (Rother et al., 2009). This can be expressed
+with a cardinality potential by relabeling variables, so that
+a value of 1 corresponds to “different” and a label of 0 cor-        Figure 8: Illustration of different possible choices for
+responds to “same”. To accomplish this in an RC model by             f (0) (top) and f (1) (bottom). Computation of p(t) in
+flipping the meaning of all binary variables under a given
+internal node. In fact, this can be done for any subset of
+                                                                     Eq. (9) for OR and Noisy-OR models is tractable with
+internal nodes, and the effect is like defining relationships        existing algorithms; for all other count distributions,
+between parents and children as zp = ±zl ± zr .                      including the “Normal” class illustrated here, p(t) can
+Count Agreements. Suppose we have disjoint sets of
+                                                                     be computed using our new algorithm.
+                                            0
+variables y ∈ {0, 1}D and y 0 ∈ {0, 1}D , and RC potentials
+              0     0
+F (y) and F (y ) defined over the two subsets. We can
+                                                      PD
+add a global potential G(y, y 0 ) that enforces         i=1 yi =
+                                                                     is possible to construct distributions which Recursive Car-
+PD0 0
+       y . Let  z     be the root auxiliary variable correspond-     dinality potentials can capture, but that pairwise graphical
+   i=1 i          r
+ing to F , and zr0 0 be the root auxiliary variable correspond-      models cannot — and vice versa. For example, among the
+ing to F 0 . Assume for notational simplicity that D = D0 .          eight possible configurations, it might be desirable to spec-
+Then we add a pairwise factor between zr and zr0 0 , and the         ify a distribution with a strong but uniform preference for
+message that gets sent from zr0 0 to zr (and vice versa) is          exactly one of the binary variables to be on. That is, as-
+simply the belief that would be computed at zr0 0 when do-           signing probability (1 − )/3 to each of (1, 0, 0), (0, 1, 0),
+ing inference solely for F (y). Intuitively, after the inwards       and (0, 0, 1), with probability /5 for all other outcomes.
+pass on both trees, the posterior over count values for one          A pairwise graphical model cannot capture this kind of
+tree is multiplied by the count potential for the other tree,        exclusive-or type relation without additional hidden vari-
+then the outward pass continues as before on both trees.             ables, but the cardinality potential can achieve it easily by
+                                                                     assigning low energy to configuration in which the sum is
+Relative Counts.                A similar idea can be used to en-    one. (This also generalizes to “exactly two”’ and similar
+force constraints on the relative counts of binary variables         distributions.) Graphical models without explicit cardinal-
+turned on in disjoint subsets. Suppose we have disjoint sets         ities would require terms of the same order as the set under
+of variables y 1 , . . . , y K and corresponding RC potentials       consideration; in this case, it would be necessary to have
+F 1 (y 1 ), . . . , F K (y K ). We then wish to define a total or-   higher-order potentials.
+          P (1) (1) PD(2) (2)                   P (K) (K)
+dering D       i=1 yi      ≤ i=1 yi ≤ . . . ≤ D   i=1 yi   . This    Naturally, there are also distributions which cannot be ex-
+creates a chain structure over root z variables. Pairwise            actly captured by the Recursive Cardinality model but can
+messages can be computed in linear time, by computing a              be easily expressed by the pairwise graphical model. With
+cumulative sum over count posteriors at the root z vari-             the three-variable model, we can achieve this by specifying
+ables. So after an inward pass done independently on each            unique pairwise potentials for each of the three pairs. Our
+tree, we make a forward and backward pass over root z                highest level of granularity in this case is to place two vari-
+variables, then follow with independent outward passes on            ables in a single inner set and then nest this within an outer
+each tree.                                                           set that also includes the third variable. The cardinality
+                                                                     potential for the inner set can match the local pairwise po-
+                                                                     tential perfectly, but if only one of the inner variables is on,
+Representational Power                                               the outer potential cannot identify which one it is. That
+                                                                     is, with a nesting of the form ((y1 , y2 ), y3 ), the cardinality
+For the past several years, the dominating design strategy           potential can differentiate between ((0, 0), ?) and ((1, 1), ?)
+for undirected graphical models has been to think in terms           but not between ((0, 1), ?) and ((1, 0), ?). Nevertheless,
+of pairwise potentials. An important question regarding              these potentials can be approximated by upper or lower
+Recursive Cardinality-based models, then, is whether they            bounds on the energy.
+add representational power beyond what is achievable with
+pairwise models. Specifically, we would like to under-
+stand what types of probability distributions can be distin-         Visualizing Alternative Cardinality
+guished via different parameters in these models and which
+ones cannot. Here we show that these two classes of model            Potentials for Multiple Instance
+are indeed disjoint. That is, while there is a set of distri-        Learning
+butions that both models can represent exactly, there are
+also distributions that the RC models can represent but
+pairwise models cannot, and vice versa.                              In order to build some intuition for the kinds of cardinal-
+                                                                     ity potentials that can be used in our generalized multiple
+We begin by considering distributions over three binary              instance learning framework, we plot several examples in
+variables, y1 , y2 , and y3 . Even with only three variables, it     Fig. 8.
+                                                                                      z9        y11
+                                                                                                                                                              z7,y10
+                                                                                                                                                                                                                           z7         y10
+                                                                                       z8
+                                                                                                                                                          z1,z2,z3,
+                             y11
+                                                                                                                                                       z4,z5,z6,z7,
+                                                                                                                                                                                                              z4                z5             z6
+                                                                                      z7        y10                                                    y7,y8,y9,y10
+
+
+                             y10                                                                                                                                                                                            z2            y8         z3     y9
+                                                                                                                                                                                                      z1      y7
+                                                                                                                                           z1,y7              z2,y8           z3,y9
+                                                                           z4              z5           z6
+
+                                                                                                                                                                                                      m(z1 , y7 )         m(z2 , y8 )                m(z3 , y9 )
+       y7                    y8                    y9            z1        y7         z2        y8            z3     y9
+                                                                                                                                                              (a)                                                               (b)
+                                                                                                                                                        z7        y10
+  y1         y2        y3          y4        y5         y6         y1           y2         y3          y4       y5        y6
+
+                                                                                                                                                                                                                                z7
+
+                            (a)                                                             (b)                                               z4             z5         z6
+
+                                                                                                                                                                                                                         zint
+                                                                                            z7,z8,
+                                                                      z9         z9                                                   z1     y7          z2       y8         z3    y9
+                        z9                                                                 y10,y11
+                                                                                                                                                                                                                    z4               z5         z6
+                                                                                                                                  m(z1 , y7 ) f (y7 ) m(z2 , y8 ) f8 (y8 ) m(z3 , y9 ) f9 (y9 )
+                        z8
+                                                                                                                                                              (c)                                                               (d)
+                                 y11                                                        z7,y10
+
+
+
+                       z7        y10                                                       z1,z2,z3,
+                                                                                       z4,z5,z6,z7,
+                                                                                       y7,y8,y9,y10
+                                                                                                                                 Figure 10: (a) Cluster tree region of interest. (b) Same
+             z4             z5          z6                                                                                       sub-model, but expressed as a factor graph. (c) After
+                        z2                   z3    y9
+                                                                            z1,y7           z2,y8            z3,y9
+                                                                                                                                 conditioning on the parent y variable, the factor graph
+       z1    y7                  y8
+
+
+                                                                  z1,y7,                    z2,y8,                   z3,y9,
+                                                                                                                                 simplifies significantly. (d) Adding intermediate vari-
+        y1        y2        y3         y4     y5        y6
+                                                                  y1,y2                     y3,y4                    y5,y6       ables so that tree becomes binary.
+                            (c)                                                             (d)
+                                                                                                                                 Next, as illustrated in Fig. 9 (c) and (d), create a junction
+Figure 9: (a) Original tree + cardinality model. (b)                                                                             tree over the model that includes y and z variables. This
+Adding z counting variables. (c) Regions for cluster                                                                             can be done such that each separator involves a single y and
+graph. (d) Cluster tree.                                                                                                         a single z variable. Note that there can be large regions,
+                                                                                                                                 particularly when the degree of some node in the original
+                                                                                                                                 tree T is large, so inference in this junction tree is still
+                                                                                                                                 not obviously efficient. However, we will now show that
+Major Extension                                                                                                                  necessary messages can be computed efficiently.
+
+Here we sketch the procedure for computing exact                                                                                 Efficient Message Computation.
+marginals under a model that includes a tree structure over                                                                      All that remains is to show how to efficiently compute mes-
+binary variables y in addition to a cardinality potential.                                                                       sages in the junction tree created in the previous section.
+Basic Formulation and Definitions. We assume that                                                                                The only new idea is that by conditioning on one y vari-
+we are given a tree structured set of edges T , and define                                                                       able within each message computation, a context-specific
+the associated pairwise distribution over binary variables                                                                       independence is revealed, making inference reduce to the
+y as follows:                                                                                                                    basic algorithm presented in the main body.
+                                                         Y                                                                       We focus on the seemingly difficult region created by the
+                                        p(y) ∝                 θij (yi , yj ).                                            (10)   procedure in the previous section. Fig. 10 (a) shows the re-
+                                                        ij∈T                                                                     gion and marks the upward message that we wish to com-
+                                                                                                                                 pute with a red arrow. Now, observe that the message
+We choose an arbitrary root node r, and direct edges out-                                                                        m(z7 , y10 ) that we wish to compute is equal to the joint
+ward away from the root. Denote the parent of node d                                                                             marginal distribution over z7 and y10 in the factor graph
+as pa(d), and the set of children of d as ch(d). See Fig. 9                                                                      shown in Fig. 10 (b). Fig. 10 (c) illustrates the result of
+(a) for an example tree + cardinality model. Here, we will                                                                       conditioning on the parent y variable, y10 . Doing so sim-
+choose y11 to be the root.                                                                                                       plifies the pairwise potential between parent and children
+                                                                                                                                 variables into unary potentials over the children. Now, for
+Adding Counting Variables.             The first step of the                                                                     the two possible values of the parent variable, there are now
+algorithm is to add counting auxiliary variables z. Define                                                                       two types of messages that need to be computed: first, the
+Λd to be the set of all original y variables that occur in                                                                       messages to the z 0 variables from the subtree beneath them
+the subtree of T rooted at d, excluding d. For example, in                                                                       (for example, from z = z2 and y = y8 to z 0 = z5 in Fig. 10
+Fig. 9 (b), Λ8 corresponding to the subtree rooted at y8 is                                                                      (c)):
+{y3 , y4 }. For each non-leaf variable yd , addPtwo auxiliary
+counting variables, z and z 0 , where z =        i∈Λd yi , and
+                                                                                                                                                                                        X
+ 0                                                                                                                                         m{y,z,z0 }→z0 (z 0 ) =                                 g(y, z, z 0 )m(z, y)f (y)                                 (11)
+z = z + yd . In the example in Fig. 9 (b), for internal                                                                                                                                 y,z
+variable y8 , the new z is labeled z2 , and the new z 0 is                                                                                                                              X
+labeled z5 . As in the basic algorithm, and as illustrated                                                                                                                        =               m(z 0 − y, y)f (y),                                       (12)
+Fig. 9 (b), auxiliary variables z are defined in terms of                                                                                                                                y
+each other when possible, so that the structure over z is
+also a tree.                                                                                                                     which requires summing two values per value of z 0 , so all
+messages can be computed in linear time; second, we need
+to compute the messages from the set of z 0 variables cor-
+responding to a set of children up to the z variable cor-
+responding to their parent. This, however, can be done
+with the basic algorithm from the main body of the paper
+after introducing intermediate variables to create a binary
+tree, as illustrated by the introduction of zint in Fig. 10
+(d). Downwards messages can be computed using the same
+ideas as for the upwards messages, so we omit further de-
+tails.
+The runtime of this algorithm is asymptotically the same
+as inference in an RC model that has the same structure
+over z variables but that does not have edges between y
+variables.
+Also, the same basic approach could be taken if instead of
+starting with a tree-structured model, we started with a
+junction tree.
+
+
+Experiments on Caltech Silhouettes
+In order to get a sense of the properties of the pairwise
+tree and RC model, we conducted further experiments on
+a more realistic dataset. We chose Caltech Silhouettes
+(Marlin et al., 2010), which consists of 4100 28 × 28 bi-
+                                                                                 1800                                                               1800
+nary images that have been derived from the Caltech-101                                                               Pairwise                                                            Pairwise
+                                                                                 1600                                 RC                            1600                                  RC
+image dataset.2 .
+                                                                RMSE from empirical
+
+
+
+
+                                                                                                                                   RMSE from empirical
+                                                                                 1400                                                               1400
+                                                                                 1200                                                               1200
+The correlation matrix for Caltech Silhouettes is signifi-                       1000                                                               1000
+cantly more complex, making it difficult to distinguish be-                           800                                                                800
+tween the models as they all look fairly similar. One qual-                           600                                                                600
+itative way to compare the distributions over binary im-                              400                                                                400
+                                                                                      200                                                                200
+ages is to look at samples from both models and compare
+these to samples from the empirical distribution. We plot                              100       101           102           103                          100        101           102           103
+                                                                                             Number of pixels in subset                                          Number of pixels in subset
+samples from the models learned on the Caltech dataset in                              (a) Adaptive clustering                                                  (b) Anti-clustering
+Fig. 11d. This dataset contains strong horizontal and verti-
+cal pairwise correlations, between pixels. The pairwise tree
+model can only include a restricted set of edges, so we chose
+                                                                Figure 12: Error in higher-order count statistics be-
+the spanning tree to capture the strongest interactions. As     tween the empirical and model distributions as a func-
+a result, the samples tend to show strong horizontal and        tion of the number of variables in a subset on the Cal-
+vertical lines. The samples from the RC model suggest           tech Silhouettes dataset.
+that it is indeed capturing a different set of statistics.
+Finally, we repeated the experiments on higher-order
+statistics, and found that the results, shown in Fig. 12,
+led the same conclusions as the Ising dataset: namely that
+the RC model is better at capturing higher-order count
+statistics.
+
+
+
+
+   2
+     http://www.vision.caltech.edu/Image Datasets/
+Caltech101/
+              (a) Caltech                         (b) Pairwise tree                  (c) Recursive Cardinality
+
+
+                                     Data
+
+
+
+                                       RC
+
+
+
+                            Pairwise Tree
+
+                                               (d) Caltech samples
+
+Figure 11: Pairwise correlation matrices for Caltech Silhouettes (a), along with the pairwise tree (b) and RC (c)
+models, and some examples from Caltech Silhouettes, and random samples from the RC and pairwise tree models
+(d). Note that these models are not learned in a class-specific manner. The whole data set, including all classes
+was used as training.
+

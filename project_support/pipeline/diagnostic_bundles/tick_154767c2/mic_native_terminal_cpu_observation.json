@@ -1,0 +1,43 @@
+{
+  "owner": {
+    "token": "154767c278664ba4a7b666c69f12abaa",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T09:12:59.944792+00:00",
+    "deadline_at": "2026-11-06T10:12:59.944792+00:00",
+    "context_sha256": "53703cbd1a484e565a296843d90b4b65999250b84cc51949376b963943abe1f7",
+    "pending_sha256": "00c5795b6ab5872c56eb7a40be61771eb6708cef5a02fc2206f0f83364789d2f"
+  },
+  "recorded_at": "2026-11-06T09:29:50.304187+00:00",
+  "reviewer_actual_thread": "01a1a5a9-7056-7c92-bc3b-ca205451add4",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=12",
+    "songcl@192.168.1.115",
+    "bash -lc 'test \"$(hostname)\" = \"dl04-MS-7E06\" && source /data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh && conda activate project_cluster && CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 python -B -'"
+  ],
+  "producer": {
+    "path": "pipeline/diagnostic_bundles/tick_154767c2/mic_terminal_cpu_probe.py",
+    "sha256": "9186e05ab27f2fd07f571ecd77e86f0158f3a7d7944317179336825f85253416"
+  },
+  "stdin_program": "import socket,os,pathlib,subprocess,json,re,hashlib,gc\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='dl04-MS-7E06'\nassert os.environ.get('CUDA_VISIBLE_DEVICES')==''\nassert os.environ.get('PYTHONDONTWRITEBYTECODE')=='1'\nroot=pathlib.Path('/data/songcl/Project/Cluster_project/Cluster_mic_20261105')\nassert subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip()=='07ef534a6e44f22bd7b2d083550ebd7823d1d3d3'\nassert not pathlib.Path('/proc/2881795').exists()\nname='model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic'\nbase=pathlib.Path('/data/songcl/Project/Cluster_project/Cluster_checkpoints')/name\nruns=sorted(p for p in base.iterdir() if p.is_dir() and (p/'best.pth').is_file() and (p/'last.pth').is_file())\nassert len(runs)==1,[(str(p),[q.name for q in p.iterdir()]) for p in runs]\nrun=runs[0]; native_logs=sorted(p for p in run.iterdir() if p.is_file() and p.suffix=='.log')\nassert len(native_logs)==1,[str(p) for p in native_logs]\nnative_log=native_logs[0]\ndef fileinfo(p):\n st=p.stat(); h=hashlib.sha256()\n with p.open('rb') as f:\n  for chunk in iter(lambda:f.read(8*1024*1024),b''): h.update(chunk)\n st2=p.stat(); assert (st.st_size,st.st_mtime_ns)==(st2.st_size,st2.st_mtime_ns)\n return {'path':str(p),'size':st.st_size,'sha256':h.hexdigest(),'mtime_ns':st.st_mtime_ns}\ntext=native_log.read_text(encoding='utf-8',errors='replace')\nvalidation_lines=[line for line in text.splitlines() if re.search(r'\\bmIoU\\s*:',line)]\nvals=[float(re.search(r'\\bmIoU\\s*:\\s*([0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)',line).group(1)) for line in validation_lines]\nassert len(vals)==26,{'count':len(vals),'lines':validation_lines[-3:]}\nbest=max(vals);best_epoch=vals.index(best)+1;no_improve=len(vals)-best_epoch\nstdout=root/'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log'\nwith stdout.open('rb') as f:\n size=f.seek(0,2);f.seek(max(0,size-131072));tail=f.read().decode('utf-8',errors='replace')\nterminal_lines=[l for l in tail.splitlines() if 'Early stopping at epoch' in l]\nassert any(re.search(r'Early stopping at epoch 26: no improvement for 10 epochs',l) for l in terminal_lines)\nassert no_improve==10\nimport torch\nassert not torch.cuda.is_initialized()\nrows=[]\nfor kind in ['best','last']:\n p=run/(kind+'.pth'); row=fileinfo(p); ckpt=torch.load(str(p),map_location='cpu',weights_only=False); meta=ckpt['meta']; row['checkpoint_top_keys']=list(ckpt); row['native_meta']={k:meta.get(k) for k in ['epoch','best_miou','epochs_no_improve']}; row['model_tensor_devices']=sorted({v.device.type for v in ckpt.get('model',{}).values() if isinstance(v,torch.Tensor)}); assert row['model_tensor_devices']==['cpu']; assert float(meta['best_miou'])==best; rows.append(row); del ckpt;gc.collect()\nassert rows[0]['native_meta']['epoch']==best_epoch\nassert rows[0]['native_meta']['epochs_no_improve']==0\nassert rows[1]['native_meta']['epoch']==25 and rows[1]['native_meta']['epochs_no_improve']==9\nassert not torch.cuda.is_initialized()\nevents=[fileinfo(p) for p in sorted(run.glob('events.out.tfevents.*'))]\nprint(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'runtime_root':str(root),'source_commit':'07ef534a6e44f22bd7b2d083550ebd7823d1d3d3','trainer_pid':2881795,'trainer_absent':True,'config_basename':name,'native_run_directory':str(run),'native_log':fileinfo(native_log),'validation_lines':validation_lines,'completed_validation_count':len(vals),'validation_values':vals,'best_miou':best,'best_epoch':best_epoch,'last_validation_miou':vals[-1],'terminal_epoch':26,'no_improve':no_improve,'terminal_matching_lines':terminal_lines,'stdout_log_observation':fileinfo(stdout),'checkpoints':rows,'event_files':events,'CUDA_VISIBLE_DEVICES':os.environ.get('CUDA_VISIBLE_DEVICES'),'torch_cuda_initialized':torch.cuda.is_initialized(),'GPU_computation':False,'signals_sent':False,'remote_mutations':False,'checkpoint_note':'Native early-stop break precedes save; actual CPU meta confirms last epoch25/no-improve9, not terminal epoch26.'}))\n",
+  "returncode": 1,
+  "observation": null,
+  "stderr_summary": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\nTraceback (most recent call last):\n  File \"<stdin>\", line 43, in <module>\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/json/__init__.py\", line 231, in dumps\n    return _default_encoder.encode(obj)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/json/encoder.py\", line 199, in encode\n    chunks = self.iterencode(o, _one_shot=True)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/json/encoder.py\", line 257, in iterencode\n    return _iterencode(o, 0)\n  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/json/encoder.py\", line 179, in default\n    raise TypeError(f'Object of type {o.__class__.__name__} '\nTypeError: Object of type float32 is not JSON serializable\n",
+  "raw_stdout_on_failure": "",
+  "local_archive_snapshot_before": {
+    "id": "M229-MIC",
+    "status": "done_earlystop",
+    "training_status": "running",
+    "archive_id": "d03c21a094d54ed0b17a50cc21deeeb7",
+    "final_best": "0.4990",
+    "epochs_final": "26/50",
+    "log_local": ""
+  },
+  "local_experiment_sha256_before": "302c2ab859130c05e92c174bbc69a2a209ad08d0a9ac0fc943ef01c4c5236534",
+  "scope": "Read-only exact MIC run native scalar log and CPU-only checkpoint metadata. No model execution, GPU queries/computation, signal, training, queue or research state mutation. Canonical rounded archive retained."
+}

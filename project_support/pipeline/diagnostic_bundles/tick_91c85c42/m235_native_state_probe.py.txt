@@ -1,0 +1,160 @@
+"""Read-only original M235 process/log/checkpoint metadata observation."""
+import os
+import socket
+import sys
+assert socket.gethostname() == 'dl04-MS-7E06' and os.getuid() == os.geteuid() == 1001
+assert sys.flags.isolated and sys.dont_write_bytecode and not sys.flags.optimize
+from datetime import datetime, timezone
+import hashlib
+import io
+import json
+from pathlib import Path
+import pickletools
+import re
+import stat
+import subprocess
+import time
+import zipfile
+
+packet = json.load(sys.stdin)
+owner = packet['owner']
+assert owner['token'] == '91c85c4270bd407ba432eca5dbf7d3a8'
+assert owner['thread_id'] == '01a159c5-29ab-7a22-ba7f-e79174757253'
+assert datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+root = Path('/data/songcl/Project/Cluster_project/Cluster_nsd_20261107')
+source = 'b1e639b3ceb14bb5c65d9f81a084d41c834b951c'
+pid = 2248650
+log = root/'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc_20261110_194721.log'
+checkpoints = root.parent/'Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/20261110_194730'
+
+def now():
+    return datetime.now(timezone.utc).isoformat()
+
+def run(argv, env=None):
+    process = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    try:
+        stdout, stderr = process.communicate(timeout=20)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError('Read-only child timeout; no signal/retry; PID '+str(process.pid))
+    assert process.returncode == 0, stderr.decode('utf-8','replace')[-1000:]
+    return stdout.decode('utf-8','replace')
+
+assert root.is_dir() and root.resolve() == root
+git_env = {'PATH':'/usr/bin:/bin','GIT_OPTIONAL_LOCKS':'0','GIT_CONFIG_NOSYSTEM':'1',
+           'GIT_CONFIG_SYSTEM':'/dev/null','GIT_CONFIG_GLOBAL':'/dev/null','LANG':'C'}
+head = run(['/usr/bin/git','--no-optional-locks','-c','core.fsmonitor=false','-C',str(root),
+            'rev-parse','--verify','HEAD'],git_env).strip()
+assert head == source
+
+def process_state():
+    proc = Path('/proc')/str(pid)
+    if not proc.exists():
+        return {'pid':pid,'exists':False,'state':'ABSENT','native_entry_matches':False}
+    try:
+        raw = (proc/'stat').read_text()
+        fields = raw.rsplit(')',1)[1].split()
+        argv = [x.decode('utf-8','replace') for x in (proc/'cmdline').read_bytes().split(b'\0') if x]
+        cwd = os.readlink(proc/'cwd')
+        uid = proc.stat().st_uid
+        matches = uid == 1001 and cwd == str(root) and any(x == 'tools/train.py' or x.endswith('/tools/train.py') for x in argv)
+        return {'pid':pid,'exists':True,'uid':uid,'state':fields[0],'ppid':int(fields[1]),
+                'starttime_ticks':int(fields[19]),'cwd':cwd,'argv':argv,'native_entry_matches':matches,
+                'alive_non_zombie':fields[0] != 'Z'}
+    except FileNotFoundError:
+        return {'pid':pid,'exists':False,'state':'EXITED_DURING_READ','native_entry_matches':False}
+
+def sample():
+    state = process_state()
+    metadata = os.lstat(log)
+    assert stat.S_ISREG(metadata.st_mode) and metadata.st_uid == 1001 and log.resolve() == log
+    with log.open('rb') as stream:
+        stream.seek(max(0,metadata.st_size-65536))
+        raw = stream.read(65536)
+    text = raw.decode('utf-8','replace')
+    progress = [[int(x) for x in row] for row in re.findall(r'Train\[(\d+)/(\d+)\]:[^\r\n]*?\b(\d+)/(\d+)\b',text)]
+    validation = [line.strip()[:700] for line in text.replace('\r','\n').splitlines()
+                  if re.search(r'\b(?:mIoU|mIOU|best_miou|validation|Validation|Val\[|eval epoch|Early stopping)\b',line)]
+    errors = [line.strip()[:900] for line in text.replace('\r','\n').splitlines()
+              if re.search(r'Traceback|Segmentation fault|Fatal Python error|RuntimeError|CUDA error|CUDA out of memory|SIGSEGV|SIGKILL|BrokenPipeError|DataLoader worker.*exited|\bKilled\b|\bAborted\b',line)]
+    exits = [line.strip()[:700] for line in text.replace('\r','\n').splitlines()
+             if re.search(r'Training completed|Finished training|early.stop|exit.code|exit.status|Process exited|train.*finished',line,re.I)]
+    return {'observed_at':now(),'process':state,'log_bytes':metadata.st_size,'log_inode':metadata.st_ino,
+            'log_mtime_ns':metadata.st_mtime_ns,'read_bytes':len(raw),'tail_sha256':hashlib.sha256(raw).hexdigest(),
+            'latest_native_progress':progress[-1] if progress else None,
+            'validation_lines':validation[-8:],'error_lines':errors[-8:],'exit_marker_lines':exits[-8:]}
+
+samples = [sample()]
+time.sleep(12)
+samples.append(sample())
+
+def checkpoint_metadata(path):
+    if not path.exists():
+        return {'path':str(path),'exists':False,'tensor_contents_verified':False}
+    before = os.lstat(path)
+    assert stat.S_ISREG(before.st_mode) and before.st_uid == 1001 and path.resolve() == path
+    found = {}
+    inspection = {'path':str(path),'exists':True,'bytes':before.st_size,'mtime_ns':before.st_mtime_ns,
+                  'inspection':'bounded ZIP central-directory and pickletools scalar metadata only; no unpickle or Torch',
+                  'tensor_contents_verified':False}
+    try:
+        with zipfile.ZipFile(path,'r') as archive:
+            entries = archive.infolist()
+            assert len(entries) <= 50000
+            members = [x for x in entries if x.filename.endswith('/data.pkl') or x.filename == 'data.pkl']
+            assert len(members) == 1 and members[0].file_size <= 4194304
+            raw = archive.read(members[0])
+            assert len(raw) <= 4194304
+            inspection.update(pickle_metadata_bytes=len(raw),pickle_metadata_sha256=hashlib.sha256(raw).hexdigest())
+        pending = None
+        for opcode,arg,position in pickletools.genops(raw):
+            if opcode.name in ('BINUNICODE','SHORT_BINUNICODE','UNICODE','BINUNICODE8'):
+                pending = arg if arg in ('epoch','best_miou','epochs_no_improve') else None
+            elif pending is not None:
+                if opcode.name in ('BINPUT','LONG_BINPUT','PUT','MEMOIZE'): continue
+                if opcode.name in ('BININT','BININT1','BININT2','INT','LONG','LONG1','LONG4','BINFLOAT','FLOAT'):
+                    found.setdefault(pending,[]).append(arg)
+                pending = None
+        for key,values in found.items():
+            assert len(values) == 1, 'Ambiguous scalar metadata key '+key
+            inspection[key] = values[0]
+        inspection['scalar_metadata_keys_found'] = sorted(found)
+        inspection['scalar_metadata_complete'] = all(k in inspection for k in ('epoch','best_miou','epochs_no_improve'))
+    except (AssertionError,ValueError,zipfile.BadZipFile,RuntimeError,EOFError) as error:
+        inspection.update(metadata_parse_error_type=type(error).__name__,metadata_parse_error=str(error)[:400])
+    after = os.lstat(path)
+    inspection['file_identity_size_mtime_stable'] = (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns) == (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns)
+    return inspection
+
+checkpoint_info = [checkpoint_metadata(checkpoints/name) for name in ('best.pth','last.pth')]
+kernel_locks = Path('/proc/locks').read_text().splitlines()
+locks = []
+for kind,ino in [('training',92537152),('diagnostic',92537153),('exclusive',92537154)]:
+    path = Path('/tmp/cluster_project_gpu0_'+kind+'.lock')
+    metadata = os.lstat(path)
+    assert stat.S_ISREG(metadata.st_mode) and metadata.st_uid == 1001 and (metadata.st_dev,metadata.st_ino) == (66308,ino)
+    key = '%02x:%02x:%d' % (os.major(metadata.st_dev),os.minor(metadata.st_dev),ino)
+    locks.append({'kind':kind,'path':str(path),'device':metadata.st_dev,'inode':metadata.st_ino,
+                  'matching_kernel_lock_rows':[line for line in kernel_locks if key in line.split()]})
+gpu_row = run(['/usr/bin/nvidia-smi','-i','0','--query-gpu=index,uuid,memory.free,memory.used,memory.total,utilization.gpu',
+               '--format=csv,noheader,nounits']).strip()
+gpu = [x.strip() for x in gpu_row.split(',')]
+assert len(gpu) == 6 and gpu[:2] == ['0','GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c']
+trainers = []
+for proc in Path('/proc').iterdir():
+    if not proc.name.isdigit(): continue
+    try:
+        if proc.stat().st_uid != 1001: continue
+        argv = [x.decode('utf-8','replace') for x in (proc/'cmdline').read_bytes().split(b'\0') if x]
+        if not any(x == 'tools/train.py' or x.endswith('/tools/train.py') for x in argv): continue
+        cwd = os.readlink(proc/'cwd')
+        if cwd.startswith('/data/songcl/Project/Cluster_project/'):
+            trainers.append({'pid':int(proc.name),'cwd':cwd,'argv':argv})
+    except (FileNotFoundError,ProcessLookupError,PermissionError): pass
+assert 'torch' not in sys.modules and datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+print(json.dumps({'owner':owner,'hostname':socket.gethostname(),'uid':os.getuid(),'pid':pid,
+ 'runtime_root':str(root),'runtime_HEAD':head,'log':str(log),'samples':samples,'checkpoint_metadata':checkpoint_info,
+ 'original_locks':locks,'lock_observation_method':'metadata_and_proc_locks_only_no_lock_acquisition',
+ 'gpu0':{'index':0,'uuid':gpu[1],'memory_free_mib':int(gpu[2]),'memory_used_mib':int(gpu[3]),
+         'memory_total_mib':int(gpu[4]),'utilization_percent':int(gpu[5])},
+ 'project_trainers':trainers,'project_cap1_occupied':bool(trainers),'signals_sent':False,
+ 'Torch_imported':False,'GPU_context_created':False,'remote_mutations':False,'observed_at':now()}))

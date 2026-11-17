@@ -1,0 +1,54 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import os,socket,subprocess,hashlib,json,re,time
+assert socket.gethostname()=='dl04-MS-7E06'
+assert datetime.now(timezone.utc)<datetime.fromisoformat(payload['owner']['deadline_at'])
+K=payload['constants'];root=Path(K['WFC']['root'])
+def git(*args):return subprocess.check_output(['git','--no-optional-locks','-c','core.fsmonitor=false','-C',str(root),*args])
+def digest(v):return hashlib.sha256(v).hexdigest()
+head=git('rev-parse','HEAD').decode().strip();base=K['WFC']['commit'];new=K['LFT_COMMIT'];assert head in (base,new)
+if head==new:
+ assert git('rev-list','--parents','-n','1',head).decode().strip().split()==[new,base]
+ diff=git('diff','--name-status',base,new,'--').decode().splitlines()
+ assert sorted(diff)==sorted('A\t'+n for n in K['LFT_HASHES'])
+ for name,want in K['LFT_HASHES'].items():assert digest(git('show',new+':'+name))==want,name
+for name,want in K['WFC']['hashes'].items():
+ assert digest(git('show',base+':'+name))==want,name
+ assert digest(git('show',head+':'+name))==want,name
+queries={}
+for key,cmd in {'gpu':['nvidia-smi','--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total','--format=csv,noheader,nounits'],'compute':['nvidia-smi','--query-compute-apps=gpu_uuid,pid','--format=csv,noheader,nounits']}.items():
+ q=subprocess.run(cmd,capture_output=True,text=True,timeout=15);assert q.returncode==0;queries[key]={'command':cmd,'returncode':q.returncode,'stdout':q.stdout,'stderr':q.stderr}
+gpu_rows={int(z.split(',')[0]):z for z in queries['gpu']['stdout'].splitlines()};compute={(z.split(',')[0].strip(),int(z.split(',')[1])) for z in queries['compute']['stdout'].splitlines() if ',' in z}
+observations=[]
+for p in payload['processes']:
+ assert datetime.now(timezone.utc)<datetime.fromisoformat(payload['owner']['deadline_at'])
+ proc=Path('/proc')/str(p['pid']);assert proc.exists() and proc.stat().st_uid==os.getuid()
+ def identity():
+  argv=(proc/'cmdline').read_bytes().replace(b'\0',b' ').decode();cwd=str((proc/'cwd').resolve());stdout=str((proc/'fd/1').resolve());start=(proc/'stat').read_text().rsplit(') ',1)[1].split()[19]
+  assert 'tools/train.py' in argv and p['config'] in argv and cwd==p['root'] and stdout==p['log'] and start==str(p['start_ticks'])
+  return {'pid':p['pid'],'start_ticks':start,'argv':argv,'cwd':cwd,'stdout':stdout}
+ before=identity();assert p['gpu_uuid'] in gpu_rows[p['physical_gpu']] and (p['gpu_uuid'],p['pid']) in compute
+ hashes={}
+ for name,want in p['hashes'].items():
+  actual=digest((root/name).read_bytes());assert actual==(K['DEPLOYED_YAML_SHA256'] if name.endswith('.yaml') else want),name;hashes[name]=actual
+ def sample():
+  file=Path(p['log']);size=file.stat().st_size
+  with file.open('rb') as f:f.seek(max(0,size-1200000));data=f.read()
+  text=data.decode('utf8',errors='replace');assert not any(k in text for k in ('Traceback','CUDA out of memory','RuntimeError'))
+  train=[(int(a),int(b)) for a,b in re.findall(r'Train\[(\d+)/\d+\]:[^\r\n]*?\|\s*(\d+)/\d+',text)]
+  val=[(int(a),int(b)) for a,b in re.findall(r'Val\[(\d+)/\d+\]:[^\r\n]*?\|\s*(\d+)/\d+',text)]
+  return {'observed_at':datetime.now(timezone.utc).isoformat(),'log_size':size,'max_native_step':max(train) if train else None,'max_native_validation_step':max(val) if val else None,'tail_sha256':digest(data),'tail_exception_seen':False}
+ a=sample();time.sleep(3);b=sample();after=identity();assert before==after
+ logger_prefix='/data/songcl/Project/Cluster_project/Cluster_checkpoints/'+Path(p['config']).stem+'/'
+ logs=[]
+ for fd in (proc/'fd').iterdir():
+  try:
+   name=str(fd.resolve())
+   if name.startswith(logger_prefix) and name.endswith('.log'):logs.append(name)
+  except (FileNotFoundError,PermissionError):pass
+ logs=sorted(set(logs));metrics=[]
+ if len(logs)==1:
+  with open(logs[0],encoding='utf8',errors='replace') as f:metrics=[line.strip() for line in f if 'mIoU :' in line or 'resume start_epoch:' in line]
+ def growth(key):return a[key] is not None and b[key] is not None and tuple(b[key])>tuple(a[key])
+ observations.append({'experiment_id':p['experiment_id'],'original_source_commit':p['commit'],'physical_gpu':p['physical_gpu'],'gpu_uuid':p['gpu_uuid'],'identity_before':before,'identity_after':after,'runtime_commit':head,'original_source_hashes':hashes,'samples':[a,b],'strict_native_train_growth':growth('max_native_step'),'strict_native_validation_growth':growth('max_native_validation_step'),'native_logger_paths':logs,'metric_lines':metrics,'checkpoint_body_read':False,'signals_sent':False})
+print(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'owner':payload['owner'],'runtime_commit':head,'allowed_additive_runtime_transition':head==new,'exact_additive9_LFT_and_WFC_source9_unchanged':True,'observations':observations,'queries':queries,'no_process_started_or_signalled':True}))

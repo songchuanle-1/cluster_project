@@ -1,0 +1,64 @@
+"""Small stdlib APF observer/packet checks; never imports worker, Torch or runtime."""
+from pathlib import Path
+from types import SimpleNamespace
+import ast,copy,hashlib,json
+from datetime import datetime,timezone
+HERE=Path(__file__).resolve().parent
+ROOT=HERE.parents[3]
+REFERENCE=ROOT/'pipeline/diagnostic_bundles/tick_d08825b5/cre_compatible_tooling/native'
+checks=[]
+def check(name,value):
+    assert value,name
+    checks.append({'name':name,'passed':True})
+def fn(tree,name):return next(n for n in ast.walk(tree) if isinstance(n,ast.FunctionDef) and n.name==name)
+def dump(n):return ast.dump(n,include_attributes=False)
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+worker=ast.parse((HERE/'worker.py').read_text());reference=ast.parse((REFERENCE/'worker.py').read_text())
+for name in ('worker.py','native_runtime.py','candidate_model/ancestry_path_factor.py','candidate_model/hier_postprocess.py'):
+    compile((HERE/name).read_bytes(),str(HERE/name),'exec');check('compile_'+name,True)
+check('original_resources_whole_AST',dump(fn(worker,'resources'))==dump(fn(reference,'resources')))
+check('original_main_control_AST',dump(fn(worker,'json_safe'))==dump(fn(reference,'json_safe')))
+rt=ast.parse((HERE/'native_runtime.py').read_text());oldrt=ast.parse((REFERENCE/'native_runtime.py').read_text())
+for name in ('sha','verify_source_version','verify','observe','acquire','release','fingerprint','save'):
+    check('runtime_AST_'+name,dump(fn(rt,name))==dump(fn(oldrt,name)))
+manifest=json.loads((HERE/'manifest_template.json').read_text());binding=json.loads((HERE/'source_version_binding.json').read_text())
+for n,h in manifest['diagnostic_files'].items():check('diagnostic_hash_'+n,sha(HERE/n)==h)
+active=('current_token','stage','tick_generated_at','deadline_at','physical_gpu','gpu_uuid','allowed_gpus','context_sha256','pending_sha256','runtime_code_commit')
+check('ten_active_null',all(manifest[k] is None for k in active))
+check('actual_version',binding['code_commit']=='bf6c3fafe0f690e16e838e7c0192f09e789389f9' and binding['parent_commit']==manifest['runtime_expected_commit']=='d58576b396cfb54577652be972f3ffaffda508c9')
+check('capable_not_executed',manifest['draft_execution_disabled'] is False and manifest['scientific_admission'] is False)
+# Extract real pure observer code and original production metadata builder, without imports.
+ns={'copy':copy};exec(compile(ast.Module(body=[fn(worker,'apf_plan_observation'),fn(worker,'apf_coverage_preflight')],type_ignores=[]),'actual_observer','exec'),ns)
+model=ast.parse((HERE/'candidate_model/ancestry_path_factor.py').read_text());exec(compile(ast.Module(body=[fn(model,'_ids'),fn(model,'build_ancestry_path_plan')],type_ignores=[]),'actual_plan','exec'),ns)
+cases=[([],[],[],[0,0,0]),([0],[0],[0],[1,1,1]),([3,1,3],[0,2,0,1],[2,0,1],[5,4,4]),([0,1,2],[0,0,1],[0,0],[4,3,2])]
+for i,(a,b,c,w) in enumerate(cases):
+    plan=ns['build_ancestry_path_plan'](a,b,c,w);observed=ns['apf_plan_observation'](plan,(a,b,c));check('actual_plan_observer_'+str(i),observed==plan)
+check('empty_inconclusive',not ns['apf_coverage_preflight']([([],[],[])])['true_factor_path_possible'])
+check('singleton_factor_legal',ns['apf_coverage_preflight']([([0],[0],[0])])['true_factor_path_possible'])
+# Real observed_mean wrapper, opaque/list-only interface; original output identity and call counts.
+class Value:
+    def __init__(self,rows):self.rows=rows
+    def __getitem__(self,key):
+        row,col=key;return Value([r[col] for r in self.rows[row]])
+    def detach(self):return self
+    def clone(self):return Value(copy.deepcopy(self.rows))
+counter=[]
+def original_mean(messages,positions,counts):
+    output=Value([['actual-return-'+str(len(counter)+1)]]);counter.append((messages,positions,counts,output));return output
+context={'phase':'middle_mean','mean_count':0,'factors_ref':Value([[1,2,3],[4,5,6]]),'mp':[0,0],'cp':[0,0],'mc':[2],'cc':[2],'mean_outputs':[],'record':{'mean_calls':[]}}
+space={'state':{'apf_context':context,'forward_index':1},'att':SimpleNamespace(path_factor=SimpleNamespace(channels=1)),'summary':lambda x:{'finite':True},'fingerprint':lambda t,x:repr(x.rows),'torch':None,'watch':lambda *a:None,'original_mean':original_mean}
+exec(compile(ast.Module(body=[fn(worker,'observed_mean')],type_ignores=[]),'actual_mean_wrapper','exec'),space)
+for which,rows in enumerate(([[2],[5]],[[3],[6]])):
+    out=space['observed_mean'](Value(rows),[0,0],[2]);check('original_mean_once_identity_'+str(which),out is counter[which][3] and out is not context['mean_outputs'][which] and len(counter)==which+1)
+check('actual_two_means_complete',context['phase']=='complete' and context['mean_count']==2)
+context.update(phase='middle_mean',mean_count=0)
+try:space['observed_mean'](Value([[2],[5]]),[0,1],[1,1])
+except AssertionError:check('wrong_group_rejected_before_original',len(counter)==2)
+else:raise AssertionError('wrong group accepted')
+# Whole weight positivity remains; nine blocks only finite/descriptive, with no slice-update assertion.
+before=ast.get_source_segment((HERE/'worker.py').read_text(),fn(worker,'before_step'));after=ast.get_source_segment((HERE/'worker.py').read_text(),fn(worker,'after_step'))
+check('whole_weight_gradient_gate',"g['abs_max']>0" in before)
+check('nine_block_zero_legal',"assert info['finite'];" in before and "assert info['finite'] and info['abs_max']>0" not in before)
+check('nine_block_updates_descriptive','descriptive_parameter_block_changed' in after and not any(isinstance(n,ast.Assert) and 'parameter_block' in ast.unparse(n) for n in ast.walk(fn(worker,'after_step'))))
+result={'recorded_at':datetime.now(timezone.utc).isoformat(),'status':'LOCAL_SOFTWARE_CHECKS_PASSED_NOT_NATIVE','count':len(checks),'checks':checks,'source_hashes':{'worker.py':sha(HERE/'worker.py'),'native_runtime.py':sha(HERE/'native_runtime.py'),'manifest_template.json':sha(HERE/'manifest_template.json'),'source_version_binding.json':sha(HERE/'source_version_binding.json')},'torch_imported':False,'worker_or_runtime_entry_executed':False,'network_gpu_git_shared_operations':False,'native':'NOT_RUN','resources':'NOT_RUN'}
+(HERE/'static_validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf8');print(json.dumps({'checks':len(checks),'status':result['status']}))

@@ -1,0 +1,21 @@
+{
+  "revision": 1,
+  "failure_scope": "implementation",
+  "scope": "Diagnosticmeasurementonly;no model/config/precision/tolerance/weights/targets/query/cohortchange;not a newtrainable realization.",
+  "reason": "Original source/ILA/head/identity errors0,but full-source receiverpermutation2.86102294921875e-6 fails1e-6. This control re-evaluates global-mean/fusion logits despite the preregistered conditionalintervention holding fusion fixed.",
+  "change": "Retain/recompute original full-source permutation failure separately. Test the SAME conditional intervention operator under receiverpermutation with ORIGINALfusionlogits permuted,not reestimated. Add frozen-gate identity. Native baseline and actualscale-deletion taskcode unchanged.",
+  "prediction": "Frozen-original-fusion identity and receiverpermutation meet unchanged1e-6 while originalfullsource errorremainsreported,possiblyfailed. Neverclaimfullnative sourcepermutationpassed;query/weights/cohort/deletionreadoutunchanged.",
+  "preregistered_at": "2026-10-19T13:50:33.829770+00:00",
+  "failure_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30bdd3a5/scale_pair_0_result.json",
+      "sha256": "e546b6d08631cabb0c0f761506b94dc6fccf4b77bef5fe972a6ac8bbe0c97835"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30bdd3a5/scale_pair_0_execution.json",
+      "sha256": "3464769ee8bbd3da020f708198653435263292649b0fd23d73f8931eadc1b7af"
+    }
+  ],
+  "result": "pending",
+  "evidence": []
+}

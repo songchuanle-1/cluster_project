@@ -1,0 +1,17 @@
+{
+  "preregistered_at": "2026-10-19T09:32:24.785782+00:00",
+  "candidate_id": "m95-scale-specific-boundary-responsibility",
+  "cohort": "First8 scenes of existing frozen32-scene TRAIN manifest,in existing order;4original expressions per scene,no outcome-based selection",
+  "checkpoint": "Available trainedM95epoch16;not verified historical champion weights",
+  "capture": "Exact final cluster gathered refined tokens,points,assignments,padding,ILA inputs,final decoder query/output and final native criterion matching. No optimizer/backward/new training.",
+  "controls": "Same-device source message identity,ILA feature identity,native prediction_head mask+score identity,zero identity and receiver permutation must meet unchanged1e-6. Preserve any failure and stop task interpretation.",
+  "interventions": "Zero only one refined scale bank before exact native _cluster_to_points;original fixed fusion weights,projection bias,message_norm and encoder gate. No weight renormalization or new residual/gate.",
+  "query": "Original final decoder returned query remains bitwise fixed;replay exact native ILA and prediction_head. Do not call whole decoder to update query.",
+  "targets": "Exact final native Criterion.loss_masks targets and original positive query/target indices,selected by equality with captured final logits. Valid native superpoints only;binary labels0/1 must be exact.",
+  "groups": "For each original matched target,original fine cell is mixed iff it contains both target0and1. Define before interventions;empty groups => unknown.",
+  "primary": "Per receiver abs(sigmoid(native_mask_logit)-original_binary_target). Fine-deletion excess mixed-versus-interior minus coarse-deletion excess mixed-versus-interior. Positive is preregistered direction,not a tuned cutoff.",
+  "aggregation": "Mean matched-query contrasts within expression,then expressions within scene,then scenes equally. Report counts/empty groups;queries and expressions are not independent scenes. Four fixed scene-pairs;no population CI/efficacy claim.",
+  "numerics": "CPU float32 failures and float64 precision discrimination retained;CPU/GPU cached-message mismatch remains a failed1e-6 control. Only fresh same-device native controls can establish task replay validity;do not waive/relax gates.",
+  "resources": "New execution needs fresh current foreground lease,server4 pinned hostname+GPU0UUID,live idleGPU and all3exclusiveflocks. Alternate authorized server3GPU1 currently occupied and exact frozen assets not mirrored. No sharing/eviction/automatic launch.",
+  "current_execution": "Prepared and CPU-checked only;0nativeGPU task runs;no new training admission."
+}

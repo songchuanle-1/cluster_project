@@ -1,0 +1,136 @@
+{
+  "token": "7db522a6c6dd4300918a67f77dc020c5",
+  "local_observed_at": "2026-10-15T03:35:13.975554+08:00",
+  "experiment": {
+    "id": "M201-BPS",
+    "config": "configs/Quard/bps/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps.yaml",
+    "server": "server-4",
+    "gpu": "0",
+    "status": "done_earlystop",
+    "history": [
+      {
+        "ts": "2026-10-14T09:59:29.366308",
+        "action": "launched",
+        "gpu": "7"
+      },
+      {
+        "ts": "2026-10-14T15:40:56.851811+08:00",
+        "action": "migrated_resume",
+        "from_server": "server-6",
+        "server": "server-4",
+        "gpu": "0",
+        "checkpoint_meta": {
+          "epoch": 8,
+          "best_miou": 0.4664499759674072,
+          "epochs_no_improve": 0,
+          "time": "Wed Oct 14 07:20:03 2026"
+        },
+        "checkpoint_sha256": "12af607876e9c669ac47e1d11c3a1e4335ae9b9701a78de508fb6a56edb200eb"
+      },
+      {
+        "ts": "2026-10-14T15:44:28.856239+08:00",
+        "action": "migration_runtime_retry",
+        "server": "server-4",
+        "gpu": "0",
+        "pid": 2634704,
+        "repair": "short TMPDIR only"
+      },
+      {
+        "ts": "2026-10-15T03:09:48.966542",
+        "status": "done_earlystop",
+        "best_miou": "0.4900",
+        "epochs": "27/50"
+      }
+    ],
+    "pid": 2634704,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps_resume_retry_20261014_154428.log",
+    "launch_verified": true,
+    "launch_verification": "training_progress",
+    "launched": "2026-10-14T09:59:29",
+    "resume_checkpoint": "/data/songcl/Project/Cluster_project/pipeline/migration_8eea3f8d47eb4034a4ea148c066192f6/resume.pth",
+    "resume_sha256": "12af607876e9c669ac47e1d11c3a1e4335ae9b9701a78de508fb6a56edb200eb",
+    "resume_meta": {
+      "epoch": 8,
+      "best_miou": 0.4664499759674072,
+      "epochs_no_improve": 0,
+      "time": "Wed Oct 14 07:20:03 2026"
+    },
+    "source_runs": [
+      {
+        "server": "server-6",
+        "gpu": "7",
+        "pid": 2867534,
+        "log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps_20261014_095849.log",
+        "launched": "2026-10-14T09:59:29",
+        "source_pid": 2867534,
+        "source_start_ticks": "1612813956",
+        "source_stopped": true,
+        "interrupted_tail": [
+          "Train[9/50]:  67%|█████████████▍      | 3136/4686 [24:16<11:50,  2.18it/s, lr=6.2e-05, eta=1 day, 0:59:40, iter_time=0.46]",
+          "Train[9/50]:  67%|█████████████▍      | 3136/4686 [24:17<11:50,  2.18it/s, lr=6.2e-05, eta=1 day, 0:59:40, iter_time=0.46]",
+          "Train[9/50]:  67%|█████████████▍      | 3137/4686 [24:17<11:58,  2.16it/s, lr=6.2e-05, eta=1 day, 0:59:40, iter_time=0.46]",
+          "Train[9/50]:  67%|█████████████▍      | 3137/4686 [24:18<11:58,  2.16it/s, lr=6.2e-05, eta=1 day, 0:59:45, iter_time=0.46]",
+          "Train[9/50]:  67%|█████████████▍      | 3138/4686 [24:18<12:38,  2.04it/s, lr=6.2e-05, eta=1 day, 0:59:45, iter_time=0.46]"
+        ],
+        "terminated_owned_children": [
+          2869033,
+          2869069,
+          2869071,
+          2869087,
+          2962521,
+          2962523
+        ],
+        "checkpoint_meta": {
+          "epoch": 8,
+          "best_miou": 0.4664499759674072,
+          "epochs_no_improve": 0,
+          "time": "Wed Oct 14 07:20:03 2026"
+        },
+        "scope": "Current unfinished epoch is replayed. Native checkpoint lacks mid-epoch/RNG restoration; no bitwise trajectory claim."
+      }
+    ],
+    "migrated_at": "2026-10-14T15:40:56.851811+08:00",
+    "migration_repair_count": 1,
+    "failed_migration_launches": [
+      {
+        "token": "8eea3f8d47eb4034a4ea148c066192f6",
+        "observed_at": "2026-10-14T15:40:56.850405+08:00",
+        "pid": 2617502,
+        "log": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps_resume_20261014_154056.log",
+        "command": [
+          "/home/songcl/.conda/envs/project_cluster/bin/python",
+          "tools/train.py",
+          "configs/Quard/bps/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps.yaml",
+          "--resume",
+          "/data/songcl/Project/Cluster_project/pipeline/migration_8eea3f8d47eb4034a4ea148c066192f6/resume.pth",
+          "--gpu_ids",
+          "0",
+          "--num_gpus",
+          "1"
+        ],
+        "checkpoint_meta": {
+          "epoch": 8,
+          "best_miou": 0.4664499759674072,
+          "epochs_no_improve": 0,
+          "time": "Wed Oct 14 07:20:03 2026"
+        },
+        "launch_verified": false,
+        "launch_verification": "pending_progress",
+        "failed_pid": 2617502,
+        "stopped_exact_process_tree": true,
+        "owned_children": [
+          2618364,
+          2618369
+        ],
+        "log_bytes": 5237,
+        "no_completed_training_steps_observed": true,
+        "failure": "Long TMPDIR causes torch_shm_manager Invalid argument; native multiprocess loading PASS with short project temp directory."
+      }
+    ],
+    "migration_progress_evidence": "pipeline/diagnostic_bundles/m201_server4_8eea3f8d47eb4034a4ea148c066192f6/progress.json",
+    "final_best": "0.4900",
+    "finished_at": "2026-10-15T03:09:48",
+    "log_local": "",
+    "epochs_final": "27/50"
+  }
+}

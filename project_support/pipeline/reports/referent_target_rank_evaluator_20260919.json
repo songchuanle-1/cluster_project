@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only static implementation and tests for fail-closed evaluation of the frozen outcome-independent referent registry; no model forward, native capture, GPU execution, queue mutation, admission, or efficacy claim",
+  "candidate_id": "referent-causality-audit",
+  "registry": {
+    "path": "pipeline/reports/referent_outcome_independent_registry_20260918-2311.json",
+    "sha256": "83fbef96307b184443ae790e54815474a03efa4f29301cb4623653daf3cbb6ff"
+  },
+  "implementation": {
+    "path": "scripts/referent_target_rank_evaluator_20260919.py",
+    "sha256": "32987438d71db5017a87b25d9c36da1268354aeebf7ed2fa303999e3caac2076"
+  },
+  "tests": {
+    "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+    "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f",
+    "tests_passed": 10,
+    "tests_failed": 0
+  },
+  "contract": {
+    "score_direction": "lower_is_better",
+    "required_score_names": [
+      "referent",
+      "objectness"
+    ],
+    "missing_data_policy": "reject_expression_no_imputation",
+    "tie_policy": "reject",
+    "required_per_expression_evidence": [
+      "native candidate key coverage",
+      "referent and objectness scores",
+      "target and candidate mask hashes",
+      "native input hash",
+      "hierarchical partition hash"
+    ],
+    "scene_balance": "equal scene means over expressions that pass complete native coverage; rejected expressions are not imputed"
+  },
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "retry_after": "2026-09-19T00:15:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory",
+    "native_capture_launched": false
+  },
+  "status": {
+    "stage_completed": "Static fail-closed rank-evaluation implementation",
+    "native_execution_completed": false,
+    "scientific_validation_complete": false,
+    "next_action": "At the recorded GPU retry deadline, run the frozen native capture for every target and all 312 predeclared same-class candidates on the 73 eligible expressions, then evaluate without imputation."
+  },
+  "limitations": [
+    "Unit tests validate implementation behavior, not scientific validity.",
+    "No native score, candidate coverage, rank, or efficacy result exists.",
+    "The evaluator intentionally rejects ties and any incomplete expression.",
+    "The fixed TRAIN cohort is diagnostic and not a held-out population sample.",
+    "M197-PIRS remains prior-art engineering evidence pending terminal analysis."
+  ]
+}

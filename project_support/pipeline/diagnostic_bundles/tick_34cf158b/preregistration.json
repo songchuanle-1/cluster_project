@@ -1,0 +1,31 @@
+{
+  "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+  "experiment_id": "M207-HAP",
+  "registered_at": "2026-10-20T21:24:04.326958+00:00",
+  "profile": "experiment_first",
+  "hypothesis": "A coarse-to-fine affine prolongation may transmit coarse semantic intercepts while keeping child variation related to actual geometry. It replaces fine/middle independent semantic constants and non-affine variation with parent intercept plus geometric-subspace projection; task efficacy unknown.",
+  "formula": "For each occupied parent group D=child_centers-mean(child_centers), A=pinv(D.T@D,hermitian=True)@(D.T@H_child_original_refined), H_child_new=H_parent_already_updated + D@A. Start coarse→middle then middle→fine. Coarse original refined bank stays. No child residual bypass or NxN projector.",
+  "matched_control": "Original M95 same seed1999/50epochs/maxiters70/data/optimizer/native YAML. Original three FFNs/CSORT/HCG/last inst_feats injection unchanged outside new operator.",
+  "degeneracy": [
+    "One child or zero geometric variation gives zero detail and parent-only output.",
+    "If rank(D)=nchild-1, e.g. up to4 affine-independent children, detail=Hchild-mean(Hchild); geometry does not uniquely smooth every group.",
+    "Child token unweighted mean equals parent in exact math; no point-mass conservation claim.",
+    "Fine/middle FFN constant bias gradients may be zero by centering; finite nonconstant feature and parent paths must be observed."
+  ],
+  "numerical_protocol": "Detached nativeFP32 geometry and batched3x3 pinv on D.TD, hermitian=True, native torch default cutoff, no ridge/epsilon/precision/schedule sweeps. Keep D.T@H, A and D@A differentiable in features. Record native group count/rank/spectrum/condition/finite/amplitude when executable.",
+  "native_pending": [
+    "Exact native YAML realTRAIN2finite loss/backward/optimizersteps and fine/mid/coarse input-edge proof",
+    "Original fvcore counter plus unsupported pinv disclosure, same bs1warmup20repeat100 median/P90/memory matchedM95",
+    "No queue/admission/launch until actual native and resource evidence passed"
+  ],
+  "history_review": "Finite source comparison distinguishes CCP child+parent residual and GEO centroid/radius projection; no exact equivalent/explicit ban found, not a novelty proof. Historical held IDs unchanged.",
+  "authorization": {
+    "path": "pipeline/authorizations/experiment_first_20261021.json",
+    "sha256": "2e892959dc60e66367401b1f0d01609ccfef0fbe331f8a9b265bb03e35053ce8"
+  },
+  "placement": "Latest explicit request usesserver4GPU0/1, currently occupied byM205/M206; no local native behavior, no sharing/eviction.",
+  "initial_resource_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_34cf158b/initial_resources.json",
+    "sha256": "064c4e2cdfe090653d6894efe168c7ebc955f5047cb69348e33c83af0cab4652"
+  }
+}

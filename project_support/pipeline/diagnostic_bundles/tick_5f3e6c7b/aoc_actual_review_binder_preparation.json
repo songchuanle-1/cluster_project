@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "status": "DEFAULT_READONLY_AOC_ACTUAL_REVIEW_BINDER_DRAFT_NOT_EXECUTED",
+  "recorded_at": "2026-10-29T14:12:56.611822+00:00",
+  "candidate_id": "hierarchy-ancestral-order-commutator-composition",
+  "code_commit": "0314b932a92a8cc7f67804068ecb1c1f7a5f2e33",
+  "source_disabled_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/aoc_promotion_prepare/preparation.json",
+    "sha256": "a1c707ce1f24a08c89550ee4a423e7dced2eaac3a77fda549010716d7296d308"
+  },
+  "reference_successful_binder": {
+    "path": "pipeline/diagnostic_bundles/tick_14fea205/bind_pes_actual_review.py",
+    "sha256": "2b6bf70741d6f638fb0c395f5bd1db878067c5b64afa066071b05e0e9ebf773d"
+  },
+  "binder": {
+    "path": "pipeline/diagnostic_bundles/tick_5f3e6c7b/bind_aoc_actual_review.py",
+    "sha256": "9b16af4249f936c86e4286c91cb881947474c59b6816423bf690e3cad61fd9c2"
+  },
+  "actual_independent_review": null,
+  "actual_raw_results": null,
+  "actual_manifest_sha256": null,
+  "actual_lease_sha256": null,
+  "default_no_binding_or_promotion": true,
+  "checks": {
+    "binder_compiles_without_import": true,
+    "default_returns_before_any_guard_raw_or_copy": true,
+    "peer_manifest_lease_hashes_not_prefilled": true,
+    "requires_exact_current_four_terminal_success_and_peer": true,
+    "only_common_flag_and_actual_evidence_copy": true,
+    "durable_intent_no_replay_project_lock_and_finally_close": true,
+    "all_payload_composed_before_first_intent": true,
+    "no_subprocess_Git_SSH_native_or_dispatch_call": true
+  },
+  "check_count": 8,
+  "literal_changes": [
+    [
+      "tick_14fea205')",
+      "tick_5f3e6c7b')"
+    ],
+    [
+      "'pes_promotion_prepare'",
+      "'aoc_promotion_prepare'"
+    ],
+    [
+      "'pes_admission_active'",
+      "'aoc_admission_active'"
+    ],
+    [
+      "'pes_execution'",
+      "'aoc_execution'"
+    ],
+    [
+      "SOURCE_SHA='1c7874c4c626c36fb65f32b466c6a5bee1f36aaefa73f30ff3cd57cf158decae'",
+      "SOURCE_SHA='a1c707ce1f24a08c89550ee4a423e7dced2eaac3a77fda549010716d7296d308'"
+    ],
+    [
+      "MANIFEST_SHA='d7ee1780c08ba1faffdaea28e12b78d2bbaf2ee4380533bb20ac7878dfb6456b'",
+      "MANIFEST_SHA=None"
+    ],
+    [
+      "LEASE_SHA='4a1d7552730d494589be8ca9781a36ad06d950818a4db4c21a9c173c914b0b8b'",
+      "LEASE_SHA=None"
+    ],
+    [
+      "CID='hierarchy-palindromic-euler-state-composition'",
+      "CID='hierarchy-ancestral-order-commutator-composition'"
+    ],
+    [
+      "CODE='9c42fdc4e9168acec18980d782ee9c163e043bb7'",
+      "CODE='0314b932a92a8cc7f67804068ecb1c1f7a5f2e33'"
+    ],
+    [
+      "BASE='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391'",
+      "BASE='9c42fdc4e9168acec18980d782ee9c163e043bb7'"
+    ],
+    [
+      "FOUR_ACTUAL_PES_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED",
+      "FOUR_ACTUAL_AOC_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED"
+    ],
+    [
+      "pes_evidence.py",
+      "aoc_evidence.py"
+    ],
+    [
+      "summarize_pes_actual.py",
+      "summarize_aoc_actual.py"
+    ],
+    [
+      "fast_forward_tested_pes.py",
+      "fast_forward_tested_aoc.py"
+    ],
+    [
+      "admit_pes_queue.py",
+      "admit_aoc_queue.py"
+    ],
+    [
+      "dispatch_pes_once.py",
+      "dispatch_aoc_once.py"
+    ],
+    [
+      "pes_actual_independent_review.json",
+      "aoc_actual_independent_review.json"
+    ],
+    [
+      "pes_active_binding_intent.json",
+      "aoc_active_binding_intent.json"
+    ],
+    [
+      "pes_active_binding_result.json",
+      "aoc_active_binding_result.json"
+    ]
+  ],
+  "necessary_interface_change": "Actual future manifest/lease hashes are mandatory explicit CLI inputs, rather than historical PES constants. Peer SHA remains mandatory. Default returns before reading actual result files.",
+  "exact_diff": "--- original_successful_PES_binder\n+++ current_AOC_binder\n@@ -3,22 +3,22 @@\n from datetime import datetime, timezone\n import argparse, hashlib, json, re, sys\n \n-TICK=Path('D:/project/cluster_project/pipeline/diagnostic_bundles/tick_14fea205')\n+TICK=Path('D:/project/cluster_project/pipeline/diagnostic_bundles/tick_5f3e6c7b')\n sys.path.insert(0,str(TICK))\n from anchor import ROOT, EXPECTED, guard\n-SOURCE=TICK/'pes_promotion_prepare'\n-DEST=TICK/'pes_admission_active'\n-EXE=TICK/'pes_execution'\n-SOURCE_SHA='1c7874c4c626c36fb65f32b466c6a5bee1f36aaefa73f30ff3cd57cf158decae'\n-MANIFEST_SHA='d7ee1780c08ba1faffdaea28e12b78d2bbaf2ee4380533bb20ac7878dfb6456b'\n-LEASE_SHA='4a1d7552730d494589be8ca9781a36ad06d950818a4db4c21a9c173c914b0b8b'\n-CID='hierarchy-palindromic-euler-state-composition'\n-CODE='9c42fdc4e9168acec18980d782ee9c163e043bb7'\n-BASE='5c0c211c8ecc9479ecb34dbb8118a95f4b20e391'\n+SOURCE=TICK/'aoc_promotion_prepare'\n+DEST=TICK/'aoc_admission_active'\n+EXE=TICK/'aoc_execution'\n+SOURCE_SHA='a1c707ce1f24a08c89550ee4a423e7dced2eaac3a77fda549010716d7296d308'\n+MANIFEST_SHA=None\n+LEASE_SHA=None\n+CID='hierarchy-ancestral-order-commutator-composition'\n+CODE='0314b932a92a8cc7f67804068ecb1c1f7a5f2e33'\n+BASE='9c42fdc4e9168acec18980d782ee9c163e043bb7'\n GOAL='0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85'\n-STATUS='FOUR_ACTUAL_PES_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED'\n+STATUS='FOUR_ACTUAL_AOC_NATIVE_AND_RESOURCE_RESULT_SEMANTICS_INDEPENDENTLY_VALIDATED'\n PAIRS=(('smoke','champion'),('smoke','candidate'),('resources','champion'),('resources','candidate'))\n-FILES=('pes_evidence.py','summarize_pes_actual.py','fast_forward_tested_pes.py','admit_pes_queue.py','dispatch_pes_once.py','source_bindings.json')\n+FILES=('aoc_evidence.py','summarize_aoc_actual.py','fast_forward_tested_aoc.py','admit_aoc_queue.py','dispatch_aoc_once.py','source_bindings.json')\n \n def read(p):return json.loads(Path(p).read_text('utf8'))\n def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()\n@@ -29,20 +29,20 @@\n     with Path(p).open('xb') as f:\n         f.write(data);f.flush();__import__('os').fsync(f.fileno())\n \n-def check_actual(peer_sha):\n+def check_actual(peer_sha,manifest_sha,lease_sha):\n     guard()\n-    peer_path=TICK/'pes_actual_independent_review.json'\n+    peer_path=TICK/'aoc_actual_independent_review.json'\n     assert sha(peer_path)==peer_sha,'Independent review bytes differ from explicit root SHA'\n     peer=read(peer_path)\n     assert peer['status']==STATUS and peer['material_concerns']==[]\n     assert peer['candidate_id']==CID and peer['code_commit']==CODE and peer['goal_sha256']==GOAL\n     assert len(peer['raw_results'])==4 and {(v['mode'],v['target']) for v in peer['raw_results']}==set(PAIRS)\n-    assert sha(EXE/'native_manifest.json')==MANIFEST_SHA and sha(EXE/'execution_lease.json')==LEASE_SHA\n+    assert sha(EXE/'native_manifest.json')==manifest_sha and sha(EXE/'execution_lease.json')==lease_sha\n     m=read(EXE/'native_manifest.json');b=read(EXE/'execution_binding.json');lease=read(EXE/'execution_lease.json')\n     assert b['owner']==EXPECTED and set(b['owner'])==set(EXPECTED)\n     assert b['candidate_id']==m['candidate_id']==CID and b['code_commit']==m['code_commit']==CODE\n     assert b['runtime_code_commit']==m['runtime_code_commit']==BASE\n-    assert b['native_manifest_sha256']==lease['native_manifest_sha256']==MANIFEST_SHA and b['execution_lease_sha256']==LEASE_SHA\n+    assert b['native_manifest_sha256']==lease['native_manifest_sha256']==manifest_sha and b['execution_lease_sha256']==lease_sha\n     assert m['current_token']==lease['token']==EXPECTED['token'] and m['goal_sha256']==GOAL\n     assert m['physical_gpu']==b['physical_gpu']==lease['physical_gpu']==0 and m['allowed_gpus']==[0]\n     assert m['gpu_uuid']==b['gpu_uuid']==lease['gpu_uuid']=='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\n@@ -60,7 +60,7 @@\n         assert envelope['certainty']=='terminal' and envelope['returncode']==0 and raw['execution_completed'] is True\n         assert all(envelope['identity'].get(k)==v for k,v in request.items() if k not in ('mode','target'))\n         expected={'candidate_id':CID,'code_commit':CODE,'goal_sha256':GOAL,'mode':mode,'target':target,\n-                  'current_token':EXPECTED['token'],'physical_gpu':0,'native_manifest_sha256':MANIFEST_SHA,\n+                  'current_token':EXPECTED['token'],'physical_gpu':0,'native_manifest_sha256':manifest_sha,\n                   'context_sha256':EXPECTED['context_sha256'],'pending_sha256':EXPECTED['pending_sha256'],\n                   'deadline_at':EXPECTED['deadline_at'],'stage':b['stage'],'gpu_uuid':b['gpu_uuid']}\n         assert all(raw.get(k)==v for k,v in expected.items())\n@@ -72,24 +72,27 @@\n     ap=argparse.ArgumentParser(description=__doc__)\n     ap.add_argument('--execute-root',action='store_true')\n     ap.add_argument('--peer-sha256','--independent-review-sha256',dest='independent_review_sha256',default=None)\n+    ap.add_argument('--manifest-sha256',default=None)\n+    ap.add_argument('--lease-sha256',default=None)\n     args=ap.parse_args()\n     if not args.execute_root:\n         print('DEFAULT_READ_ONLY_NO_BINDING_COPY_OR_PROMOTION');return\n     assert isinstance(args.independent_review_sha256,str) and re.fullmatch('[0-9a-f]{64}',args.independent_review_sha256),'Actual peer SHA argument required'\n+    assert all(isinstance(v,str) and re.fullmatch('[0-9a-f]{64}',v) for v in (args.manifest_sha256,args.lease_sha256)),'Real current manifest and lease SHA arguments required'\n     guard();assert sys.dont_write_bytecode\n     assert sha(SOURCE/'preparation.json')==SOURCE_SHA\n     original=read(SOURCE/'preparation.json')\n     assert original['draft_execution_disabled'] is True and original['prepared_for_owner']==EXPECTED\n     for name,h in original['prepared_file_hashes'].items():assert sha(SOURCE/name)==h\n-    peer,raws=check_actual(args.independent_review_sha256)\n+    peer,raws=check_actual(args.independent_review_sha256,args.manifest_sha256,args.lease_sha256)\n     source_bindings=read(SOURCE/'source_bindings.json')\n     assert source_bindings['code_commit']==CODE and source_bindings['parent_commit']==BASE\n     assert source_bindings['native_preparation']['sha256']==read(EXE/'execution_binding.json')['frozen_preparation_sha256']\n     assert source_bindings['manifest_template']['sha256']==read(EXE/'execution_binding.json')['frozen_template_sha256']\n     files={name:(SOURCE/name).read_bytes() for name in FILES}\n-    text=files['pes_evidence.py'].decode('utf8')\n+    text=files['aoc_evidence.py'].decode('utf8')\n     assert text.count('DRAFT_EXECUTION_DISABLED=True')==1\n-    files['pes_evidence.py']=text.replace('DRAFT_EXECUTION_DISABLED=True','DRAFT_EXECUTION_DISABLED=False',1).encode('utf8')\n+    files['aoc_evidence.py']=text.replace('DRAFT_EXECUTION_DISABLED=True','DRAFT_EXECUTION_DISABLED=False',1).encode('utf8')\n     evidence={'independent_review':peer,'actual_raw_results':raws,'actual_four_result_review':None,\n               'scope':'Actual four terminal result identities and SHA-bound independent review are bound. Local summary/standards, source promotion, receipt, queue and launch have not been created by this binder.'}\n     files['evidence_bindings.json']=encoded(evidence)\n@@ -100,7 +103,7 @@\n               'prepared_file_hashes':{n:hashlib.sha256(v).hexdigest() for n,v in files.items()},\n               'standards_receipt_queue_source_or_launch_written':False}\n     files['activation_binding.json']=encoded(metadata)\n-    intent=TICK/'pes_active_binding_intent.json';result=TICK/'pes_active_binding_result.json'\n+    intent=TICK/'aoc_active_binding_intent.json';result=TICK/'aoc_active_binding_result.json'\n     assert not DEST.exists() and not intent.exists() and not result.exists(),'Existing/partial activation is never replayed or overwritten'\n     # All bytes are composed before the exclusive journal and destination creation.\n     sys.path.insert(0,'C:/Users/chuanle song/.codex/skills/songcl_research_pipeline')\n",
+  "expected_command": "python -B pipeline/diagnostic_bundles/tick_5f3e6c7b/bind_aoc_actual_review.py --execute-root --peer-sha256 <actualMDCsha> --manifest-sha256 <actualManifestsha> --lease-sha256 <actualLeasesha>",
+  "output_directory": "pipeline/diagnostic_bundles/tick_5f3e6c7b/aoc_admission_active",
+  "actualrequest_result_shared_Git_SSH_GPU_or_helper_entry_executed": false,
+  "material_concerns": []
+}

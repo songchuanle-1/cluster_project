@@ -1,0 +1,27 @@
+{
+  "candidate_id": "hierarchy-middle-directional-token-convolution",
+  "passed": true,
+  "basis": "Exact independent copy of seven parent source files plus new middle_conv.py and native YAML; only middle FFN replacement and current-batch geometry cache/link; numeric YAML identical to parent.",
+  "new_graph": "Six nearest geometric directional donors on 64 middle tokens, self plus depthwise and pointwise convolution. No point-level NxN graph, language/query routing, extra gate/residual/injection, new datasets, seeds or schedule changes.",
+  "historical_review": "Finite source review distinguishes M116-CGA, M50-DGC, GEO; old held candidates remain unchanged.",
+  "limitations": [
+    "Untrained efficacy unknown",
+    "Rotation-sensitive fixed axes",
+    "Cross-coarse-parent edges",
+    "FLOPs/resources still pending native measurement"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/implementation.json",
+      "sha256": "d97ce2eea6955c35eba972493c54b8acca054a89a2a66ea350c83601155688fb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/version_native.json",
+      "sha256": "4a694eaf832101187ea3f67ae98d63c3c82b63f949671b105eefe4344ab19f4b"
+    },
+    {
+      "path": "pipeline/designs/exp_design_20261021_m205_mdc.md",
+      "sha256": "dc281a595ed644652048c33c23a045c1758d75d57f9060471181d2764f44b71a"
+    }
+  ]
+}

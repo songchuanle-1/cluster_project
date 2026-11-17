@@ -1,0 +1,96 @@
+{
+  "recorded_at": "2026-10-22T04:13:49.936838+00:00",
+  "tick_token": "5c46f46a17514a6f984ad08364f0c7cc",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "/usr/bin/python3 -B -"
+  ],
+  "payload_sha256": "ef6db157014ced8e7691196638c5065f574f492cd516ad8dac334c3e4debc2ee",
+  "returncode": 0,
+  "stdout": "{\"observed_at\": \"2026-10-22T04:13:50.456907+00:00\", \"hostname\": \"dl04-MS-7E06\", \"queried_physical_gpus\": [0], \"GPU1\": \"NOT_QUERIED_RELEASED_TO_OTHERS\", \"inventory\": {\"returncode\": 0, \"stdout\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1705, 38\", \"stderr\": \"\"}, \"contexts\": {\"returncode\": 0, \"stdout\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 128551, 1656\", \"stderr\": \"\"}, \"HAP_process\": {\"pid\": 979955, \"exists\": false}, \"native_progress\": [{\"epoch\": 19, \"epochs\": 50, \"step\": 3665, \"steps\": 4686}, {\"epoch\": 19, \"epochs\": 50, \"step\": 3665, \"steps\": 4686}], \"log\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_001959.log\", \"log_bytes\": 25363566, \"log_age_seconds\": 1494.0521738529205, \"terminal_or_metrics_lines\": [\"mIOU: 0.492. Acc_50: 0.543. Acc_25: 0.594\", \"spmIOU: 0.457. spAcc_50: 0.509. spAcc_25: 0.587\", \"save best pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/best.pth\", \"save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth\", \"mIOU: 0.489. Acc_50: 0.543. Acc_25: 0.595\", \"spmIOU: 0.454. spAcc_50: 0.504. spAcc_25: 0.586\", \"save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth\", \"mIOU: 0.491. Acc_50: 0.544. Acc_25: 0.596\", \"spmIOU: 0.456. spAcc_50: 0.507. spAcc_25: 0.589\", \"save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth\", \"mIOU: 0.498. Acc_50: 0.551. Acc_25: 0.600\", \"spmIOU: 0.461. spAcc_50: 0.511. spAcc_25: 0.593\", \"save best pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/best.pth\", \"save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth\", \"Train[19/50]:  78%|\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u258b    | 3665/4686 [21:21<05:54,  2.88it/s, lr=3e-05, eta=14:12:45, iter_time=0.35]Traceback (most recent call last):\", \"AttributeError: Caught AttributeError in DataLoader worker process 1.\", \"Original Traceback (most recent call last):\", \"AttributeError: 'Tensor' object has no attribute 'has_torch_function_unary'\"], \"last_lines\": [\"  File \\\"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py\\\", line 349, in _worker_loop\", \"    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]\", \"  File \\\"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\\\", line 52, in fetch\", \"    data = [self.dataset[idx] for idx in possibly_batched_index]\", \"  File \\\"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\\\", line 52, in <listcomp>\", \"    data = [self.dataset[idx] for idx in possibly_batched_index]\", \"  File \\\"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/framework/dataset/scannetv2.py\\\", line 430, in __getitem__\", \"    ind = np.where(instance_label == i_instance)[0]\", \"  File \\\"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_tensor.py\\\", line 1226, in __array__\", \"    return self.numpy()\", \"AttributeError: 'Tensor' object has no attribute 'has_torch_function_unary'\", \"\", \"\", \"Train[19/50]:  78%|\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u2588\\u258b    | 3665/4686 [21:53<06:05,  2.79it/s, lr=3e-05, eta=14:12:45, iter_time=0.35]\"], \"read_only\": true, \"gpu_computation_started\": false}\n",
+  "stderr": "",
+  "data": {
+    "observed_at": "2026-10-22T04:13:50.456907+00:00",
+    "hostname": "dl04-MS-7E06",
+    "queried_physical_gpus": [
+      0
+    ],
+    "GPU1": "NOT_QUERIED_RELEASED_TO_OTHERS",
+    "inventory": {
+      "returncode": 0,
+      "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1705, 38",
+      "stderr": ""
+    },
+    "contexts": {
+      "returncode": 0,
+      "stdout": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 128551, 1656",
+      "stderr": ""
+    },
+    "HAP_process": {
+      "pid": 979955,
+      "exists": false
+    },
+    "native_progress": [
+      {
+        "epoch": 19,
+        "epochs": 50,
+        "step": 3665,
+        "steps": 4686
+      },
+      {
+        "epoch": 19,
+        "epochs": 50,
+        "step": 3665,
+        "steps": 4686
+      }
+    ],
+    "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_001959.log",
+    "log_bytes": 25363566,
+    "log_age_seconds": 1494.0521738529205,
+    "terminal_or_metrics_lines": [
+      "mIOU: 0.492. Acc_50: 0.543. Acc_25: 0.594",
+      "spmIOU: 0.457. spAcc_50: 0.509. spAcc_25: 0.587",
+      "save best pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/best.pth",
+      "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth",
+      "mIOU: 0.489. Acc_50: 0.543. Acc_25: 0.595",
+      "spmIOU: 0.454. spAcc_50: 0.504. spAcc_25: 0.586",
+      "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth",
+      "mIOU: 0.491. Acc_50: 0.544. Acc_25: 0.596",
+      "spmIOU: 0.456. spAcc_50: 0.507. spAcc_25: 0.589",
+      "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth",
+      "mIOU: 0.498. Acc_50: 0.551. Acc_25: 0.600",
+      "spmIOU: 0.461. spAcc_50: 0.511. spAcc_25: 0.593",
+      "save best pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/best.pth",
+      "save last pth to /data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap/20261022_002007/last.pth",
+      "Train[19/50]:  78%|███████████████▋    | 3665/4686 [21:21<05:54,  2.88it/s, lr=3e-05, eta=14:12:45, iter_time=0.35]Traceback (most recent call last):",
+      "AttributeError: Caught AttributeError in DataLoader worker process 1.",
+      "Original Traceback (most recent call last):",
+      "AttributeError: 'Tensor' object has no attribute 'has_torch_function_unary'"
+    ],
+    "last_lines": [
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/worker.py\", line 349, in _worker_loop",
+      "    data = fetcher.fetch(index)  # type: ignore[possibly-undefined]",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\", line 52, in fetch",
+      "    data = [self.dataset[idx] for idx in possibly_batched_index]",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/utils/data/_utils/fetch.py\", line 52, in <listcomp>",
+      "    data = [self.dataset[idx] for idx in possibly_batched_index]",
+      "  File \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/framework/dataset/scannetv2.py\", line 430, in __getitem__",
+      "    ind = np.where(instance_label == i_instance)[0]",
+      "  File \"/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_tensor.py\", line 1226, in __array__",
+      "    return self.numpy()",
+      "AttributeError: 'Tensor' object has no attribute 'has_torch_function_unary'",
+      "",
+      "",
+      "Train[19/50]:  78%|███████████████▋    | 3665/4686 [21:53<06:05,  2.79it/s, lr=3e-05, eta=14:12:45, iter_time=0.35]"
+    ],
+    "read_only": true,
+    "gpu_computation_started": false
+  }
+}

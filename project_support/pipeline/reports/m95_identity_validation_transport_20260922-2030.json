@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "contract": "m95_identity_validation_transport_v1",
+  "generated_at": "2026-09-22T20:30:00+08:00",
+  "scope": "Transport availability receipt for the shared M95 identity-control validation. This records an infrastructure interruption only; it is not a capture failure, scientific result, rejection, admission, or queue change.",
+  "host": "server-6",
+  "gpu": 7,
+  "attempts": [
+    {
+      "method": "headless monitor preflight",
+      "observed_at": "2026-09-22T20:16:00+08:00",
+      "result": "unreachable",
+      "source": "pipeline/headless/.tick_context.json preflight.monitor_output"
+    },
+    {
+      "method": "direct SSH BatchMode probe",
+      "connect_timeout_seconds": 8,
+      "result": "no response before local termination after approximately 36 seconds",
+      "observed_at": "2026-09-22T20:30:00+08:00"
+    }
+  ],
+  "last_durable_progress": {
+    "path": "pipeline/reports/m95_identity_capture_progress_20260922-1813.json",
+    "sha256": "76f292f4213d5d0efc3ee5736e61c8515c9bded0f0be8f6826fe77cf7261ab30",
+    "state": "pending_progress",
+    "step": 31,
+    "expressions": 2,
+    "expected_expressions": 256
+  },
+  "candidate_ids": [
+    "referent-supervision-axis",
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation"
+  ],
+  "state": "transport_unavailable",
+  "impact": "The producer PID, unique log, artifact count, capture.json presence, completeness for all 256 manifest rows, GPU occupancy and foreign-process safety cannot be verified from this host. The hash-bound analyzer cannot be run on an incomplete or unavailable capture.",
+  "retry_after": "2026-09-22T21:30:00+08:00",
+  "unblock_condition": "Server-6 SSH succeeds; GPU7 occupancy is checked without disturbing foreign work; the unique producer log is inspected for increasing native steps or a completed capture; capture.json exists and all 256 manifest rows are bound to the frozen hashes before analysis.",
+  "next_action": "At or after the retry time, resume the same five candidate IDs in event mode. Do not start a replacement capture or new design while the shared validation transport is blocked.",
+  "not_evidence_of": [
+    "producer failure",
+    "identity-specific causal support",
+    "completed native capture",
+    "candidate rejection",
+    "admission",
+    "deployable efficacy",
+    "novelty"
+  ]
+}

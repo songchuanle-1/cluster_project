@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T15:42:35.176561+00:00",
+  "project": "cluster_project",
+  "candidate_id": "hierarchy-native-distribution-embedding-composition",
+  "experiment_id": "M233-NDE",
+  "reviewer_agent": "/root/fresh_peer",
+  "owner": {
+    "token": "2218a50249ea45588e5138890a7f4160",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-08T15:32:25.884685+00:00",
+    "deadline_at": "2026-11-08T16:32:25.884685+00:00",
+    "context_sha256": "b168aa4faa7cfc1d40895a3f2b99a3df67b31a4d635e91ba0f76653e5db5c1e8",
+    "pending_sha256": "562c3d37dc43a6c9dc205de189e87ee42d46c367cd63bb06f50a0784f858ddf3"
+  },
+  "passed": true,
+  "scope": "READ_ONLY_CANONICAL_ADMISSION_REVISION_TRANSITION_AND_REAL_ACTUAL_GATE_GRANT_PREREVIEW_NO_RECEIPT_OR_LEDGER_WRITE",
+  "checks": [
+    {
+      "check": "current2218 actual owner and actualrevision1 pending baseline read only",
+      "passed": true
+    },
+    {
+      "check": "actual70eae EQ and9958db normalization grants unchanged PASS;430checks/native/resources alltrue and actual normalized outputhashes exact",
+      "passed": true
+    },
+    {
+      "check": "in-memory pending->passed plus append-only6realresultrefs preserves everyfrozenrevisionfield and all negative/evidence archives",
+      "passed": true
+    },
+    {
+      "check": "canonical closure.validate_revisions(project, proposed, snapshotbaseline) passes without ledger mutation",
+      "passed": true
+    },
+    {
+      "check": "closure.revision_digest actualproposal binds wholefinalrevision; canonical admission requires exact same finaldigest and currentgoal/source/config/decision/gate evidence",
+      "passed": true
+    }
+  ],
+  "material_concerns": [],
+  "allowed_revision_fields_to_change": [
+    "result",
+    "evidence",
+    "result_evidence"
+  ],
+  "allowed_result_transition": "pending -> passed",
+  "evidence_rule": "Append only; retain every historical failure/input/output ref. All result_evidence must also belong to evidence, have valid hashes, and resultfile mtime must be >= original preregistered_at.",
+  "frozen_revision_fields": [
+    "change",
+    "failure_evidence",
+    "failure_scope",
+    "prediction",
+    "preregistered_at",
+    "preregistration",
+    "reason",
+    "revision",
+    "source_commit"
+  ],
+  "completed_revision_rule": "Once result is no longer pending the entire revision object becomes immutable; do not mutate later for receipt bookkeeping.",
+  "actual_review_grants": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_equivalence_actual_independent_review.json",
+      "sha256": "70eae1bebda61e240f0643623ecc9d6dc3c2ca4ff0bae4f3caa99980a4770b35"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_normalization_actual_independent_review.json",
+      "sha256": "9958db5ede4f3ff48e056e6f4cebc88dc970b844f2ed6a531c2f6f1e1a47d9ac"
+    }
+  ],
+  "proposal_appended_refs": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_equivalence_actual_independent_review.json",
+      "sha256": "70eae1bebda61e240f0643623ecc9d6dc3c2ca4ff0bae4f3caa99980a4770b35"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_normalization_actual_independent_review.json",
+      "sha256": "9958db5ede4f3ff48e056e6f4cebc88dc970b844f2ed6a531c2f6f1e1a47d9ac"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_result_active/results_20261108T151307_234650Z/native_smoke.json",
+      "sha256": "528f96a1b4eec84fb745bf63fc8d1b1233c78e97ed17d3b59c173b1a7be605bb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_result_active/results_20261108T151307_234650Z/resources.json",
+      "sha256": "77e84407118aa6bece5aef50244a9502135197bae29c6a8095195a0863b6c867"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_result_active/results_20261108T151307_234650Z/constraints_independence.json",
+      "sha256": "731f59b49f01d9149d937a5cbd9e88c997599229e71c718c5e693fe9501e2de0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_801d029a/nde_result_active/results_20261108T151307_234650Z/normalization_audit.json",
+      "sha256": "6d2ef8d9530e4d986ed3a57a56953cc80794e622040db3717c7df2d8f710fa2f"
+    }
+  ],
+  "proposal_changed_fields": [
+    "result_evidence",
+    "evidence",
+    "result"
+  ],
+  "proposed_revision_sha256": "c4505c4f5594d51e7d6062bd4bc2d06f620329057dc3cbd47d737b047c70af71",
+  "proposed_revision_digest_is_advisory_not_a_substitute_for_actual_final_digest": true,
+  "canonical_validation_read_only_passed": true,
+  "canonical_API_contract": {
+    "revision_digest": "closure.revision_digest(final_actual_revision) hashes complete sort_keys=True compact JSON revision, including ordered evidence arrays. Recompute after final append-only transition; bind exact digest in receipt.",
+    "admission": "closure.admission(project_root, task_dict, completed=False) reads the actual canonical receipt referenced by task.admission_receipt; validates current goal, id/config/codecommit, experiment_first standingauth+canonical smoke, all4gate evidence and decision hash, current allowed candidate stage, currentrevision passed+exact digest.",
+    "task_required_fields": [
+      "id=M233-NDE",
+      "config=exact native candidate YAML",
+      "code_commit=0747f6acec1c61018ec99acf2efa5329c9b3523c",
+      "admission_receipt=canonical project-relative receipt path"
+    ],
+    "prewrite_receipt_validation": "Cannot certify closure.admission until root creates the real canonical receipt and finalrevision in shared state. Actual receipt review is deferred.",
+    "returned_receipt": "Function return is validated actualreceipt object; hashes establish identity and independently reviewed data supplies scientific/technical truth."
+  },
+  "actual_native_gate_passed": true,
+  "actual_resource_gate_passed": true,
+  "actual_repaired_constructed_core_EQ_passed": true,
+  "actual_gate_data_approved_for_root_canonical_admission": true,
+  "canonical_receipt_created": false,
+  "actual_canonical_admission_already_verified": false,
+  "ledger_queue_source_SERVERS_mutated": false,
+  "training_dispatch_or_deployment_granted": false,
+  "production_dependency": "Fresh production runtime/conda/shim/source+receipt binding and verified dispatch capability; do not use consumed NSD diagnostic shim.",
+  "normalization_draft_sha256": "2ea431fa8dc271d21551b77f244cbb4ad7ea149601754c9ebb25d22c2a52568b",
+  "limitations": [
+    "This is a concrete in-memory legal transition using actualpassed gate evidence. Root may choose additional append-only evidence, which changes the finaldigest and must be reflected in the actualreceipt.",
+    "Independentactualgrant9958db explicitly approves normalizedgate data for rootcanonicaladmission; current2218 prereview rechecks immutableactualleaves, without retokening historicalmeasurements.",
+    "No canonicalreceipt, ledger, queue, source, SERVERS, scheduler or deployment changed by reviewer. Await actualreceipt for genuine canonicaladmission review."
+  ]
+}

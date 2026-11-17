@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "上海2026-10-21 08:09 begin完成监控/目标/已有合格队列派发检查；无终态和运维问题、waiting0。M205-MDC Best mIoU=.4370、第5/50轮；M206-CGCA Best=.4208、第5/50轮，均no_improve0/10。属于持续中的早期训练，最终收益未知。",
+    "08:10:22核验pinned server4 hostname、授权两卡UUID、memory/util/context及必要锁；GPU0 PID3842306约18639MiB、GPU1 PID3873690约19751MiB仍有CUDA contexts。GPU0 util0仍非空闲，未使用卡。",
+    "完成HAP本轮真实resource_check/blocked及新证据绑定。前轮完整包和busy守卫没有重复staging/执行；0新候选、0模型源提交、0真实原生数据/backward/资源测量或新增训练。",
+    "修复首次native前已确认的HAP观察器留档缺口：在全新worker_v2.py里于原pinv前保存实际G摘要，保留原pinv异常，额外谱观察器异常单独记录并在原生两步后检查完整性；未更改模型/YAML/原训练调用/资源函数，旧脚本和stage保持不变。",
+    "新worker通过Python3.10 AST/compile和独立只读复核；在server4上对提取的observer函数做5个纯Python异常/单次调用/原对象身份控制测试，全部通过。用非tensor哨兵对象，不导入torch/gorilla、不执行任何数值模型或数据/GPU；这些不是native smoke或资源证据。"
+  ],
+  "decisions": [
+    "两项既有训练保持原协议继续；不因低利用率共享运行卡，不按早期mIoU作最终有效性结论。",
+    "HAP等待真实授权空卡；下个owned tick按既有协议fresh token/lease/stage，精确f51823bb源与原YAML不变，实测原TRAIN两步/配对资源PASS才准入/同步/派发。旧stage lease不跨tick重放。",
+    "本轮没有新准入/队列/启动、未改目标/资源边界/禁用项/调度或旧held；无新增用户决定事项，不为凑配额增加变体。状态仍为训练中和等待资源，按通知约定静默。",
+    "后续HAP fresh stage使用已审worker_v2.py并重绑manifest哈希。observer_readout_complete仅字段完整/无异常，不代表额外谱全finite；私有observer异常归档ledger时映射implementation。当前native数值/梯度/预算仍待测。"
+  ]
+}

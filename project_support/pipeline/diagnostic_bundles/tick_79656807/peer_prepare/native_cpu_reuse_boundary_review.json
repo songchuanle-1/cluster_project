@@ -1,0 +1,45 @@
+{
+  "owner": {
+    "token": "79656807d78e4cd687c70bdc7df26f5f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T03:23:05.152371+00:00",
+    "deadline_at": "2026-11-10T04:23:05.152371+00:00",
+    "context_sha256": "a8ff28e14e85f34d389e9d57fb8a121d432965972597e466fb0410fe52c231a3",
+    "pending_sha256": "fbbd449cc56296157ebace8fd2e5acce20f0474cf34aa4614575895cf8ffd0d9"
+  },
+  "recorded_at": "2026-11-10T03:56:12.223430+00:00",
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "scope": "STATIC_REUSE_BOUNDARY_OBSERVATION_ONLY",
+  "worker_sha256": "e155f2c0d1fbdd1b02497821cd2e94586e178363bec46ebfccf6c3fcd202a328",
+  "runtime_sha256": "5ef15d96d5f88c8f47b7dd471d5a81ec947f3e5cfbde3915d47c19ecbfe5440a",
+  "native_setup_cpu_only_reusable_without_change": false,
+  "evidence": [
+    {
+      "file": "sinc_native_prepare/worker.py",
+      "line": 25,
+      "fact": "setup invokes torch.cuda.set_per_process_memory_fraction before any baseline/candidate common initialization."
+    },
+    {
+      "file": "sinc_native_prepare/worker.py",
+      "line": 121,
+      "fact": "Reference common-init model is constructed with .cuda(); candidate at line135 also requires .cuda()."
+    },
+    {
+      "file": "sinc_native_prepare/native_runtime.py",
+      "line": 166,
+      "fact": "acquire observes GPU0 then takes original three GPU locks and requires actual free20GB; it is not a CPU-only entry."
+    },
+    {
+      "file": "sinc_native_prepare/native_runtime.py",
+      "line": 91,
+      "fact": "verify also hashes original annotation/checkpoint/pretrain assets; whole verify is more than a core-only source check."
+    }
+  ],
+  "usable_static_components": [
+    "Exact frozen source hashes and current owner/intent/nonreplay patterns can be reused in a separate CPU-only packet.",
+    "Native YAML/source identity can be checked by stdlib reads/AST without constructing model or invoking CUDA."
+  ],
+  "common841_cpu_evidence": "No unchanged native CPU common841 execution path exists. Any CPU-only common-init diagnostic is separate evidence and does not replace native equality/TRAIN2 gates.",
+  "no_native_or_resource_PASS": true,
+  "reviewer_executed_SSH_Torch_data_GPU": false
+}

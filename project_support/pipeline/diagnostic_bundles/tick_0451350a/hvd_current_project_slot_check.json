@@ -1,0 +1,63 @@
+{
+  "owner": {
+    "token": "0451350aa2624af9a34e654a4e08c903",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-05T23:14:56.687370+00:00",
+    "deadline_at": "2026-11-06T00:14:56.687370+00:00",
+    "context_sha256": "3aee8606cc62f80fe5cd01c5c4b8522d68b23c4f53fe3d3fdb2c823d0200e492",
+    "pending_sha256": "7bb08121ba36f97205c07e23cc714e97b517717ce17e0b32afc38095edac05d2"
+  },
+  "recorded_at": "2026-11-05T23:27:51.554851+00:00",
+  "observed_at": "2026-11-05T23:19:48.348337+00:00",
+  "candidate_id": "hierarchy-native-variance-decomposition-composition",
+  "experiment_id": "M230-HVD",
+  "result": "blocked",
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "server": "server-4",
+  "physical_gpu": 0,
+  "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+  "max_project_tasks_per_gpu": 1,
+  "active_project_task": {
+    "id": "M229-MIC",
+    "status": "running",
+    "gpu": "0",
+    "pid": 2881795,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+    "code_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "launch_verified": true,
+    "launch_verification": "training_progress"
+  },
+  "trainer_starttime": "152216088",
+  "native_progress": [
+    9,
+    2856,
+    4686
+  ],
+  "cooperative_guardian_pid": 3033165,
+  "current_three_kernel_locks": [
+    "36: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF",
+    "35: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF",
+    "34: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+  ],
+  "GPU0_contexts_raw": "2881795, 19740",
+  "postlaunch_memory_free_mib": 12814,
+  "original_new_task_budget_mib": 20000,
+  "observation": {
+    "path": "pipeline/diagnostic_bundles/tick_0451350a/mic_current_run_and_guardian_observation.json",
+    "sha256": "52741ffff3d9340e9bfb5519e70299f52ec5a0d3c5af5fb92a781a0422af5adc"
+  },
+  "native_model_or_resource_test": "NOT_RUN",
+  "new_stage_lease_manifest_release_created": false,
+  "blocker": "Healthy MIC occupies sole authorized project GPU0 slot and existing three cooperative locks; HVD cannot use a second project slot. Original free-memory budget remains, external sharing permission unchanged.",
+  "next_action": "Preserve HVD original source/frozen packets; wait for natural MIC completion and guardian release, then separately review actual current-source/runtime/owner/producer binding before original native/resources."
+}

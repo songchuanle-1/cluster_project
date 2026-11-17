@@ -1,0 +1,1 @@
+Disabled default-NOP fresh-owner NSD production transport. REVIEW_SHA remains NULL and DRAFT remains True. No transport, intents, requests, observation, collect/render, installation or launch occurred. Separately reviewed live activation is required; frozen draft stays unchanged.

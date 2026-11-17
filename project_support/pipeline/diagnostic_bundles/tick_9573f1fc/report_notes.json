@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "核验上轮真实safe_sync已将M235源码部署为b1，复用历史sync/collect和全部模型准入证据；本轮优先另存owner/stage/lease与入口部署，不重跑sync或模型测试。",
+    "已将上轮真实b1 safe_sync及CPU collect按历史证据归入M235 deployment记录，未续签旧owner或重放sync。当前资源实测free16196MiB<20000。",
+    "当前owner真实runtime/source9只读验证通过（未重跑sync），新producer已stage，CPU collect外层/远端rc0完成。",
+    "新owner CPU collect实际独审通过；依据真实activation生成完整生产入口及其绑定，marker未消费、未启动训练，等待最终实际独审。",
+    "新生产入口实际render独审通过；启动前真实GPU0 free31509MiB达到原20000预算，随后仅清M235 hold并调用原canonical派发。",
+    "M235已在server4物理GPU0启动，PID2248650，canonical launch_verified=training_progress；只读限字节日志两次实测epoch1 batch97到114/4686 over12秒，来源/marker/步进独审通过。"
+  ],
+  "decisions": [
+    "保持M235 waiting/hold，完成新owner运行目录/源码验证及collect/render独审后才允许派发；原GPU0/20GB/cap1/三锁、人工暂停和外部任务保持。",
+    "M235处于训练进行中；没有完成epoch/验证结果，效力/novelty UNKNOWN，技术门槛和启动步进不作收益证明。",
+    "不重复实测既有模型门；M206/M227暂停、外部任务、GPU1禁用和全部旧160记录保持。M236待真实GPU授权槽位后继续。"
+  ]
+}

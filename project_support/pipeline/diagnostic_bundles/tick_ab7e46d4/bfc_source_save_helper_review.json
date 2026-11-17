@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T04:21:13.158376+00:00",
+  "status": "BOUNDED_SOURCE_SAVE_HELPER_STATIC_REVIEW_GUARD_CORRECTION_REQUESTED",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "helper": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/prepare_isolated_bfc_version.py",
+    "sha256": "8d434befa6e9451432d5595d354730ebf9cc58892967e9ae42e6ca0fc27ce320"
+  },
+  "source_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_ab7e46d4/new_candidate_prepare/preparation.json",
+    "sha256": "8512a69de3d5fcdd32523bbf966833485f3e17329235881de7aa0bd5adbe4501"
+  },
+  "owner_provenance": {
+    "token": "ab7e46d4f6c64d99af3ae07d0f4e5e73",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-25T04:06:01.065273+00:00",
+    "deadline_at": "2026-10-25T05:06:01.065273+00:00",
+    "context_sha256": "a47c3f51fc0135af041f35b1ec2bf697ee2b45449b73bd86dc2b8fe3be0b9a83",
+    "pending_sha256": "ec0c0023ada3d0d50d29b8daf4ac24fac580a15e465fc0bb3da86a2d55387bff"
+  },
+  "material_concerns": [
+    {
+      "code": "EXACT_ORIGINAL_OWNER_NOT_RECHECKED_AT_SOURCE_MUTATIONS",
+      "lines": [
+        53,
+        57,
+        92,
+        103
+      ],
+      "finding": "The helper reads owner once and checks token/thread/deadline then current context hashes, but does not pin all six original owner fields or foreground target mode, and performs worktree creation/copy/commit later without immediate owner recheck. The original foreground deadline and takeover boundary must remain exact for these writes.",
+      "requested_minimal_correction": "Add one exact six-field/mode/environment/original-deadline/context+pending guard using the current8512 owner provenance; call it before worktree creation and before commit, as well as initial entry. No protocol or source mechanism change."
+    }
+  ],
+  "scope_checks": [
+    "Explicit --execute-root gate precedes Git, filesystem source writes and monitor imports; default path is inert.",
+    "Fixed external DEST, BASE11a and PRIMARY11a; detached worktree only, no checkout/merge advancing the primary HEAD.",
+    "Preparation identity/commitnull/nativeNOTRUN and all16 hashes are checked; exact9 staged_repository files must be absent from BASE and byte-identical.",
+    "Only exact9 paths are copied and git-added, with stage-only9A and actual staged/blob hash checks before and after one ordinary detached commit.",
+    "Git options disable autocrlf/submodule recursion/optional locks/prompts/LFS smudge; nonstandard filters or active hooks are refused; new source attributes must be empty.",
+    "Primary snapshot stores originalHEAD, null-safe status, primary index bytes and28 existing small-file hashes. Canonical pipeline lock protects before/after ledger snapshot.",
+    "Queue/running/research plus BTC/BCR/M206 and relevant existing experiments/receipts are checked unchanged before/after.",
+    "No SSH, push, GPU, native, transport, source promotion, main commit/ff, queue or scheduler call occurs in source helper."
+  ],
+  "additional_required_manual_input_binding": "The helper checks peer review file SHA/CID/material_concerns but does not itself inspect their source-preparation field. Root must pass actual topology da6a... and final integration review explicitly bound to8512; no earlier CID-only review substitutes.",
+  "actual_source9_or_Git_operations_invoked_by_this_audit": false,
+  "helper_default_or_main_invoked": false,
+  "third_party_module_imported": false,
+  "native": "NOT_RUN",
+  "SSH_or_GPU": "NOT_RUN",
+  "shared_write_by_this_audit": false,
+  "next_action": "Root may apply only owner guard correction in a separately traceable revision, retain originalSHA, then request narrow re-review before source-only version execution. No frozen model/preparation edit is requested."
+}

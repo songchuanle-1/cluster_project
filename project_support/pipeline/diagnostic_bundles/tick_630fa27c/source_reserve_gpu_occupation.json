@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "kind": "exclusive_gpu_occupation",
+  "complete": true,
+  "read_only": true,
+  "project": "cluster_project",
+  "token": "630fa27c76be4573a47def8cc6f5b899",
+  "snapshot_generated_at": "2026-10-31T00:03:55.606602+00:00",
+  "snapshot_sha256": "61a4a93d295ab5cd440bb2ac46e49e64bde9ebcec2f68ceb8d186662636a5707",
+  "servers_sha256": "19b3753d13a8253263c6525f19a739795b816be141e21a9f9b3aaccddf4f8265",
+  "observed_at": "2026-10-31T00:05:32.595146+00:00",
+  "candidate_ids": [
+    "hierarchy-wedge-factor-incidence-composition",
+    "hierarchy-nonlinear-lifting-analysis-synthesis"
+  ],
+  "scope": {
+    "server": "server-4",
+    "host": "192.168.1.115",
+    "user": "songcl",
+    "allowed_gpus": [
+      0,
+      1
+    ],
+    "max_tasks_per_gpu": 1
+  },
+  "queries": {
+    "hostname": {
+      "rc": 0,
+      "stdout": "dl04-MS-7E06\n",
+      "stderr": "",
+      "command": [
+        "hostname"
+      ]
+    },
+    "gpu": {
+      "rc": 0,
+      "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 24, 19753, 32607\n1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 19, 19603, 32607\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+        "--format=csv,noheader,nounits"
+      ]
+    },
+    "compute": {
+      "rc": 0,
+      "stdout": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 3786531\nGPU-7f82edb9-f620-8045-caea-a75232265cd1, 3696093\n",
+      "stderr": "",
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid",
+        "--format=csv,noheader,nounits"
+      ]
+    }
+  },
+  "command": "python -B pipeline/diagnostic_bundles/tick_630fa27c/observe_source_reserve_resources.py",
+  "actual_ssh_argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import json,subprocess,os\nos.environ['\"'\"'PYTHONDONTWRITEBYTECODE'\"'\"']='\"'\"'1'\"'\"'\ncommands={'\"'\"'hostname'\"'\"': ['\"'\"'hostname'\"'\"'], '\"'\"'gpu'\"'\"': ['\"'\"'nvidia-smi'\"'\"', '\"'\"'--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total'\"'\"', '\"'\"'--format=csv,noheader,nounits'\"'\"'], '\"'\"'compute'\"'\"': ['\"'\"'nvidia-smi'\"'\"', '\"'\"'--query-compute-apps=gpu_uuid,pid'\"'\"', '\"'\"'--format=csv,noheader,nounits'\"'\"']}\nqueries={}\nfor key,command in commands.items():\n r=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.PIPE,universal_newlines=True,timeout=20)\n queries[key]=dict(rc=r.returncode,stdout=r.stdout,stderr=r.stderr,command=command)\n if key=='\"'\"'hostname'\"'\"':\n  assert r.returncode==0 and r.stdout.strip()=='\"'\"'dl04-MS-7E06'\"'\"', '\"'\"'Pinned server identity mismatch'\"'\"'\nprint(json.dumps(queries))\n'"
+  ],
+  "raw_log": {
+    "path": "pipeline/diagnostic_bundles/tick_630fa27c/source_reserve_gpu_occupation_raw.json",
+    "sha256": "6ccd841fd0a3bee13d31fdaef9dca3db5d214fc936d376d0fb320a14cb37e142"
+  },
+  "scope_note": "Standalone source-reserve observation; uses canonical raw parser/validated_state, not canonical blocked-stage collect and never edits a candidate stage."
+}

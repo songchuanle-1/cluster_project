@@ -1,0 +1,172 @@
+"""Necessary AOC observer/identity checks, stdlib only; no module entry imports."""
+from pathlib import Path
+from fractions import Fraction as F
+from types import SimpleNamespace
+from datetime import datetime,timezone
+import ast,hashlib,json,math,copy,re,traceback
+HERE=Path(__file__).resolve().parent
+ROOT=HERE.parents[3]
+ORIGIN=ROOT/'pipeline/diagnostic_bundles/tick_9db8f3be/pes_native_prepare'
+SOURCE=ROOT/'pipeline/diagnostic_bundles/tick_e666cac0/new_candidate_prepare'
+checks=[]
+def check(name,value):
+    assert value,name
+    checks.append({'name':name,'passed':True})
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+worker=(HERE/'worker.py').read_text(encoding='utf-8')
+wt=ast.parse(worker)
+runtime=(HERE/'native_runtime.py').read_text(encoding='utf-8')
+rt=ast.parse(runtime)
+for name in ('worker.py','native_runtime.py'):compile((HERE/name).read_text(encoding='utf-8'),name,'exec')
+check('core_compile_without_import',True)
+def funcs(text):return {n.name:ast.dump(n,include_attributes=False) for n in ast.parse(text).body if isinstance(n,ast.FunctionDef)}
+pf,wf=funcs((ORIGIN/'worker.py').read_text(encoding='utf-8')),funcs(worker)
+check('complete_original_resources_function_AST',pf['resources']==wf['resources'])
+rf,orf=funcs(runtime),funcs((ORIGIN/'native_runtime.py').read_text(encoding='utf-8'))
+check('eight_runtime_functions_exact',all(rf[n]==v for n,v in orf.items() if n!='require_promoted_version'))
+check('runtime_version_predicate_only_diagnostic_name_changed',rf['require_promoted_version'].replace('AOC','PES')==orf['require_promoted_version'])
+check('setup_original_numerical_body_only_metadata_renamed',pf['setup'].replace('PES','AOC').replace('euler_state','ancestral_commutator')==wf['setup'])
+check('no_old_Euler_state_event_gates','actual_true_edges' not in worker and 'actual_total_events' not in worker and 'euler_state' not in worker)
+check('wholecell_aggregate_and_descriptive_columns_only','whole_ancestral_commutator_weight_gradient' in worker and 'whole_ancestral_commutator_weight_updated' in worker and 'whole_ancestral_commutator_module_updated' in worker and 'first_argument_columns' in worker and 'Two input-column blocks descriptive; zeros legal' in worker)
+manifest=json.loads((HERE/'manifest_template.json').read_text(encoding='utf-8'))
+binding=json.loads((HERE/'source_version_binding.json').read_text(encoding='utf-8'))
+active=('current_token','stage','tick_generated_at','deadline_at','physical_gpu','gpu_uuid','allowed_gpus','context_sha256','pending_sha256','runtime_code_commit')
+check('ten_execution_fields_NULL',all(manifest[k] is None for k in active))
+check('source0314_parent_runtime9c_current5c_not_assumed_promoted',binding['code_commit']=='0314b932a92a8cc7f67804068ecb1c1f7a5f2e33' and binding['parent_commit']==binding['runtime_expected_commit']=='9c42fdc4e9168acec18980d782ee9c163e043bb7' and '5c untouched' in binding['scope'])
+for name,expected in manifest['diagnostic_files'].items():check('diagnostic_hash_'+name,sha(HERE/name)==expected)
+check('source_prototype_null_and_original_YAML',json.loads((SOURCE/'preparation.json').read_text())['code_commit'] is None and sha(HERE/'candidate.yaml')=='a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a')
+# Extract only version-guard statements up to the first guard call; no filesystem/modules.
+prefix=[]
+for n in rt.body:
+    prefix.append(n)
+    if isinstance(n,ast.Expr) and isinstance(n.value,ast.Call) and isinstance(n.value.func,ast.Name) and n.value.func.id=='require_promoted_version':break
+guard_code=compile(ast.fix_missing_locations(ast.Module(body=prefix,type_ignores=[])),'actual_AOC_runtime_guard_prefix','exec')
+guard_ns={};refused=False
+try:exec(guard_code,guard_ns)
+except RuntimeError:refused=True
+check('actual_version_bound_prefix_accepts_identity_only',not refused and guard_ns['DRAFT_EXECUTION_DISABLED'] is False)
+# Execute the real top-level prefix only through the missing-manifest read with inert
+# imports/Path. No full runtime entry, filesystem read, fcntl, subprocess or Torch call.
+class MissingManifestPath:
+    def __init__(self,value):self.value=str(value)
+    def resolve(self):return self
+    @property
+    def parent(self):return self
+    def __truediv__(self,name):return MissingManifestPath(self.value+'/'+name)
+    def read_text(self):
+        manifest_reads.append(self.value)
+        raise FileNotFoundError('No active native_manifest.json in preparation')
+manifest_reads=[];import_names=[]
+def inert_import(name,globals=None,locals=None,fromlist=(),level=0):
+    import_names.append(name)
+    if name=='re':return re
+    if name=='json':return json
+    if name=='hashlib':return hashlib
+    if name=='datetime':return SimpleNamespace(datetime=datetime,timezone=timezone)
+    if name=='pathlib':return SimpleNamespace(Path=MissingManifestPath)
+    if name=='os':return SimpleNamespace(environ={})
+    if name in ('fcntl','signal','socket','subprocess'):return SimpleNamespace()
+    raise AssertionError('Unexpected import before missing active manifest: '+name)
+top=[]
+for n in rt.body:
+    top.append(n)
+    if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='MANIFEST' for t in n.targets):break
+env={'__file__':'private/aoc/native_runtime.py','__builtins__':{**vars(__import__('builtins')),'__import__':inert_import}}
+try:exec(compile(ast.fix_missing_locations(ast.Module(body=top,type_ignores=[])),'actual_top_until_missing_active_manifest','exec'),env)
+except FileNotFoundError:missing_refused=True
+else:missing_refused=False
+check('actual_missing_active_manifest_refuses_before_Torch_or_runtime_functions',missing_refused and len(manifest_reads)==1 and manifest_reads[0].endswith('/native_manifest.json') and 'torch' not in import_names)
+# Four direct in-memory predicate branches, not full entry execution.
+guard_fn=next(n for n in rt.body if isinstance(n,ast.FunctionDef) and n.name=='require_promoted_version')
+for label,override in [('disabled',{'DRAFT_EXECUTION_DISABLED':True}),('missingcode',{'DRAFT_EXECUTION_DISABLED':False,'CANDIDATE_COMMIT':None}),('badparent',{'DRAFT_EXECUTION_DISABLED':False,'SOURCE_PARENT_COMMIT':'bad'}),('missinghash',{'DRAFT_EXECUTION_DISABLED':False,'SOURCE_PREPARATION_SHA256':None})]:
+    env={'re':re,'DRAFT_EXECUTION_DISABLED':False,'CANDIDATE_COMMIT':binding['code_commit'],'SOURCE_PARENT_COMMIT':binding['parent_commit'],'SOURCE_PREPARATION_SHA256':binding['original_source_preparation_sha256']};env.update(override)
+    exec(compile(ast.Module(body=[guard_fn],type_ignores=[]),'version_predicate','exec'),env)
+    try:env['require_promoted_version']()
+    except RuntimeError:check('version_predicate_refusal_'+label,True)
+    else:check('version_predicate_refusal_'+label,False)
+
+# Only the old source carrier definitions are read, not its executable suite.
+carrier_tree=ast.parse((SOURCE/'static_check.py').read_text(encoding='utf-8'))
+carrier=[n for n in carrier_tree.body if isinstance(n,ast.ClassDef) and n.name in ('T','Torch','Cell','Activation')]
+ns={'F':F,'math':math}
+exec(compile(ast.Module(body=carrier,type_ignores=[]),'carrier_definitions_only','exec'),ns)
+T,Torch,Cell,Activation=(ns[n] for n in ('T','Torch','Cell','Activation'))
+T.requires_grad=True
+T.clone=lambda self:T(self.v,self.shape)
+T.register_hook=lambda self,fn:SimpleNamespace(remove=lambda:None)
+def inferred_reshape(self,*shape):
+    if len(shape)==1 and isinstance(shape[0],tuple):shape=shape[0]
+    shape=list(shape)
+    if -1 in shape:shape[shape.index(-1)]=len(self.v)//math.prod(k for k in shape if k!=-1)
+    return T(self.v,shape)
+T.reshape=inferred_reshape
+Torch.isfinite=staticmethod(lambda x:SimpleNamespace(all=lambda:True))
+helpers=[n for n in wt.body if isinstance(n,ast.FunctionDef) and n.name in ('aoc_plan_observation','aoc_coverage_preflight')]
+nsobs={'copy':copy,'torch':Torch}
+exec(compile(ast.Module(body=helpers,type_ignores=[]),'actual_observer_helpers','exec'),nsobs)
+check('coverage_empty_inconclusive_before_watch',not nsobs['aoc_coverage_preflight']([([],[],[])])['true_ancestral_order_path_possible'])
+check('coverage_mixed_singleton_valid',nsobs['aoc_coverage_preflight']([([],[],[]),([0,0],[0],[0])])['total_true_paths']==1)
+coretree=ast.parse((HERE/'candidate_model/ancestral_commutator.py').read_text(encoding='utf-8'))
+corefuncs=[n for n in coretree.body if isinstance(n,ast.FunctionDef)]
+corecls=next(n for n in coretree.body if isinstance(n,ast.ClassDef))
+forward=copy.deepcopy(next(n for n in corecls.body if isinstance(n,ast.FunctionDef) and n.name=='forward'));forward.name='actual_forward'
+callbacks={n.name:n for n in ast.walk(next(n for n in wt.body if isinstance(n,ast.FunctionDef) and n.name=='smoke')) if isinstance(n,ast.FunctionDef) and n.name in ('exchange_pre','observed_plan','lite_watch','cell_pre','cell_post','activation_post','observed_mean','exchange_post')}
+def fingerprint(_torch,x):
+    def serial(value):
+        if isinstance(value,T):return [value.shape,[str(v) for v in value.v]]
+        if isinstance(value,(list,tuple)):return [serial(v) for v in value]
+        if isinstance(value,dict):return {str(k):serial(v) for k,v in value.items()}
+        return value
+    return hashlib.sha256(json.dumps(serial(x),sort_keys=True).encode()).hexdigest()
+def summary(x):return {'shape':list(x.shape),'finite':True,'abs_max':float(max(map(abs,x.v),default=0))}
+def harness(scenes,tamper=None):
+    widths=[7,5,4];batch=len(scenes);c=2
+    normalized=[T([F(1+bi+level+i+j,7) for bi in range(batch) for i in range(k) for j in range(c)],(batch,k,c)) for level,k in enumerate(widths)]
+    ids=[[T(scene[level]) for scene in scenes] for level in range(3)]
+    owner=SimpleNamespace(channels=c);bank=SimpleNamespace(cluster_ids_list=ids);att=SimpleNamespace(ancestral_commutator=owner)
+    state={'forward_index':1,'norm_counts':[1,1,1],'norm_outputs':dict(enumerate(normalized))};calls={'plan':0,'mean':0,'cell':0,'activation':0,'original_mean_returns':[],'wrapper_mean_returns':[]}
+    core={'torch':Torch};exec(compile(ast.fix_missing_locations(ast.Module(body=corefuncs+[forward],type_ignores=[])),'actual_AOC_core','exec'),core)
+    original_plan=core['build_ancestry_path_plan'];original_mean=core['mean_path_messages']
+    def plan_spy(*args):calls['plan']+=1;return original_plan(*args)
+    def mean_spy(*args):
+        calls['mean']+=1;out=original_mean(*args);calls['original_mean_returns'].append(out);return out
+    env={**nsobs,'state':state,'att':att,'bank':bank,'summary':summary,'fingerprint':fingerprint,'hooks':[],
+         'watch':lambda *args:None,'result':{},'original_plan':plan_spy,'original_mean':mean_spy,'exchange_calls':[]}
+    exec(compile(ast.fix_missing_locations(ast.Module(body=list(callbacks.values()),type_ignores=[])),'actual_AOC_callbacks','exec'),env)
+    core['build_ancestry_path_plan']=env['observed_plan']
+    def mean_wrapper(messages,positions,counts):
+        if tamper=='mean_positions':positions=[999]+positions[1:]
+        out=env['observed_mean'](messages,positions,counts);calls['wrapper_mean_returns'].append(out);return out
+    core['mean_path_messages']=mean_wrapper
+    cell=Cell();activation=Activation()
+    def hooked_cell(value):
+        if tamper=='second_input' and calls['cell']==1:
+            value=T([value.v[0]+1,*value.v[1:]],value.shape)
+        env['cell_pre'](owner,(value,));out=cell(value);calls['cell']+=1;env['cell_post'](owner,(value,),out);return out
+    def hooked_activation(value):
+        out=activation(value);calls['activation']+=1;env['activation_post'](owner,(value,),out);return out
+    owner.cell=hooked_cell;owner.activation=hooked_activation
+    try:
+        env['exchange_pre'](owner,(normalized,ids));out=core['actual_forward'](owner,normalized,ids);env['exchange_post'](owner,(normalized,ids),out)
+    except AssertionError:
+        calls['failure_traceback']=traceback.format_exc();return False,calls,env
+    return True,calls,env
+for label,scenes in [('unequal_holes',[([0,2,4],[2,0,2,1,3],[1,0,2,1])]),('empty_mixed',[([],[],[]),([0],[0],[0]),([0,1,2,3],[0,0,0,1],[0,0])])]:
+    ok,calls,env=harness(scenes)
+    if not ok:print(calls.get('failure_traceback'))
+    check('actual_forward_callbacks_'+label,ok and calls['plan']==len(scenes) and calls['cell']==calls['activation']==calls['mean']==2)
+    check('actual_mean_once_return_object_'+label,all(x is y for x,y in zip(calls['original_mean_returns'],calls['wrapper_mean_returns'])))
+    record=env['exchange_calls'][0]
+    check('actual_diamond_mean_and_final_reference_'+label,record['actual_shared_cell_two_stage_diamond'] and record['upper_means_from_same_actual_contrast_exact'] and record['final_deltas_from_actual_captures_exact'] and record['actual_cell_rows']==[2*record['actual_true_fine_paths']]*2 and 'aoc_context' not in env['state'])
+ok,calls,env=harness([([0],[0],[0])],tamper='second_input')
+check('wrong_second_branch_refused_before_second_original_cell',not ok and calls['cell']==1)
+ok,calls,env=harness([([0],[0],[0])],tamper='mean_positions')
+check('wrong_mean_group_refused_before_original_mean',not ok and calls['mean']==0)
+report={'status':'PASS_SOFTWARE_ONLY_NOT_NATIVE','candidate_id':binding['candidate_id'],'code_commit':binding['code_commit'],
+        'recorded_at':datetime.now(timezone.utc).isoformat(),'check_count':len(checks),'checks':checks,
+        'actual_observer_control_flow_cases':2,'actual_observer_negative_cases':2,'actual_version_guard_refusal_cases':5,
+        'worker_sha256':sha(HERE/'worker.py'),'runtime_sha256':sha(HERE/'native_runtime.py'),
+        'source_version_binding_sha256':sha(HERE/'source_version_binding.json'),'manifest_template_sha256':sha(HERE/'manifest_template.json'),
+        'Torch':False,'native':'NOT_RUN','resources':'NOT_RUN','scope':'Actual production forward plus actual new observer callback AST with Fraction/list carrier; no real Linear/GELU/Tensor/autograd/model result, no old33/84 suite execution.'}
+(HERE/'static_validation.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+print(json.dumps({'status':report['status'],'check_count':len(checks),'report':str(HERE/'static_validation.json')}))

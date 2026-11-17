@@ -1,0 +1,50 @@
+{
+  "id": "M186-CTF-HCG-CSORT-MQHT-TR",
+  "config": "configs/Quard/ctf_hcg_csort_mqht_tr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqht_tr.yaml",
+  "status": "done_earlystop",
+  "gpu": "0",
+  "depends_on": [],
+  "label": "M186 MQHT terminal-readout structural ablation",
+  "note": "Independent original topology with intermediate feedback removed; one context read before final decoder; identical numerical config. CUDA topology/padding/batch-isolation/gradients and exact boundary hooks passed after padding repair1. Full-model measured <=10G. Codecda808c synced both servers preserving deployment diffs.",
+  "measured_flops_g": 9.843485228,
+  "validation_report": "pipeline/reports/tr_validation_20260908-1924/resource_audit.json",
+  "design": "pipeline/designs/exp_design_20260908-1917.md",
+  "code_commit": "cda808cbbf1e87c98e7e3cb9461405856a2e1aba",
+  "server": "server-4",
+  "created_at": "2026-09-08T19:32:45",
+  "history": [
+    {
+      "ts": "2026-09-08T19:32:45",
+      "action": "enqueued",
+      "decision": "20260908-193039_next_batch.md"
+    },
+    {
+      "ts": "2026-09-10T08:27:11.033196",
+      "action": "launched",
+      "gpu": "0"
+    },
+    {
+      "ts": "2026-09-11T03:13:59.988029",
+      "status": "done_earlystop",
+      "best_miou": "0.4945",
+      "epochs": "27/50"
+    }
+  ],
+  "launched": "2026-09-10T08:27:11",
+  "pid": 1982211,
+  "stdout_log": "/data/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqht_tr_20260910_082702.log",
+  "final_best": "0.4945",
+  "finished_at": "2026-09-11T03:13:59",
+  "log_local": "D:\\project\\cluster_project\\Checkpoints\\server-4\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqht_tr\\20260910_082710\\20260910_082710.log",
+  "epochs_final": "27/50",
+  "ended_at_remote": "2026-09-11T02:57:54.187",
+  "best_miou_exact": 0.49449968338012695,
+  "best_epoch": 17,
+  "best_acc50": 0.548,
+  "best_spmiou": 0.459,
+  "validations_completed": 27,
+  "no_improve_final": 10,
+  "log_sha256": "f1227f1c8efa52aac4cd170ee136701ff707b63d0bdefa27e1bc2741e7337623",
+  "analysis": "D:\\project\\cluster_project\\pipeline\\analyses\\M186-CTF-HCG-CSORT-MQHT-TR_done_earlystop_20260911-031100.md",
+  "terminal_evidence": "Explicit trainer marker and contiguous epochs; no kill"
+}

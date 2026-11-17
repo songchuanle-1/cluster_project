@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-09-17T15:15:00+08:00",
+  "mode": "design",
+  "candidate_budget": 1,
+  "candidate_id": "counterfactual-evidence-supervision",
+  "stage": "rejected",
+  "question": "Does paired factual/counterfactual 3D scene evidence supervision define a novel core mechanism after mask-IoU score targets and listwise referent ranking were rejected as prior art?",
+  "diagnostic_basis": {
+    "deployed_train_selection_success_scene_balanced": 0.6875,
+    "positive_oracle_success_scene_balanced": 0.8671875,
+    "paired_delta_scene_balanced": 0.1796875,
+    "fixed": 22,
+    "broken": 0,
+    "mask_ok_training_negative_queries": 2455,
+    "finding": "Referent-query selection is causally relevant, but the rejected PIRS and listwise families already cover changing the score target. The remaining candidate considered here would instead perturb visual evidence and contrast factual and counterfactual scores.",
+    "evidence": [
+      {
+        "path": "pipeline/reports/positive_membership_intervention_20260916.json",
+        "sha256": "d64c8e997f29b1fe0724adc9130f124f3b22c4b7b17742021641fd3d4ed33639"
+      }
+    ]
+  },
+  "proposed_mechanism": {
+    "summary": "During training, pair the original scene with a counterfactual scene formed by removing or feature-swapping the referred object's evidence. Require the matched query's referent score to fall on the counterfactual while the original scene remains the positive view.",
+    "reason_considered": "It changes the loss's causal dependence on visual evidence instead of merely changing the scalar score target, and inference architecture would remain unchanged.",
+    "status": "not designed or implemented"
+  },
+  "primary_source_audit": [
+    {
+      "id": "2204.02285v1",
+      "title": "SwapMix: Diagnosing and Regularizing the Over-Reliance on Visual Context in Visual Question Answering",
+      "url": "https://arxiv.org/abs/2204.02285",
+      "archive_path": "pipeline/reports/swapmix_original_20260916.pdf",
+      "archive_sha256": "49c4f04f61ad6dad2f7730c8de14e9d6dae985b87d00894694ce5873d18359ad",
+      "extracted_text_path": "pipeline/reports/swapmix_original_20260916.txt",
+      "extracted_text_sha256": "c081dbc1e8d2e38537888d1c4ce2de0b48dd7e1c32528df0c14df522700b3664",
+      "finding": "SwapMix swaps visual-context object features to diagnose reliance on irrelevant context and uses the factual/counterfactual perturbation as training augmentation to regularize that reliance. This directly covers the core causal mechanism of paired factual/counterfactual visual-evidence substitution used to change the model's prediction behavior."
+    },
+    {
+      "id": "project-decision-20260916-024658",
+      "title": "Physical same-target scene-state interchange decision",
+      "path": "pipeline/decisions/20260916-024658_next_batch.md",
+      "sha256": "82b7766a1ada142ec5a9ff9d024a2384f99414a28dd8d5669602dffe50858d0a",
+      "finding": "Project policy already records SwapMix section 3.3 context swapping and SelfEQ map consistency as prior art. Target-specific control contrast exists, but it had no learned-efficacy claim and was not admitted."
+    }
+  ],
+  "verdict": {
+    "literature_gate": "fail for a new core mechanism",
+    "reason": "The candidate's whole-mechanism claim would be factual/counterfactual evidence substitution used as a supervision regularizer. SwapMix already establishes feature swapping and counterfactual training for multimodal grounding. Porting that objective to sparse 3D ScanRefer masks changes the application surface and intervention unit, but not the causal mechanism sufficiently to satisfy the goal's core-novelty requirement.",
+    "constraint_check": "The idea also requires a second training view, increasing compute and peak activation memory, while inference architecture remains unchanged. It is therefore not preferred under the lightweight-mechanism constraint even before efficacy testing.",
+    "disposition": "Reject before implementation or enqueue. Do not reopen under object deletion, evidence occlusion, factual-counterfactual contrast, context swap, or renamed variants."
+  },
+  "actions": {
+    "admitted_new_candidates": 0,
+    "enqueued": false,
+    "queue_mutation": false,
+    "training_launch": false,
+    "code_sync": false,
+    "rejected_remainder": [
+      "counterfactual-evidence-supervision"
+    ]
+  },
+  "limitations": [
+    "This is a bounded primary-source audit, not an exhaustive literature proof.",
+    "The audit rejects the claim of a new core mechanism; it does not assert that the candidate would fail empirical mIoU.",
+    "No native backward, resource, admission or training evidence was generated because the candidate failed the literature gate."
+  ]
+}

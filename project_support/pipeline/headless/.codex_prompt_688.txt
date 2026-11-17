@@ -1,0 +1,63 @@
+[Codex compact context contract]
+
+Project working directory: D:/project/cluster_project
+Durable memory file: D:/project/cluster_project/pipeline/codex_memory.md
+Tick context file: D:/project/cluster_project/pipeline/headless/.tick_context.json
+
+Before acting:
+1. Read .tick_context.json first. It contains the completed monitor/goal preflight,
+   active queue state, recent experiments, changes, and a bounded file manifest.
+2. Read the durable memory file once. Project files override thread history.
+3. Obey the context mode:
+   - steady: do not enumerate historical directories, read full queue.json, read
+     skill/reference files, or inspect old headless logs. Use the snapshot and at
+     most one targeted live-log/GPU query when needed for the current run.
+   - event: inspect only files tied to changes.new_terminal_ids, listed failures,
+     or manifests.suggested_reads.
+   - design: read goal.json and the bounded manifest first. Open older analyses or
+     decisions only by an explicit experiment ID or citation needed for the design.
+4. Never read pipeline/headless/tick_*.log during a normal tick. Those logs are
+   diagnostic evidence only when .tick_context.json reports a failed/unhealthy tick.
+5. Keep tool calls compact: combine related structured reads. Do not repeatedly
+   re-read the same file or dump whole directories into the context.
+
+Before finishing a successful tick:
+1. On event/design mode, replace the durable memory file with a concise current
+   snapshot. On steady mode, do not rewrite it unless durable facts changed.
+2. Keep these sections: Goal And Phase; Champion And Baseline; Active Hypotheses;
+   Closed Or Failed Directions; Running And Queue; Open Questions And Risks; Last Tick.
+3. Keep it under 120 lines. Do not append an unbounded transcript.
+4. A steady monitoring result is not a new research decision. Do not create a
+   repetitive type=other decision when no policy, queue, terminal state, or route changed.
+
+[Autonomous Research Pipeline — cluster_project — headless cron execution, fully autonomous, no user interaction]
+
+Environment: Windows, PROJECT_ROOT=D:/project, use "python" (not python3)
+
+Execution:
+0. Read D:/project/cluster_project/pipeline/headless/.tick_context.json first. Monitor and goal checks have already run exactly once; do not run them again.
+1. Follow its mode and bounded manifests. Do not scan whole history directories or old tick logs.
+2. Generate the normal six-section report to pipeline/reports/summary_<ts>.md. The required headings are:
+   0 Goal Status, 1 GPU Overview, 2 Running Experiments, 3 Queue Status,
+   4 This Tick's Actions, 5 Decisions Made. Delete summaries older than 24h.
+3. On event mode, handle only listed terminal/crash/state changes. Read the relevant section of formats.md only when creating a new terminal analysis or bugfix.
+4. On design mode only, read references/autonomous_design.md and the relevant templates. Read queue.candidate_budget from the tick context and aim to create that many scientifically admissible, structurally distinct variants. Enqueue fewer when fewer candidates pass the gates, and document the rejected remainder. Validate all goal constraints/bans, then perform motivation_review → exp_design → implementation/tests → enqueue → sync. Never add tuning-only, seed-repeat, pure-ablation, banned, failed-route, renamed-duplicate, or placeholder variants merely to fill capacity.
+   Admission hard gates are diagnosis, controls, native backward execution,
+   resources, independence and goal constraints. Full theoretical derivation and
+   literature novelty review are recommended but must not block an otherwise
+   testable candidate; record limitations and avoid unsupported novelty claims.
+5. On steady mode, do not perform broad research review. No-change monitoring does not require a new decision log.
+6. Log actual decisions with log_decision.sh. List pending questions from the snapshot manifest.
+7. Do NOT interact with user. Record new questions and continue.
+8. If pipeline/closure_policy.json enables closure, read references/closure.md.
+   Resume research_work.due_ids in event mode before new design. Persist each
+   candidate stage, hashed evidence and concrete next_action in research_work.json.
+   A plan alone is not completion. Use admission receipts and the safe monitor
+   dispatch path; verify training progress, not just PID. Explicitly reject
+   failed candidates or record external blockers with retry/unblock conditions.
+9. When research_on_capacity_gap is enabled and capacity is short, execute
+   substantive research every tick. A busy GPU blocks GPU execution only:
+   continue bounded evidence review, matched-control design or static implementation.
+   Do not create duplicate variants/reviews or bypass required admission gates.
+
+Start by outputting "Tick #" marker, then execute all steps.

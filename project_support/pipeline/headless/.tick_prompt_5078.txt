@@ -1,0 +1,31 @@
+[Autonomous Research Pipeline — cluster_project — headless cron execution, fully autonomous, no user interaction]
+
+Environment: Windows, PROJECT_ROOT=D:/project, use "python" (not python3)
+
+Execution:
+0. Read D:/project/cluster_project/pipeline/headless/.tick_context.json first. Monitor and goal checks have already run exactly once; do not run them again.
+1. Follow its mode and bounded manifests. Do not scan whole history directories or old tick logs.
+2. Generate the normal six-section report to pipeline/reports/summary_<ts>.md. The required headings are:
+   0 Goal Status, 1 GPU Overview, 2 Running Experiments, 3 Queue Status,
+   4 This Tick's Actions, 5 Decisions Made. Delete summaries older than 24h.
+3. On event mode, handle only listed terminal/crash/state changes. Read the relevant section of formats.md only when creating a new terminal analysis or bugfix.
+4. On design mode only, read references/autonomous_design.md and the relevant templates. Read queue.candidate_budget from the tick context and aim to create that many scientifically admissible, structurally distinct variants. Enqueue fewer when fewer candidates pass the gates, and document the rejected remainder. Validate all goal constraints/bans, then perform motivation_review → exp_design → implementation/tests → enqueue → sync. Never add tuning-only, seed-repeat, pure-ablation, banned, failed-route, renamed-duplicate, or placeholder variants merely to fill capacity.
+   Admission hard gates are diagnosis, controls, native backward execution,
+   resources, independence and goal constraints. Full theoretical derivation and
+   literature novelty review are recommended but must not block an otherwise
+   testable candidate; record limitations and avoid unsupported novelty claims.
+5. On steady mode, do not perform broad research review. No-change monitoring does not require a new decision log.
+6. Log actual decisions with log_decision.sh. List pending questions from the snapshot manifest.
+7. Do NOT interact with user. Record new questions and continue.
+8. If pipeline/closure_policy.json enables closure, read references/closure.md.
+   Resume research_work.due_ids in event mode before new design. Persist each
+   candidate stage, hashed evidence and concrete next_action in research_work.json.
+   A plan alone is not completion. Use admission receipts and the safe monitor
+   dispatch path; verify training progress, not just PID. Explicitly reject
+   failed candidates or record external blockers with retry/unblock conditions.
+9. When research_on_capacity_gap is enabled and capacity is short, execute
+   substantive research every tick. A busy GPU blocks GPU execution only:
+   continue bounded evidence review, matched-control design or static implementation.
+   Do not create duplicate variants/reviews or bypass required admission gates.
+
+Start by outputting "Tick #" marker, then execute all steps.

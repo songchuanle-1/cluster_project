@@ -1,0 +1,166 @@
+--- f653/nde_result_active/normalize_nde_actual_results.py
++++ ec459714/nde_result_provenance_prepare/normalize_nde_actual_results.py
+@@ -16,29 +16,30 @@
+ HERE = Path(__file__).resolve().parent
+ OUTPUT = HERE / ("results_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S_%fZ"))
+ OWNER_KEYS = ("token", "thread_id", "generated_at", "deadline_at", "context_sha256", "pending_sha256")
+-TICK = ROOT / 'pipeline/diagnostic_bundles/tick_f6536795'
++TICK = ROOT / 'pipeline/diagnostic_bundles/tick_ec459714'
+ EXECUTION = TICK / "nde_execution"
+ BASE_NATIVE = Path('D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_4fa1481e\\nde_revision_native_prepare')
+ NATIVE = None  # Actual reviewed execution copy is passed explicitly by root.
+ PROTOCOL = ROOT / "pipeline/diagnostic_bundles/tick_2e51495f/reserve_candidate/native_protocol.md"
+ PROOF = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision1_source/source_version.json'
+ SOURCE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_source_independent_review.json'
+-TOKEN = 'f653679598744de7ac2fafb23a96c1ea'
++TOKEN = 'ec4597142e314aa7a0478bac13e26402'
+ THREAD = "01a159c5-29ab-7a22-ba7f-e79174757253"
+ CID = "hierarchy-native-distribution-embedding-composition"
+ SOURCE = '0747f6acec1c61018ec99acf2efa5329c9b3523c'
+ PARENT = "f6257de79148581334ee495e6e2d60ccb525457c"
+ GOAL = "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+ PAIRS = (("smoke", "champion"), ("smoke", "candidate"), ("resources", "champion"), ("resources", "candidate"))
+-DRAFT_NORMALIZATION_DISABLED = False
++DRAFT_NORMALIZATION_DISABLED = True
+ EXPECTED_WORKER_SHA256 = 'b37fe5cf29ce04b8110752c7321d34b8d1a26218a6d8e02940b5773d9e4d5f72'
+ EXPECTED_RUNTIME_SHA256 = '348024f11e6a106788840c1359ad8c65363914d1f1882cfe4a5f8d319d5ea1a4'
+ HISTORICAL_PROVENANCE = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_result_prepare/historical_champion_smoke_provenance.json'
+ HISTORICAL_PROVENANCE_SHA256 = 'cbad63e6da551b6024572c47d0df6b6c147af5aaad890d8eb05dd14eea58d170'
+ REUSE_REVIEW = ROOT / 'pipeline/diagnostic_bundles/tick_4fa1481e/nde_historical_champion_smoke_reuse_review.json'
+ REUSE_REVIEW_SHA256 = '1c2913321b0bf0b9681043104096cad0100939f8fc1acc5ca52dd9b67a9ad756'
+-EXPECTED_NATIVE = Path('D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_4fa1481e\\nde_revision_native_active')
+-EXPECTED_OPERATIONAL_REFS = {'FROZEN.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/FROZEN.json', 'sha256': '19171f4e3094bcd5a11a911c7a7d135a65bb6bf9e3710921e937f84ad77dfd4f'}, 'adapter.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/adapter.py', 'sha256': '8c2613e18c51b2c03e603028ec123b26c16057d930c04587a3c9309e92e25364'}, 'remote_ops.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/remote_ops.py', 'sha256': 'db82eab9dd05fd90e30194119b0e1df559ed11a4178a2015923b11e16a48779e'}, 'run_nde_operation.py': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/run_nde_operation.py', 'sha256': '1a43c01799c9b6fba00fb9a9e31ed6824c0034237399f8733e4aa16c3b7dab9f'}, 'current_binding.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/current_binding.json', 'sha256': '6dac90238cb877863d9ed22237ee9119f9230ba05da116cbb52ce3d7e4daa160'}, 'release_template.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/release_template.json', 'sha256': 'aaf4b8734321fe6ff5dff33e7f5419e0c48230a8d44bb724143ed9bfdaa8cc18'}, 'preparation.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/preparation.json', 'sha256': '48cd8101c6999fad6a7c1cf2dfd7b85bda35b6f21fac9f922289e7c4faf0bd78'}, 'software_validation.json': {'path': 'pipeline/diagnostic_bundles/tick_f6536795/nde_operational_active/software_validation.json', 'sha256': '141c48cba979292485f6b4e1deba37f8e29823785629c34ca8842009543e6c2d'}}
++EXPECTED_NATIVE = Path('D:/project/cluster_project/pipeline/diagnostic_bundles/tick_ec459714/nde_resource_native_active')
++EXPECTED_OPERATIONAL_REFS = {'FROZEN.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/FROZEN.json', 'sha256': 'a61641c54b159fd83803b53d448fd23280b88396bd2597dc8a4c3bf7c8e5f15f'}, 'adapter.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/adapter.py', 'sha256': '4f6a1bd617692a8ca5def3b54782875b0bc35491689db25e1f25d3b91ea191b4'}, 'remote_ops.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/remote_ops.py', 'sha256': 'db82eab9dd05fd90e30194119b0e1df559ed11a4178a2015923b11e16a48779e'}, 'run_nde_operation.py': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/run_nde_operation.py', 'sha256': '1a43c01799c9b6fba00fb9a9e31ed6824c0034237399f8733e4aa16c3b7dab9f'}, 'current_binding.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/current_binding.json', 'sha256': '90ea51a3314b9cec87b3e34880ef1aa17c62f824ec34ea9ec75ddbc552a3c363'}, 'release_template.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/release_template.json', 'sha256': '2e43519f802f2c85dda767da2c9b11e242995c12d3caefdfce561e101a03ac62'}, 'preparation.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/preparation.json', 'sha256': '0399b30e69ff7884546f29e20a0ea95261e1261e40fa5519a7eb5e5978f209d0'}, 'software_validation.json': {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_resource_operational_active/software_validation.json', 'sha256': 'e5d43a8a2ba1e23f4b477a1c32a0bf74a3eda532a464f45cd77dbf440fc881ec'}}
++HISTORICAL_ARM_PROVENANCE = {('smoke', 'candidate'): {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_result_provenance_prepare/historical_candidate_smoke_provenance.json', 'sha256': 'a3984ce2f6c1950c7fe0d886071f6ba1a796e871fa2116afccbf4557426af7c4'}, ('resources', 'champion'): {'path': 'pipeline/diagnostic_bundles/tick_ec459714/nde_result_provenance_prepare/historical_champion_resource_provenance.json', 'sha256': '0f6027615f5b744f9ee6e988bb3d26ab22a15bf55b4c548ce34d92934fa6d796'}}
+ CHECKS = []
+ 
+ 
+@@ -136,11 +137,89 @@
+ 
+ 
+ def arm_path(mode, target, suffix):
+-    directory = ROOT / read(HISTORICAL_PROVENANCE)['execution_dir'] if (mode,target)==('smoke','champion') else EXECUTION
++    if (mode, target) == ('smoke', 'champion'):
++        directory = ROOT / read(HISTORICAL_PROVENANCE)['execution_dir']
++    elif (mode, target) in HISTORICAL_ARM_PROVENANCE:
++        record = HISTORICAL_ARM_PROVENANCE[mode, target]
++        path = ROOT / record['path']
++        check('historical_arm_routing_hash_' + mode + '_' + target,
++              sha(path) == record['sha256'])
++        directory = ROOT / read(path)['execution_dir']
++    else:
++        directory = EXECUTION
+     return directory / (mode + '_' + target + '_' + suffix + '.json')
+ 
+ 
+ def arm_context(mode, target, owner, manifest, binding, lease):
++    if (mode, target) in HISTORICAL_ARM_PROVENANCE:
++        label = mode + '_' + target
++        record = HISTORICAL_ARM_PROVENANCE[mode, target]
++        provenance_path = ROOT / record['path']
++        check('historical_arm_provenance_hash_' + label,
++              sha(provenance_path) == record['sha256'])
++        provenance = read(provenance_path)
++        check('historical_arm_literal_source_identity_' + label,
++              provenance['arm'] == [mode, target]
++              and provenance['source_commit'] == SOURCE
++              and provenance['runtime_code_commit'] == PARENT
++              and provenance['current_owner_execution_claimed'] is False)
++        evidence_paths = [provenance_path]
++        for name, digest in provenance['files'].items():
++            path = (ROOT / name).resolve()
++            check('historical_arm_immutable_' + label + '_' + name,
++                  path.is_relative_to(ROOT.resolve()) and sha(path) == digest)
++            evidence_paths.append(path)
++        review_ref = provenance['result_review']
++        review_path = ROOT / review_ref['path']
++        check('historical_arm_actual_review_hash_' + label,
++              sha(review_path) == review_ref['sha256'])
++        review = read(review_path)
++        if (mode, target) == ('smoke', 'candidate'):
++            smoke_review = review.get('native_smoke', {})
++            check('historical_candidate_native_only_review_not_overall_resource_pass',
++                  review.get('review_record_passed') is True
++                  and review.get('passed') is False
++                  and smoke_review.get('candidate') == 'PASS_TECHNICAL_TRAIN2_ONLY'
++                  and smoke_review.get('wholecore_original_loss_gradient_and_actual_weight_module_updated') is True
++                  and smoke_review.get('raw_remote_result_sha256') == provenance['raw_result_sha256'])
++        else:
++            check('historical_champion_resource_only_actual_review',
++                  (mode, target) == ('resources', 'champion')
++                  and review.get('passed') is True
++                  and review.get('scope') == provenance['review_acceptance']['scope'])
++        directory = ROOT / provenance['execution_dir']
++        native = ROOT / provenance['native_dir']
++        old_manifest = read(directory / 'native_manifest.json')
++        old_binding = read(directory / 'execution_binding.json')
++        old_lease = read(directory / 'execution_lease.json')
++        old_owner = provenance['original_owner']
++        check('historical_arm_original_binding_manifest_lease_' + label,
++              old_binding['owner'] == old_owner
++              and old_binding['code_commit'] == old_manifest['code_commit'] == SOURCE
++              and old_binding['runtime_code_commit'] == old_manifest['runtime_code_commit'] == PARENT
++              and old_binding['native_manifest_sha256'] == old_lease['native_manifest_sha256'] == sha(directory / 'native_manifest.json')
++              and old_binding['execution_lease_sha256'] == sha(directory / 'execution_lease.json')
++              and old_manifest['current_token'] == old_lease['token'] == old_owner['token'])
++        check('historical_arm_exact_original_activation_projection_' + label,
++              old_manifest == {**read(native / 'manifest_template.json'),
++                  'current_token': old_owner['token'], 'stage': old_binding['stage'],
++                  'tick_generated_at': old_owner['generated_at'], 'deadline_at': old_owner['deadline_at'],
++                  'physical_gpu': 0, 'gpu_uuid': old_binding['gpu_uuid'], 'allowed_gpus': [0],
++                  'context_sha256': old_owner['context_sha256'], 'pending_sha256': old_owner['pending_sha256'],
++                  'runtime_code_commit': PARENT})
++        check('historical_arm_unchanged_source_YAML_data_runtime_protocol_' + label,
++              old_manifest['candidate_id'] == CID and old_manifest['goal_sha256'] == GOAL
++              and old_manifest['root'] == manifest['root']
++              and old_manifest['config'] == manifest['config']
++              and old_manifest['assets'] == manifest['assets']
++              and old_manifest['candidate_source_hashes'] == manifest['candidate_source_hashes']
++              and old_manifest['candidate_config_sha256'] == manifest['candidate_config_sha256']
++              and sha(native / 'candidate.yaml') == sha(NATIVE / 'candidate.yaml')
++              and sha(native / 'worker.py') == EXPECTED_WORKER_SHA256
++              and sha(native / 'native_runtime.py') == EXPECTED_RUNTIME_SHA256)
++        return {'manifest': old_manifest, 'binding': old_binding, 'lease': old_lease,
++                'owner': old_owner, 'native': native, 'source': provenance['source_commit'],
++                'execution': directory, 'evidence_paths': evidence_paths}
+     if (mode,target)!=('smoke','champion'):
+         return {'manifest':manifest,'binding':binding,'lease':lease,'owner':owner,
+                 'native':NATIVE,'source':SOURCE,'execution':EXECUTION,'evidence_paths':[]}
+@@ -175,6 +254,7 @@
+     return {'manifest':old_manifest,'binding':old_binding,'lease':old_lease,'owner':old_owner,
+             'native':native,'source':provenance['source_commit'],'execution':directory,
+             'evidence_paths':evidence_paths}
++
+ 
+ 
+ def validate_external_arm_identity(result, mode, target, expected_source):
+@@ -522,8 +602,8 @@
+     evidence += [ref(PROOF), ref(SOURCE_REVIEW), ref(PROTOCOL), ref(NATIVE / "worker.py"), ref(NATIVE / "native_runtime.py")]
+     per_arm_provenance = {mode + '_' + target: {
+         'source_commit': arm['source'], 'owner': arm['owner'],
+-        'historical_reuse': (mode,target)==('smoke','champion'),
+-        'current_owner_execution_claimed': (mode,target)!=('smoke','champion'),
++        'historical_reuse': (mode,target)!=('resources','candidate'),
++        'current_owner_execution_claimed': (mode,target)==('resources','candidate'),
+         'execution': ref(arm_path(mode,target,'execution')),
+         'request': ref(arm_path(mode,target,'request')),
+         'worker': ref(arm['native']/'worker.py'), 'runtime': ref(arm['native']/'native_runtime.py'),
+@@ -532,7 +612,7 @@
+         'lease': ref(arm['execution']/'execution_lease.json')}
+         for (mode,target),arm in arm_contexts.items()}
+     evidence += [ref(HISTORICAL_PROVENANCE), ref(REUSE_REVIEW)]
+-    evidence += [ref(p) for p in arm_contexts['smoke','champion']['evidence_paths']]
++    evidence += [ref(p) for arm in arm_contexts.values() for p in arm['evidence_paths']]
+     audit = {**base, "per_arm_provenance": per_arm_provenance, "passed": not failures, "checks": CHECKS, "check_count": len(CHECKS), "failed_checks": failures,
+              "actual_input_files": input_hashes, "original_thresholds_only": True,
+              "per_row_map_bias_positivity_or_FP32_minimum_effect_gates_added": False,
+@@ -559,7 +639,7 @@
+     metrics = {"flops_g": (rb["profile"]["flops_g"], rc["profile"]["flops_g"])}
+     metrics.update({key: (rb[key], rc[key]) for key in ("median_ms", "p90_ms", "peak_allocated_bytes", "peak_reserved_bytes", "parameters")})
+     resources = {**base, "schema_version": 1, "experiment_id": "M233-NDE", "passed": True,
+-                 "decision": "ORIGINAL_RESOURCE_GATE_PASSED_ACTUAL_MATCHED_SAME_OWNER_FIXTURE",
++                 "decision": "ORIGINAL_RESOURCE_GATE_PASSED_ACTUAL_MATCHED_FIXTURE_WITH_PER_ARM_ORIGINAL_PROVENANCE",
+                  "champion_actual": evidence[2], "candidate_actual": evidence[3],
+                  "pairing": {key: rc[key] for key in ("input_sha256", "scan_ids", "ann_ids", "batch_size", "lang_num_max", "warmup", "repeat")},
+                  "runtime_code_commit": PARENT, "runtime_root": manifest["root"], "physical_gpu": 0, "gpu_uuid": binding["gpu_uuid"],

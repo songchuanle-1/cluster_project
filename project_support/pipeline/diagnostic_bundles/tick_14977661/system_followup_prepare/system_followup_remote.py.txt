@@ -1,0 +1,292 @@
+"""Root-only targeted readonly follow-up; no replay of prior system commands."""
+
+from pathlib import Path
+
+from datetime import datetime, timedelta, timezone
+
+import hashlib
+
+import json
+
+import os
+
+import re
+
+import selectors
+
+import shutil
+
+import socket
+
+import stat
+
+import subprocess
+
+import sys
+
+import time
+
+OWNER = {
+    "token": "149776616efc47dcaffa369bf8e78307",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T14:07:34.772609+00:00",
+    "deadline_at": "2026-11-09T15:07:34.772609+00:00",
+    "context_sha256": "e299a1b40e34dc23e59d8398c742efcf03b6205e8e401404b9e98f4c57ceb549",
+    "pending_sha256": "cf6b03c45b8dd89c76660ba7da6ad78ba555325351fd26774e2091eccfe1b50d",
+}
+
+RUNTIME = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+
+PROCESSES = []
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+def failure(error):
+    return {"available": False, "error_type": type(error).__name__, "error": str(error)[:600]}
+
+def command(label, executable, arguments, cap=32768, timeout=8):
+    pin()
+    assert 0 < cap <= 32768 and 0 < timeout <= 8
+    program = shutil.which(executable, path="/usr/sbin:/usr/bin:/sbin:/bin")
+    record = {"label": label, "argv": [executable, *arguments], "capture_cap_bytes": cap}
+    if not program:
+        return {**record, "available": False, "certainty": "terminal", "reason": "EXECUTABLE_NOT_FOUND"}
+    env = {"PATH": "/usr/sbin:/usr/bin:/sbin:/bin", "LC_ALL": "C", "LANG": "C", "TZ": "UTC",
+           "SYSTEMD_PAGER": "cat", "SYSTEMD_COLORS": "0", "PAGER": "cat",
+           "PYTHONDONTWRITEBYTECODE": "1"}
+    try:
+        process = subprocess.Popen([program, *arguments], stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+    except OSError as error:
+        return {**record, **failure(error), "certainty": "terminal"}
+    PROCESSES.append(process)  # Keep uncertain children/pipe handles; never terminate or kill.
+    record.update(available=True, pid=process.pid, certainty="uncertain")
+    selector = selectors.DefaultSelector()
+    buffers = {"stdout": bytearray(), "stderr": bytearray()}
+    for name, stream in (("stdout", process.stdout), ("stderr", process.stderr)):
+        os.set_blocking(stream.fileno(), False)
+        selector.register(stream, selectors.EVENT_READ, name)
+    deadline = time.monotonic() + timeout
+    truncated = False
+    try:
+        while selector.get_map() and time.monotonic() < deadline:
+            for key, _ in selector.select(timeout=min(0.1, max(0, deadline - time.monotonic()))):
+                try:
+                    raw = os.read(key.fileobj.fileno(), 4096)
+                except BlockingIOError:
+                    continue
+                if not raw:
+                    selector.unregister(key.fileobj)
+                    continue
+                room = max(0, cap - sum(map(len, buffers.values())))
+                buffers[key.data].extend(raw[:room])
+                truncated |= len(raw) > room
+        returncode = process.poll()
+        if returncode is not None and not selector.get_map():
+            record.update(certainty="terminal", returncode=returncode)
+        else:
+            record["reason"] = "TIMEOUT_OR_PENDING_PIPE; PID retained, no signal/retry"
+    finally:
+        selector.close()  # Does not close child pipes or signal the child.
+    record.update({name: bytes(raw).decode("utf-8", "replace") for name, raw in buffers.items()})
+    record.update(captured_bytes=sum(map(len, buffers.values())), output_truncated=truncated,
+                  signals_sent=False)
+    return record
+
+PYTHONS = (
+    "/home/songcl/.conda/envs/project_cluster/bin/python3.10",
+    "/home/songcl/.conda/envs/project_cluster/bin/python",
+)
+TARGET_PIDS = {3815203, 3813109}
+PID_PATTERN = re.compile(r"(^|[^0-9])(3815203|3813109)([^0-9]|$)")
+
+
+def reconcile_old_helper():
+    path = Path("/proc/883090")
+    try:
+        pin()
+        info = path.stat()
+        result = {"pid": 883090, "exists": True, "uid": info.st_uid,
+                  "prior_start_ticks_were_not_recorded": True, "command_repeated": False}
+        if info.st_uid != 1001:
+            return {**result, "identity": "UID_MISMATCH_NO_PRIVATE_ARGV_READ"}
+        raw_stat = (path / "stat").read_text().rsplit(")", 1)[1].split()
+        result.update(state=raw_stat[0], start_ticks=raw_stat[19])
+        with (path / "cmdline").open("rb") as stream:
+            raw = stream.read(4096)
+        argv = [value.decode("utf-8", "replace") for value in raw.split(b"\0") if value]
+        matches = len(argv) == 2 and Path(argv[0]).name == "uname" and argv[1] == "-srvm"
+        result["expected_uname_argv_matches"] = matches
+        result["identity"] = "CONSISTENT_ONLY_NOT_PROVEN_WITHOUT_PRIOR_START" if matches else "NOT_EXPECTED_COMMAND_OR_EMPTY"
+        if matches:
+            result["argv"] = argv
+        return result
+    except FileNotFoundError:
+        return {"pid": 883090, "exists": False, "command_repeated": False, "signals_sent": False}
+    except Exception as error:
+        return {"pid": 883090, **failure(error), "command_repeated": False}
+
+
+def report_header(path):
+    fd = None
+    try:
+        pin()
+        fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        info = os.fstat(fd)
+        assert stat.S_ISREG(info.st_mode) and info.st_uid == 1001
+        result = {"path": str(path), "bytes": info.st_size, "mtime_ns": info.st_mtime_ns,
+                  "uid": info.st_uid, "report_header_budget_bytes": 65536}
+        fields, current, consumed, stopped_at_core = {}, None, 0, False
+        allowed = {"ProblemType", "Date", "ExecutablePath", "ExecutableTimestamp",
+                   "Signal", "ProcStatus", "ProcCwd", "ProcCmdline", "Uname", "ProcPID"}
+
+        def byte():
+            nonlocal consumed
+            if consumed >= 65536:
+                return b""
+            value = os.read(fd, 1)  # Unbuffered: never prefetch encoded CoreDump data.
+            consumed += len(value)
+            return value
+
+        def rest_of_line(first=b""):
+            value = bytearray(first)
+            while consumed < 65536:
+                item = byte()
+                if not item or item == b"\n":
+                    break
+                if len(value) < 4096:
+                    value.extend(item)
+            return bytes(value)
+
+        while consumed < 65536:
+            item = byte()
+            if not item:
+                break
+            if item == b"\n":
+                current = None
+                continue
+            if item in (b" ", b"\t"):
+                continuation = rest_of_line().decode("utf-8", "replace")
+                if current in allowed:
+                    fields[current] = (fields.get(current, "") + "\n" + continuation)[:8192]
+                continue
+            key = bytearray(item)
+            while consumed < 65536:
+                item = byte()
+                if not item or item in (b":", b"\n"):
+                    break
+                assert len(key) < 96, "Malformed report header key"
+                key.extend(item)
+            if item != b":":
+                current = None
+                continue
+            current = bytes(key).decode("ascii", "strict")
+            if current == "CoreDump":
+                stopped_at_core = True
+                break  # Stop at the key/colon, before reading any value or core bytes.
+            value = rest_of_line().decode("utf-8", "replace").lstrip()
+            if current in allowed:
+                fields[current] = value[:8192]
+        status = fields.get("ProcStatus", "")
+        pid_values = re.findall(r"(?m)^\s*Pid:\s*(\d+)", status)
+        uid_values = re.findall(r"(?m)^\s*Uid:\s*(\d+)", status)
+        if fields.get("ProcPID", "").isdigit():
+            pid_values.append(fields["ProcPID"])
+        pid_match = any(int(value) in TARGET_PIDS for value in pid_values)
+        uid_match = bool(uid_values and int(uid_values[0]) == 1001)
+        exe_match = fields.get("ExecutablePath") in PYTHONS
+        after = os.fstat(fd)
+        assert (info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns) == (
+            after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+        result.update(header_bytes_read=consumed, stopped_before_core_value=stopped_at_core,
+                      header_budget_exhausted=consumed >= 65536, target_pid_match=pid_match,
+                      report_uid_match=uid_match, exact_python_executable_match=exe_match,
+                      core_contents_read_or_decoded=False)
+        if pid_match and uid_match and exe_match:
+            selected_status = [line.strip() for line in status.splitlines() if re.match(
+                r"\s*(Name|State|Tgid|Pid|PPid|TracerPid|Uid|Gid|Threads|CoreDumping):", line)]
+            result["matching_report_fields"] = {
+                key: value[:1024] for key, value in fields.items() if key != "ProcStatus"}
+            result["matching_report_status_lines"] = selected_status[:16]
+        else:
+            result["reason"] = "HEADER_NOT_PROVEN_TO_BE_EXACT_TARGET; NO_FIELD_VALUES_EMITTED"
+        return result
+    except FileNotFoundError:
+        return {"path": str(path), "exists": False}
+    except Exception as error:
+        return {"path": str(path), **failure(error), "core_contents_read_or_decoded": False}
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def apport_reports():
+    rows = []
+    for executable in PYTHONS:
+        path = Path("/var/crash") / (executable.replace("/", "_") + ".1001.crash")
+        rows.append(report_header(path))
+    return {"selection": "TWO_EXACT_PROJECT_PYTHON_BASENAMES_UID1001_ONLY",
+            "directory_scan_or_other_users_reports": False, "reports": rows}
+
+
+def apport_log():
+    path = Path("/var/log/apport.log")
+    fd = None
+    try:
+        pin()
+        fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW)
+        info = os.fstat(fd)
+        assert stat.S_ISREG(info.st_mode)
+        offset = max(0, info.st_size - 32768)
+        os.lseek(fd, offset, os.SEEK_SET)
+        raw = os.read(fd, 32768)
+        matches = [line[:800] for line in raw.decode("utf-8", "replace").splitlines()
+                   if PID_PATTERN.search(line)]
+        return {"path": str(path), "available": True, "bytes": info.st_size,
+                "tail_offset": offset, "bytes_read": len(raw),
+                "only_exact_target_PID_lines": matches[-16:],
+                "unmatched_lines_emitted": False, "complete_historical_log_scanned": False}
+    except Exception as error:
+        return {"path": str(path), **failure(error)}
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_EXPLICIT_ROOT_PAYLOAD_REQUIRED"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    kernel = command("corrected_target_PID_kernel_records", "journalctl",
+        ["-k", "--no-pager", "--since", "2026-11-09 11:27:46 UTC",
+         "--until", "2026-11-09 11:37:46 UTC", "--output=short-iso", "--lines=40",
+         "--grep", "(^|[^0-9])(3815203|3813109)([^0-9]|$)"], cap=16000)
+    result = {"owner": OWNER, "observed_at": datetime.now(timezone.utc).isoformat(),
+              "kind": "TARGETED_CORRECTED_KERNEL_APPORT_AND_UNCERTAIN_HELPER_FOLLOWUP",
+              "hostname": socket.gethostname(), "uid": os.getuid(),
+              "failure_window_original_logmtime_anchor": {
+                  "since": "2026-11-09 11:27:46 UTC", "until": "2026-11-09 11:37:46 UTC",
+                  "exact_failure_time_claimed": False},
+              "kernel_journal": kernel, "old_helper_reconciliation": reconcile_old_helper(),
+              "apport_reports": apport_reports(),
+              "apport_log": apport_log() if payload.get("include_apport_log", True) else {"requested": False},
+              "root_cause": "UNKNOWN", "Torch_or_GPU_or_native_extension_calls": False,
+              "signals_restart_resume_sudo_or_remote_writes": False,
+              "prior_uname_or_failed_kernel_command_blindly_repeated": False}
+    while len(json.dumps(result, ensure_ascii=True).encode()) > 65536 and (
+            kernel.get("stdout") or kernel.get("stderr")):
+        for key in ("stdout", "stderr"):
+            kernel[key] = kernel.get(key, "")[:len(kernel.get(key, "")) // 2]
+        kernel["whole_output_budget_truncated"] = True
+    encoded = json.dumps(result, ensure_ascii=True)
+    assert len(encoded.encode()) <= 65536
+    print(encoded)
+
+
+if __name__ == "__main__":
+    main()

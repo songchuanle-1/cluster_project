@@ -1,0 +1,237 @@
+def smoke(torch, gorilla, cfg, model, qualified, train, optimizer, scheduler, result):
+    """Two original natural TRAIN batches; transparent observations only."""
+    from framework.dataset import build_dataset, build_dataloader
+    dataset = build_dataset(cfg.data.train, logging.getLogger("rvec-native-smoke"))
+    loader = build_dataloader(dataset, dist=cfg.dist, **cfg.dataloader.train)
+    assert loader.batch_size == 2 and loader.num_workers == 4 and loader.persistent_workers and loader.drop_last
+    class TwoNativeBatches:
+        def __init__(self, native):
+            self.native, self.sampler = native, native.sampler
+        def __len__(self):
+            return 2
+        def __iter__(self):
+            yield from itertools.islice(iter(self.native), 2)
+    candidate = result["target"] == "candidate"
+    att, bank = model.dec.cluster_att, model.dec.cluster_bank
+    encoder = model.dec.encoder_layers[-1]
+    assert sum(bool(layer.use_cluster) for layer in model.dec.encoder_layers) == 1
+    assert encoder.use_cluster and encoder.cluster_gate_type == "sigmoid"
+    assert encoder.cluster_message_type == "context"
+    core = att.fine_exchange if candidate else None
+    tracked = dict(core.named_parameters()) if candidate else {
+        "ffn" + str(i) + "." + name: p for i in range(3)
+        for name, p in att.cluster_ffn[i].named_parameters()}
+    if candidate:
+        assert set(tracked) == {"wr", "wd", "w2", "b1", "b2"}
+        assert sum(p.numel() for p in tracked.values()) == 25088
+    hooks, replacements, globals_restore = [], [], []
+    state = {"forward": 0}
+    result.update(batches=[], losses=[], steps=[], core_calls=[], graph_support_observations=[],
+                  inst_to_mask_path_observations=[], raw_bank_observations=[], csort_observations=[])
+    initial = {name: fingerprint(torch, p.detach()) for name, p in tracked.items()}
+    def summary(value):
+        finite = bool(torch.isfinite(value).all())
+        return {"shape": list(value.shape), "dtype": str(value.dtype), "finite": finite,
+                "abs_max": float(value.detach().float().abs().max().cpu()) if value.numel() and finite else 0.0}
+    def watch(value, record, key):
+        assert value.requires_grad, key
+        def receive(gradient):
+            info = summary(gradient)
+            record.setdefault(key, []).append(info)
+            assert info["finite"]
+        hooks.append(value.register_hook(receive))
+    def replace(owner, name, function):
+        assert name not in vars(owner)
+        setattr(owner, name, function)
+        replacements.append((owner, name))
+    def input_hook(owner, values):
+        state.clear()
+        state["forward"] = len(result["batches"]) + 1
+        batch = values[0]
+        result["batches"].append({"sha256": fingerprint(torch, batch),
+            "scan_ids": [str(x) for x in batch.get("scan_ids", [])],
+            "ann_ids": [int(x) for x in batch.get("ann_ids", [])],
+            "scenes_len": [int(x) for x in batch.get("scenes_len", [])]})
+    original_build = bank.build_cluster_feats
+    def observed_build(*args, **kwargs):
+        output = original_build(*args, **kwargs)
+        state["raw"] = output
+        state["raw_ids"] = bank.cluster_ids_list
+        state["raw_maps"] = bank.child_cluster_maps
+        record = {"forward": state["forward"], "raw_sha256": fingerprint(torch, output),
+                  "ids_sha256": fingerprint(torch, bank.cluster_ids_list),
+                  "maps_sha256": fingerprint(torch, bank.child_cluster_maps),
+                  "outputs": [summary(x) for x in output], "original_calls": 1}
+        state["raw_record"] = record
+        result["raw_bank_observations"].append(record)
+        return output
+    replace(bank, "build_cluster_feats", observed_build)
+    if candidate:
+        graph_module = importlib.import_module(qualified + ".receiver_vector_exchange")
+        original_graph = graph_module.build_graph
+        def observed_graph(coordinates, leaves, k=32):
+            graph = original_graph(coordinates, leaves, k)
+            assert k == 32
+            leaf = torch.as_tensor(leaves, dtype=torch.long)
+            indices, allowed = graph["indices"], graph["allowed"]
+            assert indices.shape == allowed.shape and indices.shape == (len(leaf), 32)
+            rows = torch.arange(len(leaf)).unsqueeze(1).expand_as(indices)
+            assert bool((leaf[indices][allowed] == leaf[rows][allowed]).all())
+            degrees = allowed.sum(1)
+            for value in torch.unique(leaf):
+                size = int((leaf == value).sum())
+                assert bool((degrees[leaf == value] == min(32, size)).all())
+            record = {"forward": state["forward"], "point_count": len(leaf),
+                "support_sha256": fingerprint(torch, graph), "leaf_ids_sha256": fingerprint(torch, leaf),
+                "cross_leaf_edges": 0, "allowed_edges": int(allowed.sum()),
+                "offdiagonal_edges": int(((indices != rows) & allowed).sum()),
+                "fallback_rows": int(graph["fallback"].sum()), "original_calls": 1,
+                "returned_original_graph": True}
+            result["graph_support_observations"].append(record)
+            return graph
+        graph_module.build_graph = observed_graph
+        globals_restore.append((graph_module, "build_graph", original_graph))
+        def core_pre(owner, values):
+            features, padding, positions, fine_ids = values
+            assert positions.shape[-1] == 3 and fine_ids is bank.cluster_ids_list[0]
+            record = {"forward": state["forward"], "input": summary(features),
+                "padding_sha256": fingerprint(torch, padding),
+                "positions_sha256": fingerprint(torch, positions),
+                "fine_ids_sha256": fingerprint(torch, fine_ids), "actual_source_forward": True}
+            state["core_record"] = record
+            result["core_calls"].append(record)
+            watch(features, record, "native_input_gradients")
+        def core_post(owner, values, output):
+            record = state["core_record"]
+            record["output"] = summary(output)
+            assert record["output"]["finite"] and torch.count_nonzero(output[values[1]]) == 0
+            state["fine_output"] = output
+            watch(output, record, "native_output_gradients")
+        hooks += [core.register_forward_pre_hook(core_pre), core.register_forward_hook(core_post)]
+        original_read = att._cluster_to_points
+        def observed_read(*args, **kwargs):
+            assert kwargs.get("fine_message") is state["fine_output"]
+            assert args[2] is bank.cluster_ids_list
+            state["core_record"]["actual_fine_message_delivered_to_HCG"] = True
+            output = original_read(*args, **kwargs)
+            watch(output, state["core_record"], "native_HCG_output_gradients")
+            return output
+        replace(att, "_cluster_to_points", observed_read)
+    original_csort = att._cross_scale_orth_loss
+    def observed_csort(coarse, fine, maps):
+        raw = state["raw"]
+        pair = next((i for i in range(2) if coarse is raw[i+1] and fine is raw[i]), None)
+        assert pair is not None and maps is bank.child_cluster_maps[pair]
+        before = fingerprint(torch, (coarse, fine))
+        value = original_csort(coarse, fine, maps)
+        assert fingerprint(torch, (coarse, fine)) == before
+        result["csort_observations"].append({"forward": state["forward"], "pair": pair,
+            "raw_object_identity_preserved": True, "output": summary(value), "original_calls": 1})
+        return value
+    replace(att, "_cross_scale_orth_loss", observed_csort)
+    def encoder_pre(owner, values):
+        state["inst_before"] = values[2].detach().clone()
+        state["gate"] = torch.sigmoid(owner.cluster_att_gate).detach().clone()
+    def attention_post(owner, values, output):
+        state["cluster_message"] = output["point"].detach().clone()
+    def ila_pre(owner, values):
+        expected = state["inst_before"] + state["gate"] * state["cluster_message"]
+        exact = fingerprint(torch, values[1]) == fingerprint(torch, expected)
+        assert exact
+        record = {"forward": state["forward"], "single_original_inst_writeback_exact": True,
+                  "extra_injection": False, "query_sha256": fingerprint(torch, values[1])}
+        result["inst_to_mask_path_observations"].append(record)
+        watch(values[1], record, "native_post_cluster_inst_gradients")
+    def encoder_post(owner, values, output):
+        watch(output[1], result["inst_to_mask_path_observations"][-1], "native_post_ILA_inst_gradients")
+    def decoder_post(owner, values, output):
+        watch(output["masks"], result["inst_to_mask_path_observations"][-1], "native_final_mask_gradients")
+    def model_output(owner, values, output):
+        loss, variables = output
+        assert loss.numel() == 1 and bool(torch.isfinite(loss).all())
+        result["losses"].append({"forward": state["forward"], "loss": float(loss.detach().cpu()),
+                                "components": {key: summary(value) for key, value in variables.items()}})
+        result["native_loss_forwards"] += 1
+        def backward(gradient):
+            assert bool(torch.isfinite(gradient).all())
+            result["native_criterion_backwards"] += 1
+        hooks.append(loss.register_hook(backward))
+        raw_record = state["raw_record"]
+        raw_record["raw_unchanged"] = fingerprint(torch, state["raw"]) == raw_record["raw_sha256"]
+        raw_record["ids_unchanged"] = fingerprint(torch, bank.cluster_ids_list) == raw_record["ids_sha256"]
+        raw_record["maps_unchanged"] = fingerprint(torch, bank.child_cluster_maps) == raw_record["maps_sha256"]
+        assert raw_record["raw_unchanged"] and raw_record["ids_unchanged"] and raw_record["maps_unchanged"]
+    def step_pre(owner, args, kwargs):
+        assert result["native_criterion_backwards"] == state["forward"]
+        all_gradients = {name: p.grad for name, p in model.named_parameters() if p.grad is not None}
+        bad = [name for name, grad in all_gradients.items() if not bool(torch.isfinite(grad).all())]
+        assert all_gradients and not bad
+        gradients = {name: summary(p.grad) if p.grad is not None else None for name, p in tracked.items()}
+        assert all(value is not None and value["finite"] for value in gradients.values())
+        record = {"forward": state["forward"], "all_observed_parameter_gradients_finite": True,
+            "nonfinite_parameter_names": bad, "tracked_gradients": gradients,
+            "before_hash": {name: fingerprint(torch, p.detach()) for name, p in tracked.items()}}
+        if candidate:
+            actual_edges = sum(r["offdiagonal_edges"] for r in result["graph_support_observations"] if r["forward"] == state["forward"])
+            assert actual_edges > 0, "INCONCLUSIVE natural TRAIN batch has no offdiagonal support; no replacement/resampling"
+            record["actual_offdiagonal_supported_edges"] = actual_edges
+        result["steps"].append(record)
+    def step_post(owner, args, kwargs):
+        record = result["steps"][-1]
+        record["after_hash"] = {name: fingerprint(torch, p.detach()) for name, p in tracked.items()}
+        record["actual_parameter_updated"] = {name: record["before_hash"][name] != record["after_hash"][name] for name in tracked}
+        assert all(record["actual_parameter_updated"].values()), "INCONCLUSIVE inactive actual core parameter; preserve natural batch"
+        record["original_optimizer_step_completed"] = True
+        result["optimizer_steps"] += 1
+    hooks += [model.register_forward_pre_hook(input_hook), model.register_forward_hook(model_output),
+        encoder.register_forward_pre_hook(encoder_pre), att.register_forward_hook(attention_post),
+        encoder.ila.register_forward_pre_hook(ila_pre), encoder.register_forward_hook(encoder_post),
+        model.dec.register_forward_hook(decoder_post),
+        optimizer.register_step_pre_hook(step_pre), optimizer.register_step_post_hook(step_post)]
+    logger = logging.getLogger("rvec-native-smoke")
+    if not logger.handlers:
+        logger.addHandler(logging.StreamHandler(sys.stderr))
+    writer = train.SummaryWriter(cfg.work_dir)
+    torch.cuda.reset_peak_memory_stats()
+    try:
+        train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)
+        torch.cuda.synchronize()
+    finally:
+        for owner, name, original in reversed(globals_restore):
+            setattr(owner, name, original)
+        for owner, name in reversed(replacements):
+            delattr(owner, name)
+        for handle in hooks:
+            handle.remove()
+        writer.flush()
+        writer.close()
+        state.clear()
+    assert len(result["batches"]) == len(result["losses"]) == len(result["steps"]) == 2
+    assert result["optimizer_steps"] == result["native_criterion_backwards"] == result["native_loss_forwards"] == 2
+    assert len(result["raw_bank_observations"]) == len(result["inst_to_mask_path_observations"]) == 2
+    assert len(result["csort_observations"]) == 4
+    if candidate:
+        assert len(result["core_calls"]) == 2
+        for record in result["core_calls"]:
+            assert record["actual_fine_message_delivered_to_HCG"]
+            for key in ("native_input_gradients", "native_output_gradients", "native_HCG_output_gradients"):
+                assert record.get(key) and all(value["finite"] for value in record[key])
+    for record in result["inst_to_mask_path_observations"]:
+        for key in ("native_post_cluster_inst_gradients", "native_post_ILA_inst_gradients", "native_final_mask_gradients"):
+            assert record.get(key) and all(value["finite"] for value in record[key])
+    final = {name: fingerprint(torch, p.detach()) for name, p in tracked.items()}
+    assert all(final[name] != initial[name] for name in tracked)
+    verify()
+    result.update(execution_completed=True, native_data_loaded=True, native_train_function_executed=True,
+        intended_path_observed=True, backward_finite=True, observer_readout_complete=True,
+        native_smoke_checks_passed=True, wrappers_and_hooks_restored=True,
+        native_tracked_initial_hash=initial, native_tracked_after_hash=final,
+        native_tracked_each_parameter_updated=True, training_checkpoint_saved=False,
+        native_smoke_training=True, new_training=0, auxiliary_autograd_grad_or_backward_used=False,
+        actual_train_command="tools.train.train(1,model,TwoNativeBatches(loader),optimizer,scheduler,cfg,logger,writer)",
+        native_dataloader_config=dict(cfg.dataloader.train), optimizer_type=type(optimizer).__name__,
+        scheduler_type=type(scheduler).__name__, smoke_peak_allocated_bytes=torch.cuda.max_memory_allocated(),
+        smoke_peak_reserved_bytes=torch.cuda.max_memory_reserved(),
+        pure_training_peak_memory="UNKNOWN; hooks active, separate resource arm required",
+        paired_initialization_and_batch_equality="NOT_ESTABLISHED_BY_SINGLE_TARGET_RESULT",
+        efficacy="UNKNOWN", novelty="UNKNOWN", after=observe())

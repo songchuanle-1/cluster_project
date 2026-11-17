@@ -1,0 +1,107 @@
+{
+  "id": "M227-LFT",
+  "label": "LFT nonlinear lifting analysis and synthesis",
+  "config": "configs/Quard/ctf_hcg_csort_lft/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft.yaml",
+  "code_commit": "4457a46f9075f61e83340aa0f0af87d5bf4e986c",
+  "admission_receipt": "pipeline/admissions/M227-LFT.json",
+  "status": "waiting",
+  "gpu": "1",
+  "server": "server-4",
+  "profile": "experiment_first",
+  "added_at": "2026-10-31T12:52:00.679576+00:00",
+  "note": "Original seed1999/nativeYAML/50epochs/maxiters70 unchanged. Actual pairedTRAIN2/resources independently reviewed; technical admission is not efficacy. Preserve all actual canonical terminal archives, all prior terminal receipts and M206 user pause. No borrowed result or model revision; original LFT source graph unchanged.",
+  "history": [
+    {
+      "ts": "2026-10-31T12:52:00.679576+00:00",
+      "status": "waiting",
+      "action": "actual_experiment_first_admission_queued",
+      "receipt": {
+        "path": "pipeline/admissions/M227-LFT.json",
+        "sha256": "ad0ffa43c599dca23cea85da54f270e762cf09c824893106eae438174ccf1b26"
+      }
+    },
+    {
+      "ts": "2026-10-31T20:52:53.473558",
+      "action": "launched",
+      "gpu": "1"
+    },
+    {
+      "ts": "2026-11-01T04:04:27.429290+00:00",
+      "action": "direct_user_pause_both_gpus",
+      "stop_confirmation": {
+        "path": "pipeline/manual_ops/20261101_dual_user_pause/stop_confirmation.json",
+        "sha256": "cf09a5f7436db050318503386b25d2ba098d1e1591eab5d7df4cb6d2c1eb3e99"
+      },
+      "no_auto_resume": true
+    }
+  ],
+  "launch_verified": false,
+  "launch_verification": "user_paused",
+  "training_status": "paused_by_user",
+  "dispatch_phase": "user_paused",
+  "dispatch_hold": "Direct user pause: cease both GPU0/1 use; no relaunch, substitute, migration or automatic resume.",
+  "paused_run": {
+    "original_task": {
+      "id": "M227-LFT",
+      "label": "LFT nonlinear lifting analysis and synthesis",
+      "config": "configs/Quard/ctf_hcg_csort_lft/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft.yaml",
+      "code_commit": "4457a46f9075f61e83340aa0f0af87d5bf4e986c",
+      "admission_receipt": "pipeline/admissions/M227-LFT.json",
+      "status": "running",
+      "gpu": "1",
+      "server": "server-4",
+      "profile": "experiment_first",
+      "added_at": "2026-10-31T12:52:00.679576+00:00",
+      "note": "Original seed1999/nativeYAML/50epochs/maxiters70 unchanged. Actual pairedTRAIN2/resources independently reviewed; technical admission is not efficacy. Preserve all actual canonical terminal archives, all prior terminal receipts and M206 user pause. No borrowed result or model revision; original LFT source graph unchanged.",
+      "dispatch_phase": "progress_pending",
+      "claimed_gpu": "1",
+      "launch_verified": true,
+      "launch_verification": "training_progress",
+      "pid": 2685912,
+      "log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft_20261031_205217.log",
+      "launched": "2026-10-31T20:52:53"
+    },
+    "paused_at": "2026-11-01T04:04:27.428738+00:00",
+    "reason": "先暂停这两个实验 停止使用",
+    "starttime": "106767833",
+    "checkpoint_files": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft/20261031_205226/last.pth",
+        "bytes": 945770164,
+        "mtime_ns": 1793505747606392387
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft/20261031_205226/best.pth",
+        "bytes": 945770164,
+        "mtime_ns": 1793493343875619444
+      }
+    ],
+    "checkpoint_full_state_validation": "CPU_VALIDATED_SAVED_COMPLETE_EPOCH",
+    "partial_current_epoch_saved": false,
+    "stop_confirmation": {
+      "path": "pipeline/manual_ops/20261101_dual_user_pause/stop_confirmation.json",
+      "sha256": "cf09a5f7436db050318503386b25d2ba098d1e1591eab5d7df4cb6d2c1eb3e99"
+    },
+    "checkpoint": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft/20261031_205226/last.pth",
+    "checkpoint_meta": {
+      "epoch": 22,
+      "best_miou": 0.4977978467941284,
+      "epochs_no_improve": 5
+    },
+    "checkpoint_evidence": {
+      "path": "pipeline/manual_ops/20261101_dual_user_pause/checkpoint_confirmation.json",
+      "sha256": "6b873c4f586b25b8ae7b5647867b90cee67e07f3fd993a57d1a6bf845c65be56"
+    }
+  },
+  "paused_at": "2026-11-01T04:04:27.428912+00:00",
+  "resume_authorized": false,
+  "resource_authorization": {
+    "path": "pipeline/authorizations/server4_all_gpu_user_pause_20261101.json",
+    "sha256": "a0a16477336a83ea614cc8fb06ca9549dc155054303d8f2bb090938ee32d4bb4"
+  },
+  "resume_from": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_lft/20261031_205226/last.pth",
+  "resume_checkpoint_evidence": {
+    "path": "pipeline/manual_ops/20261101_dual_user_pause/checkpoint_confirmation.json",
+    "sha256": "6b873c4f586b25b8ae7b5647867b90cee67e07f3fd993a57d1a6bf845c65be56"
+  }
+}

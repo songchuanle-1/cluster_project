@@ -1,0 +1,109 @@
+{
+  "contract": "m95_static_discordance_score_audit_v1",
+  "generated_at": "2026-09-23T13:12:32.463925+08:00",
+  "scope": "Static analysis of one already verified frozen TRAIN failure report; no native data or model execution.",
+  "groups": {
+    "all": {
+      "classes": 32,
+      "scenes": 24,
+      "positive_higher": 29,
+      "positive_lower": 3,
+      "ties": 0,
+      "identity": {
+        "target_dominant": 26,
+        "same_class_peer": 5,
+        "outside_target_and_registered_peers": 1
+      },
+      "lower_rows": [
+        {
+          "manifest_index": 65,
+          "scene_id": "scene0542_00",
+          "margin": -0.11725584665934245
+        },
+        {
+          "manifest_index": 84,
+          "scene_id": "scene0437_00",
+          "margin": -0.022817224264144897
+        },
+        {
+          "manifest_index": 88,
+          "scene_id": "scene0375_00",
+          "margin": -0.09707817435264587
+        }
+      ]
+    },
+    "acceptable": {
+      "classes": 23,
+      "scenes": 19,
+      "positive_higher": 22,
+      "positive_lower": 1,
+      "ties": 0,
+      "identity": {
+        "target_dominant": 23
+      },
+      "lower_rows": [
+        {
+          "manifest_index": 84,
+          "scene_id": "scene0437_00",
+          "margin": -0.022817224264144897
+        }
+      ]
+    },
+    "seed_label_aligned": {
+      "classes": 26,
+      "scenes": 19,
+      "positive_higher": 23,
+      "positive_lower": 3,
+      "ties": 0,
+      "identity": {
+        "target_dominant": 23,
+        "same_class_peer": 3
+      },
+      "lower_rows": [
+        {
+          "manifest_index": 65,
+          "scene_id": "scene0542_00",
+          "margin": -0.11725584665934245
+        },
+        {
+          "manifest_index": 84,
+          "scene_id": "scene0437_00",
+          "margin": -0.022817224264144897
+        },
+        {
+          "manifest_index": 88,
+          "scene_id": "scene0375_00",
+          "margin": -0.09707817435264587
+        }
+      ]
+    },
+    "positive_outside_seed": {
+      "classes": 6,
+      "scenes": 6,
+      "positive_higher": 6,
+      "positive_lower": 0,
+      "ties": 0,
+      "identity": {
+        "target_dominant": 3,
+        "same_class_peer": 2,
+        "outside_target_and_registered_peers": 1
+      },
+      "lower_rows": []
+    }
+  },
+  "interpretation": "Equal thresholded masks can have distinct indicator scores and different native labels. Positive-higher is descriptive, not proof that the labels are correct or that a new supervision unit improves held-out mIoU.",
+  "limitations": [
+    "Forty outcome-selected TRAIN failures; classes within a scene are dependent.",
+    "Mean positive-minus-negative score is a class-level pair mean, not a scene-balanced effect.",
+    "Six outside-seed positives have no saved nearest-GT cause tag.",
+    "No independent query-state capture, causal training intervention, native backward or resource gate."
+  ],
+  "admission": false,
+  "queue_mutation": false,
+  "evidence": [
+    {
+      "path": "pipeline/reports/m95_discordance_provenance_20260923-1107.json",
+      "sha256": "6ed69abe4d26a2bd20283bb59119c2ebf30d4c0e73e2252903c210925292e372"
+    }
+  ]
+}

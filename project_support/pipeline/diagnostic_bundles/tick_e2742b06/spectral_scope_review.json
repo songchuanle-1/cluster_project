@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-22T16:12:01.303791+00:00",
+  "reviewer": "/root/pce_audit",
+  "owner": {
+    "token": "e2742b06404240e398267db352a2b91a",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-22T16:04:33.909155+00:00",
+    "deadline_at": "2026-10-22T17:04:33.909155+00:00"
+  },
+  "candidate_id_proposed": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "status": "NO_EXPLICIT_EQUIVALENT_REOPENING_FOUND_IN_TARGETED_REVIEW_EXTERNAL_TECHNICAL_IMPLEMENTATION_RECOMMENDED",
+  "implementation_status": "PROPOSAL_ONLY_NOT_VALIDATED_BY_THIS_REVIEW",
+  "decision_scope": "Bounded graph/policy review against directly relevant held RSTR/PCE and current PSBR plus original M95 middle FFN. Not full historical or literature novelty clearance, efficacy, native correctness or admission.",
+  "proposal_snapshot": {
+    "operator": "Within each original ids2 parent, select true point-supported middle rows, sort detached original cached geometry xyz then original middle ID. With orthonormal DCT-II Q and original f=F1 o LN1, b=f(0), return Y=X+Q^T(f(QX)-b)+b, then inverse scatter to original IDs.",
+    "parameter_scope": "Reuse original middle FFN/LN parameters and original residual; fine/coarse/raw CSORT/HCG/last inst_feats update retained.",
+    "single_FFN_scope": "Append zero sentinel to private middle working rows so f is called once; sentinel never enters raw banks, IDs, masks or HCG; unsupported actual IDs and padding retain original FFN semantics.",
+    "proposal_basis": "Current root task and new_variant direct proposal clarification, not a tested source."
+  },
+  "direct_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/transport.py",
+      "sha256": "ee6fef894eaf95eaa552901209fd6f2afb043da2b1664120ea63ed035a60d88c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/preregistration.json",
+      "sha256": "2228cb3f98f0b74a41c3d358f27f5c00e9c631749af2f2260d6a7c8d92189bea"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_99819673/committed_gate_review.json",
+      "sha256": "37b6105d602469479cd50eba355250f1f136bef3edb5d888091f50d4244e0c76"
+    },
+    {
+      "path": "pipeline/designs/exp_design_20261021-0028_rstr_committed_hold.md",
+      "sha256": "ca6ce1bea2ee9f67c63624d218a396c6e30eb3df5ce7652e0457550d9b95835a"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pce/contact_exchange.py",
+      "sha256": "14f591a5581e779d4c128da701f35489c5b9054f4b0d7e8cd915cb5b53e683fe"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/hier_postprocess.py",
+      "sha256": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f"
+    },
+    {
+      "path": "Cluster/configs/Quard/ctf_hcg_csort/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85"
+    }
+  ],
+  "graph_comparison": {
+    "RSTR": {
+      "held_graph": "After existing fine FFN, per fine-to-middle sibling group/head, form content-affinity softmax and pi-reversible nonnegative row-stochastic P; replace refined fine T with P(T,pi)T; conserve point-mass-weighted pre-fusion mean.",
+      "proposed_difference": "Middle pre/post-FFN conjugation by a fixed signed orthogonal basis; no affinity, pi/masses, stochastic probability or detailed-balance correction. Learned nonlinear f is evaluated in mixed coefficient coordinates and synthesized back. Group size or level change alone would not be sufficient, but these operator and invariant differences are substantive.",
+      "reversible_word_boundary": "RSTR reversibility means Markov detailed balance, not merely an invertible analysis/synthesis basis.",
+      "hold_preserved": "RSTR committed failure1/32 at1.027033878e-6>1e-6 and consumed2 revisions stay held. This proposal neither fixes/retests that version nor inherits its PASS or relaxes its promised conservation gate."
+    },
+    "PCE": {
+      "held_graph": "Physical-contact cross-fine-leaf point/sp feature attention, content query/key/value exchange along geometry contacts, with fine readback override.",
+      "proposed_difference": "No physical contact edges, point donors or cross-leaf point attention; fixed bounded middle-token group basis surrounding the original FFN before unchanged HCG. No PCE revision or implication that its numerical failure was cleared."
+    },
+    "PSBR": {
+      "active_graph": "Replace middle FFN with learned bidirectional Wx/Wh/Wo recurrent sibling chain under same coarse parent.",
+      "proposed_difference": "Same broad sibling-information question, distinct all-group spectral-domain FFN graph; original middle FFN retained, no learned recurrent state/new projection parameters. This is not evidence of a different diagnosed dataset defect or efficacy."
+    }
+  },
+  "mathematics": {
+    "input_Jacobian": "dY_i/dX_j = delta_ij I + sum_k Q[k,i]*Q[k,j]*J_f((QX)_k). Off-diagonal terms are generally nonzero when nonlinear local Jacobians differ.",
+    "affine_degeneracy": "For affine f(z)=zW+b the conjugation cancels and recovers original X+f(X); near-equal local Jacobians can make interaction negligible. The actual native path must be measured, not presumed from syntax.",
+    "control_identities": "Q=I, singleton n1, and all-zero X recover the baseline mathematically. They do not establish bitwise FP32 equality because subtraction/addition and Q matmuls round.",
+    "nonzero_constant_risk": "For identical nonzero tokens the DC coefficient is scaled by sqrt(n), other modes are zero, and nonlinear f need not commute with this scaling. The output generally differs from original per-token f(X), so this is not a constant-field or mean-preserving operator and may change calibration/group-size behavior.",
+    "bias_autograd": "b=f(0) must retain autograd through original LN/FFN. Detaching b changes parameter gradients and the proposed graph."
+  },
+  "policy_boundary": {
+    "not_pure_scaling_or_activation_sweep": "Nonlinear analysis/synthesis changes cross-token information dependencies; original activation/dropout/seed/init values remain fixed. No new residual branch is added; original residual stays. Affine degeneration and interaction controls make this claim falsifiable.",
+    "not_gate_routing_QKV_attnpool": "No learned gate, language/query route, QKV projection or learned attention/pooling weights proposed. Fixed DCT mixing is not itself a probability attention pool.",
+    "no_novelty_gate_invented": "Literature-level novelty/positive tiny-cohort gain is not demanded before the experiment-first technical screen. Public novelty/benefit remain UNKNOWN.",
+    "no_historical_hold_override": "General project authorization/timers/new names do not reopen old held candidates. No permission for RSTR R3/PCE R4 or altered conservation/precision/thresholds is inferred."
+  },
+  "implementation_and_numeric_risks": [
+    "Keep the original FPS/partition IDs and cached geometry; never rerun/redefine FPS, repool geometry under changed semantics, compact token IDs or sort actual point inputs. Original middle ID is a tie breaker within one fixed scene, not proof of invariance to global token renumbering.",
+    "True support must follow composed original point-to-fine-to-middle IDs, e.g. ids1[ids0]; a valid prefix alone does not exclude internal empty IDs. Q is only over occupied rows of that original parent. Preserve original unsupported/empty FFN bias and batch padding outside Q.",
+    "The private zero sentinel must not enter cluster IDs/maps/raw CSORT/HCG or scene masks. Run original LN+FFN once on the private work tensor; keep b gradients and common parameter names/initialization.",
+    "Original native YAML dropout is0.0. Preserve it; with nonzero dropout the b/control identities and sentinel RNG consumption would need different analysis. Do not change dropout to obtain a passing check.",
+    "Record FP32 Q orthogonality/analysis-synthesis roundoff, finite outputs/gradients, Q=I/singleton/zero controls and real off-diagonal same-parent dependence. Pre-register controls/tolerances before execution rather than borrowing RSTR weighted-mean conservation or relaxing failed controls.",
+    "DCT basis constants may be built deterministically then represented in FP32; feature forward/backward precision must stay original. Do not insert runtime FP64 feature math or precision/normalization tuning.",
+    "Singleton can be handled by the algebraically original direct FFN result to preserve its exact baseline path, but disclose this fast path and still test actual non-singleton transforms. Nontrivial empty and padding coverage must be recorded rather than inferred from vacuous assertions."
+  ],
+  "minimal_discriminating_controls": {
+    "baseline": "Original M95 plus explicit identity-basis mode, with same model/init/native data; baseline result and operator identity check are distinct claims.",
+    "same_parent_dependency": "Fixed nonconstant native output probe should reveal finite off-diagonal sibling gradients for n>1 where actually exercised; across-parent gradients zero at this local operator. No universal nonzero claim at all-zero/affine-degenerate inputs.",
+    "association_control": "If probing geometric association, pre-register one deterministic within-parent column permutation R: Q_control=Q R, synthesize with (Q R)^T on the same input/output ID domain. Same n/basis orthogonality/operator/weights/parameter counts; do not choose a favorable permutation after results.",
+    "avoid_equivalent_control": "A coefficient-row permutation S gives (S Q)^T[f(S Q X)-b] = Q^T[f(QX)-b] because shared rowwise f commutes with S. It is an equivalent identity control, not a wrong-geometric-association control.",
+    "native_screen": "Original YAML/pretrain/seed and real2step loss/backward, actual f/branch gradients, exact paired data/init scope, standard original-handler bs1/warm20/repeat100 resource pair. No positive-benefit admission gate invented."
+  },
+  "resource_risks": {
+    "complexity": "Two transforms cost O(C*sum_g n_g^2), n_total<=original64 middle tokens; no pointN^2/QKV. Original middle FFN is retained plus private sentinel cost.",
+    "limits": "Small theoretical FLOPs do not establish actual latency. Per-group Python/kernel launch, coordinate sorting, basis construction and unsupported operators must be reported under existing profile plus actual timing/memory. No custom handler or token-size sweep. Total<=10G and existing memory condition unchanged."
+  },
+  "implementation_recommendation": "Proceed only with a separately registered stable candidate and new external preparation files under this tick; do not alter Cluster/HEAD, existing PSBR74f queue/readiness or HRC running source. This review supports implementation feasibility, not tested correctness/admission.",
+  "unknowns": [
+    "Observed dataset defect addressed",
+    "Native nonlinear coupling magnitude and calibration effect",
+    "FP32 control behavior and nontrivial empty/padding coverage",
+    "Runtime resource cost and efficacy",
+    "Full historical equivalence or public literature novelty beyond this bounded check"
+  ],
+  "execution": {
+    "torch": false,
+    "SSH": false,
+    "GPU": false,
+    "tests": false,
+    "shared_state_write": false,
+    "model_source_write": false,
+    "old_result_modified": false
+  },
+  "write_scope": "This new review only."
+}

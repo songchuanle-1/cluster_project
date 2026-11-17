@@ -1,0 +1,26 @@
+{
+  "reviewed_at": "2026-10-20T23:14:46.242297+00:00",
+  "reviewer": "/root/pce_audit",
+  "scope": "Read-only local AST/hash/lease review, no SSH/GPU/model execution by reviewer",
+  "artifacts": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c5688ff/native_runtime.py",
+      "sha256": "67a6756d832f0d78720552bd1bfbf7833b5ac9dd85a8b168886e6f133cf1e897"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c5688ff/native_manifest.json",
+      "sha256": "05add75240e6a0ec5cb35de540691af589467fca051f18000a7d7a2cd50e3176"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c5688ff/execution_lease.json",
+      "sha256": "213c4a41e0bead74f9ae1852c38099df25319c0ed56fb94d379f92b76812ef58"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_5c5688ff/worker.py",
+      "sha256": "6370664a07b1e10d78e768eae81f03385ca758f1be0f99ae375ebda768d66dd3"
+    }
+  ],
+  "result": "No obvious static issue. GPU0/UUID0/query/lock/env consistent, current owner token/thread/deadline and manifest SHA match; 8 HAP sources/native YAML/diagnostic hashes correct; acquire before torch.",
+  "guard_test_boundary": "Actual probe invokes acquire only; finally releases even on unexpected idle and never enters worker/setup.",
+  "native_pass": false
+}

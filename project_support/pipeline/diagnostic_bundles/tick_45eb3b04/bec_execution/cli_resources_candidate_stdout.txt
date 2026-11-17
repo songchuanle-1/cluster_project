@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_521a6f59\bec_operational_prepare\adapter.py", line 480, in <module>
+    if __name__=='__main__': main()
+                             ~~~~^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_521a6f59\bec_operational_prepare\adapter.py", line 473, in main
+    elif args.operation=='run': result=adapter.run(args.mode,args.target)
+                                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_521a6f59\bec_operational_prepare\adapter.py", line 448, in run
+    require(result.get('certainty')=='terminal' and result.get('returncode')==0
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and self._raw_result_identity(result.get('result'),binding,mode,target)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        and result['result'].get('execution_completed') is True,'Native process failed/identity unknown; no PASS or replay')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_521a6f59\bec_operational_prepare\adapter.py", line 56, in require
+    raise Refused(reason)
+Refused: Native process failed/identity unknown; no PASS or replay

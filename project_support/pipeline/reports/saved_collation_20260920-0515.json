@@ -1,0 +1,2609 @@
+{
+  "observed_at_utc": "2026-09-19T21:14:24.423263+00:00",
+  "bundle": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_bundles/registry_geometry_20260920_0315_88b51c997a74",
+  "scratch": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_bundles/registry_geometry_20260920_0315_88b51c997a74_saved_collation_20260920_0515",
+  "observed_binding": {
+    "producer_sha256": "88b51c997a746a246fe90d97562ec64e8a46ef7a9a62e49393961a9f86c7519a",
+    "model_source_sha256": "cf4ce01548cecf186ba4677f5c13977f9fa527b2e33af6c82f564a7150a4c1d0",
+    "config_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "dataset_source_sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "registry_sha256": "a1a87913b30ffa3151c5eb33316cc239193cd349f636d01861475f88d8d5d3a7"
+  },
+  "native_dataset_instantiated": true,
+  "physical_bindings_verified": 3,
+  "native_capture_completed": false,
+  "scientific_validation_complete": false,
+  "annotation_and_cache_before": {
+    "/data3/songcl/data/data_cluster/scanrefer/ScanRefer_train_new.json": "018754b90bcc27d5746bb50d6c35d6e7a35fd39519ac669e3fbe3fa6f425922d",
+    "/data3/songcl/data/data_cluster/scanrefer/scene_graphs_new_train.json": "e058fdd5bee5acd4fce7e78516d88b07581131e9fe83afd226cb835e80942e08"
+  },
+  "capacity": {
+    "observed_at_utc": "2026-09-19T21:14:21.756250+00:00",
+    "gpu": 7,
+    "gpu_execution_authorized": false,
+    "training_launch": false,
+    "gpu_raw": "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 81559, 62483, 18597, 91",
+    "processes_raw": "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 1134192, 19956\nGPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 3827570, 42488",
+    "total_mib": 81559,
+    "used_mib": 62483,
+    "free_mib": 18597,
+    "utilization": 91,
+    "processes": [
+      {
+        "pid": 1134192,
+        "memory_mib": 19956,
+        "command": "python tools/train.py configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml --gpu_ids 7 --num_gpus 1 "
+      },
+      {
+        "pid": 3827570,
+        "memory_mib": 42488,
+        "command": "/home/jiaoh/conda_envs/das_env/bin/python -u /data3/jiaoh/das_foundation/scripts/train_das_mae.py --config /data3/jiaoh/das_foundation/runs/daguang_das_pretrain_2_scratch_vit_b_gpu0_2_3_5_7_b112_e300_20260916_181939/config_launch.yaml --output-dir /data3/jiaoh/das_foundation/runs/daguang_das_pretrain_2_scratch_vit_b_gpu0_2_3_5_7_b112_e300_20260916_181939 --epochs 300 --batch-size 112 --grad-accum-steps 1 --num-workers 4 --prefetch-factor 2 --max-val-samples 4096 --precision bf16 --preview-interval 5 "
+      }
+    ],
+    "process_cap_reached": true,
+    "measured_memory_sufficient": true,
+    "training": {
+      "pid": 1134192,
+      "exists": true,
+      "command": "python tools/train.py configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml --gpu_ids 7 --num_gpus 1 ",
+      "log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs_20260916_122540.log",
+      "tail": "5it/s, lr=1.7e-05, eta=3 days, 7:59:30, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2443/4686 [1:42:13<33:41,  1.11it/s, lr=1.7e-05, eta=3 days, 7:59:30, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2443/4686 [1:42:13<33:41,  1.11it/s, lr=1.7e-05, eta=3 days, 7:58:01, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2444/4686 [1:42:13<31:03,  1.20it/s, lr=1.7e-05, eta=3 days, 7:58:01, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2444/4686 [1:42:17<31:03,  1.20it/s, lr=1.7e-05, eta=3 days, 7:58:38, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2445/4686 [1:42:17<59:24,  1.59s/it, lr=1.7e-05, eta=3 days, 7:58:38, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2445/4686 [1:42:17<59:24,  1.59s/it, lr=1.7e-05, eta=3 days, 7:56:58, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2446/4686 [1:42:17<46:16,  1.24s/it, lr=1.7e-05, eta=3 days, 7:56:58, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2446/4686 [1:42:18<46:16,  1.24s/it, lr=1.7e-05, eta=3 days, 7:55:25, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2447/4686 [1:42:18<39:03,  1.05s/it, lr=1.7e-05, eta=3 days, 7:55:25, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2447/4686 [1:42:20<39:03,  1.05s/it, lr=1.7e-05, eta=3 days, 7:54:54, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2448/4686 [1:42:20<48:26,  1.30s/it, lr=1.7e-05, eta=3 days, 7:54:54, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2448/4686 [1:42:24<48:26,  1.30s/it, lr=1.7e-05, eta=3 days, 7:56:14, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2449/4686 [1:42:24<1:21:40,  2.19s/it, lr=1.7e-05, eta=3 days, 7:56:14, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2449/4686 [1:42:30<1:21:40,  2.19s/it, lr=1.7e-05, eta=3 days, 7:58:42, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2450/4686 [1:42:30<2:01:33,  3.26s/it, lr=1.7e-05, eta=3 days, 7:58:42, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2450/4686 [1:42:33<2:01:33,  3.26s/it, lr=1.7e-05, eta=3 days, 7:59:37, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2451/4686 [1:42:33<2:06:33,  3.40s/it, lr=1.7e-05, eta=3 days, 7:59:37, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2451/4686 [1:42:34<2:06:33,  3.40s/it, lr=1.7e-05, eta=3 days, 7:58:01, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2452/4686 [1:42:34<1:34:15,  2.53s/it, lr=1.7e-05, eta=3 days, 7:58:01, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2452/4686 [1:42:37<1:34:15,  2.53s/it, lr=1.7e-05, eta=3 days, 7:58:30, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2453/4686 [1:42:37<1:41:20,  2.72s/it, lr=1.7e-05, eta=3 days, 7:58:30, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2453/4686 [1:42:43<1:41:20,  2.72s/it, lr=1.7e-05, eta=3 days, 8:01:16, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2454/4686 [1:42:43<2:19:13,  3.74s/it, lr=1.7e-05, eta=3 days, 8:01:16, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2454/4686 [1:42:45<2:19:13,  3.74s/it, lr=1.7e-05, eta=3 days, 8:00:53, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2455/4686 [1:42:45<2:00:28,  3.24s/it, lr=1.7e-05, eta=3 days, 8:00:53, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2455/4686 [1:42:51<2:00:28,  3.24s/it, lr=1.7e-05, eta=3 days, 8:03:16, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2456/4686 [1:42:51<2:27:11,  3.96s/it, lr=1.7e-05, eta=3 days, 8:03:16, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2456/4686 [1:42:52<2:27:11,  3.96s/it, lr=1.7e-05, eta=3 days, 8:01:57, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2457/4686 [1:42:52<1:52:32,  3.03s/it, lr=1.7e-05, eta=3 days, 8:01:57, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2457/4686 [1:42:53<1:52:32,  3.03s/it, lr=1.7e-05, eta=3 days, 8:00:57, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2458/4686 [1:42:53<1:33:06,  2.51s/it, lr=1.7e-05, eta=3 days, 8:00:57, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2458/4686 [1:42:58<1:33:06,  2.51s/it, lr=1.7e-05, eta=3 days, 8:02:38, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2459/4686 [1:42:58<1:57:47,  3.17s/it, lr=1.7e-05, eta=3 days, 8:02:38, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2459/4686 [1:42:59<1:57:47,  3.17s/it, lr=1.7e-05, eta=3 days, 8:01:48, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2460/4686 [1:42:59<1:39:31,  2.68s/it, lr=1.7e-05, eta=3 days, 8:01:48, iter_time=2.51]\rTrain[26/50]:  52%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d         | 2460/4686 [1:43:05<1:39:31,  2.68s/it, lr=1.7e-05, eta=3 days, 8:04:04, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2461/4686 [1:43:05<2:10:09,  3.51s/it, lr=1.7e-05, eta=3 days, 8:04:04, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2461/4686 [1:43:07<2:10:09,  3.51s/it, lr=1.7e-05, eta=3 days, 8:03:59, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2462/4686 [1:43:07<1:58:34,  3.20s/it, lr=1.7e-05, eta=3 days, 8:03:59, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2462/4686 [1:43:13<1:58:34,  3.20s/it, lr=1.7e-05, eta=3 days, 8:06:10, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2463/4686 [1:43:13<2:22:39,  3.85s/it, lr=1.7e-05, eta=3 days, 8:06:10, iter_time=2.51]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2463/4686 [1:43:18<2:22:39,  3.85s/it, lr=1.7e-05, eta=3 days, 8:08:46, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2464/4686 [1:43:18<2:45:38,  4.47s/it, lr=1.7e-05, eta=3 days, 8:08:46, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2464/4686 [1:43:20<2:45:38,  4.47s/it, lr=1.7e-05, eta=3 days, 8:07:56, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2465/4686 [1:43:20<2:12:28,  3.58s/it, lr=1.7e-05, eta=3 days, 8:07:56, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2465/4686 [1:43:26<2:12:28,  3.58s/it, lr=1.7e-05, eta=3 days, 8:10:29, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2466/4686 [1:43:26<2:37:36,  4.26s/it, lr=1.7e-05, eta=3 days, 8:10:29, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2466/4686 [1:43:27<2:37:36,  4.26s/it, lr=1.7e-05, eta=3 days, 8:09:33, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2467/4686 [1:43:27<2:05:34,  3.40s/it, lr=1.7e-05, eta=3 days, 8:09:33, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2467/4686 [1:43:31<2:05:34,  3.40s/it, lr=1.7e-05, eta=3 days, 8:10:52, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2468/4686 [1:43:31<2:15:13,  3.66s/it, lr=1.7e-05, eta=3 days, 8:10:52, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2468/4686 [1:43:34<2:15:13,  3.66s/it, lr=1.7e-05, eta=3 days, 8:10:56, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2469/4686 [1:43:34<2:04:07,  3.36s/it, lr=1.7e-05, eta=3 days, 8:10:56, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2469/4686 [1:43:40<2:04:07,  3.36s/it, lr=1.7e-05, eta=3 days, 8:13:19, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2470/4686 [1:43:40<2:30:20,  4.07s/it, lr=1.7e-05, eta=3 days, 8:13:19, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2470/4686 [1:43:42<2:30:20,  4.07s/it, lr=1.7e-05, eta=3 days, 8:12:51, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2471/4686 [1:43:42<2:06:08,  3.42s/it, lr=1.7e-05, eta=3 days, 8:12:51, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2471/4686 [1:43:44<2:06:08,  3.42s/it, lr=1.7e-05, eta=3 days, 8:12:43, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2472/4686 [1:43:44<1:54:46,  3.11s/it, lr=1.7e-05, eta=3 days, 8:12:43, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2472/4686 [1:43:48<1:54:46,  3.11s/it, lr=1.7e-05, eta=3 days, 8:13:32, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2473/4686 [1:43:48<2:00:28,  3.27s/it, lr=1.7e-05, eta=3 days, 8:13:32, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2473/4686 [1:43:51<2:00:28,  3.27s/it, lr=1.7e-05, eta=3 days, 8:14:06, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2474/4686 [1:43:51<2:00:47,  3.28s/it, lr=1.7e-05, eta=3 days, 8:14:06, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2474/4686 [1:43:55<2:00:47,  3.28s/it, lr=1.7e-05, eta=3 days, 8:15:18, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2475/4686 [1:43:55<2:10:08,  3.53s/it, lr=1.7e-05, eta=3 days, 8:15:18, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2475/4686 [1:44:00<2:10:08,  3.53s/it, lr=1.7e-05, eta=3 days, 8:16:59, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2476/4686 [1:44:00<2:23:28,  3.90s/it, lr=1.7e-05, eta=3 days, 8:16:59, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2476/4686 [1:44:02<2:23:28,  3.90s/it, lr=1.7e-05, eta=3 days, 8:16:27, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2477/4686 [1:44:02<2:01:14,  3.29s/it, lr=1.7e-05, eta=3 days, 8:16:27, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2477/4686 [1:44:04<2:01:14,  3.29s/it, lr=1.7e-05, eta=3 days, 8:16:11, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2478/4686 [1:44:04<1:49:26,  2.97s/it, lr=1.7e-05, eta=3 days, 8:16:11, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2478/4686 [1:44:09<1:49:26,  2.97s/it, lr=1.7e-05, eta=3 days, 8:17:42, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2479/4686 [1:44:09<2:06:46,  3.45s/it, lr=1.7e-05, eta=3 days, 8:17:42, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2479/4686 [1:44:11<2:06:46,  3.45s/it, lr=1.7e-05, eta=3 days, 8:17:34, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2480/4686 [1:44:11<1:55:11,  3.13s/it, lr=1.7e-05, eta=3 days, 8:17:34, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2480/4686 [1:44:15<1:55:11,  3.13s/it, lr=1.7e-05, eta=3 days, 8:19:02, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2481/4686 [1:44:15<2:09:54,  3.53s/it, lr=1.7e-05, eta=3 days, 8:19:02, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2481/4686 [1:44:22<2:09:54,  3.53s/it, lr=1.7e-05, eta=3 days, 8:22:08, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2482/4686 [1:44:22<2:43:39,  4.46s/it, lr=1.7e-05, eta=3 days, 8:22:08, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2482/4686 [1:44:25<2:43:39,  4.46s/it, lr=1.7e-05, eta=3 days, 8:22:19, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2483/4686 [1:44:25<2:25:36,  3.97s/it, lr=1.7e-05, eta=3 days, 8:22:19, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2483/4686 [1:44:30<2:25:36,  3.97s/it, lr=1.7e-05, eta=3 days, 8:24:15, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2484/4686 [1:44:30<2:37:49,  4.30s/it, lr=1.7e-05, eta=3 days, 8:24:15, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2484/4686 [1:44:31<2:37:49,  4.30s/it, lr=1.7e-05, eta=3 days, 8:22:45, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2485/4686 [1:44:31<1:57:26,  3.20s/it, lr=1.7e-05, eta=3 days, 8:22:45, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2485/4686 [1:44:36<1:57:26,  3.20s/it, lr=1.7e-05, eta=3 days, 8:25:12, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2486/4686 [1:44:36<2:25:39,  3.97s/it, lr=1.7e-05, eta=3 days, 8:25:12, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2486/4686 [1:44:37<2:25:39,  3.97s/it, lr=1.7e-05, eta=3 days, 8:24:05, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2487/4686 [1:44:37<1:54:04,  3.11s/it, lr=1.7e-05, eta=3 days, 8:24:05, iter_time=2.52]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2487/4686 [1:44:43<1:54:04,  3.11s/it, lr=1.7e-05, eta=3 days, 8:26:29, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2488/4686 [1:44:43<2:22:38,  3.89s/it, lr=1.7e-05, eta=3 days, 8:26:29, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2488/4686 [1:44:44<2:22:38,  3.89s/it, lr=1.7e-05, eta=3 days, 8:25:22, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2489/4686 [1:44:44<1:52:15,  3.07s/it, lr=1.7e-05, eta=3 days, 8:25:22, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c         | 2489/4686 [1:44:51<1:52:15,  3.07s/it, lr=1.7e-05, eta=3 days, 8:28:07, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2490/4686 [1:44:51<2:28:33,  4.06s/it, lr=1.7e-05, eta=3 days, 8:28:07, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2490/4686 [1:44:52<2:28:33,  4.06s/it, lr=1.7e-05, eta=3 days, 8:27:30, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2491/4686 [1:44:52<2:00:56,  3.31s/it, lr=1.7e-05, eta=3 days, 8:27:30, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2491/4686 [1:44:54<2:00:56,  3.31s/it, lr=1.7e-05, eta=3 days, 8:26:56, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2492/4686 [1:44:54<1:44:51,  2.87s/it, lr=1.7e-05, eta=3 days, 8:26:56, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2492/4686 [1:44:59<1:44:51,  2.87s/it, lr=1.7e-05, eta=3 days, 8:28:23, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2493/4686 [1:44:59<2:02:24,  3.35s/it, lr=1.7e-05, eta=3 days, 8:28:23, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2493/4686 [1:45:00<2:02:24,  3.35s/it, lr=1.7e-05, eta=3 days, 8:27:16, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2494/4686 [1:45:00<1:37:59,  2.68s/it, lr=1.7e-05, eta=3 days, 8:27:16, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2494/4686 [1:45:04<1:37:59,  2.68s/it, lr=1.7e-05, eta=3 days, 8:28:30, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2495/4686 [1:45:04<1:54:34,  3.14s/it, lr=1.7e-05, eta=3 days, 8:28:30, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2495/4686 [1:45:07<1:54:34,  3.14s/it, lr=1.7e-05, eta=3 days, 8:28:39, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2496/4686 [1:45:07<1:50:29,  3.03s/it, lr=1.7e-05, eta=3 days, 8:28:39, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2496/4686 [1:45:07<1:50:29,  3.03s/it, lr=1.7e-05, eta=3 days, 8:27:09, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2497/4686 [1:45:07<1:24:11,  2.31s/it, lr=1.7e-05, eta=3 days, 8:27:09, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2497/4686 [1:45:13<1:24:11,  2.31s/it, lr=1.7e-05, eta=3 days, 8:29:27, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2498/4686 [1:45:13<1:59:58,  3.29s/it, lr=1.7e-05, eta=3 days, 8:29:27, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2498/4686 [1:45:14<1:59:58,  3.29s/it, lr=1.7e-05, eta=3 days, 8:28:31, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2499/4686 [1:45:14<1:38:56,  2.71s/it, lr=1.7e-05, eta=3 days, 8:28:31, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2499/4686 [1:45:20<1:38:56,  2.71s/it, lr=1.7e-05, eta=3 days, 8:30:48, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2500/4686 [1:45:20<2:11:16,  3.60s/it, lr=1.7e-05, eta=3 days, 8:30:48, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2500/4686 [1:45:22<2:11:16,  3.60s/it, lr=1.7e-05, eta=3 days, 8:30:11, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2501/4686 [1:45:22<1:50:05,  3.02s/it, lr=1.7e-05, eta=3 days, 8:30:11, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2501/4686 [1:45:28<1:50:05,  3.02s/it, lr=1.7e-05, eta=3 days, 8:33:23, iter_time=2.53]\rTrain[26/50]:  53%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b         | 2502/4686 [1:45:28<2:30:49,  4.14s/it, lr=1.7e-05, eta=3 days, 8:33:23, iter_time=2.53]",
+      "steps": [
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2443,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2443,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2444,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2444,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2445,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2445,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2446,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2446,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2447,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2447,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2448,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2448,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2449,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2449,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2450,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2450,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2451,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2451,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2452,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2452,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2453,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2453,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2454,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2454,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2455,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2455,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2456,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2456,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2457,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2457,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2458,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2458,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2459,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2459,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2460,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2460,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2461,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2461,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2462,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2462,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2463,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2463,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2464,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2464,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2465,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2465,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2466,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2466,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2467,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2467,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2468,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2468,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2469,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2469,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2470,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2470,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2471,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2471,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2472,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2472,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2473,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2473,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2474,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2474,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2475,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2475,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2476,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2476,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2477,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2477,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2478,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2478,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2479,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2479,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2480,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2480,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2481,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2481,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2482,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2482,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2483,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2483,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2484,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2484,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2485,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2485,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2486,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2486,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2487,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2487,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2488,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2488,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2489,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2489,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2490,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2490,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2491,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2491,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2492,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2492,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2493,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2493,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2494,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2494,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2495,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2495,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2496,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2496,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2497,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2497,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2498,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2498,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2499,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2499,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2500,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2500,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2501,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2501,
+          "total": 4686
+        },
+        {
+          "phase": "Train",
+          "epoch": 26,
+          "epochs": 50,
+          "step": 2502,
+          "total": 4686
+        }
+      ]
+    }
+  },
+  "saved_artifacts_verified": true,
+  "effective_train_config": {
+    "type": "scannetv2_sample_graph_edge",
+    "dataset": "scanrefer",
+    "data_root": "/data3/songcl/data/data_cluster/",
+    "prefix": "train",
+    "suffix": ".pth",
+    "training": true,
+    "mode": 4,
+    "aug": true,
+    "with_elastic": true,
+    "use_xyz": true,
+    "voxel_cfg": {
+      "scale": 50,
+      "spatial_shape": [
+        128,
+        512
+      ],
+      "max_npoint": 2500000
+    },
+    "max_des_len": 78,
+    "lang_num_max": 4
+  },
+  "native_metadata_plan": {
+    "contract": "fixed_registry_native_binding_v1",
+    "registry_sha256": "a1a87913b30ffa3151c5eb33316cc239193cd349f636d01861475f88d8d5d3a7",
+    "dataset_metadata_sha256": "cf6ebb82d64cca87366d5dbfcab0be7ad845b37a7dfcfdf3cd1a5d2e17629d38",
+    "rows": [
+      {
+        "pair_id": "scene0493_00:3:11",
+        "status": "planned",
+        "dataset_indices": [
+          6752
+        ],
+        "dataset_index": 6752,
+        "scene": "scene0493_00",
+        "expression_slot": 3,
+        "ann_id": 11,
+        "target_object_id": 3,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0481_00:0:80",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 0,
+        "ann_id": 80,
+        "target_object_id": 6,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0481_00:1:81",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 1,
+        "ann_id": 81,
+        "target_object_id": 52,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0481_00:3:83",
+        "status": "planned",
+        "dataset_indices": [
+          6620
+        ],
+        "dataset_index": 6620,
+        "scene": "scene0481_00",
+        "expression_slot": 3,
+        "ann_id": 83,
+        "target_object_id": 4,
+        "control_object_id": 48
+      },
+      {
+        "pair_id": "scene0288_00:0:28",
+        "status": "planned",
+        "dataset_indices": [
+          3893
+        ],
+        "dataset_index": 3893,
+        "scene": "scene0288_00",
+        "expression_slot": 0,
+        "ann_id": 28,
+        "target_object_id": 39,
+        "control_object_id": 38
+      },
+      {
+        "pair_id": "scene0288_00:3:31",
+        "status": "planned",
+        "dataset_indices": [
+          3893
+        ],
+        "dataset_index": 3893,
+        "scene": "scene0288_00",
+        "expression_slot": 3,
+        "ann_id": 31,
+        "target_object_id": 25,
+        "control_object_id": 24
+      },
+      {
+        "pair_id": "scene0289_00:0:64",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 0,
+        "ann_id": 64,
+        "target_object_id": 10,
+        "control_object_id": 17
+      },
+      {
+        "pair_id": "scene0289_00:1:65",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 1,
+        "ann_id": 65,
+        "target_object_id": 19,
+        "control_object_id": 16
+      },
+      {
+        "pair_id": "scene0289_00:2:66",
+        "status": "planned",
+        "dataset_indices": [
+          3921
+        ],
+        "dataset_index": 3921,
+        "scene": "scene0289_00",
+        "expression_slot": 2,
+        "ann_id": 66,
+        "target_object_id": 20,
+        "control_object_id": 16
+      },
+      {
+        "pair_id": "scene0220_00:1:21",
+        "status": "planned",
+        "dataset_indices": [
+          3011
+        ],
+        "dataset_index": 3011,
+        "scene": "scene0220_00",
+        "expression_slot": 1,
+        "ann_id": 21,
+        "target_object_id": 42,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0076_00:0:76",
+        "status": "planned",
+        "dataset_indices": [
+          1097
+        ],
+        "dataset_index": 1097,
+        "scene": "scene0076_00",
+        "expression_slot": 0,
+        "ann_id": 76,
+        "target_object_id": 7,
+        "control_object_id": 10
+      },
+      {
+        "pair_id": "scene0076_00:1:77",
+        "status": "planned",
+        "dataset_indices": [
+          1097
+        ],
+        "dataset_index": 1097,
+        "scene": "scene0076_00",
+        "expression_slot": 1,
+        "ann_id": 77,
+        "target_object_id": 8,
+        "control_object_id": 6
+      },
+      {
+        "pair_id": "scene0421_00:2:74",
+        "status": "planned",
+        "dataset_indices": [
+          5708
+        ],
+        "dataset_index": 5708,
+        "scene": "scene0421_00",
+        "expression_slot": 2,
+        "ann_id": 74,
+        "target_object_id": 14,
+        "control_object_id": 11
+      },
+      {
+        "pair_id": "scene0223_00:0:24",
+        "status": "planned",
+        "dataset_indices": [
+          3040
+        ],
+        "dataset_index": 3040,
+        "scene": "scene0223_00",
+        "expression_slot": 0,
+        "ann_id": 24,
+        "target_object_id": 20,
+        "control_object_id": 19
+      },
+      {
+        "pair_id": "scene0223_00:1:25",
+        "status": "planned",
+        "dataset_indices": [
+          3040
+        ],
+        "dataset_index": 3040,
+        "scene": "scene0223_00",
+        "expression_slot": 1,
+        "ann_id": 25,
+        "target_object_id": 17,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0319_00:1:33",
+        "status": "planned",
+        "dataset_indices": [
+          4278
+        ],
+        "dataset_index": 4278,
+        "scene": "scene0319_00",
+        "expression_slot": 1,
+        "ann_id": 33,
+        "target_object_id": 2,
+        "control_object_id": 3
+      },
+      {
+        "pair_id": "scene0319_00:2:34",
+        "status": "planned",
+        "dataset_indices": [
+          4278
+        ],
+        "dataset_index": 4278,
+        "scene": "scene0319_00",
+        "expression_slot": 2,
+        "ann_id": 34,
+        "target_object_id": 4,
+        "control_object_id": 20
+      },
+      {
+        "pair_id": "scene0192_00:2:6",
+        "status": "planned",
+        "dataset_indices": [
+          2690
+        ],
+        "dataset_index": 2690,
+        "scene": "scene0192_00",
+        "expression_slot": 2,
+        "ann_id": 6,
+        "target_object_id": 2,
+        "control_object_id": 4
+      },
+      {
+        "pair_id": "scene0110_00:0:4",
+        "status": "planned",
+        "dataset_indices": [
+          1524
+        ],
+        "dataset_index": 1524,
+        "scene": "scene0110_00",
+        "expression_slot": 0,
+        "ann_id": 4,
+        "target_object_id": 16,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0632_00:3:19",
+        "status": "planned",
+        "dataset_indices": [
+          8686
+        ],
+        "dataset_index": 8686,
+        "scene": "scene0632_00",
+        "expression_slot": 3,
+        "ann_id": 19,
+        "target_object_id": 6,
+        "control_object_id": 2
+      },
+      {
+        "pair_id": "scene0420_00:1:97",
+        "status": "planned",
+        "dataset_indices": [
+          5685
+        ],
+        "dataset_index": 5685,
+        "scene": "scene0420_00",
+        "expression_slot": 1,
+        "ann_id": 97,
+        "target_object_id": 41,
+        "control_object_id": 40
+      },
+      {
+        "pair_id": "scene0420_00:2:98",
+        "status": "planned",
+        "dataset_indices": [
+          5685
+        ],
+        "dataset_index": 5685,
+        "scene": "scene0420_00",
+        "expression_slot": 2,
+        "ann_id": 98,
+        "target_object_id": 25,
+        "control_object_id": 6
+      },
+      {
+        "pair_id": "scene0416_00:0:72",
+        "status": "planned",
+        "dataset_indices": [
+          5567
+        ],
+        "dataset_index": 5567,
+        "scene": "scene0416_00",
+        "expression_slot": 0,
+        "ann_id": 72,
+        "target_object_id": 27,
+        "control_object_id": 26
+      },
+      {
+        "pair_id": "scene0416_00:2:74",
+        "status": "planned",
+        "dataset_indices": [
+          5567
+        ],
+        "dataset_index": 5567,
+        "scene": "scene0416_00",
+        "expression_slot": 2,
+        "ann_id": 74,
+        "target_object_id": 43,
+        "control_object_id": 42
+      },
+      {
+        "pair_id": "scene0320_00:1:17",
+        "status": "planned",
+        "dataset_indices": [
+          4286
+        ],
+        "dataset_index": 4286,
+        "scene": "scene0320_00",
+        "expression_slot": 1,
+        "ann_id": 17,
+        "target_object_id": 15,
+        "control_object_id": 31
+      },
+      {
+        "pair_id": "scene0320_00:3:19",
+        "status": "planned",
+        "dataset_indices": [
+          4286
+        ],
+        "dataset_index": 4286,
+        "scene": "scene0320_00",
+        "expression_slot": 3,
+        "ann_id": 19,
+        "target_object_id": 34,
+        "control_object_id": 18
+      },
+      {
+        "pair_id": "scene0452_00:0:56",
+        "status": "planned",
+        "dataset_indices": [
+          6122
+        ],
+        "dataset_index": 6122,
+        "scene": "scene0452_00",
+        "expression_slot": 0,
+        "ann_id": 56,
+        "target_object_id": 21,
+        "control_object_id": 23
+      },
+      {
+        "pair_id": "scene0452_00:3:59",
+        "status": "planned",
+        "dataset_indices": [
+          6122
+        ],
+        "dataset_index": 6122,
+        "scene": "scene0452_00",
+        "expression_slot": 3,
+        "ann_id": 59,
+        "target_object_id": 19,
+        "control_object_id": 20
+      },
+      {
+        "pair_id": "scene0588_00:1:89",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 1,
+        "ann_id": 89,
+        "target_object_id": 44,
+        "control_object_id": 30
+      },
+      {
+        "pair_id": "scene0588_00:2:90",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 2,
+        "ann_id": 90,
+        "target_object_id": 0,
+        "control_object_id": 1
+      },
+      {
+        "pair_id": "scene0588_00:3:91",
+        "status": "planned",
+        "dataset_indices": [
+          8115
+        ],
+        "dataset_index": 8115,
+        "scene": "scene0588_00",
+        "expression_slot": 3,
+        "ann_id": 91,
+        "target_object_id": 19,
+        "control_object_id": 20
+      }
+    ],
+    "counts": {
+      "planned": 31
+    },
+    "native_execution_verified": false
+  },
+  "metadata_matches_source_plan": true,
+  "gpu_initialized": false,
+  "torch_version": "2.8.0+cu128",
+  "items": [
+    {
+      "dataset_index": 1097,
+      "scene": "scene0076_00",
+      "native_input_sha256": "009843facb64da4a6a3d7697a2230ff9194c0c1900b4d3282f877bf1b8654193",
+      "axes_sha256": "320d854d9c3c120ba524f96e6283734bb411bf196c0c9d904a40983067eef5f2",
+      "payload_sha256": "d3d11f259468bf765e12fc72d8b2292bb457f3787bad07355ea80249506d59e9",
+      "batch_sha256": "d11c67e8a6d8e8fdbfe3a3b73bf2876daa9c73b18d905e4b347e1c871f5cf285",
+      "expressions": 2,
+      "roundtrip_verified": true,
+      "repeated_collation_identical": true,
+      "inputs_unchanged": true,
+      "fields": {
+        "ann_ids": {
+          "sha256": "146b858a07498d21cfd7eba1c3a7b6822cb7b735d1caca0dc0dc3f6ae52d94f7",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "int"
+              },
+              {
+                "type": "int"
+              }
+            ]
+          }
+        },
+        "scan_ids": {
+          "sha256": "a31bebfc23bff77ff15f921a68e145cadbda9bea5221937d801ce045b69558f0",
+          "layout": {
+            "type": "list",
+            "length": 1,
+            "children": [
+              {
+                "type": "str"
+              }
+            ]
+          }
+        },
+        "voxel_coords": {
+          "sha256": "de6e7ad970dafb8a5182f9dcfeaf5cb9722dc73c7a69d15716725eae34043988",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              164170,
+              4
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "p2v_map": {
+          "sha256": "7c597ac874d844de15a1095ece23046b26a3baccdcc0f7cb0aee59637b5812f4",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              246901
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "v2p_map": {
+          "sha256": "24287a9280017a3be8bc911a72691a8be02a125292c6fec6907e5c7285e0218e",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              164170,
+              28
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "spatial_shape": {
+          "sha256": "4bfae8ac6b84e1d8e13ebb7d24ad51c02bc118bb98800b9749768fc0d274b9ca",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              3
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "feats": {
+          "sha256": "749dfc70b8a57c69b4b0aa321cd4a36dd67bf2add4aec2596c7c4b84e2d2e19a",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              246901,
+              6
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "superpoints": {
+          "sha256": "a1f6b7a0de732bca2f416733f019a4b9a5048282afe12735af9b149a5401f2a8",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              246901
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "batch_offsets": {
+          "sha256": "582dff415f4aa5160da6d9d17e6be836d41528237d0da4bcf00be4280ef8b27c",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              2
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "object_idss": {
+          "sha256": "f31b5e650e51a9ff08b451dc6d7fa5918579aa976faf31bd8db237262c3fb6ea",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "gt_pmasks": {
+          "sha256": "648edb35709860fd38422edbb1ab4ea409101c54e78d4fafca5f97fd9c56aab0",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  246901
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  246901
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "gt_spmasks": {
+          "sha256": "cf4af68b4ab0e1ab9e705c72db28bd54bf7b3155df46db9a8a73a9904299840d",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  1684
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  1684
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "sp_ref_masks": {
+          "sha256": "502b44f3bda15b5193f74fea7898ea0349f3ad465fa639ecb3cb402a095d58af",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  1684
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  1684
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "lang_tokenss": {
+          "sha256": "ff4530c2078f44b17b0eaafa0534e185cd6b387bf65d0101f4f644d0c2519790",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              2,
+              40
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "lang_masks": {
+          "sha256": "7d42a840345c1bc341514ded5a9ca16c866776145f7b64d270dd124c374eaf8b",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              2,
+              40
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "coords_float": {
+          "sha256": "a6df162eef1ab2ccc56b6d13f9a5197418fe8a47f06f35845464a40f8265191a",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              246901,
+              3
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "sp_ins_labels": {
+          "sha256": "ce7748c546b45e32a7ee052e80e158f25f33b2066e240fe5507d9076fe2d1ff5",
+          "layout": {
+            "type": "list",
+            "length": 1,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  1684
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "scenes_len": {
+          "sha256": "bdd7c88b446e3cf611822a420724707990b430ebb65cb71ca81a85e815a6459f",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              1
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "meta_datas": {
+          "sha256": "aef01c9957b803f55e9064a806031f1ccb25778102f590095ac30ee2e3210fe4",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              }
+            ]
+          }
+        },
+        "dense_maps": {
+          "sha256": "6e0db1d1598316807e5e88d89921bc3248e5e63613aa1e5c550262062f140baa",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              },
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              }
+            ]
+          }
+        },
+        "view_dependents": {
+          "sha256": "aef01c9957b803f55e9064a806031f1ccb25778102f590095ac30ee2e3210fe4",
+          "layout": {
+            "type": "list",
+            "length": 2,
+            "children": [
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              }
+            ]
+          }
+        },
+        "feats_2d": {
+          "sha256": "529f9eaaed0ede25162ff338715d1627fea1bd1e80a89f9057fa4350230101ce",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              1684,
+              1024
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        }
+      }
+    },
+    {
+      "dataset_index": 1524,
+      "scene": "scene0110_00",
+      "native_input_sha256": "4e87e6e9ee17efb8d249213a8441e17d85052e8aa2eb7b5f3c504f8d6af969a6",
+      "axes_sha256": "666614009e61e1292dc8053024a6b04abfbc02cee7fd13c3218ea53aceb125b2",
+      "payload_sha256": "dd88dd57c28d774f899d8d39127af60152ecfba342adaebc802fa5a44b2bc5a5",
+      "batch_sha256": "1277a720ad1158070ca625aa05e5ff422aed4a3adf6f0e88bcf92a809c57ba16",
+      "expressions": 4,
+      "roundtrip_verified": true,
+      "repeated_collation_identical": true,
+      "inputs_unchanged": true,
+      "fields": {
+        "ann_ids": {
+          "sha256": "c035277c66862954e85f29f52cd23bb9eaf535cac093a14603e294619a3a9e72",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "int"
+              },
+              {
+                "type": "int"
+              },
+              {
+                "type": "int"
+              },
+              {
+                "type": "int"
+              }
+            ]
+          }
+        },
+        "scan_ids": {
+          "sha256": "f4312c5a0dec069e84f9fa3fa32830ba6ae298bf2313fd540b50da4159614f38",
+          "layout": {
+            "type": "list",
+            "length": 1,
+            "children": [
+              {
+                "type": "str"
+              }
+            ]
+          }
+        },
+        "voxel_coords": {
+          "sha256": "9923f6d1002347246c6e00fe6f50c6817f61d1290f136ef44803448b2e9cc244",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              87485,
+              4
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "p2v_map": {
+          "sha256": "aba0e169b89ce65fe86d9a185e20947e04bf237759fde53989d50cc1e8c1b2c3",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              134373
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "v2p_map": {
+          "sha256": "4e1261f01f9d83ff29e16afe55858feadadb9f11cb3c29c0a73fd6e238a87d60",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              87485,
+              23
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "spatial_shape": {
+          "sha256": "0f448a6c325459ff42f1ca3bf3cf66c65bb91775729c19c8da617ef793646f50",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              3
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "feats": {
+          "sha256": "77a7fff5a9d5c5025fe98b331a20e23fc14759130abada2e3422a6c4fa81c369",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              134373,
+              6
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "superpoints": {
+          "sha256": "fe3de5f4f2fb415b4d2e167822fbee2eba94d56c98a3c27bf941129b40a02123",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              134373
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "batch_offsets": {
+          "sha256": "208c3969c50f2812ce5e01b0fb7ce3e5a3f90e87b4bbb5e1fad172396d2ce8ae",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              2
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "object_idss": {
+          "sha256": "471ac9c8d45d1a0df94d59c56d7608467c3aa8f3170f60878e1a884d0368c246",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              },
+              {
+                "type": "list",
+                "length": 1,
+                "children": [
+                  {
+                    "type": "int"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "gt_pmasks": {
+          "sha256": "7b32608a89c1cb1b657570528390efb1fd0bbfa482dd610321fd389a8376cf15",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  134373
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  134373
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  134373
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  134373
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "gt_spmasks": {
+          "sha256": "4b5b0363273e92cc24732d9b792a0212ec12b3e1cdbb8dbbe0091587307374ae",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "sp_ref_masks": {
+          "sha256": "be72b0e1c25ca7c7823b09dd3b6c2f2e09aecf9c74c0ff57e2b4708dad9802ae",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              },
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "lang_tokenss": {
+          "sha256": "fe1555e0032347a39bb7c0732dbe3a6dc7c92ef0711f401d705680258313a1aa",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              4,
+              33
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "lang_masks": {
+          "sha256": "44e16ab7af6404523523dde8a0593019984b902057c062917df091cdc51f4ef4",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int64",
+            "shape": [
+              4,
+              33
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "coords_float": {
+          "sha256": "043bf7900583e837766cee74700d221a3214371c0621f21b3f427a6ee3ecaff1",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              134373,
+              3
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "sp_ins_labels": {
+          "sha256": "aaafdf7798c5410190a198ccd69d36ca699a99fc9491132eae67f8d65fdd419b",
+          "layout": {
+            "type": "list",
+            "length": 1,
+            "children": [
+              {
+                "type": "tensor",
+                "dtype": "torch.float32",
+                "shape": [
+                  757
+                ],
+                "device": "cpu",
+                "contiguous": true
+              }
+            ]
+          }
+        },
+        "scenes_len": {
+          "sha256": "549c641ef4d3efefe9c68aaaae61d20cb4c6a5d8980febcb2f496ed74f252e75",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.int32",
+            "shape": [
+              1
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        },
+        "meta_datas": {
+          "sha256": "e53d56f987a852b2fc13176a94b32c684c2a13846101e2e432dec8bc7734bb2b",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              }
+            ]
+          }
+        },
+        "dense_maps": {
+          "sha256": "ef3a5c2da2864de8a4ce51bc524e24dfff08fec885a980f52d7d0c130fdc864f",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              },
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              },
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              },
+              {
+                "tokens_positive": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    2
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "modify_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "pron_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "other_entity_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "auxi_entity_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                },
+                "rel_positive_map": {
+                  "type": "tensor",
+                  "dtype": "torch.float32",
+                  "shape": [
+                    132,
+                    256
+                  ],
+                  "device": "cpu",
+                  "contiguous": true
+                }
+              }
+            ]
+          }
+        },
+        "view_dependents": {
+          "sha256": "e53d56f987a852b2fc13176a94b32c684c2a13846101e2e432dec8bc7734bb2b",
+          "layout": {
+            "type": "list",
+            "length": 4,
+            "children": [
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              },
+              {
+                "type": "NoneType"
+              }
+            ]
+          }
+        },
+        "feats_2d": {
+          "sha256": "76e14f064f8f178c3691043aa6b49be07674753ffda16962f7b35134df3e2d82",
+          "layout": {
+            "type": "tensor",
+            "dtype": "torch.float32",
+            "shape": [
+              757,
+              1024
+            ],
+            "device": "cpu",
+            "contiguous": true
+          }
+        }
+      }
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_bundles/registry_geometry_20260920_0315_88b51c997a74_saved_collation_20260920_0515/batch_1097.pth",
+      "sha256": "9f5327ba2e337cec7e2fe0bb36f9b82e560301fc828a2d18e50b1355038b9efd",
+      "bytes": 46757888
+    },
+    {
+      "path": "/data3/songcl/Project/Cluster_project/pipeline/diagnostic_bundles/registry_geometry_20260920_0315_88b51c997a74_saved_collation_20260920_0515/batch_1524.pth",
+      "sha256": "0c0e7d3f4666e4b3f01cfa677d79159c77f065d83d01ffab0a8dcbb863d7e706",
+      "bytes": 26205764
+    }
+  ],
+  "binding_counts": {
+    "missing_capture": 28,
+    "bound": 3
+  },
+  "full_binding_equal": true,
+  "full_binding_sha256": "621316e4b14f5242fff4c7a0bfd8c7040726cd0d2426561cd3eeb148a2ab510a",
+  "saved_collation_completed": true,
+  "model_forward_completed": false,
+  "new_train_transforms": false,
+  "denied_events": [
+    {
+      "event": "subprocess.Popen",
+      "args": "('uname', ['uname', '-p'], None, None)"
+    }
+  ],
+  "final_binding": {
+    "producer_sha256": "88b51c997a746a246fe90d97562ec64e8a46ef7a9a62e49393961a9f86c7519a",
+    "model_source_sha256": "cf4ce01548cecf186ba4677f5c13977f9fa527b2e33af6c82f564a7150a4c1d0",
+    "config_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+    "checkpoint_sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "dataset_source_sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "registry_sha256": "a1a87913b30ffa3151c5eb33316cc239193cd349f636d01861475f88d8d5d3a7"
+  },
+  "sources_stable": true,
+  "annotation_and_cache_stable": true,
+  "training_launch": false,
+  "returncode": 0,
+  "stderr": "/data3/songcl/miniconda3/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "probe_sha256": "44df45d3caac9f936b499698229d82b8031b61d599d6335da8bbfcd54402a4c6",
+  "prior_sha256": "78b0603496188468c93cb4833e6c37117d593b64fc3032925ba80e737730ada1"
+}

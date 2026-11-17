@@ -1,0 +1,30 @@
+{
+  "hostname": {
+    "rc": 0,
+    "stdout": "dl04-MS-7E06\n",
+    "stderr": "",
+    "command": [
+      "hostname"
+    ]
+  },
+  "gpu": {
+    "rc": 0,
+    "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 0, 41, 32607\n1, GPU-7f82edb9-f620-8045-caea-a75232265cd1, 16, 3533, 32607\n",
+    "stderr": "",
+    "command": [
+      "nvidia-smi",
+      "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+      "--format=csv,noheader,nounits"
+    ]
+  },
+  "compute": {
+    "rc": 0,
+    "stdout": "GPU-7f82edb9-f620-8045-caea-a75232265cd1, 1656613\n",
+    "stderr": "",
+    "command": [
+      "nvidia-smi",
+      "--query-compute-apps=gpu_uuid,pid",
+      "--format=csv,noheader,nounits"
+    ]
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "id": "M210-PSNC",
+  "candidate_id": "hierarchy-parent-spectral-nonlinear-token-coupling",
+  "config": "configs/Quard/ctf_hcg_csort_psnc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc.yaml",
+  "code_commit": "43dce016c1a1713c2a5dab7061810dc2efde8954",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.536953926086426,
+    13.908441543579102
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/psnc_a4f73140/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psnc.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "common_initialized_parameter_observations": {
+    "names_equal": true,
+    "tensor_count": 847,
+    "parameter_count": 157484090,
+    "fingerprints_equal": true,
+    "sha256": "49d11a83000a2a56c1517de4bb0700a8e2f79755617aaa760fa69612fc390fe6",
+    "scope": "All named parameters after original backbone pretrain, before TRAIN loader; no new PSNC parameters or replaced FFN",
+    "full_buffer_values": "NOT_RECORDED"
+  },
+  "spectral_nonsingleton_group_counts": [
+    64,
+    64
+  ],
+  "spectral_numeric_observations": {
+    "analysis_synthesis_reference_max_abs_error": 0.0,
+    "QtQ_max_abs_error_observed": 7.614125365762447e-07,
+    "numeric_scope": "QtQ/reference readouts observed, not a new threshold. Unexecuted zero/singleton/affine/identityQ and offdiagonal diagnostics remain NOT_RUN."
+  },
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/smoke_champion_execution.json",
+      "sha256": "135522a57c40b4a5176431054321b7e3c45b8e8cf5e3def2a7ec92c0e5df7f2e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/smoke_candidate_execution.json",
+      "sha256": "d239edecc63a40b611ac90e34e4a12807890c0e9aab14ff8c9c34b3e25e7fb17"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/resources_champion_execution.json",
+      "sha256": "839d341f7d2bb2256f349c44388be6af537a78072faff4c7ab720ed9a34d51a0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/resources_candidate_execution.json",
+      "sha256": "a5a73fb4dcbc4b14b1684434f9d02a1e126d79e41354bc164aede902a600c00c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/execution_binding.json",
+      "sha256": "a8f6337816b1172e475f9731b15a90a1e468c24d849288f1d3bc7ee10dc18011"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/native_manifest.json",
+      "sha256": "a5b23896f114aacaefe44fea71d1bd3565c4ed6bc2fe264db6e09ee778e5a5bc"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution/execution_lease.json",
+      "sha256": "0a6ed6fb19cf9a1e3482c9cc8c74de305e0b74aa51de8d99065173a2cfd14221"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution_independent_review/actual_four_result_review.json",
+      "sha256": "69ca0aee312744106885d2f617b5ca8369436e20a952363b66d4317c811d7563"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_native_resource_independent_review.json",
+      "sha256": "41888b342544c8912679cefa39e6c548336a6286c32ab8d1af2b83b5e6b9ed16"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psnc_execution_independent_review/admit_psnc_draft.py",
+      "sha256": "932fb45cb76697a29f8ebc17046bc76f3455423d8dee68eef3f7c334039a4786"
+    }
+  ],
+  "recorded_at": "2026-10-23T22:24:24.562455+00:00",
+  "limitations": {
+    "training_efficacy": "UNKNOWN",
+    "full_buffer_values": "NOT_RECORDED",
+    "offdiagonal_probe": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "zero_singleton_affine_identityQ_FP32": "NOT_RUN",
+    "empty_padding_singleton_coverage": {
+      "actual_unsupported_internal_rows": [
+        0,
+        0
+      ],
+      "actual_padding_rows": [
+        0,
+        0
+      ],
+      "actual_supported_singleton_groups": [
+        0,
+        0
+      ]
+    },
+    "raw_cross_target_digest_scope": "Cross-target exact output equality is not a preregistered gate; no magnitude/cause inferred from digest differences.",
+    "pure_TRAIN_memory": "UNKNOWN; no separate no-observer native TRAIN process pair"
+  }
+}

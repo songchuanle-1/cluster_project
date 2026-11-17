@@ -1,0 +1,7 @@
+# Instrumentation Revision1: Expression Batch Axis
+
+- First execution retained verbatim as attempt1_scale_*:1full TRAIN capture,0suffix replays,0optimizer/VAL steps. It stopped at the incorrect assertion that canonical is called once per single-scene input; no effects were accepted or reported.
+- Frozen network.expand_and_fps repeats scene superpoints once per expression; the canonical loop in native _cluster_to_points iterates the resulting expression batch. Single-scene inference still contains four expressions in this fixed cohort. This is a diagnostic axis error, not evidence that the trained point path failed.
+- Before retry, instrument every canonical invocation, retain the three weighted terms for each expression, require invocation count equal actual cluster point_input batch dimension, and stack terms along that same axis. Reconstruct every expression's exact original sum; keep1e-6 matching and all existing controls. Record actual call counts; do not claim counts from the failed assertion.
+- The original four groups, checkpoint/model/source/config, intervention subsets, normal query and selection, endpoint, tolerance, precision and deadline are unchanged. No HDS model revision3, new parameters, retraining, bias removal, gate tuning, VAL use or gate relaxation.
+- Preserve initial source/manifest/result/attempt hashes in the same stable candidate. This is a measurement-protocol revision only. Retry once under a new live resource/lock check, and keep any new failure as inconclusive.

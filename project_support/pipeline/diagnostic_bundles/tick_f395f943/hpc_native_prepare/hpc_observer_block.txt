@@ -1,0 +1,152 @@
+    if candidate:
+        hpc_module=importlib.import_module(qualified+'.hierarchy_resolvent')
+        hierarchy=importlib.import_module(qualified+'.hier_postprocess')
+        original_prepare=hierarchy.prepare_resolvent_plans
+        original_plan=hpc_module.build_resolvent_plan
+        original_solver=hierarchy.solve_resolvent_levels
+        def norm_pre(level):
+            def call(owner,values):
+                assert values[0] is state['raw_refs'][level]
+                state['norm_counts'][level]+=1
+            return call
+        def norm_post(level):
+            def call(owner,values,output):
+                state['norm_outputs'][level]=output
+            return call
+        for level in range(3):
+            hooks.extend([att.cluster_ffn_norm[level].register_forward_pre_hook(norm_pre(level)),
+                att.cluster_ffn_norm[level].register_forward_hook(norm_post(level))])
+        def observed_plan(point_ids,fine_to_middle,middle_to_coarse,bank_sizes):
+            context=state['hpc_context'];b=len(context['plans'])
+            assert (point_ids,fine_to_middle,middle_to_coarse)==context['members'][b]
+            assert bank_sizes==context['widths']
+            value=original_plan(point_ids,fine_to_middle,middle_to_coarse,bank_sizes)
+            record=hpc_plan_observation(value,point_ids,fine_to_middle,middle_to_coarse,bank_sizes)
+            record['batch']=b;context['record']['plans'].append(record);context['plans'].append(value)
+            return value
+        def observed_prepare(levels,ids):
+            assert levels is state['raw_refs'] and ids is bank.cluster_ids_list and 'hpc_context' not in state
+            members=[tuple(ids[l][b].detach().cpu().tolist() for l in range(3)) for b in range(levels[0].shape[0])]
+            coverage=hpc_coverage_preflight(members)
+            if not coverage['real_cross_level_component_possible']:
+                result['coverage_status']='INCONCLUSIVE_FIXED_BATCH_NO_SUPPORTED_TWO_FINE_COMPONENT'
+                raise RuntimeError('INCONCLUSIVE_COVERAGE: original fixed batch lacks a true fine-middle-coarse component with at least two supported fine descendants; no redraw')
+            record={'forward':state['forward_index'],'original_prepare_calls':1,'plans':[],
+                'coverage':coverage,'solver_calls':[],'native_observer_scope':'Actual original plans and two original solver calls; original gather/add/copy/new_tensor methods once with original return objects. No solver, FFN, forward, backward or residual replay.',
+                'offdiagonal_or_Jacobian_probe':'NOT_IMPLEMENTED_NOT_MEASURED','numerical_residual':'NOT_IMPLEMENTED_NOT_A_GATE'}
+            state['hpc_context']={'record':record,'members':members,'widths':[int(x.shape[1]) for x in levels],
+                'plans':[],'solver_count':0}
+            plans=original_prepare(levels,ids)
+            assert len(plans)==len(members) and all(a is b for a,b in zip(plans,state['hpc_context']['plans']))
+            state['hpc_context']['actual_plans_object']=plans
+            return plans
+        setattr(hpc_module,'build_resolvent_plan',observed_plan)
+        global_replacements.append((hpc_module,'build_resolvent_plan',original_plan))
+        setattr(hierarchy,'prepare_resolvent_plans',observed_prepare)
+        global_replacements.append((hierarchy,'prepare_resolvent_plans',original_prepare))
+        def same_batch_view(value,full,b):
+            return (tuple(value.shape)==tuple(full.shape[1:]) and value.device==full.device and value.dtype==full.dtype
+                and value.data_ptr()==full.data_ptr()+b*full.stride(0)*full.element_size())
+        method_names=('index_select','index_add','index_copy','new_tensor')
+        originals={name:getattr(torch.Tensor,name) for name in method_names}
+        def observe_operation(context,name,receiver,args,kwargs,output):
+            # Only original solver execution enables this context. Observer summaries do not
+            # invoke another solver/gather/scatter and never replace the original return.
+            b=context['batch'];plans=context['plans']
+            assert 0<=b<len(plans) and plans[b]['fine_ids']
+            plan=plans[b];count=context['counts'][name];context['counts'][name]+=1
+            ids=[plan[k] for k in ('fine_ids','middle_ids','coarse_ids')]
+            record={'batch':b,'kind':name,'input':summary(receiver),'output':summary(output)}
+            assert record['input']['finite'] and record['output']['finite']
+            if name=='index_select':
+                assert len(args)==2 and args[0]==0 and not kwargs
+                index=args[1].detach().cpu().tolist();record['indices']=index
+                if count<3:
+                    level=count;role=('fine_gather','middle_gather','coarse_gather')[level]
+                    assert index==ids[level] and same_batch_view(receiver,context['levels'][level],b)
+                    context['gathered'][level]=output
+                else:
+                    assert count in (3,4)
+                    role=('coarse_to_middle_parent_read','middle_to_fine_parent_read')[count-3]
+                    expected=plan['middle_parent_positions'] if count==3 else plan['fine_parent_positions']
+                    assert index==expected
+                    context['solved'][2 if count==3 else 1]=receiver
+                watch(receiver,record,'native_input_gradients');watch(output,record,'native_output_gradients')
+            elif name=='new_tensor':
+                assert count in (0,1) and len(args)==1 and not kwargs
+                level=count+1;key='middle_diagonal' if level==1 else 'coarse_diagonal'
+                role='actual_'+key;assert receiver is context['gathered'][level] and list(args[0])==plan[key]
+                record['actual_metadata_values']=list(args[0]);record['requires_grad']=bool(output.requires_grad)
+            elif name=='index_add':
+                assert count in (0,1) and len(args)==3 and args[0]==0 and not kwargs
+                level=count+1;role=('fine_to_middle_Schur_rhs','middle_to_coarse_Schur_rhs')[count]
+                index=args[1].detach().cpu().tolist();source=args[2]
+                assert receiver is context['gathered'][level]
+                assert index==(plan['fine_parent_positions'] if count==0 else plan['middle_parent_positions'])
+                assert source.shape[0]==len(index) and source.shape[1]==receiver.shape[1]
+                record.update(indices=index,source=summary(source))
+                assert record['source']['finite']
+                context['rhs'][level]=output
+                watch(receiver,record,'native_input_gradients');watch(source,record,'native_source_gradients');watch(output,record,'native_output_gradients')
+            else:
+                assert name=='index_copy' and count in (0,1,2) and len(args)==3 and args[0]==0 and not kwargs
+                level=count;role=('fine_original_ID_writeback','middle_original_ID_writeback','coarse_original_ID_writeback')[level]
+                index=args[1].detach().cpu().tolist();source=args[2]
+                assert index==ids[level] and same_batch_view(receiver,context['levels'][level],b)
+                if level in (1,2):assert source is context['solved'][level]
+                record.update(indices=index,source=summary(source));assert record['source']['finite']
+                context['batch_outputs'][level]=output
+                watch(receiver,record,'native_input_gradients');watch(source,record,'native_source_gradients');watch(output,record,'native_output_gradients')
+            record['role']=role;context['record']['operations'].append(record)
+            if name=='index_copy' and count==2:
+                assert context['counts']=={'index_select':5,'index_add':2,'index_copy':3,'new_tensor':2}
+                context['record']['actual_batch_operation_counts'].append({'batch':b,**context['counts']})
+                context['outputs'][b]=dict(context['batch_outputs'])
+                context['batch']=next((j for j in range(b+1,len(plans)) if plans[j]['fine_ids']),len(plans))
+                context['counts']={k:0 for k in method_names};context['gathered']={};context['rhs']={};context['solved']={};context['batch_outputs']={}
+        def method_wrapper(name):
+            original=originals[name]
+            def wrapped(receiver,*args,**kwargs):
+                output=original(receiver,*args,**kwargs)
+                context=state.get('active_hpc_solver')
+                if context is not None and not context.get('inside_observer'):
+                    context['inside_observer']=True
+                    try:observe_operation(context,name,receiver,args,kwargs,output)
+                    finally:context['inside_observer']=False
+                return output
+            return wrapped
+        for name in method_names:
+            setattr(torch.Tensor,name,method_wrapper(name));global_replacements.append((torch.Tensor,name,originals[name]))
+        def observed_solver(levels,plans):
+            parent=state['hpc_context'];parent['solver_count']+=1;phase=parent['solver_count']
+            assert phase in (1,2) and plans is parent['actual_plans_object']
+            expected=state['norm_outputs'] if phase==1 else state['ffn_outputs']
+            assert len(levels)==3 and all(levels[l] is expected[l] for l in range(3))
+            assert state['norm_counts']==[1,1,1]
+            if phase==2:assert state['ffn_counts']==[1,1,1]
+            record={'forward':state['forward_index'],'phase':'analysis' if phase==1 else 'synthesis',
+                'input':[summary(x) for x in levels],'input_sha256':fingerprint(torch,levels),
+                'operations':[],'actual_batch_operation_counts':[],
+                'original_solver_calls':1,'outputs_from_actual_index_copy_or_empty_identity':[]}
+            for l,x in enumerate(levels):assert record['input'][l]['finite'];watch(x,record,'native_input_level'+str(l)+'_gradients')
+            context={'record':record,'levels':levels,'plans':plans,'batch':next((b for b,p in enumerate(plans) if p['fine_ids']),len(plans)),
+                'counts':{k:0 for k in method_names},'gathered':{},'rhs':{},'solved':{},'batch_outputs':{},'outputs':{},'inside_observer':False}
+            assert state.get('active_hpc_solver') is None;state['active_hpc_solver']=context
+            try:output=original_solver(levels,plans)
+            finally:state.pop('active_hpc_solver',None)
+            assert context['batch']==len(plans) and len(output)==3
+            for b,plan in enumerate(plans):
+                for l in range(3):
+                    actual=context['outputs'][b][l] if plan['fine_ids'] else levels[l][b]
+                    exact=fingerprint(torch,output[l][b])==fingerprint(torch,actual)
+                    assert exact;record['outputs_from_actual_index_copy_or_empty_identity'].append({'batch':b,'level':l,'exact':exact,'empty_identity':not bool(plan['fine_ids'])})
+            record.update(output=[summary(x) for x in output],output_sha256=fingerprint(torch,output),
+                actual_supported_batch_count=len(context['outputs']),transparent_original_return=True,
+                numerical_residual_gate_added=False,per_row_or_call_nonzero_gate=False)
+            for l,x in enumerate(output):assert record['output'][l]['finite'];watch(x,record,'native_output_level'+str(l)+'_gradients')
+            parent['record']['solver_calls'].append(record)
+            if phase==1:state['analyzed_outputs']=output
+            else:state['hpc_delta_snapshots']=[x.detach().clone() for x in output]
+            return output
+        setattr(hierarchy,'solve_resolvent_levels',observed_solver)
+        global_replacements.append((hierarchy,'solve_resolvent_levels',original_solver))

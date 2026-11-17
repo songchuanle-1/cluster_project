@@ -1,0 +1,14 @@
+--- r0/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py
++++ r1/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_rvec/hier_postprocess.py
+@@ -722,8 +722,9 @@
+     def __init__(self, *args, **kwargs):
+         super().__init__(*args, **kwargs)
+         from .receiver_vector_exchange import FineLeafReceiverVectorExchange
+-        self.fine_exchange = FineLeafReceiverVectorExchange(
+-            channels=self.d_model, k=self.per_layer_topk_list[0], heads=self.nhead)
++        with torch.random.fork_rng(devices=[]):
++            self.fine_exchange = FineLeafReceiverVectorExchange(
++                channels=self.d_model, k=self.per_layer_topk_list[0], heads=self.nhead)
+         self.cluster_ffn[0] = nn.Identity()
+         self.cluster_ffn_norm[0] = nn.Identity()
+ 

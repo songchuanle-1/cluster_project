@@ -1,0 +1,59 @@
+{
+  "recorded_at": "2026-10-28T20:19:00.265798+00:00",
+  "instruction": "Root explicitly selected final DRAFTFalse version-bound capability along original PES activebinding contract. Private identity assembly only; no entry, Torch, CUDA, transport, lease or GPU action.",
+  "initial_disabled_snapshot": {
+    "actual_source_binding_provenance.json": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/actual_source_binding_provenance.json",
+      "sha256": "f1dabfbb39ef706931c6a813e59adbe35e5411cfdef9966af64cd4272a87ef93"
+    },
+    "manifest_template.json": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/manifest_template.json",
+      "sha256": "400caa02d427a20b76ab7707a9e05d46fcf5e2f18ec51dfc584e94fc79aa1a52"
+    },
+    "native_runtime.py": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/native_runtime.py",
+      "sha256": "4b179da830b217c2dfd8700e98d986210a5211c1998b628a8fbbeb86dfd6ffec"
+    },
+    "source_version_binding.json": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/source_version_binding.json",
+      "sha256": "2e160fba846710dab8a6067a3172afdc4111ba55e781524ecdf8f125ebb2e95b"
+    },
+    "static_check.py": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/static_check.py",
+      "sha256": "4f885315501be1cc5d4ccdffb66a65940dfc9f3e26a3e0c0552e4f85ef362af6"
+    },
+    "static_validation.json": {
+      "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/static_validation.json",
+      "sha256": "965e5b2727990421a052ce3048c223e0180616fa6f16a5901a3f450b90ec56cc"
+    }
+  },
+  "runtime_before": {
+    "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/disabled_wip/native_runtime.py",
+    "sha256": "4b179da830b217c2dfd8700e98d986210a5211c1998b628a8fbbeb86dfd6ffec"
+  },
+  "runtime_after": {
+    "path": "pipeline/diagnostic_bundles/tick_2ef53d6b/aoc_native_prepare/native_runtime.py",
+    "sha256": "9a7ad54c1802bb348025f7951d6b75aa13aed12c330f78716261d984a351aece"
+  },
+  "exact_runtime_diff": "--- disabled_wip/native_runtime.py\n+++ native_runtime.py\n@@ -4,7 +4,7 @@\n The preparation bundle deliberately does not include native_manifest.json/lease.\n \"\"\"\n import re\n-DRAFT_EXECUTION_DISABLED = True\n+DRAFT_EXECUTION_DISABLED = False\n \n def require_promoted_version():\n     if DRAFT_EXECUTION_DISABLED or not isinstance(SOURCE_PARENT_COMMIT,str) or re.fullmatch(r'[0-9a-f]{40}', SOURCE_PARENT_COMMIT) is None or not isinstance(CANDIDATE_COMMIT, str) or re.fullmatch(r'[0-9a-f]{40}', CANDIDATE_COMMIT) is None or not isinstance(SOURCE_PREPARATION_SHA256,str) or re.fullmatch(r'[0-9a-f]{64}', SOURCE_PREPARATION_SHA256) is None:\n",
+  "runtime_function_bodies_changed": false,
+  "worker_changed_by_transition": false,
+  "manifest_metadata_changes": [
+    "draft_execution_disabled True to False",
+    "runtime and sourcebinding diagnostic hashes",
+    "sourcebinding hash",
+    "protocol capability wording"
+  ],
+  "sourcebinding_changes": [
+    "actual source version independent peer c11c added",
+    "scope clarifies version-bound capability and parent-promotion guard"
+  ],
+  "code_commit": "0314b932a92a8cc7f67804068ecb1c1f7a5f2e33",
+  "source_parent_commit": "9c42fdc4e9168acec18980d782ee9c163e043bb7",
+  "runtime_expected_commit": "9c42fdc4e9168acec18980d782ee9c163e043bb7",
+  "actual_primary_runtime_reference": "5c0c211c8ecc9479ecb34dbb8118a95f4b20e391",
+  "all_ten_execution_fields_remain_null": true,
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "current_packet_executable_without_active_lease": false
+}

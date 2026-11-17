@@ -1,0 +1,6 @@
+# Original-run observation preparation
+Default NOP. Root only may execute with the actual current anchor and original deadline. No Torch, model, checkpoint body, process launch, signals or shared-ledger writes. WFC remains source94/originalPID2085005/start105948793/GPU0 even if global runtime is4457. Global4457 is accepted only for exact single-parent additive9 LFT tree with exact nine frozen blobs and unchanged nine committed WFC blobs. Actual deployed YAML has approved77e path adaptation.
+
+WFC-only: `python -B -X utf8 pipeline/diagnostic_bundles/tick_d94467a9/dual_original_run_observer/observe_original_runs.py --execute-root --target wfc`
+
+LFT/both: root first writes a NEW current private binding JSON using lft_binding_template.json and real canonical-dispatch original PID/start/config/stdout, owner6, then passes `--target both --lft-binding-file <absolute_path> --lft-binding-sha256 <actual_sha>`. The template has None and refuses. Each process requires current canonical experiment running/PID/source, remote exact UID/proc start/argv/cwd/stdout, physical UUID/context and unchanged actual model/YAML bytes. Original TRAIN and VAL movement are separate observations; no movement is not automatically terminal/crash. Exact partial native validation uses the existing lineage parser, not rounded stdout. Original helper is preserved. No invocation has been made.

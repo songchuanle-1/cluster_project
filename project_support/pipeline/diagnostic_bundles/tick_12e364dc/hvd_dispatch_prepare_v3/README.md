@@ -1,0 +1,1 @@
+Current-owner schema guard revision3. Original frozenv2 and exact prelaunch rejection preserved. UUID remains required in actual raw SERVERS single/perGPU fields and nativeGPU0 probe. No EXEC directory, claim, SSH or Popen occurred fromv2. All other code is byte-identical. Default NOP actually passed; code compiled. Independent review before execution.

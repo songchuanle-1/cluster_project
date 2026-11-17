@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-09T01:52:58.224700+00:00",
+  "owner": {
+    "token": "915589b3154c4c3c99b1db658f610a1f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T01:12:12.491733+00:00",
+    "deadline_at": "2026-11-09T02:12:12.491733+00:00",
+    "context_sha256": "dada34d7594e909fafb5912692a196a80a7f11a55681e45cb7b1736039e08e5e",
+    "pending_sha256": "d5e94794b90053aff865886bb78f0d94483538397354b954968aa5e13566ffd7"
+  },
+  "reviewer_thread_id": "01a1ba6d-6550-7a01-b1bf-9021c59e7d93",
+  "reviewer_agent": "/root/fresh_peer",
+  "passed": true,
+  "material_concerns": [],
+  "scope": "TERMINAL_ACTUAL_EVIDENCE_INTEGRITY_AND_HARNESS_FAILURE_CLASSIFICATION_ONLY_NOT_NATIVE_GATE_PASS",
+  "actual_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_915589b3/rvec_native_execution/run_smoke_candidate_actual.json",
+    "sha256": "1ed4fdf967dea378b9b642454047feb93708e905dc8f4b888dd890612e4fcefb"
+  },
+  "FROZEN_sha256": "88d7de57e60c68b63db7b29a19e847daa6915683296abef95f0bd7cfd54c8a4c",
+  "reviewed_worker_sha256": "f02e5d137fabb5fedd22ee2ce81c001b3d54ce5e82ff99fad3c087a36c60585f",
+  "reviewed_runtime_sha256": "ff5da5086b89ec101dc6f816660839b1435c6027a1e1a8fed577f2feb98ccefe",
+  "source_commit": "0f8cc0f978b38c24e159d3a2d37344f59cc9a0be",
+  "source_binding_sha256": "416a9dc6c6fc9a6f5397a92cda234e66e085776bd89d7cb0ce468b889311fe90",
+  "request_intent_manifest_source_binding_and_worker_hashes_match": true,
+  "transport_certainty": "terminal",
+  "ssh_bootstrap_returncode": 0,
+  "worker_returncode": 1,
+  "worker_pid": 1679005,
+  "execution_completed": false,
+  "native_smoke_passed": false,
+  "failure_classification": "HARNESS_PAIRED_IMPORT_REGISTRY_COLLISION_IMPLEMENTATION_INCONCLUSIVE",
+  "observed_failure": {
+    "type": "KeyError",
+    "registry": "gorilla losses",
+    "name": "Criterion",
+    "message": "\"An object named 'Criterion' was already registered in 'losses' registry!\\nOr let `force=True` to cover the origin\"",
+    "worker_phase": "setup line91 imports original M95 baseline package after candidate package import has succeeded",
+    "trace_chain": "baseline network.py13 imports .loss; baseline loss.py124 decorator registers Criterion; gorilla registry.py39 rejects duplicate Criterion",
+    "common_reference_model_constructed": false,
+    "candidate_model_constructed": false,
+    "pointnet_import_progress": "This attempt progressed past the candidate module import that failed on pointnet2._ext previously. It then failed at the separate paired baseline import.",
+    "loaded_pointnet_extension_origin_equality_separately_measured_in_native_result": false
+  },
+  "actual_counts": {
+    "optimizer_steps": 0,
+    "native_loss_forwards": 0,
+    "native_criterion_backwards": 0,
+    "native_predict_calls": 0,
+    "new_training": 0
+  },
+  "gate_status": {
+    "common_initialization": "UNMEASURED_NOT_REACHED",
+    "original_native_TRAIN2": "NOT_RUN",
+    "five_parameter_original_loss_gradients_and_updates": "NOT_RUN",
+    "native_graph_HCG_ILA_mask_observers": "NOT_RUN",
+    "resources": "NOT_RUN",
+    "scientific_admission": "NOT_GRANTED"
+  },
+  "RNG_or_initialization_failure_attested": false,
+  "mechanism_efficacy_or_scientific_negative_result": false,
+  "failure_metadata": {
+    "status": "ACTUAL_FAILURE_CAPTURED",
+    "pid": 1679005,
+    "actual_frame_count": 14,
+    "frame_limit": 16,
+    "actual_import_and_registry_source_hashes_captured": true
+  },
+  "actual_preflight": {
+    "observed_at": "2026-11-09T01:47:58.550534+00:00",
+    "post_acquisition_observed_at": "2026-11-09T01:47:58.617659+00:00",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "reported_free_mib": 24507,
+    "minimum20000MiB_met": true,
+    "original_lock_identities": [
+      {
+        "kind": "training",
+        "path": "/tmp/cluster_project_gpu0_training.lock",
+        "device": 66308,
+        "inode": 92537152,
+        "opened_existing_NOFOLLOW_no_create": true,
+        "nonblocking_acquired": true
+      },
+      {
+        "kind": "diagnostic",
+        "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+        "device": 66308,
+        "inode": 92537153,
+        "opened_existing_NOFOLLOW_no_create": true,
+        "nonblocking_acquired": true
+      },
+      {
+        "kind": "exclusive",
+        "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+        "device": 66308,
+        "inode": 92537154,
+        "opened_existing_NOFOLLOW_no_create": true,
+        "nonblocking_acquired": true
+      }
+    ],
+    "post_acquisition_locks_held": 3,
+    "external_contexts_before": [
+      {
+        "pid": 1184577,
+        "used_memory_mib": "4492"
+      },
+      {
+        "pid": 1320411,
+        "used_memory_mib": "3502"
+      }
+    ],
+    "external_contexts_post_acquisition": [
+      {
+        "pid": 1184577,
+        "used_memory_mib": "4492"
+      },
+      {
+        "pid": 1320411,
+        "used_memory_mib": "3502"
+      }
+    ],
+    "external_contexts_preserved_through_preflight": true,
+    "exclusive_measurement_claimed": false
+  },
+  "release_status": "PENDING_ROOT_CURRENT_READ_ONLY_POSTFLIGHT; terminal worker return is not substituted for actual lock/process reconciliation",
+  "source_flag_interpretation": "native_model_and_yaml_unchanged=false is an unset completion flag after setup failed, not proof of source modification; actual worker and baseline import source hashes are captured.",
+  "required_next_scope": "Any minimal harness correction needs a separate immutable packet/new stage and genuine delta review; preserve this attempt and forbid replay. No model change, force-success common-init, weight copy, reseed or data alteration authorized.",
+  "scientific_admission": false,
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "Torch_SSH_GPU_execution_by_reviewer": false,
+  "source_index_queue_ledger_or_shared_mutations_by_reviewer": false
+}

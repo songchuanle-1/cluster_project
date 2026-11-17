@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-09-22T07:16:52+08:00",
+  "status": "capture_bundle_deployed_checkpoint_binding_blocked",
+  "remote_root": "/data3/songcl/Project/Cluster_project/Cluster",
+  "bundle_root": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/frozen_capture_20260922",
+  "server": "server-6",
+  "gpu": 7,
+  "gpu_memory_used_mib": 42023,
+  "gpu_memory_total_mib": 81559,
+  "local_tests_passed": 32,
+  "remote_py_compile": true,
+  "remote_import": "bundle_import_ok FrozenDataset",
+  "source_remote_hashes_match": true,
+  "files": [
+    {
+      "name": "native_frozen_capture_20260916.py",
+      "sha256": "d85791b08754ce9d53213deb479c946234eddd7c347592eda90adbd6fed1bff3"
+    },
+    {
+      "name": "frozen_capture_contract_20260916.py",
+      "sha256": "cea431df835fb5ab0fe7acc88b5539c700cc3cd37a816ecdb9bf2fd1f843f788"
+    },
+    {
+      "name": "hierarchical_partition_contract_20260916.py",
+      "sha256": "1633e31d46109c7055c93b761dc43bdebcae131bdef8b04b611464981cb1537e"
+    },
+    {
+      "name": "native_endpoint_capture_20260916.py",
+      "sha256": "7da5b69f6cf27962a4d555b7f42f7f635a68caa65f1dd7847673ed73d3b639e7"
+    },
+    {
+      "name": "native_support_capture_v2_20260916.py",
+      "sha256": "458cc198d6d4a5d240f99d3c852ac41d5935edff2de3241463547a90a89b7915"
+    },
+    {
+      "name": "capture_support_20260916.py",
+      "sha256": "8ed9e62427981d7ad5a413ac8114ebf95c25f6bb517d7c6db741c799f5475975"
+    },
+    {
+      "name": "physical_mask_endpoints_20260916.py",
+      "sha256": "30c6706951110d1832b8bb1b1acbfe4d9c19a7ebd791b956b8c3526008239931"
+    },
+    {
+      "name": "paired_capture_evaluation_20260916.py",
+      "sha256": "bc5d99bc3ab4c656c84b898624246890ed3d9fa74a5727746e98b3c8b0cb74d6"
+    }
+  ],
+  "remaining_prerequisite": {
+    "name": "exact_m95_checkpoint",
+    "local_search": "no exact model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort payload found",
+    "allowed_remote_search": "no files under the exact champion checkpoint directory",
+    "attempted_alternatives": [
+      "verified the allowed server-6 code, environment, data root, and GPU7",
+      "searched local Checkpoints",
+      "searched the allowed server-6 checkpoint root"
+    ],
+    "next_action": "Bind the exact M95 checkpoint under allowed server-6 storage, then run the frozen capture and fail-closed evaluation."
+  },
+  "limitations": [
+    "Bundle deployment and import do not validate capture semantics or model efficacy.",
+    "No native capture was run because checkpoint identity cannot be frozen without the exact payload.",
+    "The foreign GPU7 process was observed but never touched."
+  ],
+  "admission": false,
+  "native_execution_completed": false,
+  "scientific_validation_complete": false
+}

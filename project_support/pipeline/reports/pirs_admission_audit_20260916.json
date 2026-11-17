@@ -1,0 +1,64 @@
+{
+  "timestamp": "2026-09-16T12:12:07.772553+08:00",
+  "scope": "Static scalar counterexamples, AST inspection and original abstract retrieval only.",
+  "tests_passed": 7,
+  "findings": [
+    "The existing candidate is detached soft-IoU weighted two-class CE, not differentiable-target BCE as the design claims.",
+    "soft>0 grants full eos weight to all 49 finite-grid queries, including a zero hard-IoU mask. Underflow can produce exceptions; this is not a native frequency measurement.",
+    "Soft-IoU reverses hard-IoU ranking in a two-point counterexample; the TRAIN hard-mask oracle does not validate this target.",
+    "Removing detach is not a fix: dBCE/dtarget=-logit permits reducing mask quality when the referent logit is negative.",
+    "BCE must act on positive-minus-negative logits to preserve the existing two-class deployment contract.",
+    "Candidate YAML uses the backbone pretrain, while the design specifies an M95 warm start; matched initialization and total updates are unspecified.",
+    "GFL original abstract explicitly combines quality and class prediction with continuous labels. Mask Scoring original abstract learns mask IoU. Provenance terminology alone does not establish a whole-mechanism increment.",
+    "Neither original abstract establishes exact equivalence to PIRS; novelty gate remains unverified, not a universal prior-art rejection.",
+    "The positive-set oracle tests GT-restricted selection, not relabelling or learned deployment; scope B remains valid but is not evidence PIRS will work."
+  ],
+  "counterexamples": {
+    "zero_hard_overlap_soft_iou": 2.269944960453358e-05,
+    "hard_good_soft": 0.3422818791946309,
+    "hard_bad_soft": 0.48514851485148514,
+    "coupled_bce_target_derivative_at_logit_minus2": 2
+  },
+  "decision": "Do not admit the current PIRS artifact. Keep referent-supervision-axis in design; preserve existing uncommitted files.",
+  "next_action": "Specify hard versus soft quality, detached gradient contract, support weighting and matched initialization; verify full GFL/Mask Scoring methods and a whole-mechanism increment before amending the existing review/design. No threshold/weight sweep or renamed variant.",
+  "literature": [
+    {
+      "url": "https://arxiv.org/abs/2006.04388",
+      "path": "pipeline/reports/pirs_gfl_original_20260916.html",
+      "sha256": "43d9b999d1446349d82d0da1890c8b298ceb4e47ed7a1ec89d45c28467a0b59a",
+      "scope": "Original abstract page only; full method equivalence not verified."
+    },
+    {
+      "url": "https://openaccess.thecvf.com/content_CVPR_2019/html/Huang_Mask_Scoring_R-CNN_CVPR_2019_paper.html",
+      "path": "pipeline/reports/pirs_mask_scoring_original_20260916.html",
+      "sha256": "96bc797929de2388468acb912df0eb277bc117c8b56b8f8274b3cf3a595b5dce",
+      "scope": "Original abstract page only; full method equivalence not verified."
+    }
+  ],
+  "sources": [
+    {
+      "path": "scripts/pirs_admission_audit_20260916.py",
+      "sha256": "8f7ab6db7c6ccba99d2a3641d91c33447cecfbb5f58d2454951e0b1d025b74ad"
+    },
+    {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs/loss.py",
+      "sha256": "a95efafe4f29d5a0345ca59a555eb1d75bac6a90878bc88ef2e3639ae36f0596"
+    },
+    {
+      "path": "Cluster/configs/Quard/pirs/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_pirs.yaml",
+      "sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a"
+    },
+    {
+      "path": "pipeline/designs/exp_design_20260916-1150.md",
+      "sha256": "e3b9ec3df8eeaf481109ffc86097f80bcd004385cfc63996c844dca63f109d1a"
+    },
+    {
+      "path": "pipeline/reviews/motivation_review_20260916-1150.md",
+      "sha256": "8b09fa61e87919113b296998dfd7487e801fdbac992a1057f21f3cac2b0b46c3"
+    }
+  ],
+  "limitations": [
+    "No native backward, resource measurement, efficacy, receipt, enqueue, sync or launch.",
+    "This audit does not resolve physical endpoint or modality support provenance in other due records."
+  ]
+}

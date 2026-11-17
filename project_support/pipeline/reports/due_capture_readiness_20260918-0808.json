@@ -1,0 +1,59 @@
+{
+  "scope": "Event-mode overdue capacity retry for blocked native capture stages; no native capture or efficacy claim",
+  "timestamp": "2026-09-18T08:08:41+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "capture_launched": false
+  },
+  "m197_preflight_progress": {
+    "epoch": "16/50",
+    "best_miou": 0.4803,
+    "no_improve": "0/10",
+    "recent_validation_sequence": [
+      0.4708,
+      0.4778,
+      0.4800,
+      0.4786,
+      0.4803
+    ]
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied at the two-process cap by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-18T09:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Performed one bounded live GPU/process query after the 08:00 retry deadline and made no launch attempt. Hash-addressed frozen static evidence was not repeated because the snapshot reported it unchanged."
+  },
+  "limitations": [
+    "No paired native capture ran, so no efficacy result or scientific validation is claimed.",
+    "M197-PIRS remains prior-art engineering evidence only.",
+    "The foreign DAS workload was observed only and was not touched."
+  ]
+}

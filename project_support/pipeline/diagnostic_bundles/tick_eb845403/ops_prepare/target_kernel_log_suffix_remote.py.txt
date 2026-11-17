@@ -1,0 +1,113 @@
+"""Default NOP. One new bounded readonly file-log route; no journal/core retry."""
+from datetime import datetime, timezone
+from pathlib import Path
+import json
+import os
+import re
+import socket
+import stat
+import sys
+
+OWNER = {
+    "token": "eb84540382834ffd88f5a83a0b797ee3",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T15:16:05.075512+00:00",
+    "deadline_at": "2026-11-09T16:16:05.075512+00:00",
+    "context_sha256": "5fc4b32a051066c9ae26d4ae02d77e48175687907a4501b0279a708b16270308",
+    "pending_sha256": "801708609a3df72ccd311cd45604bf534a09998c6cdb9cc1795244021d01238f",
+}
+FILES = ("/var/log/kern.log", "/var/log/kern.log.1",
+         "/var/log/syslog", "/var/log/syslog.1")
+LIMIT = 128 * 1024
+TARGET = re.compile(r"(^|[^0-9])(3815203|3813109)([^0-9]|$)")
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06" and os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+
+def inspect_log(name):
+    path = Path(name)
+    fd = None
+    result = {"path": name, "maximum_bytes_read": LIMIT}
+    try:
+        pin()
+        info = os.lstat(path)
+        assert stat.S_ISREG(info.st_mode) and not stat.S_ISLNK(info.st_mode)
+        result.update(exists=True, bytes=info.st_size, mtime_ns=info.st_mtime_ns,
+                      mode=oct(stat.S_IMODE(info.st_mode)))
+        if not os.access(path, os.R_OK, effective_ids=True):
+            return {**result, "readable": False, "bytes_read": 0,
+                    "outcome": "READ_PERMISSION_UNAVAILABLE_NO_READ_ATTEMPT"}
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        opened = os.fstat(fd)
+        assert stat.S_ISREG(opened.st_mode) and (opened.st_dev, opened.st_ino) == (
+            info.st_dev, info.st_ino)
+        offset = max(0, opened.st_size - LIMIT)
+        os.lseek(fd, offset, os.SEEK_SET)
+        raw = os.read(fd, min(opened.st_size, LIMIT))
+        complete_first_line = raw if offset == 0 else raw.partition(b"\n")[2]
+        matches = []
+        for line in complete_first_line.decode("utf-8", "replace").splitlines():
+            if not TARGET.search(line):
+                continue
+            text = line.encode("utf-8")[:768].decode("utf-8", "replace")
+            row = {"target_PID_line": text, "line_truncated": len(line.encode("utf-8")) > 768}
+            fault = re.search(r"\bsegfault\b.*?\bin\s+(\S+)", line, re.IGNORECASE)
+            if fault:
+                row["reported_faulting_object"] = fault.group(1)[:256]
+            matches.append(row)
+        after = os.fstat(fd)
+        return {**result, "readable": True, "read_offset": offset, "bytes_read": len(raw),
+                "full_file_scanned": offset == 0 and len(raw) == opened.st_size,
+                "file_changed_during_read": (opened.st_size, opened.st_mtime_ns) != (
+                    after.st_size, after.st_mtime_ns),
+                "target_match_count_in_suffix": len(matches),
+                "target_matches_last8": matches[-8:],
+                "unmatched_lines_emitted": False,
+                "time_window_coverage_proven": False,
+                "outcome": "TARGET_PID_LINES_PRESENT" if matches else "NO_MATCH_IN_BOUNDED_SUFFIX"}
+    except FileNotFoundError:
+        return {**result, "exists": False, "bytes_read": 0, "outcome": "FILE_ABSENT"}
+    except Exception as error:
+        return {**result, "available": False, "error_type": type(error).__name__,
+                "error": str(error)[:400], "outcome": "QUERY_UNAVAILABLE"}
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NEW_EXACT_PID_FILE_SUFFIX_ROUTE_ONLY"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    rows = [inspect_log(name) for name in FILES]
+    readable = [row for row in rows if row.get("readable")]
+    output = {"owner": OWNER, "observed_at": datetime.now(timezone.utc).isoformat(),
+              "kind": "NEW_BOUNDED_EXACT_PID_KERNEL_SYSLOG_FILE_SUFFIX_DIAGNOSTIC",
+              "hostname": socket.gethostname(), "uid": os.getuid(),
+              "worker_pid": 3815203, "original_main_pid": 3813109,
+              "original_failure_window_UTC": ["2026-11-09 11:27:46 UTC", "2026-11-09 11:37:46 UTC"],
+              "files": rows, "root_cause": "UNKNOWN",
+              "outcome": "BOUNDED_SUFFIXES_READ" if readable else "NO_READABLE_TARGET_LOG_FILE",
+              "limits": {
+                  "maximum_total_file_bytes": 4 * LIMIT,
+                  "only_current_and_dot1": True, "compressed_logs_or_full_file_scan_requested": False,
+                  "unmatched_or_foreign_context_lines_emitted": False,
+                  "timestamp_interpretation": "Retain original matching-line timestamps; no timezone/year or target-window coverage inferred",
+                  "no_match_or_denial_proves_no_fault": False,
+                  "faulting_object_identifies_upstream_root_cause_by_itself": False,
+                  "Torch_GPU_native_extension_training_restart_or_config_changes": False,
+                  "journal_Apport_core_or_readelf_repeated": False,
+                  "sudo_signals_or_remote_files_written": False}}
+    encoded = json.dumps(output, ensure_ascii=True)
+    assert len(encoded.encode()) <= 32768
+    print(encoded)
+
+
+if __name__ == "__main__":
+    main()

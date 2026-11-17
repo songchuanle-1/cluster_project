@@ -1,0 +1,14 @@
+{
+  "scope": "真实编排故障汇总，不是模型修订或科学失败；精确发生时间未逐项保存，记未知。",
+  "issues": [
+    {"event_time": null, "issue": "默认补丁工具不能写工作区", "resolution": "使用既有受控 apply-patch 入口；没有嵌套 codex exec"},
+    {"event_time": null, "issue": "server3 系统 Python3.6 的 subprocess 不支持 text 参数", "resolution": "改用已经核实的项目 Python；未改共享环境"},
+    {"event_time": null, "issue": "一次本地 PowerShell 引号解析失败", "resolution": "修正调用方式；该次未执行远端程序"},
+    {"event_time": null, "issue": "首次冻结诊断 checkpoint 复制 300 秒超时", "evidence": "asset_copy_timeout.json", "resolution": "先比对部分文件哈希，再续传，完整936269892字节 SHA256与源一致；未在校验前用于诊断"},
+    {"event_time": null, "issue": "二进制管道清理时出现 read of closed file 线程警告", "resolution": "源/目标进程退出0，完整资产哈希通过；保留警告，不视为模型失败"},
+    {"event_time": null, "issue": "机械生成等价测试脚本的本地 CRLF 与远端 LF 哈希不一致", "resolution": "在实际执行前统一相同 UTF-8 LF；原20项测试和1e-6阈值未改，最终输出/梯度误差全部0"}
+  ],
+  "model_changes": 0,
+  "implementation_revisions_added": 0,
+  "shared_environment_changes": false
+}

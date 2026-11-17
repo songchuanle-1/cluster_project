@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-23T22:14:57.213223+00:00",
+  "project": "cluster_project",
+  "reviewer_agent": "/root/mdc_review",
+  "verdict": "PSBR_NATURAL_EARLYSTOP_ARCHIVE_METADATA_AND_LIFECYCLE_INTEGRITY_VERIFIED",
+  "material_concerns": [],
+  "scope": "Local bounded review of root-produced terminal/loghash/archive evidence and current queue/running/experiment/CSV/candidate/receipt state. No fresh remote observation and no31MB log-body reread/hash.",
+  "evidence_anchors": {
+    "psbr_terminal_idle_observation.json": {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psbr_terminal_idle_observation.json",
+      "sha256": "e59cea3bc638c1cb4b62a78ded697cb59a2ab23cbaaf48c0622b915eaf117c97"
+    },
+    "psbr_terminal_archive.json": {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psbr_terminal_archive.json",
+      "sha256": "1082a73b5f1219306cbbf62eef2b5d94f6cd3fa335512fe0523dff7f10423e62"
+    },
+    "psbr_native_earlystop_log_evidence.json": {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/psbr_native_earlystop_log_evidence.json",
+      "sha256": "cd5669c812b14f2d77af7dcc2f7fc3676cb4132d7ee3d7cafb5d181aa41c699b"
+    },
+    "archive_psbr_native_earlystop.py": {
+      "path": "pipeline/diagnostic_bundles/tick_a4f73140/archive_psbr_native_earlystop.py",
+      "sha256": "ffc3e2d84ec53b7d5632acacc68b1a9632c5a24fad1b37ef75ad11863fb7e721"
+    },
+    "M209-PSBR.json": {
+      "path": "pipeline/admissions/M209-PSBR.json",
+      "sha256": "c85ae4fe82f83720330ca5b1bca176492bcc8fa82f9c2ddad98d49712c6416a2"
+    }
+  },
+  "observed_terminal_identity": {
+    "original_pid": 2372658,
+    "historical_start_ticks": "35234267",
+    "source_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+    "remote_log": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr_20261023_141002.log",
+    "root_two_readonly_observations_PID_absent": true,
+    "completed_last_TRAIN_progress": [
+      23,
+      50,
+      4686,
+      4686
+    ],
+    "native_terminal_line": "Early stopping at epoch 23: no improvement for 10 epochs (best=0.4969)",
+    "best_miou_reported": 0.4969,
+    "best_precision": "Native terminal line rounded to4dp",
+    "root_idle_samples": [
+      {
+        "GPU0_UUID": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+        "memory_MiB": 41,
+        "utilization_percent": 0,
+        "compute_contexts": []
+      },
+      {
+        "GPU0_UUID": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+        "memory_MiB": 41,
+        "utilization_percent": 0,
+        "compute_contexts": []
+      }
+    ],
+    "GPU1_not_queried_in_recorded_observations": true
+  },
+  "complete_log_hash_evidence": {
+    "local_log": "D:\\project\\cluster_project\\Checkpoints\\server_4\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr\\native_earlystop_a4f73140\\train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr_20261023_141002.log",
+    "recorded_full_log_sha256": "0204be904050ddbaf4313841921eaa6ade3d0676a3ab8f5be0b068c7e121c5cb",
+    "recorded_full_log_bytes": 30985906,
+    "root_recorded_local_remote_sha256_match": true,
+    "current_local_file_exists_and_size_matches": true,
+    "independent_full_log_body_read_or_hash_this_review": false,
+    "metadata_evidence_hash_verified": true,
+    "terminal_tail_read_from_small_loghash_evidence_only": true,
+    "scope": "Root writer directly hashed remote raw log, SCP copied it, fully checked matching local hash/no Traceback/last TRAIN progress before archive; reviewer verified that exact small evidence and writer control flow, not recomputed the large log digest."
+  },
+  "canonical_archive_integrity": {
+    "finalizer": "pipeline_monitor.finalize_task",
+    "under_project_monitor_lock_with_finally_release": true,
+    "exact_log_pull_adapter_restricted_to_original_project_host_user_log_state_config": true,
+    "current_experiment_exactly_matches_archived_snapshot": true,
+    "queue_M209_absent": true,
+    "running_M209_absent": true,
+    "CSV_exactly_one_M209_done_earlystop_row": true,
+    "research_M209_complete": true,
+    "experiment_training_status_done_earlystop": true,
+    "code_commit_config_receipt_and_verified_launch_retained": true,
+    "original_admission_waiting_and_launch_history_retained": true,
+    "prior_runs_preservation_scope": "Root writer copies prior_runs before finalize and asserts exact equality afterward; first formal PSBR run has no invented prior run.",
+    "signals_sent": false,
+    "manual_deathwatch_increment": false,
+    "source_changed_by_archive": false
+  },
+  "current_receipt_identity": {
+    "path": "pipeline/admissions/M209-PSBR.json",
+    "sha256": "c85ae4fe82f83720330ca5b1bca176492bcc8fa82f9c2ddad98d49712c6416a2",
+    "original_c85_exact_hash_retained": true,
+    "source_code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604"
+  },
+  "M206_pause_boundary": {
+    "user_paused": true,
+    "resume_authorized": false,
+    "no_task_PID": true,
+    "dispatch_hold_retained": true,
+    "GPU1_not_used_by_reviewer": true,
+    "whole_queue_before_after_preservation_scope": "Archive writer snapshots full M206 row(s) under lock and asserts unchanged; independent current metadata confirms the pause flags/noPID. No independent prearchive full-row snapshot was recreated."
+  },
+  "scientific_result_scope": {
+    "PSBR_this_realization_best": 0.4969,
+    "M95_reference": 0.502,
+    "target": 0.51,
+    "reported_gap_to_M95": -0.0051,
+    "reported_gap_to_target": -0.0131,
+    "numerical_precision": "Approximate differences of reported rounded values",
+    "no_new_champion": true,
+    "no_whole_hierarchy_or_tree_family_falsification_claim": true,
+    "no_restart_tuning_or_historical_reopen": true
+  },
+  "limits": [
+    "Root PSNC fresh diagnostic processes may now occupy GPU0; two prearchive idle observations are not a claim that GPU0 is idle at review time.",
+    "No actual raw PSNC result has been reviewed here; wait for root confirmation that all four local raw results are complete.",
+    "Full31MB log digest was generated and checked by root, while this independent review binds metadata/evidence hashes and file size only.",
+    "No original gate/large standard evidence or655historical body was reopened."
+  ],
+  "executed": {
+    "SSH": false,
+    "GPU": false,
+    "torch_import": false,
+    "tests": false,
+    "signal_or_native_or_adapter_call": false,
+    "shared_ledger_or_queue_or_source_or_lease_write": false,
+    "only_this_new_review_file_written": true
+  }
+}

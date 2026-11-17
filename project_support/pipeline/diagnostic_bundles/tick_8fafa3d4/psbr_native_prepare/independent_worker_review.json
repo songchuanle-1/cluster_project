@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "status": "STATIC_WORKER_REVIEW_NO_DEFINITE_BLOCKER_NATIVE_NOT_RUN",
+  "recorded_at": "2026-10-22T02:38:01.210151+00:00",
+  "reviewer_agent": "/root/mdc_review",
+  "candidate_id": "hierarchy-parent-segmented-bidirectional-token-state",
+  "experiment_id": "M209-PSBR",
+  "source_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "foreground_snapshot": {
+    "token": "8fafa3d4ebcb48e7ba3436e084f6ee9f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-22T02:12:05.347438+00:00",
+    "deadline_at": "2026-10-22T03:12:05.347438+00:00",
+    "context_sha256": "572e5c822cb9576e3d81892d8e2d90e95c58e2727f838e85f4bab99f613b81eb",
+    "pending_sha256": "8d12b59babd88f103f475764d77c1c9ef6d7862d829b546c35660f136c848526"
+  },
+  "scope": "Independent static review only of the frozen candidate-specific PSBR worker/runtime/template and exact candidate assets. No torch/model/runtime import, local tensor, native/SSH/GPU/stage/lease/queue execution. Root retains all production mutation authority.",
+  "frozen_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_8fafa3d4/psbr_native_prepare/preparation.json",
+    "sha256": "1e1de105f34ce4f6f87fe862bf35ee2c7c0bf26bf7404b0550559534a0e7472e"
+  },
+  "frozen_files_sha256": {
+    "preparation.json": "1e1de105f34ce4f6f87fe862bf35ee2c7c0bf26bf7404b0550559534a0e7472e",
+    "worker.py": "05ab6ac1f72f804bf9799e6b6a95127057d330d13302686740cb1acb94343385",
+    "native_runtime.py": "b6698c77ef9956c2d7381fb99164cdbf1d1f4905c13f59d04c6b9778e2bf8e67",
+    "manifest_template.json": "f90e2662cb188b838ff7e6d6b60179529a983d91a32cb06187262aee70267263",
+    "README.md": "e26120820f6159eaed4c5806aa2065659288f5cbd39eb3b3c5d5d371e31149b6",
+    "static_validation.json": "e4e07a64881ad6c4f7ee6753c1e5e66f222137b431a281ca32e8b0c5a88e54b4"
+  },
+  "candidate_source_hashes": {
+    "__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+    "backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+    "dec.py": "3a3bd73cf868982476bc58b68a286923e2b194059df00ed5017e510c8d6d0973",
+    "hier_postprocess.py": "f5086a19c1057b6efe2702547814dbf74b1753300a9022c4bca21e341d326518",
+    "loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+    "middle_recurrence.py": "301213d9d72d0121f5d3970571b4169b80a11f0a5f5962d4f7e4cc0d7fcff032",
+    "network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+    "sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+  },
+  "candidate_config_sha256": "a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a",
+  "source_commit_identity": {
+    "exact_nine_changed_paths": true,
+    "all_nine_committed_blob_hashes_match": true
+  },
+  "independent_static_checks": {
+    "count": 14,
+    "all_pass": true,
+    "checks": {
+      "worker_and_runtime_compile_without_import": true,
+      "resource_function_AST_exact_frozen_HRC_reference": true,
+      "manifest_exact_PSBR_identity": true,
+      "manifest_diagnostic_hashes_match": true,
+      "exact_eight_candidate_staged_sources": true,
+      "candidate_native_yaml_byte_equal": true,
+      "staged_candidate_hashes_match_committed_worktree": true,
+      "execution_binding_fields_intentionally_null": true,
+      "no_active_manifest_or_lease_prepared": true,
+      "no_top_level_torch_model_import": true,
+      "no_auxiliary_autograd_grad_or_backward": true,
+      "one_real_native_train_callsite": true,
+      "two_native_batches_islice": true,
+      "paired_common_param_record_is_not_PASS": true
+    }
+  },
+  "review_harness_note": {
+    "initial_predicate_false_positive": true,
+    "detail": "An initial reviewer-only textual import-name substring predicate matched itertools as tools. It was replaced with exact AST top-level module-name comparison; no worker/runtime/source repair was involved. Initial output is retained in this task tool history.",
+    "affected_worker_sha256": "05ab6ac1f72f804bf9799e6b6a95127057d330d13302686740cb1acb94343385",
+    "final_corrected_import_check_pass": true
+  },
+  "manual_review": [
+    {
+      "topic": "exact identity and setup before torch",
+      "source": "worker.py:18",
+      "finding": "main acquires the guarded runtime before setup imports native train/torch/model. Manifest/runtime bind M209-PSBR, same stable ID, exact _psbr package, config basename and 74f candidate commit. Eight staged candidate files and candidate YAML hashes match the exact committed nine-file inventory. resolve_network must return staged module.Network and the qualified .network class; fallback to M95 fails. Native train/pretrain/data/config hashes are checked before execution."
+    },
+    {
+      "topic": "native TRAIN two-step loss/backward/optimizer/scheduler",
+      "source": "worker.py:117",
+      "finding": "Original dataset/loader is used with native batch2/workers4/persistent/drop_last. TwoNativeBatches yields the first two real batches normally; one original train.train call uses native loss, zero_grad/backward, grad clipping and optimizer, then original scheduler step. A native model loss hook counts finite scalar forwards and loss-backward callbacks. Exactly two completed optimizer steps/loss/backward/batch records are required before execution_completed. No replacement loss, auxiliary backward/autograd.grad or early-stop exception is present."
+    },
+    {
+      "topic": "actual new weight gradients and optimizer updates",
+      "source": "worker.py:401",
+      "finding": "Candidate dynamic parameter inventory excludes old middle FFN and expects exactly Wx.weight/Wx.bias/Wh.weight/Wo.weight/Wo.bias, no Wh bias and 262656 parameters. Optimizer pre-hook requires finite all observed gradients and finite nonzero tracked Wx/Wh/Wo and fine/coarse weight gradients after original backward/clipping. Post-hook requires actual per-module and weight-only hash changes on each step, plus final-vs-initial changes. These are future native assertions, not measurements already made."
+    },
+    {
+      "topic": "true native nonsingleton domains and recurrent state path",
+      "source": "worker.py:202",
+      "finding": "Recurrence pre-hook checks actual support from original ids1[ids0], exact current coordinate cache and ids2 identity. Each real TRAIN batch must contain at least one supported parent group of length>=2; no alternate batch/seed selection is allowed. Hooks on the actual shared Wx/Wh/Wo verify geometry-sorted Wx input, 2*n Wh calls per group, zero boundary state in each direction and group, dimensions, finite outputs, and exact inverse write from actual detached Wo outputs into original IDs including zero unsupported/padding rows."
+    },
+    {
+      "topic": "raw CSORT/HCG/inst-to-mask intended path",
+      "source": "worker.py:304",
+      "finding": "One original bank-build wrapper records raw-bank/ID/map hashes. CSORT wrapper requires original raw tensor and child-map object identity and calls the original once; final forward checks no raw/ID/map mutation. Original HCG wrapper requires the actual recurrence output as middle and exact original fine/coarse residual values. Last encoder ILA query is checked as inst_before+sigmoid(original_gate)*message; native gradient hooks cover HCG message, post-cluster inst, post-ILA inst and final masks. Per-forward and aggregate expected call counts are required."
+    },
+    {
+      "topic": "observer side effects and finally scope",
+      "source": "worker.py:447",
+      "finding": "Observers return original tensors or None and only retain detached summaries/reference snapshots. No auxiliary autograd probe, optimizer step, RNG call or zero_grad is added. Temporary instance method replacements and registered hooks are removed in native train finally. The intended native two-step optimizer/gradient/RNG evolution is not rolled back; a separate .grad/optimizer/RNG snapshot/restore protocol for an offdiagonal probe is not implemented because that probe is absent."
+    },
+    {
+      "topic": "common initialized parameter and batch pairing readouts",
+      "source": "worker.py:106",
+      "finding": "The requested minimal addition observes common named parameters after original backbone pretrain and before original TRAIN loader, excluding old cluster_ffn.1.* and new middle_recurrence.* only. Names/count and overall fingerprint encode tensor dtype/shape/content; buffers/full state are not claimed. Both complete actual model-input batch fingerprints are also recorded. Single-target output explicitly leaves common-parameter and TRAIN-batch pairing unvalidated; root must compare two actual results externally."
+    },
+    {
+      "topic": "resource isolation and limitations",
+      "source": "worker.py:496",
+      "finding": "The full resources function AST equals the frozen reviewed HRC resource function, preserving fvcore handler hashes, same-input profile, bs1/lang1/warm20/repeat100 and median/P90/peaks/unsupported operators. Smoke observers and common-parameter readout are excluded from resource mode. Smoke peak includes diagnostic snapshots/reference work and is not pure TRAIN memory. No resource result has been executed or admitted."
+    },
+    {
+      "topic": "unbound guarded runtime",
+      "source": "native_runtime.py:100",
+      "finding": "No active manifest/lease/controller exists in this preparation. Runtime checks consistent goal/thread/token/time/context/pending/GPU/UUID/allowed list/manifest hash, two actual idle observations and three nonblocking physical-card flock locks before torch setup, then source/assets/runtime HEAD checks. Fresh local canonical owner/queue/policy/candidate authorization and deadline checks must be supplied by a future PSBR-specific external controller; this remote template is not proof of current ownership or availability."
+    }
+  ],
+  "blocking_findings": [],
+  "implemented_but_not_executed": [
+    "Original native TRAIN2 loss/backward/optimizer/scheduler path and native finite gradient/update assertions.",
+    "Actual supported nonsingleton groups and Wx/Wh/Wo/order/boundary/inverse observation hooks.",
+    "Raw bank/ID/map/CSORT/HCG/inst/ILA/mask intended-path observations.",
+    "Common initialized named-parameter and actual two-batch fingerprint readouts.",
+    "Original paired-resource per-target measurement program and guarded remote runtime."
+  ],
+  "not_implemented_or_not_completed": {
+    "offdiagonal_Jacobian_probe": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "zero_state_per_token_edge_cut": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "probe_grad_optimizer_RNG_snapshot_restore": "NOT_IMPLEMENTED; no auxiliary probe is present and no claim of such restoration is made",
+    "champion_candidate_common_parameter_pair_comparator": "NOT_IMPLEMENTED HERE; root must compare both actual result names/count/hash",
+    "champion_candidate_TRAIN_batch_pair_comparator": "NOT_IMPLEMENTED HERE; root must compare two actual full batch hashes in order",
+    "paired_resource_gate_and_standard_formatter_admission_receipt": "NOT_IMPLEMENTED HERE",
+    "PSBR_current_owner_controller_or_execution_adapter": "NOT_IMPLEMENTED HERE",
+    "active_native_manifest_execution_lease": "NOT_CREATED",
+    "native_smoke_and_resources": "NOT_RUN",
+    "dynamic_runtime_observer_and_parameter_results": "NOT_MEASURED",
+    "common_initialized_equality_and_loader_pairing": "UNKNOWN_NOT_RUN",
+    "FLOPs_latency_memory_and_trained_benefit": "UNKNOWN"
+  },
+  "required_next_action": "Root externally anchors these exact frozen preparation/program/source hashes. Future same-ID PSBR controller must validate actual current owner/context/pending/policy/candidate/resource authorization/queue/deadline and stage a fresh consistent manifest+lease only after real exclusive GPU availability. Execute champion and candidate as separate native processes, compare actual common-parameter and ordered batch fingerprints plus raw resource results, and fail honestly without changing seed/readout/batches/gates if any frozen assertion or pairing fails. Do not relabel HRC results, copy a stale execution binding, infer PASS from this review, or blindly replay an uncertain remote request.",
+  "historical_resource_reference": {
+    "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+    "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01",
+    "reuse_scope": "Complete resource function AST and guarded scaffolding only; old HRC smoke, probes/results and execution identities are not reused as PSBR evidence."
+  },
+  "scientific_or_native_PASS": false,
+  "execution_performed": {
+    "torch_import": false,
+    "model_import": false,
+    "runtime_import": false,
+    "tensor_or_native": false,
+    "ssh": false,
+    "gpu": false,
+    "stage": false,
+    "active_lease": false,
+    "production_state_write": false,
+    "git_mutation": false
+  }
+}

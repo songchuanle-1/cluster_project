@@ -1,0 +1,40 @@
+{
+  "recorded_at": "2026-10-21T20:22:52.168054+00:00",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "experiment_id": "M208-HRC",
+  "scope": "Independent static preparation review only; no real native run.",
+  "worker": {
+    "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+    "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+  },
+  "runtime": {
+    "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/native_runtime.py",
+    "sha256": "4737e6f08ebb202cec073819ba95bcb94f78fc93ed1b4d5e214ef69d1f9ef0e4"
+  },
+  "template": {
+    "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/manifest_template.json",
+    "sha256": "ea756a6b95861ac65e3a535e9cfa5743151d965d8aed4876599bdab36b414509"
+  },
+  "reviewers": [
+    "mdc_review",
+    "pce_audit",
+    "root"
+  ],
+  "result": "no_static_blocker_observed_PREPARED_UNEXECUTED",
+  "observations": [
+    "mdc复核实际原train.train两批API、原图h2固定非恒定支持probe/autograd.grad retain_graph、inside_probe屏蔽native observer，.grad值/对象/version及optimizer/scheduler/CPU-CUDA RNG前后不变断言，finally恢复wrapper/hooks。",
+    "pce及root实际AST确认resources函数与reviewed HAP worker_v2完全相同；smoke observer/probe不安装于资源模式，原fvcore/同input/bs1warm20repeat100及unsupported披露保留。",
+    "source/config九个asset精确9e543af；精确resolver身份+qualified.network双检、原backbone pretrain，无完整M95 checkpoint初始化；template旧full checkpoint仅历史lineage checksum。",
+    "runtime只允许server4固定GPU0/1 UUID，三把同卡flock、锁前/后双idle、fresh currentowner lease/manifest/hash/context/deadline及asset/source校验后才CUDA setup；没有旧token/full checkpoint setup。",
+    "最终worker37782c1a加入raw bank/ids/maps after-forward不变观察及原padding/内部empty行语义；reference1e-6与所有native断言仍待真实数据检验。"
+  ],
+  "limitations": [
+    "本轮没有staging、active native_manifest/execution_lease、SSH worker或GPU计算；template历史asset SHA/path不是本轮远程资产复核，未来执行前须实际验证。",
+    "Static PASS does not establish native loader/backward/dependency/resource success or efficacy.",
+    "Smoke峰值包含observer和autograd.grad probe开销，不是纯TRAIN内存增量；标准predict资源独立无probe，纯TRAIN峰值UNKNOWN支持项，未增加新的准入门槛。"
+  ],
+  "model_code_revision": false,
+  "native_status": "NOT_RUN",
+  "resources_status": "NOT_RUN",
+  "training_efficacy": "UNKNOWN"
+}

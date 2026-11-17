@@ -1,0 +1,119 @@
+--- tick9573/lock_core.py
++++ tickc1fe/lock_core.py
+@@ -18,6 +18,12 @@
+ import subprocess
+ 
+ import sys
++from datetime import datetime, timezone
++from types import ModuleType
++
++EXPECTED_OWNER = {'token': 'c1fe217800894083b65baac45f79aa83', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-14T01:52:47.538159+00:00', 'deadline_at': '2026-11-14T02:52:47.538159+00:00', 'context_sha256': 'e33442420ba4c77b839918c43c944153092f834b2d316bb8979f843d3cdf82a4', 'pending_sha256': '3d0bc5d2092b154a1acdb483f3d9185e95e9aa411b2089930f01dc1fd96875e6'}
++DIRECT_FREE_GUARD_SOURCE = b'"""NOT_APPROVED source draft. Running this file always performs a NOP.\n\nFuture reviewed native_runtime.observe and production prelaunch/marker callers\nmay invoke require_direct_free_memory after their original identity/lock guards.\nThis file is not wired into any deployment, entry, launcher or native test.\n"""\nimport json\nimport subprocess\n\n\nclass ResourceRefused(RuntimeError):\n    pass\n\n\ndef require_direct_free_memory():\n    """Future native observation/prelaunch/locked marker guard; no signals."""\n    argv = ["/usr/bin/nvidia-smi", "-i", "0",\n            "--query-gpu=index,uuid,memory.free,memory.used,memory.total,utilization.gpu",\n            "--format=csv,noheader,nounits"]\n    child = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,\n                             env={"PATH": "/usr/bin:/bin", "LC_ALL": "C"})\n    try:\n        stdout, stderr = child.communicate(timeout=10)\n    except subprocess.TimeoutExpired:\n        raise ResourceRefused("Uncertain resource query; preserve child PID " +\n                              str(child.pid) + "; no signal or retry")\n    if child.returncode:\n        raise ResourceRefused("Resource query failed; no launch or marker consumption")\n    fields = [part.strip() for part in stdout.decode("utf-8").strip().split(",")]\n    if len(fields) != 6 or fields[:2] != ["0", "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"]:\n        raise ResourceRefused("Physical GPU0 identity or resource row mismatch")\n    free_mib = int(fields[2])\n    if free_mib < 20000:\n        raise ResourceRefused("Direct memory.free below unchanged 20000 MiB gate")\n    return {"index": 0, "uuid": fields[1], "memory_free_mib": free_mib,\n            "memory_used_mib": int(fields[3]), "memory_total_mib": int(fields[4]),\n            "utilization_percent": int(fields[5]),\n            "memory_free_queried_directly": True}\n\n\nif __name__ == "__main__":\n    print(json.dumps({"status": "DEFAULT_NOP_NOT_APPROVED_SOURCE_DRAFT",\n                      "resource_query_performed": False,\n                      "deployment_or_training_authorized": False}))\n'
++DIRECT_FREE_GUARD_SHA256 = '1d48570e42ee34e012194ccf412e475a12608396f946e0eac27902907006c111'
+ 
+ def refuse(message, code=126):
+     print("PSC PATH lock refusal: " + message, file=sys.stderr, flush=True)
+@@ -78,8 +84,56 @@
+         refuse("protected file owner mismatch " + str(path))
+     return metadata
+ 
++
++def require_project_cap1():
++    project = Path(BINDING["runtime_root"]).parent
++    for proc in Path("/proc").iterdir():
++        if not proc.name.isdigit() or int(proc.name) == os.getpid():
++            continue
++        try:
++            if proc.stat().st_uid != BINDING["uid"]:
++                continue
++            raw = (proc / "cmdline").read_bytes()
++            argv = [value.decode(errors="replace") for value in raw.split(b"\0") if value]
++            # Handle direct scripts, -m and short option clusters using the reviewed parser.
++            trainer = bool(argv) and (is_training(script_target(argv[1:])) or
++                any(value == "tools/train.py" or value.endswith("/tools/train.py") for value in argv))
++            cwd = os.readlink(proc / "cwd")
++            same_project = cwd == str(project) or cwd.startswith(str(project) + "/")
++            if trainer and same_project:
++                refuse("Existing same-project trainer occupies cap1; preserve every job", 75)
++        except (FileNotFoundError, ProcessLookupError):
++            continue
++        except PermissionError:
++            refuse("Uncertain same-user process identity; preserve and refuse", 75)
++
++
++def require_locked_direct_free():
++    if hashlib.sha256(DIRECT_FREE_GUARD_SOURCE).hexdigest() != DIRECT_FREE_GUARD_SHA256:
++        refuse("Direct-free helper source identity mismatch")
++    module = ModuleType("cso_locked_direct_free_guard")
++    exec(compile(DIRECT_FREE_GUARD_SOURCE, "reviewed_direct_memory_free_guard.py", "exec"), module.__dict__)
++    measured = module.require_direct_free_memory()
++    if measured["index"] != 0 or measured["uuid"] != BINDING["expected_gpu_uuid"]:
++        refuse("Direct-free physical GPU0 identity mismatch")
++    if measured["memory_free_mib"] < BINDING["required_free_memory_mib"]:
++        refuse("Direct memory.free below unchanged 20000 MiB gate", 75)
++    if datetime.now(timezone.utc) >= datetime.fromisoformat(EXPECTED_OWNER["deadline_at"]):
++        refuse("Current foreground owner expired during direct-free query")
++    return measured
++
++
+ def validate_training(args):
+     # No proof/test/override environment is read by this branch.
++    if BINDING["owner"] != EXPECTED_OWNER or BINDING["owner_deadline_at"] != EXPECTED_OWNER["deadline_at"]:
++        refuse("Current six-field owner binding mismatch")
++    generated, deadline = (datetime.fromisoformat(EXPECTED_OWNER[key]) for key in ("generated_at", "deadline_at"))
++    if not generated <= datetime.now(timezone.utc) < deadline:
++        refuse("Current foreground execution owner expired")
++    if BINDING["physical_gpu"] != 0 or BINDING["max_project_tasks"] != 1 or BINDING["required_free_memory_mib"] != 20000:
++        refuse("GPU0 cap1/direct-free resource contract mismatch")
++    if BINDING["expected_gpu_uuid"] != "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c":
++        refuse("GPU0 UUID binding mismatch")
+     if BINDING["kind"] not in ("production", "cpu-proof"):
+         refuse("disabled draft; no active production binding")
+     if args != BINDING["argv"]:
+@@ -165,6 +219,10 @@
+             os.set_inheritable(descriptor, True)
+             if not os.get_inheritable(descriptor):
+                 refuse("lock FD remains close-on-exec")
++        # Revalidate source/interpreter/owner under all three retained original locks.
++        validate_training(args)
++        require_project_cap1()
++        last_moment_direct_free = require_locked_direct_free()
+         # A failed/uncertain exec consumes this artifact too. Never remove or
+         # automatically clear this one-shot marker, including after normal exit.
+         stage = Path(BINDING["stage"])
+@@ -183,6 +241,8 @@
+                 "runtime_root": BINDING["runtime_root"],
+                 "source_commit": BINDING["source_commit"],
+                 "activation_receipt_sha256": BINDING["activation_receipt_sha256"],
++                "owner": EXPECTED_OWNER, "last_moment_direct_free": last_moment_direct_free,
++                "same_project_cap1_verified_with_three_original_locks_held": True,
+                 "lock_inodes": BINDING["lock_files"],
+             }, sort_keys=True).encode("utf-8") + b"\n"
+             os.write(descriptor, payload)
+@@ -191,7 +251,7 @@
+             os.close(descriptor)
+         # FD numbers are opened after canonical Popen(close_fds=True). They
+         # survive this execve because each was made inheritable above.
+-        os.execve(BINDING["python"], [BINDING["python"], *args], os.environ.copy())
++        os.execve(BINDING["python"], [BINDING["python"], "-B", *args], os.environ.copy())
+     finally:
+         # Only reached on refusal/error, never after successful exec.
+         for descriptor in reversed(descriptors):
+@@ -201,8 +261,9 @@
+     args = sys.argv[1:]
+     if not is_training(script_target(args)):
+         # No mutable PATH search, shell function, env executable or proof switch.
+-        os.execve(BINDING["python"], [BINDING["python"], *args], os.environ.copy())
++        os.execve(BINDING["python"], [BINDING["python"], "-B", *args], os.environ.copy())
+     validate_training(args)
++    require_project_cap1()
+     locked_exec(args)
+ 
+ 
+@@ -211,5 +272,5 @@
+     BINDING = binding
+     try:
+         main()
+-    except (OSError, ValueError, KeyError) as error:
++    except (OSError, ValueError, KeyError, RuntimeError) as error:
+         refuse(type(error).__name__ + ": " + str(error))

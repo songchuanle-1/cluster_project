@@ -1,0 +1,37 @@
+{
+  "contract": "m95_entry_fps_drift_v1",
+  "observed_at": "2026-09-25T19:12:00+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "scope": "Read-only CPU comparison of two existing 256-row manifest-subset captures on server-6; no new forward, strict full-scan replay, or model claim.",
+  "capture_sha256": [
+    "91feb8142ba521ce585400a5411c190a6f3324875905fc086da52aa48da10fb9",
+    "9a297dee98f524cb9e0000592e5c0752df4330ac02c14889d01c280cecf9e668"
+  ],
+  "matched_native_input_fingerprints": "256/256",
+  "entry_fps_changed_rows": [
+    {"manifest_index": 95, "changed_indices": 2, "entry_fps_count": 256},
+    {"manifest_index": 178, "changed_indices": 2, "entry_fps_count": 256},
+    {"manifest_index": 193, "changed_indices": 192, "entry_fps_count": 256}
+  ],
+  "hierarchical_assignment_changed_rows": [37, 95, 178, 193],
+  "hierarchical_fps_position_max_abs_delta_by_level": [8.041287183761597, 7.357420444488525, 0.06535285711288452],
+  "rows_with_any_hierarchical_fps_position_delta_above_1e-5": 3,
+  "rows_with_any_hierarchical_fps_position_delta_above_1e-6": 220,
+  "selected_mask_equal_rows": "256/256",
+  "interpretation": "The three substantial geometry differences coincide with changed entry FPS support. The widespread tiny coordinate differences are not, by themselves, assignment or causal evidence. The first source of entry FPS divergence has not been captured; historical full-scan TRAIN draws differ.",
+  "strict_historical_identity_gate": "fail_28_of_65",
+  "strict_full_scan_repeat_completed": false,
+  "gpu_observation": {
+    "host": "server-6",
+    "physical_gpu": 7,
+    "utilization_percent": 0,
+    "memory_used_mib": 20067,
+    "memory_total_mib": 81559,
+    "foreign_pid": 396980,
+    "foreign_process_memory_mib": 20058,
+    "idle_guard": "utilization <10% and memory used <1024 MiB"
+  },
+  "next_action": "When GPU7 meets the idle guard and headroom, verify runtime/data/code/checkpoint/manifest hashes and execute the frozen producer without --manifest-only in separately bounded full_train_scan mode. Preserve the strict comparator tolerances, then capture the upstream entry FPS random/draw state for rows 95/178/193 and compare matched TRAIN inputs for historical rows 83/174.",
+  "admission": false,
+  "training_launched": false
+}

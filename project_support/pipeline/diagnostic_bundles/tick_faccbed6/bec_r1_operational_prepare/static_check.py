@@ -1,0 +1,96 @@
+"""Minimal actual-source R1 branch/metadata checks; no full helper or model execution."""
+from pathlib import Path
+from datetime import datetime,timezone
+import ast,copy,hashlib,json
+P=Path(__file__).resolve().parent
+R=Path('D:/project/cluster_project');O=R/'pipeline/diagnostic_bundles/tick_521a6f59/bec_operational_prepare';N=P/'native'
+sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+read_real=lambda p:json.loads(Path(p).read_text(encoding='utf-8'))
+checks=[]
+def check(n,v):assert v,n;checks.append(n)
+def fn(tree,n):return next(x for x in tree.body if isinstance(x,ast.FunctionDef) and x.name==n)
+sources={p.relative_to(P).as_posix():p.read_text(encoding='utf-8') for p in [P/'adapter.py',P/'remote_ops.py',N/'native_runtime.py',N/'worker.py']}
+for n,s in sources.items():compile(s,str(P/n),'exec');check('AST_compile_'+n,True)
+t=ast.parse(sources['adapter.py']);cls=next(n for n in t.body if isinstance(n,ast.ClassDef) and n.name=='Adapter')
+method=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='_candidate_ready')
+const={}
+for n in t.body:
+ if isinstance(n,ast.Assign) and len(n.targets)==1 and isinstance(n.targets[0],ast.Name):
+  try:const[n.targets[0].id]=ast.literal_eval(n.value)
+  except (ValueError,TypeError):pass
+work=read_real(R/'pipeline/research_work.json');original=next(c for c in work['candidates'] if c['id']==const['CANDIDATE'])
+prereg=read_real(R/'pipeline/diagnostic_bundles/tick_45eb3b04/bec_revision1_preregistration.json')
+template=read_real(N/'manifest_template.json')
+base=copy.deepcopy(original);base['code_commit']=const['COMMIT'];base['stage']='validation';base['blocker_kind']=None
+base['worker_preparation']['preparation']={'path':'fixture/native/preparation.json','sha256':const['PREPARATION_SHA']}
+fixture={'candidate':base}
+class NoTransport:
+ calls=0
+ def call(self,*a,**k):self.calls+=1;raise AssertionError('NoTransport')
+class Fake:
+ root=Path('C:/minimal_R1_fixture')
+ transport=NoTransport()
+ def _frozen_details(self):return read_real(N/'preparation.json'),template
+def require(v,m):
+ if not v:raise RuntimeError(m)
+def read(p):
+ if str(p).endswith('research_work.json'):return {'candidates':[fixture['candidate']]}
+ if str(p).endswith('bec_revision1_preregistration.json'):return prereg
+ raise AssertionError('Unplanned metadata read')
+def fake_sha(p):
+ if str(p).endswith('bec_revision1_preregistration.json'):return '3fa782b8970de909a219cc090e2188983e1afeab1ac99cac43df07b4f1e5b527'
+ raise AssertionError('Unplanned metadata hash')
+ns={**const,'read':read,'sha':fake_sha,'require':require,'hashlib':hashlib,'json':json}
+exec(compile(ast.Module(body=[method],type_ignores=[]),'actual_R1_candidate_ready','exec'),ns)
+fake=Fake()
+def run_case(name,mutator,accept):
+ fixture['candidate']=copy.deepcopy(base);mutator(fixture['candidate'])
+ try:ns['_candidate_ready'](fake,base['authorization'])
+ except RuntimeError:
+  check(name,not accept)
+ else:check(name,accept)
+run_case('registered_R1_positive',lambda c:None,True)
+run_case('mutable_evidence_appends_allowed',lambda c:c['revision_history'][0]['evidence'].append({'path':'fixture/new','sha256':'0'*64}),True)
+run_case('mutable_result_evidence_allowed',lambda c:c['revision_history'][0].update(result_evidence=[{'path':'fixture/new','sha256':'0'*64}]),True)
+run_case('foreign_second_revision_refused',lambda c:c['revision_history'].append(copy.deepcopy(c['revision_history'][0])),False)
+run_case('missing_revision_refused',lambda c:c.update(revision_history=[]),False)
+run_case('foreign_version_refused',lambda c:c.update(code_commit='0'*40),False)
+run_case('scope_hypothesis_refused',lambda c:c['revision_history'][0].update(failure_scope='hypothesis'),False)
+run_case('rewritten_protocol_refused',lambda c:c['revision_history'][0].update(change='different graph'),False)
+run_case('premature_passed_refused',lambda c:c['revision_history'][0].update(result='passed'),False)
+run_case('falsified_hypothesis_refused',lambda c:c.update(failure_scope='hypothesis'),False)
+run_case('changed_hypothesis_refused',lambda c:c.update(hypothesis='changed'),False)
+run_case('passed_revision_marker_refused',lambda c:c.update(implementation_revision_sha256='0'*64),False)
+run_case('human_hold_refused',lambda c:c.update(human_hold=True),False)
+check('branch_NoTransport_calls0',fake.transport.calls==0)
+# GPU1 must reject before even stub current guard/driver. These execute production prefixes only.
+for methodname in ['probe','prepare']:
+ m=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name==methodname)
+ ns2={**const,'require':require}
+ exec(compile(ast.Module(body=[m],type_ignores=[]),'actual_'+methodname,'exec'),ns2)
+ class Trap:
+  def guard(self,*a,**k):raise AssertionError('Must reject GPU1 before owner/driver')
+ try:ns2[methodname](Trap(),1)
+ except RuntimeError:check(methodname+'_GPU1_beforeguard_refusal',True)
+ else:raise AssertionError('GPU1 accepted')
+rt=ast.parse(sources['native/native_runtime.py']);oldrt=ast.parse((O/'native/native_runtime.py').read_text(encoding='utf-8'))
+oldf={n.name:ast.dump(n,include_attributes=False) for n in oldrt.body if isinstance(n,ast.FunctionDef)}
+newf={n.name:ast.dump(n,include_attributes=False) for n in rt.body if isinstance(n,ast.FunctionDef)}
+check('all_runtime_function_bodies_AST_original',oldf==newf)
+check('worker_original_exact7e',sha(N/'worker.py')=='7e5d0f5b109e85d0d2f0bb7f2f806dd9db73fb7885add5abc372ce244ee753e3')
+resourcefn=fn(ast.parse(sources['native/worker.py']),'resources')
+check('resources_original_AST28185',hashlib.sha256(ast.dump(resourcefn,include_attributes=False).encode()).hexdigest()=='28185afffac5b63f5d71ac9cdb1d1481b73e1aceace1a07ae78944499ed552e0')
+active=('current_token','stage','tick_generated_at','deadline_at','physical_gpu','gpu_uuid','allowed_gpus','context_sha256','pending_sha256','runtime_code_commit')
+check('all10_active_fields_null',all(template[k] is None for k in active))
+check('no_production_release_or_activefiles',all(not (P/n).exists() and not (N/n).exists() for n in ['adapter_release.json','execution_binding.json','execution_lease.json','native_manifest.json']))
+check('version_parent_expected_runtime_R1',template['code_commit']==const['COMMIT']=='026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563' and template['source_parent_commit']==template['runtime_expected_commit']==const['RUNTIME_EXPECTED_COMMIT']=='4e80006047d5cb3dcdfb9c1102e02c33f354a07d')
+nativeprep=read_real(N/'preparation.json')
+check('native14hashes_current',len(nativeprep['prepared_file_hashes'])==14 and all(sha(N/n)==h for n,h in nativeprep['prepared_file_hashes'].items()))
+check('manifest12hashes_current',len(template['diagnostic_files'])==12 and all(sha(N/n)==h for n,h in template['diagnostic_files'].items()))
+binding=read_real(N/'source_version_binding.json');r1prep=read_real(R/binding['source_preparation']['path'])
+check('R1nine_sources_exact_registered_payload',len(binding['source_files'])==9 and binding['source_files']==r1prep['source_files'] and all(sha(N/'candidate.yaml' if p.endswith('.yaml') else N/'candidate_model'/Path(p).name)==h for p,h in binding['source_files'].items()))
+check('null_source_implementation_review_not_Git_label','isolated_source_version_independent_review' not in binding and binding['revision_implementation_independent_review']['sha256']=='972c47f2bd2f9080db45c98d755ab5296a855207e9b94472cf410a27340c2dbe')
+result={'status':'MINIMAL_R1_SOURCE_AND_PRODUCTION_METADATA_BRANCH_CHECKS_PASSED_NO_NATIVE','recorded_at':datetime.now(timezone.utc).isoformat(),'checks':checks,'check_count':len(checks),'source_hashes':{n:sha(P/n) for n in sources},'NoTransport_calls':fake.transport.calls,'scope':'Exact production _candidate_ready in-memory metadata fixtures and probe/prepare GPU1 prefixes only. No full Adapter.guard/prepare/stage/run, model, runtime, subprocess, network, Git, Torch or shared state execution.','native':'NOT_RUN_ON_R1','resources':'NOT_RUN_ON_R1'}
+out=P/'static_validation_final.json'
+with out.open('x',encoding='utf-8') as f:json.dump(result,f,ensure_ascii=False,indent=2);f.write('\n')
+print(json.dumps({'checks':len(checks),'path':str(out),'status':result['status']}))

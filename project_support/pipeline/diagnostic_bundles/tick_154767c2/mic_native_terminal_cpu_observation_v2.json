@@ -1,0 +1,191 @@
+{
+  "owner": {
+    "token": "154767c278664ba4a7b666c69f12abaa",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T09:12:59.944792+00:00",
+    "deadline_at": "2026-11-06T10:12:59.944792+00:00",
+    "context_sha256": "53703cbd1a484e565a296843d90b4b65999250b84cc51949376b963943abe1f7",
+    "pending_sha256": "00c5795b6ab5872c56eb7a40be61771eb6708cef5a02fc2206f0f83364789d2f"
+  },
+  "recorded_at": "2026-11-06T09:30:27.895188+00:00",
+  "reviewer_actual_thread": "01a1a5a9-7056-7c92-bc3b-ca205451add4",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=12",
+    "songcl@192.168.1.115",
+    "bash -lc 'test \"$(hostname)\" = \"dl04-MS-7E06\" && source /data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh && conda activate project_cluster && CUDA_VISIBLE_DEVICES= PYTHONDONTWRITEBYTECODE=1 python -B -'"
+  ],
+  "producer": {
+    "path": "pipeline/diagnostic_bundles/tick_154767c2/mic_terminal_cpu_probe_v2.py",
+    "sha256": "5a076b7b7fc47bb3067228a3a85f5af56a026e2b3987cc8fd6987272571e0a57"
+  },
+  "stdin_program": "import socket,os,pathlib,subprocess,json,re,hashlib,gc\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='dl04-MS-7E06'\nassert os.environ.get('CUDA_VISIBLE_DEVICES')==''\nassert os.environ.get('PYTHONDONTWRITEBYTECODE')=='1'\nroot=pathlib.Path('/data/songcl/Project/Cluster_project/Cluster_mic_20261105')\nassert subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip()=='07ef534a6e44f22bd7b2d083550ebd7823d1d3d3'\nassert not pathlib.Path('/proc/2881795').exists()\nname='model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic'\nbase=pathlib.Path('/data/songcl/Project/Cluster_project/Cluster_checkpoints')/name\nruns=sorted(p for p in base.iterdir() if p.is_dir() and (p/'best.pth').is_file() and (p/'last.pth').is_file())\nassert len(runs)==1,[(str(p),[q.name for q in p.iterdir()]) for p in runs]\nrun=runs[0]; native_logs=sorted(p for p in run.iterdir() if p.is_file() and p.suffix=='.log')\nassert len(native_logs)==1,[str(p) for p in native_logs]\nnative_log=native_logs[0]\ndef fileinfo(p):\n st=p.stat(); h=hashlib.sha256()\n with p.open('rb') as f:\n  for chunk in iter(lambda:f.read(8*1024*1024),b''): h.update(chunk)\n st2=p.stat(); assert (st.st_size,st.st_mtime_ns)==(st2.st_size,st2.st_mtime_ns)\n return {'path':str(p),'size':st.st_size,'sha256':h.hexdigest(),'mtime_ns':st.st_mtime_ns}\ntext=native_log.read_text(encoding='utf-8',errors='replace')\nvalidation_lines=[line for line in text.splitlines() if re.search(r'\\bmIoU\\s*:',line)]\nvals=[float(re.search(r'\\bmIoU\\s*:\\s*([0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)',line).group(1)) for line in validation_lines]\nassert len(vals)==26,{'count':len(vals),'lines':validation_lines[-3:]}\nbest=max(vals);best_epoch=vals.index(best)+1;no_improve=len(vals)-best_epoch\nstdout=root/'logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log'\nwith stdout.open('rb') as f:\n size=f.seek(0,2);f.seek(max(0,size-131072));tail=f.read().decode('utf-8',errors='replace')\nterminal_lines=[l for l in tail.splitlines() if 'Early stopping at epoch' in l]\nassert any(re.search(r'Early stopping at epoch 26: no improvement for 10 epochs',l) for l in terminal_lines)\nassert no_improve==10\nimport torch\nassert not torch.cuda.is_initialized()\nrows=[]\nfor kind in ['best','last']:\n p=run/(kind+'.pth'); row=fileinfo(p); ckpt=torch.load(str(p),map_location='cpu',weights_only=False); meta=ckpt['meta']; row['checkpoint_top_keys']=list(ckpt); row['native_meta']={'epoch':int(meta['epoch']),'best_miou':float(meta['best_miou']),'epochs_no_improve':int(meta['epochs_no_improve'])}; row['model_tensor_devices']=sorted({v.device.type for v in ckpt.get('model',{}).values() if isinstance(v,torch.Tensor)}); assert row['model_tensor_devices']==['cpu']; assert float(meta['best_miou'])==best; rows.append(row); del ckpt;gc.collect()\nassert rows[0]['native_meta']['epoch']==best_epoch\nassert rows[0]['native_meta']['epochs_no_improve']==0\nassert rows[1]['native_meta']['epoch']==25 and rows[1]['native_meta']['epochs_no_improve']==9\nassert not torch.cuda.is_initialized()\nevents=[fileinfo(p) for p in sorted(run.glob('events.out.tfevents.*'))]\nprint(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'runtime_root':str(root),'source_commit':'07ef534a6e44f22bd7b2d083550ebd7823d1d3d3','trainer_pid':2881795,'trainer_absent':True,'config_basename':name,'native_run_directory':str(run),'native_log':fileinfo(native_log),'validation_lines':validation_lines,'completed_validation_count':len(vals),'validation_values':vals,'best_miou':best,'best_epoch':best_epoch,'last_validation_miou':vals[-1],'terminal_epoch':26,'no_improve':no_improve,'terminal_matching_lines':terminal_lines,'stdout_log_observation':fileinfo(stdout),'checkpoints':rows,'event_files':events,'CUDA_VISIBLE_DEVICES':os.environ.get('CUDA_VISIBLE_DEVICES'),'torch_cuda_initialized':torch.cuda.is_initialized(),'GPU_computation':False,'signals_sent':False,'remote_mutations':False,'checkpoint_note':'Native early-stop break precedes save; actual CPU meta confirms last epoch25/no-improve9, not terminal epoch26.'}))\n",
+  "returncode": 0,
+  "observation": {
+    "observed_at": "2026-11-06T09:30:28.616351+00:00",
+    "hostname": "dl04-MS-7E06",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+    "source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "trainer_pid": 2881795,
+    "trainer_absent": true,
+    "config_basename": "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic",
+    "native_run_directory": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic/20261106_030708",
+    "native_log": {
+      "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic/20261106_030708/20261106_030708.log",
+      "size": 12547542,
+      "sha256": "aa455085caa4b5e44f5dd4219d6c3ac1c2e0fc4304076223af81989e7662ba13",
+      "mtime_ns": 1793951666329525317
+    },
+    "validation_lines": [
+      "2026-11-06 03:36:26,804 - INFO - mIoU : 0.34794506430625916",
+      "2026-11-06 04:05:57,206 - INFO - mIoU : 0.3862243592739105",
+      "2026-11-06 04:35:22,281 - INFO - mIoU : 0.4121916890144348",
+      "2026-11-06 05:04:56,140 - INFO - mIoU : 0.4233380854129791",
+      "2026-11-06 05:34:13,005 - INFO - mIoU : 0.4480396509170532",
+      "2026-11-06 06:03:43,033 - INFO - mIoU : 0.4603852927684784",
+      "2026-11-06 06:33:19,437 - INFO - mIoU : 0.46718090772628784",
+      "2026-11-06 07:02:47,989 - INFO - mIoU : 0.47598424553871155",
+      "2026-11-06 07:32:19,371 - INFO - mIoU : 0.4843551814556122",
+      "2026-11-06 08:01:46,826 - INFO - mIoU : 0.48830723762512207",
+      "2026-11-06 08:31:11,285 - INFO - mIoU : 0.47800135612487793",
+      "2026-11-06 09:00:40,173 - INFO - mIoU : 0.48627614974975586",
+      "2026-11-06 09:30:15,193 - INFO - mIoU : 0.49297046661376953",
+      "2026-11-06 09:59:46,711 - INFO - mIoU : 0.48932725191116333",
+      "2026-11-06 10:30:11,063 - INFO - mIoU : 0.48995962738990784",
+      "2026-11-06 10:59:36,474 - INFO - mIoU : 0.49881425499916077",
+      "2026-11-06 11:29:12,243 - INFO - mIoU : 0.49008750915527344",
+      "2026-11-06 11:58:45,692 - INFO - mIoU : 0.4932774007320404",
+      "2026-11-06 12:28:21,800 - INFO - mIoU : 0.48973146080970764",
+      "2026-11-06 12:57:49,052 - INFO - mIoU : 0.4953445792198181",
+      "2026-11-06 13:27:12,185 - INFO - mIoU : 0.4949573576450348",
+      "2026-11-06 13:56:40,239 - INFO - mIoU : 0.4901314079761505",
+      "2026-11-06 14:26:04,319 - INFO - mIoU : 0.48797255754470825",
+      "2026-11-06 14:55:32,698 - INFO - mIoU : 0.486701101064682",
+      "2026-11-06 15:24:59,721 - INFO - mIoU : 0.48424220085144043",
+      "2026-11-06 15:54:26,329 - INFO - mIoU : 0.4875420928001404"
+    ],
+    "completed_validation_count": 26,
+    "validation_values": [
+      0.34794506430625916,
+      0.3862243592739105,
+      0.4121916890144348,
+      0.4233380854129791,
+      0.4480396509170532,
+      0.4603852927684784,
+      0.46718090772628784,
+      0.47598424553871155,
+      0.4843551814556122,
+      0.48830723762512207,
+      0.47800135612487793,
+      0.48627614974975586,
+      0.49297046661376953,
+      0.48932725191116333,
+      0.48995962738990784,
+      0.49881425499916077,
+      0.49008750915527344,
+      0.4932774007320404,
+      0.48973146080970764,
+      0.4953445792198181,
+      0.4949573576450348,
+      0.4901314079761505,
+      0.48797255754470825,
+      0.486701101064682,
+      0.48424220085144043,
+      0.4875420928001404
+    ],
+    "best_miou": 0.49881425499916077,
+    "best_epoch": 16,
+    "last_validation_miou": 0.4875420928001404,
+    "terminal_epoch": 26,
+    "no_improve": 10,
+    "terminal_matching_lines": [
+      "Early stopping at epoch 26: no improvement for 10 epochs (best=0.4988)"
+    ],
+    "stdout_log_observation": {
+      "path": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+      "size": 34482783,
+      "sha256": "a4ee1570d10e0aa9930e57f00b94e1518700f07e1a8b8070feca17d7a11ae4b1",
+      "mtime_ns": 1793951666712530579
+    },
+    "checkpoints": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic/20261106_030708/best.pth",
+        "size": 881845480,
+        "sha256": "765d16059bf5533075ed76de253e53038cade1d3765084859f958a47238bf5c9",
+        "mtime_ns": 1793933977050406764,
+        "checkpoint_top_keys": [
+          "meta",
+          "model",
+          "optimizer",
+          "scheduler"
+        ],
+        "native_meta": {
+          "epoch": 16,
+          "best_miou": 0.49881425499916077,
+          "epochs_no_improve": 0
+        },
+        "model_tensor_devices": [
+          "cpu"
+        ]
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic/20261106_030708/last.pth",
+        "size": 881845480,
+        "sha256": "2a3cbeffa258c5b328704c4d832c8b0fe806ce05dea234a27e1541d9dc855ba8",
+        "mtime_ns": 1793949900303361601,
+        "checkpoint_top_keys": [
+          "meta",
+          "model",
+          "optimizer",
+          "scheduler"
+        ],
+        "native_meta": {
+          "epoch": 25,
+          "best_miou": 0.49881425499916077,
+          "epochs_no_improve": 9
+        },
+        "model_tensor_devices": [
+          "cpu"
+        ]
+      }
+    ],
+    "event_files": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic/20261106_030708/events.out.tfevents.1793905628.dl04-MS-7E06",
+        "size": 26597820,
+        "sha256": "591c49d8a681a73baf4748b6adc77489a6266861c7d2a91de28e19822f6cfe39",
+        "mtime_ns": 1793951666713530593
+      }
+    ],
+    "CUDA_VISIBLE_DEVICES": "",
+    "torch_cuda_initialized": false,
+    "GPU_computation": false,
+    "signals_sent": false,
+    "remote_mutations": false,
+    "checkpoint_note": "Native early-stop break precedes save; actual CPU meta confirms last epoch25/no-improve9, not terminal epoch26."
+  },
+  "stderr_summary": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/cuda/__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.\n  import pynvml  # type: ignore[import]\n",
+  "raw_stdout_on_failure": null,
+  "local_archive_snapshot_before": {
+    "id": "M229-MIC",
+    "status": "done_earlystop",
+    "training_status": "running",
+    "archive_id": "d03c21a094d54ed0b17a50cc21deeeb7",
+    "final_best": "0.4990",
+    "epochs_final": "26/50",
+    "log_local": ""
+  },
+  "local_experiment_sha256_before": "302c2ab859130c05e92c174bbc69a2a209ad08d0a9ac0fc943ef01c4c5236534",
+  "preserved_prior_failure": {
+    "path": "pipeline/diagnostic_bundles/tick_154767c2/mic_native_terminal_cpu_observation.json",
+    "sha256": "29460f6d2d1e259d5f26fba7d88485df79653e3aaccd6d096b14e5938a833316",
+    "failure_scope": "observation serialization only",
+    "repair": "Convert actual NumPy checkpoint metadata scalar types to JSON int/float; no checkpoint/model/protocol changes."
+  },
+  "scope": "Read-only exact MIC native scalar log and CPU-only checkpoint metadata. No model execution, GPU query/computation, signal, training, queue or research state mutation."
+}

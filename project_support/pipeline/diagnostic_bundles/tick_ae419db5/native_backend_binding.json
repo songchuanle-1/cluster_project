@@ -1,0 +1,24 @@
+{
+  "observed_at": "2026-10-19T16:30:35.664043+00:00",
+  "wrapper_path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/pointnet2_utils.py",
+  "wrapper_sha256": "0d72921d19cd21e5321e0b7a6292712a83fe1667491fc698a9549177e9fe8b09",
+  "binary_path": "/home/songcl/.local/lib/python3.10/site-packages/pointnet2/_ext.cpython-310-x86_64-linux-gnu.so",
+  "binary_sha256": "ef0daa5ccf7fe471a5d73528762f209ba6d2dd89a6c3b50c6371eb9e0edebcfe",
+  "native_sources": [
+    {
+      "path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/_ext_src/src/sampling_gpu.cu",
+      "sha256": "cf602b8dd93a09a2d2cc27cca400a563250ac369d7a29cfa49cacc7f73e6b2ff",
+      "source_excerpt": "73:// Ouput idxs (b, m)\n74:template <unsigned int block_size>\n75:__global__ void furthest_point_sampling_kernel(\n76:    int b, int n, int m, const float *__restrict__ dataset,\n77:    float *__restrict__ temp, int *__restrict__ idxs) {\n78:  if (m <= 0) return;\n88:  const int stride = block_size;\n89:\n90:  int old = 0;\n91:  if (threadIdx.x == 0) idxs[0] = old;\n92:\n93:  __syncthreads();\n94:  for (int j = 1; j < m; j++) {\n178:}\n179:\n180:void furthest_point_sampling_kernel_wrapper(int b, int n, int m,\n181:                                            const float *dataset, float *temp,\n182:                                            int *idxs) {\n183:  unsigned int n_threads = opt_n_threads(n);\n187:  switch (n_threads) {\n188:    case 512:\n189:      furthest_point_sampling_kernel<512>\n190:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n191:      break;\n192:    case 256:\n193:      furthest_point_sampling_kernel<256>\n194:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n195:      break;\n196:    case 128:\n197:      furthest_point_sampling_kernel<128>\n198:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n199:      break;\n200:    case 64:\n201:      furthest_point_sampling_kernel<64>\n202:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n203:      break;\n204:    case 32:\n205:      furthest_point_sampling_kernel<32>\n206:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n207:      break;\n208:    case 16:\n209:      furthest_point_sampling_kernel<16>\n210:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n211:      break;\n212:    case 8:\n213:      furthest_point_sampling_kernel<8>\n214:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n215:      break;\n216:    case 4:\n217:      furthest_point_sampling_kernel<4>\n218:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n219:      break;\n220:    case 2:\n221:      furthest_point_sampling_kernel<2>\n222:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n223:      break;\n224:    case 1:\n225:      furthest_point_sampling_kernel<1>\n226:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n227:      break;\n228:    default:\n229:      furthest_point_sampling_kernel<512>\n230:          <<<b, n_threads, 0, stream>>>(b, n, m, dataset, temp, idxs);\n231:  }\n232:",
+      "literal_old_zero_present": true
+    },
+    {
+      "path": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/pointnet2/_ext_src/src/sampling.cpp",
+      "sha256": "2be47b25dc64f60f4fb75dc15d6eccd07f4c8fc4cfd962419501d9116926da65",
+      "source_excerpt": "14:                                       float *grad_points);\n15:\n16:void furthest_point_sampling_kernel_wrapper(int b, int n, int m,\n17:                                            const float *dataset, float *temp,\n18:                                            int *idxs);\n19:\n68:  return output;\n69:}\n70:at::Tensor furthest_point_sampling(at::Tensor points, const int nsamples) {\n71:  CHECK_CONTIGUOUS(points);\n72:  CHECK_IS_FLOAT(points);\n73:\n81:\n82:  if (points.device().is_cuda()) {\n83:    furthest_point_sampling_kernel_wrapper(\n84:        points.size(0), points.size(1), nsamples, points.data_ptr<float>(),\n85:        tmp.data_ptr<float>(), output.data_ptr<int>());\n86:  } else {",
+      "literal_old_zero_present": false
+    }
+  ],
+  "cuda_initialized": false,
+  "source_binary_correspondence_proved": false,
+  "scope": "Freeze actual native import binding and provided source;compiled behavior still requires actual GPU execution."
+}

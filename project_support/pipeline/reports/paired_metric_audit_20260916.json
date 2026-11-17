@@ -1,0 +1,117 @@
+{
+  "native_get_iou_ast_identical": true,
+  "counts": {
+    "champion": {
+      "expressions": 123,
+      "selected_gt_half": 85,
+      "selected_ge_half": 86,
+      "oracle_gt_half": 118,
+      "selected_at_half": 1,
+      "oracle_at_half": 1,
+      "near_half_not_equal": 0
+    },
+    "baseline": {
+      "expressions": 123,
+      "selected_gt_half": 87,
+      "selected_ge_half": 91,
+      "oracle_gt_half": 118,
+      "selected_at_half": 4,
+      "oracle_at_half": 1,
+      "near_half_not_equal": 0
+    }
+  },
+  "boundary_rows": [
+    {
+      "model": "champion",
+      "scene": "scene0240_00",
+      "ann_id": 34,
+      "selected": 0.5,
+      "oracle": 0.6666666865348816,
+      "selected_at_half": true,
+      "oracle_at_half": false,
+      "selected_within_1e6_of_half": true,
+      "oracle_within_1e6_of_half": false
+    },
+    {
+      "model": "champion",
+      "scene": "scene0416_00",
+      "ann_id": 74,
+      "selected": 0.375,
+      "oracle": 0.5,
+      "selected_at_half": false,
+      "oracle_at_half": true,
+      "selected_within_1e6_of_half": false,
+      "oracle_within_1e6_of_half": true
+    },
+    {
+      "model": "baseline",
+      "scene": "scene0240_00",
+      "ann_id": 34,
+      "selected": 0.5,
+      "oracle": 0.6666666865348816,
+      "selected_at_half": true,
+      "oracle_at_half": false,
+      "selected_within_1e6_of_half": true,
+      "oracle_within_1e6_of_half": false
+    },
+    {
+      "model": "baseline",
+      "scene": "scene0223_00",
+      "ann_id": 27,
+      "selected": 0.5,
+      "oracle": 0.5833333134651184,
+      "selected_at_half": true,
+      "oracle_at_half": false,
+      "selected_within_1e6_of_half": true,
+      "oracle_within_1e6_of_half": false
+    },
+    {
+      "model": "baseline",
+      "scene": "scene0319_00",
+      "ann_id": 32,
+      "selected": 0.5,
+      "oracle": 0.75,
+      "selected_at_half": true,
+      "oracle_at_half": false,
+      "selected_within_1e6_of_half": true,
+      "oracle_within_1e6_of_half": false
+    },
+    {
+      "model": "baseline",
+      "scene": "scene0524_00",
+      "ann_id": 1,
+      "selected": 0.5,
+      "oracle": 0.6666666865348816,
+      "selected_at_half": true,
+      "oracle_at_half": false,
+      "selected_within_1e6_of_half": true,
+      "oracle_within_1e6_of_half": false
+    },
+    {
+      "model": "baseline",
+      "scene": "scene0452_00",
+      "ann_id": 56,
+      "selected": 0.0,
+      "oracle": 0.5,
+      "selected_at_half": false,
+      "oracle_at_half": true,
+      "selected_within_1e6_of_half": false,
+      "oracle_within_1e6_of_half": true
+    }
+  ],
+  "sources": {
+    "pipeline\\reports\\baseline_matched_20260916.json": "a00cf60c7448844a9702e470c8c59cee0f23247d98d2b9432e2742ca987a97f9",
+    "scripts\\coverage_stage_capture_20260916.py": "241c3c36c1b1eebd081062282cabf4101c10a30002986e70cba889a54b0821a5",
+    "Cluster\\framework\\model\\Quard_model\\model_base1\\loss.py": "deeac0df68db3a3ad381814dfae0f56d17018e0064c504a2729b1583b561564b",
+    "Cluster\\framework\\model\\Quard_model\\model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort\\loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5"
+  },
+  "findings": [
+    "Native mask threshold is sigmoid(logit)>=0.5 in both models; zero is included.",
+    "Capture uses logit>=0, not the strict positive threshold suspected in memory.",
+    "Native denominator is union+1e-6; capture uses union.clamp_min(1).",
+    "With identical binary masks and nonempty union, absolute IoU difference is <=1e-6.",
+    "Real-arithmetic sigmoid threshold equivalence is not a floating-point proof: small negative logits may round to sigmoid 0.5. Raw logits are not retained.",
+    "Do not relabel stored strict >0.5 success as >=0.5 or point-level validation."
+  ],
+  "limitations": "Static cached TRAIN summary only. No raw logits/intersection/union, so exact native float boundary reconciliation remains unverified. No causal or novelty claim. Near-half envelope concerns denominator only, not rounded masks."
+}

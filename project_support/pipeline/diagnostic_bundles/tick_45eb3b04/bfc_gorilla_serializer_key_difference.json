@@ -1,0 +1,37 @@
+{
+  "hostname": "dl04-MS-7E06",
+  "source_sha256": "05a25338d6436b755937ada88807173d3f11446e6432b20f26a2e66649a0a53d",
+  "functions": [
+    {
+      "function": "load_state_dict",
+      "line": 40,
+      "end_line": 106,
+      "iterates_module_buffers": false,
+      "honors_non_persistent_buffer_set": false,
+      "mentions_unexpected_keys": true,
+      "strict_false_does_not_raise_for_key_mismatch": true,
+      "relevant_lines": [
+        "if strict:",
+        "raise RuntimeError(err_msg)",
+        "logger.warning(err_msg)"
+      ]
+    },
+    {
+      "function": "_save_to_state_dict",
+      "line": 361,
+      "end_line": 377,
+      "iterates_module_buffers": true,
+      "honors_non_persistent_buffer_set": true,
+      "mentions_unexpected_keys": false,
+      "strict_false_does_not_raise_for_key_mismatch": false,
+      "relevant_lines": [
+        "for name, buf in module._buffers.items():",
+        "# remove check of _non_persistent_buffers_set to allow nn.BatchNorm2d"
+      ]
+    }
+  ],
+  "torch_imported": false,
+  "GPU_query": false,
+  "checkpoint_loaded": false,
+  "remote_write": false
+}

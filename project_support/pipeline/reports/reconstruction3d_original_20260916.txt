@@ -1,0 +1,664 @@
+                                                              Distilling Coarse-to-Fine Semantic Matching Knowledge
+                                                                     for Weakly Supervised 3D Visual Grounding
+
+                                                            Zehan Wang*        Haifeng Huang* Yang Zhao Linjun Li                             Xize Cheng
+                                                                               Yichen Zhu Aoxiong Yin Zhou Zhao†
+                                                                                         Zhejiang University
+                                                                        {wangzehan01, huanghaifeng, zhaozhou}@zju.edu.cn
+arXiv:2307.09267v1 [cs.CV] 18 Jul 2023
+
+
+
+
+                                                                    Abstract
+
+                                             3D visual grounding involves finding a target object in a
+                                         3D scene that corresponds to a given sentence query. Al-
+                                         though many approaches have been proposed and achieved
+                                         impressive performance, they all require dense object-
+                                         sentence pair annotations in 3D point clouds, which are
+                                         both time-consuming and expensive. To address the prob-
+                                         lem that fine-grained annotated data is difficult to obtain,
+                                         we propose to leverage weakly supervised annotations to
+                                         learn the 3D visual grounding model, i.e., only coarse
+                                         scene-sentence correspondences are used to learn object-
+                                         sentence links. To accomplish this, we design a novel se-
+                                         mantic matching model that analyzes the semantic similar-
+                                         ity between object proposals and sentences in a coarse-to-
+                                         fine manner. Specifically, we first extract object propos-
+                                                                                                              Figure 1. (a). 3D visual grounding aims to find the object-
+                                         als and coarsely select the top-K candidates based on fea-
+                                                                                                              sentence pair from the whole scene. The fully supervised setting
+                                         ture and class similarity matrices. Next, we reconstruct the         requires all the dense ground-truth object-sentence labels for train-
+                                         masked keywords of the sentence using each candidate one             ing, while the weakly supervised method only needs the coarse
+                                         by one, and the reconstructed accuracy finely reflects the se-       scene-sentence annotations. (b). Coarse-to-Fine Semantic Match-
+                                         mantic similarity of each candidate to the query. Addition-          ing Model (bottom) analyzes the matching score of each proposal
+                                         ally, we distill the coarse-to-fine semantic matching knowl-         to the sentence, and the semantic matching knowledge is distilled
+                                         edge into a typical two-stage 3D visual grounding model,             to the two-stage 3DVG architecture (upper).
+                                         which reduces inference costs and improves performance by
+                                         taking full advantage of the well-studied structure of the ex-
+                                         isting architectures. We conduct extensive experiments on            approaches require bounding box annotations for each sen-
+                                         ScanRefer, Nr3D, and Sr3D, which demonstrate the effec-              tence query, which are laborious and expensive to obtain.
+                                         tiveness of our proposed method.                                     For example, it takes an average of 22.3 minutes to anno-
+                                                                                                              tate a scene in the ScanNet-v2 dataset [6]. Thus, we focus
+                                                                                                              on weakly supervised training for 3DVG, which only re-
+                                         1. Introduction                                                      quires scene-sentence pairs for training. This problem is
+                                                                                                              meaningful and realistic since obtaining scene-level labels
+                                            3D Visual grounding (3DVG) refers to the process of lo-           is much easier and can be scaled effectively.
+                                         calizing an object in a scene based on a natural language               However, weakly supervised 3DVG poses two chal-
+                                         sentence. The 3DVG task has recently gained attention                lenges. Firstly, a 3D point cloud can contain numerous ob-
+                                         due to its numerous applications. Despite the significant            jects of various categories, and a sentence query may con-
+                                         progress made in this area [3, 4, 39, 40, 17, 37], all these         tain multiple objects besides the target object to aid in lo-
+                                           * Equal contribution                                               calization. Without knowledge of the ground-truth object-
+                                           † Corresponding author                                             sentence pair, it is difficult to learn to link the sentence to
+
+
+                                                                                                          1
+its corresponding object from the enormous number of pos-          • Experiments conducted on three wide-used datasets
+sible object-sentence pairs. Secondly, the 3DVG task often           ScanRefer [4], Nr3D [1] and Sr3D [1] demonstrate the
+involves multiple interfering objects in the scene with the          effectiveness of our method.
+same class as the target object, and the target object must
+be distinguished based on its object attributes and the rela-    2. Related Work
+tions between objects described in the given sentence. As
+illustrated in Figure 1 (a), there are two trash cans in the     Supervised 3D Visual Grounding. Grounding a sen-
+scene, and the described target object can only be identified    tence query in a 3D point cloud is a fundamental prob-
+by fully comprehending the language description.                 lem in vision-language tasks, with wide-ranging applica-
+                                                                 tions in fields like automatic robotics [35, 34, 25, 11]
+    To address both challenges simultaneously, we propose
+                                                                 and AR/VR/metaverse [26, 9]. The ScanRefer [4] and
+a coarse-to-fine semantic matching model to measure the
+                                                                 Referit3D [1] datasets annotate dense object-sentence links
+similarity between object proposals and sentences. Specifi-
+                                                                 on the widely-used 3D point cloud dataset ScanNet [6].
+cally, our model generates object-sentence matching scores
+                                                                     Most recent 3D visual grounding methods [3, 39, 40, 17,
+from scene-sentence annotation, guided by coarse-to-fine
+                                                                 16, 37] follow a two-stage pipeline. In the first stage, pre-
+semantic similarity analysis. Firstly, we calculate the ob-
+                                                                 trained 3D object detectors [29, 22] generate 3D object pro-
+ject category similarity and feature similarity between all
+                                                                 posals. The second stage involves matching the selected ob-
+the proposals and the sentence. Combining these two sim-
+                                                                 ject proposals with the sentence query. Existing two-stage
+ilarities, we roughly select K proposals with the highest
+                                                                 methods improve performance by exploring the object at-
+similarity to the sentence, which can effectively filter out
+                                                                 tributes and relations between proposals in the second stage.
+the proposals that do not belong to the target category. Sec-
+                                                                 For example, 3DVG-Transformer [40] uses a coordinate-
+ondly, we utilize NLTK [2] to conduct part-of-speech tag-
+                                                                 guided contextual aggregation module to capture relations
+ging on the sentences and randomly mask the more mean-
+                                                                 between proposals and a multiplex attention module to dis-
+ingful nouns and adjectives words. The selected candidates
+                                                                 tinguish the target object. TransRefer3D [13] uses an entity-
+would be used to reconstruct the masked keywords of the
+                                                                 aware attention module and a relation-aware attention mod-
+sentence, which can help the model fully and deeply un-
+                                                                 ule for fine-grained cross-modal matching. 3DJCG [3] de-
+derstand the whole sentence. Since the target object and
+                                                                 vises a joint framework for 3D visual grounding [4] and 3D
+the sentence query are semantically consistent, the more the
+                                                                 dense captioning [5] tasks, and their experiments demon-
+candidate and the target object overlap, the more accurate its
+                                                                 strate that extra caption-level data can improve the perfor-
+predicted keywords will be. The object-sentence matching
+                                                                 mance of 3D visual grounding.
+score of each candidate can be measured by its reconstruc-
+                                                                     In contrast to these supervised methods, our approach
+tion loss. Eventually, in order to reduce inference time and
+                                                                 learns to localize target objects in 3D space using only
+make full use of the structure of existing 3DVG models, we
+                                                                 caption-level annotations.
+utilize knowledge distillation [15] to migrate the knowledge
+                                                                 Weakly Supervised Image Grounding.                 The image
+of the coarse-to-fine semantic matching model to a typical
+                                                                 grounding task, similar to 3DVG, aims to identify objects in
+two-stage 3DVG model, where the distilled pseudo labels
+                                                                 an image based on a sentence, and has a wide range of ap-
+are generated by the object-sentence matching scores.
+                                                                 plications [28, 20, 8, 38, 19, 36]. Weakly supervised image
+    In summary, the key contribution is four-fold:
+                                                                 grounding, which requires only images and corresponding
+  • To the best of our knowledge, this paper is the first        sentences in the training phase, has gained popularity due
+    work to address weakly supervised 3DVG, which                to the low cost of annotation [12, 31, 33, 10, 7].
+    eliminates the need for expensive and time-consuming             Weakly supervised image grounding is typically treated
+    dense object-sentence annotations and instead requires       as a Multiple Instance Learning (MIL) problem [18, 24],
+    only scene-sentence level labels.                            where the image is represented as a bag of regions, gener-
+                                                                 ated by a pre-trained image object detector. Image-sentence
+  • We approach weakly supervised 3DVG as a coarse-to-           matching scores are calculated based on region-phrase sim-
+    fine semantic matching problem and propose a coarse-         ilarity scores, and ground-truth image-sentence links are
+    to-fine semantic matching model to analyze the simi-         used to supervise these scores. For example, ARN [21]
+    larity between each proposal and the sentence.               pairs image proposals and queries based on subject, loca-
+                                                                 tion, and context information through adaptive grounding
+  • We distill the knowledge of the coarse-to-fine semantic      and collaborative reconstruction. InfoGround [12] proposes
+    matching model into a two-stage 3DVG model, which            a contrastive learning objective function [14] to optimize
+    fully leverages the well-studied network structure de-       image-sentence scores. Wang et al. [33] use a pre-trained
+    sign, leading to improved performance and reduced in-        image object detector to generate pseudo category labels for
+    ference costs.                                               all regions, achieving region-phrase alignment by distilling
+Figure 2. Overall architecture diagram of our model. The model is based on a two-stage grounding pipeline. We first extract object
+proposals by pre-trained object detector. Then, we propose a coarse-to-fine semantic matching process to find the matched object-query
+pair. Furthermore, we distill the semantic matching knowledge into an effective matching architecture to enhance the inference efficiency.
+
+
+knowledge from these pseudo labels.                                     tations available during training.
+    However, MIL-based weakly supervised image ground-
+ing methods cannot solve the weakly supervised problem
+in 3DVG. Firstly, the presence of numerous different ob-
+                                                                        3.2. Overview
+jects in a single 3D scene makes it difficult to learn a stable             As depicted in Figure 2, our model utilizes a two-stage
+MIL classifier. Secondly, while image grounding aims to                 grounding pipeline. In the first stage, we employ a pre-
+locate objects corresponding to all phrases in the sentence,            trained 3D object detector to extract Mp object proposals
+3DVG requires the identification of a single target object,             from the given point cloud. In the second stage, we propose
+necessitating a deeper and more comprehensive understand-               a coarse-to-fine semantic matching process to evaluate the
+ing of the sentence’s semantic information, rather than just            semantic similarity between each proposal and the sentence
+its phrases.                                                            query. Specifically, the coarse-to-fine process comprises
+                                                                        two steps. Firstly, we coarsely extract the top K object pro-
+3. Method                                                               posals, which are referred to as candidates, by computing
+                                                                        the object-sentence similarity matrix between all proposals
+3.1. Problem Formulation                                                and the sentence query. Secondly, we generate a more ac-
+   In this paper, we address the problem of weakly-                     curate pseudo label by considering the semantic reconstruc-
+supervised 3DVG. The input point cloud P = {pi }i=1
+                                                     Np
+                                                         con-           tion result of each candidate-sentence pair. Further details
+tains point coordinates in 3D space, represented by pi ∈                will be explained in Section 3.3 and Section 3.4.
+R3 . Correspondingly, a sentence query Q = {qi }N        q
+                                                       i=1 is               Moreover, for reducing the inference costs and further
+given to describe the object of interest. The objective of              enhancing the performance, we propose to distill the seman-
+our model is to predict a 3D bounding box B = (c, r) that               tic matching knowledge into a supervised 3DVG pipeline as
+encompasses the object, where c = (cx , cy , cz ) represents            elaborated in Section 3.5. Most advanced fully-supervised
+the center of the box, and r = (rx , ry , rz ) represents the           models typically operate using a “detection-and-matching”
+dimensions of the box. The number of input points and sen-              paradigm. This means that these powerful matching archi-
+tence length is denoted by Np and Nq , respectively. In the             tectures can be used as plug-and-play modules to incorpo-
+weakly-supervised setting, there are no bounding box anno-              rate knowledge learned from weak supervision.
+3.3. Coarse-grained Candidate Selection                                 Top-K Selection. According to the object-sentence simi-
+                                                                        larity, we coarsely select the top K candidates C̃ ∈ RK×d
+Object-Sentence Similarity. Although we have extracted
+                                                                        out of the Mp proposals P̃ ∈ RMp ×d , which can effectively
+numerous high-quality object proposals from the pre-
+                                                                        filter out proposals that are significantly different from the
+trained 3D object detector, identifying the best-matched
+                                                                        semantics of the sentence.
+proposal with the sentence query is still challenging. This
+is because a 3D scene may contain many different classes                3.4. Fine-grained Semantic Matching
+of objects, and the semantic spaces between objects and the
+sentence are not aligned. To overcome this challenge, we                    Given the K object candidates, we propose a seman-
+propose calculating a similarity matrix between the objects             tic reconstruction module to measure fine-grained semantic
+and the sentence based on both class and feature levels.                similarity between the objects and the sentence query.
+                                                                            As depicted in Figure 2, we mask important words in
+    For the class level, we can obtain the object class from
+                                                                        the sentence query, such as the target object (table), its at-
+the pre-trained 3D object detector and the text class from
+                                                                        tribute (blue), and its relation to other objects (in front of )
+a text classifier. For simplicity, we choose to train the text
+                                                                        in the scene. We reconstruct the masked words with the as-
+classifier from scratch and the classification loss Lcls is a
+                                                                        sistance of each candidate, respectively. The candidate that
+simple cross-entropy loss. Considering that the object de-
+                                                                        provides the most useful semantic information to predict the
+tector might be pre-trained on another dataset, the object
+                                                                        keywords and contains the least amount of noise is expected
+class set and the text class set may be inconsistent. There-
+                                                                        to be the best match.
+fore, before directly comparing the object proposals and the
+                                                                            We encode the masked sentence query using a textual
+sentence, we need to transfer the object class prediction to
+                                                                        encoder, denoted as Q̃m ∈ RNq ×d . For the k-th candidate
+the target text class. To achieve cthis,c we propose using a
+                                                                        c̃k ∈ Rd , we obtain the cross-modal semantic representa-
+class transform matrix Mc ∈ RNo ×Nq for class alignment.                                 Nq
+The matrix is based on the cosine similarity between the                tion f k = {fik }i=1 ∈ RNq ×d by a transformer decoder
+GloVe embeddings of different class names. Here, Noc and
+                                                                                             f k = Dec(Q̃m , c̃k ).                 (3)
+Nqc denote the number of object classes and the number of
+words in the sentence query, respectively.                              To predict the masked words, we compute the energy distri-
+    For the feature level, we align the feature representations                           Nq
+                                                                        bution ek = {eki }i=1 ∈ RNq ×d over the vocabulary by
+of the objects and the sentence query using a contrastive
+learning approach. Specifically, we pull the positive object-                                  eki = Wfik + b,                      (4)
+query pairs in the same scene closer and push the negative
+pairs further apart in the semantic space. To achieve this,             where eki ∈ RNv represents the energy distribution of the
+all the object-query pairs in the same scene are considered             i-th predicted word, and Nv is the number of words in the
+as positive pairs P, while those from different scenes are              vocabulary. W ∈ RNv ×d and b ∈ RNv are learnable pa-
+considered as negative pairs N. The feature matching loss               rameters of a fully-connected layer.
+for object-sentence feature alignment can be computed by                    Then, we use a reconstruction loss to train the seman-
+                                                                        tic reconstruction module to effectively learn key informa-
+                                                                      tion from the object context and predict the masked words.
+                                             eϕ(p,q)
+                                     P
+                                                                        Specifically, the reconstruction can be computed as
+                                  (p,q)∈P                      
+ Lmatch = − log                                             ′
+                                                                ,                                   X
+                 P                                                                   Lkrecon = −          log p(qi |eki ),
+                                                P
+                                 eϕ(p,q) +               eϕ(p ,q)                                                              (5)
+                       (p,q)∈P               (p′ ,q)∈N                                             i∈Nmask
+                                                        (1)
+where p represents an object proposal and q a sentence                  where Nmask represents positions of masked words in the
+query. ϕ is the feature similarity function, which is a dot             query and Lkrecon is the reconstruction loss for the k-th can-
+product in our practice.                                                didate c̃k . PThen the total loss for all the K candidates is
+                                                                                       K
+   We get the object-sentence similarity ŝ ∈ RMp by                    Lrecon = k=1 Lkrecon .
+
+                                                                        3.5. Knowledge Distillation
+              ŝ = ϕ(P̃c Mc , Q̃c ) + ϕ(P̃, Q̃),                  (2)
+                                                                            As mentioned earlier, a lower reconstruction loss indi-
+where P̃ ∈ RMp ×d / Q̃ ∈ RNq ×d is the encoded       c
+                                                         ob-            cates that the object candidate provides more consistent se-
+                                       c
+ject/sentence feature, and P̃c ∈ RNo / Q̃c ∈ RNq is the                 mantic information. A direct approach for object prediction
+object/sentence class prediction. ϕ is a similarity function            is to select the candidate with the lowest reconstruction loss,
+(e.g., cosine similarity or dot product). Mp is the number              as it is likely to be the best match. However, this coarse-to-
+of object proposals. d is the hidden dimension.                         fine matching process is computationally expensive during
+Table 1. Performance comparison on ScanRefer. “SUN” and “SCAN” denotes that the 3D object detector is pretrained on SUN RGB-D[32]
+or ScanNet[6], respectively. For the “R@n, IoU @m” metric, n ∈ {1, 3} and m ∈ {0.25, 0.5}.
+                                                                  R@3                                                    R@1
+                      Method               Unique               Multiple                  Overall                   Overall
+                                       m=0.25 m=0.5          m=0.25 m=0.5              m=0.25 m=0.5              m=0.25 m=0.5
+
+                  Upper Bound           57.07      35.28      55.30        35.29        55.65         35.29          -             -
+                    Random              15.88       6.99       7.38         3.28         9.03          3.96        3.66          1.37
+        SUN      MIL-Margin [10]        19.94      10.51      10.18         3.60        12.07          4.94        6.80          2.37
+                  MIL-NCE [12]          19.13      10.95       7.57         3.56         9.81          5.00        5.64          2.69
+                     Ours               24.07      18.05      12.54         7.50        14.78          9.55        10.43         6.37
+                  Upper Bound           93.82      77.02      72.61        58.01        76.72         61.70          -            -
+                    Random              21.36      14.25      10.10         7.15        12.28          8.53        4.74         3.32
+       SCAN      MIL-Margin [10]        29.54      22.49      11.48         8.04        14.99         10.84        8.16         5.66
+                  MIL-NCE [12]          48.94      40.76      17.41        13.73        23.53         18.97        18.95        14.06
+                     Ours               70.84      58.21      25.28        20.68        34.12         27.97        27.37        21.96
+
+
+inference and not explicitly optimized for grounding tasks.           We get the predict score s ∈ RMp from the matching ar-
+To tackle the issues, we propose to distill the coarse-to-            chitecture, and the index of the predicted best-match pro-
+fine semantic matching knowledge into a supervised 3DVG               posal is argmax(s). Then, we obtain the corresponding 3D
+pipeline. Our approach offers multiple benefits, including            bounding box of this object proposal.
+reduced inference costs and the ability to capitalize on more
+powerful 3DVG architectures and established learning ob-              4. Experiments
+jectives tailored for 3DVG tasks. By incorporating knowl-
+edge distillation, our framework can be integrated with any           4.1. Datasets
+advanced supervised 3DVG pipeline, enhancing the flexi-               ScanRefer. The ScanRefer [4] dataset contain 51,583 de-
+bility and practicality of our method.                                scriptions of 11,046 objects from 800 ScanNet [6] scenes.
+    For candidates, we calculate the reward according to              On average, each scene has 64.48 sentences and 13.81 ob-
+their rank of Lkrecon . The reward is reduced from one                jects. The data can be divided into “Unique” and “Mul-
+to zero, under the assumption that lower reconstruction               tiple”, depending on whether there are multiple objects of
+loss gets better reward. The distilled pseudo labels d =              the same category as the target in the scene.
+{d1 , ..., dMp } can be generated by filling the rewards of
+                                                                      Nr3D/Sr3D. The Nr3D/Sr3D dataset [1] is also based on
+candidates to their original indices and padding the non-
+                                                                      the 3D scene dataset ScanNet [6]. Nr3D contains 41,503
+candidate indices with zeros, following by a SoftMax op-
+                                                                      human utterances collected by ReferItGame, and Sr3D con-
+eration. After all, we distill the knowledge by aligning the
+                                                                      tains 83,572 sentences automatically generated based on a
+predict scores s = {s1 , ..., sMp } to the pseudo labels, where
+                                                                      “target-spatial relationship-anchor object” template. Simi-
+the predict scores are obtained from the powerful matching
+                                                                      lar to the definition of “Unique” and “Multiple” in Scan-
+architecture. The distillation loss is:
+                                                                      Refer, Nr3D/Sr3D can be split into “easy” and “hard” sub-
+                        Mp                                            sets. The “view-dep.” and “view-indep.” subsets depend on
+                        X             exp(si )
+         Ldistill = −       di log( PMp           ).       (6)        whether the description is related to the speaker’s view. 1
+                        i=1          j=1 exp(sj )
+
+3.6. Training and Inference                                           4.2. Evaluation Metric.
+
+Multi-Task Loss We train the model end-to-end via a                       To evaluate the performance of our method and baselines
+multi-task loss function, formulated by                               on these three datasets, we adopt the “R@n, IoU @m” met-
+                                                                      ric. Specifically, this metric represents the percentage of at
+ Loverall = Ldistill + λ1 Lcls + λ2 Lmatch + λ3 Lrecon (7)            least one of the top-n predicted proposals having an IoU
+where λ1 , λ2 and λ3 are hyper-parameters to balance four                 1 In the Nr3D/Sr3D datasets, the supervised task involves selecting the
+
+parts of the loss function.                                           correct matching 3D box from a set of given boxes, with the instance
+                                                                      matching accuracy serving as the evaluation metric. However, in the
+                                                                      weakly-supervised setting, we predict the boxes from scratch and assess
+Inference. Thanks to the knowledge distillation, all we               the IoU metrics, which cannot be directly compared to the results of super-
+need in the inference phase is the two-stage 3DVG pipeline.           vised methods.
+Table 2. Performance comparison on Nr3D and Sr3D dataset. “SUN” and “SCAN” denotes that the 3D object detector is pretrained on
+SUN RGB-D [32] or ScanNet [6], respectively. For the “R@n, IoU @m” metric, n = 3 and m ∈ {0.25, 0.5}.
+                                      Easy         Hard       View-dep.   View-indep.    Overall
+                    Method
+                                  m=0.25 m=0.5 m=0.25 m=0.5 m=0.25 m=0.5 m=0.25 m=0.5 m=0.25 m=0.5
+                                                               Nr3D
+                 Upper Bound       40.24   24.62    40.62      23.80     40.66    24.88   40.32    23.82   40.44    24.20
+                   Random           6.70    2.40     6.34       2.75      6.59     2.91    6.47     2.41    6.51     2.59
+        SUN     MIL-Margin [10]     9.93    5.63     7.79       4.03      8.71     4.77    8.88     4.81    8,82     4,80
+                 MIL-NCE [12]       9.93    5.42     7.77       4.79      8.45     4.67    9.00     5.32    8.81     5.09
+                    Ours           10.93   6.36      9.83       6.18     10.77     6.53   10.13     6.13   10.36     6.27
+             Upper Bound           62.43   44.75    58.98      44.18     59.15    42.91   61.44    45.29   60.64    44.45
+               Random               8.81    5.66     7.57       4.97      7.28     4.80    8.65     5.61    8.17     5.30
+       SCAN MIL-Margin [10]        14.25   10.64     9.79       7.68     10.64     8.35   12.63     9.50   11.93     9.10
+             MIL-NCE [12]          17.29   13.53     9.61       7.59     11.96     9.44   14.01    10.98   13.29    10.44
+                Ours               27.29   21.10    17.98      14.42     21.60    16.80   22.91    18.07   22.45    17.62
+                                                               Sr3D
+                 Upper Bound       39.22   23.69    39.58      21.83     25.93    13.30   39.92    23.24   39.33    22.82
+                   Random           6.53    2.28     4.61       2.17      1.86     0.80    6.05     2.32    5.96     2.25
+        SUN     MIL-Margin [10]     8.52    4.84     5.66       3.98      3.19    2.66     7.86     4.67    7.67     4.59
+                 MIL-NCE [12]       8.66    4.92     4.10       2.78      2.46     0.93    7.56     4.42    7.30     4.28
+                    Ours           10.31   6.60      8.57       6.23      4.19    1.86    10.09     6.69    9.79     6.49
+             Upper Bound           65.42   46.75    58.46      42.69     53.59    34.84   63.77    46.01   63.34    45.54
+               Random               8.50    5.38     6.85       4.55      5.59     3.72    8.12     5.20    8.01     5.13
+       SCAN MIL-Margin [10]        12.55   9.82      9.59       7.50      9.57     7.98   11.76     9.18   11.67     9.13
+             MIL-NCE [12]          17.45   12.51     9.61       7.14     12.37     7.97   15.22    11.03   15.11    10.90
+                Ours               29.40   24.87    21.00      17.47     20.21    17.15   27.19    22.90   26.89    22.66
+
+
+greater than m when compared to the ground-truth target               between all the Mp object proposals and the ground-truth
+bounding box. In our setting, n ∈ 1, 3 and m ∈ 0.25, 0.5.             bounding box as the upper bound.
+
+4.3. Implementation Details.                                          4.5. Quantitative Comparison
+    In our practice, we use the pretrained GroupFree                      The performance results of our methods and baselines
+model [22] as our 3D object detector and distill the learned          on ScanRefer and Nr3D/Sr3D are reported in Table 1 and
+semantic matching knowledge to the matching architecture              Table 2, respectively, with the best results highlighted in
+proposed in 3DJCG [3]. The input point number Np , the                bold. The comparison to supervised methods is presented
+proposal number Mp , and the candidate number K are set               in Table 3. Although the 3D object detector pre-trained on
+to 50000, 256 and 8, respectively. More details can be found          ScanNet implicitly utilizes ground truth boxes on ScanNet,
+in the supplementary material.                                        the object-sentence annotations are still unseen, and pre-
+                                                                      training on ScanNet is only used to obtain more accurate
+4.4. Compared Methods                                                 proposals. To fully avoid annotations in ScanNet, we also
+Random. We randomly select a candidate from all the pro-              evaluate results using a detector pre-trained on SUN RGB-
+posals as the predicted result.                                       D [32]. Despite the degradation caused by out-of-domain
+MIL-Margin. The MIL-Margin method [10] proposes a                     data, our method still shows significant improvement over
+max margin loss to enforce the score between a sentence               baselines. By analyzing the evaluation results, we can ob-
+and a paired scene to be higher than non-paired scenes, and           serve the following facts:
+vice versa.                                                             • Our method achieves significant improvements over
+MIL-NCE. The MIL-NCE method [12] maximizes the In-                        the Random method on all datasets, indicating the
+foNCE lower bound on mutual information between the                       effectiveness of the coarse-to-fine semantic matching
+sentence and proposals from the paired scene, compared to                 model in analyzing the similarity between objects and
+non-corresponding pairs of scenes and sentences.                          sentences when true object-sentence pairs are unavail-
+Upper Bound. The quality of the bounding boxes gener-                     able.
+ated by the 3D object detector determines the upper bound
+performance of our model. We consider the maximum IoU                   • The results show that our method outperforms widely
+   Table 3. Comparison to supervised methods on ScanRefer.                  Table 5. Ablation study on the candidate number K.
+                                                 R@1                                      R@3, SUN          R@3, SCAN
+             Method            Backbone                                          K
+                                             m=0.25    m=0.5                            m=0.25   m=0.5    m=0.25      m=0.5
+        ScanRefer [4]           VoteNet      41.19     27.40                      4     14.04    9.05      33.68      27.50
+          SAT [37]              VoteNet      44.54     30.14                      8     14.78    9.55      34.12      27.97
+     3DVG-Transformer [40]      VoteNet      47.57     34.67                     16     14.37    9.39      33.23      26.99
+         3DJCG [3]              VoteNet      49.56     37.33                     32     14.26    9.21      31.29      25.90
+               Ours             VoteNet      25.87     16.63
+               Ours            GroupFree     27.37     21.96        Table 6. Ablation study on the knowledge distillation. The match-
+                                                                    ing time is evaluated for one batch.
+Table 4. Ablation studies on the coarse-to-fine semantic matching                         R@3, SUN       R@3, SCAN       Matching Phase
+                                                                       Distill Target
+model. The experiments of all the ablation study are conducted on                        m=0.25 m=0.5 m=0.25 m=0.5        Time   Params
+ScanRefer dataset. “R@3, SUN” refers to n = 3 and the object
+                                                                       w/o distill.      13.88   9.09    31.71     26.38 31.4 ms 5.85 M
+detector is pretrained on SUN RGB-D.
+                                                                        SAT [37]         14.00   9.15    33.70     27.85 6.78 ms 1.85 M
+                              R@3, SUN          R@3, SCAN            3DVG-Trans [40]     14.01   9.10    34.61     28.22 8.38 ms 1.91 M
+  Lcls   Lmatch   Lrecon
+                           m=0.25    m=0.5    m=0.25    m=0.5          3DJCG [3]         14.78   9.55    34.12     27.97 8.22 ms 1.93 M
+                             9.03     3.96     12.28    8.53
+           ✓                 10.53    6.29     17.41    14.28
+   ✓                         13.10    8.17     32.71    25.90       4.6.1    Effectiveness of Semantic Matching Model
+   ✓       ✓                 13.76    8.48     33.03    26.58
+   ✓       ✓          ✓      14.78    9.55     34.12    27.97       Coarse-to-Fine Matching Scores. We aim to examine the
+                                                                    effect of each module in the coarse-to-fine semantic match-
+                                                                    ing model. Lcls and Lmatch denote whether to use class
+     used MIL-based weakly supervised methods by a large            similarity and feature similarity for coarsely selecting the
+     margin, and even approaches the upper bound in the             top-K candidates, respectively. Lrecon represents using the
+     “Unique” subset of ScanRefer. This suggests that our           reconstruct module to finely generate distilled pseudo la-
+     proposed model can deeply exploit the alignment rela-          bels for the selected K candidates. If Lrecon is not used,
+     tionship between 3D scenes and sentences and identify          all the selected K candidates’s rewards are set directly to 1.
+     the most semantically relevant object proposals.               Table 4 shows that using Lcls or Lmatch alone can effec-
+                                                                    tively aid the model in learning object-sentence pairs from
+   • Our coarse-to-fine semantic matching model signifi-
+                                                                    the caption-level annotations, while joint usage of Lcls and
+     cantly improves performance in the challenging “Mul-
+                                                                    Lmatch leads to better performance. Furthermore, the last
+     tiple” subset of ScanRefer and “Hard” subset of
+                                                                    two rows suggest that the fine-grained semantic matching
+     Nr3D/Sr3D, where there are multiple interfering ob-
+                                                                    module can effectively and comprehensively analyze the se-
+     jects with the same category as the target object. This
+                                                                    mantic similarity between the selected K candidates and the
+     problem requires a comprehensive understanding of
+                                                                    sentence query, and further enhance the performance.
+     the sentence to distinguish the described object, which
+                                                                    Number of Coarse-grain Candidate. We analyze the
+     our model handles efficiently with the keywords se-
+                                                                    performance for varying numbers of coarse-grained candi-
+     mantic reconstruction module.
+                                                                    dates, K ∈ 4, 8, 16, 32. As shown in Table 5, we observe
+   • The performance improvement with the SUN RGB-                  that selecting 8 candidates yields the best results for fine-
+     D pre-trained backbone is relatively small on Nr3D             grained semantic matching. We tentatively infer the reason
+     and Sr3D datasets, possibly because the target ob-             is that too small K leaves out the possible proposal that
+     jects are inherently more challenging to detect, and           covers the target object, while too large K leads to selecing
+     the pre-trained detector performs poorly due to out-           many proposals that are not relevant to the description due
+     of-distribution data. The low grounding upper bound            to the numerous objects in a 3D scene.
+     and inaccurate proposals make the training phase un-
+     stable. Nevertheless, our method outperforms all base-         4.6.2    Effectiveness of Knowledge Distillation
+     lines, and when the detector is more reliable, our se-
+     mantic matching model shows much more significant              To investigate the effect of the semantic distillation in terms
+     advantages on Nr3D/Sr3D.                                       of performance and efficiency, we construct the baseline
+                                                                    without knowledge distillation that removes the distillation
+                                                                    loss Ldistill during training and directly uses the coarse-to-
+4.6. Ablation Study
+                                                                    fine semantic matching model for inference. As shown in
+  To further assess the effectiveness of each component,            Table 6, distilling the semantic matching knowledge into
+we conduct ablation studies on the ScanRefer dataset.               the matching module of a two-stage 3DVG model brings
+                              Figure 3. Qualitative Comparison between MIL-based methods and Ours.
+
+
+a significant performance improvement. The well-studied            figure out the target object (category) is desk. With the fine-
+structure of the existing 3DVG model enhances the gener-           grained semantic matching module, our methods can better
+alization ability of our method. As for the efficiency, we         differentiate among these six desks and choose the one best-
+observe that the distilled matching module is 3× smaller           matched to the sentence (“brown” and “under two moni-
+and 4× faster than the coarse-to-fine semantic matching            tors”). In case (e), the scene contains 32 different chairs.
+model, demonstrating that the distilling operation reduces         Unfortunately, both our method and MIL-based methods
+inference costs significantly. Meanwhile, we try to distill        fail in this case. However, we consider our method’s pre-
+the knowledge into the matching modules of different su-           dicted result acceptable. Firstly, the sentence query’s ex-
+pervised methods (SAT [37], 3DVG-Transformer [40], and             pressions, such as “near the doors” and “near the center”,
+3DJCG [3]), the results show that the distillation fits well to    are ambiguous and cannot give a precise location of the tar-
+different architectures.                                           get object. Secondly, our method’s predicted chair is also
+                                                                   consistent with the sentence description and is close to the
+4.7. Qualitative Comparison                                        true chair.
+   As depicted in Figure 3, we visualize the predicted
+                                                                   5. Conclusion
+bounding boxes in the corresponding 3D scene, where the
+green box denotes that the method predicts the correct ob-            In this paper, we raise the weakly-supervised 3D visual
+ject (IoU ≥ 0.5 with the true box), and the red box indicates      grounding setting, using only coarse scene-sentence corre-
+a wrong prediction.                                                spondences to learn the object-sentence links. The weak
+   In case (a), the target object cabinet is the only cabinet      supervision gets rid of time-consuming and expensive man-
+in the simple scene. So, both MIL-based methods and our            ual annotations of accurate bounding boxes, which makes
+method can predict the box well. In case (b) / (c), the target     this problem more realistic but more challenging. To tackle
+object is a trash can / chair. MIL-based methods may be            this, we propose a novel semantic matching method to ana-
+misled by the presence of another object (bathroom counter         lyze the object-sentence semantic similarity in a coarse-to-
+/ desk) in the sentence. While our method can filter out the       fine manner. Moreover, we distill the semantic matching
+objects that do not belong to the target category, benefit-        knowledge into the existing 3D visual grounding architec-
+ing from the coarse-grained candidate selection module. In         ture, effectively reducing the inference cost and further im-
+case (d), there are six desks in the scene. The MIL-based          proving performance. The sufficient experiments on large-
+methods fail to localize the correct object, even though they      scale datasets verify the effectiveness of our method.
+References                                                                   relation aware transformer for fine-grained 3d visual ground-
+                                                                             ing. In Proceedings of the 29th ACM International Confer-
+ [1] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed                   ence on Multimedia, pages 2344–2352, 2021. 2
+     Elhoseiny, and Leonidas Guibas. Referit3d: Neural listeners
+                                                                        [14] Kaiming He, Haoqi Fan, Yuxin Wu, Saining Xie, and Ross
+     for fine-grained 3d object identification in real-world scenes.
+                                                                             Girshick. Momentum contrast for unsupervised visual rep-
+     In European Conference on Computer Vision, pages 422–
+                                                                             resentation learning. In Proceedings of the IEEE/CVF con-
+     440. Springer, 2020. 2, 5
+                                                                             ference on computer vision and pattern recognition, pages
+ [2] Steven Bird, Ewan Klein, and Edward Loper. Natural lan-                 9729–9738, 2020. 2
+     guage processing with Python: analyzing text with the natu-
+                                                                        [15] Geoffrey Hinton, Oriol Vinyals, Jeff Dean, et al. Distill-
+     ral language toolkit. ” O’Reilly Media, Inc.”, 2009. 2
+                                                                             ing the knowledge in a neural network. arXiv preprint
+ [3] Daigang Cai, Lichen Zhao, Jing Zhang, Lu Sheng, and Dong
+                                                                             arXiv:1503.02531, 2(7), 2015. 2
+     Xu. 3djcg: A unified framework for joint dense captioning
+                                                                        [16] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and
+     and visual grounding on 3d point clouds. In Proceedings of
+                                                                             Tyng-Luh Liu. Text-guided graph neural networks for re-
+     the IEEE/CVF Conference on Computer Vision and Pattern
+                                                                             ferring 3d instance segmentation. In Proceedings of the
+     Recognition, pages 16464–16473, 2022. 1, 2, 6, 7, 8, 11
+                                                                             AAAI Conference on Artificial Intelligence, volume 35, pages
+ [4] Dave Zhenyu Chen, Angel X Chang, and Matthias Nießner.
+                                                                             1610–1618, 2021. 2
+     Scanrefer: 3d object localization in rgb-d scans using natu-
+                                                                        [17] Shijia Huang, Yilun Chen, Jiaya Jia, and Liwei Wang. Multi-
+     ral language. In European Conference on Computer Vision,
+                                                                             view transformer for 3d visual grounding. In Proceedings of
+     pages 202–221. Springer, 2020. 1, 2, 5, 7
+                                                                             the IEEE/CVF Conference on Computer Vision and Pattern
+ [5] Zhenyu Chen, Ali Gholami, Matthias Nießner, and Angel X
+                                                                             Recognition, pages 15524–15533, 2022. 1, 2
+     Chang. Scan2cap: Context-aware dense captioning in rgb-d
+     scans. In Proceedings of the IEEE/CVF Conference on Com-           [18] Maximilian Ilse, Jakub Tomczak, and Max Welling.
+     puter Vision and Pattern Recognition, pages 3193–3203,                  Attention-based deep multiple instance learning. In Inter-
+     2021. 2                                                                 national conference on machine learning, pages 2127–2136.
+                                                                             PMLR, 2018. 2
+ [6] Angela Dai, Angel X Chang, Manolis Savva, Maciej Hal-
+     ber, Thomas Funkhouser, and Matthias Nießner. Scannet:             [19] Aishwarya Kamath, Mannat Singh, Yann LeCun, Gabriel
+     Richly-annotated 3d reconstructions of indoor scenes. In                Synnaeve, Ishan Misra, and Nicolas Carion.             Mdetr-
+     Proceedings of the IEEE conference on computer vision and               modulated detection for end-to-end multi-modal understand-
+     pattern recognition, pages 5828–5839, 2017. 1, 2, 5, 6                  ing. In Proceedings of the IEEE/CVF International Confer-
+                                                                             ence on Computer Vision, pages 1780–1790, 2021. 2
+ [7] Samyak Datta, Karan Sikka, Anirban Roy, Karuna Ahuja,
+     Devi Parikh, and Ajay Divakaran. Align2ground: Weakly              [20] Sahar Kazemzadeh, Vicente Ordonez, Mark Matten, and
+     supervised phrase grounding guided by image-caption align-              Tamara Berg. Referitgame: Referring to objects in pho-
+     ment. In Proceedings of the IEEE/CVF International Con-                 tographs of natural scenes. In Proceedings of the 2014 con-
+     ference on Computer Vision, pages 2601–2610, 2019. 2                    ference on empirical methods in natural language processing
+ [8] Jiajun Deng, Zhengyuan Yang, Tianlang Chen, Wengang                     (EMNLP), pages 787–798, 2014. 2
+     Zhou, and Houqiang Li. Transvg: End-to-end visual ground-          [21] Xuejing Liu, Liang Li, Shuhui Wang, Zheng-Jun Zha,
+     ing with transformers. In Proceedings of the IEEE/CVF                   Dechao Meng, and Qingming Huang. Adaptive recon-
+     International Conference on Computer Vision, pages 1769–                struction network for weakly supervised referring expression
+     1779, 2021. 2                                                           grounding. In Proceedings of the IEEE/CVF International
+ [9] John David N Dionisio, William G Burns III, and Richard                 Conference on Computer Vision, pages 2611–2620, 2019. 2
+     Gilbert. 3d virtual worlds and the metaverse: Current status       [22] Ze Liu, Zheng Zhang, Yue Cao, Han Hu, and Xin Tong.
+     and future possibilities. ACM Computing Surveys (CSUR),                 Group-free 3d object detection via transformers. In Proceed-
+     45(3):1–38, 2013. 2                                                     ings of the IEEE/CVF International Conference on Com-
+[10] Fartash Faghri, David J Fleet, Jamie Ryan Kiros, and Sanja              puter Vision, pages 2949–2958, 2021. 2, 6, 11
+     Fidler. Vse++: Improving visual-semantic embeddings with           [23] Ilya Loshchilov and Frank Hutter. Fixing weight decay reg-
+     hard negatives. arXiv preprint arXiv:1707.05612, 2017. 2,               ularization in adam. 2018. 11
+     5, 6                                                               [24] Oded Maron and Tomás Lozano-Pérez. A framework for
+[11] Qi Feng, Vitaly Ablavsky, and Stan Sclaroff. Cityflow-nl:               multiple-instance learning. Advances in neural information
+     Tracking and retrieval of vehicles at city scale by natural lan-        processing systems, 10, 1997. 2
+     guage descriptions. arXiv preprint arXiv:2101.04741, 2021.         [25] Vivek Mittal. Attngrounder: Talking to cars with attention.
+     2                                                                       In European Conference on Computer Vision, pages 62–73.
+[12] Tanmay Gupta, Arash Vahdat, Gal Chechik, Xiaodong Yang,                 Springer, 2020. 2
+     Jan Kautz, and Derek Hoiem. Contrastive learning for               [26] Stylianos Mystakidis. Metaverse. Encyclopedia, 2(1):486–
+     weakly supervised phrase grounding. In European Confer-                 497, 2022. 2
+     ence on Computer Vision, pages 752–768. Springer, 2020. 2,         [27] Alexander Neubeck and Luc Van Gool. Efficient non-
+     5, 6                                                                    maximum suppression. In 18th International Conference on
+[13] Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei                Pattern Recognition (ICPR’06), volume 3, pages 850–855.
+     Huang, Aixi Zhang, and Si Liu. Transrefer3d: Entity-and-                IEEE, 2006. 11
+[28] Bryan A Plummer, Liwei Wang, Chris M Cervantes,                 [40] Lichen Zhao, Daigang Cai, Lu Sheng, and Dong Xu. 3dvg-
+     Juan C Caicedo, Julia Hockenmaier, and Svetlana Lazeb-               transformer: Relation modeling for visual grounding on
+     nik. Flickr30k entities: Collecting region-to-phrase corre-          point clouds. In Proceedings of the IEEE/CVF International
+     spondences for richer image-to-sentence models. In Pro-              Conference on Computer Vision, pages 2928–2937, 2021. 1,
+     ceedings of the IEEE international conference on computer            2, 7, 8, 11
+     vision, pages 2641–2649, 2015. 2
+[29] Charles R Qi, Or Litany, Kaiming He, and Leonidas J
+     Guibas. Deep hough voting for 3d object detection in point
+     clouds. In proceedings of the IEEE/CVF International Con-
+     ference on Computer Vision, pages 9277–9286, 2019. 2
+[30] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J
+     Guibas. Pointnet++: Deep hierarchical feature learning on
+     point sets in a metric space. Advances in neural information
+     processing systems, 30, 2017. 11
+[31] Anna Rohrbach, Marcus Rohrbach, Ronghang Hu, Trevor
+     Darrell, and Bernt Schiele. Grounding of textual phrases in
+     images by reconstruction. In European Conference on Com-
+     puter Vision, pages 817–834. Springer, 2016. 2
+[32] Shuran Song, Samuel P Lichtenberg, and Jianxiong Xiao.
+     Sun rgb-d: A rgb-d scene understanding benchmark suite. In
+     Proceedings of the IEEE conference on computer vision and
+     pattern recognition, pages 567–576, 2015. 5, 6
+[33] Liwei Wang, Jing Huang, Yin Li, Kun Xu, Zhengyuan Yang,
+     and Dong Yu. Improving weakly supervised visual ground-
+     ing by contrastive knowledge distillation. In Proceedings of
+     the IEEE/CVF Conference on Computer Vision and Pattern
+     Recognition, pages 14090–14100, 2021. 2
+[34] Xin Wang, Qiuyuan Huang, Asli Celikyilmaz, Jianfeng Gao,
+     Dinghan Shen, Yuan-Fang Wang, William Yang Wang, and
+     Lei Zhang. Reinforced cross-modal matching and self-
+     supervised imitation learning for vision-language navigation.
+     In Proceedings of the IEEE/CVF Conference on Computer
+     Vision and Pattern Recognition, pages 6629–6638, 2019. 2
+[35] Fei Xia, Amir R Zamir, Zhiyang He, Alexander Sax, Jitendra
+     Malik, and Silvio Savarese. Gibson env: Real-world percep-
+     tion for embodied agents. In Proceedings of the IEEE con-
+     ference on computer vision and pattern recognition, pages
+     9068–9079, 2018. 2
+[36] Zhengyuan Yang, Tianlang Chen, Liwei Wang, and Jiebo
+     Luo. Improving one-stage visual grounding by recursive sub-
+     query construction. In European Conference on Computer
+     Vision, pages 387–404. Springer, 2020. 2
+[37] Zhengyuan Yang, Songyang Zhang, Liwei Wang, and Jiebo
+     Luo. Sat: 2d semantics assisted training for 3d visual
+     grounding. In Proceedings of the IEEE/CVF International
+     Conference on Computer Vision, pages 1856–1866, 2021. 1,
+     2, 7, 8
+[38] Licheng Yu, Zhe Lin, Xiaohui Shen, Jimei Yang, Xin Lu,
+     Mohit Bansal, and Tamara L Berg. Mattnet: Modular atten-
+     tion network for referring expression comprehension. In Pro-
+     ceedings of the IEEE Conference on Computer Vision and
+     Pattern Recognition, pages 1307–1315, 2018. 2
+[39] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang,
+     Sheng Wang, Zhen Li, and Shuguang Cui. Instancerefer:
+     Cooperative holistic understanding for visual grounding on
+     point clouds through instance multi-level contextual refer-
+     ring. In Proceedings of the IEEE/CVF International Confer-
+     ence on Computer Vision, pages 1791–1800, 2021. 1, 2
+A. Qualitative Study                                              initial object features (produced by the object detector) with
+                                                                  2-layer multi-head self-attention modules. The input sen-
+A.1. Coarse-to-fine Visualization                                 tence query is firstly encoded by a GloVe module, and
+    Figure 4 shows the visualization results of the coarse-       then input to a GRU cell, which produces the text feature.
+to-fine semantic matching pipeline. Given the input point         The predict module is simply a 1-layer multi-head cross-
+cloud, we first extract Mp = 256 proposals by the 3D object       attention module between the text feature (Key & Value)
+detector. (When doing visualization, we employ the Non-           and the object features (Query). For the reconstruct module,
+Maximum Supperssion[27] algorithm on these proposals to           We mask the input sentence with a random ratio p = 0.3.
+filter out some duplicate or overlapping boxes.) Then we          We use NLTK to parse the sentences, and the verbs and
+conduct the coarse-grained candidate selection among these        nouns are treated as important words. The core of the re-
+proposals to get K = 8 candidates. These candidates do the        construct module is a 3-layer transformer decoder. The in-
+fine-grained semantic matching with the sentence query one        put point number Np , the proposal number Mp , and the
+by one to finally produce the best-match result.                  candidate number K are set to 50000, 256 and 8, respec-
+    In all three cases, the coarse-grained module effectively     tively. The dimension of all hidden layers is 288. When
+selects 8 candidates related to the target object (mostly be-     calculating the candidates’ rewards, we find that instead of
+longing to the target category). For example, in case (b), the    reducing from one to zero linearly in steps of 1/(K − 1),
+sentence asks for a black chair near a table and facing the       applying a square operation over them is better for increas-
+wall. Firstly, the module filters out objects (tables, doors)     ing the discrimination between the optimal and suboptimal
+that do not belong to the target category (chair). Secondly,      candidates.
+with the assistance of the feature similarity matrix, the mod-
+                                                                  B.2. Training and Inference
+ule’s selection is also consistent with the sentence descrip-
+tion (“by the table” and “facing the wall”) to some degree.          We follow the weakly supervised setting where none of
+    After coarse-grained selection, the reconstruction-based      the object-sentence and bounding box annotations are used
+semantic matching process aims to differentiate these can-        during training. We follow [40] to use 8 sentence queries
+didates in a fine-grained way. We get the correct answer          for each scene to accelerate the training process. It takes 20
+in both cases (a) and (b), but we fail in case (c). Actually,     epochs to train our framework with a batch size of 12 (i.e.
+in case (c), the candidates we get do not contain the target      there are 96 sentence queries from 12 point clouds in each
+object. Considering that there are 32 different chairs in this    batch). For the stability of the reconstruction module, we
+scene, it’s very likely that the 8 candidates miss the target     start its training at the second epoch and ignore the high-
+object since we are not expecting the coarse-grained part to      est K/2 reconstruction losses after the third epoch. The
+have a deep understanding of the objects in the same cate-        learning rate is set to 1e-3 with cosine annealing strategy.
+gory (chair). Even in such a condition, the fine-grained part     We employ AdamW optimizer[23] with the weight decay
+still gets the best-match chair (“near the doors”, “on the left   of 5e-4. The hyper-parameters λ1 , λ2 and λ3 are set to 2, 2
+side”, and “near the center”) among the 8 candidates, which       and 1, respectively.
+demonstrates our model’s strong ability in semantic match-
+ing.
+
+B. Implementation Details
+B.1. Model Setting
+   In this section, we give a detailed description of our
+model setting. We consider the whole two-stage 3DVG
+pipeline as off-the-shelf modules. In our practice, we
+use the pre-trained GroupFree[22] model as the 3D ob-
+ject detector, which contains a PointNet++[30] backbone,
+6 layers of transformer decoder and the proposal predict
+head. The proposal predict head outputs the bounding boxes
+and the class predictions of Mp = 256 object propos-
+als. Then we employ the same attribute encoder, textual
+encoder and predict module as the supervised 3DJCG[3]
+model. The attribute encoder aggregates the attribute fea-
+tures (27-dimensional box center and corner coordinates
+and the 128-dimensional multi-view RGB features) and the
+Figure 4. Visualization of the coarse-to-fine semantic matching process. With knowledge distillation, we can directly get matching result
+from proposals during inference (skipping the time-consuming coarse-to-fine matching).
+

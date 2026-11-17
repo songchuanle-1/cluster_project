@@ -1,0 +1,57 @@
+{
+  "attnpool": {
+    "source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_attnpool/hier_postprocess.py",
+      "sha256": "ce4e6690b86c83a33940b071bb384dcbda61d3655cb783a361728018dc71ba49"
+    },
+    "aggregation_definition_sha256": "ce4e6690b86c83a33940b071bb384dcbda61d3655cb783a361728018dc71ba49",
+    "aggregation_function_lines": [
+      150,
+      202
+    ]
+  },
+  "qcond": {
+    "source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_qcond/hier_postprocess.py",
+      "sha256": "a0e6150aa33407685ce712bcd24c9f2e7d08ef0e4a4867a6f488c87e1710f52f"
+    },
+    "aggregation_definition_sha256": "a0e6150aa33407685ce712bcd24c9f2e7d08ef0e4a4867a6f488c87e1710f52f",
+    "aggregation_function_lines": [
+      146,
+      181
+    ]
+  },
+  "agg": {
+    "source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_agg/hier_postprocess.py",
+      "sha256": "3edec55f847787b87118795edd04def261204d0b8dca872241620176e6c47d62"
+    },
+    "aggregation_definition_sha256": "3edec55f847787b87118795edd04def261204d0b8dca872241620176e6c47d62",
+    "aggregation_function_lines": [
+      134,
+      175
+    ]
+  },
+  "multi": {
+    "source": {
+      "path": "Cluster/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_multi/hier_postprocess.py",
+      "sha256": "89aa7f6cde0cf68af76b43cc479d5511b97b3a6b0b4eada6f2968f3002e81615"
+    },
+    "aggregation_definition_sha256": "89aa7f6cde0cf68af76b43cc479d5511b97b3a6b0b4eada6f2968f3002e81615",
+    "aggregation_function_lines": [
+      145,
+      191
+    ]
+  },
+  "distinctions": {
+    "attnpool": "Unchanged mean cluster bank;no learned pooling weights or cluster-internal pooled query",
+    "qcond": "No decoder/language query,selected-cluster point expansion,QKVprojections or qcond gate",
+    "agg": "No learned point weighting/MLP in cluster aggregation",
+    "multi": "No extra cluster tokens or changed scale/cluster counts",
+    "TrueRoute": "No hard top-k or query-to-cluster route injection;point queries read all8coarse tokens",
+    "FLE": "No intra-fine-leaf point graph;fine/middle paths unchanged;coarse-only global semantic source",
+    "relation_transport": "No raw2D identity evidence,language relation span or candidate-mask identity transport",
+    "residual_gate": "Only replaces coarse readback;existing fusion/output projections remain fixed in structure. Algebraic delta in diagnostic is not a new learned residual/gate."
+  },
+  "ban_scope_review": "Specific historical mechanisms are not reused;this does not establish novelty or admission. Dense point-coarse attention is O(N*Kcoarse),notN2;no new projection parameters."
+}

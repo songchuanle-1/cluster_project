@@ -1,0 +1,101 @@
+"""Readonly CSO readiness: bytes/metadata/resource query only; no model imports."""
+import os
+import socket
+import sys
+assert socket.gethostname() == 'dl04-MS-7E06' and os.getuid() == os.geteuid() == 1001
+assert sys.flags.isolated and sys.dont_write_bytecode
+from datetime import datetime,timezone
+import hashlib
+import json
+from pathlib import Path
+import stat
+import subprocess
+
+packet = json.load(sys.stdin)
+owner,env,manifest = packet['owner'],packet['environment'],packet['manifest']
+assert owner['token'] == '7caf419d15d145459592faa2810e3776'
+assert datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+root = Path('/data/songcl/Project/Cluster_project/Cluster_nsd_20261107')
+assert root.is_dir() and root.resolve() == root
+
+def sha_file(path):
+    before = os.stat(path)
+    value = hashlib.sha256()
+    with open(path,'rb') as stream:
+        for chunk in iter(lambda:stream.read(1048576),b''): value.update(chunk)
+    after = os.stat(path)
+    assert (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns) == (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns)
+    return {'path':str(path),'realpath':str(Path(path).resolve()),'sha256':value.hexdigest(),'bytes':before.st_size,
+            'device':before.st_dev,'inode':before.st_ino,'uid':before.st_uid,'mtime_ns':before.st_mtime_ns,'read_stable':True}
+
+def run(argv,env=None):
+    child = subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.PIPE,env=env)
+    try: stdout,stderr = child.communicate(timeout=25)
+    except subprocess.TimeoutExpired: raise RuntimeError('Readonly child uncertain; preserve PID '+str(child.pid)+'; no signal/retry')
+    assert child.returncode == 0,stderr.decode('utf-8','replace')[-1000:]
+    return stdout.decode('utf-8','replace')
+
+git_env = {'PATH':'/usr/bin:/bin','GIT_OPTIONAL_LOCKS':'0','GIT_CONFIG_NOSYSTEM':'1',
+           'GIT_CONFIG_SYSTEM':'/dev/null','GIT_CONFIG_GLOBAL':'/dev/null','LANG':'C'}
+head = run(['/usr/bin/git','--no-optional-locks','-c','core.fsmonitor=false','-C',str(root),'rev-parse','--verify','HEAD'],git_env).strip()
+assert head == manifest['runtime_code_commit'] == 'b1e639b3ceb14bb5c65d9f81a084d41c834b951c'
+assets = manifest['assets']
+expected = {
+ env['base_conda_source']:env['base_conda_sha256'],env['python_path']:env['python_sha256'],
+ env['compatible_extension_path']:env['compatible_extension_sha256'],
+ env['torch']['module']['path']:env['torch']['module']['sha256'],
+ env['torch']['extension']['path']:env['torch']['extension']['sha256'],
+ str(root/'tools/train.py'):assets['native_train_source_sha256'],
+ str(root/'framework/dataset/scannetv2.py'):assets['dataset_source_sha256'],
+ assets['config_path']:assets['config_sha256'],assets['annotation_path']:assets['annotation_sha256'],
+ assets['checkpoint']:assets['checkpoint_sha256'],assets['pretrain']:assets['pretrain_sha256']}
+model = root/'framework/model/Quard_model'/manifest['name']
+for filename,digest in assets['source_hashes'].items(): expected[str(model/filename)] = digest
+files = []
+for path,digest in expected.items():
+    item = sha_file(path);item['expected_sha256'] = digest;item['matches'] = item['sha256'] == digest
+    files.append(item)
+assert all(x['matches'] for x in files)
+kernel = Path('/proc/locks').read_text().splitlines()
+locks = []
+for kind,ino in [('training',92537152),('diagnostic',92537153),('exclusive',92537154)]:
+    path = Path('/tmp/cluster_project_gpu0_'+kind+'.lock');m = os.lstat(path)
+    assert stat.S_ISREG(m.st_mode) and m.st_uid == 1001 and (m.st_dev,m.st_ino) == (66308,ino)
+    key = '%02x:%02x:%d' % (os.major(m.st_dev),os.minor(m.st_dev),ino)
+    locks.append({'kind':kind,'path':str(path),'device':m.st_dev,'inode':m.st_ino,
+                  'matching_kernel_lock_rows':[line for line in kernel if key in line.split()]})
+trainers = [];workers = []
+for proc in Path('/proc').iterdir():
+    if not proc.name.isdigit(): continue
+    try:
+        if proc.stat().st_uid != 1001: continue
+        argv = [x.decode('utf-8','replace') for x in (proc/'cmdline').read_bytes().split(b'\0') if x]
+        scripts = [x for x in argv if Path(x).name in ('train.py','test.py','worker.py','production_controller.py')]
+        if not scripts: continue
+        cwd = os.readlink(proc/'cwd')
+        if cwd.startswith('/data/songcl/Project/Cluster_project/') or any(x.startswith('/data/songcl/Project/Cluster_project/') for x in scripts):
+            item = {'pid':int(proc.name),'cwd':cwd,'argv':argv}
+            (trainers if any(Path(x).name in ('train.py','test.py') for x in scripts) else workers).append(item)
+    except (FileNotFoundError,ProcessLookupError,PermissionError): pass
+row = run(['/usr/bin/nvidia-smi','-i','0','--query-gpu=index,uuid,memory.free,memory.used,memory.total,utilization.gpu','--format=csv,noheader,nounits']).strip()
+parts = [x.strip() for x in row.split(',')]
+assert len(parts) == 6 and parts[:2] == ['0','GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c']
+gpu = {'index':0,'uuid':parts[1],'memory_free_mib':int(parts[2]),'memory_used_mib':int(parts[3]),
+       'memory_total_mib':int(parts[4]),'utilization_percent':int(parts[5]),'memory_free_queried_directly':True}
+contexts = run(['/usr/bin/nvidia-smi','-i','0','--query-compute-apps=pid,process_name,gpu_uuid,used_memory','--format=csv,noheader,nounits']).strip().splitlines()
+marker = root.parent/'pipeline/runtime/sinc_path_prod_9573f1fc/train-consumed.json'
+oldmarker = {'path':str(marker),'exists':marker.exists(),'executed':False}
+if marker.exists():
+    raw = marker.read_bytes();record = json.loads(raw)
+    oldmarker.update(sha256=hashlib.sha256(raw).hexdigest(),pid=record.get('pid'),source_commit=record.get('source_commit'),
+                     runtime_root=record.get('runtime_root'))
+resource_ready = gpu['memory_free_mib'] >= 20000 and not trainers and not workers and all(not x['matching_kernel_lock_rows'] for x in locks)
+assert 'torch' not in sys.modules and datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+print(json.dumps({'owner':owner,'hostname':socket.gethostname(),'uid':os.getuid(),'runtime_root':str(root),
+ 'runtime_HEAD':head,'source_environment_assets_verified':True,'files':files,'original_locks':locks,
+ 'lock_observation_method':'metadata_and_proc_locks_only_no_acquisition','gpu0':gpu,'external_context_rows':contexts,
+ 'external_contexts_preserved':True,'project_trainers':trainers,'project_workers':workers,'no_observed_unknown_project_launch':not trainers and not workers,
+ 'original_PID2248650_exists':Path('/proc/2248650').exists(),'old_consumed_entry':oldmarker,
+ 'base_conda_source_read_only_not_sourced':True,'old_lease_or_shim_executed':False,'resource_ready_at_observation':resource_ready,
+ 'readiness_passed':resource_ready,'Torch_imported':False,'GPU_context_created':False,'signals_sent':False,
+ 'remote_mutations':False,'observed_at':datetime.now(timezone.utc).isoformat()}))

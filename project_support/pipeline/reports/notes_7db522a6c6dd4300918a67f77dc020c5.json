@@ -1,0 +1,16 @@
+{
+  "actions": [
+    "本轮design快照2026-10-15 03:09:49+08，截止04:09:49不可变；任务ID/最新goalSHA24083b8d/19约束11禁令/server4 GPU0单槽/后台Disabled核实。begin仅一次，章节0-3保留原监控快照；后续纠正不篡改该快照。",
+    "begin按三位小数旧计数11/10终止同一M201 PID2634704，并记done_earlystop/27轮。实机审计发现原生完整精度日志18次验证和best/last均为best0.489848792552948@18、完成epoch26/no_improve8；epoch27仅3656/4686，无原生Early stopping消息。本次为监控误停，非完整收敛或合法patience10筛选。",
+    "原记录/台账已字节归档；只纠正同一M201行与实验为stopped_unknown、Best精确值、完成26轮，未重复终态入账或创建新实验。Acc50约0.541/spmIOU约0.454@18为三位小数日志；对Baseline约+0.000449，对Champion约-0.012151，未达目标、效益不确定。",
+    "只在cluster/server4显式精确PID模式使用真实logger full-precision和resume初始best/patience；精度/谱系缺失则不做早停。真实日志回放7项、进程6项及公共闭环69项均通过；其他项目默认路径、patience10、科学门槛/调度不变。未来恢复训练仍需实机验证计数路径。",
+    "冻结四组参数诊断实际执行启动器，返回BLOCKED/GPU launches0。03:13/03:17/03:29的资源证据：GPU0总32607MiB/使用20107/剩11994/util0%；NVML仍PID2634704占20016MiB，原进程不可见；训练flock持有、内核锁PID2634697亦不可见，原因未知。其他两诊断锁可用；低util和队列开槽不是GPU空闲。",
+    "同一M201 epoch26完整CPU恢复准备PASS：源模型严格加载前核验两项非持久常量完全相同；642优化器状态、scheduler、best/no_improve8精确恢复，checkpointSHAf2f6fb53bd3a6388e1bf05e8d7c5099bacf94e5f81f06d4584d2a1707426d8df。第一次未审计常量键与第二次numpy float32收据序列化失败均保留；第三次通过。CUDA未初始化，0原生/GPU前向/参数梯度/优化器更新/训练恢复启动。",
+    "先续三旧ID再完成误停恢复准备；四原ID均blocked/gpu_context_or_lock_not_released，retry_after=2026-10-15T04:15:14.021082+08:00，真实GPU/锁释放才恢复。三scalar六门槛仍false、旧source/FD/full-forward FAIL全部保留；BPS训练协议未完成，不改名/冷启动/扫参/判机制失败。同一仪器不冒称3独立机制；设计以真实external_resource_blocked收尾，未声称路线耗尽。",
+    "未执行sudo/GPU reset/删除锁/外部进程信号或全机进程扫描；无法核实可安全清理的活进程，需要服务器侧排查残留。PDC用户文件原SHA不变。本轮postflight尚未执行，执行状态待finish；收据仅begin到收据局部用量窗口，未知不填零、缓存属于输入/推理属于输出、不是账单；实际产出不等于科学收益。"
+  ],
+  "decisions": [
+    "恢复优先保持同一M201完整原生状态及patience10；在GPU上下文/训练flock真释放前不启动任何GPU实验，不以低util或队列空槽越过独占保护。",
+    "四原ID均保留可续动作和实际阻塞证据；短期资源冷却须finish通过后才生效，下一自动调度时间未知。没有合格新机制就保留空槽，不放宽目标、科学准入或制造变体。"
+  ]
+}

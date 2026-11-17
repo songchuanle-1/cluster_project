@@ -1,0 +1,52 @@
+def nec_coverage_preflight(members):
+    scenes=[]
+    for batch,(points,fm,mc) in enumerate(members):
+        fine=sorted(set(points));middle=sorted({fm[i] for i in fine});coarse=sorted({mc[j] for j in middle})
+        scenes.append({'batch':batch,'fine_ids':fine,'middle_ids':middle,'coarse_ids':coarse,'actual_path_count':len(fine)})
+    return {'scenes':scenes,'true_supported_core_possible':any(p['actual_path_count'] for p in scenes),'total_true_paths':sum(p['actual_path_count'] for p in scenes)}
+
+
+def nec_plan_observation(plan,members):
+    points,fm,mc=members;fine=sorted(set(points));middle=sorted({fm[i] for i in fine});coarse=sorted({mc[j] for j in middle})
+    keys=[(l,i) for l,ids in enumerate((fine,middle,coarse)) for i in ids];pos={key:i for i,key in enumerate(keys)}
+    edges=[(pos[(0,i)],pos[(1,fm[i])]) for i in fine]+[(pos[(1,j)],pos[(2,mc[j])]) for j in middle]
+    incident=[[] for _ in keys];neighbors=[[] for _ in keys]
+    for e,(a,b) in enumerate(edges):incident[a].append(e);incident[b].append(e);neighbors[a].append(b);neighbors[b].append(a)
+    for row in neighbors:row.sort()
+    components=[]
+    for root in coarse:
+        nodes={pos[(2,root)]};pending=list(nodes)
+        for n in pending:
+            for q in neighbors[n]:
+                if q not in nodes:nodes.add(q);pending.append(q)
+        # Metadata only: two BFS diameter, not feature/operator replay.
+        def distances(s):
+            out={s:0};todo=[s]
+            for n in todo:
+                for q in neighbors[n]:
+                    if q not in out:out[q]=out[n]+1;todo.append(q)
+            return out
+        first=distances(pos[(2,root)]);far=max(first,key=lambda n:(first[n],-n));diameter=max(distances(far).values())
+        components.append({'root_id':root,'nodes':sorted(nodes),'edges':sorted({e for n in nodes for e in incident[n]}),'diameter':diameter})
+    expected={'fine_ids':fine,'middle_ids':middle,'coarse_ids':coarse,'node_keys':keys,'edges':edges,'incident':incident,'neighbors':neighbors,'components':components,'point_count':len(points)}
+    assert plan==expected
+    return copy.deepcopy(plan)
+
+
+def nec_rounds_observation(rounds,plans):
+    expected=[];components=[];no=eo=0
+    for p in plans:
+        components.extend((no,eo,c,p) for c in p['components']);no+=len(p['node_keys']);eo+=len(p['edges'])
+    for r in range(max((c['diameter'] for _,_,c,_ in components),default=0)):
+        e=[];left=[];right=[];nodes=[];sources=[];receivers=[];counts=[]
+        for no,eo,c,p in components:
+            if r>=c['diameter']:continue
+            for edge in c['edges']:
+                a,b=p['edges'][edge];e.append(eo+edge);left.append(no+a);right.append(no+b)
+            for n in c['nodes']:
+                row=len(nodes);nodes.append(no+n);counts.append(len(p['incident'][n]));sources.extend(eo+edge for edge in p['incident'][n]);receivers.extend([row]*len(p['incident'][n]))
+        expected.append({'round_index':r,'edge_receivers':e,'left_nodes':left,'right_nodes':right,'node_receivers':nodes,'incident_sources':sources,'incident_receivers':receivers,'node_counts':counts})
+    assert rounds==expected
+    return copy.deepcopy(rounds)
+
+

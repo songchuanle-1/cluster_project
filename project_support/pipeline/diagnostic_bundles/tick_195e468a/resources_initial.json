@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-11-07T11:10:50.520950+00:00",
+  "owner_provenance_only": {
+    "token": "195e468ab222437d9a742dcc2f3d973f",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-07T11:09:16.891482+00:00",
+    "deadline_at": "2026-11-07T12:09:16.891482+00:00",
+    "context_sha256": "814fca239167c1cdefe925d1d47468049ab1d21148eb69f30042ca5bc8619902",
+    "pending_sha256": "0ee52baadc51998b0665e2f718dc7e1950401ad68843a9b55e86b5f2b993b217"
+  },
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -c '\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nimport socket,subprocess,json,os,fcntl\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\nroot=Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_psc_20261106'\"'\"')\ncommit=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',str(root),'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip()\nassert commit=='\"'\"'0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d'\"'\"'\nrow=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,memory.total,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True,timeout=10).strip()\nvalues=[x.strip() for x in row.split('\"'\"','\"'\"')]\nassert values[:2]==['\"'\"'0'\"'\"','\"'\"'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\"'\"']\nused,total,util=int(values[2]),int(values[3]),int(values[4])\nraw=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True,timeout=10).strip()\ncontexts=[]\nfor line in raw.splitlines():\n if line.strip():\n  fields=[x.strip() for x in line.split('\"'\"','\"'\"')];contexts.append({'\"'\"'pid'\"'\"':int(fields[0]),'\"'\"'used_memory_mib'\"'\"':fields[1]})\nlocks=[]\nfor kind in ('\"'\"'training'\"'\"','\"'\"'diagnostic'\"'\"','\"'\"'exclusive'\"'\"'):\n p=Path('\"'\"'/tmp/cluster_project_gpu0_'\"'\"'+kind+'\"'\"'.lock'\"'\"');info=p.stat()\n with p.open('\"'\"'r+b'\"'\"') as handle:\n  try:fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB);available=True\n  except BlockingIOError:available=False\n locks.append({'\"'\"'kind'\"'\"':kind,'\"'\"'inode'\"'\"':info.st_ino,'\"'\"'available'\"'\"':available})\nproject=[]\nfor directory in Path('\"'\"'/proc'\"'\"').iterdir():\n if not directory.name.isdigit():continue\n try:\n  if directory.stat().st_uid!=os.getuid():continue\n  argv=[x.decode(errors='\"'\"'replace'\"'\"') for x in (directory/'\"'\"'cmdline'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if x]\n  if not any(arg=='\"'\"'tools/train.py'\"'\"' or arg.endswith('\"'\"'/tools/train.py'\"'\"') for arg in argv):continue\n  cwd=os.readlink(directory/'\"'\"'cwd'\"'\"')\n  if cwd.startswith('\"'\"'/data/songcl/Project/Cluster_project/'\"'\"'):\n   text=(directory/'\"'\"'stat'\"'\"').read_text()\n   project.append({'\"'\"'pid'\"'\"':int(directory.name),'\"'\"'starttime'\"'\"':text[text.rfind('\"'\"')'\"'\"')+2:].split()[19],'\"'\"'cwd'\"'\"':cwd,'\"'\"'argv'\"'\"':argv})\n except (FileNotFoundError,PermissionError,ProcessLookupError):pass\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),\n '\"'\"'runtime_root'\"'\"':str(root),'\"'\"'runtime_source'\"'\"':commit,'\"'\"'physical_gpu'\"'\"':0,'\"'\"'gpu_uuid'\"'\"':values[1],\n '\"'\"'memory_used_mib'\"'\"':used,'\"'\"'memory_total_mib'\"'\"':total,'\"'\"'memory_free_mib'\"'\"':total-used,\n '\"'\"'utilization_percent'\"'\"':util,'\"'\"'external_or_other_contexts'\"'\"':contexts,'\"'\"'project_trainers'\"'\"':project,\n '\"'\"'locks'\"'\"':locks,'\"'\"'usable_under_authorized_overlay'\"'\"':total-used>=20000 and not project and all(x['\"'\"'available'\"'\"'] for x in locks),\n '\"'\"'exclusive_performance_claimed'\"'\"':False,'\"'\"'signals_sent'\"'\"':False,'\"'\"'training_or_GPU_diagnostic_launched'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stderr": "",
+  "observer_reused_from": {
+    "path": "pipeline/diagnostic_bundles/tick_eb827823/observe_resources.py",
+    "sha256": "f3e52d198b9aa640666a36b738f61a437ee4a24caf7086d6e088ce73dc7635ec"
+  },
+  "observer_remote_program_sha256": "2d3ecfbed36c8a100bd1fb8012f04a976afc730cb9da48a04338d4dfc4fef143",
+  "observation": {
+    "observed_at": "2026-11-07T11:10:51.004962+00:00",
+    "hostname": "dl04-MS-7E06",
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_psc_20261106",
+    "runtime_source": "0cccd91c32751d8ea2f9e2d99d031ce23b5ef20d",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "memory_used_mib": 15801,
+    "memory_total_mib": 32607,
+    "memory_free_mib": 16806,
+    "utilization_percent": 92,
+    "external_or_other_contexts": [
+      {
+        "pid": 669505,
+        "used_memory_mib": "15694"
+      }
+    ],
+    "project_trainers": [],
+    "locks": [
+      {
+        "kind": "training",
+        "inode": 92537152,
+        "available": true
+      },
+      {
+        "kind": "diagnostic",
+        "inode": 92537153,
+        "available": true
+      },
+      {
+        "kind": "exclusive",
+        "inode": 92537154,
+        "available": true
+      }
+    ],
+    "usable_under_authorized_overlay": false,
+    "exclusive_performance_claimed": false,
+    "signals_sent": false,
+    "training_or_GPU_diagnostic_launched": false
+  }
+}

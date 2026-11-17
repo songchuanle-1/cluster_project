@@ -1,0 +1,98 @@
+{
+  "owner": {
+    "token": "12e364dc14cd4e1195532c7fd295b834",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T11:09:29.664423+00:00",
+    "deadline_at": "2026-11-06T12:09:29.664423+00:00",
+    "context_sha256": "bf1e90947d091f4e8fe53f8876d130ac0d5493d8ff0a82e1547eb900459588a1",
+    "pending_sha256": "6877a9553b1a86ab70fe0e29c1442ff1e70b52c875adc38549034c975f87f162"
+  },
+  "recorded_at": "2026-11-06T12:04:51.061692+00:00",
+  "canonical_entry": "pipeline_monitor.reconcile_claims",
+  "calls": [
+    {
+      "actual_command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "songcl@192.168.1.115",
+        "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+      ],
+      "stdin_program": "import socket;assert socket.gethostname()=='dl04-MS-7E06'\nfrom pathlib import Path\nimport os,sys\np=Path('/proc/2829477')\nassert p.exists()\ns=(p/'stat').read_text();assert s[s.rfind(')')+2:].split()[19]=='158248846'\nassert p.stat().st_uid==1001\nassert os.readlink(p/'cwd')=='/data/songcl/Project/Cluster_project/Cluster_hvd_20261106'\nassert os.readlink(p/'fd/1')=='/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log'\nwith open('/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log','rb') as f:\n n=f.seek(0,2);f.seek(max(0,n-24000));sys.stdout.buffer.write(f.read(24000))\n",
+      "original_requested_command": "if kill -0 2829477 2>/dev/null; then tail -c 24000 /data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log; else echo __DEAD__; fi",
+      "kill_zero_replaced_by_readonly_proc_identity": true,
+      "returncode": 0,
+      "stdout_sha256": "a2215cd585d252e76ce832995b6451b8c5da64cf4373a6ccb3369262dd085b54",
+      "stdout_bytes": 24000,
+      "native_steps": [
+        [
+          1,
+          2187
+        ],
+        [
+          1,
+          2188
+        ],
+        [
+          1,
+          2189
+        ],
+        [
+          1,
+          2190
+        ],
+        [
+          1,
+          2191
+        ]
+      ]
+    }
+  ],
+  "task_after": {
+    "id": "M230-HVD",
+    "label": "HVD",
+    "candidate_id": "hierarchy-native-variance-decomposition-composition",
+    "config": "configs/Quard/ctf_hcg_csort_hvd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd.yaml",
+    "code_commit": "d20eb221eff6584b67d4e9b5673559d0e1cb735b",
+    "admission_receipt": "pipeline/admissions/M230-HVD.json",
+    "profile": "experiment_first",
+    "status": "running",
+    "gpu": "0",
+    "created_at": "2026-11-06T10:12:38.475741+00:00",
+    "resource_authorization": {
+      "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+      "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+    },
+    "requires_exclusive_ownership": false,
+    "launch_verified": true,
+    "launch_verification": "training_progress",
+    "dispatch_hold_history": [
+      {
+        "recorded_at": "2026-11-06T11:46:27.162004+00:00",
+        "previous_hold": "Technical admission and dedicated HVD deployment passed. Hold new launch until fresh current-owner actual Linux CPU proof verifies the reviewed HVD-only wrapper inherits all three cooperative flocks and canonical argv routing, followed by current GPU0 >=20000MiB/max1/UUID probe. This is launch protection, not missing human authorization. Do not replay prior owner/lease/intent; reuse valid native/resource evidence.",
+        "clear_reason": "ActualLinuxUID/PID/threeinheritedFDs/FLOCKcontention/naturalrelease/exactcanonicalargv proof independently passed; live resource checks remain in canonical dispatch.",
+        "proof": {
+          "path": "pipeline/diagnostic_bundles/tick_12e364dc/hvd_three_lock_activation/actual_cpu_proof.json",
+          "sha256": "941b1ae61a082594fcc985a3f0f73284bf89643364b1adfa176efbf7519a2855"
+        },
+        "independent_review": {
+          "path": "pipeline/diagnostic_bundles/tick_12e364dc/hvd_three_lock_independent_review.json",
+          "sha256": "c52f7d71137b87d439bee48a9a11b20f7faaff9b45b50a97b5b01d0b29a5f95d"
+        }
+      }
+    ],
+    "dispatch_phase": "verified",
+    "server": "server-4",
+    "claimed_gpu": "0",
+    "pid": 2829477,
+    "log": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log",
+    "retries": 1
+  },
+  "signals_sent": false,
+  "training_launches": 0,
+  "same_existing_PID_verified": true
+}

@@ -1,0 +1,215 @@
+{
+  "id": "M232-NSD",
+  "candidate_id": "hierarchy-native-spatial-dirichlet-composition",
+  "config": "configs/Quard/ctf_hcg_csort_nsd/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nsd.yaml",
+  "code_commit": "f6257de79148581334ee495e6e2d60ccb525457c",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "recorded_at": "2026-11-07T17:44:40.905929+00:00",
+  "passed": true,
+  "steps": 2,
+  "losses": [
+    9.129654884338379,
+    13.906927108764648
+  ],
+  "champion_losses": [
+    9.529125213623047,
+    13.909586906433105
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "train": {
+      "data_root": "/home/songcl/data/data/",
+      "prefix": "train",
+      "type": "scannetv2_sample_graph_edge",
+      "training": true
+    },
+    "val": {
+      "data_root": "/home/songcl/data/data/",
+      "prefix": "val",
+      "type": "scannetv2_sample_graph_edge",
+      "training": false
+    }
+  },
+  "paired_TRAIN_batches": {
+    "shared_initialization_verified": true,
+    "two_natural_train_batches": true,
+    "common_tensor_count": 835,
+    "common_parameter_count": 155907386,
+    "common_sha256": "5c80b2ad41397f3c19b149bfa7acf120edd6127a000129cdc3a8dcbe139c5d49",
+    "excluded_name_prefixes": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.cluster_ffn.2.",
+      "dec.cluster_att.spatial_dirichlet."
+    ],
+    "batches": [
+      {
+        "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+        "scan_ids": [
+          "scene0031_00",
+          "scene0673_00"
+        ],
+        "ann_ids": [
+          24,
+          25,
+          26,
+          27,
+          40,
+          41,
+          42,
+          43
+        ],
+        "scenes_len": [
+          4,
+          4
+        ]
+      },
+      {
+        "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+        "scan_ids": [
+          "scene0505_00",
+          "scene0315_00"
+        ],
+        "ann_ids": [
+          120,
+          121,
+          122,
+          123,
+          92,
+          93,
+          94,
+          95
+        ],
+        "scenes_len": [
+          4,
+          4
+        ]
+      }
+    ]
+  },
+  "whole_NSD_core_original_loss_gradient_and_update": [
+    {
+      "forward": 1,
+      "aggregate_weight_gradient": {
+        "finite": true,
+        "abs_max": 7.486331014661118e-06,
+        "observed_weight_tensors": 4,
+        "scope": "Aggregate across entire spatial_dirichlet; individual map zeros/unused legal"
+      },
+      "aggregate_weight_updated": true,
+      "aggregate_module_updated": true
+    },
+    {
+      "forward": 2,
+      "aggregate_weight_gradient": {
+        "finite": true,
+        "abs_max": 5.015681381337345e-06,
+        "observed_weight_tensors": 4,
+        "scope": "Aggregate across entire spatial_dirichlet; individual map zeros/unused legal"
+      },
+      "aggregate_weight_updated": true,
+      "aggregate_module_updated": true
+    }
+  ],
+  "actual_NSD_path_observations": [
+    {
+      "forward": 1,
+      "native_positions_sha256": "9b23851c021b6818c2ab7b08c528db6940066277cf2e3cf474852fb4bf3855f3",
+      "exact_original_decoder_padded_positions_reference": true,
+      "exact_original_encoder_feature_and_mask_references": true,
+      "native_observer_scope": "Original support/coordinate-only adjacent-chain/tie means/squared contrasts; three actual shared analysis calls and three actual shared synthesis calls; original restoration/HCG/rawskip/single-inst path. Wrappers return unchanged original objects.",
+      "per_parameter_nonzero_FP32_minimum_effect_gate_added": false,
+      "actual_true_fine_paths": 2048,
+      "actual_supported_scene_count": 8,
+      "actual_chain_energy_calls": 24,
+      "actual_chain_builder_calls": 24,
+      "actual_analysis_calls": 24,
+      "actual_synthesis_calls": 24,
+      "actual_final_index_copy_calls": 24,
+      "actual_production_NSDirichlet_path_observed": true,
+      "no_feature_energy_or_model_replay": true,
+      "actual_internal_backward_callbacks": 176,
+      "all_observed_internal_gradients_finite": true,
+      "internal_gradient_scope": "Finite observed flags only; no per-branch/parameter nonzero or completeness gate; whole-core aggregate controls trainability."
+    },
+    {
+      "forward": 2,
+      "native_positions_sha256": "3a970500a2c9eb45ba5a00b11002e9d9ed3e41273a2ebc087046a44cf7468448",
+      "exact_original_decoder_padded_positions_reference": true,
+      "exact_original_encoder_feature_and_mask_references": true,
+      "native_observer_scope": "Original support/coordinate-only adjacent-chain/tie means/squared contrasts; three actual shared analysis calls and three actual shared synthesis calls; original restoration/HCG/rawskip/single-inst path. Wrappers return unchanged original objects.",
+      "per_parameter_nonzero_FP32_minimum_effect_gate_added": false,
+      "actual_true_fine_paths": 2048,
+      "actual_supported_scene_count": 8,
+      "actual_chain_energy_calls": 24,
+      "actual_chain_builder_calls": 24,
+      "actual_analysis_calls": 24,
+      "actual_synthesis_calls": 24,
+      "actual_final_index_copy_calls": 24,
+      "actual_production_NSDirichlet_path_observed": true,
+      "no_feature_energy_or_model_replay": true,
+      "actual_internal_backward_callbacks": 176,
+      "all_observed_internal_gradients_finite": true,
+      "internal_gradient_scope": "Finite observed flags only; no per-branch/parameter nonzero or completeness gate; whole-core aggregate controls trainability."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/smoke_champion_execution.json",
+      "sha256": "b4556d805c06d3b5d6c0b676a3544db7d6a9478b9ee310509aa01773f2ca4b8a"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/smoke_candidate_execution.json",
+      "sha256": "6dce16125548b401c81bec3a53c178b973b957273bbd19cf7945c5351c2f8e5c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/resources_champion_execution.json",
+      "sha256": "bf40ba160a573ee1302750b9e3027e4a2be20dc4f47cbd8748970ccf80f85bf7"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/resources_candidate_execution.json",
+      "sha256": "178feb33d7d1cb9acc83ee245a1b7f2535157ee909751c0d4c89f0e469b5c0e1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/native_manifest.json",
+      "sha256": "c207943c37c3d2193f638860a30c669f6b1a9b3bc4dd7cdc69eaba9b62a72883"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/execution_binding.json",
+      "sha256": "fa20241e999fe4b12fe09de9dfd3fd350abab62b12cfb1e0ce45cd97a7ea00e1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_execution/execution_lease.json",
+      "sha256": "8de13ea3a167a980ded7078dff2dc1757cee225d4c1e73c50198f2f317d4f6ac"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_compatible_source/compatible_source_version.json",
+      "sha256": "e1a03ed4f1631d78f427fedc153d54bf7a3a0a94bcb2272e11c7caf19c1e3302"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_c706ca80/nsd_compatible_source_independent_review.json",
+      "sha256": "32609b8720b466713911a3d93650272f5ba4e376218253ef5dd261e5992758d2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_2e51495f/reserve_candidate/native_protocol.md",
+      "sha256": "ab5675efd2d72432c827d60095d3bddbd6fef53fa3b0a2764af5a9f9ba61dee4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_current_activation/native/worker.py",
+      "sha256": "cd1cb8b000b7109db99b7bb44b69867d1c3bb5e63466a749b51bb4d35fd09112"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_355279e0/nsd_current_activation/native/native_runtime.py",
+      "sha256": "8ca969c6b4d7099fcf4e407d27ef979e93070a2be06f5f9784f3eed8a29c48f9"
+    }
+  ],
+  "limitations": [
+    "Two natural TRAIN steps establish technical execution only, not trained efficacy or novelty.",
+    "Smoke memory includes observer hooks and snapshots; it is not pure optimizer TRAIN memory.",
+    "Individual rows/maps/biases/statistic components may be zero; no additional coverage or positivity gate was added."
+  ]
+}

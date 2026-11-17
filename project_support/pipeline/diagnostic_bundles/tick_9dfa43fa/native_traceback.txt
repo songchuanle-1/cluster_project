@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py", line 515, in <module>
+    gorilla.launch(
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/core/launch.py", line 68, in launch
+    main_func(*args)
+  File "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py", line 476, in main
+    train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)
+  File "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/tools/train.py", line 109, in train
+    loss, log_vars = model(batch, mode='loss')
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_nde/network.py", line 110, in forward
+    return self.loss(**batch)
+  File "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107/framework/utils/utils.py", line 11, in wrapper
+    x = x.cuda()
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1082, in cuda
+    return self._apply(lambda t: t.cuda(device))
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 928, in _apply
+    module._apply(fn)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 928, in _apply
+    module._apply(fn)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 928, in _apply
+    module._apply(fn)
+  [Previous line repeated 3 more times]
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 964, in _apply
+    or isinstance(param, FakeTensor)
+TypeError: FakeTensor.__new__() missing 3 required positional arguments: 'fake_mode', 'elem', and 'device'
+Train[1/50]:  20%|███▉                | 932/4686 [13:44<55:19,  1.13it/s, lr=0.0001, eta=2 days, 7:52:30, iter_time=0.86]

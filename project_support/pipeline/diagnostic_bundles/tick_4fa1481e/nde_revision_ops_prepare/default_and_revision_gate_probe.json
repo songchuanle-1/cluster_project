@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T01:31:21.216682+00:00",
+  "producer_agent": "/root/nde_ops",
+  "actual_author_thread_id": "01a1b845-a78e-7cb2-8d77-a64fb63b444f",
+  "passed": true,
+  "scope": "Actual default NOP subprocesses and extracted stdlib-only revision gate; no adapter/Torch/native import, SSH/GPU or shared state mutation",
+  "checks": [
+    {
+      "check": "render_disabled_ops.py actual default NOP",
+      "passed": true,
+      "observation": {
+        "status": "DEFAULT_NOP_NO_FILES_OR_TRANSPORT",
+        "native": "NOT_RUN",
+        "resources": "NOT_RUN"
+      }
+    },
+    {
+      "check": "run_nde_operation.py actual default NOP",
+      "passed": true,
+      "observation": {
+        "status": "DEFAULT_NOP_NO_ENTRY_OR_TRANSPORT",
+        "candidate_id": "hierarchy-native-distribution-embedding-composition",
+        "code_commit": "0747f6acec1c61018ec99acf2efa5329c9b3523c",
+        "selected_physical_gpu": 0,
+        "active_binding_created": false,
+        "native_executed": false
+      }
+    },
+    {
+      "check": "exact current pending revision1 gate accepts frozen registration only",
+      "passed": true
+    },
+    {
+      "check": "altered revision digest rejected",
+      "passed": true
+    },
+    {
+      "check": "completed receipt cannot impersonate pending diagnostic revision",
+      "passed": true
+    },
+    {
+      "check": "no active binding/release/lease/manifest/request or stage created",
+      "passed": true
+    }
+  ],
+  "FROZEN": {
+    "path": "pipeline/diagnostic_bundles/tick_4fa1481e/nde_revision_ops_prepare/FROZEN.json",
+    "sha256": "e9e230a5c4f332f864099133d054e61f545263c3e328bccb49762af05be5496b"
+  },
+  "native": "NOT_RUN",
+  "resources": "NOT_RUN"
+}

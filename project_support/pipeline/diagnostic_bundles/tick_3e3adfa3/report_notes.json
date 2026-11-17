@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "上海2026-10-21 10:08 begin完成监控、目标和已有合格队列派发检查；无终态/运维问题、waiting0。M205-MDC Best=.4741、第9/50轮，M206-CGCA Best=.4462、第7/50轮，均no_improve0/10。持续训练，收敛和最终收益尚未确定。",
+    "10:08:52核验pinned server4主机/授权两卡UUID、memory/util/context与必要锁：GPU0 PID3842306约18643MiB、GPU1 PID3873690约19751MiB仍有CUDA contexts，两卡均非idle，既有训练未动。",
+    "HAP本轮1次真实资源检查blocked，绑定当前tick_attempt/新证据并更新资源wake条件。已准备的HAP源码/原YAML/完整包/已审worker_v2证据复用；未重复staging、busy guard、控制测试或torch/model/data/GPU执行。",
+    "旧8个blocked到期，委托一次有界只读复核：4项辅助监督scope hold、2项数值测量实现hold、PCE/RSTR修订耗尽仍保持；本轮未见解锁授权或新修复证据，全部未重开，旧记录未改。",
+    "0新候选、0模型源提交、0原生执行、0准入/队列/启动。当前没有新增用户动作或可用资源。"
+  ],
+  "decisions": [
+    "两项现有训练遵循原seed/schedule/验证/早停协议继续，不因低util或旧flock可用共享运行卡，不按当前训练中指标断言最终效果。",
+    "HAP真实授权空卡出现后，用下个owned tick fresh token/lease/stage和已审tick_73e1f420/worker_v2.py及精确f51823bb源/原YAML/资产，核验UUID/contexts/locks后执行实际TRAIN两步/配对资源，实测PASS才准入/安全同步/派发。",
+    "旧hold到期只复查证据，不产生重开、额外历史修订或新批准；实验优先授权不越过历史限制。挂起项不阻断HAP，当前真正阻塞仍是两卡运行占用。",
+    "无目标/资源边界/禁用项/调度变更、无新用户决定。当前为健康运行和同一资源等待，按通知约定静默；不凑配额、不重复已有诊断。"
+  ]
+}

@@ -1,0 +1,14 @@
+--- frozen_v1/crash_probe_bootstrap.py
++++ instrumented_v2/crash_probe_bootstrap.py
+@@ -172,7 +172,10 @@
+                 marker('original_worker_' + frame.f_code.co_name + '_' + event)
+         return None
+ 
+-    marker('original_entry_before', original_worker_argv=argv,
++    marker('original_entry_before', instrumented=True, fault_localization_only=True,
++           original_worker_resources_function_unchanged=True,
++           comparable_resources_or_latency_evidence=False, technical_admission_evidence=False,
++           original_worker_argv=argv,
+            original_entry_sha256=sha(worker), bootstrap_sha256=sha(__file__),
+            interpreter=sys.executable, interpreter_flags=str(sys.flags),
+            launcher_orig_argv=getattr(sys, 'orig_argv', None),

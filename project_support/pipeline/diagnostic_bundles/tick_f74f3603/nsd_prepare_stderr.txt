@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f74f3603\nsd_current_activation\run_nsd_operation.py", line 60, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f74f3603\nsd_current_activation\run_nsd_operation.py", line 51, in main
+    if a.operation in ('probe','prepare'):result=getattr(adapter,a.operation)(0)
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f74f3603\nsd_current_activation\adapter.py", line 369, in prepare
+    probe=self.probe(gpu); self._check_probe(probe,gpu)
+                           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f74f3603\nsd_current_activation\adapter.py", line 350, in _check_probe
+    require(observation.get('usable_under_current_overlay_policy') is True,'GPU0 is not usable under the current explicit overlay policy')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\project\cluster_project\pipeline\diagnostic_bundles\tick_f74f3603\nsd_current_activation\adapter.py", line 82, in require
+    raise Refused(reason)
+nsd_reviewed_adapter.Refused: GPU0 is not usable under the current explicit overlay policy

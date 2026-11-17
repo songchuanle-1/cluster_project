@@ -1,0 +1,25 @@
+{
+  "candidate_id": "hierarchy-middle-directional-token-convolution",
+  "model_commit_unchanged": "59013e132241322054f1906e771aa78b81c48da6",
+  "failure_scope": "diagnostic_implementation",
+  "observed": "First native forward attempt loaded a real train batch, but diagnostic JSON serialization stopped at scenes_len; observer failed parsing the partial result. Native smoke did not pass; underlying forward outcome is unknown. No process remains.",
+  "recovery": "Convert diagnostic batch metadata tensor scalars to Python ints; preserve finite-summary fix in separate v2 diagnostic. Persist full subprocess stdout/stderr before parsing result. Same exact model/YAML, data, seed, train loop and resource constraints. No hypothesis conclusion or negative evidence erased.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/smoke_candidate_execution.json",
+      "sha256": "c182e230b54b508aa72e7e23f9e07330c537162b8a955eb88f3742f1ccb72316"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/smoke_observer_recovery2.json",
+      "sha256": "cce6510c16ae4d4e7d7db0a18e7fa19bbe55f4486e0e049fed8d80557fca854e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_v2/worker.py",
+      "sha256": "ae1293a13af04abe74a81eaeeef07705ec70ebabd03b1a90bc0c335412ed155c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_30b1eba0/native_v2/control.py",
+      "sha256": "75a9692f492dc4688a253f9a38e956f3bd0b226eabb8b8412e4172206a90ec79"
+    }
+  ]
+}

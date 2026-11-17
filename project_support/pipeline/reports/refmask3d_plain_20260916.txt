@@ -1,0 +1,3600 @@
+RefMask3D: Language-Guided Transformer for 3D Referring
+Segmentation
+Shuting He∗
+
+Henghui Ding†
+
+1 Institute of Big Data, Fudan University
+
+Institute of Big Data, Fudan University,
+Shanghai, China
+hhding@fudan.edu.cn
+
+2 Nanyang Technological University
+
+heshuting555@gmail.com
+
+arXiv:2407.18244v1 [cs.CV] 25 Jul 2024
+
+ABSTRACT
+3D referring segmentation is an emerging and challenging visionlanguage task that aims to segment the object described by a natural
+language expression in a point cloud scene. The key challenge behind this task is vision-language feature fusion and alignment. In
+this work, we propose RefMask3D to explore the comprehensive
+multi-modal feature interaction and understanding. First, we propose a Geometry-Enhanced Group-Word Attention to integrate language with geometrically coherent sub-clouds through cross-modal
+group-word attention, which effectively addresses the challenges
+posed by the sparse and irregular nature of point clouds. Then, we
+introduce a Linguistic Primitives Construction to produce semantic
+primitives representing distinct semantic attributes, which greatly
+enhance the vision-language understanding at the decoding stage.
+Furthermore, we introduce an Object Cluster Module that analyzes
+the interrelationships among linguistic primitives to consolidate
+their insights and pinpoint common characteristics, helping to capture holistic information and enhance the precision of target identification. The proposed RefMask3D achieves new state-of-the-art
+performance on 3D referring segmentation, 3D visual grounding,
+and also 2D referring image segmentation. Especially, RefMask3D
+outperforms previous state-of-the-art method by a large margin of
+3.16% mIoU on the challenging ScanRefer dataset. Code is available
+at https://github.com/heshuting555/RefMask3D.
+
+CCS CONCEPTS
+
+Instance
+Segmentation
+“This is a white kitchen counter.
+It is above the cabinets”
+
+Matching
+
+(a) Two-stage Framework
+
+Group B
+
+Group A
+
+Geometry-Enhanced
+Group-Word Attention
+
+Object
+Cluster
+
+Linguistic Primitives Contrastive
+Loss
+Construction
+“This is a white kitchen counter.
+It is above the cabinets”
+
+(b) RefMask3D
+
+Figure 1: (a) Two-stage framework, fusing language features
+in the later matching stage, exhibit limited interactions and
+weak alignment between vision and language features. In
+contrast, (b) our RefMask3D conducts comprehensive visionlanguage fusion in both the early feature encoding stage
+and decoding stage. Combined with contrastive learning, our
+model learns a well-structured vision-language joint feature
+space than two-stage methods.
+
+the 32nd ACM International Conference on Multimedia (MM’24), October 28November 1, 2024, Melbourne, Australia. ACM, New York, NY, USA, 10 pages.
+https://doi.org/10.1145/3664647.3680998
+
+• Computing methodologies → Scene understanding.
+
+KEYWORDS
+
+1
+
+3D referring segmentation, Language-guided Transformer, visionlanguage learning
+
+Given a point cloud scene and a natural language description of the
+target object within the scene, 3D referring segmentation [25, 50,
+56, 57] aims at predicting a point-wise mask for the target object.
+Despite its similarity to 3D visual grounding task [2, 5] that focuses
+on predicting bounding boxes based on language descriptions, 3D
+referring segmentation has remained underexplored. This disparity
+in research attention could be attributed to the fact that 3D referring
+segmentation demands point-wise masks and a deeper, nuanced
+understanding of intricate fine-grained semantics.
+The prevailing methods [2, 5, 25, 50] in 3D referring segmentation, as shown in Figure 1 (a), typically adopt a two-stage segmentationthen-matching pipeline that firstly segments redundant objects using a pre-trained instance segmentation model, and then selects
+the target object by matching visual and linguistic features [25, 50].
+However, this pipeline exhibits inherent limitations. Given that the
+matching phase relies on segmentation predictions from the first
+phase, any omissions or inaccuracies at the first phase inevitably
+significantly weaken the accuracy of the following matching phase.
+
+ACM Reference Format:
+Shuting He and Henghui Ding. 2024. RefMask3D: Language-Guided Transformer for 3D Referring Segmentation. In Proceedings of Proceedings of the
+32nd ACM International Conference on Multimedia (MM ’24)Proceedings of
+∗ Visiting scholar at Institute of Big Data, Fudan University, Shanghai, China.
+† Corresponding author (henghui.ding@gmail.com).
+
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for components of this work owned by others than the
+author(s) must be honored. Abstracting with credit is permitted. To copy otherwise, or
+republish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+© 2024 Copyright held by the owner/author(s). Publication rights licensed to ACM.
+ACM ISBN 979-8-4007-0686-8/24/10
+https://doi.org/10.1145/3664647.3680998
+
+INTRODUCTION
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+Furthermore, simplistic incorporation of textual information during matching fails to analyze the semantic impact of individual
+words, thus overlooking complex semantic nuances and leading
+to matching errors. These issues underscore the necessity for a
+unified approach that integrates both segmentation and matching
+processes with a deeper linguistic understanding. In response, our
+work introduces a streamlined, effective end-to-end pipeline that
+comprehensively leverages language information. The proposed
+method, RefMask3D, enhances the interaction and understanding
+between vision and language, aiming to enhance the performance
+of 3D referring segmentation.
+First, different from previous two-stage works [2, 5, 25, 50] that
+adopt segmentation-then-matching pipeline, we propose to fully harness the early feature encoding layers to extract rich multi-modal
+context. To this end, we introduce a Geometry-Enhanced GroupWord Attention, which conducts cross-modal attention between
+language and local groups (sub-clouds) with geometrically adjacent points at each stage of the Point Encoder. This integration
+not only reduces the noise from direct point-to-word correlations,
+which is common due to the sparse and irregular nature of point
+clouds, but also leverages the intrinsic geometric relationships and
+fine-grained 3D structure within the point clouds. The proposed
+Geometry-Enhanced Group-Word Attention significantly improves
+the model’s ability to interact with and understand linguistic and
+geometric data. Additionally, we incorporate a learnable “background” language token to prevent the entanglement of irrelevant
+language features with local group features. For example, as shown
+in Figure 1 (b), “Group A” as a non-target group exhibits low responses to these irrelevant words. This approach ensures that point
+features are enriched with semantic-related linguistic information,
+maintaining a continuous and context-aware awareness of the relevant language context at each group or point in the network.
+Second, with the fused vision-language features, we further design how to effectively identify the target object in decoder. Effectively localizing the target significantly hinges on the cues provided
+by the query input to the cross-modal decoder [14, 44, 46]. A majority of existing works [27, 48, 52, 60] initialize non-parametric
+query with point positions sampled with furthest point sampling
+(FPS) or parametric learnable query. Such strategies typically aim to
+scan the whole point cloud scene to identify all possible objects as
+candidates. However, it inadvertently sidesteps an essential aspect:
+the fact that only one language-referred target object is present,
+potentially leading to insufficient training or posing challenges in
+optimization. Although 3D-SPS [46] proposes to select the top-𝑘
+query points close to the given language description to alleviate this
+issue, the selection process is susceptible to noise, particularly in
+scenarios where the chosen points do not encompass the languagerelated target. To address these challenges, we introduce a strategy
+termed Linguistic Primitives Construction (LPC). We initialize a
+diverse set of primitives, each designed to represent distinct semantic attributes such as shape, color, size, relationships, location, and
+so on. By engaging in interactions with specific linguistic information, these primitives are capable of acquiring corresponding
+attributes. Feeding these semantically enriched primitives into the
+decoder enhances the network’s focus on diverse semantics within
+the point cloud, thereby significantly improving the model’s ability
+to accurately localize and identify the target object.
+
+Shuting He and Henghui Ding
+
+Furthermore, an Object Cluster Module is proposed to capture
+holistic information and generate the object embedding for segmenting the target object. Linguistic primitives are designed to
+focus on specific parts of a point cloud that correlate with their semantic attributes. However, our ultimate goal is to identify a unique
+target object based on the given text, which requires a holistic understanding of language. To achieve this, we propose an Object
+Cluster Module. This module first explores the relationships among
+the linguistic primitives to discern commonalities and differences in
+their focus areas. Utilizing this insight, we initialize language-based
+queries to capture these common characteristics, which form the
+final object embedding crucial for identifying the target object. The
+proposed Object Cluster Module greatly help the model to deepen
+the holistic understanding of linguistic and visual information.
+Our main contributions are summarised as follows:
+• We propose a Geometry-Enhanced Group-Word Attention,
+which enhances cross-modal interactions by integrating language with geometrically coherent sub-clouds, effectively
+addressing the challenges posed by the sparse and irregular
+nature of point clouds.
+• We design a Linguistic Primitives Construction, a strategy
+that learns primitives to represent distinct semantic attributes,
+enhancing the model’s capability to accurately identify targets through interaction with specific linguistic information.
+• We introduce an Object Cluster Module that analyzes the
+interrelationships among linguistic primitives to unify their
+insights and pinpoint common characteristics to deepen the
+holistic understanding of linguistic and visual information.
+• We achieve new state-of-the-art performance on 3D referring segmentation and visual grounding, and significantly
+outperform previous methods by a large margin.
+
+2 RELATED WORKS
+2.1 3D Instance and Referring Segmentation
+3D Instance Segmentation aims to detect and segment instances
+in the sparse point clouds. The success of the transformer has
+permeated the 3D modeling domain [36, 59]. In 3D object detection, methods [36, 44, 48, 59] employing the transformer have
+achieved state-of-the-art results. Inspired by this, transformer-based
+methods like Mask3D [52], OneFormer3D [32], SPFormer [54],
+MAFT [34] for instance segmentation have subsequently been developed. Mask3D [52] treats each object as an instance query. Through
+Transformer decoders, it learns these queries by attending to multiscale point cloud features and the queries concurrently produce all
+instance masks integrating with point features.
+Influenced by advancements in 2D multimodality [11–14, 18–
+20, 22, 23, 37–41, 53, 58], 3D referring segmentation is increasingly
+gaining attention. This field focuses on segmenting a target instance
+based on a given language expression. TGNN [25] is the first work
+to solve this challenging problem and introduces aggregating textual features by considering the neighboring local structure of each
+instance but also emphasizes capturing spatial interactions centered around each object. X-RefSeg3D [50] follows the paradigm
+of TGNN and builds a multimodal graph for the given 3D environment, integrating textual and spatial connections to facilitate
+
+RefMask3D: Language-Guided Transformer for 3D Referring Segmentation
+
+reasoning through the use of graph neural networks. 3D-STMN [57]
+is proposed to construct dense superpoint-text matching which is
+enhanced through dependency-driven insights in the end-to-end
+paradigm. SegPoint [21] designs a unified framework and generates segmentation masks for a diverse range of tasks utilizing the
+reasoning capabilities of a multi-modal Large Language Model. Despite the notable achievements of existing methods, they fall short
+in facilitating comprehensive multi-modal feature interaction and
+understanding. This paper is dedicated to addressing this challenge.
+
+2.2
+
+3D Visual Grouding
+
+3D visual grounding aims to identify and locate the referred object
+in a 3D scene based on the language expression. Three datasets
+including ScanRefer [5], ReferIt3D [2] and Multi3DRefer [66] are
+proposed to facilitate the research which contains object-expression
+pairs based on ScanNet [9]. Previous methods [1, 3, 15–17, 24, 26,
+51, 63, 63, 65, 67, 68] mostly employ a two-stage pipeline. They
+first exploit either a 3D object detector [29, 31, 44] or ground truth
+information to generate object proposals. Subsequently, they utilize a text encoder [10, 42] to extract linguistic features and then
+identify the referred object through feature fusion and language
+feature matching. In this context, InstanceRefer [65] streamlines
+the task by approaching it as an instance-matching challenge. LanguageRefer [51] turns the multi-modal problem into a language
+modeling scenario, achieved by substituting 3D features with predicted object labels. SAT [63] employs additional 2D semantics to
+boost multi-modal alignment and achieve superior performance.
+In contrast to the two-stage methods, 3D-SPS [46] adopts a progressive keypoint selection strategy guided by language and locates
+the target directly within a single-stage network for the first time.
+BUTD-DETR [27] calculates the correlation between each word and
+object, subsequently selecting the word features that align with the
+object’s name to match the corresponding object. EDA [60] builds
+upon BUTD-DETR and further proposes text decoupling to separate
+text components by grammatical analysis. Single-stage methods
+have taken a dominant role and both BUTD-DETR and EDA have
+demonstrated superior performance. However, these methods either need to train an additional text span predictor network or
+employ external tools to decouple text which is time-consuming
+and complicated. Besides, they are designed for visual grounding
+and cannot perfectly adapt to referring segmentation. To this end,
+we propose our method to simplify the image-text matching and
+apply it to both 3D referring segmentation and visual grounding.
+
+3 METHODS
+3.1 Architecture Overview
+Figure 2 shows the overall architecture of our proposed end-toend 3D referring segmentation approach RefMask3D. RefMask3D
+takes an input pair comprising a point cloud scene and a textual
+description, and produces a point-wise mask for the target object
+indicated by the textual description. The point cloud scene, denoted
+as 𝑃𝑐𝑙𝑜𝑢𝑑 ∈ R𝑁 × (3+𝐹 ) , consists of a total of 𝑁 points, with each
+point containing 3D coordinate information ∈ R3 and an auxiliary
+feature ∈ R𝐹 like color.
+First, a text encoder is employed to embed the text description
+into language features, denoted as 𝑭𝑡 ∈ R𝑁𝑡 ×𝐷 , where 𝐷 and 𝑁𝑡
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+represent the number of channels and words, respectively. We extract point features from the point encoder which builds deep interaction between vision and language through Geometry-Enhanced
+Group-Word Attention. The point encoder is a 3D U-Net-like backbone. In the vanilla U-Net architecture, the feature map at the
+𝑖-th layer in the upsampling path is obtained by combining the
+features from the corresponding 𝑖-th layer in the downsampling
+path with the features from the (𝑖 + 1)-th layer which is illustrated
+in the gray line in Figure 2. The vanilla output features denote
+as 𝑭𝑖 ∈ R𝑁𝑖 ×𝐷 , 𝑖 = {1, 2, 3, 4}. Therefore, the multi-scale visionlanguage features derived from the point encoder are denoted
+as 𝑭𝑖′ ∈ R𝑁𝑖 ×𝐷 , 𝑖 = {1, 2, 3, 4}. The full-resolution feature map
+𝑭0′ ∈ R𝑁 ×𝐷 is used as the mask feature for mask predictions.
+Then, Linguistic Primitives Construction produces primitives O ′
+to represent distinct semantic attributes by informative language
+cues, enhancing the model’s capability to accurately localize and
+identify targets through interaction with specific linguistic information. The linguistic primitives O ′ , the multi-scale point features
+{𝑭1′, 𝑭2′, 𝑭3′, 𝑭4′ }, and language features 𝑭𝑡 collectively serve as input
+to a 4-layer cross-modal transformer decoder, which is applied 𝐿
+times, leading to an overall transformer decoder with 4𝐿 layers.
+Next, the output of linguistic primitives through transformer
+decoder and object queries O𝑐 are fed into the Object Cluster Module to analyze the interrelationships among linguistic primitives to
+unify their insights and pinpoint common characteristics. Finally,
+we obtain masks by performing a multiplication operation between
+the last-layer object embedding O𝑐′ and mask feature 𝑭0′ . Meanwhile,
+we employ a MLP head to predict confidence score. The mask with
+the highest confidence score is selected as the output.
+
+3.2
+
+Geometry-Enhanced Group-Word Attention
+
+Different from models [25, 27, 46, 60] that stack a modality fusion
+module on top of the vision or language backbones, our approach
+integrates multi-modal fusion within the point encoder, leveraging the advantages of an end-to-end paradigm. Early-stage fusion
+of cross-modal features is believed to enhance the effectiveness
+of the fusion process in 2D-RES tasks [62]. However, it remains
+unexplored within the 3D field. The 3D domain, characterized by
+the sparse and irregular distribution of point cloud data, presents
+unique challenges to cross-modal fusion. The conventional 2D
+method of directly establishing relationships between each point
+and linguistic terms introduces excessive noise, potentially impairing performance due to the complexity and variability of point
+cloud structures. Addressing this challenge, we introduce GeometryEnhanced Group-Word Attention mechanism. Unlike traditional
+methods that calculate cross-modal relationships at the individual
+point level, our approach innovatively processes local groups (subclouds) with geometrically adjacent points. This methodology not
+only mitigates the noise associated with direct point-to-word correlations but also capitalizes on the inherent geometric relationships
+within point clouds, enhancing the model’s ability to accurately
+integrate linguistic and 3D structure.
+Firstly, we employ farthest point sampling (FPS) to downsample
+the point number of features 𝑭𝑖 from 𝑁𝑖 to 𝑁𝑔 , which serves as a
+set of local centroids. Following the identification of these local
+centroids, we proceed to gather their neighboring points. This is
+
+179
+
+188
+189
+190
+191
+192
+
+mple
+
+183
+184
+185
+186
+187
+
+Downsa
+
+181
+182
+
+Transformer Decoder
+
+180
+
+ple
+
+174
+175
+176
+177
+178
+
+and EDA have demonstrated superior performance. Howsampling phase are denoted as {F00 , F10 , F20 , F30 , F40 }. The
+201
+ever, these methods either need to train an additional text
+full-resolution feature map F00 2 RN ⇥D is utilized as the
+202
+span predictor network or utilize external tools to decouple
+mask feature to generate the final mask predictions.
+203
+CVPR
+text which is time-consuming and complicated. Besides,
+In
+the
+Transformer
+Decoder,
+the
+proposed
+Language204
+#1260
+they are designed for visual grounding and cannot perfectly
+Cluster Query Generation
+module
+clusters #1260.
+language
+infor205
+CVPR 2024
+Submission
+CONFIDENTIAL
+REVIEW COPY. DO NOT DISTRIBUTE.
+adapt to referring segmentation. To this end, we propose
+mation into No learnable queries O, enabling each query
+206
+our method to simplify the image-text matching and apply
+to accumulate varying comprehensions of textual descrip207
+MM
+’24,3D
+October
+28–November
+1, 2024,
+VIC, Australia. tion. These queries are hence guided by informative lanShuting He and Henghui Ding
+it to
+both
+referring
+segmentation
+andMelbourne,
+visual grounding.
+208
+306
+Theguage
+abovecues
+operations
+arethe
+alltarget
+performed
+the dim
+Nt .
+to identify
+objecton
+instead
+of aimlessly
+209 Specifically, within a mini-batch, we organize
+307
+With
+Â,objects.
+each object
+query effectively
+accumulates
+the
+itive samples into a set denoted as P, which con
+3. Methods
+seeking
+The language-cluster
+queries
+O0 , the multi210
+Point Encoder
+0
+308
+word
+embeddings
+corresponding
+group and
+samples with different textual descriptions for the
+scale
+point features
+{F10 , F20 , F30to
+, Fits
+and the language
+fea211
+4 },designated
+3.1. Architecture Overview
+Residual
+ture !Tlanguage-cluster
+as input to anamely
+4-layer W
+cross-modal
+212
+& collectively serve
+309!
+obtains
+embeddings,
+= ÂV .
+ject. Other samples not categorized as positive ar
+ℱ
+&
+%
+%
+!
+Block
+!
+transformer
+decoder,
+which is applied
+L times, culminating
+213
+Figure 2 shows the proposed end-to-end 3D referring
+310seg- To!ensure
+that
+these
+language-cluster
+embeddings
+appropribled under the negative sample set N. A limitati
+'
+Score
+in an
+overall decoder
+layers. the object queries,
+214
+mentation model RefMask3D. RefMask3D takes an311
+input ately
+complement
+ratherwith
+than4Ldominate
+due to the finite number of negative samples, co
+&
+!"
+Block
+Next,
+cross-modal
+contrastive
+learning
+takes
+the
+object
+215
+pair comprising a point cloud scene and a textual descrip312
+and to& maintain a balanced integration of linguistic inforby the batch size. Additionally, the quality of pos
+embedding
+and language
+feature block
+of the G.
+i-thGFFN
+cross-modal
+216
+!$ we introduce
+ℱ mation,
+tion, and produces a point-wise mask for the target !
+object
+$
+313
+an
+additional
+consists
+of
+negative samples for contrastive learning cannot be
+&
+Block
+#
+transformer !decoder
+layer as inputs to conduct intra and
+217
+indicated by the textual description. The point cloud314
+scene, !a' two-layer
+Multi-Layer Perceptron (MLP),Self-Attention
+followed by a
+under such a random mini-batch. To address thes
+inter-sample learning to construct the discriminative
+feature
+218
+denoted as Pcloud 2 RN ⇥(3+F ) , consists of a total of N
+& The role of G is to generate a series of
+315
+sigmoid
+function.
+we introduce a memory bank and hard sample sel
+!
+Block
+K,V,
+Q
+$
+of object embedding and language features.
+219
+points, with each point containing 3D coordinate!informa!#&representation
+ℱ
+#
+$× from W. These weight
+weight maps derived
+refine the composition
+ofMask
+P and N for effective lea
+Output
+tion Geometry-Enhanced
+2 R3 and an auxiliary feature 2 RF like color. 316 ! element-wise
+Finally, we obtain masks by performing
+a multiplica220
+Cross-Attention
+• Momory Bank Construction. Building upon
+317and' maps
+used tobetween
+adjust the
+the last-layer
+influenceobject
+of each
+elementand
+inQ
+Group-Word
+Attention
+First,
+we extract
+the vision and language features
+tionare
+operation
+embedding
+221
+K,V
+ℒ()* [15, 41, 44], which emphasiz
+from recent studies
+318
+language-cluster
+embeddings,wethereby
+a harbuild deep interaction
+between them in the !
+encoder.
+feature F00 . Meanwhile,
+employensuring
+a MLP head
+to
+222
+ℱ A !"&the mask
+ℱ
+"
+Self-Attention
+portance of a large pool of negative samples f
+319!'
+monious
+of linguistic
+and object
+queries.
+text encoder is employed to embed the text description
+predictblend
+the confidence
+score.
+The mask
+with the highest
+223
+Linguistic
+Pos.
+tive contrastive learning,
+weNeg.
+introduce two distin
+320 D&
+Finally,
+thescore
+language-cluster
+object
+query
+is formulated
+into language features, denoted as T 2 RNt ⇥D , where
+confidence
+is thenPrimitive
+selected
+as the
+output.
+224
+Object
+Cluster
+Module
+!!
+ℱ
+!
+Text
+Construction
+ory banks: a visual
+memory
+bank Mv 2 RN s⇥
+321 ! by:
+Push
+Pull
+“This is a white
+322
+O0 = !1 (O + W G(W)),
+(5)
+textual
+memory
+bank
+M
+2
+RN s⇥D to address
+t
+"
+3
+kitchen counter. It is
+Text !'
+pooling
+0
+tations imposed by mini-batch sizes. These memo
+323
+where !1 is the linear projection layer. O represents the
+above the cabinets”
+Encoder
+Upsam
+
+171
+172
+173
+
+are structured to store object embeddings and text
+324
+language-cluster object queries, with distinct queries conrespectively. The term Ns denotes the total count
+325
+centrating on various clustered language semantics. The
+ing samples,
+while
+D represents
+326proposed
+objectRefMask3D.
+queries are designed
+to cluster
+linguistic information
+Figure 2: The framework overview of the
+It extracts
+text-enriched
+point features
+from the
+point
+encoder the dimensionali
+
+feature Construction
+vectors. The content
+of Mv and Mt is dyn
+327Group-Word
+that exhibits
+similar semantic
+patterns. Feeding
+such objectPrimitives
+which is assisted by Geometry-Enhanced
+Attention.
+Subsequently,
+the Linguistic
+Module
+updated throughout the training process with featu
+328
+queriesattributes.
+into the decoder
+enables
+it to emphasize
+diverse
+generates primitives to embody specific
+semantic
+These
+primitives
+are then
+fedlaninto the Transformer Decoder to
+all training samples. This approach allows us to ef
+329
+guage information patterns, which contributes to accurately
+focus on diverse semantics. Object Cluster Module is employed to analyze the interrelationships among linguistic primitives to
+access the entire dataset’s sample pool.
+330
+identifying target objects.
+unify their insights and pinpoint common characteristics to enhance the precision of target identification.
+• Hard Sample Selection: With the extensive sam
+331
+3.4. Cross-Modal Contrastive Learning
+lection in our memory bank, a key question emerg
+do we select the most appropriate positive and
+
+332
+While the(𝑘-NN)
+proposed Language-Cluster
+Generation
+achieved through the application of the 𝑘-nearest
+Neighbor
+words related Query
+to it. To
+tackle this, we introduce learnable backsamples? Drawing from previous studies [22, 23,
+333
+aids in identifying target objects, it does not effectively mitialgorithm, which allows us to systematically associate each local
+ground embeddings for language features, denoted as 𝑻𝑏𝑔 ∈ R𝐷 .
+it’s evident that hard samples play a crucial role
+334
+gate ambiguities arising from other embeddings. These amcentroid with its adjacent points based on its geometric proximity.
+This strategy is designed to allow points
+trastivewithout
+learning corresponding
+by aiding the development of ro
+335
+biguities could lead to false positives during the inference
+The aforementioned process is formulated 336
+as:
+text
+information
+to
+focus
+on
+a
+generic
+background
+text embedding,
+resentations. Therefore,
+for a given target objec
+stage. Previous approaches employed contrastive learn𝑻𝑏𝑔 , reducing
+theothers.
+potential
+distortion
+caused
+by unrelated
+text on select objects
+textual
+description,
+we specifically
+𝑔
+337
+token
+from
+This
+is
+𝑁
+×𝑘 ×𝐷ing to differentiate the target
+𝑔
+𝑭𝑖 = 𝑘-NN(FPS(𝑭𝑖 ), 𝑭𝑖 ) ∈ R
+.
+(1)
+feature.
+Specifically,
+feature
+𝑖, we
+long
+to theencoding
+same classlayer
+and are
+located in the same
+338
+achieved by maximizingthe
+thepoint
+similarity
+between
+the targetat each
+perform
+a concatenation
+operation on
+thenegative
+language
+featureThis
+𝑭𝑡 with
+hard
+samples.
+approach effectively a
+token
+and theofcorresponding
+expression
+while minimizing
+As such, we obtain 𝑁𝑔 local groups, each 339
+of which
+consists
+𝑘
+the issuethe
+of distractions
+caused by multiple instanc
+the (negative)
+background
+feature
+above relationship
+340
+similarities
+pairs.
+The 𝑻process
+𝑏𝑔 . Subsequently,
+points. Next, we perform group-word cross-modal
+attentionwith
+be-non-target
+same class in a scene. To ensure a stable training
+341
+can
+be
+formulated
+as
+intra-sample
+contrastive
+learning:
+calculation
+process
+becomes:
+tween 𝑁𝑔 local groups and language features 𝑭𝑡 as:
+𝑔
+exp(< t, o+ > /⌧ ) 𝑔′
+𝑭𝑖 [𝑭𝑡 ; 𝑻𝑏𝑔the
+]𝑇 rest of the negative samples are acquired via
+𝑔 𝑇
+,
+342
+Lintra = log PNo
+(6)√
+sampling.
+For the positive sample selection, given
+,
+S
+=
+𝑭
+𝑭
+𝑖
+𝑡
+𝑔
+(5)
+k=1 exp(< t, ok > /⌧ )
+𝐷 object, we include all its corresponding
+textual desc
+S𝑖 = 𝑖√
+∈ R𝑁𝑔 ×𝑘 ×𝑁𝑡 ,
+(2)
+′
+′
+343
+where <, > denotes cosine similarity, ⌧ is the temperature
+𝐷
+𝑐
+𝑐
+𝑭 = R (softmax(SUtilizing
+))𝑭 , the constructed positive and negativ
+344
+
+𝑖𝑡 obtained
+parameter, 𝑔t 2 RD represents the text embedding
+
+𝑖
+
+𝑡
+
+sets, we develop the inter-sample loss Linter using
+where S𝑖 denotes the relationship between
+groups
+𝑭𝑖language
+and features
+o
+345local by
+pooling
+T . The
+{ok }N
+′the concatenation
+where
+[; ] set
+represents
+𝐷 is the
+k=1𝑔comprises
+positiveoperation,
+supervised and
+contrastive
+approach, formular
+𝑭𝑡 and we sum along 𝑘 nearest neighbors346
+dimentation
+obtain derived
+channel
+S𝑖 theenables
+language elobject to
+embeddings
+from dimension.
+the output of
+cross- point features withoutX
+1
+exp(< a, a+ > /⌧
+the relationship between each local centroid
+𝑭𝑡 denoted
+as layer,ement
+to emphasize
+the
+background
+feature,
+347 withmodal
+transformer
+with ocorrespondence
+object
++ being the positive
+P
+Linter
+=
+logreduc0
+S𝑖𝑐 ∈ R𝑁𝑔 ×𝑁𝑡 . Subsequently, we extract 348
+linguistic
+featuresthat
+𝑭𝑖𝑡𝑐matches ing
+embedding
+withirrelevant
+the ground-truth
+a0 2P,N exp(< a, a
+featuremask.
+impact. The operation R (·)|P|
+is used
+a+ 2Pto remove
+349
+The intra-sample lossthe
+Lintra
+focuses
+onapenalizing
+related to the local centroids as,
+lastonly
+column
+from
+given matrix, which prevents the integration
+350
+discrepancies within a single
+language
+description
+and point
+where
+a represents
+item, which can be
+of
+the
+background
+feature
+into the final
+fused
+feature. the
+As anchor
+such, we
+𝑔 ×𝐷 .
+′ the inter-sample rela𝑭𝑖𝑡𝑐 = softmax(S𝑖𝑐 )𝑭𝑡 ∈ R𝑁351
+(3) doesn’t account 𝑐for
+cloud scene, and
+object or features
+a language
+feature.
+When a is an objec
+obtain 𝑭𝑖𝑡 which
+represent refined linguistic
+related
+to
+the
+352
+tionships between different samples, e.g., the same object
+ding, a+ and a0 are text embeddings, and vice ve
+local centroids and not influenced by
+irrelevant words. The backFinally, inspired by PointNet++ [49], we propagate 𝑭𝑖𝑡𝑐 from each
+353
+but different textual descriptions, different objects from the
+primary aim of L
+is to refine the embedding
+ground embedding is a learnable parameter, designedinter
+to capture the
+local centroid to its corresponding original354point same
+number
+with
+a
+or different point cloud scene. To overcome this limthat embeddings of the same object from differen
+overallondata
+distributionlevel
+of the
+background
+weighted summation and obtain linguistic355
+featuresitation,
+related
+the to operate
+wetopropose
+the inter-sample
+to dataset
+ties and
+(e.g.,represent
+text and point)
+are brought closer, while
+information
+effectively.
+This
+embedding
+is
+only
+used
+during
+whole point feature map 𝑭𝑖𝑡 ∈ R𝑁𝑖 ×𝐷 which
+have
+the
+same
+shape
+356
+consider the global context of the entire dataset.
+dings of different objects
+are the
+distanced. This app
+attention calculation process. By incorporating the background
+as 𝑭𝑖 . We combine them to generate multi-modal feature maps 𝑭𝑖′
+embedding, we facilitate more accurate cross-modal interactions,
+via element-wise multiplication.
+5
+which
+are not adversely influenced by irrelevant words.
+𝑭𝑖′ = 𝑭𝑖𝑡 ⊙ 𝑭𝑖 .
+(4)
+𝑔
+
+Through the above process, we have implemented cross-modal
+fusion based on the sparse and irregular characteristics of 3D data
+in the point feature extraction stage.
+Besides, in vanilla cross-modal attention, the challenge arises
+when dealing with situations where a point has no corresponding
+
+3.3
+
+Linguistic Primitives Construction
+
+In the 3D domain, the existing approaches typically initialize queries
+with point coordinates sampled from the input point cloud [44, 48,
+52]. These sampling strategies are based on either the farthest
+point sampling method [48, 52] or the 𝑘-closest points sampling
+
+291
+V , are employed to project the object query and the lan312 for precise
+and!referring.
+to maintain
+a balanced
+linguistic
+inforsize. Additionally, the quality of positive and
+261
+formation, a vital factor
+Specifically,
+objectintegration
+query with theoflowest
+cost to the
+ground-truthbyob-the batch
+311
+The background embedding is a learnable parameter, deguage word feature T into a shared feature space, which are
+292
+262
+solely relying on farthest
+point sampling
+often
+results
+in pre- an ject
+mask as our
+output.G.And
+then supervise
+the
+312
+CVPR
+CVPR
+313
+mation,
+we
+introduce
+additional
+block
+G
+consists
+of them innegative
+samples for contrastive
+learning cannot be ensured
+ned to capture the overall data distribution of the dataset
+represented as Q, K, and V , respectively. Subsequently, we
+293
+#1260
+#1260
+314
+a
+two-layer
+Multi-Layer
+Perceptron
+(MLP),
+followed
+by
+a
+under
+such
+a
+random
+mini-batch.
+To address these issues
+represent background information effectively. This emcalculate the similarity between each pair of object query
+294
+CVPR315
+2024
+Submission
+#1260.
+CONFIDENTIAL
+DOaNOT
+DISTRIBUTE.
+ding is only used during the attention calculation
+prosigmoid
+function.
+The4 role as:
+ofREVIEW
+G is to COPY.
+generate
+series
+of
+we introduce a memory bank and hard sample selection to
+and word
+feature,
+formulated
+295
+s. By incorporating the background embedding,316
+we fa- element-wise weight mapsT derived from W. These weight
+refine the composition of P and N for effective learning.
+QK
+= p
+RNo ⇥Nt .
+(3)
+296
+tate more accurate cross-modal interactions, which
+• Momory Bank Construction. Building upon insights
+317 are maps are used to A
+adjust
+the2 influence
+of each element
+in
+D
+adversely
+influenced
+by irrelevant
+words. are allTransformer
+RefMask3D:
+Language-Guided
+3Dthe
+Referring
+Segmentation
+MM ’24, October
+1, 2024,
+Melbourne,
+VIC, Australia.
+306
+The
+above
+operations
+performed
+on
+dim N
+. embeddings,
+Specifically,ensuring
+within a mini-batch,
+we28–November
+organize
+the
+posfrom
+recent studies
+[15,
+41,357
+44],
+which emphasize the im
+318
+thefor
+language-cluster
+After
+computingtthe similarity
+matrixthereby
+A, we then cluster a har297
+307
+With
+Â, each
+object query
+accumulates
+the
+itive
+samples
+into
+a
+set
+denoted
+as
+P,
+which
+contains
+the
+358
+. Language-Cluster
+Query
+Generation
+portance
+of
+a
+large
+pool
+of
+negative
+samples for effec
+319 effectively
+monious
+blend
+of
+linguistic
+and
+object
+queries.
+the word features into each group in Q. However, per298
+308
+word
+embeddings
+corresponding
+to
+its
+designated
+group
+and
+samples
+with
+different
+textual
+descriptions
+for
+the
+same
+ob359
+shared
+feature
+space,
+which
+are
+represented
+as
+𝑄,
+𝐾,
+and
+𝑉
+,
+respective
+contrastive
+learning,
+we
+introduce
+two distinct mem
+320
+Finally,
+the
+language-cluster
+object
+query
+is
+formulated
+forming
+this
+clustering
+with
+a
+one-to-one
+hard
+assignment
+299
+he 3D domain, the existing approaches typically initial309with point
+obtains
+language-cluster
+W in
+= a ÂV
+.
+ject.
+Other
+not
+as
+positive
+assem360bank
+not feasible
+differentiable
+manner.
+To samples
+overcome
+this categorized
+300
+tively.
+Subsequently,
+weory
+calculate
+similarity
+between
+each
+banks:the
+aarevisual
+memory
+Mvpair
+2 RN s⇥D , and a
+321input by:isnamely
+queries
+coordinates
+sampled fromembeddings,
+the
+0
+!strategies
+Linear
+N s⇥D
+!
+challenge,
+weappropriemploy
+differentiable
+Gumbel-Softmax
+301
+310 [31, 35,
+To 39].
+ensure
+thatsampling
+these
+language-cluster
+embeddings
+bled
+under
+the
+negative
+sample
+set
+N.
+A
+limitation
+arises
+361
+322 are
+O
+= !the
+(O
++
+W
+G(W)),
+(5)
+Linguistic
+Primitives
+of
+primitive
+and
+word
+feature,
+formulated
+as:
+nt cloud
+These
+textual memory bank Mt 2 R
+to address the limi
+1
+approach
+45] to assign the
+features
+the ob- of302
+ed on311
+either the ately
+farthestcomplement
+point sampling
+method
+[35,dominate
+39] where
+rather
+than
+the!1object
+dueword
+tolayer.
+the
+finite
+number
+negativetations
+samples,
+constrained
+362 sizes. These memory banks
+by mini-batch
+𝑇imposed
+323
+is[20,
+thequeries,
+linear projection
+O0torepresents
+the
+𝑄𝐾
+ject
+Q in ainfordifferentiablebyway
+and
+generate
+cor303
+𝑡.
+he k-closest
+points
+technique
+[19, 31]. integration
+Such
+312
+and sampling
+to maintain
+a balanced
+of query
+linguistic
+the
+batch
+size.theAdditionally,
+theAare
+quality
+and
+363
+= structured
+R𝑁to𝑜 ×𝑁
+√ of∈positive
+store
+object
+embeddings(7)
+and text features
+324
+language-cluster
+object
+with
+distinct
+#queries,
+responding clustering
+matrix
+between
+Q and
+K, i.e.,queries con304
+hods 313
+are prevalent
+in tasks
+visual grounding
+[19,
+𝐷
+softmax
+mation,
+we like
+introduce
+anGumbel
+additional
+block
+G.
+G
+consists
+of
+negative
+samples
+for
+contrastive
+learning
+cannot
+be
+ensured
+364
+respectively.
+The
+term
+N
+denotes
+the
+total
+count of train
+325
+centrating
+on
+various
+clustered
+language
+semantics.
+The
+s
+43] and instance segmentation [39]. However, a key
+t
+Mula
+computing
+the similarity
+matrix
+A,
+unlike
+the
+314
+a two-layer Multi-Layer Perceptron
+(MLP),
+by
+such
+random
+mini-batch.
+To
+address
+these
+issues,
+365conventional
+Ãqueries
+= followed
+Gumbel-Softmax(A)
+2cluster
+RNo ⇥N
+, aAfter
+ing
+samples,
+while
+D
+represents
+the
+dimensionality
+of the
+326 in- object
+are designed
+tounder
+linguistic
+information
+itation of these methods is their neglect of language
+(4)
+305
+cross-attention
+that
+a softmax
+normalize
+315
+function.
+Thesegmentation.
+role327
+of G isthat
+to generate
+asimilar
+series
+of ) + Ãwe
+introduce
+a memory
+bank
+andperforms
+hard
+sample
+selection
+to
+366
+feature
+vectors.
+Theoperation
+content
+oftoM
+Â = one-hot(
+Ãargmax
+stop-gradient(
+Ã).such object
+exhibits
+semantic
+patterns.
+Feeding
+mation,
+which issigmoid
+vital for precise
+referring
+v and Mt is dynamically
+Mul
+the correlation
+of
+corresponding
+to atraining
+specific
+primitive,
+316
+element-wise weight
+maps 328
+derived from
+These
+weight
+refine
+composition
+of PlanandallNwords
+for
+effective
+learning.the
+367 process
+updated
+throughout
+with features from
+$
+%W.into
+"
+queries
+the decoder
+enables
+it tothe
+emphasize
+diverse
+
+317
+318
+319
+320
+321
+!'
+dding322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+
+aimConstruction.
+to enable eachBuilding
+primitiveupon
+to concentrate
+on
+• Momory we
+Bank
+insights
+368the most remaps are used to adjust the
+influence
+of each element
+in
+all training
+samples.
+This approach
+allows us to effectively
+329
+guage
+patterns,
+to accurately
+4 !#information
+!
+!"" which contributes
+Linear
+Linear!$ embeddings,
+Linear
+Linear
+semantic.
+“white”.
+Therefore,
+we
+employ
+the
+from recent lated
+studies
+[15, 41,e.g.
+44],
+which
+emphasize
+the
+im369differentiable
+the language-cluster
+thereby
+ensuring
+a
+haraccess the entire dataset’s sample
+pool.
+330
+identifying target objects.
+[28, 61] to
+portance of Gumbel-Softmax
+a large pool of approach
+negative
+samples
+forassign
+effec-the word
+370 features to
+monious blend of linguistic and object queries.
+• Hard
+Sample
+Selection:
+With the extensive sample col
+the primitives
+𝑄 introduce
+in a differentiable
+waymemand generate
+331 object
+3.4.query
+Cross-Modal
+Contrastive
+Learning
+tive contrastive
+learning, we
+two
+distinct
+371 the correFinally, the language-cluster
+is formulated
+lection in Nour
+memory bank,
+a key question emerges: how
+s⇥D
+clustering
+matrix
+Â
+anda 𝐾, 372
+ory banks: sponding
+a visual memory
+bank
+M
+2 between
+R
+, 𝑄and
+by:
+do vwe
+select
+the
+most
+appropriate positive and negative
+332
+While
+the
+proposed
+Language-Cluster
+Query
+Generation
+0
+N
+s⇥D
+Primitives
+Word Embedding (5)
+!'
+O = !1 (O + W G(W)),
+textual memory bank Mt Â2 =RGumbel-Softmax(A)
+to address the ∈
+𝑡373
+R𝑁𝑜 ×𝑁
+.
+samples?
+Drawinglimifrom
+previous
+studies(8)[22, 23, 37, 41]
+333
+aids in identifying target objects, it does not effectively mititations imposed by mini-batch sizes. These memory banks
+374
+where !1 is the linear projection layer. O0 represents the
+it’s
+evident
+that
+hard
+samples
+play
+a crucial role in con
+334
+gate ambiguities arising fromare
+other
+embeddings.
+These
+amÂ, each
+With
+primitive
+effectively
+chooses
+the word
+structured
+to store
+object
+embeddings
+and text
+features,
+375 embeddings
+language-cluster
+object queries,
+withConstruction
+distinct queries
+con-initializes
+Figure 3: Linguistic
+Primitives
+(LPC)
+trastive
+learning
+by
+aiding
+the
+development
+of robust rep
+335
+biguities could lead to false respectively.
+positives during
+the
+inference
+corresponding
+its semantic
+and
+thenof
+obtains
+The term Ns to
+denotes
+the total
+count
+train- linguistic
+376 primitives
+centrating
+various clustered
+language
+semantics.
+Theattributes.
+various on
+primitives
+O to express
+distinct
+semantic
+resentations.
+Therefore,
+for
+a
+given
+target
+object
+and its
+′
+336
+stage. Previous approachesing
+employed
+contrastive
+learn, which
+are formulated
+by:
+samples,Owhile
+D represents
+the dimensionality
+of the
+377
+object
+queries
+are designed
+cluster linguistic
+These
+primitives
+aftertointeracting
+withinformation
+linguistic informatextual
+description,
+we
+specifically
+select
+objects
+that
+be
+337
+ing
+to
+differentiate
+the
+target
+token
+from
+others.
+This
+is
+′ t is dynamically
+feature vectors. The content of Mv andOM
+378
+that
+exhibits
+similar semantic
+patterns.
+Feeding suchattribute
+object values
+tion
+are capable
+of acquiring
+corresponding
+=𝜔
+(same
+Â𝑉 ), class and are
+(9)
+1
+long
+to
+the
+located
+in
+the
+same
+scene
+as
+338
+bydiverse
+maximizing
+similarity
+between the
+thetraining
+target process with features from
+throughout
+379
+queries
+into the
+it toachieved
+emphasize
+lan- theupdated
+denoted
+O ′ . decoder enables
+hard
+negative
+samples.
+This
+approach
+effectively
+addresses
+where
+𝜔
+is
+the
+linear
+projection
+layer.
+The
+linguistic
+primitives
+are
+339
+token
+and
+the
+corresponding
+expression
+while
+minimizing
+all training samples. 1This approach allows us to effectively
+380
+guage information patterns, which contributes to accurately
+the issue of distractions caused
+by multiple
+designed
+exhibit
+semantic
+primitives
+into instances of the
+similarities with non-target (negative)
+pairs.
+Thetoprocess
+access the entire
+dataset’s
+sample
+pool. patterns. Feeding such381
+identifying target objects. 340
+same
+class
+in
+a
+scene.
+To
+ensure
+a
+stable
+training process
+the
+transformer
+decoder
+enables
+it
+to
+emphasize
+diverse
+language
+341
+can be formulated as intra-sample
+contrastive
+learning:
+• Hard Sample Selection: With the extensive sample col382
+technique
+[27, 44].Contrastive
+Such methods
+are prevalent in tasks like visual
+3.4.
+Cross-Modal
+Learning
+the rest of
+negative
+samples
+aretarget
+acquired via random
+information,
+which
+contributes
+tothe
+accurately
+exp(<
+>
+/⌧ )
+lectiont,ino+our
+memory
+bank,
+a key
+question
+emerges:
+how identifying
+383
+grounding [27, 44, 60] and
+However,
+342 instance segmentation
+Lintra = [52].
+log P
+(6) stage.
+objectsmost
+in, the later
+sampling. For the positive sample
+selection, given the targe
+Nodo we select
+384
+While
+proposedofLanguage-Cluster
+Queryneglect
+Generation
+t, ok the
+> /⌧ ) appropriate positive and negative
+a keythe
+limitation
+these methods is their
+of language
+ink=1 exp(<
+object,
+we
+include
+all
+its
+corresponding
+textual descriptions
+samples? Drawing from previous studies [22, 23, 37, 41],
+385
+aids
+in identifying
+target
+objects,
+it does
+not
+effectively
+miti343
+where
+<,
+> denotes
+cosine similarity,
+⌧ 3.4
+is the temperature
+formation,
+which
+is vital
+for precise
+referring
+segmentation.
+RelyObject
+Cluster
+Module
+Utilizing
+the
+constructed
+positive
+and
+negative sample
+it’s evident that hard samples play a crucial role in con386
+gate
+arising from
+embeddings.
+These
+344other
+parameter,
+2 RD amrepresents
+the text embedding
+obtained
+ingambiguities
+solely on farthest
+point
+sampling
+oftentresults
+in
+predictions
+sets,
+we
+develop
+the
+inter-sample
+loss
+L
+using a multi
+Each
+linguistic
+primitive
+focuses
+on
+different
+semantic
+patterns
+in
+inter
+trastive
+learning
+by
+aiding
+the
+development
+of
+robust
+rep387
+No
+biguities
+could
+lead
+false345
+positives
+the
+inference
+by during
+pooling
+language
+features
+T . The set {ok }given
+that stray
+from
+thetoobjects
+of interest,
+especially
+in sparse
+scenes,
+k=1 comprises
+positive
+supervised
+contrastive
+formularted as:
+point
+that
+correlate
+with
+their
+attributes.
+resentations.the
+Therefore,
+forcloud
+a given
+target
+object
+and
+its linguistic
+388 approach,
+stage.
+Previous
+approaches
+employed
+contrastive
+learnthereby hindering convergence
+or
+resulting
+in the loss
+of objects.
+346
+object
+embeddings
+derived
+from the output
+of theourcrossHowever,
+ultimate goal,
+based
+on the
+is toexp(<
+identify
+X
+textual description,
+we specifically
+select
+objects
+be- text,389
+ingAlthough
+to differentiate
+tokenmodal
+others.
+Thislayer,
+is introduc1thatgiven
+a, aa + > /⌧ )
+3D-SPSthe
+[46]target
+attempts
+tofrom
+address
+this issue
+by
+347
+transformer
+with o+ being the
+positive
+object
+P
+L
+=
+log
+,
+inter
+unique
+target
+object,
+which
+requires
+a
+comprehensive
+understandlong to the same class and are located in the same|P|
+scene as
+390
+achieved
+by maximizing query
+the similarity
+between
+the target
+exp(< a, a0 > /⌧ )
+ing a language-aware
+that selects
+the top-𝑘
+348 selection
+embedding
+that matches
+withquery
+the ground-truth
+mask.
+a0 2P,N
+a+responsible
+2P
+ing
+of
+language.
+For
+example,
+the
+primitive
+for
+“white”
+hard
+negative
+samples.
+This
+approach
+effectively
+addresses
+391
+token
+andclose
+the corresponding
+expression
+while minimizing
+points
+to the given349
+language
+description.
+Yet, this
+approach
+is focuses focus
+The intra-sample
+loss
+Lintra
+only
+on penalizing
+(7
+all the
+parts
+of theofpicture,
+but
+the issue of will
+distractionson
+caused
+by white
+multiple
+instances
+the
+392 we need to
+similarities
+non-target
+(negative)topairs.
+The
+process
+manuallywith
+tailored
+and susceptible
+noise.
+This
+becomes
+particu350
+discrepancies
+within
+a single
+language
+description
+and
+point
+where
+a
+represents
+the
+anchor
+item,
+which
+can
+be
+either
+an
+find
+the
+one
+above
+the
+cabinets.
+To
+this
+end,
+we
+employ
+an
+Object
+same class in a scene. To ensure a stable training process,
+393
+canlarly
+be formulated
+intra-sample
+contrastive
+learning:
+problematicaswhen
+the
+points
+don’t
+reflectfor theCluster
+351 selected
+cloud
+scene,
+andaccurately
+doesn’t account
+inter-sample
+relaobject
+or
+a
+language
+feature.
+When
+a
+is
+an
+object
+embed
+Module
+to
+explore
+the
+relationships
+among
+the
+linguisthe rest of the negative samples are acquired
+via random
+394
+exp(<
+o+all>anchored
+/⌧ between
+)
+the target
+object
+they t,
+are
+a(6)
+single samples,
+word. e.g.,
+tionships
+same object
+ding,
+a+given
+and the
+a0 are
+textdifferences
+embeddings,
+and vice versa. The
+, todifferent
+Lintra
+= or
+logwhen
+ticthe
+primitives
+to identify
+commonalities
+and
+in their
+P352
+sampling. For
+the
+positive
+sample
+selection,
+target
+395
+No
+In response to these challenges,
+we
+propose
+a
+Linguistic
+Primiexp(<
+t,
+o
+>
+/⌧
+)
+353
+but
+different
+textual
+descriptions,
+different
+objects
+from
+the
+primary
+aim
+of
+L
+is
+to
+refine
+the
+embedding
+space so
+k
+k=1
+focus areas.
+Specifically, we
+initialize
+𝑁𝑐 inter
+potential396
+object queries
+object, we include
+all its corresponding
+textual
+descriptions.
+tives<,
+Construction
+to incorporate
+semantic
+content
+fromcloud
+language
+𝑁𝑐this
+×𝐷 ,lim354
+same
+different
+point
+scene.
+To
+overcome
+that
+embeddings
+of
+the
+same
+object
+from
+different
+modali
+where
+> denotes cosine
+similarity,
+⌧ isorthe
+temperature
+O
+∈
+R
+leveraging
+sentence-level
+linguistic
+features.
+This
+𝑐 constructed positive and negative sample
+Utilizing the
+397
+that learnt 2
+diverse
+linguistic
+primitives
+towelocate
+objects
+relatedon
+to the inter-sample
+parameter,
+RD represents
+text
+embedding
+obtained
+355 the
+itation,
+propose
+to operate
+level
+to
+ties
+(e.g.,
+text
+and
+point)
+are
+brought
+closer,
+while
+embed
+initialization
+facilitates
+a
+deeper
+grasp
+of
+object
+descriptions.
+We
+sets, we develop the inter-sample loss Linter using a multi398
+o
+semantic
+properties
+bycorresponding
+pooling language
+features
+T . Theconsider
+setseparately.
+{ok }N
+comprises
+356
+the
+global
+context ofpositive
+the entire
+dataset.
+dings
+of different
+objects
+are
+distanced.
+This approach ef
+conductcontrastive
+a self-attention
+mechanism
+to extract
+these
+common
+chark=1
+supervised
+approach,
+formularted
+as:
+399
+the process derived
+outlinedfrom
+in Figure
+3, we begin
+initializing 𝑁𝑜
+objectInembeddings
+the output
+of theby
+crossacteristics
+from linguistic primitives.
+In the decoding process, we in1 X
+exp(< a, a+ > /⌧ )
+learnable
+primitives
+sampling
+them
+from different
+modal
+transformer
+layer,by
+with
+o+ being
+the positive
+object Gaussian
+queries, treating them
+as queries, with the common
+Linter = put these object
+log P
+0
+5 exp(< a, a > /⌧ ) ,
+|P| +
+distributions,
+each specifying
+a distinct semantic
+embedding
+that matches
+with the ground-truth
+mask. property to be
+a0 2P,Nlinguistic
+characteristics
+enriched
+primitives acting as keys/values.
+a 2P
+captured.
+represented
+byintra
+O, to
+serve
+as ouronprimitives,
+The intra-sample
+loss L
+only
+focuses
+penalizing
+(7)
+400
+This setup enables the decoder to merge linguistic
+insights from
+discrepancies within a single language description
+where a represents
+theprimitives
+anchor item,
+be either
+an
+401
+linguistic
+intowhich
+objectcan
+queries,
+efficiently
+identifying and
+𝑁𝑜 ×𝐷 and point
+O ∼ N (𝜇 , (𝜎 )) ∈ R
+,
+(6)
+cloud scene, and doesn’t𝑖 account𝑖 for𝑖 the inter-sample relaobject or a language
+Whenobject’s
+a is anqueries
+object embed402 achieving
+groupingfeature.
+the referred
+into O𝑐′ , thereby
++
+0
+tionships
+between
+different
+samples,
+e.g.,
+the
+same
+object
+ding,
+a
+and
+a
+are
+text
+embeddings,
+and
+vice
+versa.
+The
+403
+precise
+object
+identification.
+where 𝑁𝑜 is the number of primitives, 𝜇𝑖 and 𝜎𝑖 are learnable parambuteters
+different
+descriptions,
+different
+fromare
+theassumed
+primary
+404
+of thetextual
+Gaussian
+distribution.
+Theseobjects
+primitives
+to aim of Linter is to refine the embedding space so
+same
+or different
+cloud e.g.,
+scene.
+To overcome
+lim- relationthat embeddings
+the same object
+from different modali405
+3.5 ofTraining
+Objectives
+contain
+diversepoint
+semantics
+shape,
+color, size,this
+material,
+itation,
+we
+propose
+to
+operate
+on
+the
+inter-sample
+level
+to
+ties
+(e.g.,
+text
+and
+point)
+are
+brought
+closer,
+while
+embed406
+ship, and location. Then, we let each primitive aggregate language
+While the proposed Object Cluster Module aids in identifying
+target
+consider
+the
+global
+context
+of
+the
+entire
+dataset.
+dings
+of
+different
+objects
+are
+distanced.
+This
+approach
+ef407arising from
+of distinct linguistic entities and extract corresponding information
+objects, it does not effectively mitigate ambiguities
+from the given language. For example, in the description in Figure 2,
+the primitive responsible for color concentrates for “white”,
+5 and
+the primitive responsible for location highlight “above”. To achieve
+this, three distinct linear layers, 𝜔𝑄 , 𝜔 𝐾 , and 𝜔𝑉 , are employed
+to project the primitives and the language word feature 𝑭𝑡 into a
+
+other embeddings. These ambiguities could lead to false positives
+during the inference stage. We employ contrastive learning to differentiate the target token from others. This is achieved by maximizing
+the similarity between the target token and the corresponding expression while minimizing similarities with non-target (negative)
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+Shuting He and Henghui Ding
+
+Table 1: Ablation study of the proposed method on ScanRefer
+dataset. GEGWA, LPC, and OCM denote Geometry-Enhanced
+Group-Word Attention, Linguistic Primitives Construction,
+and Object Cluster Module, respectively.
+Components
+GEGWA
+LPC
+✗
+✓
+✗
+✗
+✓
+✓
+✗
+✓
+
+✗
+✗
+✓
+✗
+✓
+✗
+✓
+✓
+
+Table 2: Ablation studies of different fusion strategies for
+GEGWA on ScanRefer.
+
+Results
+OCM
+
+mIoU
+
+Acc@0.5
+
+✗
+✗
+✗
+✓
+✗
+✓
+✓
+✓
+
+39.24
+42.16 (+2.92)
+41.58 (+2.34)
+40.81 (+1.57)
+43.83 (+4.59)
+43.12 (+3.88)
+42.75 (+3.51)
+44.86 (+5.62)
+
+43.95
+46.56 (+2.61)
+45.81 (+1.86)
+44.97 (+1.02)
+48.15 (+4.20)
+47.48 (+3.53)
+47.02 (+3.07)
+49.24 (+5.29)
+
+(10)
+
+where <, > denotes cosine similarity, 𝜏 is the temperature parameter,
+𝑡 ∈ R𝐷 represents the text embedding obtained by pooling language
+𝑁𝑜
+features 𝑭𝑡 . The set {𝑜𝑘 }𝑘=1
+comprises object embeddings derived
+from the output of the object cluster decoder O𝑐′ , with 𝑜 + being
+positive object embedding that matches with ground-truth mask.
+During the training phase, we use Hungarian matching to select an object embedding with the lowest cost to the ground-truth
+object as our output. The matching losses include single-class crossentropy loss on the output score, binary cross-entropy loss, and
+dice loss on mask prediction,
+Lmatch = 𝜆cls Lcls + 𝜆bce Lbce + 𝜆dice Ldice .
+
+(11)
+
+The total training loss is calculated as: L = Lmatch + 𝜆con Lcon ,
+where the weights 𝜆cls , 𝜆bce , 𝜆dice , and 𝜆con are used for balancing
+different loss terms.
+
+4 EXPERIMENTS
+4.1 Datasets and Evaluation Metrics
+The ScanRefer dataset [5] is based on the 800 ScanNet scenes [9]
+and comprises 51, 583 linguistic descriptions. On average, each
+scene contains 13.81 objects and 64.48 descriptions. The dataset’s
+performance is evaluated using the Acc@𝑚IoU metric. It represents
+the proportion of descriptions where the predicted box or mask
+aligns with the ground truth, having an IoU > 𝑚, where 𝑚 ∈
+{0.25, 0.5}. The results are categorized into unique and multiple.
+An object is regarded as unique if it’s the sole entity of its class
+in a scene, and multiple otherwise. For 3D referring segmentation,
+there is another metric mean intersection-over-union (mIoU) which
+calculates the IoU between the prediction and ground truth masks
+averaged across all the test samples.
+
+4.2
+
+Implementation Details
+
+Our experimental setup generally adheres to the default configurations of Mask3D [52], except where explicitly noted. For the point
+encoder, we utilize Minkowski Res16UNet34C [8]. For language embeddings, we utilize BERT [10], following its proven effectiveness in
+capturing linguistic nuances. We employ the AdamW optimizer [30]
+
+mIoU
+
+Acc@0.5
+
+No fusion
+Point-level fusion
+Ours w/o bg
+Ours
+
+39.24
+40.33
+41.25
+42.16
+
+43.95
+44.78
+45.62
+46.56
+
+Table 3: Ablation studies of different groups and neighbors
+numbers for GEGWA on ScanRefer.
+
+pairs. The process can be formulated as,
+exp(< 𝑡, 𝑜 + > /𝜏)
+L𝑐𝑜𝑛 = − log Í𝑁
+,
+𝑜
+exp(< 𝑡, 𝑜𝑘 > /𝜏)
+𝑘=1
+
+Encoder
+
+𝑁𝑔
+
+𝑘
+
+mIoU
+
+Acc@0.5
+
+64
+64
+32
+128
+64
+
+8
+32
+16
+16
+16
+
+39.24
+41.54
+42.25
+41.18
+42.39
+42.16
+
+43.95
+45.86
+46.63
+45.47
+46.78
+46.56
+
+Table 4: Ablation studies of input query designs for Linguistic
+Primitives Construction (LPC) on ScanRefer.
+Input Query
+
+mIoU
+
+Acc@0.5
+
+FPS
+Top-𝑘
+Ours w/o Gaussian
+Ours w/o Gumbel-softmax
+Ours
+
+39.24
+40.18
+40.51
+40.86
+41.58
+
+43.95
+44.31
+44.74
+45.03
+45.81
+
+with an initial learning rate of 4×10 −5 , accompanied by a cosine
+decay schedule to adjust the learning rate progressively. We configure the training process to span a maximum of 20 epochs with
+a batch size of 16. Following Mask3D, we set the coefficients for
+different loss functions 𝜆𝑐𝑙𝑠 , 𝜆𝑏𝑐𝑒 , and 𝜆𝑑𝑖𝑐𝑒 to 2, 5, and 5, respectively. For hyper-parameter optimization, we meticulously choose
+values that best suit our model’s architecture and the task’s complexity. Specifically, we set the contrastive loss coefficient 𝜆con to
+0.3, the temperature parameter 𝜏 to 0.05 to manage the softmax
+distribution’s sharpness, and the layer count 𝐿 to 3. Additionally,
+we determine the number of primitives 𝑁𝑜 to 100 and the potential
+object queries 𝑁𝑐 to 10, ensuring the model’s capacity to handle
+diverse and intricate object interactions effectively.
+
+4.3
+
+Ablation Study
+
+• Component Analysis. We conduct detailed experiments to
+demonstrate the effectiveness of each component in the proposed
+method. As shown in Table 1, our vanilla baseline integrating
+Mask3D with language input only in the transformer decoder
+achieves a mIoU of 39.24%, establishing a strong pipeline. Then, the
+introduction of the Geometry-Enhanced Group-Word Attention
+(GEGWA) enhances performance by 2.92% mIoU, highlighting its
+effectiveness in fusing linguistic and visual features in the point encoder and minimizing the influence of irrelevant points and words
+for improved cross-modal interaction. Furthermore, incorporating the Linguistic Primitives Construction (LPC) boosts mIoU by
+2.34%, underscoring its importance in clustering diverse semantic language information for target identification in 3D referring
+
+RefMask3D: Language-Guided Transformer for 3D Referring Segmentation
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+Table 5: 3D referring expression segmentation benchmark results on ScanRefer, evaluated by mIoU, accuracy IoU 0.25 and IoU
+0.5. † The accuracy is obtained through our own implementation, which involved adding an auxiliary mask head.
+Stage
+Two
+
+Single
+
+Method
+
+Reference
+
+Modality
+
+TGNN [25]
+X-RefSeg3D [50]
+BUTD-DETR [27]†
+EDA [60]†
+3D-STMN [57]
+SegPoint [21]
+RefMask3D (ours)
+
+AAAI’21
+AAAI’24
+ECCV’22
+CVPR’23
+AAAI’24
+ECCV’24
+ACMMM’24
+
+3D
+3D
+3D
+3D
+3D
+3D
+3D
+
+Table 6: 3D visual grounding results using 3D modality on
+ScanRefer, with IoU 0.5 as the evaluation metric.
+Method
+ScanRefer [5]
+ReferIt3D [2]
+TGNN [25]
+InstanceRefer [65]
+SAT [63]
+FFL-3DOG [15]
+3DVG-Trans. [67]
+3DJCG [4]
+BUTD-DETR [27]
+D3Net [6]
+EDA [60]
+ViewRefer [16]
+3D-SPS [46]
+BUTD-DETR [27]
+EDA [60]
+RefMask3D (ours)
+
+Reference
+
+Unique
+
+Two-stage methods
+ECCV’20
+46.19
+ECCV’20
+37.50
+AAAI’21
+56.80
+ICCV’21
+66.83
+ICCV’21
+50.83
+ICCV’21
+67.94
+ICCV’21
+58.47
+CVPR’22
+61.30
+ECCV’22
+64.98
+ECCV’22
+70.35
+CVPR’23
+68.57
+ICCV’23
+Single-stage methods
+CVPR’22
+64.77
+ECCV’22
+61.24
+CVPR’23
+69.42
+ACMMM’24
+78.69
+
+Multiple
+
+Overall
+
+21.26
+12.80
+23.18
+24.77
+25.16
+25.70
+28.70
+30.08
+33.97
+30.50
+37.64
+26.50
+
+26.10
+16.90
+29.70
+32.93
+30.14
+34.01
+34.47
+36.14
+38.60
+37.87
+42.26
+33.66
+
+29.61
+32.81
+36.82
+38.15
+
+36.43
+37.05
+41.70
+45.62
+
+segmentation. The addition of the Object Cluster Module (OCM)
+further enhances our model, contributing a 1.57% increase in mIoU
+by constructing a discriminative identification for the target. By
+combining all these components in RefMask3D, we achieve new
+state-of-the-art performance with a remarkable mIoU of 44.86%
+and an Acc@0.5 of 49.24% on the challenging ScanRefer dataset,
+demonstrating the effectiveness of our proposed approach.
+• Different Fusion Strategies for GEGWA. In Table 2, we evaluate the impact of different fusion designs. The absence of visionlanguage fusion within the encoder results in a decrease of 2.92% in
+mIoU, confirming the effectiveness of early-stage fusion. The w/o
+bg configuration uses a standard cross-attention module without
+background embeddings to filter out irrelevant information. This
+approach underperforms our method by 0.91% in mIoU, highlighting the importance of eliminating irrelevant data in cross-modal
+interactions. The point-level fusion setup directly conducts fusion
+in the individual point without considering the neighbors and geometric information, leading to a 1.83% reduction in mIoU. This
+outcome demonstrates that processes local groups with geometrically adjacent points are beneficial for overall performance.
+• Different Group and Neighbors Numbers for GEGWA. In
+Table 3, we assess the impact of varying the number of groups
+𝑁𝑔 and the number of neighbors 𝑘. By holding 𝑁𝑔 constant at 64
+
+Unique (∼19%)
+0.25
+0.5
+
+Multiple (∼81%)
+0.25
+0.5
+
+Overall
+0.25
+0.5
+
+mIoU
+
+76.63
+79.88
+89.30
+89.55
+
+38.01
+40.51
+46.20
+48.09
+
+37.50
+40.33
+45.53
+48.13
+54.60
+55.87
+
+27.80
+29.94
+35.47
+36.21
+39.50
+41.70
+44.86
+
+63.30
+66.42
+84.00
+84.69
+
+29.70
+31.24
+29.20
+40.77
+
+31.40
+33.77
+36.22
+38.06
+39.80
+49.24
+
+There is the brown chair
+nearest the TV.
+
+Text
+
+“brown”
+
+color
+
+(a) #1 Primitive
+
+Scene
+
+“nearest”
+
+GT
+
+relationship “chair”
+
+(b) #5 Primitive
+
+name
+
+(c) #8 Primitive
+
+Figure 4: Primitives heatmap visualization. Different primitives represent distinct semantic attributes. Blue indicates
+the lowest response levels, while red signifies the highest
+response levels.
+
+and incrementally increasing 𝑘 from 8 to 32, we observed a rapid
+improvement in performance followed by a plateau. Similarly, fixing
+𝑘 at 16 and elevating 𝑁𝑔 from 32 to 128 also resulted in a swift rise
+in outcomes, which then stabilized. Considering computational
+efficiency, we ultimately opted for 𝑁𝑔 = 64 and 𝑘 = 16 as the
+configuration that yields optimal results.
+• Comparison with Other Designs for LPC. In Table 4, we examine the effect of input queries fed into the Transformer Decoder. The
+FPS method, widely used in point sampling and described in PointNet++ [49], covers the entire scene but lacks focus on languagerelevant points. The Top-𝑘 approach [46] selects the top 𝑘 points
+most relevant to a given text based on object confidence. We use
+𝑘 = 100 in our experiments. According to the results in Table 4,
+the proposed Linguistic Primitives Construction outperforms other
+query inputs, achieving promising results. Besides, we observed
+a notable point when not utilizing Gaussian initialization for the
+primitives, opting instead for learnable parameters directly, which
+resulted in a performance decrease of 1.07% mIoU. This finding
+underscores the significance of employing Gaussian initialization
+to ensure independence among multiple primitives, playing a crucial role in effectively capturing diverse semantic information for
+the final result. Additionally, the employment of Gumbel-softmax
+enhances the overall performance which is in line with our analysis.
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+Shuting He and Henghui Ding
+
+GT
+
+TGNN
+
+RefMask3D
+(ours)
+
+Text
+
+the refrigerator is located
+closest to the left side of
+this is the soap dispenser the room. to the left of
+by the wall. it is near
+the refrigerator is the
+the bathroom sink.
+kitchen sink.
+(a)
+(b)
+
+a bookshelf is against
+wall with a door to the
+left of it. this bookshelf
+has a desk and chair in
+front of it.
+(c)
+
+this coffee table is in
+front of a chair on the left, it is a brown chair with
+and a small round table
+armrests and four legs.
+on it's right. to the left of it is directly under a
+it is an orange stool.
+blackboard.
+(d)
+(e)
+
+this is a black leather
+loveseat. if you were
+sitting in it, the long,
+short bookshelf would
+be on the right.
+(f)
+
+Figure 5: Visualization results of complex language descriptions on ScanRefer. we use color masks for clarity: green represents
+the ground truth, red indicates incorrect predictions by TGNN, and blue signifies correct predictions by ours.
+
+4.4
+
+Comparison with State-of-the-Art Methods
+
+• 3D Referring Segmentation Benchmark Results. We evaluate
+RefMask3D on ScanRefer [5] and report the mIoU and Acc@𝑚IoU
+performance in Table 5. For a fair comparison with SOTA methods,
+we implement BUTD-DETR [27] and EDA [60] with an auxiliary
+mask head [60]. The results show that RefMask3D outperforms existing methods, achieving the highest scores across all metrics with
+a significant improvement of +3.16% in mIoU. This demonstrates
+the effectiveness of RefMask3D and highlights its exceptional visionlanguage understanding capabilities.
+• 3D Visual Grounding Benchmark Results. Instance segmentation predictions can be readily converted into bounding box predictions by determining the minimum and maximum coordinates
+of the masked instances. With this capability, we extend our experimentation to the realm of 3D visual grounding. Table 6 shows the
+results on ScanRefer dataset [5], with Acc@0.5 as the metric. Our
+findings show that RefMask3D surpasses previous methods, achieving an improvement of +3.36% in Acc@0.5 compared to previous
+state-of-the-art methods. It is worth noting that this achievement
+is made using only the bounding boxes derived from instance segmentation predictions, without dedicated designs for 3D visual
+grounding. This highlights the effectiveness of our RefMask3D in
+extracting and understanding more discriminative and effective
+vision-language joint representations.
+• 2D Referring Image Segmentation Results. In Table 7, we
+apply RefMask3D to 2D referring image segmentation by using
+Mask2Former [7] framework based on Swin-B [43] backbone. We
+remove GEGWA component which is specifically designed for 3D
+realm. Our results are compared with the leading methods on RefCOCO/+/g [47, 64]. We train a single RefMask3D model on RefCOCO/+/g without the need for extensive pre-training. RefMask3D
+
+Table 7: 2D referring image segmentation benchmark results
+on the val split of RefCOCO/+/g. Overall IoU is metric.
+Method
+
+RefCOCO
+
+RefCOCO+
+
+RefCOCOg
+
+62.4
+70.5
+70.6
+72.7
+73.0
+73.8
+74.9
+75.3
+
+50.6
+62.3
+62.1
+63.5
+66.0
+65.1
+66.9
+
+49.2
+59.9
+61.2
+63.5
+65.0
+67.9
+66.3
+
+MCN [45]
+CRIS [55]
+RefTR [35]
+LAVT [62]
+VLT [14]
+GRES [37]
+LISA [33]
+RefMask3D (ours)
+
+outperforms previous methods on all three benchmarks, underscoring its versatility and effectiveness in referring segmentation.
+
+4.5
+
+Visualization
+
+In Figure 4, we visualize the primitive heatmap on the given point
+cloud. Different primitives represent distinct semantic attributes
+like “color” (a), “relationship” (b), “name” (c). The above qualitative
+results highlight our Linguistic Primitive Construction is capable
+of acquiring corresponding attribute values which improves the
+ability to accurately localize and identify the target object.
+In Figure 5, we visualize the grounding truth masks, predictions
+of TGNN [25], and predictions of RefMask3D in each column from
+top to bottom. RefMask3D effectively interprets complex language
+phrases like “soap dispenser” (a) and accurately segments the target
+object, even among items of the same category (b)-(f). In contrast,
+TGNN often misinterprets sentences and is easily misled by distractors. These qualitative results highlight RefMask3D’s superior
+ability to fuse and align vision-language features, enabling a deeper
+understanding of complex language descriptions.
+
+RefMask3D: Language-Guided Transformer for 3D Referring Segmentation
+
+5
+
+CONCLUSION
+
+In this work, we present an effective single-stage approach RefMask3D to address the challenging 3D referring segmentation and
+grounding. In the proposed RefMask3D, first, a Geometry-Enhanced
+Group-Word Attention (GEGWA) is introduced for continuous and
+contextual fusion of language and vision features at the encoding
+stage. Then, a Linguistic Primitives Construction (LPC) is utilized
+to learn semantic primitives for representing distinct semantic attributes, enhancing fine-grained vision-language understanding
+at decoding stage. Moreover, an Object Cluster Module (OCM) is
+designed to capture holistic information and produce object embedding for generating the final segmentation prediction. The proposed
+RefMask3D consistently achieves new state-of-the-art performance
+on 3D referring segmentation, 3D visual grounding, and 2D referring image segmentation.
+
+REFERENCES
+[1] Ahmed Abdelreheem, Ujjwal Upadhyay, Ivan Skorokhodov, Rawan Al Yahya,
+Jun Chen, and Mohamed Elhoseiny. 2022. 3dreftransformer: Fine-grained object
+identification in real-world scenes using natural language. In WACV. 3941–3950.
+[2] Panos Achlioptas, Ahmed Abdelreheem, Fei Xia, Mohamed Elhoseiny, and
+Leonidas Guibas. 2020. Referit3d: Neural listeners for fine-grained 3d object
+identification in real-world scenes. In ECCV. Springer, 422–440.
+[3] Eslam Bakr, Yasmeen Alsaedy, and Mohamed Elhoseiny. 2022. Look around and
+refer: 2d synthetic semantics knowledge distillation for 3d visual grounding. In
+NeurIPS. 37146–37158.
+[4] Daigang Cai, Lichen Zhao, Jing Zhang, Lu Sheng, and Dong Xu. 2022. 3djcg: A
+unified framework for joint dense captioning and visual grounding on 3d point
+clouds. In CVPR. 16464–16473.
+[5] Dave Zhenyu Chen, Angel X Chang, and Matthias Nießner. 2020. Scanrefer:
+3d object localization in rgb-d scans using natural language. In ECCV. Springer,
+202–221.
+[6] Dave Zhenyu Chen, Qirui Wu, Matthias Nießner, and Angel X Chang. 2022.
+D3Net: A Unified Speaker-Listener Architecture for 3D Dense Captioning and
+Visual Grounding. In ECCV. Springer, 487–505.
+[7] Bowen Cheng, Ishan Misra, Alexander G Schwing, Alexander Kirillov, and Rohit
+Girdhar. 2022. Masked-attention mask transformer for universal image segmentation. In CVPR. 1290–1299.
+[8] Christopher Choy, JunYoung Gwak, and Silvio Savarese. 2019. 4D SpatioTemporal ConvNets: Minkowski Convolutional Neural Networks. In CVPR.
+[9] Angela Dai, Angel X Chang, Manolis Savva, Maciej Halber, Thomas Funkhouser,
+and Matthias Nießner. 2017. Scannet: Richly-annotated 3d reconstructions of
+indoor scenes. In CVPR. 5828–5839.
+[10] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. 2018. Bert:
+Pre-training of deep bidirectional transformers for language understanding. arXiv
+preprint arXiv:1810.04805 (2018).
+[11] Henghui Ding, Scott Cohen, Brian Price, and Xudong Jiang. 2020. Phraseclick:
+toward achieving flexible interactive segmentation by phrase and click. In ECCV.
+Springer, 417–435.
+[12] Henghui Ding, Chang Liu, Shuting He, Xudong Jiang, and Chen Change Loy.
+2023. MeViS: A large-scale benchmark for video segmentation with motion
+expressions. In ICCV. 2694–2703.
+[13] Henghui Ding, Chang Liu, Suchen Wang, and Xudong Jiang. 2021. Visionlanguage transformer and query generation for referring segmentation. In ICCV.
+16321–16330.
+[14] Henghui Ding, Chang Liu, Suchen Wang, and Xudong Jiang. 2022. VLT: Visionlanguage transformer and query generation for referring segmentation. IEEE
+Transactions on Pattern Analysis and Machine Intelligence 45, 6 (2022), 7900–7916.
+[15] Mingtao Feng, Zhen Li, Qi Li, Liang Zhang, XiangDong Zhang, Guangming Zhu,
+Hui Zhang, Yaonan Wang, and Ajmal Mian. 2021. Free-form description guided
+3d visual graph network for object grounding in point cloud. In ICCV. 3722–3731.
+[16] Ziyu Guo, Yiwen Tang, Renrui Zhang, Dong Wang, Zhigang Wang, Bin Zhao,
+and Xuelong Li. 2023. ViewRefer: Grasp the Multi-view Knowledge for 3D Visual
+Grounding with GPT and Prototype Guidance. In ICCV.
+[17] Dailan He, Yusheng Zhao, Junyu Luo, Tianrui Hui, Shaofei Huang, Aixi Zhang,
+and Si Liu. 2021. Transrefer3d: Entity-and-relation aware transformer for finegrained 3d visual grounding. In ACM MM. 2344–2352.
+[18] Shuting He and Henghui Ding. 2024. Decoupling static and hierarchical motion
+perception for referring video segmentation. In CVPR. 13332–13341.
+[19] Shuting He, Henghui Ding, and Wei Jiang. 2023. Primitive generation and
+semantic-related alignment for universal zero-shot segmentation. In CVPR.
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+[20] Shuting He, Henghui Ding, and Wei Jiang. 2023. Semantic-promoted debiasing
+and background disambiguation for zero-shot instance segmentation. In CVPR.
+[21] Shuting He, Henghui Ding, Xudong Jiang, and Bihan Wen. 2024. SegPoint:
+Segment Any Point Cloud via Large Language Model. In ECCV.
+[22] Shuting He, Henghui Ding, Chang Liu, and Xudong Jiang. 2023. GREC: Generalized referring expression comprehension. arXiv preprint arXiv:2308.16182
+(2023).
+[23] Shuting He, Xudong Jiang, Wei Jiang, and Henghui Ding. 2023. Prototype adaption and projection for few-and zero-shot 3d point cloud semantic segmentation.
+IEEE TIP (2023), 3199–3211.
+[24] Joy Hsu, Jiayuan Mao, and Jiajun Wu. 2023. Ns3d: Neuro-symbolic grounding of
+3d objects and relations. In CVPR. 2614–2623.
+[25] Pin-Hao Huang, Han-Hung Lee, Hwann-Tzong Chen, and Tyng-Luh Liu. 2021.
+Text-guided graph neural networks for referring 3d instance segmentation. In
+AAAI. 1610–1618.
+[26] Shijia Huang, Yilun Chen, Jiaya Jia, and Liwei Wang. 2022. Multi-view transformer
+for 3d visual grounding. In CVPR. 15524–15533.
+[27] Ayush Jain, Nikolaos Gkanatsios, Ishita Mediratta, and Katerina Fragkiadaki.
+2022. Bottom up top down detection transformers for language grounding in
+images and point clouds. In ECCV. Springer, 417–433.
+[28] Eric Jang, Shixiang Gu, and Ben Poole. 2016. Categorical reparameterization
+with gumbel-softmax. arXiv preprint arXiv:1611.01144 (2016).
+[29] Li Jiang, Hengshuang Zhao, Shaoshuai Shi, Shu Liu, Chi-Wing Fu, and Jiaya Jia.
+2020. Pointgroup: Dual-set point grouping for 3d instance segmentation. In CVPR.
+4867–4876.
+[30] Diederik P Kingma and Jimmy Ba. 2014. Adam: A method for stochastic optimization. arXiv preprint arXiv:1412.6980 (2014).
+[31] Alexander Kirillov, Kaiming He, Ross Girshick, Carsten Rother, and Piotr Dollár.
+2019. Panoptic segmentation. In CVPR. 9404–9413.
+[32] Maxim Kolodiazhnyi, Anna Vorontsova, Anton Konushin, and Danila Rukhovich.
+2024. OneFormer3D: One transformer for unified point cloud segmentation. In
+CVPR.
+[33] Xin Lai, Zhuotao Tian, Yukang Chen, Yanwei Li, Yuhui Yuan, Shu Liu, and Jiaya
+Jia. 2024. Lisa: Reasoning segmentation via large language model. In CVPR.
+[34] Xin Lai, Yuhui Yuan, Ruihang Chu, Yukang Chen, Han Hu, and Jiaya Jia. 2023.
+Mask-Attention-Free Transformer for 3D Instance Segmentation. In ICCV.
+[35] Muchen Li and Leonid Sigal. 2021. Referring transformer: A one-step approach
+to multi-task visual grounding. NeurIPS (2021), 19652–19664.
+[36] Xiangtai Li, Henghui Ding, Haobo Yuan, Wenwei Zhang, Jiangmiao Pang, Guangliang Cheng, Kai Chen, Ziwei Liu, and Chen Change Loy. 2024. Transformerbased visual segmentation: A survey. IEEE TPAMI (2024).
+[37] Chang Liu, Henghui Ding, and Xudong Jiang. 2023. GRES: Generalized Referring
+Expression Segmentation. In CVPR. 23592–23601.
+[38] Chang Liu, Henghui Ding, Yulun Zhang, and Xudong Jiang. 2023. Multi-modal
+mutual attention and iterative interaction for referring image segmentation. IEEE
+Transactions on Image Processing 32 (2023), 3054–3065.
+[39] Chang Liu, Xudong Jiang, and Henghui Ding. 2022. Instance-specific feature
+propagation for referring segmentation. IEEE Transactions on Multimedia 25
+(2022), 3657–3667.
+[40] Chang Liu, Xudong Jiang, and Henghui Ding. 2024. PrimitiveNet: decomposing
+the global constraints for referring segmentation. Visual Intelligence 2, 1 (2024),
+16.
+[41] Chang Liu, Xiangtai Li, and Henghui Ding. 2024. Referring Image Editing: Objectlevel Image Editing via Referring Expressions. In CVPR. 13128–13138.
+[42] Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer
+Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov. 2019. Roberta: A
+robustly optimized bert pretraining approach. arXiv preprint arXiv:1907.11692
+(2019).
+[43] Ze Liu, Yutong Lin, Yue Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin,
+and Baining Guo. 2021. Swin transformer: Hierarchical vision transformer using
+shifted windows. In ICCV. 10012–10022.
+[44] Ze Liu, Zheng Zhang, Yue Cao, Han Hu, and Xin Tong. 2021. Group-free 3d
+object detection via transformers. In ICCV. 2949–2958.
+[45] Gen Luo, Yiyi Zhou, Xiaoshuai Sun, Liujuan Cao, Chenglin Wu, Cheng Deng, and
+Rongrong Ji. 2020. Multi-task collaborative network for joint referring expression
+comprehension and segmentation. In CVPR. 10034–10043.
+[46] Junyu Luo, Jiahui Fu, Xianghao Kong, Chen Gao, Haibing Ren, Hao Shen, Huaxia
+Xia, and Si Liu. 2022. 3d-sps: Single-stage 3d visual grounding via referred point
+progressive selection. In CVPR. 16454–16463.
+[47] Junhua Mao, Jonathan Huang, Alexander Toshev, Oana Camburu, Alan L Yuille,
+and Kevin Murphy. 2016. Generation and comprehension of unambiguous object
+descriptions. In CVPR. 11–20.
+[48] Ishan Misra, Rohit Girdhar, and Armand Joulin. 2021. An end-to-end transformer
+model for 3d object detection. In CVPR. 2906–2917.
+[49] Charles Ruizhongtai Qi, Li Yi, Hao Su, and Leonidas J Guibas. 2017. Pointnet++:
+Deep hierarchical feature learning on point sets in a metric space. In NeurIPS.
+[50] Zhipeng Qian, Yiwei Ma, Jiayi Ji, and Xiaoshuai Sun. 2024. X-RefSeg3D: Enhancing Referring 3D Instance Segmentation via Structured Cross-Modal Graph
+
+MM ’24, October 28–November 1, 2024, Melbourne, VIC, Australia.
+
+Neural Networks. In AAAI. 4551–4559.
+[51] Junha Roh, Karthik Desingh, Ali Farhadi, and Dieter Fox. 2022. Languagerefer:
+Spatial-language model for 3d visual grounding. In Conference on Robot Learning.
+PMLR, 1046–1056.
+[52] Jonas Schult, Francis Engelmann, Alexander Hermans, Or Litany, Siyu Tang,
+and Bastian Leibe. 2023. Mask3D: Mask Transformer for 3D Semantic Instance
+Segmentation. In ICRA. IEEE, 8216–8223.
+[53] Yanyan Shao, Shuting He, Qi Ye, Yuchao Feng, Wenhan Luo, and Jiming Chen.
+2024. Context-Aware Integration of Language and Visual References for Natural
+Language Tracking. In CVPR.
+[54] Jiahao Sun, Chunmei Qing, Junpeng Tan, and Xiangmin Xu. 2023. Superpoint
+transformer for 3d scene instance segmentation. In AAAI. 2393–2401.
+[55] Zhaoqing Wang, Yu Lu, Qiang Li, Xunqiang Tao, Yandong Guo, Mingming Gong,
+and Tongliang Liu. 2022. Cris: Clip-driven referring image segmentation. In
+CVPR. 11686–11695.
+[56] Changli Wu, Yihang Liu, Yiwei Ma, Haowei Wang, Gen Luo, Jiayi Ji, Henghui
+Ding, Xiaoshuai Sun, and Rongrong Ji. 2024. 3D-GRES: Generalized 3D Referring
+Expression Segmentation. In ACM MM.
+[57] Changli Wu, Yiwei Ma, Qi Chen, Haowei Wang, Gen Luo, Jiayi Ji, and Xiaoshuai
+Sun. 2024. 3D-STMN: Dependency-Driven Superpoint-Text Matching Network
+for End-to-End 3D Referring Expression Segmentation. In AAAI. 5940–5948.
+[58] Jianzong Wu, Xiangtai Li, Xia Li, Henghui Ding, Yunhai Tong, and Dacheng
+Tao. 2024. Towards robust referring image segmentation. IEEE TIP 33 (2024),
+1782–1794.
+[59] Jianzong Wu, Xiangtai Li, Shilin Xu, Haobo Yuan, Henghui Ding, Yibo Yang,
+Xia Li, Jiangning Zhang, Yunhai Tong, Xudong Jiang, et al. 2024. Towards open
+
+Shuting He and Henghui Ding
+
+vocabulary learning: A survey. IEEE TPAMI (2024).
+[60] Yanmin Wu, Xinhua Cheng, Renrui Zhang, Zesen Cheng, and Jian Zhang. 2023.
+EDA: Explicit Text-Decoupling and Dense Alignment for 3D Visual Grounding.
+In CVPR. 19231–19242.
+[61] Jiarui Xu, Shalini De Mello, Sifei Liu, Wonmin Byeon, Thomas Breuel, Jan Kautz,
+and Xiaolong Wang. 2022. Groupvit: Semantic segmentation emerges from text
+supervision. In CVPR. 18134–18144.
+[62] Zhao Yang, Jiaqi Wang, Yansong Tang, Kai Chen, Hengshuang Zhao, and
+Philip HS Torr. 2022. Lavt: Language-aware vision transformer for referring
+image segmentation. In CVPR. 18155–18165.
+[63] Zhengyuan Yang, Songyang Zhang, Liwei Wang, and Jiebo Luo. 2021. Sat: 2d
+semantics assisted training for 3d visual grounding. In ICCV. 1856–1866.
+[64] Licheng Yu, Patrick Poirson, Shan Yang, Alexander C Berg, and Tamara L Berg.
+2016. Modeling context in referring expressions. In ECCV. Springer, 69–85.
+[65] Zhihao Yuan, Xu Yan, Yinghong Liao, Ruimao Zhang, Sheng Wang, Zhen Li, and
+Shuguang Cui. 2021. Instancerefer: Cooperative holistic understanding for visual
+grounding on point clouds through instance multi-level contextual referring. In
+CVPR. 1791–1800.
+[66] Yiming Zhang, ZeMing Gong, and Angel X Chang. 2023. Multi3DRefer: Grounding Text Description to Multiple 3D Objects. In ICCV. 15225–15236.
+[67] Lichen Zhao, Daigang Cai, Lu Sheng, and Dong Xu. 2021. 3DVG-Transformer:
+Relation modeling for visual grounding on point clouds. In ICCV. 2928–2937.
+[68] Ziyu Zhu, Xiaojian Ma, Yixin Chen, Zhidong Deng, Siyuan Huang, and Qing
+Li. 2023. 3d-vista: Pre-trained transformer for 3d vision and text alignment. In
+ICCV.
+
+

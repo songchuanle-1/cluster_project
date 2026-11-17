@@ -1,0 +1,243 @@
+{
+  "status": "ACTUAL_AEF_PAIRED_RESOURCE_SEMANTICS_INDEPENDENTLY_VALIDATED_NOT_ADMISSION",
+  "reviewed_at": "2026-10-27T04:28:43.805274+00:00",
+  "owner_token": "458bf62f20024209b63da2009998d280",
+  "candidate_id": "hierarchy-parent-antisymmetric-edge-flux",
+  "experiment_id": "M216-AEF",
+  "code_commit": "56b2a96dc48cc8a88f0f7105527ef448113b1060",
+  "runtime_code_commit": "026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "material_concerns": [],
+  "anchors": {
+    "protocol": {
+      "path": "pipeline/diagnostic_bundles/tick_150c2902/new_candidate_prepare/native_protocol.md",
+      "sha256": "2db56f395f93ace93cf10c9ee79885fc53f661e14d2f95525317e95bb7deddde"
+    },
+    "frozen_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_05f6addd/aef_native_prepare/worker.py",
+      "sha256": "75faabae38d0318b4934c2ce960bce6e2888cec777af2e90112d79d74e12d9b0"
+    },
+    "binding": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/execution_binding.json",
+      "sha256": "8453895224f29ed2a498c37b5d24180ac51a06e322f1cb5281e94947eac085b3"
+    },
+    "manifest": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/native_manifest.json",
+      "sha256": "59cb9328cb8e7b1a73286c896f4462ee7ae61b97a78b689728c12b5b4013ffae"
+    },
+    "lease": {
+      "path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/execution_lease.json",
+      "sha256": "f405ea209d3f3c78037b5edf34367923dc9c387b5a2c75b0eecb87872d163077"
+    },
+    "original_resource_ast_reference": {
+      "path": "pipeline/diagnostic_bundles/tick_86e41faa/hrc_native_prepare/worker.py",
+      "sha256": "37782c1ae1ea9cb2f7bb77d59c7b8aff926438fbac827106f94d8c8fa396ef01"
+    }
+  },
+  "raw_results": [
+    {
+      "mode": "resources",
+      "target": "champion",
+      "execution_path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/resources_champion_execution.json",
+      "execution_sha256": "6c258046398b355773806cbdfb97759ea2f8ff0242d17acb4c964a93fd4858cd",
+      "result_sha256": "af74321d77524b07b84500c054e60a27333387ae7b5ff45a9e5681ea41c61e42",
+      "request_id": "ab45d64ab580424da6fcae7bdec9a93e",
+      "request": {
+        "path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/resources_champion_request.json",
+        "sha256": "695f5813d56bf25bc40dc86df96384598953e905ffa5332538986d71f00c406d"
+      }
+    },
+    {
+      "mode": "resources",
+      "target": "candidate",
+      "execution_path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/resources_candidate_execution.json",
+      "execution_sha256": "a707359cfbf4d9007973d93721f0bcf6aa59243bd8cf3ef4ea42ff3fe242ebef",
+      "result_sha256": "750fe982182e255d47dd57db67527eddf56ea9c76087f1312c0944ac3289a8ed",
+      "request_id": "41f5a4420d724d2987b3141dd5cb5b4c",
+      "request": {
+        "path": "pipeline/diagnostic_bundles/tick_458bf62f/aef_execution/resources_candidate_request.json",
+        "sha256": "d925cda1546b5d0560ef0a3247e7cad34c38cfe73af3b18d73432a6fc2ffef2a"
+      }
+    }
+  ],
+  "observations": {
+    "whole_resources_function_AST_equals_original_reviewed_protocol": true,
+    "same_fvcore_three_file_hashes": {
+      "flop_count": "b5a02604a883bcda75deb918d68639d207c433938cf27e7034dd6de26a2956ba",
+      "jit_analysis": "110f30463ba9f20a86dc1f7a447bed29fe6d55dfedff4a30e05e955e47cacb31",
+      "jit_handles": "ef3a1d20ccad504bfdab7d2a127bce9483de1125d170d915d22f4addbc36c129"
+    },
+    "same_input": {
+      "sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+      "scan_ids": [
+        "scene0011_00"
+      ],
+      "ann_ids": [
+        0
+      ]
+    },
+    "same_original_initialization": {
+      "kind": "native_train_pretrain",
+      "path": "/home/songcl/data/data/sp_unet_backbone.pth",
+      "sha256": "a6f400bcf9bd722230d16ea7c3424b0d7658730126df604f67b4cccf42e25c1f",
+      "loader": "gorilla.load_checkpoint(strict=False,map_location=cpu)",
+      "trained_m95_checkpoint_loaded": false,
+      "seed": 1999
+    },
+    "data_source": {
+      "train": {
+        "data_root": "/home/songcl/data/data/",
+        "prefix": "train",
+        "type": "scannetv2_sample_graph_edge",
+        "training": true
+      },
+      "val": {
+        "data_root": "/home/songcl/data/data/",
+        "prefix": "val",
+        "type": "scannetv2_sample_graph_edge",
+        "training": false
+      }
+    },
+    "protocol": {
+      "batch_size": 1,
+      "lang_num_max": 1,
+      "warmup": 20,
+      "repeat": 100,
+      "native_predict_calls_per_target": 121,
+      "torch_no_grad_predict": true,
+      "no_optimizer_scheduler_training_steps": true
+    },
+    "statistics": {
+      "champion": {
+        "flops": 9762532428.0,
+        "flops_g": 9.762532428,
+        "parameters": 157484090,
+        "median_ms": 34.441398980561644,
+        "p90_ms": 36.041261069476604,
+        "peak_allocated_bytes": 936763392,
+        "peak_reserved_bytes": 1191182336,
+        "measurements_count": 100,
+        "median_and_p90_recomputed_exact": true,
+        "full_unsupported_ops": {
+          "prim::PythonOp.Voxelization": 1,
+          "aten::add": 110,
+          "aten::zero_": 1,
+          "aten::scatter_add_": 14,
+          "aten::lt": 7,
+          "aten::div_": 7,
+          "aten::repeat": 10,
+          "prim::PythonOp.FurthestPointSampling": 4,
+          "aten::rsub": 1,
+          "aten::mul": 152,
+          "aten::ne": 1,
+          "aten::cumsum": 1,
+          "aten::embedding": 3,
+          "aten::add_": 31,
+          "aten::div": 89,
+          "aten::softmax": 52,
+          "aten::gelu": 27,
+          "aten::fill_": 1,
+          "aten::cdist": 3,
+          "aten::min": 3,
+          "aten::sort": 3,
+          "aten::sub": 6,
+          "aten::pow": 1,
+          "aten::sum": 9,
+          "aten::exp": 1,
+          "aten::sigmoid": 5,
+          "aten::topk": 1,
+          "aten::masked_fill_": 30,
+          "aten::mean": 1,
+          "aten::expand_as": 1,
+          "aten::argmax": 1
+        },
+        "by_operator": {
+          "mm": 337393664.0,
+          "batch_norm": 10543552.0,
+          "layer_norm": 27256320.0,
+          "linear": 8362490368.0,
+          "matmul": 9750528.0,
+          "bmm": 960490496.0,
+          "einsum": 54607500.0
+        }
+      },
+      "candidate": {
+        "flops": 9743658060.0,
+        "flops_g": 9.74365806,
+        "parameters": 157089850,
+        "median_ms": 35.6633749906905,
+        "p90_ms": 37.46051110792905,
+        "peak_allocated_bytes": 935187968,
+        "peak_reserved_bytes": 1189085184,
+        "measurements_count": 100,
+        "median_and_p90_recomputed_exact": true,
+        "full_unsupported_ops": {
+          "prim::PythonOp.Voxelization": 1,
+          "aten::add": 110,
+          "aten::zero_": 1,
+          "aten::scatter_add_": 14,
+          "aten::lt": 7,
+          "aten::div_": 7,
+          "aten::repeat": 10,
+          "prim::PythonOp.FurthestPointSampling": 4,
+          "aten::rsub": 1,
+          "aten::mul": 154,
+          "aten::ne": 1,
+          "aten::cumsum": 1,
+          "aten::embedding": 3,
+          "aten::add_": 31,
+          "aten::div": 89,
+          "aten::softmax": 52,
+          "aten::gelu": 27,
+          "aten::fill_": 1,
+          "aten::cdist": 3,
+          "aten::min": 3,
+          "aten::sort": 3,
+          "aten::sub": 7,
+          "aten::pow": 1,
+          "aten::sum": 9,
+          "aten::exp": 1,
+          "aten::sigmoid": 5,
+          "aten::topk": 1,
+          "aten::masked_fill_": 30,
+          "aten::index_select": 2,
+          "aten::index_add": 2,
+          "aten::neg": 1,
+          "aten::mean": 1,
+          "aten::expand_as": 1,
+          "aten::argmax": 1
+        },
+        "by_operator": {
+          "mm": 337393664.0,
+          "batch_norm": 10543552.0,
+          "layer_norm": 27256320.0,
+          "linear": 8343616000.0,
+          "matmul": 9750528.0,
+          "bmm": 960490496.0,
+          "einsum": 54607500.0
+        }
+      }
+    },
+    "percentage_changes_candidate_over_champion": {
+      "median_ms": 3.5479859886601073,
+      "p90_ms": 3.9378478897188485,
+      "peak_allocated_bytes": -0.16817736617956713,
+      "peak_reserved_bytes": -0.17605633802817433,
+      "smoke_peak_allocated_bytes": -0.09121644681172603,
+      "smoke_peak_reserved_bytes": -0.04431641923332563
+    },
+    "flops_delta": -18874368.0,
+    "parameters_delta": -394240,
+    "original_total_within10G": true,
+    "memory15percent_condition_triggered": false,
+    "memory_scope": "Prediction peaks measured after warmup on original resource process; smoke peaks include native TRAIN2 observers. Pure original TRAIN peak not measured.",
+    "full_unsupported_retained": true,
+    "recorded_process_identity_scope": "Both resource initial identities include exact constructed argv/start_ticks. Terminal process outcome is direct Popen wait/rc0 plus original request/result chain; this is not a future-signal identity authorization."
+  },
+  "limitations": [
+    "No original accuracy/gain, novelty, generalization or multi-seed inference is established. Candidate median and P90 were slower in this same-GPU0 pair; no extra latency gate is introduced.",
+    "Original standard fvcore total retains all unsupported operators, including candidate index_select/index_add/neg; no one-sided supplemental counter, alternate handler or claim that all CPU metadata work is counted.",
+    "Full optimizer/no-observer pure TRAIN memory and no-cluster baseline delta remain UNKNOWN; no +0.003 accuracy retention evidence is required because measured +15% condition is false.",
+    "Reviewer read local actual JSON and frozen resource/protocol source; no Torch, native execution, transport, SSH, GPU, Git or shared mutation. This review does not issue standard PASS, receipt, queue admission or training efficacy."
+  ]
+}

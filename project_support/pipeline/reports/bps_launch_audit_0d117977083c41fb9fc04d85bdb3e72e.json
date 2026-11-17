@@ -1,0 +1,247 @@
+{
+  "tick_token": "0d117977083c41fb9fc04d85bdb3e72e",
+  "id": "M201-BPS",
+  "candidate_id": "m95-native-between-pair-support",
+  "local_checked_at": "2026-10-14T10:01:18.268967+08:00",
+  "remote": {
+    "remote_time": "2026-10-14T02:04:42.866880+00:00",
+    "hostname": "das",
+    "commit": "f8457d3b657e66306a7fce1afb3d81d8ab874669",
+    "package": {
+      "__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+      "backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "between_support.py": "18e2a35e3df74c2823b2af36457dbbb7944c3b3697616f480b234d172797ce74",
+      "dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "deterministic_mean.py": "9404e6a5463aeb983abd13e858eeda56924ee2327ab629ace9cde6d5ad13baaf",
+      "hier_postprocess.py": "a6908f1ad57f7fce24ffdc3ecc67e311d60652bdf50aa24993d114131ab1f907",
+      "loss.py": "0777b73df68736e434cb5da75f6b18db2a2bcfbb6a0ec4e444fac091a3f3d630",
+      "network.py": "13837c4fd3a8474e336d21d2d67985acb6bc9a764149498bc65f80168b00f176",
+      "sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+    },
+    "config": {
+      "work_dir": "/data3/songcl/Project/Cluster_project/Cluster_checkpoints",
+      "train": {
+        "seed": 1999,
+        "epochs": 50,
+        "interval": 1,
+        "pretrain": "/data3/songcl/data/data_cluster/sp_unet_backbone.pth",
+        "save_epoch": 100,
+        "grad_clip": 0.1
+      },
+      "test": {
+        "seed": 1999,
+        "test_topk_per_scene": 100,
+        "test_score_thresh": 0.0,
+        "test_npoint_thresh": 100
+      },
+      "dataloader": {
+        "train": {
+          "batch_size": 2,
+          "num_workers": 4,
+          "persistent_workers": true
+        },
+        "val": {
+          "batch_size": 1,
+          "num_workers": 2,
+          "persistent_workers": true
+        },
+        "test": {
+          "batch_size": 1,
+          "num_workers": 1,
+          "persistent_workers": true
+        }
+      },
+      "data": {
+        "train": {
+          "type": "scannetv2_sample_graph_edge",
+          "dataset": "scanrefer",
+          "data_root": "/data3/songcl/data/data_cluster/",
+          "prefix": "train",
+          "suffix": ".pth",
+          "training": true,
+          "mode": 4,
+          "aug": true,
+          "with_elastic": true,
+          "use_xyz": true,
+          "voxel_cfg": {
+            "scale": 50,
+            "spatial_shape": [
+              128,
+              512
+            ],
+            "max_npoint": 2500000
+          },
+          "max_des_len": 78,
+          "lang_num_max": 4
+        },
+        "val": {
+          "type": "scannetv2_sample_graph_edge",
+          "dataset": "scanrefer",
+          "data_root": "/data3/songcl/data/data_cluster/",
+          "prefix": "val",
+          "suffix": ".pth",
+          "training": false,
+          "mode": 4,
+          "aug": false,
+          "with_elastic": false,
+          "use_xyz": true,
+          "voxel_cfg": {
+            "scale": 50,
+            "spatial_shape": [
+              128,
+              512
+            ],
+            "max_npoint": 2500000
+          },
+          "max_des_len": 78,
+          "lang_num_max": 32
+        }
+      },
+      "model": {
+        "between_catalog": "/data3/songcl/Project/Cluster_project/pipeline/bps_catalog_1d59938f077948578e91e2cf34fc9d53.json",
+        "between_catalog_sha256": "9ddcddeff3629c50c50054a9eaadb0828f5dfcb8541defd16705341c0dc567f2",
+        "data_root": "/data3/songcl/data/data_cluster/",
+        "input_channel": 6,
+        "blocks": 5,
+        "block_reps": 2,
+        "media": 32,
+        "normalize_before": true,
+        "return_blocks": true,
+        "pool": "mean",
+        "infer_mode": "sem",
+        "fps_num": 256,
+        "task_type": "res",
+        "sampling_module": {
+          "num_proposal": 128,
+          "pc_dim": 256,
+          "lang_dim": 256,
+          "d_model": 256
+        },
+        "dec": {
+          "cluster_mode": "ctf_hcg_csort",
+          "csort_weight": 0.01,
+          "num_layer": 6,
+          "d_model": 256,
+          "nhead": 8,
+          "hidden_dim": 1024,
+          "dropout": 0.0,
+          "activation_fn": "gelu",
+          "iter_pred": true,
+          "contrastive_align_loss": true,
+          "num_proposal_fine": 512,
+          "cluster_layer_nums": [
+            256,
+            64,
+            8
+          ],
+          "per_layer_topk_list": [
+            32,
+            16,
+            8
+          ],
+          "cluster_att_num_layers": 1,
+          "cluster_att_init": 0.1
+        },
+        "criterion": {
+          "loss_weight": [
+            1.0,
+            1.0,
+            0.5,
+            5.0,
+            0.1,
+            0.1,
+            0.1,
+            1.0
+          ],
+          "cost_weight": [
+            1.0,
+            1.0,
+            0.1
+          ],
+          "loss_fun": "focal",
+          "match_last_layer": true,
+          "layer_differ_weight": true
+        },
+        "test_cfg": {
+          "topk_insts": 100,
+          "score_thr": 0.0,
+          "npoint_thr": 100
+        },
+        "norm_eval": false,
+        "fix_module": [
+          "text_encoder"
+        ]
+      },
+      "optimizer": {
+        "type": "AdamW",
+        "lr": 0.0001,
+        "weight_decay": 0.0005,
+        "paramwise_cfg": {
+          "text_encoder": {
+            "lr_mult": 0.001
+          },
+          "input_conv": {
+            "lr_mult": 0.01
+          },
+          "unet": {
+            "lr_mult": 0.01
+          },
+          "output_layer": {
+            "lr_mult": 0.01
+          },
+          "dec": {
+            "lr_mult": 1.0
+          }
+        }
+      },
+      "lr_scheduler": {
+        "type": "PolyLR",
+        "max_iters": 70,
+        "power": 4.0,
+        "constant_ending": 0.0
+      }
+    },
+    "catalog_sha256": "9ddcddeff3629c50c50054a9eaadb0828f5dfcb8541defd16705341c0dc567f2"
+  },
+  "task": {
+    "id": "M201-BPS",
+    "candidate_id": "m95-native-between-pair-support",
+    "config": "configs/Quard/bps/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps.yaml",
+    "status": "running",
+    "gpu": "7",
+    "label": "M201 coherent physical BETWEEN pair support loss",
+    "depends_on": [],
+    "code_commit": "f8457d3b657e66306a7fce1afb3d81d8ab874669",
+    "admission_receipt": "pipeline/admissions/M201-BPS.json",
+    "note": "User-authorized scoped tested-code commit and GPU7 launch. Six gates passed, inherited seed1999/epochs50/max_iters70. Training efficacy/harm unknown; preserve foreign jobs. Stable hypothesis m95-native-between-pair-support.",
+    "pid": 2867534,
+    "log": "/data3/songcl/Project/Cluster_project/Cluster/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps_20261014_095849.log",
+    "server": "server-6",
+    "launch_verified": true,
+    "launch_verification": "training_progress",
+    "launched": "2026-10-14T09:59:29"
+  },
+  "source_verified_count": 9,
+  "configuration_only_canonical_paths_changed": true,
+  "training_steps": {
+    "first": [
+      1,
+      29
+    ],
+    "last": [
+      1,
+      226
+    ],
+    "distinct_count": 198
+  },
+  "log_excerpt": "[01:58<32:30,  2.29it/s, lr=0.0001, eta=1 day, 12:03:22, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 214/4686 [01:59<32:30,  2.29it/s, lr=0.0001, eta=1 day, 12:02:26, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 215/4686 [01:59<34:00,  2.19it/s, lr=0.0001, eta=1 day, 12:02:26, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 215/4686 [01:59<34:00,  2.19it/s, lr=0.0001, eta=1 day, 12:00:49, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 216/4686 [01:59<34:12,  2.18it/s, lr=0.0001, eta=1 day, 12:00:49, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 216/4686 [02:00<34:12,  2.18it/s, lr=0.0001, eta=1 day, 11:59:51, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 217/4686 [02:00<35:06,  2.12it/s, lr=0.0001, eta=1 day, 11:59:51, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 217/4686 [02:00<35:06,  2.12it/s, lr=0.0001, eta=1 day, 11:58:53, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 218/4686 [02:00<35:45,  2.08it/s, lr=0.0001, eta=1 day, 11:58:53, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 218/4686 [02:01<35:45,  2.08it/s, lr=0.0001, eta=1 day, 11:59:15, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 219/4686 [02:01<37:51,  1.97it/s, lr=0.0001, eta=1 day, 11:59:15, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 219/4686 [02:01<37:51,  1.97it/s, lr=0.0001, eta=1 day, 11:57:49, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 220/4686 [02:01<37:20,  1.99it/s, lr=0.0001, eta=1 day, 11:57:49, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 220/4686 [02:02<37:20,  1.99it/s, lr=0.0001, eta=1 day, 11:57:20, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 221/4686 [02:02<37:35,  1.98it/s, lr=0.0001, eta=1 day, 11:57:20, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 221/4686 [02:02<37:35,  1.98it/s, lr=0.0001, eta=1 day, 11:57:59, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 222/4686 [02:02<39:29,  1.88it/s, lr=0.0001, eta=1 day, 11:57:59, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 222/4686 [02:03<39:29,  1.88it/s, lr=0.0001, eta=1 day, 11:57:32, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 223/4686 [02:03<39:24,  1.89it/s, lr=0.0001, eta=1 day, 11:57:32, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 223/4686 [02:03<39:24,  1.89it/s, lr=0.0001, eta=1 day, 11:55:02, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 224/4686 [02:03<36:44,  2.02it/s, lr=0.0001, eta=1 day, 11:55:02, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 224/4686 [02:04<36:44,  2.02it/s, lr=0.0001, eta=1 day, 11:53:09, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 225/4686 [02:04<35:37,  2.09it/s, lr=0.0001, eta=1 day, 11:53:09, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 225/4686 [02:04<35:37,  2.09it/s, lr=0.0001, eta=1 day, 11:50:42, iter_time=0.55]\nTrain[1/50]:   5%|▉                   | 226/4686 [02:04<34:05,  2.18it/s, lr=0.0001, eta=1 day, 11:50:42, iter_time=0.55]",
+  "crash_markers": false,
+  "gpu_csv": "7, GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 81559, 15237, 65843, 76",
+  "gpu_processes": [
+    "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 262355, python, 928",
+    "GPU-7b284db0-8d77-1b8d-e89a-15a4af73de2a, 2867534, python, 14288"
+  ],
+  "foreign_pid262355_preserved": true,
+  "scientific_status": "training; efficacy/harm/novelty unknown",
+  "audit_adapter_initial_error": "Local shell quoting SyntaxError; no remote action; repaired invocation only"
+}

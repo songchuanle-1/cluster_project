@@ -1,0 +1,856 @@
+                                            Rethinking the Reference-based Distinctive Image Captioning
+                                                             Yangjun Mao∗                                                    Long Chen∗                                    Zhihong Jiang
+                                                         Zhejiang University                                           Columbia University                              Zhejiang University
+                                                        maoyj0119@zju.edu.cn                                         zjuchenlong@gmail.com                         zju_jiangzhihong@zju.edu.cn
+
+                                                              Dong Zhang                                       Zhimeng Zhang, Jian Shao                                        Jun Xiao†
+                                             Hong Kong University of Science and                                  Zhejiang University                                    Zhejiang University
+                                                 Technology, dongz@ust.hk                                  zhimeng@zju.edu.cn,jshao@zju.edu.cn                            junx@zju.edu.cn
+
+                                         ABSTRACT                                                                                      KEYWORDS
+arXiv:2207.11118v1 [cs.CV] 22 Jul 2022
+
+
+
+
+                                         Distinctive Image Captioning (DIC) — generating distinctive cap-                              Image Captioning, Distinctiveness, Benchmark, Transformer
+                                         tions that describe the unique details of a target image — has re-
+                                                                                                                                       ACM Reference Format:
+                                         ceived considerable attention over the last few years. A recent DIC
+                                                                                                                                       Yangjun Mao∗ , Long Chen∗ , Zhihong Jiang, Dong Zhang, Zhimeng Zhang,
+                                         work proposes to generate distinctive captions by comparing the
+                                                                                                                                       Jian Shao, and Jun Xiao† . 2022. Rethinking the Reference-based Distinctive
+                                         target image with a set of semantic-similar reference images, i.e.,                           Image Captioning. In Proceedings of the 30th ACM International Conference
+                                         reference-based DIC (Ref-DIC). It aims to make the generated cap-                             on Multimedia (MM ’22), October 10–14, 2022, Lisboa, Portugal. ACM, New
+                                         tions can tell apart the target and reference images. Unfortunately,                          York, NY, USA, 11 pages. https://doi.org/10.1145/3503161.3548358
+                                         reference images used by existing Ref-DIC works are easy to dis-
+                                         tinguish: these reference images only resemble the target image at
+                                         scene-level and have few common objects, such that a Ref-DIC model                            1    INTRODUCTION
+                                         can trivially generate distinctive captions even without considering                          Image captioning, i.e., generating natural language descriptions to
+                                         the reference images. For example, if the target image contains ob-                           summarize the salient contents of a target image, has drawn much
+                                         jects “towel” and “toilet” while all reference images are without                             attention from the multimedia community. It has great impacts
+                                         them, then a simple caption “A bathroom with a towel and a                                    on many downstream applications, such as helping blind people
+                                         toilet” is distinctive enough to tell apart target and reference im-                          and developing navigation systems. However, as revealed in [11,
+                                         ages. To ensure Ref-DIC models really perceive the unique objects                             12], conventional image captioning models tend to generate over-
+                                         (or attributes) in target images, we first propose two new Ref-DIC                            generic captions or even identical captions when input images are
+                                         benchmarks. Specifically, we design a two-stage matching mech-                                similar. Obviously, these generic captions neglect the unique details
+                                         anism, which strictly controls the similarity between the target                              of the target image. Recent captioning works [12, 25, 26, 42] begin
+                                         and reference images at object-/attribute- level (vs. scene-level).                           to make generated captions more distinctive and ask these captions
+                                         Secondly, to generate distinctive captions, we develop a strong                               describe more unique details of each target image, called Distinctive
+                                         Transformer-based Ref-DIC baseline, dubbed as TransDIC. It not                                Image Captioning (DIC).
+                                         only extracts visual features from the target image, but also encodes                            Currently, mainstream DIC works follow the same setting as
+                                         the differences between objects in the target and reference images.                           plain image captioning: using one single image as input, and gener-
+                                         Finally, for more trustworthy benchmarking, we propose a new                                  ating distinctive captions for each image, dubbed as Single-image
+                                         evaluation metric named DisCIDEr for Ref-DIC, which evaluates                                 DIC (Single-DIC). In this setting, they tend to generate a totally
+                                         both the accuracy and distinctiveness of the generated captions.                              distinctive caption. By “totally”, we mean the generated caption is
+                                         Experimental results demonstrate that our TransDIC can generate                               asked to distinguish its corresponding image from all images in the
+                                         distinctive captions. Besides, it outperforms several state-of-the-art                        dataset, i.e., dataset-level distinctiveness. To this end, they always
+                                         models on the two new benchmarks over different metrics.                                      resort to reinforcement learning and develop different distinctive
+                                                                                                                                       rewards [25, 26]. However, this Single-DIC setting has two inherent
+                                         CCS CONCEPTS                                                                                  issues: 1) It is difficult (or impossible) to generate a totally distinc-
+                                         • Computing methodologies → Computer vision.                                                  tive caption for the target image unless we describe all the details
+                                         ∗ Yangjun Mao and Long Chen are co-first authors with equal contributions to this
+                                                                                                                                       in the image. 2) Even for our humans, we still need some reference
+                                         work. Our code is available on https://github.com/maoyj1998/TransDIC.
+                                                                                                                                       images when generating distinctive captions. For example in Fig-
+                                         † Jun Xiao is the corresponding author.                                                       ure 1 (b), without any reference images, people won’t know what
+                                                                                                                                       should be emphasized in the target image, and may simply predict
+                                         Permission to make digital or hard copies of all or part of this work for personal or
+                                         classroom use is granted without fee provided that copies are not made or distributed         “A bathroom with a towel” for the image. In contrast, they will
+                                         for profit or commercial advantage and that copies bear this notice and the full citation     focus on the unique colors of “towel” and “shower curtain”, and
+                                         on the first page. Copyrights for components of this work owned by others than ACM            predict “A bathroom with a pink towel and a blue shower
+                                         must be honored. Abstracting with credit is permitted. To copy otherwise, or republish,
+                                         to post on servers or to redistribute to lists, requires prior specific permission and/or a   curtain” when they use the “white shower curtain” in ref-img1
+                                         fee. Request permissions from permissions@acm.org.                                            and “yellow towel” in ref-img2 as references.
+                                         MM ’22, October 10–14, 2022, Lisboa, Portugal                                                    For human-like distinctive captioning, a recent work proposes
+                                         © 2022 Association for Computing Machinery.
+                                         ACM ISBN 978-1-4503-9203-7/22/10. . . $15.00                                                  to study the DIC task based on a group of semantic-similar refer-
+                                         https://doi.org/10.1145/3503161.3548358                                                       ence images, dubbed Reference-based DIC (Ref-DIC). Different
+MM ’22, October 10–14, 2022, Lisboa, Portugal                                                                                   Yangjun Mao, et al.
+
+
+                                                                          regions) some region references when generating captions. Specif-
+                                                                          ically, we firstly find similar regions from reference images (ref-
+                                                                          erence regions) for each target region. Then, we send target re-
+                                                                   (a)    gion and its corresponding reference regions into the Two-Flow
+                                                                          Encoder Module, which consists of a Target flow and a Target-
+                                                                          Reference flow. The Target flow aims to encode target image fea-
+       Target Image
+                                                                          tures through self-attention blocks [38]. And the Target-Reference
+                                   Ref-img 1        Ref-img 2
+                                                                          flow enables cross-image interactions between target and reference
+                                                                          images through a multi-layer co-attention. Different from the exist-
+                                                                          ing Ref-DIC work [43] which proposes an attention module to focus
+                                                                  (b)     on unique objects in target image, our TransDIC directly enables
+                                                                          the feature interactions between target and reference images.
+                                                                              Furthermore, to fully take advantage of ground-truth captions
+                                                                          of reference images, we propose a new CIDEr-based [40] metric
+       Target Image               Ref-img 1          Ref-img 2            termed as DisCIDEr. According to our definition of group-level dis-
+                                                                          tinctiveness, we believe frequently-used n-grams in ground-truth
+Figure 1: (a): An example of constructed reference image                  captions of reference images should be given less weight at evalua-
+group used in existing Ref-DIC work [43]. (b): Selected refer-            tion time. The metric can not only directly evaluate the distinctive-
+ence images for the same target image using our two-stage                 ness, but also preserve the accuracy advantage of CIDEr. Extensive
+matching mechanism. We use same colors to denote the                      experimental results on multiple Ref-DIC benchmarks (COCO-DIC
+same object categories in the different images (e.g., “towel”             and Flickr30K-DIC) have demonstrated the effectiveness of our
+is with yellow box, “shower curtain” is with red box, and                 proposed TransDIC.
+“toilet” is with green box). We only show two reference im-                   In summary, we make three contributions in this paper:
+ages here.                                                                  (1) We proposed two new benchmarks for Ref-DIC, constructed
+                                                                                groups in those benchmarks can inform the model which parts
+                                                                                in target image should be emphasized.
+from Single-DIC, they use the target image and all reference im-            (2) We developed a new model TransDIC for Ref-DIC, which
+ages as input and these reference images will inform DIC models                 achieves better performance than the state-of-the-art Ref-DIC
+which parts of the target image should be emphasized. Compared                  models in terms of both accuracy and distinctiveness.
+to Single-DIC, the generated captions are only asked to distinguish         (3) We proposed a new metric named DisCIDEr which considers
+the target image from the group of reference images, i.e., group-               both the distinctiveness and accuracy of the generated caption.
+level distinctiveness. Unfortunately, the reference images used in
+existing Ref-DIC works [43] can be trivially distinguished: these
+reference images only resemble the target image at the scene-level and    2   RELATED WORK
+have few common objects, thus Ref-DIC models can simply generate          Image Captioning. Most modern image captioning models typi-
+distinctive captions even without considering the reference images. For   cally employ an encoder-decoder framework for caption genera-
+example in Figure 1 (a), target and reference images have no object       tion [15, 16, 22, 41, 44]. Within this framework, many efforts have
+in common (e.g., “towel", “shower curtain", or “toilet"), each            been made to improve the architecture, including attention mecha-
+object in target image is unique, such that the Ref-DIC model can         nisms [1, 5, 7, 14, 46], graph convolution networks [8, 50, 51], and
+trivially generate “a bathroom with a towel” to tell the target           transformer-based models [10, 17]. Meanwhile, another series of
+and reference images apart.                                               works explore different training objectives at the training stage. For
+   As mentioned above, reference images are crucial when defining         example, Dai et al. [11] and Shetty et al. [35] leverage Generative
+the unique details in the target image. In this paper, we propose two     Adversarial Network (GAN) to the improve the diversity of gener-
+new benchmarks for the Ref-DIC task: COCO-DIC and Flickr30K-              ated captions. Some recent captioning works apply Reinforcement
+DIC. To strictly control the unique details between target and            Learning (RL) to captioning and achieve great success [24, 32, 34, 48].
+reference images, we propose a two-stage matching mechanism,              These models directly optimize non-differentiable evaluation met-
+which can measure image similarity at the object-/attribute- level        rics (e.g., BLEU [27], CIDEr [40]), which boost the caption genera-
+(vs. scene-level in [43]), and deliberately make target and reference     tion procedure at the sentence-level.
+images have some common objects. Under this mechanism, Ref-DIC            Distinctive Image Captioning (DIC). Compared with conven-
+models can learn to focus on the unique attributes and objects in         tional image captioning, DIC is a more challenging task, which
+target image. As the example in Figure 1 (b), compared to ref-img1,       tends to generate more informative and descriptive captions. Ac-
+target image has the unique attribute “blue” of “shower curtain”          cording to the stage they take effect, existing solutions can be
+and the unique object “towel”.                                            coarsely divided into two categories: Inference-based and Training-
+   To achieve group-level distinctiveness, we propose to empha-           based methods. Inference-based models mainly modify the caption
+size both unique attributes and objects in target image. Thus, we         decoding procedure at inference time and thus can be applied to any
+also propose a new Transformer-based captioning model named               captioning architecture [39, 45]. In contrast, training-based meth-
+TransDIC, which directly gives each region in target image (target        ods, resort to different training objects [25, 26] or the progressive
+Rethinking the Reference-based Distinctive Image Captioning                                                                  MM ’22, October 10–14, 2022, Lisboa, Portugal
+
+
+                        A long yellow and
+    𝐼1                  red train traveling
+                         A motorcycle
+                        down   tracks.drive
+                                                                                           A person rides an                 riding
+
+                                                                                           ATV with other
+                                                                                            A motorcycle    ATVs.
+                                                                                                         drive
+                                                                                                                       ATV             person
+
+
+
+
+                                                 Encoder
+                                  …
+              …
+
+
+
+
+                                                           Text
+
+
+
+
+                                                                                                      …
+                                                                                   …
+
+
+
+
+                                                                                                                                                Fine-grained
+                                                                  Coarse-grained
+
+
+
+
+                                                                                                                                                  matching
+                        A person rides an                                                  A motorcycle sitting              sitting
+
+
+
+
+                                                                    matching
+ 𝐼𝑁−1                   ATV with other
+                         A motorcycle    ATVs.
+                                      drive                                                next to the
+                                                                                            A motorcycle drive      motorcycle         person
+                                                                                           motorcycle.
+
+
+
+
+                                                                                                                                                               …
+                                                                                   𝑰𝒄
+    𝐼𝑡                                                                                     A man in red shirt
+                                                                                                                               on
+
+                                                                                           and a red hat is on a
+                                                                                                         drive
+                                                                                            A motorcycleon          motorcycle         person
+                                                                                           motorcycle       hill.
+                                                                                                                                                                 𝑰𝒇
+                                                                                   𝐼𝑡
+
+Figure 2: The pipeline of our two-stage matching procedure. In the first stage, we calculate image-text similarity scores between
+target image 𝐼𝑡 and the captions of all other images in D through CLIP [31] and construct a coarse-grained group I𝑐 for target
+image 𝐼𝑡 . In the second stage, we leverage scene graphs to calculate the object and attribute overlaps between images in I𝑐 and
+𝐼𝑡 . We rearrange I𝑐 according to their similarity scores with 𝐼𝑡 , and finally get the fine-grained reference image group I𝑓 .
+
+
+training procedure [23]. Recently, some works begin to study the                        3.1      Task Definition: Reference-based DIC
+DIC task based on semantic-similar reference images. Specifically,                      Given a target image 𝐼𝑡 and a group of 𝐾 reference images
+Wang et al. [42] propose to assign higher weights to distinctive                                  𝐾 which are semantic-similar to 𝐼 , Ref-DIC models aim
+                                                                                        I𝑟 = {𝐼𝑖 }𝑖=1                                 𝑡
+ground-truth captions at the training stage, Wang et al. [43] use                       to generate a natural language sentence 𝑆 = {𝑤 1, 𝑤 2, . . . , 𝑤𝑇 }. The
+multiple images as input to emphasize distinctive objects. In this                      generated sentence 𝑆 should not only correctly describe the target
+paper, we propose a co-attention based model to directly enable                         image 𝐼𝑡 , but also contain sufficient details about 𝐼𝑡 , so it can tell
+the feature interactions between target and reference images.                           apart target and reference images. For example in Figure 1 (b), given
+   To evaluate the distinctiveness of generated captions in DIC,                        the target and reference images, Ref-DIC models aim to generate
+several new evaluation metrics are developed. SPICE-U [45] is de-                       a distinctive caption “a bathroom with a pink towel, a blue
+signed for Single-DIC. CIDErBtw [42] measures the distinctiveness                       shower curtain and a toilet”. The detail “pink towel” is help-
+of caption at sentence-level similarity. DisWordRate [43] directly                      ful to distinguish target image from ref-img2 because the “towel”
+evaluates the occurrences of distinctive words. In this paper, we                       in ref-img2 is “white”. On the contrary, predicting “a bathroom
+develop a new metric named DisCIDEr for Ref-DIC. Compared to                            with a towel and a toilet” fails to meet the requirements
+existing metrics, our metric fully explore the distinctiveness of each                  because it is suitable for both target and reference images.
+individual n-gram in ground-truth captions of target image.
+Multi-input Image Captioning. Several captioning settings need
+multiple images as input. According to the number of input images,
+                                                                                        3.2      Ref-DIC Benchmarks Construction
+they can be divided into two categories: Two-image based and Group-                     Given a conventional image captioning dataset D, suppose it con-
+based captioning. Two-image based captioning tends to describe                          tains 𝑁 images and each one has 𝑀 corresponding ground-truth
+the common [36] or different [28, 30, 37, 49] parts between the                         captions. We build new Ref-DIC benchmarks based on 𝐷, by cou-
+two images. Thus, the two images in their settings always have                          pling each image (target image) with several semantic-similar ref-
+strong correlations. For example, the change captioning task takes                      erence images. Specifically, each image in D will be regarded as a
+before and after images as input and describes the changes between                      target image 𝐼𝑡 , and all remaining 𝑁 − 1 images are termed as its
+them. In contrast, group-based captioning typically uses a group of                     candidate reference images. For each target image 𝐼𝑡 , our goal is
+images as references to investigate certain properties of the target                    to retrieve 𝐾 reference images from its candidate reference images
+image. For example, Chen et al. [4] firstly model the relevance and                     to construct the reference image group I𝑟 .
+diversity between target and reference images and aim to generate                           To achieve group-level distinctiveness, 𝐼𝑡 and retrieved I𝑟 should
+diverse captions for the target image. Li et al. [19] tend to describe a                have some common objects, such that I𝑟 will inform the model to
+group of target images using another group of semantically similar                      focus on the unique details in 𝐼𝑡 . To this end, we design a two-stage
+images as references.                                                                   matching mechanism. In the first stage, we construct a coarse-
+                                                                                        grained group I𝑐 based on the image-text similarity score for
+                                                                                        each target image. Then in the second stage, we investigate fine-
+                                                                                        grained details of 𝐼𝑡 and I𝑐 , and construct a fine-grained group I𝑓
+3    PROPOSED BENCHMARKS                                                                based on I𝑐 . Finally, we select 𝐾 images out of I𝑓 to construct the
+In this section, we firstly formally define the Ref-DIC task. Then we                   I𝑟 . We detailed introduce our two-stage matching pipeline below.
+describe our solution for Ref-DIC benchmarks construction. Finally,
+we provide details of our proposed COCO-DIC and Flickr30K-DIC                           3.2.1 Coarse-grained Group Construction. Following [43], we use
+benchmarks for Ref-DIC.                                                                 an image-text retrieval model to calculate similarity scores between
+MM ’22, October 10–14, 2022, Lisboa, Portugal                                                                                                                Yangjun Mao, et al.
+
+
+
+                                               road                black             helmet
+                                                                                              Figure 3, when calculating object overlaps, “black helmet” (top)
+                                                                                              and “helmet” (bottom) from two graphs denote one-time object
+                                                on             ride                   with    overlap (e.g., common object “helmet”). As for attribute overlaps,
+                                                                                              two graphs have both “black motorcycle” in common and denote
+                                                      motorcycle      person          three
+                                       black
+                                                                                              one-time attribute overlap1 . In this paper, we take the sum over
+                                                                                              object and attribute overlaps as the final similarity score for two
+                                          road                                       helmet   images. And we sort all images in I𝑐 according to their similarity
+                                           on
+                                                                                              scores to 𝐼𝑡 to construct the fine-grained group I𝑓 . It is worth not-
+                                                                   sit to             with
+                                        middle of                                             ing that we select 𝐾 images but not the top-K from I𝑓 to construct
+                                                        motorcycle          person
+                                                                                              𝐼𝑟 . The reason for this choice is that we believe the most similar
+                                        black
+                                                                                              images from I𝑓 may contain the identical objects and attributes as
+                                                                                              𝐼𝑡 , thus they won’t help to emphasize any unique details in 𝐼𝑡 . More
+Figure 3: An example of parsed scene graphs for the ground-                                   detailed discussion about the top-K selection are left in Table 5.
+truth captions of two images. Two graphs have four ob-
+ject overlaps: “helmet”, “people”, “motorcycle”, and “road”                                   3.3     Benchmarks: COCO-DIC & Flickr30K-DIC
+(green), and one attribute overlap “black” (blue).                                            We apply our matching mechanism to widely-used captioning
+                                                                                              benchmarks MS-COCO [9] and Flickr30K [29] to construct COCO-
+Table 1: Statistical summary of the COCO-DIC, Flickr30K-                                      DIC and Flickr30K-DIC, respectively. Some basic statistics about
+DIC, and existing Ref-DIC benchmark [43]. “#overlaps” de-                                     our proposed benchmarks are reported in Table 1. Different from
+notes the number of object/attribute overlap in each dataset.                                 the construction procedure proposed in [43], they avoid image
+                                                                                              reuse (or overlap) among different constructed groups. Thus, some
+                         images       #overlaps in a group                                    images which are not similar enough may be forced to construct
+ Datasets          Train   Val Test Train Val        Test                                     a group. In contrast, we find 𝐾 reference images independently to
+ Wang et al. [43] 133,980 5,562 5,538 3.8    3.7      3.7                                     ensure the similarity within a group.
+ COCO-DIC         123,287 5,000 5,000 5.0    4.9      4.9
+ Flickr30K-DIC     29,000 1,014 1,000 5.3    5.3      5.3                                     4 PROPOSED APPROACH
+                                                                                              4.1 Preliminaries
+                                                                                              4.1.1 Transformer-based Image Captioning. Transformer [38] fol-
+images and texts. Specifically, as shown in Figure 2 (left), we use a
+                                                                                              lows the standard Encoder-Decoder architecture. It employs the
+pre-trained CLIP [31] to firstly extract the visual feature of target
+                                                                                              self-attention mechanism to explore the internal correlation within
+image 𝐼𝑡 and text features of ground-truth captions from candidate
+                                                                                              the sequential data, which has been widely adopted by numer-
+reference images. Then, we perform the cosine similarity between
+                                                                                              ous image captioning models [10, 17]. For a given image 𝐼 , they
+visual feature and all text features to get (𝑁 − 1) × 𝑀 scores. Fi-
+                                                                                              use proposal features [1] extracted by an object detector as input:
+nally, we select ||I𝑐 || captions with the highest scores, and their                                    𝑁 where 𝑥 ∈ R𝑑 is the feature vector for 𝑖-th proposal
+                                                                                              𝑋 = {𝑥𝑖 }𝑖=1         𝑖
+corresponding images are used as the coarse group I𝑐 for 𝐼𝑡 .
+                                                                                              in 𝐼 and 𝑁 is the number of proposals. They employ multiple self-
+   The CLIP-based matching mechanism can effectively filter out
+                                                                                              attention layers as Encoder, and the outputs of the 𝑙-th layer is
+some obviously unrelated candidate images. However, since it en-
+                                                                                              calculated as follows:
+codes texts at the sentence level, several fine-grained details may
+be neglected when computing similarity. For example in Figure 2,                                            𝐻𝑙−1 = LN (𝑂𝑙−1 + MH(𝑂𝑙−1, 𝑂𝑙−1, 𝑂𝑙−1 )) ,                      (1)
+ground-truth captions of candidate image 𝐼 1 contain the “train”,                                              𝑂𝑙 = LN (𝐻𝑙−1 + FFN(𝐻𝑙−1 )) ,                                (2)
+thus 𝐼 1 will be removed due to a low scene-level similarity score
+to 𝐼𝑡 . Meanwhile, 𝐼 𝑁 −1 is considered similar to 𝐼𝑡 by the CLIP be-                         where 𝑂 0 refers to input proposal features 𝑋 , and 𝑂𝑙−1 is outputs
+cause both of them describe the scene of “someone is riding a                                 of the (𝑙 − 1)-th layer. LN(·) denotes the layer normalization [2],
+vehicle”. However, they resemble each other only at the sense-                                FFN(·) denotes the feed forward network, and MH(·) denotes the
+level and do not contain any common objects (e.g., “motorcycle”                               multi-head attention [38]. Encoded visual features are fed into the
+in 𝐼𝑡 and “ATV” in 𝐼 𝑁 −1 are totally different objects).                                     Decoder for caption generation. It generates a word probability
+                                                                                              distribution 𝑃𝑡 = 𝑃 (𝑤𝑡 |𝑤 1:𝑡 −1, 𝐼 ) at each time step t conditioning
+3.2.2 Fine-grained Group Construction. To overcome the short-                                 on the previously generated words {𝑤 1, . . . , 𝑤𝑡 −1 } and image 𝐼 .
+coming of the coarse-grained group, we propose a fine-grained
+matching mechanism that directly uses object and attribute over-                              4.1.2 Model Optimization. Mainstream captioning works typically
+laps between two images as the similarity measurement. Firstly, for                           resort to a two-stage procedure for model optimization [10, 34].
+                                                                                                                                                        𝑀 . They
+                                                                                              Given an image 𝐼 and its ground-truth captions 𝐶 = {𝑐𝑖 }𝑖=1
+𝐼𝑡 or any image in I𝑐 , we parse all its ground-truth captions into
+one scene graph. Then, we extract objects and attributes from scene                           firstly apply a cross-entropy loss (XE) to pre-train the model and
+graphs [6, 18, 21, 47] of two images to calculate overlaps. Specifi-                          then employ reinforcement learning (RL) to finetune sequence
+cally, objects from the two graphs will be compared according to                              generation.
+their categories. However, two attributes should firstly correspond                           1 Note that the “black helmet” and “black motorcycle” contain no attribute overlap
+to the same objects and then compare to each other. For example in                            because the attribute “black” belongs to different objects.
+Rethinking the Reference-based Distinctive Image Captioning                                                                          MM ’22, October 10–14, 2022, Lisboa, Portugal
+
+
+
+                                                                                                   Q,K,V                                                           “A living room
+                                                                                                                  Self-Attention
+      𝐼𝑡                                                                                                                                                           with red”
+                                                                                        M𝑡                                          Target Flow         ෡𝑡
+                                                                                                                                                        𝑀
+                                 𝑀𝑡
+                                          couch
+      𝐼1                              painting                                                                                            ×N
+                                       chair                                                                Q                                                         Transformer
+                                                                                                                   Co-Attention
+                                 𝑀1                 S1
+                                                                                                                                                                        Decoder
+
+                                       sofa                                                                                        Select Layer
+                                                                                                                                                        ෩𝑡
+                                                                                                                                                        𝑀
+                                      painting
+      𝐼2                                  chair                                                                                           ×N
+                                          lamp                                                                                                                     0.6 0.8 …       0.1
+                                𝑀2
+               …
+
+
+
+
+                                                                      …
+                                                    S2                                                K,V                                                         table couches hats
+                                                                                                                  Self-Attention
+                                          couch
+                                                                                                                                                                   𝑃(𝑤𝑡 |𝑤1:𝑡−1 , 𝑀′ )
+      𝐼𝐾                              painting
+                                                                                                       Q,K,V
+                                           TV                                                                                       Fuse Layer
+                                 𝑀𝐾                 S𝐾                                                                    Target-Reference Flow
+
+            Input                         (a) Similar Region Matching                              (b) Two Flows Encoder                                            (c) Decoder
+
+
+Figure 4: Overview of our proposed TransDIC model. It consists of three parts: (a) A Similar Region Matching module that
+couples each target region with reference regions. (b) A Two-Flow Encoder module that encodes both target and reference
+images. (c) A plain captioning decoder. In module (a), we use the same colors to denote the same objects. We firstly send target
+and reference images into the similar region matching module to construct Target-Reference tuples, e.g., all regions marked
+with green boxes contain the object “couch”, thus form a Target-Reference tuple. Then we send constructed tuples into the Two-
+Flow Encoder for target image and cross-image features extraction. Finally, both kinds of features are sent into the decoder
+for caption generation.
+
+
+   When training with XE, for a ground-truth caption 𝑐𝑖 = {𝑤𝑡 }𝑇𝑡=1 ,                        A plain Transformer-based Captioning Decoder for caption genera-
+they ask the model to minimize the following cross-entropy loss:                             tion. An overview of our model is shown in Figure 4.
+                                    𝑇
+                                   ∑︁                                                        4.2.1 Similar Region Matching. For each target region, we retrieve
+                       𝐿𝑥𝑒 = −            log 𝑃 (𝑤𝑡 |𝑤 1:𝑡 −1, 𝐼 ),              (3)         regions from reference images with the highest similarity scores to
+                                   𝑡 =1                                                      it as its reference regions. Given a target image 𝐼𝑡 and its correspond-
+where 𝑃 (𝑤𝑡 |𝑤 1:𝑡 −1, 𝐼 ) denotes the predicted probability of word 𝑤𝑡 .                    ing I𝑟 , their region features are firstly projected into the memory
+   When training with reinforcement learning, they firstly generate                          space through an MLP layer. We denote memory features for 𝐼𝑡
+top-n captions 𝐶ˆ = {𝑐ˆ𝑖 }𝑛𝑖=1 through beam search, and then optimize                        and the K images in I𝑟 as 𝑀𝑡 = {𝑚𝑡𝑗 }𝑁                         𝑘 𝑁
+                                                                                                                                             𝑗=1 and 𝑀𝑘 = {𝑚𝑖 }𝑖=1 , 𝑘 =
+the following RL loss [10]2 :                                                                {1 . . . 𝐾 } , respectively.
+                                  𝑛                                                              Then, we calculate the cosine similarity scores between features
+                              1 ∑︁
+                    𝐿𝑟𝑙 = −         ((𝑟 (𝑐ˆ𝑖 , 𝐶) − 𝑏) log 𝑝 (𝑐ˆ𝑖 )),            (4)         in 𝑀𝑡 and 𝑀𝑘 , i.e.,
+                              𝑛 𝑖=1
+                                                                                                                          𝑆𝑖𝑘𝑗 = 𝑐𝑜𝑠 (𝑚𝑘𝑖 , 𝑚𝑡𝑗 ),                    (5)
+where r(·, ·) is the reward function computed between 𝑐ˆ𝑖 and 𝐶, and                         where 𝑚𝑡𝑗 represents the 𝑗-th region in 𝐼𝑡 , and 𝑚𝑘𝑖 represents the
+     Í
+𝑏 = ( 𝑛𝑖=1 𝑟 (𝑐ˆ𝑖 , 𝐶))/𝑛 is the baseline, calculated as the mean of the
+                                                                                             𝑖-th region in reference image 𝐼𝑘 . We apply max operation to get
+rewards obtained by the generated captions.
+                                                                                             the most similar region for 𝑟 𝑡𝑗 according to the calculated 𝑆 𝑘 :
+4.2        TransDIC: Transformer-based Ref-DIC                                                                                                 𝑁
+                                                                                                                        𝑟ˆ𝑘𝑗 = arg max ({𝑆𝑖𝑘𝑗 }𝑖=1 ),                                    (6)
+                                                                                                                                      𝑖
+Given a target image 𝐼𝑡 , we term all regions (or proposals) in it
+as target regions 𝑅𝑡 = {𝑟𝑛𝑡 }𝑛=1  𝑁 . Our proposed model tends to                            where 𝑟ˆ𝑘𝑗 denotes the most similar region from image 𝐼𝑘 for 𝑟 𝑡𝑗 , i.e.,
+                          𝑡
+give each target region 𝑟𝑛 some region references when generating                            reference region. As an example in Figure 4 (a), reference image
+captions. To this end, we firstly couple each 𝑟𝑛𝑡 with semantic-similar                      𝐼𝐾 contains regions “couch”, “painting” and “TV”. For the region
+regions from I𝑟 as the reference, i.e., reference regions. Then we                           “couch” in 𝐼𝑡 , we can learn from the similarity matrix 𝑆 𝐾 : the region
+send each target region and its reference regions into the model for                         is similar to the “couch” in 𝐼𝐾 (deep green) while is different from
+distinctive caption generation.                                                              the “TV” or “painting” (light green) in 𝐼𝐾 . Max operation is then
+   Specifically, our TransDIC consists of three components: 1) Sim-                          token along each column of 𝑆 𝐾 , and “couch” in 𝐼𝑘 is selected as the
+ilar Region Matching module in Section 4.2.1. 2) Two-Flow En-                                reference region for “couch” in 𝐼𝑡 .
+coder module. The module contains two parallel data flows to ex-                                 Finally, for each target region 𝑟𝑛𝑡 , we gather 𝐾 reference regions,
+tract both target image and cross-image features in Section 4.2.2. 3)                        one for each, from 𝐾 reference images. We put these 𝐾 + 1 regions
+                                                                                             together and term them as a Target-Reference region tuple:
+2 Note that there are several RL variants for caption generation, we only demonstrate
+one typical policy gradient solution here.                                                                  𝑇𝑛 = {𝑟𝑛𝑡 , 𝑟ˆ𝑛1 , 𝑟ˆ𝑛2 , . . . , 𝑟ˆ𝑛𝐾 }. 𝑛 = {1, . . . , 𝑁 }                (7)
+MM ’22, October 10–14, 2022, Lisboa, Portugal                                                                                         Yangjun Mao, et al.
+
+
+For example in Figure 4 (a), all regions marked with green boxes                                                    All red furniture and dark green
+form a Target-Reference tuple (for “couch”).                                                                        walls in this room.
+                                                                              Target
+4.2.2 Two-Flow Encoder. Our proposed module takes 𝑀𝑡 and 𝑀𝑘                   Img                                   A sitting room with three chairs,
+as input, and extracts target image features and cross-image fea-                                                   a sofa and a fireplace.
+tures through the Target flow and the Target-Reference flow,
+respectively. An overview of the module is shown in 4 (b).                                                          A living room with red leather
+                                                                              Ref                                   furniture in it.
+   Target flow. The flow enables the region interactions within the
+                                                                              Img
+target image 𝐼𝑡 . Same as the standard transformer-based captioning                                                 A living room decorated with
+model, it sends memory features 𝑀𝑡 into multiple self-attention                                                     red couch and chair.
+layers, and finally outputs encoded features 𝑀ˆ 𝑡 = {𝑚ˆ 𝑖𝑡 }𝑖=1𝑁 for 𝐼 .
+                                                                       𝑡
+   Target-Reference flow. This data flow consists of select lay-             Figure 5: An example of the intuition behind DisCIDEr. N-
+ers and fuse layers. Given a Target-Reference region tuple 𝑇𝑛 , we           gram “red” appears in both target and reference images,
+denote the memory features for target region and reference regions           thus should be given less attention (blue). In contrast, we
+in 𝑇𝑛 as 𝑚¯ 𝑛𝑡 and 𝑀¯𝑛 = {𝑚¯ 𝑖𝑛 }𝑖=1
+                                 𝐾 , respectively. The flow takes in those
+                                                                             should pay more attention to “fireplace”, because it ap-
+two kinds of features and generates cross-image features through             pears only in target image (red).
+select and fuse layers:
+   Fuse layer. The goal of the fuse layer is to enable the interactions
+among memory features within 𝑀¯𝑛 . We stack multiple fuse layers,
+                                                                             We conduct extensive experiments and ablation studies to reveal
+and the 𝑙-th fuse layer is calculated as follows:
+                                                                             the superiority of our proposed model, as well as our proposed
+                     𝑈𝑙 = MH(𝑈𝑙−1, 𝑈𝑙−1, 𝑈𝑙−1 ),                    (8)      benchmarks for Ref-DIC.
+where 𝑈 0 refers to 𝑀¯𝑛 and 𝑈𝑙−1 is the outputs of the (𝑙 − 1)-th fuse
+layer. Because all the features in 𝑀¯𝑛 are semantic-similar, the model       5.1    Datasets
+can learn to capture the primary concepts they are describing.               We developed the COCO-DIC and Flickr30K-DIC based on the
+   Select layer. The select layer builds on the co-attention mech-           MS-COCO [9] and Flickr30K [29]. They contain 123287 and 31014
+anism. We set features of target region as query, features of ref-           images, respectively. Each image is annotated with 5 ground-truth
+erence regions as key and value in multi-head attention. Multiple            captions. For both datasets, we followed the splits provided by [16],
+co-attention layers are stacked, the 𝑙-th select layer is computed as:       and constructed reference image groups within the training, vali-
+                       𝑉𝑙 = MH(𝑉𝑙−1, 𝑈𝑙−1, 𝑈𝑙−1 ),                    (9)    dation, and test splits. For completeness, we also reported results
+                                                                             on Wang et al. [43]’s dataset for Ref-DIC.
+where 𝑉0 refers to 𝑚¯ 𝑛𝑡 , 𝑉𝑙−1 and 𝑈𝑙−1 are the outputs of the (𝑙 −1)-th
+select and fuse layer, respectively. By the residual connection in self-     5.2    Evaluation Metrics
+attention blocks, feature 𝑚¯ 𝑛𝑡 will gradually select useful information
+from reference images while preserving the original information              We applied two kinds of metrics to evaluate the accuracy and dis-
+from 𝐼𝑡 .                                                                    tinctiveness of generated captions. For accuracy evaluation, we
+     As an example shown in Figure 4 (b), our model can learn to fo-         calculated four commonly used evaluation metrics: BLEU-N (B-N)
+cus on the unique attributes and objects in 𝐼𝑡 . For unique attributes,      (1- to 4-grams) [27], ROUGE-L (R) [20], METEOR (M) [3], and CIDEr
+we send all reference regions of “couch” (green boxes) into fuse             (C) [40]. For distinctiveness evaluation, we developed a new metric
+layers, the model will be informed they are describing the concept           named DisCIDEr (DisC). We introduce the DisCIDEr below.
+“couch”. Since target region also describes “couch”, the select layer        DisCIDEr. All existing metrics designed for Ref-DIC task fail to
+learns to focus on the unique color “red” of the “couch” in 𝐼𝑡 . When        fully explore the distinctiveness of each individual n-gram in GT
+predicting unique objects, for “vase” region in 𝐼𝑡 , because all se-         captions of target image. To solve this, we assign these n-grams
+lected reference regions for it (blue boxes) do not contain the same         with different weights according to group-level distinctiveness: if
+concept, the select layer learns that “vase” is a unique object in 𝐼𝑡 .      an n-gram occurs frequently in ground-truch captions of reference
+     We use the outputs of the last select layer as final refined target     images, it is less distinctive. As an example in Figure 5, both target
+feature 𝑚˜ 𝑛𝑡 for region 𝑟𝑛𝑡 in 𝐼𝑡 . For N Target-Reference tuples in        and reference images are describing “red sofa”, so we should
+                                                                             assign lower weights to the word “red” in ground-truth captions
+𝐼𝑡 , we can get 𝑀˜ 𝑡 = {𝑚˜ 𝑖𝑡 }𝑖=1
+                               𝑁 as the outputs of Target-Reference
+                                                                             of 𝐼𝑡 at evaluation time. Instead, since only image 𝐼𝑡 contains the
+flow. Finally, we concatenate the outputs of Target flow and Target-
+                                                                             object “fireplace”, we should put more weight on it.
+Reference flow as the final outputs of the Two-Flow Encoder:
+                                                                                  To realize this intuition, we modifies the n-gram weighting pro-
+                              𝑀𝑡′ = [𝑀ˆ 𝑡 ; 𝑀˜ 𝑡 ],                 (10)     cedure of CIDEr by adding a re-weight term. For a target image
+                                                                             𝐼𝑡 , we denote its generated and ground-truth captions as 𝑐 and
+where [·; ·] denotes concatenation operation, and 𝑀𝑡′ will be sent                      𝑀 , respectively. Similarly, we denote ground-truth cap-
+                                                                             𝑆𝑡 = {𝑠𝑡𝑖 }𝑖=1
+into decoder for caption generation.                                                                                       𝑗
+                                                                             tions for reference images I𝑟 as 𝑆𝑟 = {𝑠𝑟 }𝑀    𝑗=1 , 𝑟 = {1 . . . 𝐾 }. The
+5    EXPERIMENTS                                                                                                           𝑗
+                                                                             number of times an n-gram 𝜔𝑑 occurs in 𝑠𝑡 is denoted as ℎ𝑑 (𝑠𝑡 ). We
+                                                                                                                                                 𝑗
+
+In this section, we describe the datasets used for experiments and           modify CIDEr by adding an Inverse reference frequency term
+                                                                                                            𝑗
+introduce a new distinctiveness-based evaluation metric DisCIDEr.            after it when calculating 𝑔𝑑 (𝑠𝑡 ) for the n-grams in ground-truth
+Rethinking the Reference-based Distinctive Image Captioning                                                              MM ’22, October 10–14, 2022, Lisboa, Portugal
+
+
+Table 2: Comparison of captions accuracy on COCO family                                    Table 3: Comparison of captions accuracy on Flickr30K fam-
+with state-of-the-art image captioning models.                                             ily with state-of-the-art image captioning models.
+
+ Model                 B-1                   B-4       M       R        C       DisC             Model            B-1  B-4        M        R        C      DisC
+ Dataset: MS-COCO                                                                                Dataset: Flickr30K
+ UpDown [1]            79.8                  36.3      27.7   56.9    120.1       —              NIC [41]         66.3 18.3       —       —        —        —
+ AoANet [14]           80.2                  38.9      29.2   58.8    129.8       —              Xu et al. [46]   66.9 19.9      18.5     —        —        —
+ Transformer [38]      80.0                  38.2      28.9   58.2    127.3      98.7            Transformer [38] 70.7 27.7      21.4    49.0     61.2     39.1
+ 𝑀 2 Transformer [10] 80.8                   39.1      29.2   58.6    131.2       —              Dataset: Flickr30K-DIC
+ DiscCap [26]           —                    36.1      27.4   57.3    114.3       —              GdisCap [43]     71.7 29.0     22.1     49.6     65.6     41.2
+ CIDErBtwCap [42]       —                    38.5      29.1   58.8    127.8       —              CAGC [19]        72.9 29.1     21.9     50.1     62.2     39.0
+ Dataset: COCO-DIC                                                                               TransDIC         73.2 30.1     22.5     50.3     65.1     41.4
+ GdisCap [43]          80.0                 37.3 28.4 57.5 125.8 96.6
+ CAGC [19]             80.7                 38.1 28.7 57.9 127.9 98.0                      Table 4: Ablation study of Two-Flow Encoder on COCO-DIC.
+ TransDIC (Ours)       81.6                 39.3 29.2 58.5 132.0 102.2                     “Fuse” and “Select” denote the fuse layer and select layer in
+ Dataset: Wang et al. [43]                                                                 the Target-Reference flow, respectively.
+ GdisCap [43]          80.2                 37.7 28.3 57.3 126.6 97.7
+ CAGC [19]             80.4                 37.7 28.7 57.6 127.2 98.0                       Fuse      Select   B-1     B-4      M        R         C        DisC
+ TransDIC (Ours)       81.0                 38.8 29.1 58.2 130.8 101.9                       ✗          ✗      80.0    38.2    28.9     58.2     127.3       98.7
+                                                                                             ✗          ✓      81.3    38.4    29.0     58.1     130.0      100.2
+                                                                                             ✓          ✗      81.6    39.1    29.1     58.4     131.3      101.6
+captions of 𝐼𝑡 :
+                                                                                             ✓          ✓      81.6    39.3    29.1     58.5     132.0      102.2
+                   ℎ𝑑 (𝑠𝑡𝑖 )                                 |𝐼 |
+  𝑔𝑑 (𝑠𝑡𝑖 ) = Í                    log(            Í              Í            𝑞     )
+                  𝑤𝑙 ∈Ω ℎ𝑙 (𝑠𝑡 )
+                             𝑖
+                                          max(1,          min(1,   𝑠𝑝 ∈𝐼𝑝 ℎ𝑑 (𝑠𝑝 )))
+                                                    𝐼𝑝 ∈𝐼           𝑞
+
+                                   |                       {z                        }     Results on COCO-family Benchmarks. From Table 2, we can
+                                               Inverse document frequency                  observe: 1) For accuracy evaluation, our proposed TransDIC achieves
+                              𝑚+𝐾                                                          the best performance on all conventional metrics at both COCO-
+          log(    Í                Í                   ),                           (11)   DIC and Wang et al. [43] (e.g., 132.0 vs. 125.8 in GdisCap on CIDEr).
+               𝑛 + 𝑆𝑢 ∈𝑆 1:𝐾 min(1, 𝑠𝑢𝑣 ∈𝑆𝑢 ℎ𝑑 (𝑠𝑢𝑣 ))
+          |                   {z                       }                                   Meanwhile, our model outperforms some strong state-of-the-art
+                        Inverse reference frequency                                        models (e.g., 132.0 vs. 131.2 in 𝑀 2 Transformer on CIDEr) in terms
+ where Ω is the vocabulary of all n-grams and 𝐼 is the set of all                          of accuracy-based metrics. 2) For distinctiveness evaluation, our
+images. 𝑚 and 𝑛 are two parameters. In this way, DisCIDEr can                              model gets the highest scores on DisCIDEr in the two datasets.
+evaluate the group-level distinctiveness while preserve advantage                          Results on Flickr30K-family Benchmarks. From Table 3, we
+of n-gram based metric. We refer reader to [40] for more details.                          can observe: 1) For accuracy evaluation, our TransDIC achieves
+                                                                                           the largest performance gains on most metrics while it is narrowly
+5.3     Implementation Details                                                             defeated by GdisCap on CIDEr (65.1 vs. 65.6). 2) For distinctiveness-
+                                                                                           based metrics, our model outperforms GdisCap by 0.2 on DisCIDEr
+Following [1], we used the region proposal features extracted by
+                                                                                           (41.4 vs. 41.2), despite it having a lower CIDEr score.
+the Faster R-CNN [33] with dimension 2048, and the memory space
+was of dimension 512. The number of self-attention blocks in Target
+                                                                                           5.5     Ablation Studies
+flow, select and fuse layers in Target-Reference flow were set to 3.
+In the two-stage matching procedure, the size of I𝑐 was 500. For I𝑟 ,                      We conducted extensive experiments to verify the influences of the
+we used images with top-p to top-(p+K-1) highest similarity scores,                        proposed Two-Flow Encoder module and group similarity.
+where p is an adjustable parameter for group similarity and both                           5.5.1 Influence of Two-Flow Encoder. To measure the influence
+benchmarks set p to 3, K to 5. Parameters 𝑚 and 𝑛 in DisCIDEr                              of each component in our proposed Target-Reference flow, we
+were set to 0.8 and 5.0.                                                                   trained an ordinary transformer as the baseline and three variants
+                                                                                           of our model. 1) Target-Reference flow only contains the select layer:
+5.4     Comparison with State-of-the-Art Methods                                           stacked select layers always take the original reference features
+We reported our results on two kinds of datasets: 1) Our constructed                       as input. 2) Target-Reference flow only contains the fuse layer:
+COCO-DIC and Flickr30K-DIC datasets. 2) The dataset proposed                               outputs of the last fuse layer are directly used as the outputs of the
+in [43]. We compared our TransDIC model with three kinds of                                Target-Reference flow. 3) Transformer with complete select and
+state-of-the-art models: 1) NIC [41], Xu et al. [46], UpDown [1],                          fuse layers. All these models were trained on COCO-DIC and the
+AoANet [14], Transformer [38], 𝑀 2 Transformer [10]. They                                  results were shown in Table 4.
+only aim to generate captions with high accuracy. 2) DiscCap [26],                         Results. As can be observed in rows 2 and 3, two additional compo-
+CIDErBtwCap [42]. They are designed for the Single-DIC. 3) Gdis-                           nents can improve captioning performance consistently in terms of
+Cap [43] that is designed for the Ref-DIC. We also compared                                both accuracy and distinctiveness. Above all, our complete model
+CAGC [19] which use multiple images as input.                                              achieves the most promising performance in all metrics.
+MM ’22, October 10–14, 2022, Lisboa, Portugal                                                                                         Yangjun Mao, et al.
+
+
+
+
+       Transformer: a train traveling down the tracks in a field.                Transformer: a plate of food with meat and broccoli on it.
+    GdisCap: a train traveling down         GdisCap: a train traveling down    GdisCap: a plate of food with       GdisCap: a plate of food with
+    the tracks in a field.                  the tracks in a field.             meat and broccoli.                  meat and broccoli.
+    Ours: a green and white train           Ours: a yellow and red train       Ours: a plate of meat and           Ours: a plate of meat and
+    traveling down the tracks .             traveling down tracks              carrots and broccoli.               broccoli and a fork.
+
+
+Figure 6: Examples of generated captions for two similar images. The green words indicate the unique details in the images.
+
+                                Table 5: Ablation study of group similarity on COCO-DIC and Flickr30K-DIC.
+
+    (a) Comparison of different group trained          (b) Comparison of different group trained     (c) Comparison of different group
+    with TransDIC on COCO-DIC                          with GdisCap on COCO-DIC                      trained with TransDIC on Flickr30K-DIC
+               TransDIC at COCO-DIC                               GdisCap at COCO-DIC                      TransDIC at Flickr30K-DIC
+      Group       B-1   B-4    C    DisC                 Group      B-1    B-4   C    DisC             Metric B-1     B-4      C   DisC
+      top1-5     81.6 39.1 132.2 101.4                   top1-5    80.4 38.0 126.9 97.0                top1-5 72.5 29.4 64.5        40.6
+      top2-6      81.4 39.3 131.5 101.4                  top2-6     79.8 37.5 125.1   96.2             top2-6 70.8 28.8 62.4        39.3
+      top3-7     81.6 39.3 132.0 102.2                   top3-7     80.0 37.3 125.8   96.6             top3-7 73.2 30.1 65.1        41.6
+      top4-8      81.0 38.7 130.7 101.5                  top4-8     80.2 37.6 125.3 97.1               top4-8 73.5 30.9 66.7 42.0
+
+
+
+5.5.2 Influence of Group Similarity. To quantify the influence of               1) our proposed two-stage matching mechanism may fail to collect
+group similarity, we used different p when choosing K most similar              object-/attribute- level similarity reference images. 2) our proposed
+images from I𝑓 , e.g., top-2 to top-6 (top2-6) group when setting p             DisCIDEr may degrade to existing CIDEr. We believe this omitting
+to 2. The results were reported in Table 5.                                     problem is due to the natural defect of datasets (COCO/Flickr30K):
+Results. From Table 5 (a), we can observe: Top1-5 group is sur-                 Since these datasets are annotated for general captioning task, hu-
+passed by top3-7 group on DisCIDEr (101.4 vs. 102.2), despite it                man annotators may tend to simply describe the objects while
+having a marginal improvement on CIDEr (132.2 vs. 132.0). The                   ignoring its attributes (e.g., color) when there is no reference image.
+results indicate that the most similar reference group is not always
+helpful to group-level distinctiveness.
+                                                                                7    CONCLUSIONS
+5.6      Qualitative Results                                                    In this paper, we argued that all existing DIC works fail to achieve
+                                                                                group-level distinctiveness. To solve this problem, firstly, we intro-
+We illustrated the qualitative results of our proposed TransDIC and
+                                                                                duced a two-stage matching mechanism and proposed two new
+compared it with the Transformer and SOTA Ref-DIC model Gdis-
+                                                                                benchmarks for Ref-DIC. Then, we developed a Transformer-based
+Cap [43] in Figure 6. Naive captioning models generate identical
+                                                                                model for Ref-DIC. Finally, we came up with a new evaluation
+captions for similar images. In contrast, our TransDIC can describe
+                                                                                metric termed DisCIDEr. We conducted extensive experiments to
+the unique attributes and objects in the target image. For unique
+                                                                                verify the effectiveness of TransDIC. Moving forward, we are going
+attributes, as shown in Figure 6 (left), TransDIC precisely captures
+                                                                                to 1) extend our Ref-DIC into video domains, or 2) design stronger
+the unique attributes “green and white” and “yellow and red”
+                                                                                Ref-DIC models.
+for the two trains, respectively. In Figure 6 (right), for unique ob-
+jects, TransDIC captures unique objects “carrots” and “a fork”
+for each individual image. The results demonstrate that TransDIC                ACKNOWLEDGMENTS
+can generate distinctive captions in terms of unique objects and
+                                                                                This work was supported by the National Key Research & Devel-
+attributes.
+                                                                                opment Project of China (2021ZD0110700), the National Natural
+                                                                                Science Foundation of China (U19B2043, 61976185), Zhejiang Natu-
+6     LIMITATIONS                                                               ral Science Foundation (LR19F020002), Zhejiang Innovation Foun-
+One possible limitation of our work is that if original human-                  dation(2019R52002), and the Fundamental Research Funds for the
+annotated captions omit some objects or attributes, it will lead to:            Central Universities(226-2022-00087).
+Rethinking the Reference-based Distinctive Image Captioning                                                                     MM ’22, October 10–14, 2022, Lisboa, Portugal
+
+
+REFERENCES                                                                                [27] Kishore Papineni, Salim Roukos, Todd Ward, and Wei-Jing Zhu. 2002. BLEU: a
+ [1] Peter Anderson, Xiaodong He, Chris Buehler, Damien Teney, Mark Johnson,                   method for automatic evaluation of machine translation. In ACL.
+     Stephen Gould, and Lei Zhang. 2018. Bottom-up and top-down attention for             [28] Dong Huk Park, Trevor Darrell, and Anna Rohrbach. 2019. Robust change
+     image captioning and visual question answering. In CVPR.                                  captioning. In ICCV. 4624–4633.
+ [2] J. L. Ba, J. R. Kiros, and G. E. Hinton. 2016. Layer Normalization. (2016).          [29] B. A. Plummer, L. Wang, C. M. Cervantes, J. C. Caicedo, and S. Lazebnik. 2016.
+ [3] Satanjeev Banerjee and Alon Lavie. 2005. METEOR: An automatic metric for MT               Flickr30k Entities: Collecting Region-to-Phrase Correspondences for Richer
+     evaluation with improved correlation with human judgments. In ACL workshop.               Image-to-Sentence Models. In ICCV.
+ [4] Fuhai Chen, Rongrong Ji, Xiaoshuai Sun, Yongjian Wu, and Jinsong Su. 2018.           [30] Yue Qiu, Shintaro Yamamoto, Kodai Nakashima, Ryota Suzuki, Kenji Iwata, Hi-
+     Groupcap: Group-based image captioning with structured relevance and diversity            rokatsu Kataoka, and Yutaka Satoh. 2021. Describing and Localizing Multiple
+     constraints. In CVPR. 1345–1353.                                                          Changes with Transformers. In ICCV. 1971–1980.
+                                                                                          [31] Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh,
+ [5] Long Chen, Zhihong Jiang, Jun Xiao, and Wei Liu. 2021. Human-like controllable
+                                                                                               Sandhini Agarwal, Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark,
+     image captioning with verb-specific semantic roles. In Proceedings of the IEEE/CVF
+                                                                                               et al. 2021. Learning transferable visual models from natural language supervision.
+     Conference on Computer Vision and Pattern Recognition. 16846–16856.
+                                                                                               In ICML. 8748–8763.
+ [6] Long Chen, Hanwang Zhang, Jun Xiao, Xiangnan He, Shiliang Pu, and Shih-
+                                                                                          [32] Marc’Aurelio Ranzato, Sumit Chopra, Michael Auli, and Wojciech Zaremba. 2015.
+     Fu Chang. 2019. Counterfactual critic multi-agent training for scene graph
+                                                                                               Sequence level training with recurrent neural networks. arXiv (2015).
+     generation. In ICCV.
+                                                                                          [33] Shaoqing Ren, Kaiming He, Ross Girshick, and Jian Sun. 2016. Faster r-cnn:
+ [7] Long Chen, Hanwang Zhang, Jun Xiao, Liqiang Nie, Jian Shao, Wei Liu, and Tat-
+                                                                                               Towards real-time object detection with region proposal networks. IEEE TPAMI
+     Seng Chua. 2017. Sca-cnn: Spatial and channel-wise attention in convolutional
+                                                                                               (2016).
+     networks for image captioning. In CVPR.
+                                                                                          [34] Steven J Rennie, Etienne Marcheret, Youssef Mroueh, Jerret Ross, and Vaibhava
+ [8] Shizhe Chen, Qin Jin, Peng Wang, and Qi Wu. 2020. Say As You Wish: Fine-
+                                                                                               Goel. 2017. Self-critical sequence training for image captioning. In CVPR.
+     grained Control of Image Caption Generation with Abstract Scene Graphs. In
+                                                                                          [35] Rakshith Shetty, Marcus Rohrbach, Lisa Anne Hendricks, Mario Fritz, and Bernt
+     CVPR.
+                                                                                               Schiele. 2017. Speaking the same language: Matching machine to human captions
+ [9] X. Chen, H. Fang, T. Y. Lin, R. Vedantam, S. Gupta, P. Dollar, and C. L. Zitnick.
+                                                                                               by adversarial training. In ICCV.
+     2015. Microsoft COCO Captions: Data Collection and Evaluation Server. arXiv
+                                                                                          [36] Alane Suhr, Stephanie Zhou, Ally Zhang, Iris Zhang, Huajun Bai, and Yoav Artzi.
+     (2015).
+                                                                                               2019. A corpus for reasoning about natural language grounded in photographs.
+[10] M. Cornia, M. Stefanini, L. Baraldi, and R. Cucchiara. 2020. Meshed-Memory
+                                                                                               (2019).
+     Transformer for Image Captioning. In CVPR.
+                                                                                          [37] Hao Tan, Franck Dernoncourt, Zhe Lin, Trung Bui, and Mohit Bansal. 2019.
+[11] Bo Dai, Sanja Fidler, Raquel Urtasun, and Dahua Lin. 2017. Towards diverse and
+                                                                                               Expressing visual relationships via language. (2019).
+     natural image descriptions via a conditional gan. In ICCV.
+                                                                                          [38] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+[12] Bo Dai and Dahua Lin. 2017. Contrastive learning for image captioning. In
+                                                                                               Aidan N Gomez, Łukasz Kaiser, and Illia Polosukhin. 2017. Attention is all
+     NeurIPS.
+                                                                                               you need. In NeurIPS.
+[13] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2016. Deep residual
+                                                                                          [39] Ramakrishna Vedantam, Samy Bengio, Kevin Murphy, Devi Parikh, and Gal
+     learning for image recognition. In CVPR.
+                                                                                               Chechik. 2017. Context-aware captions from context-agnostic supervision. In
+[14] Lun Huang, Wenmin Wang, Jie Chen, and Xiao-Yong Wei. 2019. Attention on
+                                                                                               CVPR.
+     attention for image captioning. In ICCV. 4634–4643.
+                                                                                          [40] Ramakrishna Vedantam, C Lawrence Zitnick, and Devi Parikh. 2015. Cider:
+[15] Justin Johnson, Andrej Karpathy, and Li Fei-Fei. 2016. Densecap: Fully convolu-
+                                                                                               Consensus-based image description evaluation. In CVPR.
+     tional localization networks for dense captioning. In CVPR. 4565–4574.
+                                                                                          [41] Oriol Vinyals, Alexander Toshev, Samy Bengio, and Dumitru Erhan. 2015. Show
+[16] Andrej Karpathy and Li Fei-Fei. 2015. Deep visual-semantic alignments for
+                                                                                               and tell: A neural image caption generator. In CVPR.
+     generating image descriptions. In CVPR.
+                                                                                          [42] Jiuniu Wang, Wenjia Xu, Qingzhong Wang, and Antoni B Chan. 2020. Compare
+[17] Guang Li, Linchao Zhu, Ping Liu, and Yi Yang. 2019. Entangled transformer for
+                                                                                               and Reweight: Distinctive Image Captioning Using Similar Images Sets. In ECCV.
+     image captioning. In ICCV. 8928–8937.
+                                                                                          [43] Jiuniu Wang, Wenjia Xu, Qingzhong Wang, and Antoni B Chan. 2021. Group-
+[18] Lin Li, Long Chen, Yifeng Huang, Zhimeng Zhang, Songyang Zhang, and Jun
+                                                                                               based distinctive image captioning with memory attention. In ACM MM. 5020–
+     Xiao. 2022. The Devil is in the Labels: Noisy Label Correction for Robust Scene
+                                                                                               5028.
+     Graph Generation. In Proceedings of the IEEE/CVF Conference on Computer Vision
+                                                                                          [44] Yanhui Wang, Ning Xu, An-An Liu, Wenhui Li, and Yongdong Zhang. 2021. High-
+     and Pattern Recognition. 18869–18878.
+                                                                                               Order Interaction Learning for Image Captioning. IEEE Transactions on Circuits
+[19] Zhuowan Li, Quan Tran, Long Mai, Zhe Lin, and Alan L Yuille. 2020. Context-
+                                                                                               and Systems for Video Technology (2021).
+     aware group captioning via self-attention and contrastive features. In CVPR.
+                                                                                          [45] Zeyu Wang, Berthy Feng, Karthik Narasimhan, and Olga Russakovsky. 2020.
+     3440–3450.
+                                                                                               Towards Unique and Informative Captioning of Images. In ECCV.
+[20] Chin-Yew Lin. 2004. Rouge: A package for automatic evaluation of summaries.
+                                                                                          [46] Kelvin Xu, Jimmy Ba, Ryan Kiros, Kyunghyun Cho, Aaron Courville, Ruslan
+     In ACL workshop.
+                                                                                               Salakhudinov, Rich Zemel, and Yoshua Bengio. 2015. Show, attend and tell:
+[21] An-An Liu, Hongshuo Tian, Ning Xu, Weizhi Nie, Yongdong Zhang, and Mohan
+                                                                                               Neural image caption generation with visual attention. In ICML.
+     Kankanhalli. 2021. Toward region-aware attention learning for scene graph
+                                                                                          [47] Ning Xu, An-An Liu, Yongkang Wong, Weizhi Nie, Yuting Su, and Mohan Kankan-
+     generation. IEEE Transactions on Neural Networks and Learning Systems (2021).
+                                                                                               halli. 2020. Scene graph inference via multi-scale context modeling. IEEE Trans-
+[22] An-An Liu, Yingchen Zhai, Ning Xu, Weizhi Nie, Wenhui Li, and Yongdong
+                                                                                               actions on Circuits and Systems for Video Technology (2020), 1031–1041.
+     Zhang. 2021. Region-Aware Image Captioning via Interaction Learning. IEEE
+                                                                                          [48] Ning Xu, Hanwang Zhang, An-An Liu, Weizhi Nie, Yuting Su, Jie Nie, and Yong-
+     Transactions on Circuits and Systems for Video Technology (2021).
+                                                                                               dong Zhang. 2019. Multi-level policy and reward-based deep reinforcement
+[23] Lixin Liu, Jiajun Tang, Xiaojun Wan, and Zongming Guo. 2019. Generating
+                                                                                               learning framework for image captioning. IEEE Transactions on Multimedia
+     Diverse and Descriptive Image Captions Using Visual Paraphrases. In ICCV.
+                                                                                               (2019), 1372–1383.
+[24] Siqi Liu, Zhenhai Zhu, Ning Ye, Sergio Guadarrama, and Kevin Murphy. 2017.
+                                                                                          [49] An Yan, Xin Eric Wang, Tsu-Jui Fu, and William Yang Wang. 2021. L2C: Describing
+     Improved image captioning via policy gradient optimization of spider. In ICCV.
+                                                                                               Visual Differences Needs Semantic Understanding of Individuals. (2021).
+     873–881.
+                                                                                          [50] Xu Yang, Kaihua Tang, Hanwang Zhang, and Jianfei Cai. 2019. Auto-encoding
+[25] Xihui Liu, Hongsheng Li, Jing Shao, Dapeng Chen, and Xiaogang Wang. 2018.
+                                                                                               scene graphs for image captioning. In CVPR. 10685–10694.
+     Show, tell and discriminate: Image captioning by self-retrieval with partially
+                                                                                          [51] Ting Yao, Yingwei Pan, Yehao Li, and Tao Mei. 2018. Exploring visual relationship
+     labeled data. In ECCV.
+                                                                                               for image captioning. In ECCV. 684–699.
+[26] Ruotian Luo, Brian Price, Scott Cohen, and Gregory Shakhnarovich. 2018. Dis-
+     criminability objective for training descriptive captions. In CVPR.
+MM ’22, October 10–14, 2022, Lisboa, Portugal                                                                                Yangjun Mao, et al.
+
+
+Appendix. A             USER STUDY INTERFACE
+We conduct user studies to validate the effectiveness of our proposed DisCIDEr. Specifically, we invite 5 experts and give them a picture
+and two captions that describe it. They are asked to choose which one better matches the image in terms of accuracy and distinctiveness and
+the user interface for this is shown in Fig. 7. The caption which got more than 3 votes is regarded as human judgment. We randomly select
+100 images from the test split of MS-COCO and ask the experts to give their judgments. A metric agrees with human judgment only if it
+gives a higher score to the same caption that experts choose. We use the agreement counts between human judgment and the metric as the
+effectiveness measurement.
+
+
+
+                                   Following is an image and two captions that describe it:
+
+
+                                                                    A group boats are setting in the water.
+
+
+                                                                    A group boats are docked in a marina.
+
+
+
+                         Please chose which caption better describe the image in terms of
+                         accuracy and distinctiveness.
+
+
+Figure 7: We display an image and two captions generated by Transformer [38] and our proposed TransDIC, respectively. The
+users are asked to choose which caption better describe the image in terms of accuracy and distinctiveness.
+
+User Studies on DisCIDEr. We conducted a user study to validate the effectiveness of DisCIDEr with 5 experts. We randomly selected
+100 images (100 trials) from the test set. In each trial, an image and two captions (generated by Transformer and TransDIC, respectively)
+were displayed and these experts are asked to choose the better caption in terms of distinctiveness and accuracy. These captions which got
+more than 3 votes were regarded as human judgment. We calculated the agreements between human judgments and different metrics (i.e.,
+whether humans and metrics give higher scores to a same caption). Results were reported in Table 6. From Table 6, we can observe that
+DisCIDEr achieves better agreement than both the accuracy-based metric CIDEr and the distinctiveness-based metric DisWordRate.
+
+                                                      Table 6: User study of different metrics
+
+                                                  Metric     CIDEr [40]   DisWordRate [43]   DisCIDEr
+                                                Agreements      58              62              64
+
+
+Appendix. B             DETAILS OF THESE COMPARED BASELINES
+In this section, we describe implementation details of two compared state-of-the-art baselines: GdisCap [43] and CAGC [19]. These two
+group-based captioning baselines are both built on top of the widely-used Transformer [38] architecture, which takes a sequence of visual
+features as input and encode them through multiple self-attention layers. We introduce the two baselines in detail.
+ (1) GdisCap [43]: It develops a Group-based Memory Attention (GMA) module which assigns higher weights to the distinctive regions
+     and two special losses: DisLoss and MemCls loss, which directly encourage the model to generate distinctive words. We re-implement
+     their proposed GMA module and DisLoss.
+ (2) CAGC [19]: It is designed to describe a group of target images in the context of another group of related reference images. To this end,
+     they extract visual features for all images in target and reference groups from the ResNet50 network [13] (after pool5 layer). Then,
+     these Visual features of images are sent into multiple self-attention layers to enable the interactions within each group (target image
+     interacts with other images only within target group, and same for reference group). Finally, they construct group representations
+     and contrastive representations for both groups and send them into a decoder for captions generation. To make a fair comparison, we
+     replace the visual features with mean pooled bottom-up features [1] and re-implement their visual content encoder.
+Rethinking the Reference-based Distinctive Image Captioning                                                               MM ’22, October 10–14, 2022, Lisboa, Portugal
+
+
+Appendix. C             MORE QUALITATIVE RESULTS
+We report more qualitative results in Fig. 8 and Fig. 9. In Fig. 8, we compare our TransDIC with Transformer and GdisCap. Remarkably, our
+model can precisely capture the unique objects and attributes in the image. For example in Fig. 8 (row2, column 3), both Transformer and
+GdisCap wrongly mix the tie and shirt into “blue shirt” while TransDIC correctly matches the “shirt” with “black” and “tie” with “blue”. In
+terms of numerals, in Fig. 8 (row2, column 1), only TransDIC predicts the right number, whereas others mistake it for “one”. In Fig. 9, we test
+all models with two similar images, as can be seen on the left side, TransDIC correctly captures the “red and white” and “green and red”
+for the two buses, respectively.
+
+
+
+
+       Transformer: a living room with        Transformer: a little girl in a blue    Transformer: a man and a woman Transformer: two small planes
+       chairs and a table.                    jumper is balancing on one hand.        preparing food in a kitchen    are parked on the grass.
+       GdisCap: a living room with            GdisCap: a little girl in overalls is   GdisCap: two people standing at      GdisCap: a small plane is
+       chairs and a table.                    standing on bleachers.                  a counter in a restaurant.           parked in the grass.
+
+       TransDIC: a living room with           TransDIC: a little girl is standing     TransDIC: two people standing        TransDIC: a small blue and white
+       red couches and a fireplace.           on a balance beam.                      at a counter in a restaurant.        airplane sitting on the grass.
+
+
+
+
+       Transformer: a woman is smiling        Transformer: a man standing in          Transformer: a young man             Transformer: a person in green
+       in front of a sign.                    front of a blue house.                  wearing a blue shirt and a tie.      pants is standing on a ladder.
+       GdisCap: a woman standing in           GdisCap: a man is standing in           GdisCap: a man wearing a blue        GdisCap: a child in a striped
+       front of a birthday cake.              front of a blue door.                   shirt and a tie.                     shirt is walking in the rain.
+
+       TransDIC: two women are                TransDIC: a man standing in             TransDIC: a man wearing a            TransDIC: a child is running
+       holding a birthday cake.               front of a blue garage door.            black shirt and a blue tie.          through a puddle.
+
+
+
+
+Figure 8: Examples of generated captions for two similar images using Transformer, GdisCap and TransDIC. The green words
+indicate the unique details in the images while blue denote the mistakes in the generated captions.
+
+
+
+
+         Transformer: a red and yellow bus driving down a street.                        Transformer: a city street with cars and a clock tower.
+      GdisCap a red and yellow bus           GdisCap: a red and yellow bus            GdisCap: cars driving down a          GdisCap: cars parked in front
+      driving down a street.                 driving down a street.                   city street with a traffic light.     of a clock tower at night.
+      Ours: a red and white bus              Ours: a green and red bus                Ours: a car driving down a city       Ours: two cars parked in front
+      driving down a street.                 driving down the street.                 street with a traffic light.          of a building with a clock tower.
+
+
+Figure 9: Examples of generated captions for two similar images. The green words indicate the unique details in the images.
+

@@ -1,0 +1,152 @@
+{
+  "status": "FIXED_TWO_CPU_IMPORT_ORDER_CONTROL_INDEPENDENTLY_REVIEWED_NOT_NATIVE_PASS",
+  "reviewed_at": "2026-10-27T18:21:57.969727+00:00",
+  "owner_token": "01b53a4e60c941719a2eb3bea379789b",
+  "material_concerns": [],
+  "anchors": {
+    "actual_CPU_pair": {
+      "path": "pipeline/diagnostic_bundles/tick_01b53a4e/import_order_prepare/import_order_actual_result.json",
+      "sha256": "b4969bf06fe29f6bd751cb4f815efd09ced323ea488831ce8a4e2028ff66080d"
+    },
+    "CPU_intent": {
+      "path": "pipeline/diagnostic_bundles/tick_01b53a4e/import_order_prepare/import_order_intent.json",
+      "sha256": "f3effad19ecc618eeaa453ddde73eba761d3d67436a436a63d300b9c25f62206"
+    },
+    "static_preparation": {
+      "path": "pipeline/diagnostic_bundles/tick_01b53a4e/import_order_prepare/preparation.json",
+      "sha256": "718f355288c26dc8527f0285a08da62460ca0621e79d982f9dbe20032cac87ec"
+    },
+    "protocol": {
+      "path": "pipeline/diagnostic_bundles/tick_01b53a4e/import_order_prepare/protocol.json",
+      "sha256": "1d40a39a5ac280777792fa248a743f0c4b428d85844d966708405bad834d29c6"
+    }
+  },
+  "conditions": [
+    {
+      "condition": "PCCM_FIRST",
+      "cpu_pid": 28457,
+      "command": [
+        "/home/songcl/.conda/envs/project_cluster/bin/python",
+        "-B",
+        "-",
+        "PCCM_FIRST"
+      ],
+      "ordered_phases": [
+        "complete_original_pccm_and_real_transformer",
+        "gorilla",
+        "torch_explicit"
+      ],
+      "all_phases_passed": true,
+      "full_original_parser": {
+        "source": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/pccm/core/parsers.py",
+        "source_sha256": "e004988c79f7d48a24d0ba66c8e5b600503815643275bf12beb430ca17ee491e",
+        "grammar_sha256": "77632b808824acd627f6004d08c04a95ee563e1f49026a218c7effda534aca96",
+        "parser": "lalr",
+        "start": [
+          "args"
+        ],
+        "transformer_type": "pccm.core.parsers.AttrArgTransformer",
+        "real_AttrArgTransformer_instance": true,
+        "manual_constructor_kwargs_omitted": false
+      },
+      "private_cache_paths": {
+        "TMPDIR": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/PCCM_FIRST/tmp",
+        "MPLCONFIGDIR": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/PCCM_FIRST/mpl",
+        "XDG_CACHE_HOME": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/PCCM_FIRST/cache",
+        "XDG_CONFIG_HOME": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/PCCM_FIRST/config"
+      },
+      "reported_private_write_event_count": 4,
+      "reported_readonly_platform_helpers": [
+        {
+          "event": "subprocess.Popen",
+          "command": "uname -p"
+        }
+      ],
+      "policy_denials": [],
+      "cuda_initialized": false,
+      "initial_module_set_clean": true,
+      "Python_trace_or_profile_callbacks_observed": false,
+      "gettrace_getprofile_scope": "Public Python hooks only; no claim to inspect every C-level interpreter hook.",
+      "whitelisted_environment": {
+        "PYTHONPATH": null,
+        "PYTHONPYCACHEPREFIX": "/tmp/cluster_project_server4_4ca73fba",
+        "TORCH_COMPILE_DISABLE": null,
+        "TORCHDYNAMO_DISABLE": null,
+        "PYDEVD_USE_FRAME_EVAL": null
+      },
+      "sys_flags": "sys.flags(debug=0, inspect=0, interactive=0, optimize=0, dont_write_bytecode=1, no_user_site=0, no_site=0, ignore_environment=0, verbose=0, bytes_warning=0, quiet=0, hash_randomization=1, isolated=0, dev_mode=False, utf8_mode=0, warn_default_encoding=0, int_max_str_digits=-1)",
+      "loaded_vs_source_compiled_code_all_samples_equal": true
+    },
+    {
+      "condition": "GORILLA_FIRST",
+      "cpu_pid": 28658,
+      "command": [
+        "/home/songcl/.conda/envs/project_cluster/bin/python",
+        "-B",
+        "-",
+        "GORILLA_FIRST"
+      ],
+      "ordered_phases": [
+        "gorilla",
+        "torch_explicit",
+        "complete_original_pccm_and_real_transformer"
+      ],
+      "all_phases_passed": true,
+      "full_original_parser": {
+        "source": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/pccm/core/parsers.py",
+        "source_sha256": "e004988c79f7d48a24d0ba66c8e5b600503815643275bf12beb430ca17ee491e",
+        "grammar_sha256": "77632b808824acd627f6004d08c04a95ee563e1f49026a218c7effda534aca96",
+        "parser": "lalr",
+        "start": [
+          "args"
+        ],
+        "transformer_type": "pccm.core.parsers.AttrArgTransformer",
+        "real_AttrArgTransformer_instance": true,
+        "manual_constructor_kwargs_omitted": false
+      },
+      "private_cache_paths": {
+        "TMPDIR": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/GORILLA_FIRST/tmp",
+        "MPLCONFIGDIR": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/GORILLA_FIRST/mpl",
+        "XDG_CACHE_HOME": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/GORILLA_FIRST/cache",
+        "XDG_CONFIG_HOME": "/data/songcl/Project/Cluster_project/pipeline/import_order_01b53a4e/GORILLA_FIRST/config"
+      },
+      "reported_private_write_event_count": 4,
+      "reported_readonly_platform_helpers": [
+        {
+          "event": "subprocess.Popen",
+          "command": "uname -p"
+        }
+      ],
+      "policy_denials": [],
+      "cuda_initialized": false,
+      "initial_module_set_clean": true,
+      "Python_trace_or_profile_callbacks_observed": false,
+      "gettrace_getprofile_scope": "Public Python hooks only; no claim to inspect every C-level interpreter hook.",
+      "whitelisted_environment": {
+        "PYTHONPATH": null,
+        "PYTHONPYCACHEPREFIX": "/tmp/cluster_project_server4_4ca73fba",
+        "TORCH_COMPILE_DISABLE": null,
+        "TORCHDYNAMO_DISABLE": null,
+        "PYDEVD_USE_FRAME_EVAL": null
+      },
+      "sys_flags": "sys.flags(debug=0, inspect=0, interactive=0, optimize=0, dont_write_bytecode=1, no_user_site=0, no_site=0, ignore_environment=0, verbose=0, bytes_warning=0, quiet=0, hash_randomization=1, isolated=0, dev_mode=False, utf8_mode=0, warn_default_encoding=0, int_max_str_digits=-1)",
+      "loaded_vs_source_compiled_code_all_samples_equal": true
+    }
+  ],
+  "observed_result": "Both pccm-first and original gorilla/torch-first CPU import prefixes completed with the real original AttrArgTransformer and unchanged parser source. No order-specific failure was reproduced under these conditions.",
+  "root_cause": "UNKNOWN",
+  "compatibility_fix_proven": false,
+  "scope_limits": [
+    "Per-condition private TMPDIR/MPLCONFIGDIR/XDG_CACHE_HOME/XDG_CONFIG_HOME and fixed startup PYTHONHASHSEED1999 are explicit CPU-control conditions, not changes to the native model seed/data or global environment.",
+    "No original tools.train full import, CUDA memory-fraction setup, model construction, original TRAIN forward/backward, initialized-parameter pairing, resources or accuracy has been tested by this control.",
+    "Only Python audit-visible private writes/read-only helper calls were recorded; the audit is not a kernel sandbox. All reported write targets stayed within their condition directory and no policy denial occurred.",
+    "CPU success does not erase original0f02 CRE/HPC terminalrc1 import failures, validate a root cause or justify installing/changing dependencies/cache/model/worker."
+  ],
+  "bounded_next_step": "Because the original gorilla->torch->full-pccm CPU condition actually passed cleanly, root may perform its separately authorized at-most-one new original-source/worker native first-control readiness test under the current fresh owner/stage/deadline/idleauthorizedGPU0 and original scientific gates. It is not a replay of old request or a model revision. Actual native TRAIN2 decides whether the remaining three arms can proceed; a new failure must be retained and stopped.",
+  "native_or_resource_PASS": false,
+  "standard_PASS_receipt_queue_created": false,
+  "reviewer_execution_scope": "Author wrote and compiled the default-disabled CPU scripts; root performed the actual pair. This review only reads local actual results and exact source/intents. No reviewer SSH/GPU/model/Git/shared-ledger operation.",
+  "new_action": false,
+  "user_decision": false,
+  "bounded_native_retest_is_separately_root_authorized": true
+}

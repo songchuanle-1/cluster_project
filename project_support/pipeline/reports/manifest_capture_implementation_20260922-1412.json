@@ -1,0 +1,71 @@
+{
+  "capacity_preflight": {
+    "action": "do not evict or interfere with foreign work",
+    "foreign_pid": 3694608,
+    "foreign_process": "/home/jiaoh/conda_envs/das_env/bin/python",
+    "gpu": 7,
+    "host": "server-6",
+    "memory_total_mib": 81559,
+    "memory_used_mib": 42023,
+    "safe_project_slot": false,
+    "utilization_percent": 100
+  },
+  "capture_contract": {
+    "completion": "fail closed unless all 256 unique manifest rows are found",
+    "model_or_training_code_changed": false,
+    "persisted_query_evidence": [
+      "raw query mask logits and boolean masks",
+      "query scores",
+      "native-positive flags",
+      "FPS seed support inside the target union",
+      "physical instance labels",
+      "sampled semantic labels",
+      "target union",
+      "manifest index and manifest SHA256"
+    ],
+    "queue_mutation": false,
+    "selection": "exact scene_id and ann_id pairs from the frozen manifest"
+  },
+  "contract": "m95_manifest_capture_implementation_v1",
+  "generated_at": "2026-09-22T14:12:27+08:00",
+  "local_validation": {
+    "focused_tests_passed": 50,
+    "manifest_contract_tests_passed": 6,
+    "py_compile": true,
+    "supporting_capture_tests_passed": 44
+  },
+  "manifest": {
+    "contract": "m95_preregistered_identity_controls_v1",
+    "path": "pipeline/diagnostic_runs/m95_identity_controls_20260922/manifest.json",
+    "rows": 256,
+    "sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023"
+  },
+  "next_action": "When server-6 GPU7 has a safe project slot, execute the deployed manifest producer with the exact checkpoint and manifest hash, then run the frozen controls and stage-specific analyses.",
+  "not_evidence_of": [
+    "admission",
+    "deployable efficacy",
+    "population effect",
+    "novelty",
+    "referent-specific causality"
+  ],
+  "producer": {
+    "artifact_contract": "m95_manifest_native_query_artifact_v1",
+    "path": "scripts/native_manifest_capture_20260922.py",
+    "sha256": "f71305e0aaaf796774a9d408161390dc60e0d292d42d3324ed7ae84073ef6b8f",
+    "test_path": "scripts/test_native_manifest_capture_20260922.py",
+    "test_sha256": "6706dc733d9a8937f41c3105d79659b111808719087c35e038780df18c8427d5"
+  },
+  "remote_validation": {
+    "bundle": "/data3/songcl/Project/Cluster_project/Cluster/pipeline/diagnostic_bundles/manifest_capture_20260922",
+    "focused_tests_passed": 6,
+    "host": "server-6",
+    "manifest_rows_loaded": 256,
+    "manifest_sha256": "4ad801fe41fb2fb50e30c882edeeff9ff0c70440918c8b661a089da3332d7023",
+    "producer_sha256": "f71305e0aaaf796774a9d408161390dc60e0d292d42d3324ed7ae84073ef6b8f",
+    "py_compile": true,
+    "test_sha256": "6706dc733d9a8937f41c3105d79659b111808719087c35e038780df18c8427d5"
+  },
+  "schema_version": 1,
+  "scope": "Manifest-bound capture implementation and remote deployment validation. No model forward, queue mutation, admission, training, or efficacy result.",
+  "status": "implementation_deployed_native_run_gpu_blocked"
+}

@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T05:02:04.865677+00:00",
+  "status": "EXPLICIT_NATIVE_CRASH_AND_EARLYSTOP_FULL_LOG_EVIDENCE_INDEPENDENTLY_VERIFIED_CANONICAL_ARCHIVE_PENDING",
+  "material_concerns": [
+    {
+      "code": "BFC_NATIVE_DATALOADER_SCATTER_OVERLAP_CRASH",
+      "experiment_id": "M213-BFC",
+      "native_last_TRAIN": [
+        20,
+        50,
+        3832,
+        4686
+      ],
+      "observed_path": "DataLoader worker0 -> scannetv2.get_sp_label -> torch_scatter.scatter_mean/scatter_add_",
+      "scientific_scope": "Observed data/common-scatter operational failure, not a demonstrated BFC mechanism efficacy rejection. Error text clone suggestion is not a validated fix."
+    }
+  ],
+  "anchors": {
+    "actual_progress": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/original_phase_reconciliation.json",
+      "sha256": "e6355b9b3e90bf377a869e73dd7b9e21f4e688f4dcea00d59a3ae52d1b965d44"
+    },
+    "full_terminal_log_evidence": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/full_terminal_log_evidence.json",
+      "sha256": "6304243523380f887494a7119d5c5c7b5b751469298f553d3db26e013ff8fbd9"
+    },
+    "canonical_monitor_source": {
+      "path": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\pipeline_monitor.py",
+      "sha256": "b8886763e21bfec3eab09c0afdc53be3ed87ab5f4a9f285cc26cfdf5cec14f47"
+    }
+  },
+  "original_full_logs_independently_stream_hashed": [
+    {
+      "path": "Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/native_terminal_45eb3b04/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc_20261026_003517.log",
+      "sha256": "daf14d066a1d7633561c6a67137cfe73dad86866c7870d377709b2d79fd40152",
+      "id": "M213-BFC",
+      "bytes": 26759161
+    },
+    {
+      "path": "Checkpoints/server_4/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr/native_terminal_45eb3b04/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bcr_20261025_115717.log",
+      "sha256": "f14c962f5d636ffb3bbf06ddf99cf6db58d5268be159bcd19c87300bb5d9cd71",
+      "id": "M212-BCR",
+      "bytes": 37250555
+    }
+  ],
+  "check_count": 25,
+  "checks_passed": [
+    "new_private_terminal_review",
+    "full_terminal630424_exact_anchor",
+    "phase_e635_exact_anchor",
+    "current_root_owner_matches_both_proofs_and_target",
+    "two_independent_readonly_observation_times_ordered",
+    "strict_actual_server_hostname_same",
+    "M213-BFC_exact_original_PID_absent_in_two_separate_observations",
+    "M213-BFC_original_log_source8_deployedYAML_runtime_unchanged",
+    "M213-BFC_local_full_log_size_and_streamed_SHA_match_exact_remote",
+    "M213-BFC_log_inactive_over600s_and_no_new_progress",
+    "M213-BFC_two_GPU_snapshots_no_compute_contexts_exact_UUID_idle_inventory",
+    "M213-BFC_expected_native_terminal_classification_and_epoch",
+    "M212-BCR_exact_original_PID_absent_in_two_separate_observations",
+    "M212-BCR_original_log_source8_deployedYAML_runtime_unchanged",
+    "M212-BCR_local_full_log_size_and_streamed_SHA_match_exact_remote",
+    "M212-BCR_log_inactive_over600s_and_no_new_progress",
+    "M212-BCR_two_GPU_snapshots_no_compute_contexts_exact_UUID_idle_inventory",
+    "M212-BCR_expected_native_terminal_classification_and_epoch",
+    "BFC_tail_explicit_original_DataLoader_scannet_scatter_overlap_exception",
+    "BFC_partial_logged_validation_best_precision_retained",
+    "BCR_tail_explicit_native_earlystop27_patience10_best4995",
+    "lifecycle_still_pending_not_prematurely_removed",
+    "M206_pause_not_resumed_or_migrated",
+    "canonical_deathwatch_is_consecutive_ticks_but_counter_per_call",
+    "canonical_finalize_preserves_task_admission_and_launch_lineage"
+  ],
+  "native_results": {
+    "BFC": {
+      "state": "crashed",
+      "last_TRAIN": [
+        20,
+        50,
+        3832,
+        4686
+      ],
+      "completed_validation_count": 19,
+      "max_printed_validation_miou": 0.499,
+      "best_checkpoint_exact_value": "UNKNOWN_NOT_READ",
+      "precision_boundary": "Only three-decimal printed validation maximum; canonical final_best formatting must not be presented as an exact checkpoint result."
+    },
+    "BCR": {
+      "state": "done_earlystop",
+      "epoch": 27,
+      "patience": 10,
+      "native_earlystop_best_printed": 0.4995,
+      "training_and_validation_complete_for_epoch": true
+    }
+  },
+  "resource_context_observation": {
+    "original_PIDs_absent_in_two_separate_observations": true,
+    "GPU0_compute_contexts": [],
+    "GPU1_compute_contexts": [],
+    "memory_used_MiB": {
+      "0": 41,
+      "1": 15
+    },
+    "utilization_pct": {
+      "0": 0,
+      "1": 0
+    },
+    "idle_at_saved_observation_times": true,
+    "current_registered_tasks_still_block_preparation": true,
+    "fresh_preexecution_idle_UUID_assets_locks_owner_lease_still_required": true
+  },
+  "canonical_next_step": {
+    "do_not_run_third_same_tick_monitor_to_manufacture_3of3": true,
+    "option_wait": "Keep existing deathwatch2/3 until a later distinct foreground tick for ordinary automatic reconciliation.",
+    "option_explicit_terminal_archive": "With these exact full logs/source/receipt and stable original-PID absence, use a separately reviewed current-owner project-lock wrapper around canonical finalize_task for BFC crashed and BCR done_earlystop. Preserve archive_pending/idempotency/three lifecycle ledgers/admission+launch proofs and M206. Do not edit queue/deathwatch manually or select another latest log. Existing archive_pending must be recovered, not finalized twice.",
+    "recommended": "Exact reviewed canonical terminal archive is evidence-supported now; do not fabricate a third consecutive tick. If the wrapper cannot establish exact protections, retain2/3 and stop lifecycle mutation this turn."
+  },
+  "BFC_recovery_boundary": {
+    "automatic_cold_or_full_resume_permitted_by_this_review": false,
+    "source_human_exact_resume_authorization_and_checkpoint_fullstate_verification_still_required": true,
+    "no_user_question_needed_before_current_archive_and_concrete_recovery_preparation": true,
+    "cause_and_clone_fix": "Not established; bounded source/error and full checkpoint metadata audit may proceed without launching or changing frozen scientific protocol.",
+    "public_dependency_change": "Any actual common source/dataset fix needs proper version/asset rebinding and applicable fresh real controls; never silently patch frozen candidate/runtime evidence."
+  },
+  "new_action": true,
+  "user_decision": false,
+  "notification_recommendation": "NOTIFY_BFC_CRASH_AND_BCR_NATIVE_EARLYSTOP_RESULT_WITH_RECOVERY_BOUNDARIES",
+  "limits": [
+    "Only saved new evidence, full local log streaming SHA and last128KiB per original log were read; no full log text scan, checkpoint body, old held evidence or credential access. Root performed all remote observations.",
+    "No helper/SSH/GPU/Git/Torch/test/transport/canonical mutation by reviewer. Lifecycle remains pending at review time; this report does not claim archive/lease/admission/native restart success.",
+    "Per-call deathwatch increment is not three distinct ticks. Physical idle snapshots do not bypass registered running state, current fresh resource checks, source/version assets or the original deadline/admission budget."
+  ]
+}

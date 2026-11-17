@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-08T15:55:44.243427+00:00",
+  "status": "PROSPECTIVE_ROOT_COMMANDS_PENDING_INDEPENDENT_ACTIVATION_AND_ADMISSION_REVIEW",
+  "baseline_command": [
+    "python",
+    "-B",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2218a502\\nde_deployment_active\\prepare_nde_baseline.py",
+    "--execute-root"
+  ],
+  "FF_command": [
+    "python",
+    "-B",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2218a502\\nde_deployment_active\\deploy_nde.py",
+    "--execute-root",
+    "--phase",
+    "ff",
+    "--receipt",
+    "D:\\project\\cluster_project\\pipeline\\admissions\\M233-NDE.json",
+    "--review",
+    "<actual consolidated FF-compatible independent review path>",
+    "--review-sha256",
+    "<actual review SHA256>",
+    "--native-manifest",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_801d029a\\nde_execution\\native_manifest.json",
+    "--native-result",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_801d029a\\nde_result_active\\results_20261108T151307_234650Z\\native_smoke.json",
+    "--resource-result",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_801d029a\\nde_result_active\\results_20261108T151307_234650Z\\resources.json",
+    "--protected-baseline",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2218a502\\nde_deployment_baseline.json",
+    "--baseline-sha256",
+    "<actual full baseline SHA256>"
+  ],
+  "same_existing_runtime_sync_call": "closure.safe_sync(ROOT, ROOT / 'Cluster', authorized_server4, monitor.ssh)",
+  "inherited_runtime_and_switch_phases_not_authorized": true,
+  "queue_registration_after_production_and_pointer_only": true,
+  "dispatch_command": [
+    "python",
+    "-B",
+    "D:\\project\\cluster_project\\pipeline\\diagnostic_bundles\\tick_2218a502\\nde_dispatch_active\\dispatch_nde_once.py",
+    "--execute-root",
+    "--production-result",
+    "<actual2218 production result path>",
+    "--production-review",
+    "<actual2218 production review path>",
+    "--production-review-sha256",
+    "<actual2218 production review SHA256>"
+  ]
+}

@@ -1,0 +1,31 @@
+--- 801d/metadata_projection_delta.diff
++++ 2218/metadata_projection_delta.diff
+@@ -33,7 +33,7 @@
+ SO_SHA = "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033"
+ SSH = ["-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=8"]
+ DEST = "songcl@192.168.1.115"
+-EXPECTED = {'token': '801d029aa45243ee841454512bcf0b84', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-08T14:23:40.346565+00:00', 'deadline_at': '2026-11-08T15:23:40.346565+00:00', 'context_sha256': 'b9ef46219c253d45bcfeb260172550ea36ccff49567e7bb26b45b498b633ea69', 'pending_sha256': '80d5927f103adce942e5c0ca08f4a8fd8001c25cf087823650c205dca8ada131'}
++EXPECTED = {'token': '2218a50249ea45588e5138890a7f4160', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-08T15:32:25.884685+00:00', 'deadline_at': '2026-11-08T16:32:25.884685+00:00', 'context_sha256': 'b168aa4faa7cfc1d40895a3f2b99a3df67b31a4d635e91ba0f76653e5db5c1e8', 'pending_sha256': '562c3d37dc43a6c9dc205de189e87ee42d46c367cd63bb06f50a0784f858ddf3'}
+ TESTED_OWNER = {'token': '801d029aa45243ee841454512bcf0b84', 'thread_id': '01a159c5-29ab-7a22-ba7f-e79174757253', 'generated_at': '2026-11-08T14:23:40.346565+00:00', 'deadline_at': '2026-11-08T15:23:40.346565+00:00', 'context_sha256': 'b9ef46219c253d45bcfeb260172550ea36ccff49567e7bb26b45b498b633ea69', 'pending_sha256': '80d5927f103adce942e5c0ca08f4a8fd8001c25cf087823650c205dca8ada131'}
+ TESTED_NATIVE_MANIFEST_SHA256 = '3375a78743ac76d57c7c1d3825ae451c27f4b990c284266d440ed723c5c1e3de'
+ 
+@@ -182,8 +182,8 @@
+         "physical_gpu": 0, "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c", "allowed_gpus": [0],
+     }.items())
+     assert manifest.get("draft_execution_disabled") is False
+-    version_path = ROOT / "pipeline/diagnostic_bundles/tick_801d029a/nde_deployment_prepare/deployment_source_version.json"
+-    assert sha(version_path) == "cf99053201bb7b8ed9350115bf49a2cd7a6c59a60d5e1a8f9310fa6cff27080a"
++    version_path = ROOT / "pipeline/diagnostic_bundles/tick_2218a502/nde_deployment_prepare/deployment_source_version.json"
++    assert sha(version_path) == "d8e4abf3b5417cee839d44d5032bbe7682bb98299a01d198f6acdf43b2f6a749"
+     version = read(version_path)
+     assert version["code_commit"] == SOURCE and version["parent_commit"] == BASE
+     paths = version["source_files_exact9"]
+@@ -400,7 +400,7 @@
+     assert actual["kind"]=="PRODUCTION_PATH_INSTALLED_NO_TRAINER_LAUNCHED" and actual["owner"]==EXPECTED
+     assert actual["binding"]["source_commit"]==SOURCE and actual["binding"]["runtime_root"]==NEW_ROOT
+     assert actual["training_launch_or_GPU_use"] is False and actual["one_shot_consumed"] is False
+-    assert actual["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/nde_path_prod_801d029a/conda_source.sh"
++    assert actual["shim"]=="/data/songcl/Project/Cluster_project/pipeline/runtime/nde_path_prod_2218a502/conda_source.sh"
+     assert not (EXEC / "switch_intent.json").exists(), "Prior switch intent: inspect/reconcile; never replay"
+     proof = read(TICK / "nde_runtime_deployment.json")
+     assert proof["inputs"] == inputs

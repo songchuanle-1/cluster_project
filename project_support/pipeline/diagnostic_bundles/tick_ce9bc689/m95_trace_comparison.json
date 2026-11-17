@@ -1,0 +1,1008 @@
+{
+  "passed": true,
+  "model": "m95",
+  "observed_at": "2026-10-18T12:26:58.686438+00:00",
+  "input_equal": true,
+  "model_equal": true,
+  "rng_before_equal": {
+    "torch_cpu": true,
+    "torch_cuda": true,
+    "numpy": true,
+    "python": true
+  },
+  "rng_after_forward_equal": {
+    "torch_cpu": true,
+    "torch_cuda": true,
+    "numpy": true,
+    "python": true
+  },
+  "trace_event_count": 354,
+  "different_event_count": 309,
+  "first_difference": {
+    "sequence": 38,
+    "label": "unet.conv.2",
+    "phase": "post",
+    "equal": false,
+    "different_tensor_keys": [
+      "x.features",
+      "x.indices"
+    ],
+    "scalars_equal": true,
+    "matching_pre": {
+      "sequence": 37,
+      "equal": true
+    }
+  },
+  "first_divergent_equal_input_boundary": {
+    "sequence": 38,
+    "label": "unet.conv.2",
+    "phase": "post",
+    "equal": false,
+    "different_tensor_keys": [
+      "x.features",
+      "x.indices"
+    ],
+    "scalars_equal": true,
+    "matching_pre": {
+      "sequence": 37,
+      "equal": true
+    }
+  },
+  "loss_abs_difference": 5.960464477539063e-08,
+  "target_gradient_norm_abs_differences": {
+    "level_gate": 4.423782229423523e-09,
+    "point_out_proj": 4.190951585769653e-09
+  },
+  "selected_boundaries": [
+    {
+      "sequence": 0,
+      "label": "voxelization",
+      "phase": "pre",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "raw_statistics": {
+        "x.0.0": {
+          "shape": [
+            310606,
+            6
+          ],
+          "different": 0,
+          "elements": 1863636,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0
+        },
+        "x.0.1": {
+          "shape": [
+            200278,
+            21
+          ],
+          "different": 0,
+          "elements": 4205838
+        }
+      }
+    },
+    {
+      "sequence": 1,
+      "label": "voxelization",
+      "phase": "post",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 0,
+        "equal": true
+      },
+      "raw_statistics": {
+        "x": {
+          "shape": [
+            200278,
+            6
+          ],
+          "different": 0,
+          "elements": 1201668,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "label": "extract_feat",
+      "phase": "pre",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 309,
+      "label": "network.scatter_mean",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0.0"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {
+        "x.0.0": {
+          "shape": [
+            310606,
+            32
+          ],
+          "different": 6308984,
+          "elements": 9939392,
+          "max_absolute": 6.258487701416016e-06,
+          "mean_absolute": 1.256684586855212e-07
+        },
+        "x.0.1": {
+          "shape": [
+            310606
+          ],
+          "different": 0,
+          "elements": 310606
+        }
+      }
+    },
+    {
+      "sequence": 310,
+      "label": "network.scatter_mean",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 309,
+        "equal": false
+      },
+      "raw_statistics": {
+        "x": {
+          "shape": [
+            1914,
+            32
+          ],
+          "different": 46949,
+          "elements": 61248,
+          "max_absolute": 4.76837158203125e-06,
+          "mean_absolute": 1.2742382522547063e-07
+        }
+      }
+    },
+    {
+      "sequence": 311,
+      "label": "extract_feat",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 2,
+        "equal": true
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 312,
+      "label": "network.scatter_mean",
+      "phase": "pre",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "raw_statistics": {
+        "x.0.0": {
+          "shape": [
+            310606,
+            3
+          ],
+          "different": 0,
+          "elements": 931818,
+          "max_absolute": 0.0,
+          "mean_absolute": 0.0
+        },
+        "x.0.1": {
+          "shape": [
+            310606
+          ],
+          "different": 0,
+          "elements": 310606
+        }
+      }
+    },
+    {
+      "sequence": 313,
+      "label": "network.scatter_mean",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 312,
+        "equal": true
+      },
+      "raw_statistics": {
+        "x": {
+          "shape": [
+            1914,
+            3
+          ],
+          "different": 2609,
+          "elements": 5742,
+          "max_absolute": 1.9073486328125e-06,
+          "mean_absolute": 6.180431932664744e-08
+        }
+      }
+    },
+    {
+      "sequence": 314,
+      "label": "expand_and_fps",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0.0",
+        "x.0.1"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 315,
+      "label": "expand_and_fps",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 314,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 316,
+      "label": "text_encoder",
+      "phase": "pre",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 317,
+      "label": "text_encoder",
+      "phase": "post",
+      "equal": true,
+      "different_tensor_keys": [],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 316,
+        "equal": true
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 318,
+      "label": "dec",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 325,
+      "label": "dec.encoder_layers.0",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 326,
+      "label": "dec.encoder_layers.0",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 325,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 327,
+      "label": "dec.decoder_layers.0",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 328,
+      "label": "dec.decoder_layers.0",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 327,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 329,
+      "label": "dec.encoder_layers.1",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 330,
+      "label": "dec.encoder_layers.1",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 329,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 331,
+      "label": "dec.decoder_layers.1",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 332,
+      "label": "dec.decoder_layers.1",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 331,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 333,
+      "label": "dec.encoder_layers.2",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 334,
+      "label": "dec.encoder_layers.2",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 333,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 335,
+      "label": "dec.decoder_layers.2",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 336,
+      "label": "dec.decoder_layers.2",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 335,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 337,
+      "label": "dec.encoder_layers.3",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 338,
+      "label": "dec.encoder_layers.3",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 337,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 339,
+      "label": "dec.decoder_layers.3",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 340,
+      "label": "dec.decoder_layers.3",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 339,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 341,
+      "label": "dec.encoder_layers.4",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 342,
+      "label": "dec.encoder_layers.4",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 341,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 343,
+      "label": "dec.decoder_layers.4",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 344,
+      "label": "dec.decoder_layers.4",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 343,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 345,
+      "label": "dec.encoder_layers.5",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 347,
+      "label": "cluster_to_points",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0.0",
+        "x.0.1.0",
+        "x.0.1.1",
+        "x.0.1.2"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {
+        "x.0.0": {
+          "shape": [
+            8,
+            1185,
+            256
+          ],
+          "different": 2189892,
+          "elements": 2426880,
+          "max_absolute": 3.814697265625e-06,
+          "mean_absolute": 1.0380649812267037e-07
+        },
+        "x.0.1.0": {
+          "shape": [
+            8,
+            256,
+            256
+          ],
+          "different": 456925,
+          "elements": 524288,
+          "max_absolute": 5.036592483520508e-06,
+          "mean_absolute": 1.5581296430866587e-07
+        },
+        "x.0.1.1": {
+          "shape": [
+            8,
+            64,
+            256
+          ],
+          "different": 110375,
+          "elements": 131072,
+          "max_absolute": 2.86102294921875e-06,
+          "mean_absolute": 1.2142014060856354e-07
+        },
+        "x.0.1.2": {
+          "shape": [
+            8,
+            8,
+            256
+          ],
+          "different": 11390,
+          "elements": 16384,
+          "max_absolute": 9.5367431640625e-07,
+          "mean_absolute": 1.1017175438610138e-07
+        },
+        "x.0.2.0.0": {
+          "shape": [
+            729
+          ],
+          "different": 0,
+          "elements": 729
+        },
+        "x.0.2.0.1": {
+          "shape": [
+            729
+          ],
+          "different": 0,
+          "elements": 729
+        },
+        "x.0.2.0.2": {
+          "shape": [
+            729
+          ],
+          "different": 0,
+          "elements": 729
+        },
+        "x.0.2.0.3": {
+          "shape": [
+            729
+          ],
+          "different": 0,
+          "elements": 729
+        },
+        "x.0.2.0.4": {
+          "shape": [
+            1185
+          ],
+          "different": 0,
+          "elements": 1185
+        },
+        "x.0.2.0.5": {
+          "shape": [
+            1185
+          ],
+          "different": 0,
+          "elements": 1185
+        },
+        "x.0.2.0.6": {
+          "shape": [
+            1185
+          ],
+          "different": 0,
+          "elements": 1185
+        },
+        "x.0.2.0.7": {
+          "shape": [
+            1185
+          ],
+          "different": 0,
+          "elements": 1185
+        },
+        "x.0.2.1.0": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.1": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.2": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.3": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.4": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.5": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.6": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.1.7": {
+          "shape": [
+            256
+          ],
+          "different": 0,
+          "elements": 256
+        },
+        "x.0.2.2.0": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.1": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.2": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.3": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.4": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.5": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.6": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.2.2.7": {
+          "shape": [
+            64
+          ],
+          "different": 0,
+          "elements": 64
+        },
+        "x.0.3": {
+          "shape": [
+            8,
+            1185
+          ],
+          "different": 0,
+          "elements": 9480
+        }
+      }
+    },
+    {
+      "sequence": 348,
+      "label": "cluster_to_points",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 347,
+        "equal": false
+      },
+      "raw_statistics": {
+        "x": {
+          "shape": [
+            8,
+            1185,
+            256
+          ],
+          "different": 1706485,
+          "elements": 2426880,
+          "max_absolute": 1.52587890625e-05,
+          "mean_absolute": 1.7026653978531351e-07
+        }
+      }
+    },
+    {
+      "sequence": 350,
+      "label": "dec.encoder_layers.5",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 345,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 351,
+      "label": "dec.decoder_layers.5",
+      "phase": "pre",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.2",
+        "x.4",
+        "x.5",
+        "x.6"
+      ],
+      "scalars_equal": true,
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 352,
+      "label": "dec.decoder_layers.5",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.0",
+        "x.1",
+        "x.2",
+        "x.3",
+        "x.4",
+        "x.5"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 351,
+        "equal": false
+      },
+      "raw_statistics": {}
+    },
+    {
+      "sequence": 353,
+      "label": "dec",
+      "phase": "post",
+      "equal": false,
+      "different_tensor_keys": [
+        "x.aux_outputs.0.indis",
+        "x.aux_outputs.0.masks",
+        "x.aux_outputs.0.proj_queries",
+        "x.aux_outputs.0.proj_tokens",
+        "x.aux_outputs.0.scores",
+        "x.aux_outputs.1.indis",
+        "x.aux_outputs.1.masks",
+        "x.aux_outputs.1.proj_queries",
+        "x.aux_outputs.1.proj_tokens",
+        "x.aux_outputs.1.scores",
+        "x.aux_outputs.2.indis",
+        "x.aux_outputs.2.masks",
+        "x.aux_outputs.2.proj_queries",
+        "x.aux_outputs.2.proj_tokens",
+        "x.aux_outputs.2.scores",
+        "x.aux_outputs.3.indis",
+        "x.aux_outputs.3.masks",
+        "x.aux_outputs.3.proj_queries",
+        "x.aux_outputs.3.proj_tokens",
+        "x.aux_outputs.3.scores",
+        "x.aux_outputs.4.indis",
+        "x.aux_outputs.4.masks",
+        "x.aux_outputs.4.proj_queries",
+        "x.aux_outputs.4.proj_tokens",
+        "x.aux_outputs.4.scores",
+        "x.indis",
+        "x.masks",
+        "x.orth_reg_loss",
+        "x.proj_queries",
+        "x.proj_tokens",
+        "x.ref_scores",
+        "x.scores"
+      ],
+      "scalars_equal": true,
+      "matching_pre": {
+        "sequence": 318,
+        "equal": false
+      },
+      "raw_statistics": {}
+    }
+  ],
+  "scope": "one instrumented ORIGINAL pair/model;not seedvariance/CI,operatorcause or efficacy"
+}

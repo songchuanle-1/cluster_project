@@ -1,0 +1,137 @@
+{
+  "id": "M209-PSBR",
+  "candidate_id": "hierarchy-parent-segmented-bidirectional-token-state",
+  "config": "configs/Quard/ctf_hcg_csort_psbr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr.yaml",
+  "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.569498062133789,
+    13.913694381713867
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/psbr_dfb6440d/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_psbr.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/smoke_champion_execution.json",
+      "sha256": "4befb854616e1fb956acec6c6196fcaec0313f949f1c254496dbbad8c07646b1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/smoke_candidate_execution.json",
+      "sha256": "1c6dc469bdd5e10ca05c42f9007cb9c053e054c9f1cb5776f2d6158efe89df9e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/resources_champion_execution.json",
+      "sha256": "83d47f0e47dfbd58211d30b2e9501f405d05fd266debb129c869ef3dfa560797"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/resources_candidate_execution.json",
+      "sha256": "62e5133bb60b336c91691c2f857b9cde352de3fcc020ea2b162ed97f4f65afc2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/execution_binding.json",
+      "sha256": "f89867665ca314b19a45077db7843f9df92e7174f22ae5dc25bbb68de3b7e9e2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/native_manifest.json",
+      "sha256": "93bb3611fc046e156fabbb26dd77fbefe1f41b7ec8bfb6e192f0573b71e4e453"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_execution/execution_lease.json",
+      "sha256": "23c2c3c8bca671ea6763f1ac4757093573d307762f0c2fe575659226e70122e1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_result_review/actual_four_result_review.json",
+      "sha256": "796bb940e855d98d968037597b4346870fba2c07d94cd320dcf69256f9c1e1d1"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/psbr_native_resource_independent_review.json",
+      "sha256": "4bddd224d76cb8c387755e77441e2254980577d65b4e8ee38bf1b4ef52bdc585"
+    }
+  ],
+  "recorded_at": "2026-10-22T14:28:28.699709+00:00",
+  "recurrence_nonsingleton_group_counts": [
+    64,
+    64
+  ],
+  "paired_initialization_scope": "After original backbone pretrain, before original TRAIN loader; exclude replaced middle FFN and new recurrence only",
+  "common_initialized_parameters_fingerprint": {
+    "scope": "After original backbone pretrain, before original TRAIN loader; exclude replaced middle FFN and new recurrence only",
+    "excluded_name_fragments": [
+      "cluster_ffn.1.",
+      "middle_recurrence."
+    ],
+    "tensor_count": 843,
+    "parameter_count": 156958522,
+    "sha256": "04231c23641ec4d1fd7b9a31292b1b117ee84c5c22385379f641ddba2063b07a",
+    "paired_equality": "NOT_VALIDATED_BY_SINGLE_TARGET_WORKER"
+  },
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "limitations": {
+    "full_state_including_buffers_hash": "NOT_RECORDED; common named parameters excluding replaced/new modules are actually fingerprinted",
+    "nontrivial_internal_empty_child_and_padding_cases": "NOT_OBSERVED_IN_THESE_TWO_BATCHES",
+    "raw_and_map_cross_target_digests": "Different; not a preregistered exact-output equality gate. No unmeasured cause claimed.",
+    "pure_TRAIN_peak_memory": "UNKNOWN; smoke includes unchanged diagnostic/probe overhead",
+    "training_efficacy": "UNKNOWN"
+  }
+}

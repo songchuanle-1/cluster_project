@@ -1,0 +1,69 @@
+{
+  "recorded_at": "2026-10-30T08:18:32.744466+00:00",
+  "reference_operational_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_692b4575/elc_operational_prepare/preparation.json",
+    "sha256": "3ef93f05824b7b2833de569c0f5d09d9097806a0d2bdf5d63bb802dfe05b5ade"
+  },
+  "reference_module_hashes": {
+    "adapter.py": "83c2498d18f0b56c1e863a7d8253a0d4edfeaab162933837944e679cfe86db6a",
+    "remote_ops.py": "0d5c76c0bb639791e31450be3fc3155432e0b31a02e9270a898d9df42f441859"
+  },
+  "reference_reviewed_policy_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/preparation.json",
+    "sha256": "3c76c1eb7329df2f6206eaafc4ca376b012d934ef8b99c712a709c1a02a0a058"
+  },
+  "reference_reviewed_policy_static_validation": {
+    "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_prepare/policy_static_validation.json",
+    "sha256": "803f25c088e6f30227e3f5812cecd4a8069838545c4d5c0b911d7066b2435ae2"
+  },
+  "reference_policy_independent_review": {
+    "path": "pipeline/diagnostic_bundles/tick_a6e82f44/sfc_policy_compat_independent_review.json",
+    "sha256": "8ce8d9555758206d4789cc270cfce98e20b3be6909a54cd159903b02366d0abf"
+  },
+  "ordered_literal_changes": [
+    {
+      "before": "RESOURCE_AUTHORIZATION = {'path':'pipeline/authorizations/server4_gpu0_only_20261026.json','sha256':'94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09'}",
+      "after": "RESOURCE_AUTHORIZATION = {'path': 'pipeline/authorizations/server4_gpu1_20261030.json', 'sha256': '6529ecf4cb9bc39c698650e3116df67870a2f82e76c046296c8a1e74aa0d68c2'}\nSERVERS_POLICY_SHA256 = '19b3753d13a8253263c6525f19a739795b816be141e21a9f9b3aaccddf4f8265'\nPOLICY_GPU_UUIDS = {0:'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c',1:'GPU-7f82edb9-f620-8045-caea-a75232265cd1'}"
+    },
+    {
+      "before": "'Current explicit GPU0-only authorization changed'",
+      "after": "'Current explicit retained-GPU0 plus GPU1 resource authorization changed'"
+    },
+    {
+      "before": "        server=yaml.safe_load((self.root/'SERVERS.yaml').read_text(encoding='utf-8'))['servers']['server-4']",
+      "after": "        require(sha(self.root/'SERVERS.yaml')==SERVERS_POLICY_SHA256,'Current exact SERVERS resource policy changed')\n        server=yaml.safe_load((self.root/'SERVERS.yaml').read_text(encoding='utf-8'))['servers']['server-4']"
+    },
+    {
+      "before": "all(type(g) is int and g in GPU_UUIDS for g in allowed)",
+      "after": "all(type(g) is int and g in POLICY_GPU_UUIDS for g in allowed)"
+    },
+    {
+      "before": "'GPU whitelist is unknown or outside this GPU0-only packet'",
+      "after": "'GPU whitelist is unknown or outside the current exact resource policy'"
+    },
+    {
+      "before": "require(allowed==[0],'This ELC packet supports only current GPU0 authorization')",
+      "after": "require(allowed==[0,1],'This ELC policy copy requires exact current [0,1] authorization; selected capability remains GPU0 only')"
+    },
+    {
+      "before": "all(uuids.get(str(g))==GPU_UUIDS[g] for g in allowed)",
+      "after": "all(uuids.get(str(g))==POLICY_GPU_UUIDS[g] for g in allowed)"
+    },
+    {
+      "before": "require((type(value) is int and value in GPU_UUIDS) or (type(value) is str and value in ('0',)),'Active queue GPU is malformed/unknown')",
+      "after": "require((type(value) is int and value in POLICY_GPU_UUIDS) or (type(value) is str and value in ('0','1')),'Active queue GPU is malformed/unknown')"
+    }
+  ],
+  "actual_changed_function_ASTs": [
+    "Adapter.guard",
+    "Adapter._local_idle"
+  ],
+  "all_other_adapter_function_ASTs_exact": true,
+  "policy_function_AST_equal_to_reviewed_SFC_except_ELC_diagnostic_identity": true,
+  "remote_ops_byte_identical": true,
+  "native_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_692b4575/elc_native_prepare/preparation.json",
+    "sha256": "28ec7b290cae00e50e30f28d9cef3d9d4ccc75cc3c4936cb15db1014a5d7cec9"
+  },
+  "scope": "Existing ELC source18e childSFCc9/worker614a/protocol7add and all native bytes unchanged. Only new static operational policy compatibility. Parent technicalreceipt/HEAD c9 remains necessary, not established by this packet; no computation or activation."
+}

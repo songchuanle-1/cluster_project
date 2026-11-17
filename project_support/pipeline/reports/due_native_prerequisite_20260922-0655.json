@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "scope": "Event-mode readiness check for the four blocked due native diagnostics after the prior unhealthy tick; no model forward, training, queue mutation, sync, or efficacy claim",
+  "generated_at": "2026-09-22T06:55:00+08:00",
+  "trigger": {
+    "mode": "event",
+    "reasons": [
+      "previous_tick_unhealthy",
+      "research_artifact_changed"
+    ],
+    "due_ids": [
+      "referent-causality-audit",
+      "referent-discrimination",
+      "instance-identity-representation",
+      "modality-identity-preservation"
+    ]
+  },
+  "observations": {
+    "server_6_reachable": true,
+    "remote_host": "das",
+    "allowed_gpu": 7,
+    "script_roots_checked": [
+      "/data3/songcl/Project/Cluster_project/scripts",
+      "/data3/songcl/Project/Cluster_project/Cluster/scripts"
+    ],
+    "native_capture_entrypoint_found": false,
+    "native_capture_entrypoint": "native_frozen_capture_20260916.py",
+    "exact_m95_checkpoint_found_under_server_6": false,
+    "nearest_checkpoint_namespace": "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_*",
+    "champ_csort_payload": {
+      "config_found": true,
+      "weights_found": false,
+      "description": "The server-6 champ_csort directory contains only a log, event file, and config; it is not the exact M95 training checkpoint."
+    },
+    "existing_fixed16_capture": {
+      "native_capture_completed": true,
+      "expressions": 16,
+      "target_independent_objectness_axis_present": false,
+      "required_cohort_size": 123,
+      "conclusion": "The archived fixed-16 capture cannot satisfy the complete candidate-rank contract and must not be relabeled as objectness evidence."
+    }
+  },
+  "resolution": {
+    "stage": "blocked",
+    "blocker": "server-6 is reachable, but the frozen capture entry point is unavailable in both allowed remote script roots and no exact M95 checkpoint is available under the allowed server-6 checkpoint root.",
+    "retry_after": "2026-09-22T08:00:00+08:00",
+    "unblock_condition": "Deploy the frozen capture bundle, bind an exact M95 checkpoint under server-6 storage, and produce complete same-forward evidence with a validated target-independent objectness axis and the candidate-specific controls.",
+    "alternatives_attempted": [
+      "Verified live server-6 reachability without running monitor or goal preflight.",
+      "Searched only the two allowed remote script roots for the frozen capture entry point.",
+      "Searched the allowed server-6 checkpoint root for an exact M95 checkpoint and inspected the nearest champ_csort payload.",
+      "Confirmed from the frozen producer contract that target-mask IoU and geometry cannot be relabeled as target-independent objectness."
+    ]
+  },
+  "actions": {
+    "training_launched": false,
+    "native_diagnostic_launched": false,
+    "queue_mutated": false,
+    "sync_performed": false,
+    "research_work_schema_repaired": true
+  },
+  "limitations": [
+    "This receipt verifies prerequisites only; it does not provide candidate-rank, identity, modality, or efficacy evidence.",
+    "The exact M95 payload may exist on a dispatch-disabled host, but that host is not an admissible execution location for this pipeline.",
+    "No objectness values were inferred, imputed, or substituted from IoU or geometry."
+  ]
+}

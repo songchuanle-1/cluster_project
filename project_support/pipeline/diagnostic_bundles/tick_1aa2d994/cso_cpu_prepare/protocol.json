@@ -1,0 +1,49 @@
+{
+  "owner": {
+    "token": "1aa2d994ab004c93b2ea069c90ef9356",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T05:07:20.849412+00:00",
+    "deadline_at": "2026-11-10T06:07:20.849412+00:00",
+    "context_sha256": "eff960250947a7e168ea5f144742d7a877fd810d38f3f958cca86ab058cc9a93",
+    "pending_sha256": "d7e6661624a7282adbfadedf6e35e015206fb97cb7ab4add04a79974af7a6f58"
+  },
+  "scope": "REMOTE_CPU_ONLY_SYNTHETIC_EXACT_CORE_CHECK",
+  "experiment_id": "M236-CSO",
+  "source_core_sha256": "28fa6a138fdecc25dadee894fda0fea285ac2759625284bf26998fa1d93f88ee",
+  "dtypes": [
+    "torch.float64",
+    "torch.float32"
+  ],
+  "tolerances": {
+    "float64": {
+      "atol": 2e-08,
+      "rtol": 2e-06
+    },
+    "float32": {
+      "atol": 3e-05,
+      "rtol": 0.0003
+    }
+  },
+  "registered_checks": [
+    "Fast and literal reference full and diagonal outputs, inputs gradients and all-nine-parameter gradients",
+    "Native valid fine incidences with gaps, singleton/unoccupied leaf slots, NaN padding excluded, padding outputs/gradients zero",
+    "Joint point permutation, fine-ID relabeling, compact/padded equivalence, exact cross-scene isolation and ignored positions",
+    "Near-constant feature and latent populations at fixed scales 0,1e-9,1e-6,1e-3 in both dtypes; exact constant-channel LayerNorm input; finite forward/backward",
+    "Same projected mean/diagonal but opposite cross-correlation in exact statistics/six-step matrix function; separate declared controlled-projection model instance full-vs-diagonal output discriminant",
+    "Two synthetic core updates with original frozen-YAML AdamW lr1e-4/weight_decay5e-4/decoder lr multiplier1 and native grad_clip0.1; all nine finite nonzero gradients and actual updates",
+    "Empty/mismatched/negative incidence rejection; no project full-model/dataset imports"
+  ],
+  "controlled_parameter_fixture": "Only the separate correlation diagnostic copy projects native input channels0,1 onto latent0,1 with all other projection weights zero; LayerNorm/readout remain constructor defaults. Training/reference fixtures use untouched seeded parameters. Frozen source is never edited.",
+  "matrix_function": "Six Newton-Schulz iterations exactly as frozen, epsilon exactly torch.finfo(dtype).eps; report relative square residual without asserting exact square-root convergence.",
+  "native_backward": "NOT_RUN",
+  "resources": "NOT_RUN",
+  "native_data_loaded": false,
+  "efficacy": "UNKNOWN",
+  "novelty": "UNKNOWN",
+  "fixed_registration_not_validation_selection": true,
+  "limits_seconds": {
+    "worker": 95,
+    "remote_bootstrap": 110,
+    "ssh": 120
+  }
+}

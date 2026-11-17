@@ -1,0 +1,94 @@
+"""Localize current semantic controls to fixed native mask-error points."""
+import ast
+import copy
+from datetime import datetime,timezone
+import shutil
+import argparse
+from ops import *
+parser=argparse.ArgumentParser()
+parser.add_argument('--batch',type=int,choices=range(4),required=True)
+parser.add_argument('--attempt',type=int,default=1)
+args=parser.parse_args()
+label='error_readout_'+str(args.batch)
+if args.attempt>1:label+='_attempt'+str(args.attempt)
+owner=guard(400)
+protocol={'preregistered_at':datetime.now(timezone.utc).isoformat(),'candidate_id':CID,
+ 'scope':'Frozen TRAIN pair '+str(args.batch)+' of the same8predefinedscenes;diagnostic error localization,not a new loss/model or population efficacy',
+ 'groups':'For each expression,union of wrong point labels among the ORIGINAL native matched-positive query masks,restricted to valid points. Complement are original correct points. Freeze groups before interventions;groundtruth is diagnostic only.',
+ 'readouts':'Per-group count,native original message-gradient dot candidate message-change(first-order surrogate only),actual changed mask-logit magnitude. Compare raw-key candidate,uniform mean,cyclic mismatch and identity with unchanged native criterion/matching.',
+ 'next_if_inconclusive':'Continue SAMEstableID with this frozen protocol on remaining6predefinedTRAINscenes before any diagnosis/admission claim;do not repeat resources,backward or old audits',
+ 'new_training':False,'new_loss':False,'tolerance':1e-6}
+save(label+'_protocol.json',protocol)
+tree=ast.parse((PREVIOUS/'raw_key_revision1/native_raw_key.py').read_text())
+changes={'support':0,'readout':0,'name':0}
+class Errors(ast.NodeTransformer):
+    def visit_FunctionDef(self,node):
+        self.generic_visit(node)
+        if node.name=='observed_loss_masks':
+            insertion=ast.parse('''if 'error_support' not in held:
+    held['error_support']=[]
+    for b,(qi,ti) in enumerate(indices):
+        if len(qi)==0 or targets[b].get('masks') is None:
+            held['error_support'].append(None)
+        else:
+            predicted=pred_masks[b][qi].detach()>0
+            target=targets[b]['masks'][ti].detach().bool()
+            valid=~held['gather'][3][b]
+            assert int(valid.sum().cpu())==predicted.shape[-1]==target.shape[-1]
+            support=torch.zeros_like(valid)
+            support[valid]=(predicted!=target).any(0)
+            held['error_support'].append(support.detach().clone())
+''').body
+            index=next(i for i,n in enumerate(node.body) if isinstance(n,ast.Return))
+            node.body[index:index]=insertion
+            changes['support']+=1
+        return node
+    def visit_Assign(self,node):
+        self.generic_visit(node)
+        if len(node.targets)==1 and ast.unparse(node.targets[0])=='condition':
+            changes['readout']+=1
+            return [node,*ast.parse('''condition['error_group_readouts']=[]
+delta=(message-base).detach()
+for b,error_group in enumerate(held['error_support']):
+    if error_group is None:
+        condition['error_group_readouts'].append(None)
+        continue
+    valid=~mask[b]
+    groups={'original_error':error_group,'original_correct':valid&~error_group}
+    entry={}
+    for group_name,support in groups.items():
+        count=int(support.sum().cpu())
+        entry[group_name]={'points':count,'native_gradient_dot_message_delta':float((native_gradient[b,support].double()*delta[b,support].double()).sum().cpu()),'message_delta_norm':float(delta[b,support].norm().cpu()),'mask_logit_max_change':float((output[2][b,:,support]-normal[2][b,:,support]).abs().max().cpu()) if count else None}
+    condition['error_group_readouts'].append(entry)
+''').body]
+        return node
+    def visit_Constant(self,node):
+        if node.value=='native_raw_key_result.json':changes['name']+=1;return ast.Constant('native_error_readout_result.json')
+        return node
+tree=Errors().visit(tree)
+assert changes=={k:1 for k in changes},changes
+ast.fix_missing_locations(tree)
+local=OUT/label
+local.mkdir(exist_ok=False)
+(local/'native_error_readout.py').write_text(ast.unparse(tree)+'\n',encoding='utf-8')
+for n in ('native_runtime.py','coarse_cross_attention_r1.py'):shutil.copyfile(PREVIOUS/'raw_key_revision1'/n,local/n)
+manifest=copy.deepcopy(tick.load(PREVIOUS/'raw_key_revision1/native_manifest.json'))
+stage=STAGE+'/'+label
+manifest.update(stage=stage,cohort=manifest['cohort'][2*args.batch:2*args.batch+2],error_protocol=evidence(OUT/(label+'_protocol.json')))
+manifest['diagnostic_files']={p.name:tick.digest(p) for p in local.iterdir()}
+save(label+'/native_manifest.json',manifest)
+save(label+'/execution_lease.json',{'project':'cluster_project','thread_id':THREAD,'token':TOKEN,'deadline_at':owner['deadline_at'],'native_manifest_sha256':tick.digest(local/'native_manifest.json')})
+advance([OUT/(label+'_protocol.json'),local/'native_manifest.json',local/'native_error_readout.py'],next_action='Execute frozen error-localized scene pair '+str(args.batch)+';other predefined scenes pending,not a scientific failure')
+ssh('from pathlib import Path\nimport json\nPath('+repr(stage)+').mkdir(parents=True,exist_ok=False)\nprint(json.dumps({"created":True}))')
+sc=run(['scp',*SSH,*[str(p) for p in local.iterdir()],'songcl@192.168.1.115:'+stage+'/'])
+assert sc.returncode==0,sc.stderr
+guard(320)
+remaining=(datetime.fromisoformat(owner['deadline_at'])-datetime.now(timezone.utc)).total_seconds()
+command='source /data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh && conda activate project_cluster && python -B '+shlex.quote(stage+'/native_error_readout.py')+' --lease '+shlex.quote(stage+'/execution_lease.json')
+result=run(['ssh',*SSH,'songcl@192.168.1.115',shlex.join(['bash','-lc',command])],min(400,int(remaining)-150))
+save(label+'_execution.json',{'returncode':result.returncode,'stdout':result.stdout,'stderr':result.stderr,'finished_at':datetime.now(timezone.utc).isoformat()})
+pull=run(['scp',*SSH,'songcl@192.168.1.115:'+stage+'/native_error_readout_result.json',str(local/'native_error_readout_result.json')])
+assert pull.returncode==0,pull.stderr
+value=tick.load(local/'native_error_readout_result.json')
+advance([local/'native_error_readout_result.json',OUT/(label+'_execution.json')],next_action='Interpret frozen errorlocalized controls and finish remaining predefined scenes;do not repeat passed native/resources or claim admission')
+print(json.dumps({'execution_completed':value.get('execution_completed'),'controls_passed':value.get('controls_passed'),'error':value.get('error'),'conditions':[{'condition':c['condition'],'loss_delta':c['native_loss_delta'],'error_readouts':c['error_group_readouts']} for c in value.get('coarse_conditions',[])]},ensure_ascii=False))

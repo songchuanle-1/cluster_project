@@ -1,0 +1,126 @@
+{
+  "id": "M206-CGCA",
+  "candidate_id": "hierarchy-coarse-conditioned-fine-channel-attention",
+  "config": "configs/Quard/ctf_hcg_csort_cgca/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cgca.yaml",
+  "code_commit": "898ff63a2cf63d3895a9e86c0ee3d1e5b672b335",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.526998519897461,
+    13.908799171447754
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "diagnostic_invocation": "python -B pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/control.py smoke",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "observed_at": "2026-10-20T21:11:23.303094+00:00",
+  "new_operator_parameters": 0,
+  "intended_edge_proof": [
+    {
+      "fine_input": {
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "torch.float32",
+        "requires_grad": false,
+        "finite": true,
+        "abs_max": 0.00025033921701833606
+      },
+      "coarse_input": {
+        "shape": [
+          8,
+          8,
+          256
+        ],
+        "dtype": "torch.float32",
+        "requires_grad": false,
+        "finite": true,
+        "abs_max": 0.0013269123155623674
+      },
+      "output": [
+        {
+          "shape": [
+            8,
+            256,
+            256
+          ],
+          "dtype": "torch.float32",
+          "requires_grad": false,
+          "finite": true,
+          "abs_max": 0.00011316297604935244
+        }
+      ]
+    },
+    {
+      "fine_input": {
+        "shape": [
+          8,
+          256,
+          256
+        ],
+        "dtype": "torch.float32",
+        "requires_grad": false,
+        "finite": true,
+        "abs_max": 0.00012069190415786579
+      },
+      "coarse_input": {
+        "shape": [
+          8,
+          8,
+          256
+        ],
+        "dtype": "torch.float32",
+        "requires_grad": false,
+        "finite": true,
+        "abs_max": 0.00016247261373791844
+      },
+      "output": [
+        {
+          "shape": [
+            8,
+            256,
+            256
+          ],
+          "dtype": "torch.float32",
+          "requires_grad": false,
+          "finite": true,
+          "abs_max": 7.451188866980374e-05
+        }
+      ]
+    }
+  ],
+  "affected_native_ffn_parameters_updated": true,
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/smoke_candidate_result.json",
+      "sha256": "d2fe096bf2e353006f71b46e4fa595dfc743a45ac764750bd2ea9d4e106df6c2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/smoke_candidate_execution.json",
+      "sha256": "58bd768950d8561c88d0d0561c2a5afab7b0df1f872a05ba59ff7fef8d3a7e6f"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/native_manifest.json",
+      "sha256": "454a097734919bf8bc3c4bf0426092300aea53cef9add9df06718b1abe2502b6"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_native/worker.py",
+      "sha256": "aad44f6846614a054df6ce94d61a3a9f4788a4cb0dffa5e12191d5fc9b84be0d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/cgca_version_native.json",
+      "sha256": "aa0df3982a54dc3a3a23a5e937570468ef1bfc5762fe700ba994983147d672b9"
+    }
+  ],
+  "efficacy": "UNKNOWN; finite two-step execution and gradients do not establish mIoU gain."
+}

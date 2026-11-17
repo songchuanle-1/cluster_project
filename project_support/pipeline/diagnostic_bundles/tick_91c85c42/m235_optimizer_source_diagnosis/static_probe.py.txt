@@ -1,0 +1,145 @@
+"""Read-only source/cache disassembly; never imports Torch or executes code objects."""
+import os
+import socket
+import sys
+assert socket.gethostname() == 'dl04-MS-7E06' and os.getuid() == os.geteuid() == 1001
+assert sys.flags.isolated and sys.dont_write_bytecode and not sys.flags.optimize
+from datetime import datetime,timezone
+import ast
+import dis
+import hashlib
+import importlib.util
+import json
+import marshal
+from pathlib import Path
+import re
+import stat
+import struct
+import types
+
+owner = json.load(sys.stdin)['owner']
+assert owner['token'] == '91c85c4270bd407ba432eca5dbf7d3a8'
+assert datetime.now(timezone.utc) < datetime.fromisoformat(owner['deadline_at'])
+adam = Path('/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/optim/adam.py')
+root = Path('/data/songcl/Project/Cluster_project/Cluster_nsd_20261107')
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+def file_bytes(path,maximum=2097152):
+    before = os.lstat(path)
+    assert stat.S_ISREG(before.st_mode) and before.st_size <= maximum
+    raw = path.read_bytes()
+    after = os.lstat(path)
+    stable = (before.st_dev,before.st_ino,before.st_size,before.st_mtime_ns,before.st_ctime_ns) == (after.st_dev,after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns)
+    return raw,{'path':str(path),'sha256':sha(raw),'size':before.st_size,'mtime_ns':before.st_mtime_ns,
+                'ctime_ns':before.st_ctime_ns,'device':before.st_dev,'inode':before.st_ino,
+                'uid':before.st_uid,'read_stable':stable}
+
+def numbered(text,start,end):
+    return [{'line':i,'text':x} for i,x in enumerate(text.splitlines(),1) if start <= i <= end]
+
+def functions(code,name):
+    found = []
+    if code.co_name == name: found.append(code)
+    for constant in code.co_consts:
+        if isinstance(constant,types.CodeType): found += functions(constant,name)
+    return found
+
+def instructions(code):
+    current_line = code.co_firstlineno
+    result = []
+    for instruction in dis.get_instructions(code):
+        if instruction.starts_line is not None: current_line = instruction.starts_line
+        result.append({'offset':instruction.offset,'opname':instruction.opname,'argrepr':instruction.argrepr,
+                       'starts_line':instruction.starts_line,'effective_line':current_line})
+    return result
+
+source_raw,source_identity = file_bytes(adam)
+source_text = source_raw.decode('utf-8')
+source_ast = ast.parse(source_text,filename=str(adam))
+ast_functions = [x for x in ast.walk(source_ast) if isinstance(x,(ast.FunctionDef,ast.AsyncFunctionDef)) and x.name == '_init_group']
+assert len(ast_functions) == 1
+node = ast_functions[0]
+source_grad_lines = sorted({x.lineno for x in ast.walk(node) if isinstance(x,ast.Attribute) and x.attr == 'grad'})
+# compile() creates a code object for static comparison; it is never exec/eval'ed.
+compiled = compile(source_raw,str(adam),'exec',dont_inherit=True,optimize=0)
+compiled_functions = functions(compiled,'_init_group')
+assert len(compiled_functions) == 1
+expected_code = compiled_functions[0]
+pyc_paths = sorted((adam.parent/'__pycache__').glob('adam.*.pyc'))
+assert len(pyc_paths) <= 8
+cache_results = []
+for path in pyc_paths:
+    raw,identity = file_bytes(path)
+    item = {'identity':identity,'header_hex':raw[:16].hex(),'magic_matches_interpreter':raw[:4] == importlib.util.MAGIC_NUMBER}
+    if len(raw) < 16:
+        item['error'] = 'Short pyc header'; cache_results.append(item); continue
+    flags = struct.unpack('<I',raw[4:8])[0]
+    item['flags'] = flags
+    if flags & 1:
+        item.update(mode='hash',checked_hash=bool(flags & 2),source_hash_header_hex=raw[8:16].hex(),
+                    current_source_hash_hex=importlib.util.source_hash(source_raw).hex())
+        item['header_matches_current_source'] = raw[8:16] == importlib.util.source_hash(source_raw)
+    else:
+        stamp,size = struct.unpack('<II',raw[8:16])
+        item.update(mode='timestamp',source_mtime_header=stamp,source_size_header=size,
+                    current_source_mtime_seconds=int(source_identity['mtime_ns']//1000000000)&0xffffffff,
+                    current_source_size=source_identity['size'])
+        item['header_matches_current_source'] = stamp == item['current_source_mtime_seconds'] and size == source_identity['size']
+    if not item['magic_matches_interpreter']:
+        item['error'] = 'Different interpreter magic; not unmarshalled'; cache_results.append(item); continue
+    optimization = 1 if '.opt-1.' in path.name else 2 if '.opt-2.' in path.name else 0
+    item['optimization_tag'] = optimization
+    compared_code = functions(compile(source_raw,str(adam),'exec',dont_inherit=True,optimize=optimization),'_init_group')[0]
+    loaded = marshal.loads(raw[16:])
+    assert isinstance(loaded,types.CodeType)
+    found = functions(loaded,'_init_group')
+    item['init_group_code_objects'] = len(found)
+    details = []
+    for code in found:
+        ops = instructions(code)
+        offsets = [i for i,x in enumerate(ops) if x['opname'] in ('LOAD_ATTR','STORE_ATTR','LOAD_METHOD') and x['argrepr'] == 'grad']
+        windows = []
+        for index in offsets:
+            windows.append(ops[max(0,index-4):min(len(ops),index+6)])
+        details.append({'co_filename':code.co_filename,'co_firstlineno':code.co_firstlineno,
+          'co_code_sha256':sha(code.co_code),'co_lnotab_hex':code.co_lnotab.hex(),
+          'line_starts':list(dis.findlinestarts(code)),'varnames':list(code.co_varnames),'names':list(code.co_names),
+          'grad_attribute_instruction_windows':windows,
+          'line191_instructions':[x for x in ops if x['effective_line'] == 191],
+          'all_instructions':ops,
+          'same_bytecode_as_current_source_compile':code.co_code == compared_code.co_code,
+          'same_firstlineno_as_current_source_compile':code.co_firstlineno == compared_code.co_firstlineno,
+          'same_line_starts_as_current_source_compile':list(dis.findlinestarts(code)) == list(dis.findlinestarts(compared_code)),
+          'same_varnames_and_names_as_current_source_compile':(code.co_varnames,code.co_names) == (compared_code.co_varnames,compared_code.co_names)})
+    item['functions'] = details
+    cache_results.append(item)
+
+target_files = [root/'tools/train.py',
+ root/'framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/loss.py',
+ root/'framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_sinc/network.py']
+integration = []
+pattern = re.compile(r'optimizer|param_groups|add_param_group|torch\.optim|\.grad\s*=')
+for path in target_files:
+    raw,identity = file_bytes(path)
+    text = raw.decode('utf-8')
+    lines = text.splitlines()
+    hits = [i for i,line in enumerate(lines,1) if pattern.search(line)]
+    assert len(hits) <= 120
+    selected = set()
+    for hit in hits: selected.update(range(max(1,hit-3),min(len(lines),hit+3)+1))
+    integration.append({'identity':identity,'direct_optimizer_pattern_hit_lines':hits,
+                        'bounded_relevant_source':[{'line':i,'text':lines[i-1]} for i in sorted(selected)],
+                        'train_line130_context':numbered(text,110,145) if path.name == 'train.py' else []})
+python_raw,python_identity = file_bytes(Path(sys.executable).resolve(),67108864)
+assert 'torch' not in sys.modules
+print(json.dumps({'owner':owner,'hostname':socket.gethostname(),'uid':os.getuid(),
+ 'python':sys.executable,'python_version':sys.version,'python_identity':python_identity,
+ 'adam_source_identity':source_identity,'adam_source_lines135_245':numbered(source_text,135,245),
+ 'source_init_group_start_end':[node.lineno,node.end_lineno],'source_grad_attribute_lines':source_grad_lines,
+ 'source_compiled_for_static_comparison_only':True,'code_objects_executed':False,
+ 'current_source_compiled_init_group_co_code_sha256':sha(expected_code.co_code),
+ 'current_source_compiled_grad_instructions':[x for x in instructions(expected_code) if x['opname'] in ('LOAD_ATTR','STORE_ATTR','LOAD_METHOD') and x['argrepr'] == 'grad'],
+ 'pyc_caches':cache_results,'integration_sources':integration,'Torch_imported':False,'GPU_context_created':False,
+ 'signals_sent':False,'remote_mutations':False,'observed_at':datetime.now(timezone.utc).isoformat()}))

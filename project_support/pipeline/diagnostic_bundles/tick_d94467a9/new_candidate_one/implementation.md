@@ -1,0 +1,11 @@
+# NEC source-only implementation
+
+`NodeEdgeComposition` lives in the independent `_nec/node_edge_coupling.py`; attribute `dec.cluster_att.node_edge_coupling`, maps `edge_cell/node_cell` and one shared original GELU. Original constructor consumes all FFN/LN initialization before CPUfork creates new maps, then replaced FFNs become Identity rather than unused parameters. Common native pairing must exclude only removedFFNs/newcore and retain3LN dynamically.
+
+Actual production helpers build true original-ID support, two-BFS exact component diameters, and scene-local rounds with separate node/edge offsets. Each round edge-cell reads OLD own edge and OLD endpoint nodes, then a single functional edge copy precedes the node-cell reading OLD own node and newly updated incident edges. Components that completed D generate neither edge nor node rows. Unsupported/pad rows get zero deltas; finalhD directly feeds original3rawskips/HCG/rawCSORT/singleinst path. No feature detach or mutation of raw banks/parents/FPS exists.
+
+Metadata traversal is linear in true nodes/edges plus deterministic sorting; active round records and tensor work scale with D*(N+E), D at most4 for the original supported three-level forest. Python planning, copies/means and synchronization have real cost; source linear MAC proxy is not whole-call resources or10G PASS.
+
+Executed command: `python -B -X utf8 pipeline/diagnostic_bundles/tick_d94467a9/new_candidate_one/static_check.py`. First run passed29 software checks, including9 actual production-forward AST/list cases, independent original-ID dual-state equations, a scalar-erf GELU case, mixedD2/D4 stop/no-fake-row control, edge-memory/NEWedge-read counterexamples and8 invalid metadata cases. Only four generic list primitives were extracted from an old checker; no old test main/assertions were executed. No first failure occurred. This is not Torch, FP32, parameter initialization equality, autograd, nativeTRAIN or resources evidence.
+
+Prototype source/code/actual-parent remainNULL with current94 reference. No Git/source promotion/native/op/queue or shared state action occurred. A future then-current compatible version must be saved/tested; do not assume a sibling source can fast-forward. The ordinary message-passing family and all limitations remain explicit.

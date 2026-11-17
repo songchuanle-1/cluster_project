@@ -1,0 +1,127 @@
+{
+  "owner": {
+    "token": "9573f1fc8cad435fb47660949b563298",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-10T11:34:11.138562+00:00",
+    "deadline_at": "2026-11-10T12:34:11.138562+00:00",
+    "context_sha256": "963ebc596263bcce708d1b19a7a4eac472136dbe68ac348d242d38ddc5e2151e",
+    "pending_sha256": "3809a1ef5963b17c4df04c3870d57c65b50cd273631eb1f2ab25b8f6b8284857"
+  },
+  "started_at": "2026-11-10T11:37:55.560308+00:00",
+  "body_sha256": "c0e964a82df9a484c6a4e99fdaf5b3f1a8d3870cd389c58c6c70adb0b585641b",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "-o",
+    "PasswordAuthentication=no",
+    "-o",
+    "KbdInteractiveAuthentication=no",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -I -B -c '\nimport hashlib,json,os,pathlib,socket,subprocess\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"' and os.getuid()==os.geteuid()==1001\nroot=pathlib.Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_nsd_20261107'\"'\"')\ndef query(argv):\n r=subprocess.run(argv,capture_output=True,text=True,timeout=20)\n assert len(r.stdout.encode())<131072 and len(r.stderr.encode())<8192\n return {'\"'\"'argv'\"'\"':argv,'\"'\"'returncode'\"'\"':r.returncode,'\"'\"'stdout'\"'\"':r.stdout,'\"'\"'stderr'\"'\"':r.stderr}\nresult={'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'uid'\"'\"':os.getuid(),'\"'\"'runtime_root'\"'\"':str(root)}\nresult['\"'\"'head'\"'\"']=query(['\"'\"'/usr/bin/git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-c'\"'\"','\"'\"'core.fsmonitor=false'\"'\"','\"'\"'-C'\"'\"',str(root),'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'])\nassert result['\"'\"'head'\"'\"']['\"'\"'returncode'\"'\"']==0 and result['\"'\"'head'\"'\"']['\"'\"'stdout'\"'\"'].strip() in ('\"'\"'d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e'\"'\"','\"'\"'b1e639b3ceb14bb5c65d9f81a084d41c834b951c'\"'\"')\nresult['\"'\"'inventory'\"'\"']=query(['\"'\"'/usr/bin/nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-gpu=index,uuid,memory.total,memory.used,memory.free,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'])\nresult['\"'\"'compute'\"'\"']=query(['\"'\"'/usr/bin/nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'])\nassert result['\"'\"'inventory'\"'\"']['\"'\"'returncode'\"'\"']==result['\"'\"'compute'\"'\"']['\"'\"'returncode'\"'\"']==0\nfields=[v.strip() for v in result['\"'\"'inventory'\"'\"']['\"'\"'stdout'\"'\"'].strip().split('\"'\"','\"'\"')]\nassert fields[:2]==['\"'\"'0'\"'\"','\"'\"'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\"'\"'] and len(fields)==6\ntotal,used,free,util=map(int,fields[2:])\nresult.update(physical_gpu=0,gpu_uuid=fields[1],memory_total_mib=total,memory_used_mib=used,memory_free_mib=free,utilization_percent=util,minimum_free_mib=20000,launch_memory_satisfied=free>=20000)\nresult['\"'\"'lock_identities'\"'\"']=[]\nfor kind,ino in [('\"'\"'training'\"'\"',92537152),('\"'\"'diagnostic'\"'\"',92537153),('\"'\"'exclusive'\"'\"',92537154)]:\n p=pathlib.Path('\"'\"'/tmp/cluster_project_gpu0_'\"'\"'+kind+'\"'\"'.lock'\"'\"'); s=p.lstat()\n assert (s.st_dev,s.st_ino)==(66308,ino)\n result['\"'\"'lock_identities'\"'\"'].append({'\"'\"'kind'\"'\"':kind,'\"'\"'device'\"'\"':s.st_dev,'\"'\"'inode'\"'\"':s.st_ino,'\"'\"'stat_only'\"'\"':True})\nresult['\"'\"'project_trainers'\"'\"']=[]\nfor p in pathlib.Path('\"'\"'/proc'\"'\"').iterdir():\n if not p.name.isdigit():continue\n try:\n  if p.stat().st_uid==1001 and (p/'\"'\"'cwd'\"'\"').resolve()==root:\n   argv=(p/'\"'\"'cmdline'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"')\n   if b'\"'\"'tools/train.py'\"'\"' in argv:result['\"'\"'project_trainers'\"'\"'].append({'\"'\"'pid'\"'\"':int(p.name),'\"'\"'native_entry_observed'\"'\"':True})\n except (OSError,RuntimeError):pass\nresult['\"'\"'producer_pins'\"'\"']=[]\nfor path,expected in [\n('\"'\"'/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_21ebd237/entry_factory.py'\"'\"','\"'\"'0a8ed26bd62327314de89f4228b53c8c633fdd73e4e1867d674df94b24d073dd'\"'\"'),\n('\"'\"'/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/bin/python'\"'\"','\"'\"'62ae097cd67499ab86941c79c4eb8526173f4a694ffb6e41406f42355b37a64e'\"'\"'),\n('\"'\"'/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/binding.json'\"'\"','\"'\"'beb2c6497cc5fa5fdf0bb33e0d1d7cff2060a9a0315c919f45ef2124e6c07e29'\"'\"')]:\n h=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest();assert h==expected\n result['\"'\"'producer_pins'\"'\"'].append({'\"'\"'path'\"'\"':path,'\"'\"'sha256'\"'\"':h,'\"'\"'read_only_not_executed'\"'\"':True})\nresult.update(read_only=True,torch_imported=False,gpu_context_created=False,signals_or_job_control=False,GPU1_accessed=False)\nprint(json.dumps(result))\n'"
+  ],
+  "read_only": true,
+  "returncode": 0,
+  "stdout": "{\"observed_at\": \"2026-11-10T11:37:56.840969+00:00\", \"hostname\": \"dl04-MS-7E06\", \"uid\": 1001, \"runtime_root\": \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107\", \"head\": {\"argv\": [\"/usr/bin/git\", \"--no-optional-locks\", \"-c\", \"core.fsmonitor=false\", \"-C\", \"/data/songcl/Project/Cluster_project/Cluster_nsd_20261107\", \"rev-parse\", \"HEAD\"], \"returncode\": 0, \"stdout\": \"b1e639b3ceb14bb5c65d9f81a084d41c834b951c\\n\", \"stderr\": \"\"}, \"inventory\": {\"argv\": [\"/usr/bin/nvidia-smi\", \"-i\", \"0\", \"--query-gpu=index,uuid,memory.total,memory.used,memory.free,utilization.gpu\", \"--format=csv,noheader,nounits\"], \"returncode\": 0, \"stdout\": \"0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 32607, 15914, 16196, 22\\n\", \"stderr\": \"\"}, \"compute\": {\"argv\": [\"/usr/bin/nvidia-smi\", \"-i\", \"0\", \"--query-compute-apps=pid,used_memory\", \"--format=csv,noheader,nounits\"], \"returncode\": 0, \"stdout\": \"2186456, 500\\n2190397, 15308\\n\", \"stderr\": \"\"}, \"physical_gpu\": 0, \"gpu_uuid\": \"GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c\", \"memory_total_mib\": 32607, \"memory_used_mib\": 15914, \"memory_free_mib\": 16196, \"utilization_percent\": 22, \"minimum_free_mib\": 20000, \"launch_memory_satisfied\": false, \"lock_identities\": [{\"kind\": \"training\", \"device\": 66308, \"inode\": 92537152, \"stat_only\": true}, {\"kind\": \"diagnostic\", \"device\": 66308, \"inode\": 92537153, \"stat_only\": true}, {\"kind\": \"exclusive\", \"device\": 66308, \"inode\": 92537154, \"stat_only\": true}], \"project_trainers\": [], \"producer_pins\": [{\"path\": \"/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_21ebd237/entry_factory.py\", \"sha256\": \"0a8ed26bd62327314de89f4228b53c8c633fdd73e4e1867d674df94b24d073dd\", \"read_only_not_executed\": true}, {\"path\": \"/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/bin/python\", \"sha256\": \"62ae097cd67499ab86941c79c4eb8526173f4a694ffb6e41406f42355b37a64e\", \"read_only_not_executed\": true}, {\"path\": \"/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/binding.json\", \"sha256\": \"beb2c6497cc5fa5fdf0bb33e0d1d7cff2060a9a0315c919f45ef2124e6c07e29\", \"read_only_not_executed\": true}], \"read_only\": true, \"torch_imported\": false, \"gpu_context_created\": false, \"signals_or_job_control\": false, \"GPU1_accessed\": false}\n",
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-11-10T11:37:56.840969+00:00",
+    "hostname": "dl04-MS-7E06",
+    "uid": 1001,
+    "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+    "head": {
+      "argv": [
+        "/usr/bin/git",
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "-C",
+        "/data/songcl/Project/Cluster_project/Cluster_nsd_20261107",
+        "rev-parse",
+        "HEAD"
+      ],
+      "returncode": 0,
+      "stdout": "b1e639b3ceb14bb5c65d9f81a084d41c834b951c\n",
+      "stderr": ""
+    },
+    "inventory": {
+      "argv": [
+        "/usr/bin/nvidia-smi",
+        "-i",
+        "0",
+        "--query-gpu=index,uuid,memory.total,memory.used,memory.free,utilization.gpu",
+        "--format=csv,noheader,nounits"
+      ],
+      "returncode": 0,
+      "stdout": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 32607, 15914, 16196, 22\n",
+      "stderr": ""
+    },
+    "compute": {
+      "argv": [
+        "/usr/bin/nvidia-smi",
+        "-i",
+        "0",
+        "--query-compute-apps=pid,used_memory",
+        "--format=csv,noheader,nounits"
+      ],
+      "returncode": 0,
+      "stdout": "2186456, 500\n2190397, 15308\n",
+      "stderr": ""
+    },
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "memory_total_mib": 32607,
+    "memory_used_mib": 15914,
+    "memory_free_mib": 16196,
+    "utilization_percent": 22,
+    "minimum_free_mib": 20000,
+    "launch_memory_satisfied": false,
+    "lock_identities": [
+      {
+        "kind": "training",
+        "device": 66308,
+        "inode": 92537152,
+        "stat_only": true
+      },
+      {
+        "kind": "diagnostic",
+        "device": 66308,
+        "inode": 92537153,
+        "stat_only": true
+      },
+      {
+        "kind": "exclusive",
+        "device": 66308,
+        "inode": 92537154,
+        "stat_only": true
+      }
+    ],
+    "project_trainers": [],
+    "producer_pins": [
+      {
+        "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prepare_21ebd237/entry_factory.py",
+        "sha256": "0a8ed26bd62327314de89f4228b53c8c633fdd73e4e1867d674df94b24d073dd",
+        "read_only_not_executed": true
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/bin/python",
+        "sha256": "62ae097cd67499ab86941c79c4eb8526173f4a694ffb6e41406f42355b37a64e",
+        "read_only_not_executed": true
+      },
+      {
+        "path": "/data/songcl/Project/Cluster_project/pipeline/runtime/rvec_path_prod_21ebd237/binding.json",
+        "sha256": "beb2c6497cc5fa5fdf0bb33e0d1d7cff2060a9a0315c919f45ef2124e6c07e29",
+        "read_only_not_executed": true
+      }
+    ],
+    "read_only": true,
+    "torch_imported": false,
+    "gpu_context_created": false,
+    "signals_or_job_control": false,
+    "GPU1_accessed": false
+  }
+}

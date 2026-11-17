@@ -1,0 +1,47 @@
+"""Read-only /proc/source/producer/log verification; no model imports, signals or files written."""
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,os,re,socket,stat,subprocess,sys
+def steps(text):
+    pattern = (r"Train\[(\d+)/\d+\]:[^\r\n]*?\|\s*(\d+)/\d+"
+               r"|Epoch:\s*\[(\d+)\]\s*\[\s*(\d+)/\d+\]")
+    return [tuple(int(v) for v in match if v) for match in re.findall(pattern, text)]
+P=json.load(sys.stdin)
+assert socket.gethostname()=="dl04-MS-7E06" and os.getuid()==os.geteuid()==1001
+assert P["source_commit"]=="d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e"
+def sha(p):return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+def checked(path,expected):
+ p=Path(path);s=os.lstat(p);assert stat.S_ISREG(s.st_mode) and s.st_uid==1001 and not stat.S_ISLNK(s.st_mode);assert sha(p)==expected;return p
+r=Path(P["runtime_root"]);assert r.resolve()==Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+env={k:v for k,v in os.environ.items() if not k.startswith("GIT_")};env["GIT_OPTIONAL_LOCKS"]="0"
+head=subprocess.check_output(["/usr/bin/git","--no-optional-locks","-c","core.fsmonitor=false","-C",str(r),"rev-parse","HEAD"],env=env,text=True,timeout=10).strip();assert head==P["source_commit"]
+binding= json.loads(checked(P["binding_path"],P["binding_sha256"]).read_text(encoding="utf-8"))
+assert binding["runtime_root"]==str(r) and binding["source_commit"]==head and binding["kind"]=="production"
+checked(binding["entry"],P["entry_sha256"]);checked(P["core_path"],P["core_sha256"])
+assert Path(P["core_path"]).parent==Path(binding["stage"])
+assert len(binding["source_files"])==8
+for relative,expected in binding["source_files"].items():
+ p=(r/relative).resolve();assert p.is_relative_to(r);checked(p,expected)
+config=r/binding["argv"][1];checked(config,binding["runtime_config_sha256"])
+marker= json.loads(checked(binding["one_shot_marker"],P["marker_sha256"]).read_text(encoding="utf-8"))
+assert marker["pid"]==P["pid"] and marker["uid"]==1001 and marker["source_commit"]==head and marker["runtime_root"]==str(r) and marker["argv"]==binding["argv"]
+assert marker["activation_receipt_sha256"]==binding["activation_receipt_sha256"]
+proc=Path("/proc")/str(P["pid"]);assert proc.stat().st_uid==1001 and (proc/"cwd").resolve()==r
+fields=(proc/"stat").read_text().rsplit(")",1)[1].split();start=fields[19];assert start==str(P["start_ticks"]),"PID identity changed; reconcile, never infer a new start"
+argv=[v.decode("utf-8",errors="replace") for v in (proc/"cmdline").read_bytes().split(b"\0") if v];assert argv[1:]==binding["argv"] and Path(argv[0]).resolve()==Path(binding["python_realpath"])
+expected_locks={(66308,92537152),(66308,92537153),(66308,92537154)};fds=[]
+for fd in (proc/"fd").iterdir():
+ try:
+  s=fd.stat()
+  if (s.st_dev,s.st_ino) in expected_locks:fds.append({"fd":int(fd.name),"dev":s.st_dev,"ino":s.st_ino})
+ except OSError:pass
+assert {(x["dev"],x["ino"]) for x in fds}==expected_locks
+assert {(x["dev"],x["ino"]) for x in marker["lock_inodes"]}==expected_locks
+log=Path(P["log"]);assert log.is_file() and log.resolve().is_relative_to(Path("/data/songcl/Project/Cluster_project"))
+size=log.stat().st_size
+with log.open("rb") as f:f.seek(max(0,size-128*1024));tail=f.read(128*1024)
+text=tail.decode("utf-8",errors="replace");native=steps(text)
+workmatch=re.search(r"(?m)^work_dir:\s*([^\r\n]+)",config.read_text(encoding="utf-8"));configured=workmatch.group(1).strip().strip("\"'") if workmatch else None
+if P.get("work_dir"):assert configured and Path(P["work_dir"]).resolve().is_relative_to(Path(configured).resolve())
+gpu=subprocess.check_output(["nvidia-smi","-i","0","--query-gpu=index,uuid,memory.free,memory.used,utilization.gpu","--format=csv,noheader,nounits"],text=True,timeout=10).strip();assert gpu.split(",")[1].strip()=="GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+print(json.dumps({"observed_at":datetime.now(timezone.utc).isoformat(),"hostname":socket.gethostname(),"pid":P["pid"],"alive":True,"start_ticks":start,"argv":argv,"runtime_root":str(r),"source_commit":head,"source_files_verified":8,"binding_sha256":P["binding_sha256"],"entry_sha256":P["entry_sha256"],"core_sha256":P["core_sha256"],"marker_sha256":P["marker_sha256"],"marker_consumed":True,"inherited_lock_fds":fds,"all_three_original_lock_inodes_inherited":True,"runtime_config_sha256":binding["runtime_config_sha256"],"configured_work_dir":configured,"actual_work_dir_from_dispatch":P.get("work_dir"),"log":str(log),"log_bytes":size,"bytes_read":len(tail),"tail_sha256":hashlib.sha256(tail).hexdigest(),"native_steps_last5":native[-5:],"native_steps_distinct":len(set(native)),"latest_native_step":native[-1] if native else None,"validation_epochs_last5":re.findall(r"Val\[(\d+)/\d+\]",text)[-5:],"terminal_markers":{k:k in text for k in ["Early stopping","Training finished","Training completed"]},"error_markers":{k:k in text for k in ["Traceback","CUDA out of memory","RuntimeError","Segmentation fault"]},"gpu0":gpu,"signals_sent":False,"training_started_by_observer":False,"remote_files_written":False}))

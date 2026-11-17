@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-25T08:33:29.023736+00:00",
+  "status": "DISABLED_PROMOTION_V2_AND_CHECKER_REBINDING_STATIC_REVIEW_RESOLVED_NATIVE_NOT_RUN",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "code_commit": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+  "owner_provenance": {
+    "token": "3824d9c96f6343e09d60362b4a00495b",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-25T08:06:47.370222+00:00",
+    "deadline_at": "2026-10-25T09:06:47.370222+00:00",
+    "context_sha256": "eeb5e674ac8ae4fb2c3d5142b0d3cfaa39a96e426127b39702ad55b02b839fe3",
+    "pending_sha256": "fe7d536849cc9c0d1dc633d37f1ec8bfb47c977d30ded4d77d2fc35a0835571c"
+  },
+  "promotion_V2_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/preparation.json",
+    "sha256": "957d9b00f5a541ee4501797bdfe8ef117a47f88b1b11adbd1f83387efefa5867"
+  },
+  "preserved_V1_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/preparation.json",
+    "sha256": "82d11e19477cafb96c7578722f074aa782ebf74efeb52e23406cc9a7d21f8a53"
+  },
+  "preserved_V1_review": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_checker_rebinding_review.json",
+    "sha256": "224477acdb508f553c1e48cf449c214113015996ff2a8fd2255bf8af75ccfc9a"
+  },
+  "checker_rebinding_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/preparation.json",
+    "sha256": "d16808a86d030b11dd932ab32734011547119f0f30b63cfdac47a6b6f4553542"
+  },
+  "material_concerns": [],
+  "reviewed_V2_core": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/promotion_common.py",
+      "sha256": "3fd3240384ac090f4eb7f53c93302b574da9a8effe60480d59d9c77e79c682ad"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/fast_forward_tested_bfc.py",
+      "sha256": "96f7772d9998c2e04123935a3bf8bb8d818004a53d36dd1497755f143b97ba21"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/dispatch_bfc.py",
+      "sha256": "971efe3745d7ff7b58ab492d04d465a0f3cb89563f53a5aa464c5db37f7973d3"
+    }
+  ],
+  "supporting_evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/guard_revision_provenance.json",
+      "sha256": "e64057e837f13879ae4d11071a71edb2f4f6adb5b15862406c48866598113065"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/guard_validation.json",
+      "sha256": "1cc7286f6dcdefea9d107ce2dda724b527eb84a0f6f097493c0699d9ec7a03e7"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/test_guard_revision.py",
+      "sha256": "a4ded5aadff9d6dd23067e0e96c4711b336dee6e8ce38944e8e8f443ee92215e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/README.md",
+      "sha256": "83b86c261a8dc365f1f988e3e0dd6f27a5b1b78af47884bff06df5fcc111da44"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare/disabled_validation.json",
+      "sha256": "2858a67af8603d791ff16d75f62d5b56422c8e4fffe9554dafe2b7231b3a03d8"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_execution_review_prepare/rebinding_validation.json",
+      "sha256": "167487295361a282880c998e9adfbc3e4a2a739fe4b1599821cbf0d7ad0751cd"
+    }
+  ],
+  "V1_resolution": [
+    "Added physical_gpu accepts only exact int0/1 or literal string0/1 and rejects bool/float/malformed/unknown values before busy-set construction.",
+    "Added running_assignments validates server/GPU/value shape, known IDs, approved nonempty server, no duplicate physical cards or same experiment reserved twice. Empty disabled-server dictionaries remain legal.",
+    "Each protected active BTC0/BCR1 row is now bound to exact original card/source commit/receipt path/PID/launch_verified and experiment running status, with one exact running-map tuple. Mismatched/missing/stale/unknown assignments refuse.",
+    "Absent original rows are accepted only for explicit canonical done_complete/done_earlystop experiments without remaining reservation. Present terminal rows must match the same exact status and no reservation. Unknown/uncertain/paused/replaced old states conservatively require reconciliation rather than being called free.",
+    "M206 exact user-pause row/experiment remains preserved and cannot be active. Other running mappings are snapshotted except the newly admitted BFC only.",
+    "Dispatcher uses strict parsed GPU assignments and validated registry before constructing busy set/current actual active count. After canonical call, new target card and any new running mapping must equal actual selected binding."
+  ],
+  "unchanged_execution_safety": [
+    "Exact ff helper bytes unchanged96f7772d: tested11a-to48fc single-parent/nineA/Git blobs/source modes/emptyindex/protected28/no-overlap/ff-only/noautostash/nohooks/LF and immediate owner checks preserved.",
+    "All original common functions except protected_lifecycle are AST-identical; only two assignment parsers added. Dispatcher changes only main guard logic; strict_ssh lock holder and all other function ASTs remain identical to V1.",
+    "Strict source pins and actual four local+independent reviewed result identities still required. No old M212 native result is relabeled as BFC. DRAFT False/four refs None remain unchanged.",
+    "Actual selected0or1 binding determines all stage/UUID/NVML/three-lock transport. Same holder acquires training/diagnostic/exclusive locks, checks selected UUID/idle/no contexts, executes original canonical Popen and only then releases.",
+    "Exactly one original canonical_process_queue call keeps selected-only allowset, dynamic active0..2/current count, total2/max1percard/no overlay. No durable intent/pending-progress/uncertain replay, blind relaunch or other-card fallback is added.",
+    "Present original jobs or canonical natural terminal archives are protected rather than assuming both jobs run forever. Protected before/after data include source/receipt/experiment rows and other running map; full resulting running map is recorded.",
+    "Checker rebinding remains exactly the module TICK constant; reviewer/history/evidence bytes and admission function ASTs remain prior c42f/f382 reviewed semantics. No source/model/native worker/resource/scientific gate change occurred."
+  ],
+  "proof_scope": {
+    "author_targeted_proof": {
+      "path": "pipeline/diagnostic_bundles/tick_3824d9c9/bfc_promotion_prepare_v2/guard_validation.json",
+      "sha256": "1cc7286f6dcdefea9d107ce2dda724b527eb84a0f6f097493c0699d9ec7a03e7"
+    },
+    "logical_checks": 11,
+    "negative_guard_fixtures": 43,
+    "all_reported_checks_true_and_source_hashes_match": true,
+    "read_not_rerun_by_this_audit": true,
+    "note": "In-memory guard and AST/command construction only, not actual project state/terminal/hardware/Git/native evidence; prior V1 transport construction proof remains unchanged because strict_ssh AST is unchanged."
+  },
+  "current_disabled_values": {
+    "DRAFT_EXECUTION_ENABLED": false,
+    "SEMANTIC_REVIEW_PATH": null,
+    "SEMANTIC_REVIEW_SHA": null,
+    "INDEPENDENT_REVIEW_PATH": null,
+    "INDEPENDENT_REVIEW_SHA": null
+  },
+  "actual_BFC_four_raw": "PENDING_REAL_RESULTS",
+  "native_resources_ff_admission_dispatch": "NOT_RUN",
+  "SSH_GPU_Git_tests_or_shared_actions_by_this_audit": "NOT_RUN",
+  "future_execution_presigned": false,
+  "current_hardware_idleness_inferred": false,
+  "next_action": "Root may preserve the reviewed V2 disabled preparation and actual checker rebinding as future templates. Actual activation requires a separately copied current-owner materialization with real four-result refs, source ff/receipt/canonical admission and an actually idle authorized selected card; neither current busy job is displaced. No root action is required to manufacture availability this round."
+}

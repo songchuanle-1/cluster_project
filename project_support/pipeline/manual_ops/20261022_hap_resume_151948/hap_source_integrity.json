@@ -1,0 +1,42 @@
+{
+  "recorded_at": "2026-10-22T07:20:32.802093+00:00",
+  "passed": true,
+  "error": null,
+  "source_integrity_file": "C:\\Users\\chuanle song\\.codex\\skills\\songcl_research_pipeline\\source_integrity.py",
+  "source_integrity_sha256": "b62c4c4363defe85d9d9c111cb68212724dac7fcf439f58299d0d5061e3ad643",
+  "tested_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+  "mappings": [
+    [
+      "/home/songcl/data/data",
+      "/home/songcl/data/data"
+    ],
+    [
+      "/home/songcl/3dres/project/cluster_project/Checkpoints",
+      "/data/songcl/Project/Cluster_project/Cluster_checkpoints"
+    ]
+  ],
+  "probes": [
+    {
+      "command": [
+        "ssh",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "StrictHostKeyChecking=yes",
+        "-o",
+        "ConnectTimeout=8",
+        "songcl@192.168.1.115",
+        "source /data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh && conda activate project_cluster && python -B -c '\nimport json,pathlib,subprocess\nroot=pathlib.Path('\"'\"'/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1'\"'\"').resolve()\ndef within_root(path):\n    try:path.resolve().relative_to(root)\n    except ValueError:return False\n    return True\ndef git(*args):\n    return subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'-C'\"'\"',str(root),*args])\nassert git('\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"').decode().strip()=='\"'\"'f51823bbddf0f8095a9a5813bf1f8169e3d7edb0'\"'\"'\nchanged=git('\"'\"'diff'\"'\"','\"'\"'--name-only'\"'\"','\"'\"'-z'\"'\"','\"'\"'--ignore-submodules=none'\"'\"','\"'\"'HEAD'\"'\"').split(b'\"'\"'\\0'\"'\"')\nuntracked=git('\"'\"'ls-files'\"'\"','\"'\"'--others'\"'\"','\"'\"'--exclude-standard'\"'\"','\"'\"'-z'\"'\"').split(b'\"'\"'\\0'\"'\"')\nbad=[]\nfor raw in changed:\n    if not raw: continue\n    name=raw.decode('\"'\"'utf-8'\"'\"')\n    path=root/name\n    if (path.suffix not in ['\"'\"'.c'\"'\"', '\"'\"'.cfg'\"'\"', '\"'\"'.cpp'\"'\"', '\"'\"'.cu'\"'\"', '\"'\"'.h'\"'\"', '\"'\"'.hpp'\"'\"', '\"'\"'.ini'\"'\"', '\"'\"'.json'\"'\"', '\"'\"'.py'\"'\"', '\"'\"'.pyi'\"'\"', '\"'\"'.sh'\"'\"', '\"'\"'.so'\"'\"', '\"'\"'.toml'\"'\"', '\"'\"'.yaml'\"'\"', '\"'\"'.yml'\"'\"'] and not path.is_dir()\n            and name not in ('\"'\"'.gitmodules'\"'\"','\"'\"'requirements.txt'\"'\"','\"'\"'Dockerfile'\"'\"')):continue\n    if ([('\"'\"'/home/songcl/data/data'\"'\"', '\"'\"'/home/songcl/data/data'\"'\"'), ('\"'\"'/home/songcl/3dres/project/cluster_project/Checkpoints'\"'\"', '\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints'\"'\"')] and name.startswith('\"'\"'configs/'\"'\"')\n            and path.suffix in ('\"'\"'.yaml'\"'\"','\"'\"'.yml'\"'\"') and path.is_file()\n            and within_root(path)):\n        import yaml\n        def adapt(value):\n            if isinstance(value,dict):return {k:adapt(v) for k,v in value.items()}\n            if isinstance(value,list):return [adapt(v) for v in value]\n            if isinstance(value,str):\n                for old,new in [('\"'\"'/home/songcl/data/data'\"'\"', '\"'\"'/home/songcl/data/data'\"'\"'), ('\"'\"'/home/songcl/3dres/project/cluster_project/Checkpoints'\"'\"', '\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints'\"'\"')]:value=value.replace(old,new)\n            return value\n        original=yaml.safe_load(git('\"'\"'show'\"'\"','\"'\"'HEAD:'\"'\"'+name).decode('\"'\"'utf-8'\"'\"'))\n        if yaml.safe_load(path.read_text())==adapt(original):continue\n    bad.append(name)\nfor raw in untracked:\n    if raw and pathlib.PurePosixPath(raw.decode('\"'\"'utf-8'\"'\"')).suffix in ['\"'\"'.c'\"'\"', '\"'\"'.cfg'\"'\"', '\"'\"'.cpp'\"'\"', '\"'\"'.cu'\"'\"', '\"'\"'.h'\"'\"', '\"'\"'.hpp'\"'\"', '\"'\"'.ini'\"'\"', '\"'\"'.json'\"'\"', '\"'\"'.py'\"'\"', '\"'\"'.pyi'\"'\"', '\"'\"'.sh'\"'\"', '\"'\"'.so'\"'\"', '\"'\"'.toml'\"'\"', '\"'\"'.yaml'\"'\"', '\"'\"'.yml'\"'\"']:\n        bad.append(raw.decode('\"'\"'utf-8'\"'\"'))\nassert git('\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"').decode().strip()=='\"'\"'f51823bbddf0f8095a9a5813bf1f8169e3d7edb0'\"'\"'\nprint(json.dumps({'\"'\"'ok'\"'\"':not bad,'\"'\"'paths'\"'\"':bad[:6]}))\n'"
+      ],
+      "returncode": 0,
+      "stdout": "{\"ok\": true, \"paths\": []}\n",
+      "stderr": ""
+    }
+  ],
+  "read_only": true,
+  "source_synced": false,
+  "source_modified": false,
+  "GPU_computation": false,
+  "resume_authorization_created": false,
+  "resume_started": false
+}

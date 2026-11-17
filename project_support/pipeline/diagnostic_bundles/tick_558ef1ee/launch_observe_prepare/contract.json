@@ -1,0 +1,24 @@
+{
+  "status": "READY_DEFAULT_NOP_PENDING_ACTUAL_DISPATCH_IDENTITY_PATHS",
+  "dispatch_proof_required_fields": [
+    "task_id",
+    "source_commit",
+    "pid",
+    "start_ticks",
+    "runtime_root",
+    "log",
+    "binding_path",
+    "binding_sha256",
+    "entry_sha256",
+    "core_path",
+    "core_sha256",
+    "marker_sha256"
+  ],
+  "optional_fields": [
+    "work_dir"
+  ],
+  "derivation": "Root/ops must normalize these values ONLY from actual queue/dispatch result/PID start identity/materialized production binding+entry+marker hashes and runtime config. No PID/log/stage/workdir is guessed by the observer; missing start identity requires reconciliation. Production filenames are not yet asserted actual by author.",
+  "usage": "python -B observe_once.py --execute-root --label before --dispatch-proof ACTUAL_DISPATCH_FACTS_JSON --dispatch-proof-sha256 ACTUAL_SHA; repeat with fresh --label after --previous BEFORE_ACTUAL_JSON --previous-sha256 BEFORE_SHA",
+  "bounds": "One35s read-only SSH call; max128KB log read; output last5 native steps/validation epochs plus terminal/error flags, never raw carriage-return tail. No remote writes or signals. Local unique intent/result only.",
+  "genuine_peer_review": "Quick actual program review requested; author has not executed SSH/GPU or changed shared state."
+}

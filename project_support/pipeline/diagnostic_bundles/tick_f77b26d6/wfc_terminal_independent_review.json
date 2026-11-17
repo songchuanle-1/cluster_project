@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "owner": {
+    "token": "f77b26d64ead4c52bd429009cc78827b",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-04T12:10:09.687225+00:00",
+    "deadline_at": "2026-11-04T13:10:09.687225+00:00",
+    "context_sha256": "8a38ad0f3b3aab162ddd646f8c33471cd3b5dbc71bb7e740c984ef3e4a70bc81",
+    "pending_sha256": "d6468cd803156354fcb87253c1cdeeb381f1147a243d38a67108259c58c7a9e9"
+  },
+  "reviewer": "/root/tick_audit",
+  "recorded_at": "2026-11-04T12:40:54.669595+00:00",
+  "scope": "Independent local recomputation of supplied full terminal stdout/native evidence and exact source94 train.py. No SSH, GPU computation, tests, checkpoint-body load, lifecycle/candidate mutation, or novelty/effectiveness claim.",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_f77b26d6/wfc_terminal_observation.json",
+      "sha256": "61f616ff5ee556056d0c266731d0cbae460c2d732b803f7482fe8f7b1e24bd0c"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_f77b26d6/stdout_terminal_full.log",
+      "sha256": "ac3477d400bf01b14bc85032f5af5289f0c1b8811771f656bed2dd891eb5a61e"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_f77b26d6/native_logger_terminal_full.log",
+      "sha256": "a5dffadd0d63a66aee295449ee984f3ef615000bd14ffba822d9dd7dc198e5d6"
+    }
+  ],
+  "source": {
+    "commit": "94c4fe61b38f46f321a7ee84236fea70ade04d9b",
+    "train_py_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+    "local_primary_bytes_equal_original94": true
+  },
+  "result": {
+    "classification": "done_complete_natural_early_stop",
+    "terminal_epoch": 30,
+    "patience": 10,
+    "resumed_start_epoch": 26,
+    "resumed_validation_values": [
+      0.48364129662513733,
+      0.48184701800346375,
+      0.48421984910964966,
+      0.4811730682849884,
+      0.48382365703582764
+    ],
+    "resumed_completed_validations": 5,
+    "restored_best": 0.49711745977401733,
+    "restored_no_improve": 5,
+    "exact_final_best_miou": 0.49711745977401733,
+    "exact_final_no_improve": 10,
+    "last_validation_miou": 0.48382365703582764,
+    "full_train_progress": [
+      30,
+      4686
+    ],
+    "full_validation_progress": [
+      30,
+      363
+    ],
+    "earlystop_marker_in_both_logs": true,
+    "recognized_error_markers_absent": true,
+    "original_pid_absent_as_recorded": true,
+    "champion_m95_miou": 0.502,
+    "champion_improved": false
+  },
+  "checkpoint_caveat": "Native early-stop break occurs before checkpoint save. A last.pth reflecting prior epoch29/no-improve9 is compatible with observed epoch30/no-improve10; checkpoint body was not read by this review.",
+  "derived_summary_correction": "Rounded stdout mIOU .484 and empty generic log_local cannot represent full resumed lineage. Correct derived best from native full log plus restored seed metadata, retaining canonical archive identity/history/source/receipts.",
+  "gpu0_observation": {
+    "at": "2026-11-04T12:23:37.165805+00:00",
+    "uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "utilization_percent": 0,
+    "memory_mib": 46,
+    "compute_pids": [],
+    "scope": "Snapshot only; fresh occupation/lease validation remains required before a later GPU operation."
+  },
+  "GPU1": "NOT_QUERIED_NOT_AUTHORIZED",
+  "review_decision": "PASS_TERMINAL_LINEAGE"
+}

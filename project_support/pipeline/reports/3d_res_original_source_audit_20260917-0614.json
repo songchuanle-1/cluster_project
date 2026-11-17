@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-09-17T06:14:21+08:00",
+  "mechanism_id": "referent-supervision-axis",
+  "candidate_id": "M197-PIRS",
+  "question": "Does PIRS introduce a novel 3D-RES core mechanism, or is mask-IoU-derived referent-score supervision already established in the original sources?",
+  "sources": [
+    {
+      "id": "2211.15766v1",
+      "title": "Superpoint Transformer for 3D Scene Instance Segmentation",
+      "url": "https://arxiv.org/abs/2211.15766",
+      "archive_url": "https://export.arxiv.org/e-print/2211.15766v1",
+      "archive_sha256": "941a601e2abc959beb31eca97b53fc35c8ae6f0eb321e4df00020d21e586893f",
+      "finding": "SPFormer's shared prediction head predicts an IoU-aware score for each query, and its score branch estimates the IoU between the predicted superpoint mask and the ground-truth mask. The training loss is an L2 target ||s_k - iou_k||_2 on assigned high-quality proposals, and the score is used in the final ranking score sqrt(p_i * s_i * ms_i).",
+      "relevant_source": [
+        "SPFormer.tex lines 280,334-349"
+      ]
+    },
+    {
+      "id": "2412.02402v2",
+      "title": "RG-SAN: Rule-Guided Spatial Awareness Network for End-to-End 3D Referring Expression Segmentation",
+      "url": "https://arxiv.org/abs/2412.02402",
+      "archive_url": "https://export.arxiv.org/e-print/2412.02402v2",
+      "archive_sha256": "ad5cffe1942078cf863992e9bceeedd40c8151ce2254d39d5b789254b32546a3a",
+      "finding": "RG-SAN is a 3D-RES method on ScanRefer and explicitly adds an auxiliary score loss for mask-quality prediction, citing SPFormer. This imports the mask-IoU-derived classification-score mechanism into the exact task family.",
+      "relevant_source": [
+        "neurips_2024.tex lines 311-319",
+        "neurips_2024.bbl lines 308-310"
+      ]
+    },
+    {
+      "id": "2407.18244v1",
+      "title": "RefMask3D: Language-Guided Transformer for 3D Referring Segmentation",
+      "url": "https://arxiv.org/abs/2407.18244",
+      "archive_url": "https://export.arxiv.org/e-print/2407.18244v1",
+      "archive_sha256": "db673a18d477e6a7938336c1704621a6cb37d4dd79307fc03f96e972c6942d87",
+      "finding": "The full source uses Hungarian matching and matched-object classification/mask losses. It does not remove SPFormer/RG-SAN prior art for score targets derived from mask IoU.",
+      "relevant_source": [
+        "sec/3_Method.tex lines 123-129"
+      ]
+    },
+    {
+      "id": "2308.16632v1",
+      "title": "3D-STMN: Dependency-Driven Superpoint-Text Matching Network for End-to-End 3D Referring Expression Segmentation",
+      "url": "https://arxiv.org/abs/2308.16632",
+      "archive_url": "https://export.arxiv.org/e-print/2308.16632v1",
+      "archive_sha256": "8ebf523e5bae703c24a41c39664a8fe1b50b2d4481022a92645b493425620e84",
+      "finding": "The original source establishes dense superpoint-text matching through a different mechanism; it does not clear the mask-quality-score prior art above.",
+      "relevant_source": [
+        "CVPR.tex lines 121-127,174-206"
+      ]
+    },
+    {
+      "id": "2407.20664v2",
+      "title": "3D-GRES: Generalized 3D Referring Expression Segmentation",
+      "url": "https://arxiv.org/abs/2407.20664",
+      "archive_url": "https://export.arxiv.org/e-print/2407.20664v2",
+      "archive_sha256": "a305c966db5e7b39437558ad97142310666519d6045de54c89275fab477fe4ff",
+      "finding": "The paper defines query target-presence BCE and query-text alignment; it does not establish a novel distinction that rescues PIRS, and its own multi-query mechanism is orthogonal prior art.",
+      "relevant_source": [
+        "3D-GRES.tex lines 486-582"
+      ]
+    },
+    {
+      "id": "2410.13294v2",
+      "title": "LESS: Label-Efficient and Single-Stage Referring 3D Segmentation",
+      "url": "https://arxiv.org/abs/2410.13294",
+      "archive_url": "https://export.arxiv.org/e-print/2410.13294v2",
+      "archive_sha256": "75d717e999d0e93fbadf6c911646fad60eb57363be45523a8b66e43cf2e7ceab",
+      "finding": "LESS uses query-mask and query-sentence alignment with binary-mask supervision. It is additional 3D-RES prior art and does not restore novelty to a generic mask-quality score target.",
+      "relevant_source": [
+        "neurips_2024.tex lines 165-213"
+      ]
+    }
+  ],
+  "verdict": {
+    "literature_gate": "fail for a new core mechanism",
+    "reason": "Mask-IoU-derived query-quality supervision is already explicit in SPFormer and is already applied to ScanRefer 3D-RES by RG-SAN. PIRS changes the assignment/supervision unit to detached soft targets on every query, but the core mechanism remains prior art rather than a distinct whole-mechanism contribution.",
+    "disposition": "Keep M197-PIRS running to terminate the already-admitted experiment and preserve its pre-registered evidence, but admit no successor and leave the one design-budget slot empty. A future candidate must change the causal mechanism rather than rename or retune this quality-target idea."
+  },
+  "limitations": [
+    "This is a bounded audit of six primary 3D vision/referring-segmentation sources plus the earlier VarifocalNet check; it is not an exhaustive literature proof.",
+    "The source archives were fetched from the versioned arXiv e-print URLs and hashed locally; the archive hashes are recorded above.",
+    "The audit establishes prior art for the core score-target mechanism and does not claim that PIRS has no incremental implementation differences."
+  ],
+  "actions": {
+    "candidate_budget": 1,
+    "admitted_new_candidates": 0,
+    "enqueued": false,
+    "queue_mutation": false,
+    "training_launch": false,
+    "successor": null
+  }
+}

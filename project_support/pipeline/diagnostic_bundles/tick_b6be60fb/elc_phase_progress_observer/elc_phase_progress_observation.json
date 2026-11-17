@@ -1,0 +1,161 @@
+{
+  "owner": {
+    "token": "b6be60fb2f1f44afb67d32e0a36f6e27",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-31T06:11:08.655556+00:00",
+    "deadline_at": "2026-10-31T07:11:08.655556+00:00",
+    "context_sha256": "0578c92752d72e439838945b5d5f0fdd2de6a9ef7c5c3fd49f400278a7304615",
+    "pending_sha256": "ddd77ec412a1cebda0ccada232c1ad959388272cf1a49e605d2440ea7da75dbf"
+  },
+  "observed_at": "2026-10-31T06:11:44.232501+00:00",
+  "command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "export PYTHONDONTWRITEBYTECODE=1 && /usr/bin/python3 -B -c 'import socket,os,json,subprocess,hashlib,time,re\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='\"'\"'dl04-MS-7E06'\"'\"'\np=json.loads('\"'\"'{\"pid\": 3786531, \"start_ticks\": \"96685141\", \"root\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1\", \"commit\": \"18e64b8d95ed0ba5c1053ead114c0f91a4b0c324\", \"log\": \"/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc_20261030_165149.log\", \"config\": \"configs/Quard/ctf_hcg_csort_elc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc.yaml\", \"name\": \"model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc\", \"hashes\": {\"configs/Quard/ctf_hcg_csort_elc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc.yaml\": \"a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/__init__.py\": \"327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/backbone.py\": \"1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/dec.py\": \"6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/edge_line_graph.py\": \"872ef66f5488ae3b9f7022e82bc87e107f2ffc54fce90cdd75b748a0715bc06f\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/hier_postprocess.py\": \"3cbba5a7e17c17d1c94f3fc3b6f7d5a82e9d1ed4eb315aa7b6f663442aa1a4b1\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/loss.py\": \"c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/network.py\": \"5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d\", \"framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/sample_model.py\": \"b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999\"}}'\"'\"');pid=p['\"'\"'pid'\"'\"'];proc=Path('\"'\"'/proc'\"'\"')/str(pid)\nassert proc.exists() and proc.stat().st_uid==os.getuid()\ndef identity():\n cmd=(proc/'\"'\"'cmdline'\"'\"').read_bytes().replace(b'\"'\"'\\0'\"'\"',b'\"'\"' '\"'\"').decode();env=dict(v.split(b'\"'\"'='\"'\"',1) for v in (proc/'\"'\"'environ'\"'\"').read_bytes().split(b'\"'\"'\\0'\"'\"') if b'\"'\"'='\"'\"' in v)\n assert '\"'\"'tools/train.py'\"'\"' in cmd and p['\"'\"'config'\"'\"'] in cmd and str((proc/'\"'\"'cwd'\"'\"').resolve())==p['\"'\"'root'\"'\"']\n initial_env=env.get(b'\"'\"'CUDA_VISIBLE_DEVICES'\"'\"');assert initial_env in (None,b'\"'\"'0'\"'\"')\n return {'\"'\"'pid'\"'\"':pid,'\"'\"'argv'\"'\"':cmd,'\"'\"'cwd'\"'\"':str((proc/'\"'\"'cwd'\"'\"').resolve()),'\"'\"'start_ticks'\"'\"':(proc/'\"'\"'stat'\"'\"').read_text().rsplit('\"'\"') '\"'\"',1)[1].split()[19],'\"'\"'initial_cuda_environment'\"'\"':initial_env.decode() if initial_env is not None else '\"'\"'NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT'\"'\"'}\nbefore=identity();assert before['\"'\"'start_ticks'\"'\"']==p['\"'\"'start_ticks'\"'\"'] and str((proc/'\"'\"'fd'\"'\"'/'\"'\"'1'\"'\"').resolve())==p['\"'\"'log'\"'\"'];head=subprocess.check_output(['\"'\"'git'\"'\"','\"'\"'--no-optional-locks'\"'\"','\"'\"'-C'\"'\"',p['\"'\"'root'\"'\"'],'\"'\"'rev-parse'\"'\"','\"'\"'HEAD'\"'\"'],text=True).strip();assert head==p['\"'\"'commit'\"'\"']\ngpu=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-gpu=index,uuid,memory.used,utilization.gpu'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nrow=[x.strip() for x in gpu.split('\"'\"','\"'\"')];assert row[0]=='\"'\"'0'\"'\"' and row[1]=='\"'\"'GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\"'\"'\ncontexts=subprocess.check_output(['\"'\"'nvidia-smi'\"'\"','\"'\"'-i'\"'\"','\"'\"'0'\"'\"','\"'\"'--query-compute-apps=pid,used_memory'\"'\"','\"'\"'--format=csv,noheader,nounits'\"'\"'],text=True).strip()\nassert str(pid) in [line.split('\"'\"','\"'\"')[0].strip() for line in contexts.splitlines()]\nhashes={}\nfor rel,want in p['\"'\"'hashes'\"'\"'].items():\n actual=hashlib.sha256((Path(p['\"'\"'root'\"'\"'])/rel).read_bytes()).hexdigest();hashes[rel]=actual\n assert actual==(want if rel.endswith('\"'\"'.py'\"'\"') else '\"'\"'77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea'\"'\"')\ndef sample():\n path=Path(p['\"'\"'log'\"'\"']);size=path.stat().st_size\n with path.open('\"'\"'rb'\"'\"') as f:f.seek(max(0,size-1200000));data=f.read()\n txt=data.decode('\"'\"'utf8'\"'\"',errors='\"'\"'replace'\"'\"');steps=[(int(a),int(b)) for a,b in re.findall(r'\"'\"'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',txt)]\n validation_steps=[(int(a),int(b)) for a,b in re.findall(r'\"'\"'Val\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/\\d+'\"'\"',txt)]\n assert not any(e in txt for e in ['\"'\"'Traceback'\"'\"','\"'\"'CUDA out of memory'\"'\"','\"'\"'RuntimeError'\"'\"'])\n return {'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'log_size'\"'\"':size,'\"'\"'tail_sha256'\"'\"':hashlib.sha256(data).hexdigest(),'\"'\"'last_native_step'\"'\"':steps[-1] if steps else None,'\"'\"'max_native_step'\"'\"':max(steps) if steps else None,'\"'\"'max_native_validation_step'\"'\"':max(validation_steps) if validation_steps else None,'\"'\"'tail_exception_seen'\"'\"':False}\na=sample();time.sleep(3);b=sample();after=identity();assert before==after\nstrict_train_growth=a['\"'\"'max_native_step'\"'\"'] is not None and b['\"'\"'max_native_step'\"'\"'] is not None and tuple(b['\"'\"'max_native_step'\"'\"'])>tuple(a['\"'\"'max_native_step'\"'\"'])\nstrict_validation_growth=a['\"'\"'max_native_validation_step'\"'\"'] is not None and b['\"'\"'max_native_validation_step'\"'\"'] is not None and tuple(b['\"'\"'max_native_validation_step'\"'\"'])>tuple(a['\"'\"'max_native_validation_step'\"'\"'])\nfd=[]\nfor f in (proc/'\"'\"'fd'\"'\"').iterdir():\n try:\n  target=str(f.resolve())\n  if target.endswith('\"'\"'.log'\"'\"') and target.startswith('\"'\"'/data/songcl/Project/Cluster_project/Cluster_checkpoints/'\"'\"'+p['\"'\"'name'\"'\"']+'\"'\"'/'\"'\"'):fd.append(target)\n except (FileNotFoundError,PermissionError):pass\nfd=sorted(set(fd));metric_lines=[]\nif len(fd)==1:\n with open(fd[0],errors='\"'\"'replace'\"'\"') as f:\n  for line in f:\n   if '\"'\"'mIoU :'\"'\"' in line or '\"'\"'resume start_epoch:'\"'\"' in line:metric_lines.append(line.strip())\nprint(json.dumps({'\"'\"'observed_at'\"'\"':datetime.now(timezone.utc).isoformat(),'\"'\"'hostname'\"'\"':socket.gethostname(),'\"'\"'identity_before'\"'\"':before,'\"'\"'identity_after'\"'\"':after,'\"'\"'runtime_commit'\"'\"':head,'\"'\"'source_hashes'\"'\"':hashes,'\"'\"'samples'\"'\"':[a,b],'\"'\"'strict_native_train_growth'\"'\"':strict_train_growth,'\"'\"'strict_native_validation_growth'\"'\"':strict_validation_growth,'\"'\"'observation_scope'\"'\"':'\"'\"'Operational existing-process phase observation only. VAL is not TRAIN launch/native-smoke proof. No model or gate change.'\"'\"','\"'\"'native_logger_paths'\"'\"':fd,'\"'\"'metric_lines'\"'\"':metric_lines,'\"'\"'checkpoint_body_read'\"'\"':False,'\"'\"'GPU_queries'\"'\"':'\"'\"'Read-only GPU0 UUID/compute-PID queries only'\"'\"','\"'\"'GPU0'\"'\"':gpu,'\"'\"'GPU0_contexts'\"'\"':contexts,'\"'\"'signals_sent'\"'\"':False}))\n'"
+  ],
+  "returncode": 0,
+  "stdout_sha256": "8dc6cc6c1e5c89866e362e6635390c522340c0b1c7a6f07e364c190cc054fcf7",
+  "stderr": "",
+  "observation": {
+    "observed_at": "2026-10-31T06:11:44.278811+00:00",
+    "hostname": "dl04-MS-7E06",
+    "identity_before": {
+      "pid": 3786531,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_elc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "96685141",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "identity_after": {
+      "pid": 3786531,
+      "argv": "python tools/train.py configs/Quard/ctf_hcg_csort_elc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc.yaml --gpu_ids 0 --num_gpus 1 ",
+      "cwd": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+      "start_ticks": "96685141",
+      "initial_cuda_environment": "NOT_EXPOSED_IN_INITIAL_PROC_ENVIRONMENT"
+    },
+    "runtime_commit": "18e64b8d95ed0ba5c1053ead114c0f91a4b0c324",
+    "source_hashes": {
+      "configs/Quard/ctf_hcg_csort_elc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc.yaml": "77eac419317cb7d7f5d4688337597a966b27d2f920484c1e2323d279240289ea",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/__init__.py": "327bf439ad68108b0493d337a2097dc83626e71af869b2536408232f197eda62",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/backbone.py": "1eb4ac3483961e708c23b0abad396c181dbf38c56fcca559d88b9622af46bafd",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/edge_line_graph.py": "872ef66f5488ae3b9f7022e82bc87e107f2ffc54fce90cdd75b748a0715bc06f",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/hier_postprocess.py": "3cbba5a7e17c17d1c94f3fc3b6f7d5a82e9d1ed4eb315aa7b6f663442aa1a4b1",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/loss.py": "c172cfb26706c0dd335e0cab4e2ac0823e0b057a00352863151e24d5547ccbf5",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/network.py": "5a77eb852b3c6e5de2804d80a2c7a16504f1fd8a57aa94dc6045d9f35587625d",
+      "framework/model/Quard_model/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/sample_model.py": "b22319d5c3958a9a893cb6c2134dd7e124778610aba7e8b9c90647560c806999"
+    },
+    "samples": [
+      {
+        "observed_at": "2026-10-31T06:11:41.235065+00:00",
+        "log_size": 38007626,
+        "tail_sha256": "1a25d477c35354eb0a321ec7daa3d4b4fa537b3a11b63bff51afd0978a801345",
+        "last_native_step": [
+          28,
+          4415
+        ],
+        "max_native_step": [
+          28,
+          4415
+        ],
+        "max_native_validation_step": null,
+        "tail_exception_seen": false
+      },
+      {
+        "observed_at": "2026-10-31T06:11:44.253416+00:00",
+        "log_size": 38009186,
+        "tail_sha256": "b30b59a84031c1cfb0721eba691735183c2d803be6909ed9974600babece5a98",
+        "last_native_step": [
+          28,
+          4420
+        ],
+        "max_native_step": [
+          28,
+          4420
+        ],
+        "max_native_validation_step": null,
+        "tail_exception_seen": false
+      }
+    ],
+    "strict_native_train_growth": true,
+    "strict_native_validation_growth": false,
+    "observation_scope": "Operational existing-process phase observation only. VAL is not TRAIN launch/native-smoke proof. No model or gate change.",
+    "native_logger_paths": [
+      "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc/20261030_165159/20261030_165159.log"
+    ],
+    "metric_lines": [
+      "2026-10-30 17:37:27,403 - INFO - mIoU : 0.3176555037498474",
+      "2026-10-30 18:23:04,844 - INFO - mIoU : 0.3869154751300812",
+      "2026-10-30 19:09:03,066 - INFO - mIoU : 0.4125078022480011",
+      "2026-10-30 19:55:14,038 - INFO - mIoU : 0.4419926106929779",
+      "2026-10-30 20:41:22,054 - INFO - mIoU : 0.4476255774497986",
+      "2026-10-30 21:27:25,925 - INFO - mIoU : 0.4649178087711334",
+      "2026-10-30 22:13:36,752 - INFO - mIoU : 0.47884783148765564",
+      "2026-10-30 22:59:44,798 - INFO - mIoU : 0.4801415205001831",
+      "2026-10-30 23:45:57,192 - INFO - mIoU : 0.4800925850868225",
+      "2026-10-31 00:31:54,814 - INFO - mIoU : 0.4861147999763489",
+      "2026-10-31 01:18:31,472 - INFO - mIoU : 0.4859965145587921",
+      "2026-10-31 02:04:38,100 - INFO - mIoU : 0.4904188811779022",
+      "2026-10-31 02:51:00,881 - INFO - mIoU : 0.4950491487979889",
+      "2026-10-31 03:37:00,515 - INFO - mIoU : 0.4948608875274658",
+      "2026-10-31 04:22:47,538 - INFO - mIoU : 0.4888874888420105",
+      "2026-10-31 05:08:45,023 - INFO - mIoU : 0.5002608299255371",
+      "2026-10-31 05:54:37,480 - INFO - mIoU : 0.4969792068004608",
+      "2026-10-31 06:40:54,376 - INFO - mIoU : 0.49429813027381897",
+      "2026-10-31 07:26:47,286 - INFO - mIoU : 0.49413642287254333",
+      "2026-10-31 08:12:42,842 - INFO - mIoU : 0.4981438219547272",
+      "2026-10-31 08:58:21,423 - INFO - mIoU : 0.5015384554862976",
+      "2026-10-31 09:44:19,357 - INFO - mIoU : 0.49480801820755005",
+      "2026-10-31 10:30:10,229 - INFO - mIoU : 0.49518507719039917",
+      "2026-10-31 11:16:02,638 - INFO - mIoU : 0.4900944232940674",
+      "2026-10-31 12:01:38,801 - INFO - mIoU : 0.4904356300830841",
+      "2026-10-31 12:46:23,581 - INFO - mIoU : 0.4873431921005249",
+      "2026-10-31 13:31:46,741 - INFO - mIoU : 0.4843410551548004"
+    ],
+    "checkpoint_body_read": false,
+    "GPU_queries": "Read-only GPU0 UUID/compute-PID queries only",
+    "GPU0": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 19753, 16",
+    "GPU0_contexts": "3786531, 19700",
+    "signals_sent": false
+  },
+  "precise_native_validation": {
+    "values": [
+      0.3176555037498474,
+      0.3869154751300812,
+      0.4125078022480011,
+      0.4419926106929779,
+      0.4476255774497986,
+      0.4649178087711334,
+      0.47884783148765564,
+      0.4801415205001831,
+      0.4800925850868225,
+      0.4861147999763489,
+      0.4859965145587921,
+      0.4904188811779022,
+      0.4950491487979889,
+      0.4948608875274658,
+      0.4888874888420105,
+      0.5002608299255371,
+      0.4969792068004608,
+      0.49429813027381897,
+      0.49413642287254333,
+      0.4981438219547272,
+      0.5015384554862976,
+      0.49480801820755005,
+      0.49518507719039917,
+      0.4900944232940674,
+      0.4904356300830841,
+      0.4873431921005249,
+      0.4843410551548004
+    ],
+    "best": 0.5015384554862976,
+    "no_improve": 6,
+    "scope": "Exact live original logger mIoU lines only; no checkpoint read, current training incomplete."
+  }
+}

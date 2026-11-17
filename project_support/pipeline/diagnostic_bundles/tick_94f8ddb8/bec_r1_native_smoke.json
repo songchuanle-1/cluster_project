@@ -1,0 +1,475 @@
+{
+  "id": "M215-BEC",
+  "candidate_id": "hierarchy-cross-level-bipartite-edge-composition",
+  "config": "configs/Quard/ctf_hcg_csort_bec/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bec.yaml",
+  "code_commit": "026c0c4cda5332bbcce0faa33b3cbdb3d3c5b563",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "implementation_revision_sha256": "ad1becebe65da26496692ec060a9f68e723b3348569498c62ae330a7b0e6a824",
+  "steps": 2,
+  "losses": [
+    9.390539169311523,
+    13.913387298583984
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/bec_r1_94f8ddb8_gpu0/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bec.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "common_initialized_parameter_observations": {
+    "names_equal": true,
+    "tensor_count": 839,
+    "parameter_count": 156432954,
+    "fingerprints_equal": true,
+    "sha256": "768c65cb75c85549680ac25ab16409c2579750d6176a1acd53034b53d8ad40c6",
+    "scope": "Original common named parameters after native backbone pretrain, before TRAIN loader; exclude exact replaced fine/middle FFN and new bipartite_edges prefixes on both targets; retain all three original LayerNorms and coarse FFN; derive actual names/counts, no fixed843",
+    "excluded_name_prefixes": [
+      "dec.cluster_att.cluster_ffn.0.",
+      "dec.cluster_att.cluster_ffn.1.",
+      "dec.cluster_att.bipartite_edges."
+    ],
+    "full_buffer_values": "NOT_RECORDED"
+  },
+  "actual_fine_edge_counts": [
+    2048,
+    2048
+  ],
+  "actual_middle_edge_counts": [
+    512,
+    512
+  ],
+  "actual_new_operator_call_counts": [
+    {
+      "up_fine": 8,
+      "up_middle": 8,
+      "down_middle": 8,
+      "down_fine": 8
+    },
+    {
+      "up_fine": 8,
+      "up_middle": 8,
+      "down_middle": 8,
+      "down_fine": 8
+    }
+  ],
+  "actual_private_mean_call_counts": [
+    16,
+    16
+  ],
+  "actual_required_weight_blocks": [
+    "down_fine_context",
+    "down_fine_retained",
+    "down_middle_context",
+    "down_middle_retained",
+    "up_fine_retained_child",
+    "up_fine_retained_parent",
+    "up_fine_upward_child",
+    "up_fine_upward_parent",
+    "up_middle_retained_child",
+    "up_middle_retained_parent",
+    "up_middle_upward_child",
+    "up_middle_upward_parent"
+  ],
+  "native_test_owner": {
+    "token": "94f8ddb8a6e049c48c8e6237f4c737e8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-26T14:57:12.614254+00:00",
+    "deadline_at": "2026-10-26T15:57:12.614254+00:00",
+    "context_sha256": "0104947a1b56f553572b7cddc0fa2f5ab0edbee9ba33f161af61e6990c234793",
+    "pending_sha256": "95a698a880ff7b5655a002531c1e3b5704e0f9c34ed4e1093f2c6ad72dba2331"
+  },
+  "current_promotion_owner": {
+    "token": "94f8ddb8a6e049c48c8e6237f4c737e8",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-26T14:57:12.614254+00:00",
+    "deadline_at": "2026-10-26T15:57:12.614254+00:00",
+    "context_sha256": "0104947a1b56f553572b7cddc0fa2f5ab0edbee9ba33f161af61e6990c234793",
+    "pending_sha256": "95a698a880ff7b5655a002531c1e3b5704e0f9c34ed4e1093f2c6ad72dba2331"
+  },
+  "current_resource_authorization": {
+    "path": "pipeline/authorizations/server4_gpu0_only_20261026.json",
+    "sha256": "94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09"
+  },
+  "effective_stop_at": "2026-10-26T15:57:12.614254+00:00",
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/smoke_champion_execution.json",
+      "sha256": "60c13eed2c49629d2e8cb3862e8c3f8be49b574f56f295d4f7153d39c1bb2661"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/smoke_candidate_execution.json",
+      "sha256": "f2a1bc3ea90cfdc29556077c0900878ca4b2cf037000fccaf3cd72faf86e09ba"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/resources_champion_execution.json",
+      "sha256": "60590f8a817271881e9d5794dd3bb197223e75a86964e28269f75d52a3be4759"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/resources_candidate_execution.json",
+      "sha256": "4ee5e9b966b8a7ae0390f64967915708fdf3a29b301f2ff2c318416ec1827a56"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/execution_binding.json",
+      "sha256": "98eadcc7aa2a45b1f15fb8f8be0d0ee009b27358ead8037aa14d095ebd8ff7a5"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/native_manifest.json",
+      "sha256": "932721c436c7e45bb5331b83000823e665afc2becded1208d3752c3ee8e561a4"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_execution/execution_lease.json",
+      "sha256": "fec32a69fc05291d736dba6193144408183288f91ff588831644b7c7cd5a91af"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_actual_four_result_review.json",
+      "sha256": "89099675a78da788f8186968102de364901859110f68ad8cd7bb45065ee798e0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_r1_actual_four_result_independent_review.json",
+      "sha256": "46c47d4983a31205d710be5889e7e9e812bd4d3649865edef60c5f046b4c0a36"
+    },
+    {
+      "path": "pipeline/authorizations/server4_gpu0_only_20261026.json",
+      "sha256": "94075ebd59f352b98209c9572faa5ea0cb260178645e067b5d01b1602ea7da09"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_faccbed6/bec_r1_execution_review_prepare/review_bec_r1.py",
+      "sha256": "071202cf0b3ccfed125c00e68e9e3b847fb20388f8fbd83d0bd66eb68a6b13c5"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_94f8ddb8/bec_promotion_execute/admit_bec_queue.py",
+      "sha256": "20c0e8fbea96014903fd08c463af4f4024e5d111db2060f02fcc080f2136ebc0"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bec_revision1_preregistration.json",
+      "sha256": "3fa782b8970de909a219cc090e2188983e1afeab1ac99cac43df07b4f1e5b527"
+    }
+  ],
+  "recorded_at": "2026-10-26T15:18:05.217167+00:00",
+  "limitations": {
+    "efficacy": "UNKNOWN",
+    "full_buffer_values": "NOT_RECORDED",
+    "offdiagonal_probe": "NOT_IMPLEMENTED_NOT_MEASURED",
+    "optional_degree_empty_padding_coverage": [
+      [
+        {
+          "singleton_fine": 2,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 62,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 2,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 62,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 2,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 62,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 2,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 62,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 3,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 61,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 3,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 61,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 3,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 61,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 3,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 61,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      [
+        {
+          "singleton_fine": 0,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 64,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 0,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 64,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 0,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 64,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 0,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 64,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 5,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 59,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 5,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 59,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 5,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 59,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "singleton_fine": 5,
+          "singleton_middle": 0,
+          "degree_ge2_fine": 59,
+          "degree_ge2_middle": 8,
+          "unsupported": [
+            0,
+            0,
+            0
+          ],
+          "padding": [
+            0,
+            0,
+            0
+          ]
+        }
+      ]
+    ],
+    "raw_cross_target_digest_scope": "Cross-target exact intermediate output equality is not a new gate. Digest differences do not establish magnitude/cause or efficacy.",
+    "pure_TRAIN_memory": "UNKNOWN; no separate no-observer native TRAIN process pair"
+  }
+}

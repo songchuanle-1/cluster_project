@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-21T17:49:45.672370+08:00",
+  "snapshot_generated_at": "2026-09-21T09:26:18.315015+00:00",
+  "resumed_due_ids": [
+    "referent-supervision-axis",
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/dependency_provenance_progress_20260921-1515.json",
+      "sha256": "6bbc14a82e3198d41d431e118f0ea21986763eac0fc9a2d8073a587b77c68d61"
+    },
+    {
+      "path": "pipeline/decisions/20260921-174816_other.md",
+      "sha256": "8d548712c48352bb2947fddb1a9783aa3fed2783878b718c3438dcf02bf9b4ee"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "4d645fb5c39f5dbd9e1a9d7773a86f1267e2d6637c22f1cf96ed8317d8ab1f38"
+    },
+    {
+      "path": "SERVERS.yaml",
+      "sha256": "4df853316bde84adef2adaf1f7dad63b0be8c57af011297d8154f5588893085c"
+    },
+    {
+      "path": "scripts/dependency_observation_collector_20260921.py",
+      "sha256": "45734872cce26ae9ae6c0e47eaa724a43ff0c1549b8345b12c428ac33edaaa90"
+    },
+    {
+      "path": "scripts/test_dependency_observation_collector_20260921.py",
+      "sha256": "1687a6820e98edf1e87f34e5db711c80ee6c8232f861f66b6c1607af2c9350ed"
+    },
+    {
+      "path": "scripts/dependency_provenance_audit_20260921.py",
+      "sha256": "e8294f12a9461df545abaa3bb9b868eac0bc0b6a1d5aeacb98f6323922dec0d2"
+    },
+    {
+      "path": "scripts/test_dependency_provenance_audit_20260921.py",
+      "sha256": "7289329e87c471d89d5efa3a83809bd31048da23d75db51083cf00283afb2056"
+    },
+    {
+      "path": "scripts/saved_dependency_inventory_20260921.py",
+      "sha256": "a606be9c0c764553656860abd84f1d5fd8178972b554f7d1410f9be307860761"
+    },
+    {
+      "path": "scripts/persist_dependency_collector_tick_20260921.py",
+      "sha256": "60b2aa85190f55635d98ef3c73d78e234d467f4d6b4d6cab32d0d89d0d1d6466"
+    }
+  ],
+  "connectivity": {
+    "server": "server-4",
+    "attempts": 1,
+    "source": "direct_ssh_retry",
+    "returncode": 1,
+    "stderr": "ssh: connect to host 192.168.1.137 port 22: Connection refused",
+    "runtime_verified": false,
+    "gpu_occupancy_verified": false,
+    "roots_observed": false
+  },
+  "collector": {
+    "contract": "installed-dependency-observation-v1",
+    "plan_contract": "installed-dependency-collection-plan-v1",
+    "collector": "scripts/dependency_observation_collector_20260921.py",
+    "collector_sha256": "45734872cce26ae9ae6c0e47eaa724a43ff0c1549b8345b12c428ac33edaaa90",
+    "validator": "scripts/dependency_provenance_audit_20260921.py",
+    "stdlib_only": true,
+    "model_package_imports": false,
+    "native_extension_execution": false,
+    "planned_observations": [
+      "runtime executable, Python SOABI/Torch version/CUDA version",
+      "environment, code, data, work and site-packages roots",
+      "explicit bootstrap modules and exact nine direct packages",
+      "package module and metadata SHA256 rows",
+      "pointgroup_ops_ext ELF identity and DT_NEEDED declarations",
+      "hashed ldconfig-cache candidates for every DT_NEEDED row"
+    ],
+    "observed_host_input": false,
+    "abi_compatibility_checked": false,
+    "runtime_loader_resolution_verified": false,
+    "shared_library_provenance_observed": false,
+    "native_data_loaded": false,
+    "external_dependency_attestation": false,
+    "native_execution_completed": false,
+    "scientific_validation_complete": false,
+    "admission": false
+  },
+  "completed_work": [
+    "Added a standalone stdlib-only collector for the validated installed-dependency observation contract.",
+    "The collector discovers the exact nine direct distributions and module files without importing them.",
+    "It hashes package metadata, explicit bootstrap files, runtime roots and the native extension bytes.",
+    "It parses ELF64/ELF32 dynamic sections directly and records DT_NEEDED declarations without executing the extension.",
+    "It requires one hashed ldconfig-cache candidate for every declared shared library.",
+    "It records CUDA_VISIBLE_DEVICES as observed environment state and rejects absent or duplicate identities.",
+    "Synthetic tests cover the ELF parser, cache parser, package discovery, output schema and rejection paths.",
+    "No target filesystem, package, ELF, shared library or GPU was observed."
+  ],
+  "validation": {
+    "tests_run": 709,
+    "tests_passed": 705,
+    "new_tests": 6,
+    "modules": [
+      "test_dependency_observation_collector_20260921",
+      "test_dependency_provenance_audit_20260921",
+      "test_server4_execution_validator_20260921",
+      "test_pinned_bootstrap_launcher_20260921",
+      "test_preidentity_handoff_20260921",
+      "test_preidentity_torch_imports_20260921",
+      "test_import_phase_audit_20260921",
+      "test_logical_gpu_identity_20260921",
+      "test_gpu_inventory_20260921",
+      "test_gpu_runtime_validation_20260921",
+      "test_model_execution_inventory_20260921",
+      "test_relocated_geometry_driver_20260921",
+      "test_relocated_saved_replay_20260921",
+      "test_prepared_collation_execution_20260921",
+      "test_saved_dependency_inventory_20260921",
+      "test_prepare_collation_handoff_20260921",
+      "test_bounded_collation_process_20260921",
+      "test_host_collation_receipts_20260920",
+      "test_scratch_collation_launch_20260920",
+      "test_native_factory_bridge_20260920",
+      "test_relocated_native_factory_20260920",
+      "test_relocated_factory_core_20260920",
+      "test_same_child_collation_20260920",
+      "test_scratch_cpu_boundary_20260920",
+      "test_cpu_diagnostic_bootstrap_20260920",
+      "test_pinned_diagnostic_imports_20260920",
+      "test_native_saved_batch_validation_20260920",
+      "test_relocated_saved_collation_20260920",
+      "test_saved_physical_location_20260920",
+      "test_saved_replay_migration_20260920",
+      "test_recover_cpu_progress_20260920",
+      "test_probe_next_saved_replay_20260920",
+      "test_probe_next_physical_20260920",
+      "test_native_saved_geometry_driver_20260920",
+      "test_saved_geometry_replay_20260920",
+      "test_probe_saved_collation_20260920",
+      "test_probe_physical_items_20260920",
+      "test_stage_registry_diagnostic_20260920",
+      "test_remote_registry_inventory_20260920",
+      "test_registry_runner_cli_20260920",
+      "test_native_registry_geometry_runner_20260920",
+      "test_referent_registry_binding_20260919",
+      "test_referent_geometry_registry_20260919",
+      "test_geometry_torch_static_20260919",
+      "test_native_geometry_runtime_20260919",
+      "test_referent_geometry_capture_20260919",
+      "test_referent_geometry_control_20260919",
+      "test_referent_native_expression_producer_20260919",
+      "test_referent_object_rank_capture_20260919",
+      "test_referent_target_rank_evaluator_20260919",
+      "test_native_endpoint_capture_20260916",
+      "test_frozen_capture_contract_20260916"
+    ],
+    "skipped": [
+      {
+        "test": "test_descendant_pipe_is_closed_after_leader_exit (test_bounded_collation_process_20260921.ProcessTests.test_descendant_pipe_is_closed_after_leader_exit)",
+        "reason": "Linux process-group cleanup needs Linux"
+      },
+      {
+        "test": "test_symlink_source_rejected (test_pinned_diagnostic_imports_20260920.PinnedImportsTest.test_symlink_source_rejected)",
+        "reason": "Symlink creation unavailable: [WinError 1314] \u5ba2\u6237\u7aef\u6ca1\u6709\u6240\u9700\u7684\u7279\u6743\u3002: 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpche_fw6i\\\\real.py' -> 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmpche_fw6i\\\\bundle\\\\_synthetic_pinned_producer.py'"
+      },
+      {
+        "test": "test_exception_removes_real_module_hook (test_geometry_torch_static_20260919.SyntheticTorchTest.test_exception_removes_real_module_hook)",
+        "reason": "Torch not installed locally"
+      },
+      {
+        "test": "test_strided_float_labels_real_module_hooks (test_geometry_torch_static_20260919.SyntheticTorchTest.test_strided_float_labels_real_module_hooks)",
+        "reason": "Torch not installed locally"
+      }
+    ],
+    "output": ".......................................................................................................................................................................................................................................s..................................................................................................................................................................s..................................................................................................................................................................................................ss......................................................................................................................\n----------------------------------------------------------------------\nRan 709 tests in 47.152s\n\nOK (skipped=4)\n",
+    "native_data_loaded": false,
+    "abi_compatibility_checked": false
+  },
+  "native_execution_completed": false,
+  "scientific_validation_complete": false,
+  "native_backward_verified": false,
+  "resources_verified": false,
+  "admission": false,
+  "training_launch": false,
+  "checkpoint_transfer": false,
+  "queue_changed": false,
+  "queue_sha256": "1fb0bf22702581457204f05b95b1bf30c9e682534d605c34aaeb8ae7ff5a8746",
+  "blocker": "Server-4 refused SSH port 22 again at 17:44 Asia/Shanghai. The stdlib-only collector is implemented and synthetically tested, but no target root, bootstrap module, package file, ELF declaration, shared library or GPU was observed. ABI, loader resolution, runtime, isolation and native execution remain unverified.",
+  "next_action": "Continue the existing saved-only diagnostic, no new review or variant. Retry server-4 once at/after 2026-09-21T18:45:00+08:00. If reachable, materialize an explicit collection plan, run dependency_observation_collector_20260921 in the target interpreter, validate the manifest with dependency_provenance_audit_20260921, and inspect M197 checkpoint/optimizer/epoch/paths. If unreachable, cross-check the collector against the validator using a POSIX fixture only; do not fabricate host rows or promote local facts. Do not assert ABI, loader resolution or runtime equivalence. Only after verified host, held GPU0/1 slot, dependency/asset/isolation receipts and 3 artifacts/6 data hashes may saved3040/3893 collation advance; then export3921/4278 retaining31. Never regenerate recovered groups or run legacy server-6/GPU7 CLI.",
+  "retry_after": "2026-09-21T18:45:00+08:00",
+  "pending_questions_24h": [],
+  "limitations": [
+    "The collector is validated only against synthetic packages and ELF data.",
+    "No target Python, site-packages, package metadata, extension ELF or system library was read.",
+    "The receipt records declarations; it does not prove loaded bytes or linker resolution.",
+    "Python SOABI, Torch version and observed CUDA_VISIBLE_DEVICES are facts, not compatibility decisions.",
+    "No sandbox, GPU slot, assets, data, backward, resources or admission evidence exists."
+  ]
+}

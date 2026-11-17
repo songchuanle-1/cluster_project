@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "purpose": "Disabled static GPU0 shared-resource HVD catalogue; not an execution activation or result",
+  "candidate_id": "hierarchy-native-variance-decomposition-composition",
+  "experiment_id": "M230-HVD",
+  "code_commit": "e38d92db60f43dde00ae0e537493dc3f3dfc82db",
+  "native_preparation_sha256": "e781aa7a3709392242945e2393a262187b7b8800ee3bc66c7ce765c4c54038dc",
+  "manifest_template_sha256": "43dd4ac595646917004e3e29f9ac48dc5b262388a1cd9df1537b51b27b7201c6",
+  "source_version_binding_sha256": "80712180bc41629e3be70a28ddc8eea8390dcbc322606777225177d904e7121a",
+  "source_hashes": {
+    "adapter.py": "4efe24f5ce3db2c43223f69fb60c5ffb84a92262008398e2b35fa37fb4e851e9",
+    "remote_ops.py": "aeb4807ab2e5aa1b147a69b709e28777cf3ec9e2922be5f3b06515bca755b157"
+  },
+  "external_candidate_preparation_and_release_anchors_required": true,
+  "fresh_owned_binding_and_live_idle_still_required": true,
+  "explicit_selected_physical_GPU_capability": [
+    0
+  ],
+  "selection_scope": "PhysicalGPU0 only, exact current sharing grant and20000MiB available-memory budget; three cooperative project locks/max1 and local project-busy guard remain. No concurrent HVD diagnostic while NEC runs.",
+  "conditional_parent_promotion": {
+    "expected_primary_HEAD": "6bc36adfe42764aac2209e6600fb3a783e2fa374",
+    "historical_LFT_receipt_code_commit": "4457a46f9075f61e83340aa0f0af87d5bf4e986c",
+    "required_technical_receipt": "pipeline/admissions/M227-LFT.json",
+    "profile": "experiment_first",
+    "training_completion_or_effect_requirement": false,
+    "applies_to_mutations_only": true
+  },
+  "resource_policy": {
+    "SERVERS_sha256": "f046762ec6e87321a70d2595cf35e52fa6e57b3f4aa585ab1fedbf624ae7ef6c",
+    "authorization": {
+      "path": "pipeline/authorizations/server4_gpu0_overlay_20261104.json",
+      "sha256": "783ffc27d48872940c2e15adcb85f6bb5f9b94492a8abd88694799f483d20e88"
+    },
+    "live_allowed_gpus": [
+      0
+    ],
+    "selected_GPU_capability": [
+      0
+    ],
+    "max_tasks_per_gpu": 1,
+    "allow_external_overlay": true,
+    "task_memory_mb": 20000,
+    "resource_memory_policy": {
+      "allow_external_overlay": true,
+      "minimum_free_mib_before_launch": 20000,
+      "max_project_tasks_per_gpu": 1,
+      "cooperative_lock_kinds": [
+        "training",
+        "diagnostic",
+        "exclusive"
+      ],
+      "external_contexts": "record_preserve_no_signals",
+      "measurement_scope": "authorized_overlay_potentially_contended_not_exclusive"
+    }
+  },
+  "draft_execution_disabled": true,
+  "operational_ready": false,
+  "runtime_binding": {
+    "expected_runtime_code_commit": "6bc36adfe42764aac2209e6600fb3a783e2fa374",
+    "remote_code_root": "/data/songcl/Project/Cluster_project/Cluster_nec_20261104"
+  }
+}

@@ -1,0 +1,187 @@
+"""One bounded stdlib resource observation; no Torch or CUDA initialization."""
+from datetime import datetime, timezone
+from pathlib import Path
+import fcntl
+import hashlib
+import json
+import os
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+OWNER = {
+    "token": "df8e31277a3644ffb73d674a6d58f4c6",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-09T19:08:49.914440+00:00",
+    "deadline_at": "2026-11-09T20:08:49.914440+00:00",
+    "context_sha256": "39f6521cdc7e6b7f1db79a6dfd0fb9bc310db06faf25060cdecfb5f3aaf3d99d",
+    "pending_sha256": "0328f4d3c4865bef20d41b9124d936cf6dc28cd12920d77cff26a29e96640c24",
+}
+ROOT = Path("/data/songcl/Project/Cluster_project/Cluster_nsd_20261107")
+EXPECTED_UUID = "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c"
+FILES = {
+    "framework/lib/pointgroup_ops/pointgroup_ops.py": "33df62f4cea0b5a99e8e6346840b6ccdcf3703affa97fd26b613f7feef79a473",
+    "framework/lib/pointgroup_ops/src/voxelize/voxelize.cpp": "b9f3c936fe33de97f6d3e3e2411b49df8cca587756725a646f50bf2a3a523300",
+    "framework/lib/pointgroup_ops/src/pointgroup_ops_api.cpp": "8e9e0621b85061f1240a37f16fe599df2d489df4fadd55d291dc5429a59644a8",
+    "framework/lib/pointgroup_ops/pointgroup_ops_ext.cpython-310-x86_64-linux-gnu.so": "c86f516858d480e2583a437deb598279bc626e74975a060b17d75bf03f630033",
+}
+PROCESSES = []
+
+
+def pin():
+    assert socket.gethostname() == "dl04-MS-7E06"
+    assert os.getuid() == os.geteuid() == 1001
+    assert datetime.now(timezone.utc) < datetime.fromisoformat(OWNER["deadline_at"])
+
+
+def identity(pid):
+    try:
+        return (Path("/proc") / str(pid) / "stat").read_text().rsplit(")", 1)[1].split()[19]
+    except FileNotFoundError:
+        return None
+
+
+def hash_file(path):
+    assert path.resolve() == path
+    before = os.lstat(path)
+    assert stat.S_ISREG(before.st_mode) and before.st_uid == 1001 and before.st_size <= 32 * 1024 * 1024
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(65536), b""):
+            digest.update(block)
+    after = os.lstat(path)
+    assert (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns) == (
+        after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+    return digest.hexdigest()
+
+
+def tail(fd, maximum):
+    size = os.fstat(fd).st_size
+    return os.pread(fd, min(size, maximum), max(0, size - maximum)).decode("utf-8", "replace")
+
+
+def observe(argv, environment, seconds, stop, label):
+    pin()
+    assert time.monotonic() < stop
+    out = os.memfd_create("rve_resource_stdout", os.MFD_CLOEXEC)
+    err = os.memfd_create("rve_resource_stderr", os.MFD_CLOEXEC)
+    process = subprocess.Popen(argv, cwd=str(ROOT), env=environment, stdin=subprocess.DEVNULL,
+                               stdout=out, stderr=err)
+    PROCESSES.append(process)
+    start = identity(process.pid)
+    until = min(stop, time.monotonic() + seconds)
+    while process.poll() is None and time.monotonic() < until:
+        time.sleep(0.02)
+    code = process.poll()
+    record = {"label": label, "argv": argv, "pid": process.pid, "start_ticks": start,
+              "certainty": "terminal" if code is not None else "uncertain", "returncode": code,
+              "stdout_bytes": os.fstat(out).st_size, "stderr_bytes": os.fstat(err).st_size,
+              "stdout": tail(out, 1024), "stderr_tail": tail(err, 1024),
+              "signals_sent": False, "automatic_retry": False}
+    if code is None:
+        record["reason"] = "SOFT_TIMEOUT_PRESERVE_PID_NO_SIGNAL_OR_RETRY"
+        record["output_descriptors"] = [f"/proc/{process.pid}/fd/1", f"/proc/{process.pid}/fd/2"]
+    else:
+        os.close(out)
+        os.close(err)
+    return record
+
+
+def main():
+    payload = json.load(sys.stdin)
+    if payload.get("execute_root") is not True:
+        print(json.dumps({"status": "DEFAULT_NOP_NO_HELPERS_OR_LOCKS"}))
+        return
+    assert payload["owner"] == OWNER
+    pin()
+    assert (datetime.fromisoformat(OWNER["deadline_at"]) - datetime.now(timezone.utc)).total_seconds() > 40
+    result = {"owner": OWNER, "kind": "ONE_CURRENT_GPU0_RESOURCE_OBSERVATION",
+              "recorded_at": datetime.now(timezone.utc).isoformat(), "supervisor_pid": os.getpid(),
+              "supervisor_start_ticks": identity(os.getpid()), "hostname": socket.gethostname(),
+              "uid": os.getuid(), "minimum_free_MiB": 20000, "resource_snapshot_allows_next_review": False,
+              "Torch_imported": False, "CUDA_initialized": False, "GPU_diagnostic_prepared_or_executed": False,
+              "signals_sent": False, "automatic_retry": False, "maximum_soft_wall_seconds": 14,
+              "scope": "Momentary resource observation only; no future reservation, idle requirement or training clearance."}
+    owned, opened = [], []
+    try:
+        assert ROOT.resolve() == ROOT
+        env = dict(os.environ)
+        env.update(PYTHONDONTWRITEBYTECODE="1", GIT_OPTIONAL_LOCKS="0", GIT_CONFIG_NOSYSTEM="1",
+                   GIT_CONFIG_GLOBAL="/dev/null", GIT_CONFIG_SYSTEM="/dev/null")
+        stop = time.monotonic() + 14
+        git = observe(["/usr/bin/git", "--no-optional-locks", "-c", "core.fsmonitor=false",
+                       "-C", str(ROOT), "rev-parse", "HEAD"], env, 3, stop, "runtime_HEAD")
+        result["git"] = git
+        if git["certainty"] != "terminal" or git["returncode"] != 0:
+            result["status"] = "PREQUERY_GIT_UNCERTAIN_OR_FAILED"
+            return
+        assert git["stdout"].strip() == "d21477b0d85e6ddcef428ea98ddf6b86fcc38f7e" and git["stdout_bytes"] <= 128
+        result["source_commit"] = git["stdout"].strip()
+        actual = {name: hash_file(ROOT / name) for name in FILES}
+        assert actual == FILES
+        result["source_and_binary_hashes"] = actual
+        python = Path("/home/songcl/.conda/envs/project_cluster/bin/python")
+        assert str(python.resolve()) == "/home/songcl/.conda/envs/project_cluster/bin/python3.10"
+        result["project_python_realpath"] = str(python.resolve())
+        result["project_python_sha256"] = hash_file(python.resolve())
+        assert result["project_python_sha256"] == "61ae9cdb79cb325d09a903fc05610369ee6488e954b19e165aad9dd6ba0e72f5"
+        result["locks"] = []
+        for kind, inode in (("training", 92537152), ("diagnostic", 92537153), ("exclusive", 92537154)):
+            path = Path("/tmp/cluster_project_gpu0_" + kind + ".lock")
+            before = os.lstat(path)
+            assert stat.S_ISREG(before.st_mode) and before.st_uid == 1001
+            assert (before.st_dev, before.st_ino) == (66308, inode)
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+            opened.append(fd)
+            info, after = os.fstat(fd), os.lstat(path)
+            assert (info.st_dev, info.st_ino) == (after.st_dev, after.st_ino) == (66308, inode)
+            available = False
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                owned.append(fd)
+                available = True
+            except BlockingIOError:
+                pass
+            result["locks"].append({"kind": kind, "dev": info.st_dev, "ino": info.st_ino,
+                                    "nonblocking_acquired": available, "created_or_replaced": False})
+        all_locks = len(owned) == 3
+        if not all_locks:
+            for fd in owned:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            owned.clear()
+        result["all_original_locks_held_during_query"] = all_locks
+        smi = observe(["/usr/bin/nvidia-smi", "-i", "0", "--query-gpu=index,uuid,memory.free",
+                       "--format=csv,noheader,nounits"], env, 5, stop, "GPU0_index_UUID_free_only")
+        result["nvidia_smi"] = smi
+        if smi["certainty"] != "terminal" or smi["returncode"] != 0:
+            result["status"] = "RESOURCE_QUERY_UNCERTAIN_OR_FAILED"
+            return
+        assert smi["stdout_bytes"] <= 512 and len(smi["stdout"].splitlines()) == 1
+        fields = [value.strip() for value in smi["stdout"].strip().split(",")]
+        assert len(fields) == 3 and fields[0] == "0" and fields[1] == EXPECTED_UUID
+        free = int(fields[2])
+        assert 0 <= free <= 1024 * 1024
+        result["GPU0"] = {"index": 0, "uuid": fields[1], "free_MiB": free,
+                          "identity_matches": True, "meets_original_20000_MiB": free >= 20000}
+        result["resource_snapshot_allows_next_review"] = all_locks and free >= 20000
+        result["status"] = "RESOURCE_SNAPSHOT_CAPACITY_AVAILABLE" if all_locks and free >= 20000 else "GPU_DIAGNOSTIC_RESOURCE_BLOCKED"
+        pin()
+    except BaseException as error:
+        result.update(status="PROVENANCE_OR_RESOURCE_OBSERVATION_FAILED", error_type=type(error).__name__,
+                      error=str(error)[:600], resource_snapshot_allows_next_review=False)
+    finally:
+        for fd in owned:
+            fcntl.flock(fd, fcntl.LOCK_UN)
+        for fd in opened:
+            os.close(fd)
+        result["only_own_locks_released"] = True
+        result["finished_at"] = datetime.now(timezone.utc).isoformat()
+        encoded = json.dumps(result, ensure_ascii=True)
+        assert len(encoded.encode()) <= 16384
+        print(encoded)
+
+
+if __name__ == "__main__":
+    main()

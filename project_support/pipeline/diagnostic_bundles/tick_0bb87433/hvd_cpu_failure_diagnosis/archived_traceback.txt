@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/tools/train.py", line 515, in <module>
+    gorilla.launch(
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/gorilla/core/launch.py", line 68, in launch
+    main_func(*args)
+  File "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/tools/train.py", line 476, in main
+    train(epoch, model, train_loader, optimizer, lr_scheduler, cfg, logger, writer)
+  File "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/tools/train.py", line 129, in train
+    grad_total_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.train.grad_clip)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/utils/clip_grad.py", line 36, in _no_grad_wrapper
+    return func(*args, **kwargs)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/utils/clip_grad.py", line 214, in clip_grad_norm_
+    parameters = list(parameters)
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2673, in parameters
+    for _name, param in self.named_parameters(recurse=recurse):
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2706, in named_parameters
+    yield from gen
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2641, in _named_members
+    for module_prefix, module in modules:
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2863, in named_modules
+    yield from module.named_modules(
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2863, in named_modules
+    yield from module.named_modules(
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2863, in named_modules
+    yield from module.named_modules(
+  [Previous line repeated 3 more times]
+  File "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py", line 2855, in named_modules
+    if self not in memo:
+TypeError: argument of type 'MultiheadAttention' is not iterable
+Train[5/50]:  31%|██████▏             | 1449/4686 [08:19<18:36,  2.90it/s, lr=7.9e-05, eta=19:14:27, iter_time=0.32]

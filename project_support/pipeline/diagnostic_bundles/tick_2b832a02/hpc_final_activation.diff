@@ -1,0 +1,61 @@
+--- draft9fc
++++ root-enabled-current-records
+@@ -7,9 +7,9 @@
+ sys.path.insert(0, str(TICK))
+ from anchor import ROOT, EXPECTED, guard, sha
+ import record_utils as u
+-DRAFT_EXECUTION_DISABLED = True
++DRAFT_EXECUTION_DISABLED = False
+ SOURCE = '6282263d805c1741234f97afc981a05aca2ad6e3'
+-HERE = TICK / 'final_hpc_tick_prepare'
++HERE = TICK / 'final_hpc_tick_execute'
+ 
+ def encoded(value):
+     return (json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False)+'\n').encode('utf8')
+@@ -44,6 +44,7 @@
+     os.environ['GIT_OPTIONAL_LOCKS']='0'; guard()
+     bound=u.read(HERE/'actual_bindings.json'); u.check_refs(list(bound.values()))
+     loaded={k:u.read(ROOT/v['path']) for k,v in bound.items()}
++    assert loaded['held']['owner']==EXPECTED and loaded['held']['unchanged'] is True
+     b=loaded['post']; assert b['owner']==EXPECTED and b['new_ADMITTED_HPC_original_pid']==187081
+     ds=loaded['dispatch']; assert ds['canonical_dispatch_invoked_once'] is True and ds['verified_native_progress'] is True
+     task=ds['task_after']; assert task['status']=='running' and task['pid']==187081 and task['launch_verified'] is True
+@@ -76,6 +77,11 @@
+         assert all(u.digest(c)==b['candidate_digests'][c['id']] for c in work['candidates'])
+         now=datetime.now(timezone.utc).isoformat(); by={c['id']:c for c in work['candidates']}
+         h=by[u.HPC]; a=by[u.APF]; assert h['stage']=='training' and h['code_commit']==SOURCE
++        h['source_status']='TESTED_HPC6282_PRESENT_IN_PRIMARY_AND_RUNTIME'
++        h['next_action']='Monitor exact original M218 PID187081/source-runtime6282 on authorized GPU0 and native validation. Preserve old2f7 import failure/root-cause UNKNOWN; no replay/restart/tuning or GPU1.'
++        h.setdefault('current_version_compatibility_history',[]).append(copy.deepcopy(h.get('current_version_compatibility')))
++        h['current_version_compatibility']={'current_source_commit':SOURCE,'source_parent_commit':'d58576b396cfb54577652be972f3ffaffda508c9','current_primary_and_runtime':SOURCE,'status':'TESTED_SOURCE_PRESENT_IN_PRIMARY_AND_RUNTIME','scope':'Raw native manifest runtime parentd585 retained as historical actual test input; current canonical admitted training source/runtime6282 independently verified.'}
++
+         assert by[u.CRE]['stage']=='complete' and a['code_commit']=='bf6c3fafe0f690e16e838e7c0192f09e789389f9'
+         h.setdefault('native_check_history',[]).append({'recorded_at':now,'prior_current_native_check':copy.deepcopy(h.get('current_native_check'))})
+         h['current_native_check']={'recorded_at':now,'result':'passed','code_commit':SOURCE,'optimizer_steps':2,
+@@ -98,6 +104,9 @@
+         a['current_resource_check']={'recorded_at':now,'result':'compatible_packaging_required','physical_gpu':0,'current_runtime':SOURCE,
+             'evidence':bound['growth'],'scope':'Existing APF bf6 parentd585/static tools preserved. Current main/runtime6282 requires separately saved compatible source and version-bound tooling before future fresh-idle GPU0 native checks; no model revision or old-raw relabel.'}
+         a['requires_current_runtime_compatible_copy']=True
++        a.setdefault('current_version_compatibility_history',[]).append(copy.deepcopy(a.get('current_version_compatibility')))
++        a['current_version_compatibility']={'existing_source_commit':a['code_commit'],'existing_parent_commit':'d58576b396cfb54577652be972f3ffaffda508c9','current_primary_and_runtime':SOURCE,'status':'NEEDS_COMPATIBLE_SOURCE_AND_TOOL_METADATA_BEFORE_FUTURE_NATIVE','scope':'Preserve bf6/parentd585 source and frozen old native/op/NULL artifacts. Package unchanged nine files against actual current6282 with a new version proof; no sibling ff or borrowed test PASS.'}
++
+         a['next_action']='Preserve bf6/parentd585 and frozen source/native/op history. Package unchanged nine source files on actual current compatible6282 parent, bind fresh static tools, then await genuinely idle GPU0 for original paired TRAIN2/resources. Native/results remain NOT_RUN.'
+         for c,keys in ((h,('review','native_peer','smoke','resources','receipt','dispatch','growth','launch_peer')),(a,('growth',))):
+             for k in keys:
+@@ -141,7 +150,7 @@
+ ## Closed Or Failed Directions
+ - CRE complete/auxdone，canonical archive/原receipt/原日志不再改；旧0f CRE/HPC依赖导入失败根因仍UNKNOWN，本次HPC四臂通过不证明环境根因修复。
+ - CTS stopped_unknown14/.4890不自动恢复；BFC DataLoader overlap crash20/3832根因UNKNOWN，epoch19旧ckpt不含完整RNG/sampler/失败输入；需专属恢复计划及许可。
+-- M206 pause+dispatch_hold+resumeFalse；PCE2+extra1、RSTR2已尽，禁R4/R3/M201自动恢复；HAP恢复授权已消费。旧10本轮due小字段digest未变，仅5bc9私有边界证明，不读旧855/grant/checkpoint正文。
++- M206 pause+dispatch_hold+resumeFalse；PCE2+extra1、RSTR2已尽，禁R4/R3/M201自动恢复；HAP恢复授权已消费。旧10本轮due小字段digest未变，仅5bc9私有边界证明，不追读旧目标/grant/checkpoint正文。
+ 
+ ## Running And Queue
+ - 唯一正式训练M218-HPC server4 physicalGPU0 PID187081/runtime6282；原日志hpc_20261028_183226.log。不要因dispatch_phase旧progress_pending重放。
+@@ -176,6 +185,6 @@
+             'memory_lines':len(memory.splitlines()),'notes':u.ref(notes_path),'decision':u.ref(decision),
+             'final_records_only':True,'canonical_postflight_or_finish_performed':False}))
+         print(json.dumps({'status':'RECORDED','result':u.ref(result)},ensure_ascii=False))
+-    finally: lock.release()
++    finally: lock.close()
+ 
+ if __name__=='__main__': main()

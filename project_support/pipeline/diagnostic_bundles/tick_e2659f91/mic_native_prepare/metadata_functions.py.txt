@@ -1,0 +1,17 @@
+def mic_coverage_preflight(members):
+    scenes=[]
+    for batch,(points,fm,mc) in enumerate(members):
+        fine=sorted(set(points));middle=sorted({fm[i] for i in fine});coarse=sorted({mc[j] for j in middle})
+        scenes.append({'batch':batch,'fine_ids':fine,'middle_ids':middle,'coarse_ids':coarse,'actual_path_count':len(fine)})
+    return {'scenes':scenes,'true_supported_core_possible':any(x['actual_path_count'] for x in scenes),'total_true_paths':sum(x['actual_path_count'] for x in scenes)}
+
+
+def mic_plan_observation(plan,members):
+    points,fm,mc=members;fine=sorted(set(points));middle_paths=[fm[i] for i in fine];coarse_paths=[mc[j] for j in middle_paths]
+    middle=sorted(set(middle_paths));coarse=sorted(set(coarse_paths));mp=[middle.index(j) for j in middle_paths];cp=[coarse.index(k) for k in coarse_paths]
+    expected={'fine_ids':fine,'middle_for_paths':middle_paths,'coarse_for_paths':coarse_paths,'middle_ids':middle,'coarse_ids':coarse,
+        'middle_parent_positions':mp,'coarse_parent_positions':cp,'middle_path_counts':[mp.count(j) for j in range(len(middle))],
+        'coarse_path_counts':[cp.count(k) for k in range(len(coarse))],'path_count':len(fine),'point_count':len(points)}
+    assert plan==expected;return copy.deepcopy(plan)
+
+

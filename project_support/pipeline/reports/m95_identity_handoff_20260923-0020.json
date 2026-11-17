@@ -1,0 +1,73 @@
+{
+  "contract": "m95_identity_descriptive_handoff_v1",
+  "generated_at": "2026-09-22T16:21:06.750352+00:00",
+  "source": {
+    "path": "/data3/songcl/Project/Cluster_project/pipeline/reports/m95_manifest_identity_analysis_20260923-0012.json",
+    "sha256": "1980ac6fe2731dd5cd3b03194e1529905562e4eeceaac04b96823f6de5da131f"
+  },
+  "script_sha256": "55b691ca4cdf86daf807ff08aee9d5ee1c7b85354741b8038f36fa7d098047f9",
+  "registered_primary": {
+    "available": 65,
+    "name": "scene_balanced_paired_target_iou_uplift",
+    "pooled_mean": 0.6648917611321752,
+    "rejection_reasons": [],
+    "scene_balanced_mean": 0.6648917611321752,
+    "scene_bootstrap_95ci": {
+      "draws": 10000,
+      "hi": 0.7397966126396509,
+      "lo": 0.5863504511351585,
+      "point_estimate": 0.6648917611321752,
+      "scene_count": 65,
+      "seed": 1999,
+      "unit": "scene"
+    },
+    "scenes": 65,
+    "score_match": {
+      "available": 65,
+      "max_absolute_score_difference": 0.09590262174606323,
+      "mean_absolute_score_difference": 0.01955023998251328
+    },
+    "supported": true
+  },
+  "descriptive": {
+    "common_support_positive_minus_target_objectness": {
+      "available": 243,
+      "scenes": 213,
+      "pooled_mean": -0.0002805836139169472,
+      "scene_bootstrap_95ci": {
+        "draws": 10000,
+        "seed": 1999,
+        "unit": "scene",
+        "point_estimate": -0.0003201024327784891,
+        "scene_count": 213,
+        "lo": -0.0009603072983354673,
+        "hi": 0.0
+      }
+    },
+    "common_support_expressions": 243,
+    "excluded_from_common_support": 13,
+    "primary_missingness": {
+      "ambiguous_no_score_matched_pair": 58,
+      "ambiguous_no_peer_query": 5,
+      "class_unique_no_peer_by_design": 128
+    },
+    "failure_counts": {
+      "total": 56,
+      "selection_with_acceptable_candidate": 40,
+      "positive_repairs": 27,
+      "target_objectness_repairs": 25,
+      "no_acceptable_candidate": 16
+    },
+    "expressions": 256,
+    "scenes": 220
+  },
+  "limitations": [
+    "Common-support comparison is post-capture descriptive, not a new primary test.",
+    "Target-objectness uses the true target union; it is not any-instance objectness.",
+    "Positive-versus-known-wrong target IoU is an oracle contrast, not deployable efficacy.",
+    "Only score-match-eligible ambiguous rows enter the primary estimand.",
+    "Feature margins use a target-positive query and overlapping prototypes; not causal mediation.",
+    "Cross-stage cosine differences alone cannot diagnose modality or identity destruction.",
+    "No new mechanism, novelty, resource gate, native candidate backward, or admission is established."
+  ]
+}

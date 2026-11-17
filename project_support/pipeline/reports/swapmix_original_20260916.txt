@@ -1,0 +1,612 @@
+                        SwapMix: Diagnosing and Regularizing
+           the Over-Reliance on Visual Context in Visual Question Answering
+
+    Vipul Gupta1 Zhuowan Li2 Adam Kortylewski2 Chenyu Zhang2 Yingwei Li2 Alan Yuille2
+              1                                2
+                Pennsylvania State University    Johns Hopkins University
+           vkg5164@psu.edu         {zli110, akortyl1, czhan129, yingwei.li, ayuille1}@jhu.edu
+
+
+
+                        Abstract                                                     Context Perturbation
+                                                                                        Tennis Ball → Soccer Ball
+
+    While Visual Question Answering (VQA) has progressed
+rapidly, previous works raise concerns about robustness of
+current VQA models. In this work, we study the robust-
+ness of VQA models from a novel perspective: visual con-
+text. We suggest that the models over-rely on the visual
+context, i.e., irrelevant objects in the image, to make pre-
+dictions. To diagnose the models’ reliance on visual con-        Question: What color is the woman’s dress?
+text and measure their robustness, we propose a simple           Ground-truth answer: Orange.
+                                                                 Model prediction: Orange.        Model prediction: White.
+yet effective perturbation technique, SwapMix. SwapMix
+perturbs the visual context by swapping features of irrele-     Figure 1. VQA models over-rely on visual context. By swapping
+vant context objects with features from other objects in the    features of irrelevant context objects, we can perturb the model
+dataset. Using SwapMix we are able to change answers to         prediction. Here the tennis ball (in yellow box) is an irrelevant
+more than 45% of the questions for a representative VQA         context object for the question. Changing feature of the tennis ball
+model. Additionally, we train the models with perfect sight     to feature of soccer ball results in change in model prediction.
+and find that the context over-reliance highly depends on
+the quality of visual representations. In addition to diag-     exploit language prior [2, 33, 34], statistical bias [1, 16] or
+nosing, SwapMix can also be applied as a data augmen-           dataset shortcuts [20, 21] to answer questions.
+tation strategy during training in order to regularize the          While previous works studied VQA robustness from the
+context over-reliance. By swapping the context object fea-      perspective of language context, in this work, we study the
+tures, the model reliance on context can be suppressed ef-      robustness of VQA models from a different view: visual
+fectively. Two representative VQA models are studied us-        context. The visual context refers to the background in the
+ing SwapMix: a co-attention model MCAN and a large-             image or the irrelevant objects that are not needed during the
+scale pretrained model LXMERT. Our experiments on the           reasoning process to answer the question. For example, in
+popular GQA dataset show the effectiveness of SwapMix           Figure 1, the tennis ball is irrelevant for the question ”What
+for both diagnosing model robustness, and regularizing the      color is the women’s dress”, so we say it is a context object.
+over-reliance on visual context. The code for our method is     Ideally, a model with real perception and reasoning ability
+available at https://github.com/vipulgupta1011/swapmix          should be robust to the irrelevant context. However, in our
+                                                                work, we find that VQA models are vulnerable to context
+                                                                changes, which suggests the models’ over-reliance on the
+1. Introduction                                                 irrelevant context in the image.
+                                                                    To study the role of visual context, we propose a simple
+   Visual Question Answering (VQA) is a challenging task        perturbation strategy named SwapMix, which perturbs the
+that requires a model to answer open-ended questions based      visual context by swapping features of context object with
+on images. In recent years, VQA performance is greatly          features from another object in the dataset. We first identify
+boosted by different techniques including intra- and inter-     the visual features corresponding to irrelevant objects in the
+modality attentions [7,49], large scale multi-modal pretrain-   image, then randomly swap them with feature vectors of an-
+ing [26, 27, 42], etc. However, previous works study the        other similar object from the dataset. For example, in Figure
+robustness of VQA models and show that the models may           1, the tennis ball is a context object for the given question,
+so we swap tennis ball feature vector with a feature vector               liance and effective accuracy and shows improvement by
+of soccer ball. The swapping confuses the model to mis-                   using SwapMix as data augmentation technique.
+recognize the color of the dress. In the swapping process,
+we carefully control the swapped objects to ensure that the               2. Related Works
+new object is compatible to the scene (e.g., we don’t want
+to change the ball into a car).                                           Visual Question Answering. The most common approach
+    Surprisingly, by perturbing the irrelevant context, more              for VQA is to first extract visual features using convolution
+than 45% of the correct answers get changed. This reveals                 neural networks and question features using LSTM [4], then
+that VQA models highly rely on the context in the image,                  fuse them together to make answer predictions [53]. Multi-
+thus are vulnerable to context perturbations. The model                   ple works have shown the effectiveness of attention in VQA
+may utilize shortcut correlations in the visual context to                [6, 10, 14, 23, 48, 50, 51]. BAN [22] proposes bilinear atten-
+make predictions. We diagnose two representative VQA                      tion that utilizes vision and language information. MCAN
+models: MCAN [49] as representative for attention-based                   [49] is a co-attention model which uses self-attention and
+models, and LXMERT [42] as representative for large-scale                 guided-attention units to model the intra-modal and inter-
+pretrained models. Our experiments show that LXMERT is                    modal interactions between visual and question input. OS-
+much more robust to context perturbations, which indicates                CAR [27] uses object tags in images as anchors to im-
+that large-scale pretraining may increase model robustness.               prove alignment between modalities. LXMERT [42] is a
+    We further find that the context over-reliance highly de-             large-scale Transformer [44] model that consists of three
+pends on the quality of visual representations: a perfect                 encoders: an object relationship encoder, a language en-
+sighted model relies much less on context. We achieve this                coder, and a cross-modality encoder. In concurrent work,
+by replacing the visual representations 1 with the ground-                [9] proposes feature swapping for domain adaptation from
+truth object and attribute encoding, which can be viewed                  synthetic to real data.
+as gold visual representation that provides the model the
+                                                                          Biases and Robustness in VQA. Despite the prosper-
+perfect sight. By studying this perfectly sighted model,
+                                                                          ity in the development of VQA, multiple previous works
+we can exclude the influence of imperfect visual percep-
+                                                                          show bias in VQA models. [1] points out the generaliza-
+tion, thus purely focus on the reliance on relevant objects
+                                                                          tion incapacity of VQA models. [18] shows bias reliance of
+in the reasoning process. Our results shows that by pro-
+                                                                          VQA models. [31] discover and enumerate explicitly biases
+viding VQA models with the perfect visual encoding, the
+                                                                          learned by the model. Many work show that the models
+answer changes are greatly reduced from 45.0% to 16.4%
+                                                                          exploit language prior [2, 33, 34], statistical bias [1, 16] or
+(for MCAN model). This suggests that models trained with
+                                                                          dataset shortcuts [20, 21] to answer questions. There are
+perfect visual representations are more robust and that the
+                                                                          many approaches to mitigate the bias in models. [2] intro-
+context over-reliance largely comes from the imperfection
+                                                                          duces a method that reorganizes the VQA v2 dataset. Some
+of visual perception features.
+                                                                          works use question-only model: [37] introduces training as
+    In addition to diagnosing context over-reliance, Swap-
+                                                                          an adversarial game between the base model and a question-
+Mix can also be used as a data augmentation technique dur-
+                                                                          only adversary, while [8] adds a question-only branch to do
+ing training. In training, we randomly swap a part of the
+                                                                          joint training with the base model, and omits it at test time.
+context features with other object features from the dataset.
+                                                                          CSS [11] generates counterfactual samples during train-
+This forces the model to focus more on relevant objects in
+                                                                          ing, which improves the visual-explainable ability. [40, 47]
+the image and less on irrelevant context. Our empirical re-
+                                                                          leverage the important visual information by humans to fo-
+sults show that by applying SwapMix in training, the model
+                                                                          cus on selected regions during training. [12] designed a two-
+robustness improves by more than 40% and effective accu-
+                                                                          stage model, the first stage trains only on biases, and the
+racy improves by more than 5% on GQA dataset [19].
+                                                                          second stage focuses on the other patterns of the dataset.
+    Our main contributions in this paper are three-fold. First,
+                                                                          In addition to decreasing modal biases, there are lot of
+we are the first to study VQA robustness from the perspec-
+                                                                          work on measuring biases more accurately and efficiently.
+tive of visual context. With our simple context perturbation
+                                                                          MUTANT [15] and GQA-OOD [20] use out-of-distribution
+strategy named SwapMix, we benchmark robustness of two
+                                                                          (OOD) generalization. Early work like [30] provided a soft
+representative VQA models and find their over-reliance on
+                                                                          measure score based on a lexical set. [5] measures the per-
+visual context. Second, we find that a perfect sighted model
+                                                                          formance of the models based on both the baseline ques-
+relies much less on visual context. We provide models with
+                                                                          tions and the CLOSURE test, indicating that the gap be-
+perfect visual encodings and observe the improvement in
+                                                                          tween these two measurements is the behavior of gener-
+model robustness. Third, we define 2 metrics, context re-
+                                                                          alization. [13] measures bias in VQA by finding counter-
+   1 Majority of VQA models use object features extracted by pretrained   examples from validation set with their proposed rules and
+object detectors as visual representation.                                use the mined counter-examples to evaluate model. Differ-
+ent from the above previous works, our work is the first to      object detector Faster RCNN [39]. In this case, V ∈ Rn×d
+study the reliance on visual context of VQA models by gen-       is a set of object features, where n is the number of objects
+erating new examples.                                            in the image and d is the dimension of the feature vector for
+Context in computer vision. Contextual information is            each object.
+important for computer vision. For object recognition, early         Among the n objects in the image, there are some irrele-
+work by [43] introduced a context-based model using place        vant objects that are not needed in the reasoning process of
+categorization to simplify object recognition, [35] studied      question answering. For a fully robust model, changing the
+how context influences object recognition, and recent work       context, C should not change model’s prediction as shown
+by [52] modified a global context model to enhance perfor-       in Figure 1. We refer to those irrelevant objects as visual
+mance. Moreover, [45] demonstrate that object detection          context and denote visual context by C. C ∈ Rm×d is a
+models rely too much on contextual information when ob-          subset of V . It contains feature vectors corresponding to m
+jects are occluded, and resolve this using a compositional       irrelevant objects. Each row of the context C, denoted as
+generative model [24, 25] that separates the object and con-     ci , is a feature vector corresponding to an irrelevant object.
+text in the representation. For scene graphs, [38, 46] intro-        The context objects are identified using the question rea-
+duce a hierarchical context model to generate a scene graph,     soning steps. For example, in order to answer the question
+and [29] augment the node features of scene graphs with          “What color is the statue in front of the trees”, we need to
+contextual information. For segmentation, [17] presents          first find the tree, then find the statue in front of the tree and
+multi-scale contextual representation with context modules,      finally query its color. The GQA dataset [19] provides the
+which leverage the global image representations to estimate      ground-truth reasoning steps for each question, as well as
+local affinity of sub-regions, and [28] introduces a switch-     the selected objects after each step. We use those reason-
+able context network to improve the performance of seman-        ing steps to filter out all the relevant and irrelevant objects
+tic segmentation of RGB-D images. In the field of VQA,           for the question. Then Intersection-over-Union (IoU) ratio
+[41] add a visual context based attention that takes into ac-    is used to match the predicted objects with the ground-truth
+count the previously attended visual content.                    ones.
+
+3. Method                                                        3.2. VQA Model with Perfect Sight
+    VQA models are not robust to minor perturbations. In             We conjecture that the model robustness is related to the
+this section, we provide a simple perturbation technique that    quality of visual perception. The majority of the current
+measures the reliance of VQA models on visual context, i.e.      VQA models use the object features described above as vi-
+irrelevant objects image. We swap features corresponding         sual input to the model. The features are extracted by a pre-
+to irrelevant objects in the image with other objects from the   trained off-the-shelf object detector which is not updated in
+dataset. In an ideal scenario, changing the context objects      VQA training. These pre-extracted features may contain a
+in the image should not affect the model’s prediction, while     large amount of noise and miss out on important informa-
+in our experiments, we found that VQA models rely heavily        tion that is required to answer the question. In this case,
+on the context and are not robust to small perturbations.        the model may be forced to learn unreasonable data corre-
+    We name our method, SwapMix, which performs per-             lations from irrelevant context to predict the answers cor-
+turbations on visual context to diagnose the robustness of       rectly, which reduces the robustness of the model.
+the model. SwapMix can also be used as a data augmen-                Therefore, to study the influence of visual perception im-
+tation technique during training to improve the robustness       perfection, we train a model with perfect sight and compare
+and effective accuracy of the model. We first define what        its behavior with model trained with commonly used de-
+visual context is, then introduce VQA models with perfect        tected features. The models with perfect sight are trained
+sight which leads to interesting diagnosing findings, next       using the scene graph annotations in GQA dataset. We re-
+describe how we perform SwapMix, and finally talk about          place the object features with the encoding of ground-truth
+how to apply SwapMix as a training strategy.                     object annotations. More specifically, for each object, we
+                                                                 encode its annotated class label and attributes into one-hot
+3.1. Definition of Visual Context                                encodings, which are then encoded using GloVe [36] em-
+   Here we clarify the definition of visual context and pro-     beddings and finally converted to inner dimension d with
+vide formulation for the problem.                                a FC layer. The object bounding box coordinates are also
+                                                                 converted to same dimension using a FC layer. The final
+                     f = M odel(V, Q)
+                                                                 representation of an object i is the average of three parts:
+   Here, V represents the visual representation and Q rep-       ci = Avg(oi , ai , bi ). oi , ai , bi ∈ R1×d are encodings for
+resents the question input. A widely-used visual representa-     object class label, attributes and bounding box coordinates
+tion is the object-based features [3] extracted by pretrained    respectively.
+                                             Question:                                                 Original Answer: Gray.
+                                             What color is the             VQA Model
+                                             statue?
+
+
+
+           feature extraction                 SwapMix: Swap the context object feature with other object features
+
+                                                       …                                                      …
+         object-based features
+
+
+
+
+        features of similar objects         car                        motorcycle                   white bus                 blue bus
+
+
+                                                                                                                !
+                                                       …
+                                                       !                                                        …
+                                      (a) ! swaps based on class names                        (b) ! swaps based on attributes
+Figure 2. Overview of our method. Given an image and a question, we first find context object (e.g. red bus in the yellow box) using the
+reasoning steps of the question. Then we swap the context object feature with other similar object features in the dataset. We perform k
+swaps based on (a) object class names and (b) object attributes each. The model’s reliance on context can be evaluated with the percentage
+of answer changes when context gets perturbed.
+
+3.3. SwapMix                                                            on the roadside is unnatural. swapped feature always corre-
+                                                                        sponding to an object from the dataset. The swapped feature
+    Now we introduce our proposed context perturbation                  resembles a real object and thus this perturbation is equiva-
+strategy: SwapMix. The overall idea is shown in Figure                  lent to replacing the irrelevant object with another object in
+2. First, we describe the broad idea about the method and               the image. Next, we will provide more details on how we
+then we go into details on how we select candidates for con-            choose candidate features to swap with.
+text swapping, how we perform context swapping in terms                     To better describe our feature swapping strategy, we de-
+of object class labels and attributes, and finally, how we ap-          note each context object feature (each row of context C) as
+ply SwapMix as a training strategy to improve robustness                ci (o; a1 , a2 , . . .). Here o is the class label for the object i,
+of the models.                                                          and a1 , a2 , . . . are its attributes. Each object belongs to a
+    After discovering the context objects as described in Sec-          unique object class while it can have an arbitrary number of
+tion 3.1, we swap their features with other object features             attributes. For example in Figure 2, feature corresponding
+from the dataset. For each context object, we perform two               to the large red bus can be written as c(bus; red, large).
+types of context swapping based on (a) class label and (b)
+attributes. In (a) we swap the object feature with the fea-             Swapping the context class. We swap the object feature
+ture of an object from a different class. For example, we               with the feature of an object from a different class. For
+change a bus into a car. In (b) we swap the object feature              example in Figure 2 we swap the bus to car, motorcycle, etc.
+with feature of an object from same class but with different            This type of feature swapping is similar to putting an object
+attributes. For example, we change a red bus with yellow                of a different class in place of the irrelevant context object
+bus. For both (a) and (b), we perform k feature swaps per               in the image. The context swapping helps us understand the
+context object, therefore altogether we have 2k swaps for               dependency of the VQA model on irrelevant objects in the
+each context object. We perform context swapping itera-                 visual input.
+tively for each irrelevant object in the image and measure                  To ensure that the swapped class is in the similar domain
+the percentage of answer changes.                                       as object of interest, we only swap the object into similar
+    We control the swapping process to make sure that the               classes. To achieve this, for each context object, we find the
+new object is compatible with the image. For example, we                k nearest classes to its class name. More specifically, we
+may want to change a bus into a car, but we don’t want                  compute cosine similarities between GloVe embeddings of
+to change it into a computer because a computer parking                 class names and pick the top k class labels. Additionally,
+we set a threshold (0.5) to filter out the classes with small                          cp (op ; ap1 , ap2 , ...) belonging to an object p from the dataset.
+similarities 2 . In this way, we get the candidates for swap-                          We define a matrix for swapping, S ∈ Rm×d , where each
+ping each context object and ensure the selected matching                              row of S is equal to cp . We perform feature swapping to
+classes are in the similar domain. For example, for the class                          convert C to C p with the following operation :
+car, its top-5 similar classes are: truck, motorcycle, vehicle,
+taxi, bus.                                                                                                   C^{p} = C \odot P + S \odot P^{c} 
+      For each context object ci (o; a1 , a2 , . . .) with class o,
+we select the k nearest class labels to o for swapping                                     P ∈ {0, 1}m×d is the perturbation matrix and  \odot  is
+as described above. For each of the k classes, we ran-                                 Hadamard product [32], also known as element wise ma-
+domly pick one object from the dataset that belongs to that                            trix multiplication. All the rows of P are 1’s except j th row
+class. This results in k candidate features for swapping:                              corresponding to cj . P c is complementary matrix of P, P c
+ĉji (oj ; aj1 , aj2 , . . .) where j = {1, 2....k}. Then by swap-                     = J - P, where J is the matrix with each entry being 1. Thus,
+ping ci to each of the ĉji , we get k perturbations for each                          all entries of P c are 0’s except for j th row. Effectively, we
+irrelevant context object.                                                             modify the context C to C p by changing context of j th row,
+      To perturb the perfectly sighted models trained with                             from cj to cp .
+the encoding of ground truth object class and attributes, a                            Summary. For each context object, we get k swaps for its
+straight-forward way is to simply modify the one-hot en-                               class labels and another k swaps for attributes. Thus 2k
+coding for the class label. However, this might cause the                              context swaps are performed for each irrelevant object. To
+object names to be incompatible with attributes, such as                               generate one perturbation for an image, we only perturb one
+pink elephant or green basketball. Therefore, to ensure that                           context object at a time. Given m context objects in the
+the swapped context corresponds to a real object, we pick a                            image, we perform m ∗ 2k perturbations. This is detailed
+random object of the swapped class from the dataset and use                            testing on the model to check if it depends on context for
+its attributes to generate one-hot encodings for the swapped                           predictions. The results of these m ∗ 2k perturbations are
+object attributes.                                                                     used to measure the robustness of the model.
+Swapping the context attributes. To further study the
+                                                                                       3.4. SwapMix as a training strategy.
+context reliance, we change the object attributes while keep-
+ing the object class unchanged. The object feature is                                      We can further use SwapMix to improve the robustness
+swapped with the feature of an object from the same class                              of the model. We use SwapMix during training to augment
+but with different attributes. For example in Figure 2, the                            the training images. The model sees a new version of the
+red bus can be changed to orange bus, yellow bus, etc. Com-                            image at every epoch based on context swapping. Using
+pared with object class swapping, attribute swapping can be                            SwapMix with training, we force the model to pay less at-
+viewed as a more controlled perturbation that helps reveal                             tention to context, C, and focus on relevant objects in the
+the models’ reliance on the context in more detail.                                    image to answer the questions.
+      For each context object ci (o; a1 , a2 , . . .), we swap it                          During training, we swap the feature vectors belonging
+with k objects of same class label but different attributes.                           to context with other feature vectors from the dataset. We
+To get the k swapping candidates, we randomly select k                                 identify the context and perform context swapping based
+objects from the list of objects belonging to same class                               on (a) class label and (b) attributes in the same way as ex-
+with different attributes from the dataset 3 . This results in                         plained in the above sections. We perform context swapping
+ĉji (o; aj1 , aj2 , . . .) where j = {k + 1, k + 2, . . . , 2k}. The                  on some irrelevant objects. For every irrelevant object, we
+object o remains the same across all context swaps.                                    decide to swap a feature with a probability of p = 0.5. If
+      To perturb the model with perfect sight, we just change                          selected for context swapping, we decide if we have to per-
+the one-hot encodings for the attributes. We pick top k                                form context swapping based on the class label with a prob-
+attributes which are similar to attribute of interest using                            ability of p = 0.5, otherwise, we perform context swapping
+GloVe similarity. For example, the attribute black can be                              based on attributes.
+swapped with: blue, green, red, purple, yellow.                                            SwapMix training can be performed on both models
+                                                                                       trained with FasterRCNN features and model with perfect
+Algorithm. Let cj ∈ R1×d be the context corresponding
+                                                                                       sight. We add a new function in the data loading part of
+to j th irrelevant object. The aim is to swap cj with context
+                                                                                       training, which changes the context in the image. As we do
+    2 For cases where the number of matching classes with threshold 0.5 are            context swapping for every image during data loading, the
+less than k, we select random classes from the datasets to make number of              training time increases by a factor of 1.4 times. In our anal-
+swaps exactly k. We also tried not padding with random classes. The
+experimental results are similar for the two settings.
+                                                                                       ysis, we show that both the robustness of the model and the
+    3 If the list of objects belonging to same class is less than k, let’s say k ′ ,   effective accuracy increases using SwapMix on both Faster-
+we perform only k′ feature swapping for that object.                                   RCNN and Perfect Sight embeddings.
+                                                        MCAN                                                                                                                                              LXMERT
+                                      Acc.      Context Reliance            Effective Acc.                                                    Acc.                                                  Context Reliance   Effective Acc.
+  Faster RCNN                         70.55          45.05                      38.77                                                        83.78 4                                                     10.10             75.32
+  Perfect Sight                       90.34          16.40                      75.53                                                         91.58                                                      18.85             74.31
+  Faster RCNN + SwapMix               61.04          26.94                      44.61                                                         83.72                                                       7.31             77.60
+  Perfect Sight + SwapMix             88.10          11.65                      77.83                                                         91.45                                                      17.34             75.59
+
+Table 1. Results for diagnosing the context reliance for MCAN [49] and LXMERT [42] models. We study models trained with both
+FasterRCNN features and perfect sight embeddings. Here Context Reliance is the percentage of correctly-answered questions that are
+successfully perturbed by SwapMix; Effective Acc. is the context-robust accuracy.
+
+4. Experiment                                                                   Evaluation metrics. We introduce 2 new metrics to evalu-
+                                                                                ate the model robustness, context reliance and effective ac-
+4.1. Dataset and Experiment Setup                                               curacy. As explained in Section 3.3, we apply 2mk pertur-
+Dataset. Our experiments are based on the GQA dataset                           bations for each question where m is the number of irrel-
+[19]. GQA train split contains 72140 images with 943k                           evant objects in the image and 2k is the number of feature
+questions and val split contains 10243 images with 132k                         swaps per irrelevant object. We consider a question relying
+questions. The dataset provides annotated scene graphs for                      on context if its answer changes for any for the 2mk per-
+each image and ground-truth reasoning steps for each ques-                      turbations. Based on this definition, context reliance is the
+tion. We leverage the reasoning steps to identify visual con-                   percentage of context-relying questions that are originally
+text and leverage the scene graph annotation to train models                    answered correctly. Effective Accuracy is the percentage of
+with perfect sight. We train the models on GQA train set                        questions that are consistently predicted correctly and sur-
+and test them on GQA val test. GQA also has a test-dev                          vive all 2mk SwapMix perturbations.
+                                                                                                                  PN Mathematically, it
+split and a test split, which are not used in our work because                  can be written as effective Acc = i qi /N , where N is the
+they do not have scene graph and reasoning step annotation.                     total number of questions in the dataset and qi is defined as:
+
+Models. Among the many different VQA models, in this
+work, we focus on two representative models: MCAN [49]                             q_{i} = \begin {dcases*} 0, & if $ gt \neq Model(V^{j},Q)$ for any perturbation j \\ 1, & otherwise. \end {dcases*}
+and LXMERT [42]. MCAN is a representative of attention-
+based models, which contains self-attention and guided-
+attention units to model the intra-modal and inter-modal in-                    4.2. SwapMix Perturbation Results
+teractions between visual and question input. LXMERT is
+a representative of large-scale pretrained models which can                        We finetune the MCAN model and LXMERT model
+be then finetuned to solve a set of downstream tasks.                           on GQA training split with object features extracted by
+                                                                                pretrained Faster RCNN. After finetuning, MCAN reaches
+Implementation Details. We use the official released code                       70.55% accuracy and LXMERT reaches 83.78% accuracy
+for both MCAN and LXMERT models. We finetune both                               on GQA validation split. These results are comparable with
+MCAN and LXMERT pre-trained models using Faster-                                ones reported by original authors.
+RCNN features on the GQA train set using the default                               Then we perform SwapMix perturbation to extensively
+hyperparameters as described by respective authors. For                         test models’ reliance on context. The evaluation results for
+training models with perfect sight, we get ground-truth ob-                     both the MCAN model and LXMERT model are shown
+ject names and attributes from scene graph annotation in                        in Table 1. For measuring robustness, context reliance
+GQA dataset. MCAN with perfect sight takes a total of 50                        and the effective accuracy are reported. Surprisingly, 45%
+epochs to converge and LXMERT model takes 6 epochs.                             of MCAN answers get changed after perturbation and
+For LXMERT, we use the object features provided by its                          the effective accuracy drops significantly from 70.55% to
+authors in the official codebase. For MCAN, we used the                         38.77%. The significant drop suggests that the MCAN
+object features released with GQA dataset.                                      model relies heavily on the context and is not robust to
+                                                                                context swapping. On the contrary, LXMERT is more ro-
+    4 We note that LXMERT finetuned with Faster RCNN features has               bust. We conjecture this is because LXMERT is pretrained
+higher accuracy and shows high robustness towards SwapMix perturba-             on a large amount of image-text pairs from five vision-
+tion. This is because we test both the models on GQA val split and              and-language datasets [42] and the large-scale pretraining
+LXMERT was pretrained with five large vision-language datasets where
+it has seen images in GQA val set during pretraining. This is reported in
+                                                                                equipped the model with better robustness.
+the codebase. Therefore the LXMERT results with Faster RCNN features               Next, we study VQA models with perfect sight. We train
+needs to be viewed with cautious.                                               both models with perfect sight using encodings of ground
+                                                                MCAN                                 LXMERT
+                                                     Class Reliance Attr Reliance          Class Reliance Attr Reliance
+                     Faster RCNN                         32.52          28.41                   7.29           7.61
+                     Faster RCNN + SwapMix               18.19          17.10                   5.78           5.94
+            k=5
+                     Perfect Sight                       11.11           3.16                  14.57           1.34
+                     Perfect Sight + SwapMix              7.64           2.36                  12.89           1.32
+                     Faster RCNN                         39.40          34.47                   8.18           8.81
+                     Faster RCNN + SwapMix               22.18          20.91                   6.27           6.58
+            k=10
+                     Perfect Sight                       15.52           3.71                  18.82           1.35
+                     Perfect Sight + SwapMix             10.89           2.72                  17.28           1.36
+
+Table 2. Detailed analysis of reliance on context. Here we measure the reliance on (a) class names and (b) attributes of irrelevant objects
+on model prediction. We provide analysis on k perturbations on context for each irrelevant object.
+
+truth object names and attributes. As shown in table 1,                 sistent for MCAN with perfect sight and LXMERT. Table
+both models achieve more than 90% accuracy with perfect                 2 further shows that SwapMix training improves robustness
+sight. We observe a significant improvement in robustness               in both context class reliance and attribute reliance. The
+of MCAN with perfect sight: its context reliance drops by               results consistently show that SwapMix as a training strat-
+28.7% compared with training on Faster RCNN features                    egy decreases model reliance on context, encourages model
+(from 45.1% to 16.4%) and the effective accuracy improves               robustness and improves effective accuracy.
+from 38.77% to 75.53%. This suggests that models trained                    Interestingly, we notice that there is a trade-off between
+with perfect sight are more robust than its FasterRCNN                  model robustness and overall accuracy. While we see
+counterparts when trained with the same amount of data.                 significant improvement in model robustness, it is notice-
+It is also noticeable that the LXMERT performance is in a               able that the overall model accuracy drops to some extent.
+similar range with MCAN, which suggests that LXMERT is                  For example, when applying SwapMix training to MCAN
+no more robust than MCAN without seeing more pretrain-                  model with perfect sight, its context reliance reduces by
+ing data in the same domain.                                            4.7% and effective accuracy improves by 2.3%, while the
+    In Table 2, we provide more detailed results of pertur-             overall model accuracy drops by 2.2%. The model utilizes
+bations on object class and attribute separately. Interest-             biases and correlations in context to achieve high perfor-
+ingly, we observe that models with perfect sight are highly             mance, thus when the context reliance is reduced by Swap-
+robust to attribute perturbations: only 3.7% and 1.4% of                Mix training, the effective accuracy improves while the
+the correct answers get changed by attribute perturbation               overall accuracy drops. Hereby we suggest that the effective
+for MCAN and LXMERT respectively. This suggests that                    accuracy is a better description of the models’ true ability to
+given the ground-truth class name, the model can distin-                understand the task without relying on context bias.
+guish the relevant and irrelevant objects well, thus are ro-
+bust to perturbation on the attributes of context objects.
+                                                                        4.4. Ablations and Analysis
+    To further support our claim of generalisation of Swap-             Ablating the swapping number k. In Table 2, we addi-
+Mix, we tested our approach on OSCAR [27]. We see                       tionally provide ablation study results for the hyperparam-
+26.3% of OSCAR answers relies on visual context. The re-                eter k, which is the perturbation number. The results for
+sults are consistent with our initial results that transformer          k = 5 or k = 10 are shown in the table. We do k per-
+models are more robust than MCAN.                                       turbations on class names and attributes of context objects
+                                                                        and report the percentage of questions affected. The result
+4.3. SwapMix Training Results                                           shows that when we increase the perturbations number of k
+    Using SwapMix as a training data augmentation strat-                from 5 to 10, the reported answer changes increase accord-
+egy consistently improves the robustness of both models in              ingly for both models, which is expected. Whereas it is also
+all settings. For both MCAN and LXMERT, trained with                    notable that the reliance increase is not significant, showing
+both FasterRCNN features and perfect encodings, SwapMix                 that most reliance on context can be revealed with a rel-
+training reduces the models’ reliance on context and boosts             atively small number of perturbations. By default, we use
+the effective accuracy.                                                 k=10 to benchmark reliance on the context of VQA models.
+    As shown in Table 1 (marked as +SwapMix), Swap-                     Random padding to k swaps. When doing object name
+Mix training significantly decreases the context reliance of            perturbation, for cases where number of compatible classes
+MCAN by 40% (from 45% to 27%) and increases its effec-                  is less than k, we select random classes from the dataset
+tive accuracy by 5.8% (row 3). The results are also con-                to pad the perturbation number to exactly k. To verify that
+this random padding does not bring extra noise in the result,
+we compare results with and without random padding. As
+shown in table 3, the effect of random padding is negligible.
+
+                                  MCAN
+                                         Random        w/o random
+                                                                                            Question : Is the camera silver or tan?
+            FRCNN                         45.1            40.3                              Answer : Tan
+  k=10
+            FRCNN + SwapMix               26.9            24.3                   (a) Without SwapMix                     (b) With SwapMix
+            FRCNN                         38.1            35.0
+  k=5
+            FRCNN + SwapMix               22.4            20.8             Figure 4. Visualization of attention weights for models (a) without
+                                                                           SwapMix training (b) with SwapMix training. SwapMix training
+Table 3. Context reliance measured by SwapMix with and without             effectively suppresses models’ reliance on visual context.
+random padding to generate k perturbations. This table verifies
+                                                                           relevant context objects such as the car, the tree, etc., while
+that random padding does not lead to significant difference.
+                                                                           model trained with SwapMix augmentation focuses highly
+Examples for SwapMix Perturbation. In Figure 3, we                         on the relevant object, camera, and pays very little attention
+show examples for our proposed SwapMix perturbation.                       to other objects. The visualization qualitatively shows that
+Example (a) is based on class name swapping and example                    when applied as data augmentation strategy, SwapMix ef-
+(b) is based on attribute swapping, both of which resulted in              fectively suppresses the model’s dependency on visual con-
+the change of model prediction. In example (a), the boot is                text and forces the model to focus more on relevant objects.
+irrelevant to the question about sweater color, while chang-
+ing boots into snow boots results in a change in model pre-                5. Conclusion
+diction. In example (b), when we swap the blue signboard
+in the background with a green signboard, the model pre-                      In this work, we study the reliance of VQA models on
+diction on the short’s color changed to green as well. The                 context, i.e. irrelevant objects in the image for prediction.
+examples are based on the results of MCAN model with per-                  We propose a simple yet effective perturbation technique:
+fect sight. The examples intuitively show that VQA models                  SwapMix. SwapMix is effective in both diagnosing model
+rely heavily on context and by perturbing irrelevant context               robustness on context reliance, and regularizing the con-
+in the image, we can change model prediction.                              text reliance of VQA models thus making them more ro-
+                                                                           bust. Our experiments of two representative models on
+Attention visualization for SwapMix training. Training                     GQA show the effectiveness of SwapMix. Interestingly,
+using SwapMix as data augmentation reduces the models’                     we find that the robustness of VQA models highly depends
+reliance on context. In Figure 4, we show the visualization                on the quality of visual perception and models with perfect
+of attention weights for models trained without SwapMix                    sight are more robust to context perturbation. Large-scale
+and models trained using SwapMix as data augmentation.                     pretraining also helps improve model robustness. We hope
+The visualization is based on the LXMERT model with per-                   that our initial analysis on reliance on visual context can
+fect sight. For the given question, “Is the camera silver or               serve as a starting point for future researchers to study VQA
+tan”, a model with vanilla training pays more attention to ir-             robustness and reliability.
+                                                                           Negative impact and limitations. Our work study the ro-
+                                                                           bustness of VQA models and find that the models are vul-
+                                                                           nerable to context perturbations. The proposed SwapMix
+                                                                           perturbation strategy may be used maliciously to attack
+                                                                           VQA models. To overcome this potential negative impact,
+                                                                           we suggest that training with SwapMix can effectively reg-
+                                                                           ularize reliance on context and that better visual representa-
+ Question: Is the sweater blue?    Question: The shorts have what color?
+ Swap: boot → snow boot            Swap: signboard blue → green            tion may improve model robustness. The limitation of our
+ Answer change: No → Yes           Answer change: Grey → Green             work is that we only study two representative models, using
+  (a) Context object class swap      (a) Context attribute swap            two types of visual features on the GQA dataset.
+Figure 3. Examples for SwapMix perturbationson GQA val split.
+Blue boxes show relevant objects and yellow boxes show context
+                                                                           Acknowledgements
+objects. In (a) we perform class name perturbation and change                 This work is supported by NSF 1763705.
+boots to snow boots. In (b) we perform attribute perturbation and
+change color of signboard from blue to green. Both these Swap-
+Mix perturbations change model prediction.
+References                                                         [13] Corentin Dancette, Rémi Cadène, Damien Teney, and
+                                                                        Matthieu Cord. Beyond question-based biases: Assessing
+ [1] Aishwarya Agrawal, Dhruv Batra, and Devi Parikh. Analyz-           multimodal shortcut learning in visual question answering.
+     ing the behavior of visual question answering models. arXiv        2021 IEEE/CVF International Conference on Computer Vi-
+     preprint arXiv:1606.07356, 2016. 1, 2                              sion (ICCV), pages 1554–1563, 2021. 2
+ [2] Aishwarya Agrawal, Dhruv Batra, Devi Parikh, and Anirud-      [14] Akira Fukui, Dong Huk Park, Daylen Yang, Anna Rohrbach,
+     dha Kembhavi. Don’t just assume; look and answer: Over-            Trevor Darrell, and Marcus Rohrbach. Multimodal com-
+     coming priors for visual question answering. In Proceed-           pact bilinear pooling for visual question answering and vi-
+     ings of the IEEE Conference on Computer Vision and Pattern         sual grounding. arXiv preprint arXiv:1606.01847, 2016. 2
+     Recognition, pages 4971–4980, 2018. 1, 2                      [15] Tejas Gokhale, Pratyay Banerjee, Chitta Baral, and Yezhou
+ [3] Peter Anderson, Xiaodong He, Chris Buehler, Damien                 Yang. Mutant: A training paradigm for out-of-distribution
+     Teney, Mark Johnson, Stephen Gould, and Lei Zhang.                 generalization in visual question answering. arXiv preprint
+     Bottom-up and top-down attention for image captioning and          arXiv:2009.08566, 2020. 2
+     visual question answering. In Proceedings of the IEEE con-    [16] Yash Goyal, Tejas Khot, Douglas Summers-Stay, Dhruv Ba-
+     ference on computer vision and pattern recognition, pages          tra, and Devi Parikh. Making the v in vqa matter: Elevating
+     6077–6086, 2018. 3                                                 the role of image understanding in visual question answer-
+ [4] Stanislaw Antol, Aishwarya Agrawal, Jiasen Lu, Margaret            ing. In Proceedings of the IEEE Conference on Computer
+     Mitchell, Dhruv Batra, C Lawrence Zitnick, and Devi Parikh.        Vision and Pattern Recognition, pages 6904–6913, 2017. 1,
+     Vqa: Visual question answering. In Proceedings of the IEEE         2
+     international conference on computer vision, pages 2425–      [17] Junjun He, Zhongying Deng, Lei Zhou, Yali Wang, and Yu
+     2433, 2015. 2                                                      Qiao. Adaptive pyramid context network for semantic seg-
+ [5] Dzmitry Bahdanau, Harm de Vries, Timothy J O’Donnell,              mentation. In Proceedings of the IEEE/CVF Conference
+     Shikhar Murty, Philippe Beaudoin, Yoshua Bengio, and               on Computer Vision and Pattern Recognition, pages 7519–
+     Aaron Courville. Closure: Assessing systematic general-            7528, 2019. 3
+     ization of clevr models. arXiv preprint arXiv:1912.05783,     [18] Lisa Anne Hendricks, Kaylee Burns, Kate Saenko, Trevor
+     2019. 2                                                            Darrell, and Anna Rohrbach. Women also snowboard: Over-
+ [6] Hedi Ben-Younes, Rémi Cadene, Matthieu Cord, and Nico-            coming bias in captioning models. In Proceedings of the Eu-
+     las Thome. Mutan: Multimodal tucker fusion for visual              ropean Conference on Computer Vision (ECCV), pages 771–
+     question answering. In Proceedings of the IEEE interna-            787, 2018. 2
+     tional conference on computer vision, pages 2612–2620,        [19] Drew A Hudson and Christopher D Manning. Gqa: A new
+     2017. 2                                                            dataset for real-world visual reasoning and compositional
+ [7] Rémi Cadène, Hedi Ben-younes, Matthieu Cord, and Nicolas         question answering. In Proceedings of the IEEE/CVF con-
+     Thome. Murel: Multimodal relational reasoning for visual           ference on computer vision and pattern recognition, pages
+     question answering. 2019 IEEE/CVF Conference on Com-               6700–6709, 2019. 2, 3, 6
+     puter Vision and Pattern Recognition (CVPR), pages 1989–      [20] Corentin Kervadec, Grigory Antipov, Moez Baccouche, and
+     1998, 2019. 1                                                      Christian Wolf. Roses are red, violets are blue... but should
+ [8] Remi Cadene, Corentin Dancette, Matthieu Cord, Devi                vqa expect them to? In Proceedings of the IEEE/CVF Con-
+     Parikh, et al. Rubi: Reducing unimodal biases for visual           ference on Computer Vision and Pattern Recognition, pages
+     question answering. Advances in neural information pro-            2776–2785, 2021. 1, 2
+     cessing systems, 32:841–852, 2019. 2                          [21] Corentin Kervadec, Theo Jaunet, Grigory Antipov, Moez
+ [9] Paola Cascante-Bonilla, Hui Wu, Letao Wang, Rogerio                Baccouche, Romain Vuillemot, and Christian Wolf. How
+     Feris, and Vicente Ordonez. Simvqa: Exploring simulated            transferable are reasoning patterns in vqa? 2021 IEEE/CVF
+     environments for visual question answering. In Proceed-            Conference on Computer Vision and Pattern Recognition
+     ings of the IEEE Conference on Computer Vision and Pattern         (CVPR), pages 4205–4214, 2021. 1, 2
+     Recognition (CVPR), 2022. 2                                   [22] Jin-Hwa Kim, Jaehyun Jun, and Byoung-Tak Zhang. Bi-
+[10] Kan Chen, Jiang Wang, Liang-Chieh Chen, Haoyuan Gao,               linear attention networks. arXiv preprint arXiv:1805.07932,
+     Wei Xu, and Ram Nevatia. Abc-cnn: An attention based               2018. 2
+     convolutional neural network for visual question answering.   [23] Jin-Hwa Kim, Kyoung-Woon On, Woosang Lim, Jeonghee
+     arXiv preprint arXiv:1511.05960, 2015. 2                           Kim, Jung-Woo Ha, and Byoung-Tak Zhang. Hadamard
+[11] Long Chen, Xin Yan, Jun Xiao, Hanwang Zhang, Shiliang              product for low-rank bilinear pooling. arXiv preprint
+     Pu, and Yueting Zhuang. Counterfactual samples synthesiz-          arXiv:1610.04325, 2016. 2
+     ing for robust visual question answering. In Proceedings of   [24] Adam Kortylewski, Ju He, Qing Liu, and Alan L Yuille.
+     the IEEE/CVF Conference on Computer Vision and Pattern             Compositional convolutional neural networks: A deep archi-
+     Recognition, pages 10800–10809, 2020. 2                            tecture with innate robustness to partial occlusion. In Pro-
+[12] Christopher Clark, Mark Yatskar, and Luke Zettlemoyer.             ceedings of the IEEE/CVF Conference on Computer Vision
+     Don’t take the easy way out: Ensemble based meth-                  and Pattern Recognition, pages 8940–8949, 2020. 3
+     ods for avoiding known dataset biases. arXiv preprint         [25] Adam Kortylewski, Qing Liu, Angtian Wang, Yihong Sun,
+     arXiv:1909.03683, 2019. 2                                          and Alan Yuille. Compositional convolutional neural net-
+     works: A robust and interpretable model for object recog-            proposal networks. IEEE Transactions on Pattern Analysis
+     nition under occlusion. International Journal of Computer            and Machine Intelligence, 39:1137–1149, 2015. 3
+     Vision, 129(3):736–760, 2021. 3                                 [40] Ramprasaath R Selvaraju, Stefan Lee, Yilin Shen, Hongxia
+[26] Liunian Harold Li, Mark Yatskar, Da Yin, Cho-Jui Hsieh,              Jin, Shalini Ghosh, Larry Heck, Dhruv Batra, and Devi
+     and Kai-Wei Chang. Visualbert: A simple and performant               Parikh. Taking a hint: Leveraging explanations to make vi-
+     baseline for vision and language. ArXiv, abs/1908.03557,             sion and language models more grounded. In Proceedings
+     2019. 1                                                              of the IEEE/CVF International Conference on Computer Vi-
+[27] Xiujun Li, Xi Yin, Chunyuan Li, Pengchuan Zhang, Xiaowei             sion, pages 2591–2600, 2019. 2
+     Hu, Lei Zhang, Lijuan Wang, Houdong Hu, Li Dong, Furu           [41] Himanshu Sharma and Anand Singh Jalal. Visual question
+     Wei, et al. Oscar: Object-semantics aligned pre-training for         answering model based on graph neural network and con-
+     vision-language tasks. In European Conference on Computer            textual attention. Image and Vision Computing, 110:104165,
+     Vision, pages 121–137. Springer, 2020. 1, 2, 7                       2021. 3
+[28] Di Lin, Ruimao Zhang, Yuanfeng Ji, Ping Li, and Hui             [42] Hao Tan and Mohit Bansal. Lxmert: Learning cross-
+     Huang. Scn: switchable context network for semantic seg-             modality encoder representations from transformers. arXiv
+     mentation of rgb-d images. IEEE transactions on cybernet-            preprint arXiv:1908.07490, 2019. 1, 2, 6
+     ics, 50(3):1120–1131, 2018. 3                                   [43] Antonio Torralba, Kevin P Murphy, William T Freeman, and
+[29] Xin Lin, Changxing Ding, Jinquan Zeng, and Dacheng Tao.              Mark A Rubin. Context-based vision system for place and
+     Gps-net: Graph property sensing network for scene graph              object recognition. In Computer Vision, IEEE International
+     generation. In Proceedings of the IEEE/CVF Conference                Conference on, volume 2, pages 273–273. IEEE Computer
+     on Computer Vision and Pattern Recognition, pages 3746–              Society, 2003. 3
+     3753, 2020. 3
+                                                                     [44] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszko-
+[30] Mateusz Malinowski and Mario Fritz. A multi-world ap-
+                                                                          reit, Llion Jones, Aidan N Gomez, Łukasz Kaiser, and Illia
+     proach to question answering about real-world scenes based
+                                                                          Polosukhin. Attention is all you need. In Advances in neural
+     on uncertain input. Advances in neural information process-
+                                                                          information processing systems, pages 5998–6008, 2017. 2
+     ing systems, 27:1682–1690, 2014. 2
+                                                                     [45] Angtian Wang, Yihong Sun, Adam Kortylewski, and Alan L
+[31] Varun Manjunatha, Nirat Saini, and Larry S Davis. Explicit
+                                                                          Yuille. Robust object detection under occlusion with context-
+     bias discovery in visual question answering models. In Pro-
+                                                                          aware compositionalnets. In Proceedings of the IEEE/CVF
+     ceedings of the IEEE/CVF Conference on Computer Vision
+                                                                          Conference on Computer Vision and Pattern Recognition,
+     and Pattern Recognition, pages 9562–9571, 2019. 2
+                                                                          pages 12645–12654, 2020. 3
+[32] Elizabeth Million. The hadamard product. 2007. 5
+                                                                     [46] Wenbin Wang, Ruiping Wang, Shiguang Shan, and Xilin
+[33] Yulei Niu, Kaihua Tang, Hanwang Zhang, Zhiwu Lu, Xian-
+                                                                          Chen. Sketching image gist: Human-mimetic hierarchical
+     sheng Hua, and Ji-Rong Wen. Counterfactual vqa: A cause-
+                                                                          scene graph generation. In Computer Vision–ECCV 2020:
+     effect look at language bias. 2021 IEEE/CVF Conference
+                                                                          16th European Conference, Glasgow, UK, August 23–28,
+     on Computer Vision and Pattern Recognition (CVPR), pages
+                                                                          2020, Proceedings, Part XIII 16, pages 222–239. Springer,
+     12695–12705, 2021. 1, 2
+                                                                          2020. 3
+[34] Yulei Niu, Kaihua Tang, Hanwang Zhang, Zhiwu Lu, Xian-
+     Sheng Hua, and Ji-Rong Wen. Counterfactual vqa: A cause-        [47] Jialin Wu and Raymond J Mooney. Self-critical reason-
+     effect look at language bias. In Proceedings of the IEEE/CVF         ing for robust visual question answering. arXiv preprint
+     Conference on Computer Vision and Pattern Recognition                arXiv:1905.09998, 2019. 2
+     (CVPR), pages 12700–12710, June 2021. 1, 2                      [48] Zichao Yang, Xiaodong He, Jianfeng Gao, Li Deng, and
+[35] Aude Oliva and Antonio Torralba. The role of context in              Alex Smola. Stacked attention networks for image question
+     object recognition. Trends in cognitive sciences, 11(12):520–        answering. In Proceedings of the IEEE conference on com-
+     527, 2007. 3                                                         puter vision and pattern recognition, pages 21–29, 2016. 2
+[36] Jeffrey Pennington, Richard Socher, and Christopher D Man-      [49] Zhou Yu, Jun Yu, Yuhao Cui, Dacheng Tao, and Qi Tian.
+     ning. Glove: Global vectors for word representation. In              Deep modular co-attention networks for visual question an-
+     Proceedings of the 2014 conference on empirical methods in           swering. In Proceedings of the IEEE/CVF Conference
+     natural language processing (EMNLP), pages 1532–1543,                on Computer Vision and Pattern Recognition, pages 6281–
+     2014. 3                                                              6290, 2019. 1, 2, 6
+[37] Sainandan Ramakrishnan, Aishwarya Agrawal, and Ste-             [50] Zhou Yu, Jun Yu, Jianping Fan, and Dacheng Tao. Multi-
+     fan Lee. Overcoming language priors in visual question               modal factorized bilinear pooling with co-attention learning
+     answering with adversarial regularization. arXiv preprint            for visual question answering. In Proceedings of the IEEE
+     arXiv:1810.03649, 2018. 2                                            international conference on computer vision, pages 1821–
+[38] Guanghui Ren, Lejian Ren, Yue Liao, Si Liu, Bo Li, Jizhong           1830, 2017. 2
+     Han, and Shuicheng Yan. Scene graph generation with hi-         [51] Zhou Yu, Jun Yu, Chenchao Xiang, Jianping Fan, and
+     erarchical context. IEEE Transactions on Neural Networks             Dacheng Tao. Beyond bilinear: Generalized multimodal
+     and Learning Systems, 32(2):909–915, 2020. 3                         factorized high-order pooling for visual question answering.
+[39] Shaoqing Ren, Kaiming He, Ross B. Girshick, and Jian Sun.            IEEE transactions on neural networks and learning systems,
+     Faster r-cnn: Towards real-time object detection with region         29(12):5947–5959, 2018. 2
+[52] Qiaoyong Zhong, Chao Li, Yingying Zhang, Di Xie, Shi-
+     cai Yang, and Shiliang Pu. Cascade region proposal and
+     global context for deep object detection. Neurocomputing,
+     395:170–177, 2020. 3
+[53] Bolei Zhou, Yuandong Tian, Sainbayar Sukhbaatar, Arthur
+     Szlam, and Rob Fergus. Simple baseline for visual question
+     answering. arXiv preprint arXiv:1512.02167, 2015. 2
+

@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "status": "READ_ONLY_SOURCE_DIAGNOSIS_CAUSE_UNCONFIRMED",
+  "candidate_id": "hierarchy-affine-coarse-to-fine-prolongation",
+  "experiment_id": "M207-HAP",
+  "recorded_at": "2026-10-22T04:21:14.075757+00:00",
+  "owner": {
+    "token": "5c46f46a17514a6f984ad08364f0c7cc",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-22T04:11:20.228657+00:00",
+    "deadline_at": "2026-10-22T05:11:20.228657+00:00"
+  },
+  "scope": "Only local saved observation/remote-read artifacts and source text/AST/hash inspection. No SSH, torch/model import, tensor/GPU execution, dataset loading, checkpoint loading, environment/source/ledger mutation or restart.",
+  "classification": {
+    "failure_scope": "implementation_or_environment_data_pipeline; underlying cause inconclusive",
+    "hypothesis_falsified": false,
+    "reason": "The saved exception originates in a DataLoader worker while constructing a shared dataset item, before that batch enters model/HAP forward/backward. No HAP numerical error or scientific early-stop conclusion is established by this crash.",
+    "not_demonstrated": [
+      "HAP mechanism failure",
+      "model divergence/nonfinite gradients",
+      "GPU OOM",
+      "corrupt checkpoint",
+      "deterministic data-value error",
+      "package mixed-version root cause",
+      "transient-only root cause"
+    ]
+  },
+  "confirmed_facts": {
+    "saved_log": {
+      "path": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap_20261022_001959.log",
+      "size": 25363566,
+      "inode": 193206010,
+      "mtime_ns": 1792640936404786364,
+      "sha256": "794be0ab616954c28ec8b120f57309c6443f7ba87133c983e2f506887ad84a59"
+    },
+    "original_hap_PID": 979955,
+    "hap_PID_absent_in_two_root_observations": true,
+    "last_recorded_native_progress": {
+      "epoch": 19,
+      "epochs": 50,
+      "step": 3665,
+      "steps": 4686
+    },
+    "exception_type": "AttributeError in DataLoader worker process 1",
+    "error": "'Tensor' object has no attribute 'has_torch_function_unary'",
+    "data_stack": "torch/utils/data/_utils/worker.py:349 -> fetch.py:52 -> scannetv2.py:430 -> installed torch/_tensor.py:1226 return self.numpy()",
+    "runtime_HEAD_observed": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+    "dataset_sha_local_matches_remote": true,
+    "dataset_sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+    "installed_tensor_source": {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_tensor.py",
+      "size": 72764,
+      "inode": 55902582,
+      "mtime_ns": 1782094207407519345,
+      "sha256": "991589d60a0c177977a17ecd5a6f4b800fa942900cd11e2021fde44985c69637",
+      "lines_1215_to_1230": [
+        "            keys.remove(\"__cuda_array_interface__\")",
+        "",
+        "        return sorted(keys)",
+        "",
+        "    # Numpy array interface, to support `numpy.asarray(tensor) -> ndarray`",
+        "    __array_priority__ = 1000  # prefer Tensor ops over numpy ones",
+        "",
+        "    def __array__(self, dtype=None):",
+        "        if has_torch_function_unary(self):",
+        "            return handle_torch_function(Tensor.__array__, (self,), self, dtype=dtype)",
+        "        if dtype is None:",
+        "            return self.numpy()",
+        "        else:",
+        "            return self.numpy().astype(dtype, copy=False)",
+        "",
+        "    # Wrap Numpy array again in a suitable tensor when done, to support e.g."
+      ]
+    },
+    "gpu0_not_free": {
+      "first_root_observation_context": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 128551, 1656",
+      "newer_root_observation_context": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 181902, 1638",
+      "newer_inventory": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 1687, 37",
+      "meaning": "Original HAP process disappearance does not establish free capacity. Other GPU0 consumers changed from PID128551 to181902 and remain busy; no attribution/stop authorization inferred. GPU1 was not queried and remains excluded by the latest resource restriction."
+    }
+  },
+  "source_causal_chain": [
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "lines": [
+        367,
+        368,
+        369
+      ],
+      "finding": "A real scene is loaded and original train/test transform supplies NumPy label arrays."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "lines": [
+        374,
+        375,
+        376
+      ],
+      "finding": "Semantic/instance labels are explicitly torch.from_numpy(...).long(), then shared get_sp_label uses CPU torch/torch_scatter before context-mask generation. No HAP-specific function is called in this dataset code."
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "lines": [
+        417,
+        428,
+        430,
+        439
+      ],
+      "finding": "Context/reference masks are NumPy arrays. np.unique(instance_label) enumerates labels and np.where(instance_label==i_instance)[0] converts a Tensor comparison mask through NumPy interoperability. The traceback identifies this latter conversion, not mask semantics or HAP computation."
+    },
+    {
+      "path": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/_tensor.py",
+      "lines": [
+        1222,
+        1223,
+        1224,
+        1225,
+        1226
+      ],
+      "finding": "Saved actual installed source first evaluates the module-global has_torch_function_unary(self), then dtype=None reaches self.numpy(). The traceback lands on self.numpy(), so a simple missing Python global in the guard is inconsistent with the observed location. Failure occurs inside/under Tensor.numpy conversion; the precise native or object-state cause is not shown."
+    },
+    {
+      "path": "Cluster/framework/torch/overrides.py",
+      "lines": [
+        31,
+        32,
+        33,
+        1385,
+        1386
+      ],
+      "finding": "The local partial framework torch-related source exposes has_torch_function_unary as a module-level alias of torch._C helper; it is not a required Tensor instance method. This is a local framework copy, not proof of the currently loaded installed _tensor implementation."
+    },
+    {
+      "path": "Cluster/framework/torch/nn/functional.py",
+      "lines": [
+        6,
+        12,
+        13,
+        14
+      ],
+      "finding": "Local custom functional code imports the helper from installed torch.overrides. A bounded search of framework/tools/scripts found no assignment replacing torch.overrides, Tensor.numpy or Tensor.__array__; absence in this search does not exclude mutation in dependencies/native extensions or dead-worker memory state."
+    }
+  ],
+  "runtime_provenance_boundary": {
+    "historical_same_server_torch_version": "2.8.0+cu128",
+    "historical_reference": "pipeline/diagnostic_bundles/tick_899d59f1/runtime_import_check.json (same active runtime root, imported selected model, CUDA context uninitialized)",
+    "additional_historical_reference": "pipeline/diagnostic_bundles/tick_2546d803/fresh_resume_environment.json, 2026-10-19",
+    "current_installed_torch_numpy_versions": "NOT_FRESHLY_VERIFIED_BY_THIS_DIAGNOSIS",
+    "current_tensor_source_read": "Parent root read and hashed actual installed _tensor.py; no local full installed torch package exists under this child Python prefix, so no torch import was attempted.",
+    "installed_source_hash_fresh_remote": "991589d60a0c177977a17ecd5a6f4b800fa942900cd11e2021fde44985c69637",
+    "version_mismatch_or_recent_environment_edit_proven": false,
+    "mtime_limit": "Source mtime/hash alone cannot establish all compiled libraries/package metadata/environment state or the dead worker in-memory object state."
+  },
+  "hypotheses_requiring_discrimination": [
+    {
+      "hypothesis": "Worker-local Tensor/NumPy/native-extension state or conversion dispatch failure during a long-lived persistent worker",
+      "support": "Late failure after many successful native batches; shared worker conversion path rather than HAP stack. Earlier np.unique(label) in the same item was reached before the failing bool-mask conversion.",
+      "limits": "No worker state dump, exact failed sample/type dump or fresh reproduction. Cannot declare transient or attribute memory corruption.",
+      "next_check": "Record fresh CPU int64/bool Tensor conversion behavior before/after project dataset imports; if needed reproduce original dataset access in an isolated diagnostic process with unchanged native augmentation/sampler/worker settings, logging worker/process/type/sample identities."
+    },
+    {
+      "hypothesis": "Installed Python/native torch/NumPy package or extension identity inconsistency",
+      "support": "The missing-instance-attribute text is unexpected at self.numpy() and exact installed _C/NumPy/overrides identities are not captured in the saved traceback.",
+      "limits": "Historical runtime torch version and fresh dataset/_tensor hashes do not demonstrate a mismatch. No package repair is justified yet.",
+      "next_check": "Read current distribution metadata, interpreter/site paths and file hashes for torch, torch._C, torch._tensor, torch.overrides, NumPy and relevant extension libraries; compare import origins/version/build to saved runtime provenance. Do not install/upgrade or replace code during this read."
+    },
+    {
+      "hypothesis": "Specific mask/scalar/Tensor type or data path triggers conversion",
+      "support": "The failing expression compares CPU Long Tensor labels with a NumPy unique scalar and converts the resulting boolean mask.",
+      "limits": "The exact scene/index/annotation/scalar/type/device/shape are absent; ordinary label values alone do not explain the helper attribute error.",
+      "next_check": "Capture or recover offending sample identity; record type(label), label dtype/device/subclass, type(unique scalar), comparison result type/dtype/device, and compare .numpy(), np.asarray/np.unique and np.where without training or changing stored data."
+    }
+  ],
+  "minimal_diagnostic_protocol_not_executed": {
+    "scope": "Separate short CPU-only interoperability check, not a model/native smoke or admission result. Future parent executes only within current authorization; no code/environment mutation.",
+    "environment": "Same project_cluster interpreter and library search path; hide CUDA only inside the diagnostic subprocess before importing torch; no CUDA calls, GPU context, optimizer or training.",
+    "record": [
+      "sys.executable and actual torch/NumPy distribution versions and module file paths",
+      "torch._C and torch._tensor/overrides origins and hashes; relevant helper object type/module and identity of __array__.__globals__[has_torch_function_unary]",
+      "Plain CPU Long Tensor with representative integer/ignored labels: np.unique plus NumPy-scalar equality -> bool Tensor -> .numpy()/np.asarray()/np.where",
+      "The same CPU conversions after importing original tools.train and framework.dataset.scannetv2, without creating/changing the production loader or model",
+      "On reproduction, complete traceback and exact type/dtype/device/shape/sample/worker identity; on success, report only this small fresh-process check passed, not crash resolved"
+    ],
+    "no_tuning": [
+      "Do not change training num_workers, persistent_workers, prefetch, seed, augmentation, sampler or YAML",
+      "Do not replace np.where blindly to bypass the unknown native conversion problem",
+      "Do not pip/conda install/upgrade or edit torch/dataset/native extensions without demonstrated cause and separate reviewed repair"
+    ],
+    "outcome": "NOT_RUN"
+  },
+  "minimal_recovery_proposal_not_executed": {
+    "first": "Preserve exact full failure log and last full checkpoint in immutable snapshots with hashes and config/runtime/source lineage; parent is separately performing CPU-only checkpoint inspection.",
+    "checkpoint_requirements": [
+      "Full model state present/nonempty and loadable",
+      "Optimizer state/groups and scheduler state present/nonempty",
+      "Native meta epoch,best_miou,epochs_no_improve retained",
+      "Exact checkpoint SHA/source/config and original run identity bound; choose last full state, not best weights-only or fresh model"
+    ],
+    "then_if_cpu_interop_and_source_checks_pass": "Under existing valid resume authorization and fresh actual resource/source/lease verification, restart the same HAP experiment using the original native --resume path, same admitted source/config/seed/epochs/max_iters and original four-worker loader. Fresh process/workers are operational recovery, not a new architecture or parameter sweep. No cold fallback, new candidate or GPU1 migration.",
+    "if_cpu_interop_fails_or_repeats": "Hold same experiment as implementation/environment fault and isolate proven mismatch/conversion cause; do not relabel as hypothesis rejection or tune loader settings. Any necessary shared-source/environment repair requires explicit reviewed scope and fresh applicable evidence.",
+    "resume_granularity": "Native train.py starts at saved meta.epoch+1 and restores best_miou/epochs_no_improve via gorilla.resume. The crash is within epoch19; actual saved epoch must be CPU-inspected. Epoch-boundary recovery may replay the incomplete epoch and is not bitwise mid-epoch/DataLoader RNG continuation.",
+    "gpu_boundary": "GPU0 is currently busy in root observations; HAP PID death is not idle proof. Current authorization permits GPU0 only; GPU1 stays released/user-paused. No process may be stopped or card shared by this proposal.",
+    "checkpoint_or_resume_status": "NOT_INSPECTED_OR_EXECUTED_BY_THIS_CHILD"
+  },
+  "unknowns": [
+    "Underlying Tensor.numpy/native conversion root cause",
+    "Exact offending sample and in-worker types/state",
+    "Fresh current torch/NumPy/_C/package/library metadata consistency",
+    "Fresh CPU interop reproduction outcome",
+    "Full last checkpoint content and actual meta epoch (parent separately inspecting)",
+    "Identity/ownership and lifetime of other GPU0 consumers",
+    "Whether a fresh unchanged native full-resume will repeat the failure"
+  ],
+  "evidence": {
+    "pipeline/diagnostic_bundles/tick_5c46f46a/gpu0_observation.json": {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/gpu0_observation.json",
+      "sha256": "c833199c4a213e9ed7bbbb9c8717b37c63c0fd2fd002b407ebb7abbc0b8aaf38"
+    },
+    "pipeline/diagnostic_bundles/tick_5c46f46a/hap_crash_remote_inspection.json": {
+      "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_crash_remote_inspection.json",
+      "sha256": "5815809ed7a2aa29e28ba696590e17de775fcbe3216d8d5ca08e71d94d47d22d"
+    },
+    "pipeline/diagnostic_bundles/tick_899d59f1/runtime_import_check.json": {
+      "path": "pipeline/diagnostic_bundles/tick_899d59f1/runtime_import_check.json",
+      "sha256": "5085b85a8d21d38bcdc80f345272f0f9f3190a147d6182857d98530ad6947a62"
+    },
+    "pipeline/diagnostic_bundles/tick_2546d803/fresh_resume_environment.json": {
+      "path": "pipeline/diagnostic_bundles/tick_2546d803/fresh_resume_environment.json",
+      "sha256": "14625fdad43384b83391e8685950a1559254307ad11799c43b0cdc8579476863"
+    },
+    "Cluster/framework/dataset/scannetv2.py": {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"
+    },
+    "Cluster/framework/torch/overrides.py": {
+      "path": "Cluster/framework/torch/overrides.py",
+      "sha256": "535add0bfe6e7f4d8288cf54b8698971775befef8324eb3bb56f0cb715b06624"
+    },
+    "Cluster/framework/torch/nn/functional.py": {
+      "path": "Cluster/framework/torch/nn/functional.py",
+      "sha256": "5e4af05ce23c844cda798c24980dab93151535303fecfb1fd07363e639399515"
+    },
+    "Cluster/tools/train.py": {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    }
+  },
+  "mutations": {
+    "only_output": "pipeline/diagnostic_bundles/tick_5c46f46a/dataloader_source_diagnosis.json",
+    "shared_source_changed": false,
+    "environment_changed": false,
+    "ledger_or_queue_changed": false,
+    "ssh_executed": false,
+    "torch_imported": false,
+    "gpu_used": false,
+    "checkpoint_loaded": false,
+    "resume_launched": false
+  }
+}

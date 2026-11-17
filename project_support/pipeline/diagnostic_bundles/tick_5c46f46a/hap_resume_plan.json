@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "PREPARED_AWAITING_EXPLICIT_HUMAN_RESUME_AUTHORIZATION_AND_FREE_GPU0",
+  "prepared_at": "2026-10-22T04:24:49.497219+00:00",
+  "id": "M207-HAP",
+  "config": "configs/Quard/ctf_hcg_csort_hap/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap.yaml",
+  "code_commit": "f51823bbddf0f8095a9a5813bf1f8169e3d7edb0",
+  "server": "server-4",
+  "gpu": "0",
+  "remote_code_root": "/data/songcl/Project/Cluster_project/Cluster_experiment_first_899d59f1",
+  "resume_from": "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_hap_crash_5c46f46a/20261022_002007/last.pth",
+  "checkpoint_sha256": "28ad9df5784c0287cc085df81faa10e0efe251cb417126034db1ad24d7e11966",
+  "checkpoint_proof": {
+    "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_resume_checkpoint_proof.json",
+    "sha256": "1891c2b86b584655cc27f115e8f130596e6687741ef9493292cd06a2968b2111"
+  },
+  "saved_meta": {
+    "epoch": 18,
+    "best_miou": 0.4975287616252899,
+    "epochs_no_improve": 0
+  },
+  "intended_native_argv": [
+    "python",
+    "tools/train.py",
+    "configs/Quard/ctf_hcg_csort_hap/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hap.yaml",
+    "--gpu_ids",
+    "0",
+    "--num_gpus",
+    "1",
+    "--resume",
+    "/data/songcl/Project/Cluster_project/pipeline/resume_snapshots/20261022_hap_crash_5c46f46a/20261022_002007/last.pth"
+  ],
+  "retained_protocol": {
+    "seed": 1999,
+    "epochs": 50,
+    "max_iters": 70,
+    "num_workers": 4,
+    "persistent_workers": true
+  },
+  "expected_first_resume_epoch": 19,
+  "model_optimizer_scheduler_and_best_patience_state_preserved": true,
+  "limitations": [
+    "Epoch19 partial minibatch progress was not saved.",
+    "The checkpoint has meta/model/optimizer/scheduler, no saved full RNG/loader worker state. Exact interrupted minibatch/RNG trajectory is not guaranteed.",
+    "Fresh CPU interop tests passed but do not reproduce the failed native sample or long-lived worker; root cause remains UNKNOWN and another crash remains possible."
+  ],
+  "source_integrity": {
+    "path": "pipeline/diagnostic_bundles/tick_5c46f46a/hap_source_integrity.json",
+    "sha256": "b4d1a4516e95346517296a71dbb681e80919236288bd17df1e2c0b02067936c4"
+  },
+  "cpu_interop": {
+    "path": "pipeline/diagnostic_bundles/tick_5c46f46a/cpu_tensor_numpy_check.json",
+    "sha256": "8ae5bc82f2780842b4fd8ce2b61fd3ec9ebe3a6b526a3a47c07734f0a17a309b"
+  },
+  "native_admission": {
+    "path": "pipeline/admissions/M207-HAP.json",
+    "sha256": "61aded24398cb95d2296c3fc3fffeeb6e2960e6e9646fffc2d18c466ea564c59"
+  },
+  "authorization_contract": {
+    "path": "C:/Users/chuanle song/.codex/skills/songcl_research_pipeline/cluster_resume.py",
+    "function": "validate",
+    "required": "Explicit human resume authorization required",
+    "current_hap_resume_grant": "MISSING",
+    "standing_experiment_first_preserves_resume_restrictions": true
+  },
+  "before_launch_required": [
+    "Human exact HAP resume grant bound to this config/commit/checkpoint/server/GPU.",
+    "Revalidate actual exact f518 source, allowed native YAML path mappings, checkpoint SHA, conda/data assets.",
+    "Revalidate latest GPU0 authorization/physical UUID and fresh empty compute context plus all exclusive leases; preserve every foreign/unregistered process.",
+    "Use canonical full-state native resume with no cold-start or fallback checkpoint; verify increasing native training steps."
+  ],
+  "exclusions": [
+    "GPU1 remains released to others; no diagnostics/training there.",
+    "M206 remains user-paused; HAP consent does not authorize M206 resume or migration.",
+    "No worker-count/NumPy/source/environment/seed/schedule/hyperparameter changes."
+  ],
+  "queue_task_created": false,
+  "resume_authorization_created": false,
+  "training_started": false
+}

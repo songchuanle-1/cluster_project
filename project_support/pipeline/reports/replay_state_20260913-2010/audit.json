@@ -1,0 +1,183 @@
+{
+  "at": "2026-09-13T20:09:40.466647",
+  "live": {
+    "id": "M193-CTF-HCG-CSORT-MQHC-TR",
+    "config": "configs/Quard/ctf_hcg_csort_mqhc_tr/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqhc_tr.yaml",
+    "remote_log": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mqhc_tr/20260913_020753/20260913_020753.log",
+    "best": {
+      "epoch": 17,
+      "miou": 0.4906114339828491,
+      "acc50": 0.543,
+      "spmiou": 0.454
+    },
+    "completed": 26,
+    "epoch": 27,
+    "no_improve": 9,
+    "early_stop": false,
+    "trainer_present": true,
+    "log_sha256": "637cadccb2d551bddc946f617159227b85d47915067ee8de4eeb845d773a7d00"
+  },
+  "gpu": {
+    "server-4": "0, 52, 21261, 32607\n1, 0, 15, 32607",
+    "server-6": "7, 0, 6, 81559"
+  },
+  "local_train_sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+  "checkpoint": {
+    "checkpoint": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort/20260815_101011/best.pth",
+    "sha256": "fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e",
+    "keys": [
+      "meta",
+      "model",
+      "optimizer",
+      "scheduler"
+    ],
+    "meta": {
+      "epoch": 16,
+      "best_miou": "0.5024607",
+      "epochs_no_improve": 0,
+      "time": "Sat Aug 15 22:47:13 2026"
+    },
+    "optimizer_keys": [
+      "state",
+      "param_groups"
+    ],
+    "optimizer_state_count": 642,
+    "optimizer_state_fields": [
+      "exp_avg",
+      "exp_avg_sq",
+      "step"
+    ],
+    "optimizer_steps_min": 73581.0,
+    "optimizer_steps_max": 74976.0,
+    "param_groups": [
+      {
+        "type": "text_encoder",
+        "lr_mult": 0.001,
+        "lr": 3.541464389837568e-05,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.0005,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true,
+        "initial_lr": 0.0001
+      },
+      {
+        "type": "input_conv",
+        "lr_mult": 0.01,
+        "lr": 3.541464389837568e-05,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.0005,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true,
+        "initial_lr": 0.0001
+      },
+      {
+        "type": "unet",
+        "lr_mult": 0.01,
+        "lr": 3.541464389837568e-05,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.0005,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true,
+        "initial_lr": 0.0001
+      },
+      {
+        "type": "output_layer",
+        "lr_mult": 0.01,
+        "lr": 3.541464389837568e-05,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.0005,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true,
+        "initial_lr": 0.0001
+      },
+      {
+        "type": "dec",
+        "lr_mult": 1.0,
+        "lr": 3.541464389837568e-05,
+        "betas": [
+          0.9,
+          0.999
+        ],
+        "eps": 1e-08,
+        "weight_decay": 0.0005,
+        "amsgrad": false,
+        "maximize": false,
+        "foreach": null,
+        "capturable": false,
+        "differentiable": false,
+        "fused": null,
+        "decoupled_weight_decay": true,
+        "initial_lr": 0.0001
+      }
+    ],
+    "scheduler": {
+      "max_iters": 70,
+      "power": 4.0,
+      "constant_ending": 0.0,
+      "base_lrs": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "last_epoch": 16,
+      "_step_count": 17,
+      "_is_initial": false,
+      "_get_lr_called_within_step": false,
+      "_last_lr": [
+        3.541464389837568e-05,
+        3.541464389837568e-05,
+        3.541464389837568e-05,
+        3.541464389837568e-05,
+        3.541464389837568e-05
+      ]
+    },
+    "save_source": "@master_only\ndef save_checkpoint(model,\n                    filename,\n                    optimizer=None,\n                    scheduler=None,\n                    meta=None):\n    r\"\"\"Save checkpoint to file.\n    The checkpoint will have 3 fields:\n        ``meta``, ``state_dict`` and ``optimizer``.\n        By default ``meta`` will contain version and time info.\n    Args:\n        model (Module): Module whose params are to be saved.\n        filename (str): Checkpoint filename.\n        optimizer (:obj:`Optimizer`, optional): Optimizer to be saved.\n        meta (dict, optional): Metadata to be saved in checkpoint.\n    \"\"\"\n    # prevent save incomplete checkpoint due to key interrupt\n    with DelayedKeyboardInterrupt():\n        if meta is None:\n            meta = {}\n        elif not isinstance(meta, dict):\n            raise TypeError(\n                f\"meta must be a dict or None, but got {type(meta)}\")\n        meta.update(time=time.asctime())\n\n        os.makedirs(osp.dirname(filename), exist_ok=True)\n        if is_module_wrapper(model):\n            model = model.module\n\n        checkpoint = {\n            \"meta\": meta,\n            \"model\": weights_to_cpu(get_state_dict(model))\n        }\n        # save optimizer state dict in the checkpoint\n        if optimizer is not None:\n            if isinstance(optimizer, Optimizer):\n                checkpoint[\"optimizer\"] = optimizer.state_dict()\n            elif isinstance(optimizer, dict):\n                checkpoint[\"optimizer\"] = {}\n                for name, optim in optimizer.items():\n                    checkpoint[\"optimizer\"][name] = optim.state_dict()\n            else:\n                raise TypeError(\n                    f\"Optimizer should be dict or torch.optim.Optimizer but got {type(optimizer)}\"\n                )\n\n        # save lr_scheduler state dict in the checkpoint\n        if scheduler is not None:\n            if isinstance(scheduler, (_LRScheduler, ReduceLROnPlateau)):\n                checkpoint[\"scheduler\"] = scheduler.state_dict()\n            elif isinstance(scheduler, dict):\n                checkpoint[\"scheduler\"] = {}\n                for name, sche in scheduler.items():\n                    checkpoint[\"scheduler\"][name] = sche.state_dict()\n            else:\n                raise TypeError(\n                    f\"scheduler should be dict or torch.optim.lr_scheduler._LRScheduler/ReduceLROnPlateau \"\n                    f\"but got {type(scheduler)}\"\n                )\n\n        # immediately flush buffer\n        with open(filename, \"wb\") as f:\n            torch.save(checkpoint, f)\n            f.flush()\n",
+    "load_source": "def load_checkpoint(model: nn.Module,\n                    filename: str,\n                    map_location: Optional[Union[str, Callable]] = None,\n                    strict: bool = True):\n    r\"\"\"Load checkpoint from a file or URI.\n    Args:\n        model (Module): Module to load checkpoint.\n        filename (str): Accept local filepath, URL.\n        map_location (func): Same as :func:`torch.load`.\n        strict (bool): Whether to allow different params for the model and\n            checkpoint.\n    Returns:\n        dict or OrderedDict: The loaded checkpoint.\n    \"\"\"\n    checkpoint = _load_checkpoint(filename, map_location)\n    # OrderedDict is a subclass of dict\n    if not isinstance(checkpoint, dict):\n        raise RuntimeError(\n            f\"No state_dict found in checkpoint file {filename}\")\n    # get model state_dict from checkpoint\n    if \"model\" in checkpoint:\n        state_dict = checkpoint[\"model\"]\n    elif \"state_dict\" in checkpoint:\n        state_dict = checkpoint[\"state_dict\"]\n    else:\n        state_dict = checkpoint\n    # strip prefix of state_dict\n    if list(state_dict.keys())[0].startswith(\"module.\"):\n        state_dict = {k[7:]: v for k, v in state_dict.items()}\n    # load state_dict\n    load_state_dict(model, state_dict, strict)\n    return checkpoint\n",
+    "cuda_initialized": false,
+    "run_files": [
+      "20260815_101011.log",
+      "best.pth",
+      "events.out.tfevents.1786759811.dl04-MS-7E06",
+      "last.pth",
+      "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort.yaml"
+    ]
+  }
+}

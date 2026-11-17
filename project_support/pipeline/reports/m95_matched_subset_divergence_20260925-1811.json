@@ -1,0 +1,48 @@
+{
+  "contract": "m95_matched_subset_divergence_v1",
+  "observed_at": "2026-09-25T18:11:00+08:00",
+  "candidate_id": "m95-repro-drift-boundary",
+  "scope": "Read-only server-6 CPU comparison of two completed native manifest-subset captures; no new native forward or mechanism efficacy claim.",
+  "captures": [
+    {
+      "path": "pipeline/diagnostic_runs/m95_boundary_trace_20260925_1707_c/capture.json",
+      "sha256": "91feb8142ba521ce585400a5411c190a6f3324875905fc086da52aa48da10fb9"
+    },
+    {
+      "path": "pipeline/diagnostic_runs/m95_frozen_strict_20260925_1724/capture.json",
+      "sha256": "9a297dee98f524cb9e0000592e5c0752df4330ac02c14889d01c280cecf9e668"
+    }
+  ],
+  "matched_input_fingerprints": "256/256",
+  "same_checkpoint_config_model": true,
+  "partition_changed_rows": [
+    {"manifest_index": 37, "scene": "scene0486_00", "ann_id": 26, "changed_assignments": [1, 0, 0], "changed_seed_indices": 0, "query_scores_over_1e-3": 0},
+    {"manifest_index": 95, "scene": "scene0311_00", "ann_id": 47, "changed_assignments": [2, 2, 0], "changed_seed_indices": 1, "query_scores_over_1e-3": 0},
+    {"manifest_index": 178, "scene": "scene0124_00", "ann_id": 38, "changed_assignments": [3, 2, 0], "changed_seed_indices": 0, "query_scores_over_1e-3": 0},
+    {"manifest_index": 193, "scene": "scene0672_00", "ann_id": 19, "changed_assignments": [1197, 219, 31], "changed_seed_indices": 125, "query_scores_over_1e-3": 46, "query_ious_over_1e-6": 94}
+  ],
+  "row193": {
+    "query71_scores": [0.00023805529053788632, 0.9939940571784973],
+    "query71_ious": [0.3877550959587097, 0.560606062412262],
+    "selected_query": 9,
+    "selected_iou": 0.5454545617103577,
+    "selected_mask_equal": true,
+    "sampled_seed_indices_changed": 125,
+    "interpretation": "Large nonselected-query differences coincide with widespread hierarchy/seed changes despite identical dataset input fingerprints. The per-run hierarchy source is not isolated; association is not causality."
+  },
+  "historical_full_scan_identity_gate": "fail_28_of_65_prior_paired_rows",
+  "strict_full_scan_repeat_completed": false,
+  "gpu_observation": {
+    "host": "server-6",
+    "physical_gpu": 7,
+    "utilization_percent": 10,
+    "memory_used_mib": 20041,
+    "memory_total_mib": 81559,
+    "external_pid": 396980,
+    "external_process_mib": 20032,
+    "idle_guard": "utilization <10% and memory used <1024 MiB"
+  },
+  "next_action": "On eligible GPU7, verify SSH, code/conda/data and checkpoint/manifest/frozen-entrypoint hashes; run unmodified producer in full_train_scan mode and strict frozen comparator at unchanged tolerances. Then isolate same-draw hierarchy/seed/query boundaries including row193 and historical rows83/174.",
+  "admission": false,
+  "training_launched": false
+}

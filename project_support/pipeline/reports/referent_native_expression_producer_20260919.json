@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "scope": "CPU-only native-to-registry expression projection for the frozen referent target-rank audit; no model forward, native score, GPU execution, queue mutation, admission, or efficacy claim",
+  "timestamp": "2026-09-19T02:11:18+08:00",
+  "candidate_id": "referent-causality-audit",
+  "registry": {
+    "path": "pipeline/reports/referent_outcome_independent_registry_20260918-2311.json",
+    "sha256": "83fbef96307b184443ae790e54815474a03efa4f29301cb4623653daf3cbb6ff"
+  },
+  "implementation": {
+    "path": "scripts/referent_native_expression_producer_20260919.py",
+    "sha256": "7db6fd4c7daee6be498b47ccd65f17fb6b24807af9c843a4f3a5ff7da0f8d8ac"
+  },
+  "tests": {
+    "producer_suite": {
+      "path": "scripts/test_referent_native_expression_producer_20260919.py",
+      "sha256": "ab7bced707570737594000a2f8748bff8103d1549f508e30a8a7dfca194ce73d",
+      "tests_passed": 8,
+      "tests_failed": 0
+    },
+    "object_capture_suite": {
+      "path": "scripts/test_referent_object_rank_capture_20260919.py",
+      "sha256": "e38d7623e67c49d01926ad2ac6d88bb78b99ddee858572e6017e6d7b6cdfe05b",
+      "tests_passed": 12,
+      "tests_failed": 0
+    },
+    "frozen_evaluator_suite": {
+      "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+      "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f",
+      "tests_passed": 10,
+      "tests_failed": 0
+    },
+    "total_passed": 30,
+    "total_failed": 0
+  },
+  "projection_contract": {
+    "physical_identity": "exact scene, ann_id, dataset_index, and expression_slot join",
+    "registry_scope": "all and only primary_rank_eligible expressions must be present",
+    "query_order": "sampled_seed_indices, confidence scores, and IoU values remain on the native query axis",
+    "referent_cost": "negative native objectness confidence; lower is better",
+    "objectness_cost": "one minus native candidate mask IoU; lower is better",
+    "identity_checks": [
+      "capture model class, config path, config hash, producer hash, model source hash, and checkpoint hash",
+      "registry content hash and rank-eligibility",
+      "native input and hierarchical-partition hashes",
+      "query seed indices inside exact native superpoint support",
+      "finite probabilities for confidence and IoU axes"
+    ],
+    "missing_data_policy": "reject before object-rank capture construction; no imputation"
+  },
+  "remote_observation": {
+    "timestamp": "2026-09-19T02:08:00+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "native_capture_launched": false
+  },
+  "status": {
+    "stage_completed": "Fail-closed native capture to frozen expression-contract projection",
+    "native_execution_completed": false,
+    "scientific_validation_complete": false,
+    "next_action": "When GPU7 capacity opens, run the frozen M95 native capture, project its rows with referent_native_expression_producer_20260919.py, build the object-rank capture, and evaluate without imputation."
+  },
+  "limitations": [
+    "Unit tests validate the static projection boundary, not model quality or scientific validity.",
+    "No native capture, candidate coverage count, target rank, or efficacy result exists.",
+    "The fixed TRAIN cohort is diagnostic and not a held-out population sample.",
+    "The projection enforces complete rank-eligible coverage and rejects the whole projection if an expression is absent."
+  ]
+}

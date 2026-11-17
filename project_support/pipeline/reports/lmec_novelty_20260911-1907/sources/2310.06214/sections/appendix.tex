@@ -1,0 +1,462 @@
+\newpage
+\appendix
+\label{appendix}
+
+\section{Appendix}
+
+Our Appendix contains the following sections:
+\begin{itemize}
+    \item Identification of failure cases as a benefit of the interpretability.
+    \item Broader Impact and Ethical Considerations.
+    \item GPT-generated path influence on the overall grounding accuracy.
+    \item Justification for CoT performance when integration into Vil3DRef.
+    \item Do we use additional supervision?
+    \item Causal vs. Non-Causal CoT.
+    \item Nr3D Ambiguity.
+    \item Related Work.
+    \item Explore data-augmentation effect in the limited data scenario (10\%).
+    \item Pseudo labels human-evaluation.
+    \item In-context prompt used for object order extraction.
+    \item Examples of generated paraphrases for an utterance.
+\end{itemize}
+\vspace{6mm}
+
+
+% --------------------------------------------------------
+\subsection{Identification of failure cases as a benefit of the interpretability}
+\label{appendix_interpretability}
+
+% --------------------------------------------------------
+\begin{figure}[t!]
+%\captionsetup{font=small}
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/Interpretability_CoT3D.pdf}
+\caption{Identification of failure cases as a benefit of the interpretability. In this example, there are two anchors mentioned in the description, desk and monitor, and the target is the chair. The correct chair should be number two, however, the model predicts number four. By visualizing the attention maps, on the left, we can identify the main cause of the wrong prediction, whereas, the first anchor localize a wrong desk (desk \#3). Therefore, the rest of the chain, i.e., the monitor and the chair are localized wrongly.}
+%\vspace{-7mm}
+\label{fig_Interpretability_CoT3D}
+\end{figure}
+% --------------------------------------------------------
+
+To demonstrate our interpretability abilities, we visualize attention maps as shown in Figure \ref{fig_Interpretability_CoT3D}.
+In Figure \ref{fig_Interpretability_CoT3D}, the input description is ``the chair to the far left hand side of the taller desk with the computer monitor on it.''
+Accordingly, there are two anchors mentioned in the description, i.e., desk and monitor, and the target is the chair. The correct chair should be number two, however, the model predicts number four. 
+By visualizing the attention maps, on the left part of Figure \ref{fig_Interpretability_CoT3D}, we can identify the main cause of the wrong prediction, whereas, the first anchor localize a wrong desk (desk \#3) instead of desk \#2.
+Therefore, the rest of the chain, i.e., the monitor and the chair are localized wrongly.
+This example also shows the ambiguity in Nr3D, where it is hard to say which desk is the taller, desk \#2 or desk \#3.
+
+
+% --------------------------------------------------------
+\subsection{Broader Impact and Ethical Considerations}
+\label{appendix_extended_social_impact}
+
+3D visual grounding holds profound implications across diverse domains and applications, spanning from integrating outdoor systems, e.g., autonomous driving and indoor navigation systems.
+
+\noindent \textbf{Outdoor navigation systems:}
+3D visual grounding empowers the agents to execute a broad spectrum of tasks, facilitating assistive systems catering to the needs of elderly individuals and those with disabilities—such as the visually impaired. 
+For instance, in the context of visually impaired individuals, the technology's ability to ground objects within their 3D environment from language descriptions is pivotal in navigation tasks such as determining the nearest exit or chair.
+
+\noindent \textbf{Autonomous driving:}
+In the realm of autonomous driving, a 3D visual grounding system takes on a critical role in translating navigational instructions into actionable responses within the dynamic visual landscape. 
+This technology enables seamless communication between the language input, such as navigation commands, and the 3D world the autonomous vehicle operates in. 
+For instance, when given a directive like "merge into the right lane at the upcoming intersection where the three pedestrians are walking," the 3D visual grounding system interprets this command by analyzing the spatial layout, recognizing lanes and pedestrians, and identifying the appropriate merging point. By bridging the gap between language instructions and the complex visual cues inherent in driving scenarios, this system enhances the vehicle's ability to accurately interpret and execute instructions, contributing to safer and more efficient autonomous driving experiences.
+
+\noindent \textbf{Data-efficiency importance for autonomous driving:}
+Introducing a data-efficient solution for the 3D visual grounding task holds immense importance in the context of autonomous driving, particularly considering the challenges associated with manually labeling vast amounts of 3D point cloud data from lidar sensors. 
+The conventional approach of manually annotating such data is labor-intensive and economically burdensome. 
+By proposing a data-efficient solution, our system addresses a critical bottleneck in developing autonomous driving technology. 
+This allows the autonomous vehicle to learn and generalize from minimal labeled data, significantly reducing the dependency on large, expensive datasets.
+The capacity to make accurate 3D visual groundings with limited labeled information not only streamlines the training process but also makes deploying autonomous vehicles more scalable and cost-effective. 
+
+\noindent \textbf{Federated learning for indoor navigation systems:}
+Aligned with this imperative, the inherent data-efficient nature of our approach positions it as an ideal candidate for federated learning schemes, which is perfectly aligned with the indoor setup when privacy is required, e.g., the robot is operating in a personalized environment such as the client home.
+This becomes particularly relevant when a robot is introduced into a novel indoor environment and necessitates rapid learning from minimal interactions with its new user without sending the private data of the new environment to the server; thus, learning from limited data is essential.
+
+% --------------------------------------------------------
+\subsection{GPT-generated path influence on the overall grounding accuracy}
+\label{appendix_GPT-generated_path}
+
+The GPT-generated path is only used as a teacher label for training a simple MLP that predicts the path during the inference time.
+Therefore, GPT is not involved in the system during inference, as we train a simple MLP layer, i.e., the Pathway-Head in Figure \ref{fig_cot_arch}, to predict the logical order.
+For instance, when the system is deployed on a robot, it will be efficient as our simple MLP Pathway-Head is utilized to generate a reasonable order based on the input description.
+
+Accordingly, GPT could be seen as a design choice to obviate the need for human annotations during training.
+
+In Table \ref{tab_GPTgenerated_path_influence}, the Pseudo and GT labels are for the anchors' localization, not the path.
+For the path, we always use our MLP-predicted path.
+However, the accuracy will not be affected if we replace it with the GPT-generated path.
+As shown in Table \ref{tab_GPTgenerated_path_influence}, we achieve 64.4\% and 64.5\% using our predicted and GPT-generated paths, respectively.
+This is an intuitive result, as when we assess the performance of the Pathway Head separately, we get 98\% accuracy w.r.t the GPT-generated path.
+Therefore, replacing the Pathway Head generated path by the GPT ones is expected not to impact the final performance.
+
+%-------------------------------------------
+\begin{table}
+\centering
+\caption{Ablation study about the GPT-generated path influence on the overall grounding accuracy.}
+\begin{tabular}{cc}
+        \toprule[1.5pt]
+        \textbf{Method} & \textbf{Grounding Accuracy} \\
+        \cmidrule(r){1-2}
+        MVT & 55.1 \\
+        MVT+ScanEnts & 59.3 \\
+        MVT+PhraseRefer & 59.0 \\
+        MVT+CoT(Pseudo labels) & 60.4 \\
+        MVT+CoT(GT labels) & 64.4 \\
+        MVT+CoT(GT labels+GPT Path) & 64.5 \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\label{tab_GPTgenerated_path_influence}
+\end{table}
+%-------------------------------------------
+
+% --------------------------------------------------------
+\subsection{Justification for CoT performance when integration into Vil3DRef}
+\label{appendix_Justification_vil}
+For ViL, our observations, in Figure \ref{fig_data_eff}, reveal a substantial performance enhancement in the demanding data-efficient scenario, accompanied by marginal improvements when employing the entire dataset. 
+These modest gains are likely due to nearing the peak attainable accuracy of the dataset, influenced by the limitations posed by annotation errors.
+
+To substantiate our hypothesis, we have conducted three experiments:
+\begin{itemize}
+    \item Replacing our pseudo labels with GT: We replaced our pseudo labels with ground truth annotations \citep{yuan2022toward, abdelreheem2022scanents3d}, which is intuitively guaranteed to enhance performance. 
+    As shown in Table \ref{tab:benchmark_nr3d}, the substitution of our pseudo labels with ground truth annotations yielded performance improvements across the three alternative baselines; LAR \citep{bakr2022look}, SAT \citep{yang2021sat}, MVT \citep{huang2022multi}, with the exception of ViL.
+    \item Deactivation of ViL's Knowledge Distillation Loss (Teacher Loss): We disabled the knowledge distillation loss proposed by ViL. This maneuver, as shown in Table \ref{tab_vil_justification}, while significantly impairing ViL's performance, exhibited negligible influence on ours (ViL+CoT).
+    \item Deactivation of P++ pre-training: Consequently, the deactivation of the teacher loss alongside P++ pre-training had a pronounced detrimental effect on ViL's performance, yielding a referring accuracy of 59.4\%. 
+    In contrast, our own performance was only slightly affected, maintaining a referring accuracy of 70.3\%. 
+    These findings collectively serve to reinforce our hypothesis that our performance within the ViL architecture is effectively limited by an upper bound.
+\end{itemize}
+
+%-------------------------------------------
+\begin{table}
+%\captionsetup{font=small}
+\centering
+\caption{Comparison between causal and non-causal masking in our CoT transformer decoder-based, based on MVT \citep{huang2022multi}.}
+\begin{tabular}{cccc}
+        \toprule[1.5pt]
+        \textbf{+Pre-trained P++} & \textbf{+Teacher Loss} & \textbf{ViL} & \textbf{Ours} \\
+        \cmidrule(r){1-2}
+        \cmidrule(r){3-3}
+        \cmidrule(r){4-4}
+        \xmark & \xmark & 59.4 & \textbf{70.3} \\
+        \cmark & \xmark & 69.5 & \textbf{72.7} \\
+        \cmark & \cmark & 72.8 & \textbf{73.6} \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+\label{tab_vil_justification}
+\end{table}
+%-------------------------------------------
+
+% --------------------------------------------------------
+\subsection{Do we use additional supervision?}
+
+Our main thesis is to show that the design of our CoT framework can be accomplished with notable efficiency, obviating the need for human intervention. Furthermore, we emphasize its demonstrable capacity for substantial enhancement of existing methodologies, particularly within the context of data efficiency, as shown in Figure \ref{fig_data_eff}. To this end, we have devised an efficient pseudo-label generator to provide inexpensive guidance to improve the learning efficiency of most existing methods, as we demonstrated in our experiments in Table \ref{tab:benchmark_nr3d} and Figure \ref{fig_data_eff}. 
+These pseudo labels are not required at test time.
+Proper design of such an approach is pivotal in attaining a significant performance gain while circumventing the need for intensive human annotations.
+A pertinent example can be drawn from the labeling procedure employed in PhraseRefer \citep{yuan2022toward}, which demanded a cumulative workforce commitment of 3664 hours, roughly equivalent to an extensive five-month timespan.
+Hence, our pseudo-label generation module is delineated into three core components: the anchor parser, the anchor localization module, and the pathway prediction module. Notably, it is essential to highlight that solely the pathway prediction component leverages a pre-trained model to generate a ground truth but is not involved during training or at inference.
+More specifically, the anchor parser and localization modules do not contain any learnable parameters nor pre-trained models, as they use rule-based heuristics where only two pieces of information are needed: 1- objects' class labels. 2 - objects' position. 
+These two sources of supervision are utilized by all referring architectures, where object class labels are used as ground truth for the classification head, and object positions are incorporated in the model's pipeline either by concatenation with the objects' point clouds or input to the multi-modal transformer as a positional encoding. Accordingly, both modules do not require any additional supervision. 
+Solely, the anchor pathway prediction module requires a pre-trained model to generate the ground truth path, but it is not involved during training or at inference.
+The trajectory of reasoning (referred to as the Chain-of-Thoughts) produced by the pathway prediction module is indispensable within our framework. 
+The omission of the anchor chain would inevitably result in the degradation of our framework, resembling the parallel scenario wherein anchors and the target object are independently detected. Conversely, our framework adopts a sequential, auto-regressive approach, wherein each anchor is predicted consecutively. To show the effectiveness of our proposed method, we compare it against the parallel approach, as shown in Table \ref{Table_ablation_for_cot_components}.
+In summary, solely the pathway prediction component leverages a pre-trained model to generate a ground truth but is not involved during training or at inference. Additionally, with zero human efforts, we achieve a significant performance gain on four distinct baselines, as shown in Figure \ref{fig_data_eff}.
+
+% --------------------------------------------------------
+\subsection{Causal vs. Non-Causal CoT}
+\label{appendix_Causal_NonCausal_CoT}
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure    %%%%%%%%%%%%%%%%%%
+\begin{figure*}
+%\vspace{-6mm}
+%\captionsetup{font=scriptsize}
+\centering
+\includegraphics[width=0.99\linewidth]{Figures/Figures_supp/CoT3D_causal_vs_noncausal.pdf}
+%\vspace{-3mm}
+\caption{Comparison between two variants of our Chain-of-Thoughts framework.
+On the left is the causal version, where we first localize the anchors in parallel (shown in green), then feed them to the masked transformer decoder to predict the refined anchors' location in auto-regressive manner. In contrast, on the right is the non-causal variant of our CoT framework, where we feed the multi-modal features $F$ directly to the transformer decoder and remove the causal constrains, i.e., all the anchors can attend to each others. In both variants, the decoder outputs the anchors in auto-regressive way and respects the GT logical path for the chain of anchors.}
+\label{fig_causal_vs_noncausal}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure    %%%%%%%%%%%%%%%%%%
+%\tabcolsep=0.1cm
+\begin{table}
+%\captionsetup{font=small}
+\centering
+\caption{Comparison between causal and non-causal masking in our CoT transformer decoder-based, based on MVT \citep{huang2022multi}.}
+    \scalebox{0.99}{
+    \begin{tabular}{ccc}
+        \toprule[1.5pt]
+        \textbf{Masking Type} & \textbf{Nr3D ↑} & \textbf{Sr3D ↑} \\
+        \cmidrule(r){1-1}
+        \cmidrule(r){2-3}
+        \textbf{Causal} & 60.4 & 73.2 \\
+        \textbf{Non-Causal} & \textbf{60.9} & 73.2 \\
+        \bottomrule[1.5pt]
+    \end{tabular}
+    }
+\label{tab_causal_non_causal}
+\end{table}
+% --------------------------------------------
+In contrast to the conventional teacher-forcing technique, our approach employs a parallel referring head to predict the initial, unordered locations of anchors, depicted in green within Figure \ref{fig_cot_arch}. 
+This implementation facilitates an investigation into the implications of causal masking, by removing the causality constraints. 
+Essentially, this entails permitting the decoder to encompass a broader scope by attending to all anchors concurrently, irrespective of their order. 
+However, our CoT decoder still adhere to the correct sequential order for prediction of both anchors and the target object auto-regressively.
+Figure \ref{fig_causal_vs_noncausal}, illustrates the modifications made to the architecture to accommodate the random masking approach.
+Empirical results, as shown in Table \ref{tab_causal_non_causal}, indicate a marginal enhancement in accuracy on the Nr3D dataset—almost 0.5\%—upon relaxation of the causality constraints. However, no discernible improvements materialize on the Sr3D dataset.
+
+% --------------------------------------------------------
+\subsection{Nr3D Ambiguity}
+\label{appendix_nr3d_ambiguity}
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure    %%%%%%%%%%%%%%%%%%
+\begin{figure*}
+%\vspace{-6mm}
+%\captionsetup{font=scriptsize}
+\centering
+\includegraphics[width=0.99\linewidth]{Figures/Figures_supp/view_dependent_ambiguity.pdf}
+%\vspace{-3mm}
+\caption{A visual representation of Nr3D ambiguity view-dependent issue, where predictions hinge on the speaker's viewpoint. For instance, these four samples show that given an input description two options could be considered true based on the speaker's viewpoint. The green and orange arrows represent two different views. The color of the box indicates its corresponding view-point.}
+\label{fig_nr3d_ambiguity}
+\end{figure*}
+%%%%%%%%%%%%%%%%%%%%%%%%    Figure    %%%%%%%%%%%%%%%%%%
+The challenges posed by Nr3D are not solely attributed to its free-form nature; rather, it is compounded by its susceptibility to ambiguity. 
+A visual representation of this issue is provided in Figure \ref{fig_nr3d_ambiguity} showcasing instances of ambiguity where even human annotators encounter difficulties in accurately localizing objects due to viewpoint-dependent considerations. 
+In such cases, correct predictions hinge on the speaker's viewpoint, an aspect that often remains undisclosed.
+
+To fortify this standpoint, we conducted an in-depth analysis of the consistency between two recently released manually annotated datasets \citep{yuan2022toward, abdelreheem2022scanents3d}. Surprisingly, the matching accuracy between these annotations stands at a mere 80\%, signifying the extent of inherent data ambiguity and the ensuing challenges. 
+In essence, divergent annotations from distinct human annotators due to ambiguity impedes the potential for further enhancements.
+
+% --------------------------------------------------------
+\subsection{Anchor Localization Accuracy}
+\label{appendix_anchor_loc_acc}
+For each scene, we have the objects' proposals $\mathcal{P} = (\mathcal{B}, \mathcal{C})$, 
+where $\mathcal{B} = \{\mathbf{b_i}\}_{i=1}^{L}$ bounding boxes $\mathbf{b}_i \in \mathbb{R}^6$,
+$\mathcal{C} = { c_i}_{i=1}^{L}$ is the class label and L is the number of objects in the scene.
+Given the extracted objects' names, $\widetilde{\mathcal{O^T}} = \{o_i\}_{i=1}^{K}$, using our syntactic parser, the anchors localization module automatically assign each object's name to the corresponding box, $\mathcal{\widetilde{A}}  = (\mathcal{\widetilde{B}}, \widetilde{\mathcal{O^T}})$, where $\mathcal{\widetilde{B}} \subseteq \mathcal{B}$ and $\mathcal{\widetilde{A}} \subseteq \mathcal{P}$.
+To assess the assignation quality, we ask the annotators to assign a box for each extracted object's name $\widetilde{\mathcal{O^T}}$ from the input utterance, creating the GT set $\mathcal{A}  = (\mathcal{\bar{B}}, \widetilde{\mathcal{O^T}})$, where $\mathcal{\bar{B}} \subseteq \mathcal{B}$ and $\mathcal{A} \subseteq \mathcal{P}$.
+Then, we measure the precision between the two sets, i.e., $\mathcal{\widetilde{A}}$ and $\mathcal{A}$.
+
+% --------------------------------------------------------
+\subsection{Related Work}
+\label{appendix_related_work}
+
+Our novel architecture draws success from several areas, including 3D visual grounding, chain-of-thought reasoning, and scene graph parsers.
+
+% --------------------------------------------------------
+\noindent \textbf{3D visual grounding.}
+Existing work can be grouped into one- and two-stage approaches. Single-stage methods depend on detecting objects directly by fusing text features with point-cloud level visual representations and enable grounding multiple objects from a single sentence \citep{mdetr, luo20223d}. 
+Two-stage methods dissociate the object detection task from selecting a target among detected objects \citep{achlioptas2020referit3d, chen2020scanrefer}, by detecting objects during the first stage and then classifying the resulting objects. 
+To benchmark the 3D visual grounding task, ReferIt3D \citep{achlioptas2020referit3d} and ScanRefer \citep{chen2020scanrefer} were introduced by collecting textual annotations from the ScanNet dataset \citep{dai2017scannet}. 
+Early work depended on graph-based approaches \citep{veličković2018graph, wang2019dynamic} to infer spatial relations. The object graph is constructed by connecting each object with its top nearest neighbors \citep{abdelreheem20223dreftransformer,feng2021free, 
+huang2021text, yuan2021instancerefer} based on Euclidean distances. Taking advantage of the Transformer’s attention mechanism, which is naturally suitable for multi-modal features fusion, \citep{he2021transrefer3d, zhao20213dvg} achieved remarkable performance by applying self-attention and cross-attention on input features. 
+While methods such as BEAUTY-DETR \citep{jain2022bottom} and \citep{luo20223d} adopt a single-stage approach, most works follow the two-stage approach with pre-detected object proposals. 
+LAR \citep{bakr2022look}, and SAT \citep{yang2021sat} use a multi-modal approach by introducing 2D images of the scenes to aid object grounding. Conversely, MVT \citep{huang2022multi} focuses on 3D point clouds by extracting multiple views of the objects and aggregating them to improve view robustness to make the transformer view-invariant. 
+LanguageRefer \citep{roh2022languagerefer} converts the visual grounding task into a language-based object prediction problem instead of the cross-modal approach. 
+Similarly, NS3D \citep{hsu2023ns3d} focuses on language features by translating language into hierarchical programs. 
+EDA \citep{wu2022eda} explicitly separates textual attributes and performs dense alignment between language and point cloud objects. 
+ViL3DRel \citep{chen2022language} includes a spatial self-attention layer that considers the relative distances and orientations between objects in 3D point clouds.
+
+% --------------------------------------------------------
+\noindent \textbf{Chain of thoughts.}
+In machine learning, a chain of thought refers to the series of intermediate steps that a model takes to arrive at its final decision or prediction.
+The chain-of-thought concept has been used in many different machine learning applications, including natural language processing \citep{wei2022chain, chowdhery2022palm, lyu2023faithful, wang2022self, zhang2023multimodal, madaan2022text}, and robotics \citep{jia2023chain, yang2022chain}. 
+In natural language processing, chain-of-thought prompting adds intermediate reasoning steps to the output of LLMs, which leads to increased reasoning capabilities \citep{zhao_survey_2023, wei2022chain}. 
+In robotics, understanding the chain of thought can help to identify which sensory inputs were used to arrive at a particular action or decision.
+Moreover, \citep{jia2023chain} divides the primary goal into subgoals to tackle the complex sequential decision-making problems using the Hierarchical RL (HRL) \citep{hutsebaut2022hierarchical}.
+
+% --------------------------------------------------------
+\noindent \textbf{Scene graph parser.}
+Extracting scene graphs is a fundamental task in NLP and multimodal vision. This problem depends on extracting directed graphs, where nodes are objects and edges represent relationships between objects \citep{lou2022unsupervised, xu2017scene, haowu, yongjiang, yang2018graph,schuster-etal-2015-generating}. 
+Scene graphs have been used in scene understanding to enhance image captioning and predicting pairwise relations between detected objects \citep{li2017scene, dai2017detecting, li2017vipcnn}. 
+Other works have leveraged graphs to enhance text-to-image generation models by learning the relations between the objects in the sentence \citep{feng2023trainingfree, johnson2018image}. 
+Existing off-the-shelf tools \citep{schuster-etal-2015-generating} can parse the language description grammatically into a scene graph with a dependency tree \citep{wu2022eda}. 
+% --------------------------------------------------------
+
+% --------------------------------------------------------
+\subsection{Explore data-augmentation effect in the limited data scenario (10\%)}
+\label{appendix_Explore_data_augmentation}
+
+\begin{table}
+\centering
+\caption{Ablation study for different components of our {\papernameAbbrev} framework, such as different augmentation techniques and distractor loss. All the experiments are conducted on 10\% of Nr3D dataset.} 
+\scalebox{0.85}{
+\begin{tabular}{ccccccc}
+    \toprule
+    \- &  \makecell{+Scene\\ Aug.}  &  \makecell{+Point\\ Aug.} & \makecell{+Lang.\\ Aug.}  & \makecell{+Ref.\\ Aug.} & \- & Ref. Acc. \\
+    \cmidrule(r){2-5}
+    \cmidrule(r){6-7}
+     (a) &  -      &  -      &  -   &  -   & \- & 27.6 \\ 
+     (b) &  -      &  -      &  \cmark   &  -   & \- & 37.5 \\ 
+     (c) &  \cmark       &  -      &  -  &  -    & \- & 34.5 \\
+     (d) &  -      &  \cmark      &  -   &  -   & \- & 34.0 \\ 
+     (e) &  -      &  \cmark      &  \cmark   &  -   & \- & 35.5 \\ 
+     (f) &  -      &  -      &  \cmark   &  \cmark   & \- & \textbf{37.5} \\
+    \bottomrule
+  \end{tabular}
+}
+\label{appendix_table_data_aug_10}
+\end{table}
+% -----------------------------------------------------------------
+\noindent \textbf{Visual-based Augmentation.}
+Two visual augmentations are explored at the scene and point cloud levels. 
+At the scene level, we randomly shuffle every object presented in the scene with another object of the same class from one of the ScanNet scenes. 
+At the point cloud level, we apply a small random isotropic Gaussian noise, rotate the points along each axis, and randomly flip the $x$ and $y$ axes.
+In addition, we apply a small random RGB translation over color features. 
+These visual augmentations are used to enhance the robustness and generalization capabilities of our architecture.
+
+\noindent \textbf{Language-based Augmentation.}
+We utilize a T5 \citep{raffel2019t5} transformer model fine-tuned on paraphrase datasets to augment the input utterances. 
+To ensure the quality of the generated paraphrases, we use the Parrot library \citep{prithivida2021parrot} to filter them based on a fluency and adequacy score. 
+This aims to enhance the naturalness and diversity of the generated utterances.
+We showcase an example of an input utterance alongside its corresponding generated paraphrases in Table \ref{tab:paraphrases}. 
+
+\noindent \textbf{Referring-based Augmentation.}
+The maximum number of objects in the sentence $M$ is 8 and 3 for Nr3D and Sr3D, respectively.
+However, in 52\% and 98.5\% of Nr3D and Sr3D, respectively, two objects only are mentioned in the utterance; the target and one anchor.
+This motivates us to apply a simple referring-based augmentation by swapping the target and the anchor while keeping the same semantic information.
+For instance, if the relation between two objects is ``near to'', it should be the same after swapping.
+However, if it was ``on the right of'', it should be swapped to be ``on the left of''.
+
+% --------------------------------------------------------
+
+\noindent \textbf{Results.}
+We have explored several augmentation techniques to enhance our architecture's robustness and generalization capabilities.
+However, we report the results on only 10\% of the data as we notice no gain is achieved when leverage more training data, e.g., 40\%.
+As shown in Table \ref{appendix_table_data_aug_10}, the language and referring augmentations (rows b and f) increase the performance slightly.
+However, the two visual-based augmentations (rows c, d, and e) do not give any performance gain.
+% --------------------------------------------------------
+
+% --------------------------------------------------------
+\subsection{Pseudo Labels Human-Evaluation}
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/AMT_obj_order_UI.png}
+\caption{Our User-Interface (UI), designed on Amazon-Mechanical-Turk (AMT) \citep{amt}. We detailed the instructions on the left, and the task is mentioned on the right. The annotators are asked to extract the mentioned objects in the input sentence in chronological order, then assign each object a logical order to reach the end goal, the target. We demonstrated the instructions on the left for each sample for better performance.}
+\vspace{4mm}
+\label{fig_AMT_obj_order_UI}
+\end{figure*}
+% --------------------------------------------------------
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/AMT_obj_relation_UI.png}
+\caption{Our User-Interface (UI), designed on Amazon-Mechanical-Turk (AMT) \citep{amt}. We detailed the instructions on the left, and the task is mentioned on the right. The annotators are asked to chronologically extract the mentioned objects in the input sentence and their subject and relation in triplet format. We demonstrated the instructions on the left for each sample for better performance.}
+\label{fig_AMT_obj_relation_UI}
+\end{figure*}
+% --------------------------------------------------------
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/website_allscenes.png}
+\caption{The intro screen of our web-based User-Interface (UI) for anchors localization task. On the intro page, we list the available scenes and the corresponding number of sentences for each scene in parentheses. More specifically, for each scene, we demonstrate the number of annotated sentences divided by the total number of sentences in that scene.}
+\label{fig_website_allscenes}
+\end{figure*}
+% --------------------------------------------------------
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/website_scene_w_sentences_done_inprogress.png}
+\caption{Our web-based User-Interface (UI) for anchors localization tasks. After clicking on a particular scene from the intro page, the 3D interactive window will be displayed at the top, and corresponding sentences will be displayed below it.
+To facilitate the annotators' task, we mark the annotated sentences in green and the remaining in yellow.}
+\vspace{8mm}
+\label{fig_website_scene_w_sentences_done_inprogress}
+\end{figure*}
+% --------------------------------------------------------
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.92\textwidth]{Figures/Figures_supp/website_sentence_w_uniqueobj.png}
+\caption{Our web-based User-Interface (UI) for anchors localization tasks. After clicking on a specific sentence, the 3D interactive window will be displayed at the top, and the corresponding sentence will be displayed below it.
+To facilitate the annotators' task, we mark the anchors' words in a clickable yellow box. Once a box is clicked, we show the corresponding boxes with the same class label as the clicked word. Finally, the annotator's task is to pick the correct box out of the colored boxes. In this example, we have a unique box for the word window; therefore, only one box is shown.}
+\label{fig_website_sentence_w_uniqueobj}
+\end{figure*}
+% --------------------------------------------------------
+% --------------------------------------------------------
+\begin{figure*}[t!]
+\centering
+\includegraphics[width=0.99\textwidth]{Figures/Figures_supp/website_hard_example.png}
+\caption{Our web-based User-Interface (UI) for anchors localization tasks. After clicking on a particular sentence, the 3D interactive window will be displayed at the top, and the corresponding sentence will be displayed below it.
+To facilitate the annotators' task, we mark the anchors' words in a clickable yellow box. Once a box is clicked, we show the corresponding boxes with the same class label as the clicked word. Finally, the annotator's task is to pick the correct box out of the colored boxes. In this example, we have nine boxes for the word chair. The selected box by the annotator is marked in green, while the other distractors are marked in red.}
+\label{fig_website_hard_example}
+\end{figure*}
+% --------------------------------------------------------
+
+The accuracy of the pseudo-labels plays a vital role in the overall performance. 
+To evaluate pseudo-labels, we manually collect ground-truth labels for:
+\begin{enumerate}
+  \item The predicted orderings of the anchors in the utterance.
+    Figures \ref{fig_AMT_obj_order_UI} and \ref{fig_AMT_obj_relation_UI} depict our User-Interface (UI), designed on Amazon-Mechanical-Turk (AMT) \citep{amt} for objects' order and relations collecting. We detailed the instructions on the left, and the task is mentioned on the right. The annotators are asked to extract the mentioned objects in the input sentence in chronological order and their spatial relationship, then assign each object a logical order to reach the end goal, the target. We demonstrated the instructions on the left for each sample for better performance.
+    To evaluate orderings predicted by in-context-learning, we use the normalized Levenshtein edit distance between two sequences, where a distance of 1 means that every object in the sequence is incorrect. We achieve an average distance of 0.18 between predicted and ground-truth orderings.
+  \item The final localization of the anchors as predicted by the geometry module, as demonstrated in Figures \ref{fig_website_allscenes}, \ref{fig_website_scene_w_sentences_done_inprogress}, \ref{fig_website_sentence_w_uniqueobj}, and \ref{fig_website_hard_example}.
+    To evaluate the geometry module’s accuracy, we consider anchor-wise localization accuracy. Therefore, we design a web-based interface to collect ground-truth data for 10\% of Nr3D dataset.
+    At the entry screen, Depicted in Figure \ref{fig_website_allscenes}, we list the available scenes and the corresponding number of sentences for each scene in parentheses. More specifically, for each scene, we demonstrate the number of annotated sentences divided by the total number of sentences in that scene. To facilitate the annotators' task, we mark the annotated sentences in green and the remaining in yellow.
+    Afterwards, when the annotator clicks on a particular scene, the 3D interactive window will be displayed at the top, and corresponding sentences will be displayed below it, as shown in Figure \ref{fig_website_scene_w_sentences_done_inprogress}.
+    We mark the anchors' words in a clickable yellow box. Once a box is clicked, we show the corresponding boxes with the same class label as the clicked word. Finally, the annotator's task is to pick the correct box out of the colored boxes. 
+    For instance in Figure \ref{fig_website_sentence_w_uniqueobj}, we have a unique box for the word window; therefore, only one box is shown.
+    In contrast, Figure \ref{fig_website_hard_example} shows more challenging sample, where we have nine boxes for the word chair. The selected box by the annotator is marked in green, while the other distractors are marked in red.
+
+\end{enumerate}
+
+% -------------------------------------------------
+
+
+% -------------------------------------------------
+\subsection{In-context prompt used for object order extraction}
+\label{appendix_In_context_prompt_used_for_object_order_extraction}
+
+We provide below the abridged prompt we use to extract the logical order of objects to follow to find the target object, following a given input utterance. We find empirically that 1) providing a large number of examples, 2) mentioning reasoning explanations, 3) asking to first provide the list of mentioned objects, and 4) repeating instructions at the end of the prompt increases the quality of the predicted object orderings produced by GPT3.5.
+
+\begin{table}[h]
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{@{}ll@{}}
+        \toprule
+Given a set of instructions to locate a target object in a room, your task is to extract the order of objects mentioned in each instruction. \\
+1. First list all the unordered mentioned objects in the sentence using the format: "\textbf{L:} [object\_1, object\_2, object\_3]". \\
+2. Then order the objects using the format "\textbf{R:} [object order]" and mark the target object with "t". Only include the names of the objects. \\
+Additionally, please exclude any additional information or descriptors such as color or size adjectives. The target is the subject of the sentence. \\ \\
+\textbf{Q:} "The pillow on the couch that is on the right hand side of the room, when you are facing the TV, and is closest to the TV" \\
+\textbf{L:} [TV, couch, pillow] \\
+\textbf{R:} [1: TV, 2: couch, t: pillow] \\
+(explanation: we first need to find the TV to orient ourselves,\\
+then find the couch on the right hand-side of the room, and then the pillow on the couch.
+Do not mention the explanations in the future.) \\
+\textbf{Q:} "The pillow on the bed that is on the far end of the room and is at the rear and right hand side of the bed" \\
+\textbf{L:} [pillow, bed] \\
+\textbf{R:} [1: bed, t: pillow] \\
+\textbf{Q:} "Standing at the end of the bed looking towards the pillows, choose the pillow that is in the front, smaller and more to the right." \\ 
+\textbf{L:} [bed, pillow] \\
+\textbf{R:} [1: bed, t: pillow] \\
+\textbf{Q:} "There are two groups of kitchen cabinets; three along the wall with the stove, and two on the opposite wall.\\
+Looking at the wall opposite the stove, the one with the refrigerator, please select the kitchen cabinet closest to the refrigerator." \\
+\textbf{L:} [kitchen cabinet, wall, stove, refrigerator] \\
+\textbf{[...]} \\ \\
+Do not mention explanations. Only include objects in the list.\\
+Do not add any text beyond the reply. The target is the subject of the sentence.\\
+Mention all relevant objects in the reply. Don't use color or size adjectives.\\
+Please exclude any color adjectives in your response. Avoid using any descriptive words related to color in your response. \\
+\textbf{Query:} \\
+        \bottomrule
+        \end{tabular}%
+}
+    \end{table}
+
+% -------------------------------------------------
+\subsection{Example of generated paraphrases}
+
+In Table \ref{tab:paraphrases} below, we provide an example of an input utterance sampled from Nr3D and its associated generated paraphrases.
+
+\begin{table}[h]
+    \vspace{0.5em}
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \caption{Example of an input utterance from Nr3D and its associated paraphrases.}
+    \vspace{0em}
+    \label{tab:paraphrases}
+    \resizebox{.95\textwidth}{!}{%
+        \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{Input Utterance} & When entering the room, look on the nightstand to the left of the bed headboard, you will find some books. \\ \midrule
+        \textbf{Paraphrase 1}    & You'll find a few books on a nightstand just to the left of the headboard.                                 \\
+        \textbf{Paraphrase 2}    & You'll find a few books on a nightstand just to the left of the bed headboard.                             \\
+        \textbf{Paraphrase 3}    & Look at the nightstand to the left of the headboard of the bed, and you will find some books.              \\
+        \textbf{Paraphrase 4}    & When you enter the room, look at the nightstand to the left of the headboard of the bed.                   \\ \bottomrule
+        \end{tabular}
+    }
+    \vspace{-1em}
+\end{table}

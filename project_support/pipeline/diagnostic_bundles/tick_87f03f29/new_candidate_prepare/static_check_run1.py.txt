@@ -1,0 +1,226 @@
+"""Execute actual production AST with a small transparent list carrier, never Torch."""
+import ast
+from copy import deepcopy
+from fractions import Fraction as Q
+from hashlib import sha256
+from itertools import product
+import json
+import math
+from pathlib import Path
+from types import SimpleNamespace
+
+HERE=Path(__file__).resolve().parent
+ROOT=HERE.parents[3]
+MODEL='model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_elc'
+DEST=HERE/'staged_repository/framework/model/Quard_model'/MODEL
+SOURCE=ROOT/'Cluster/framework/model/Quard_model'/MODEL.removesuffix('_elc')
+CHECKS=[]
+
+def check(name,condition):
+    if not condition:raise AssertionError(name)
+    CHECKS.append(name)
+
+def size(shape):return math.prod(shape)
+
+class T:
+    def __init__(self,data,shape=None):
+        self.data=list(data);self.shape=tuple(shape if shape is not None else (len(self.data),))
+        assert len(self.data)==size(self.shape),(len(self.data),self.shape)
+        self.ndim=len(self.shape);self.device='list';self.dtype='rational_or_float'
+    def reshape(self,*shape):
+        if len(shape)==1 and isinstance(shape[0],(tuple,list)):shape=tuple(shape[0])
+        shape=list(shape)
+        if -1 in shape:shape[shape.index(-1)]=len(self.data)//math.prod(k for k in shape if k!=-1)
+        return T(self.data,shape)
+    def new_zeros(self,shape):return T([Q(0)]*size(shape),shape)
+    def new_tensor(self,values):return T(values)
+    def detach(self):return self
+    def cpu(self):return self
+    def tolist(self):return list(self.data)
+    def __getitem__(self,keys):
+        if not isinstance(keys,tuple):keys=(keys,)
+        keys=keys+(slice(None),)*(self.ndim-len(keys));axes=[];out=[]
+        for key,width in zip(keys,self.shape):
+            if isinstance(key,int):axes.append([key%width])
+            else:
+                axis=list(range(width))[key];axes.append(axis);out.append(len(axis))
+        values=[]
+        for coordinate in product(*axes):
+            offset=0
+            for v,width in zip(coordinate,self.shape):offset=offset*width+v
+            values.append(self.data[offset])
+        return T(values,out)
+    def index_select(self,dim,index):
+        assert dim==0
+        block=size(self.shape[1:]);values=[]
+        for i in index.data:values.extend(self.data[int(i)*block:(int(i)+1)*block])
+        return T(values,(len(index.data),)+self.shape[1:])
+    def index_add(self,dim,index,source):
+        assert dim==0
+        result=list(self.data);block=size(self.shape[1:])
+        for row,i in enumerate(index.data):
+            for col in range(block):result[int(i)*block+col]+=source.data[row*block+col]
+        return T(result,self.shape)
+    def index_copy(self,dim,index,source):
+        assert dim==0 and len(set(index.data))==len(index.data)
+        result=list(self.data);block=size(self.shape[1:])
+        for row,i in enumerate(index.data):result[int(i)*block:(int(i)+1)*block]=source.data[row*block:(row+1)*block]
+        return T(result,self.shape)
+    def unsqueeze(self,dim):
+        dim=dim if dim>=0 else dim+self.ndim+1
+        shape=list(self.shape);shape.insert(dim,1);return T(self.data,shape)
+    def cumsum(self,dim):
+        assert self.ndim==3 and dim==1
+        groups,degree,c=self.shape;result=[]
+        for g in range(groups):
+            total=[Q(0)]*c
+            for d in range(degree):
+                total=[a+b for a,b in zip(total,self.data[(g*degree+d)*c:(g*degree+d+1)*c])]
+                result.extend(total)
+        return T(result,self.shape)
+    def flip(self,dims):
+        assert self.ndim==3 and tuple(dims)==(1,)
+        g,d,c=self.shape
+        return T([self.data[(a*d+b)*c+k] for a in range(g) for b in reversed(range(d)) for k in range(c)],self.shape)
+    def __add__(self,other):
+        assert self.shape==other.shape
+        return T([a+b for a,b in zip(self.data,other.data)],self.shape)
+    def __truediv__(self,other):
+        if self.shape==other.shape:return T([a/b for a,b in zip(self.data,other.data)],self.shape)
+        assert self.ndim==2 and other.shape==(self.shape[0],1)
+        return T([v/other.data[i//self.shape[1]] for i,v in enumerate(self.data)],self.shape)
+
+def stack(values,dim=0):
+    assert dim==0 and all(x.shape==values[0].shape for x in values)
+    return T([v for x in values for v in x.data],(len(values),)+values[0].shape)
+
+def cat(values,dim):
+    dim=dim if dim>=0 else dim+values[0].ndim
+    shape=list(values[0].shape);shape[dim]=sum(v.shape[dim] for v in values)
+    before=size(shape[:dim]);after=size(shape[dim+1:]);data=[]
+    for b in range(before):
+        for v in values:
+            width=v.shape[dim]*after;data.extend(v.data[b*width:(b+1)*width])
+    return T(data,shape)
+
+class Map:
+    def __init__(self,kind):self.kind=kind;self.calls=[]
+    def vector(self,row):
+        c=len(row)//2
+        return [(Q(2,5)*row[k]+Q(3,7)*row[c+k]+Q(k+1,11)) if self.kind=='U'
+                else (Q(1,4)*row[k]+Q(2,9)*row[c+k]-Q(k+1,13)) for k in range(c)]
+    def __call__(self,x):
+        self.calls.append(deepcopy(x));c=x.shape[-1]//2
+        return T([v for row in range(x.shape[0]) for v in self.vector(x.data[row*2*c:(row+1)*2*c])],(x.shape[0],c))
+
+def rational_activation(x):return T([v+v*v/Q(20) for v in x.data],x.shape)
+def scalar_gelu(x):return T([float(v)*0.5*(1+math.erf(float(v)/math.sqrt(2))) for v in x.data],x.shape)
+
+source=(DEST/'edge_line_graph.py').read_text(encoding='utf-8');tree=ast.parse(source)
+body=[n for n in tree.body if isinstance(n,ast.FunctionDef)]
+cls=next(n for n in tree.body if isinstance(n,ast.ClassDef))
+forward=next(n for n in cls.body if isinstance(n,ast.FunctionDef) and n.name=='forward')
+ns={'torch':SimpleNamespace(tensor=lambda data,**kw:T(data),stack=stack,cat=cat,long='long')}
+exec(compile(ast.fix_missing_locations(ast.Module(body=body+[forward],type_ignores=[])),'actual_ELC_production_AST','exec'),ns)
+
+def oracle(scene_values,scene,widths,U,R,activation):
+    points,f2m,m2c=scene
+    fine=sorted(set(points));middle=sorted({f2m[i] for i in fine});coarse=sorted({m2c[j] for j in middle})
+    edges=[((0,i),(1,f2m[i])) for i in fine]+[((1,j),(2,m2c[j])) for j in middle]
+    neighbor={e:[f for f in edges if f!=e and set(e).intersection(f)] for e in edges}
+    states={e:activation(T(U.vector(scene_values[e[0][0]][e[0][1]]+scene_values[e[1][0]][e[1][1]]))).data for e in edges}
+    components=[];unseen=set(edges)
+    while unseen:
+        seed=min(unseen);queue=[seed];found={seed}
+        for e in queue:
+            for f in neighbor[e]:
+                if f not in found:found.add(f);queue.append(f)
+        unseen-=found;diameter=0
+        for start in found:
+            dist={start:0};queue=[start]
+            for e in queue:
+                for f in neighbor[e]:
+                    if f not in dist:dist[f]=dist[e]+1;queue.append(f)
+            diameter=max(diameter,max(dist.values()))
+        components.append((sorted(found),diameter))
+    c=len(scene_values[0][0]) if widths[0] else 2
+    for r in range(max((d for _,d in components),default=0)):
+        updated=dict(states)
+        for group,d in components:
+            if r>=d:continue
+            for e in group:
+                mean=[sum((states[f][k] for f in neighbor[e]),Q(0))/len(neighbor[e]) for k in range(c)]
+                updated[e]=activation(T(R.vector(states[e]+mean))).data
+        states=updated
+    out=[[[Q(0)]*c for _ in range(k)] for k in widths]
+    for level,ids in enumerate((fine,middle,coarse)):
+        for i in ids:
+            incident=[e for e in edges if (level,i) in e]
+            out[level][i]=[sum((states[e][k] for e in incident),Q(0))/len(incident) for k in range(c)]
+    return out,components
+
+SCENES=[([0],[0],[0]),([0,1],[0,0],[0]),([0,1],[0,1],[0,0]),
+        ([1,3,3,4],[0,2,1,0,2],[1,0,1]),([],[],[])]
+WIDTHS=(6,4,3)
+
+def run_case(label,scenes,activation=rational_activation):
+    batch=len(scenes);c=2
+    nested=[[[[Q((b+1)*11+(l+1)*3+i+k,37) for k in range(c)] for i in range(w)] for b in range(batch)] for l,w in enumerate(WIDTHS)]
+    levels=[T([v for scene in values for row in scene for v in row],(batch,w,c)) for values,w in zip(nested,WIDTHS)]
+    memberships=[[T(scene[level]) for scene in scenes] for level in range(3)]
+    obj=SimpleNamespace(channels=c,initialize=Map('U'),cell=Map('R'),activation=activation)
+    actual=ns['forward'](obj,levels,memberships)
+    expected=[[] for _ in WIDTHS];component_info=[]
+    for b,scene in enumerate(scenes):
+        values=[nested[l][b] for l in range(3)]
+        result,components=oracle(values,scene,WIDTHS,obj.initialize,obj.cell,activation)
+        component_info.extend(components)
+        for l in range(3):expected[l].extend(v for row in result[l] for v in row)
+    check(label+':actual forward equals independent keyed line-graph oracle',all(x.data==y for x,y in zip(actual,expected)))
+    max_d=max((d for _,d in component_info),default=0)
+    expected_rows=[sum(len(e) for e,d in component_info if r<d) for r in range(max_d)]
+    check(label+':one global initialize and active-only synchronous map rows',len(obj.initialize.calls)==int(bool(component_info)) and [x.shape[0] for x in obj.cell.calls]==expected_rows)
+    return actual
+
+def main():
+    check('ELC EXP/CID absent from the authorized 26-item index',not any(z.get('experiment_id')=='M225-ELC' or z.get('id')=='hierarchy-undirected-edge-state-line-graph-composition' for z in json.loads((HERE.parent/'recent_mechanism_index.json').read_text(encoding='utf-8'))['items']))
+    for i,scene in enumerate(SCENES):run_case('single'+str(i),[scene])
+    run_case('mixed D1/D3/empty',[SCENES[0],SCENES[2],SCENES[4]])
+    run_case('zero batch',[])
+    # A true scalar erf GELU example has one adjacent donor per edge; exact arithmetic order agrees.
+    out=run_case('minimal chain scalar erf GELU',[SCENES[0]],scalar_gelu)
+    check('three-node endpoint-coupled readout',all(out[1].data[k]==(out[0].data[k]+out[2].data[k])/2 for k in range(2)))
+    p=ns['build_edge_line_graph_plan']([0,1,2],[0,0,1],[0,0],WIDTHS)
+    rounds=ns['build_edge_rounds']([p])
+    check('unequal endpoint degrees use total OTHER-edge count',rounds[0]['counts']==[2,2,1,3,2])
+    check('true point duplicates do not duplicate edges',len(ns['build_edge_line_graph_plan']([1,1],[0,2],[0,0,1],WIDTHS)['edges'])==2)
+    invalid=[([True],[0],[0],WIDTHS),([-1],[0],[0],WIDTHS),([6],[0],[0],WIDTHS),([1],[0],[0],WIDTHS),([0],[4],[0],WIDTHS),([0],[0],[],WIDTHS),([0],[0],[0],(6,4,True)),([0],[0],[0],(6,4))]
+    for i,args in enumerate(invalid):
+        try:ns['build_edge_line_graph_plan'](*args)
+        except ValueError:pass
+        else:raise AssertionError('invalid metadata accepted '+str(i))
+    check('eight invalid metadata cases reject before indexing',True)
+    for pth in DEST.glob('*.py'):compile(pth.read_bytes(),str(pth),'exec')
+    check('eight independent Python model files compile without import',len(list(DEST.glob('*.py')))==8)
+    copied=['__init__.py','backbone.py','dec.py','loss.py','network.py','sample_model.py']
+    check('six untouched original model files byte identical',all((DEST/n).read_bytes()==(SOURCE/n).read_bytes() for n in copied))
+    yaml=next((HERE/'staged_repository/configs').rglob('*.yaml'))
+    check('native YAML original bytes a18 unchanged',sha256(yaml.read_bytes()).hexdigest()=='a18f2c6ffcaac3e3050835a5afea1db1e7b0d23afc79f25c6c65134c813b004a')
+    original=ast.parse((SOURCE/'hier_postprocess.py').read_text(encoding='utf-8'));actual=ast.parse((DEST/'hier_postprocess.py').read_text(encoding='utf-8'))
+    def methods(tree):return {(c.name,n.name):ast.dump(n,include_attributes=False) for c in tree.body if isinstance(c,ast.ClassDef) for n in c.body if isinstance(n,ast.FunctionDef)}
+    om,am=methods(original),methods(actual)
+    allowed={('C2F_ClusterAttn_CTF','__init__'),('C2F_ClusterAttn_CTF','forward')}
+    check('all original other hierarchy methods AST identical',om.keys()==am.keys() and all(om[k]==am[k] for k in om if k not in allowed))
+    ctor=next(c for c in actual.body if isinstance(c,ast.ClassDef) and c.name=='C2F_ClusterAttn_CTF').body
+    check('original three FFN/LN construction precedes CPU RNG fork/core and Identity',(DEST/'hier_postprocess.py').read_text().index('self.cluster_ffn_norm')<(DEST/'hier_postprocess.py').read_text().index('with torch.random.fork_rng(devices=[])')<(DEST/'hier_postprocess.py').read_text().index('self.cluster_ffn = nn.ModuleList([nn.Identity()'))
+    check('source parameter and native linear-MAC arithmetic',2*(2*256*256+256)==262656 and 4*320*2*256*256==167772160 and 328*8*256*256==171966464)
+    result={'status':'PASS_SOFTWARE_ONLY_NOT_NATIVE','check_count':len(CHECKS),'checks':CHECKS,'actual_forward_cases':8,'invalid_metadata_cases':len(invalid),'Torch':False,'native':'NOT_RUN','resources':'NOT_RUN','carrier_scope':'Actual production AST. Seven exact rational nonlinear/list cases plus minimal-chain scalar-erf-GELU/list; neither Torch, FP32, autograd nor actual Linear/GELU proof. Independent keyed edge-neighbor graph uses all-pairs BFS only in tiny oracle.','source_file_hashes':{p.relative_to(HERE).as_posix():sha256(p.read_bytes()).hexdigest() for p in sorted((HERE/'staged_repository').rglob('*')) if p.is_file()}}
+    (HERE/'static_validation.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8')
+    print(json.dumps({'status':result['status'],'check_count':len(CHECKS),'Torch':False}))
+
+if __name__=='__main__':
+    try:main()
+    except Exception as exc:
+        report={'status':'FAILED_SOFTWARE_CHECK','checks_before_failure':CHECKS,'error':type(exc).__name__+': '+str(exc),'Torch':False,'source_file_hashes':{p.relative_to(HERE).as_posix():sha256(p.read_bytes()).hexdigest() for p in sorted((HERE/'staged_repository').rglob('*')) if p.is_file()}}
+        (HERE/'static_validation_failed.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+        raise

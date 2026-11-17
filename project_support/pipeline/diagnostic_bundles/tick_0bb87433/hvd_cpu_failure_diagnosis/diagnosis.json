@@ -1,0 +1,75 @@
+{
+  "recorded_at": "2026-11-06T15:13:05.488229+00:00",
+  "experiment_id": "M230-HVD",
+  "root_cause": "UNKNOWN",
+  "failure_scope": "runtime_implementation_inconclusive",
+  "full_original_traceback_confirmed": {
+    "caller": "tools/train.py:129 clip_grad_norm_(model.parameters(), cfg.train.grad_clip)",
+    "time_scope": "Backward has returned immediately before parameter enumeration in original source; optimizer.step for this batch was not reached via this caller.",
+    "error": "TypeError: argument of type 'MultiheadAttention' is not iterable",
+    "stack_site": "installed torch.nn.Module.named_modules:2855 if self not in memo",
+    "original_log": {
+      "path": "Checkpoints/server_4/hvd_crashed_2e51495f/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hvd_20261106_195228.log",
+      "sha256": "810eb46d4008d60848b097b9077b15dff826688b75e35435704bc3d48ca2d57a"
+    },
+    "bounded_traceback": {
+      "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/archived_traceback.txt",
+      "sha256": "78f2dba25fb7b44bd75a865603c6dbe6640a084b9734f6a6df93973092fdc859"
+    }
+  },
+  "actual_cpu_observation": {
+    "path": "pipeline/diagnostic_bundles/tick_0bb87433/hvd_cpu_failure_diagnosis/cpu_observation.json",
+    "sha256": "800239168e4b57fa806415a5239bc68a477746a7e1ad4802a35ef79d91066b04"
+  },
+  "actual_library": {
+    "version": "2.8.0+cu128",
+    "file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/__init__.py",
+    "module_file": "/home/songcl/.conda/envs/project_cluster/lib/python3.10/site-packages/torch/nn/modules/module.py",
+    "module_file_sha256": "0cb24956454199a46e8fc37a7cce4fc1cff52130f25fb6eb052745e9eca89067"
+  },
+  "actual_custom_attention_binding": {
+    "class_module": "framework.torch.nn.modules.activation",
+    "source_file": "/data/songcl/Project/Cluster_project/Cluster_hvd_20261106/framework/torch/nn/modules/activation.py",
+    "source_sha256": "d1b1b3b971c17fa4cc208a507cbe1046dea96a4db6857e34bf96dddf5cbe2f46",
+    "class_own_methods": [
+      "_reset_parameters",
+      "forward"
+    ],
+    "named_modules_in_class_dict": false,
+    "named_modules_signature": "(memo: Optional[set['Module']] = None, prefix: str = '', remove_duplicate: bool = True)",
+    "bound_self_is_instance": true,
+    "bound_func_is_installed_Module_named_modules": true,
+    "parameter_devices": [
+      "cpu"
+    ]
+  },
+  "actual_cpu_result": {
+    "completed": true,
+    "iterations": 128,
+    "nesting_wrappers": 6,
+    "counts_unique": [
+      [
+        10,
+        12,
+        0.0
+      ]
+    ],
+    "all_parameter_devices": [
+      "cpu"
+    ],
+    "remove_duplicate_false_count": 14,
+    "duplicate_memo_path_exercised": true,
+    "clip_norm_no_gradients": true,
+    "original_failure_reproduced": false,
+    "limitation": "Fresh small CPU tree only. It does not reconstruct the crashed HVD object, its batch, prior forward/backward history or original CUDA runtime state."
+  },
+  "conclusion": "The original grad-clipping parameter-enumeration call site is now directly confirmed. Actual installed Torch2.8.0+cu128 Module methods and custom MultiheadAttention bound traversal method were inspected. A small six-level CPU tree, including an aliased attention reference, completed128 parameter/Module traversal and clip_norm(no-grad) iterations. Persistent failure was not reproduced. This is not a reconstruction of the crashed training object and does not establish a root cause or repair.",
+  "implication_for_PSC": "No persistent common dependency/traversal fault was observed in this narrowly scoped CPU check, so this result supplies no evidence-based reason to assert all PSC execution is broken. It does not waive PSC original native checks/resources, launch locks or any resource/owner binding, and does not authorize HVD restart.",
+  "not_established": [
+    "Cause of the memo value becoming MultiheadAttention in the original process.",
+    "Behavior after the original HVD CUDA forward/backward history or on its failed batch.",
+    "Checkpoint exact saved metrics/epochs; no checkpoint was loaded.",
+    "HVD mechanism efficacy or scientific failure."
+  ],
+  "scope": "One strict-known-host key-only CPU SSH observation. CUDA_VISIBLE_DEVICES empty before torchimport; only CPU parameters constructed. No GPU/NVML, dataset, checkpoint, forward/backward, optimizer, training, restart/signal, remote stage, source/environment/package or scheduler mutation."
+}

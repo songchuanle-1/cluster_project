@@ -1,0 +1,976 @@
+               Inducing Causal Structure for Interpretable Neural Networks
+
+
+                   Atticus Geiger * 1 Zhengxuan Wu * 1 Hanson Lu * 1 Josh Rozner 1 Elisa Kreiss 1
+                               Thomas Icard 1 Noah D. Goodman 1 Christopher Potts 1
+
+
+                          Abstract                                   In this paper, we present interchange intervention training
+      In many areas, we have well-founded insights                   (IIT), a new method that trains a neural network to realize
+      about causal structure that would be useful to                 the abstract structure of a causal model. In IIT, we (1) align
+      bring into our trained models while still allowing             the variables in a causal model C with the representations
+      them to learn in a data-driven fashion. To achieve             in a neural model N and (2) train N to have the counter-
+      this, we present the new method of interchange                 factual behavior of C by performing aligned interchange
+      intervention training (IIT). In IIT, we (1) align              interventions (swapping of internal states created for differ-
+      variables in a causal model (e.g., a deterministic             ent inputs) on N using C’s counterfactual output as the gold
+      program or Bayesian network) with representa-                  label for the counterfactual prediction of N . IIT objectives
+      tions in a neural model and (2) train the neural               are differentiable and guarantee that, when the loss is zero,
+      model to match the counterfactual behavior of                  the target causal model is a causal abstraction of the neural
+      the causal model on a base input when aligned                  network in the sense of Beckers & Halpern (2019).
+      representations in both models are set to be the               IIT is an extension of the causal abstraction analysis of
+      value they would be for a source input. IIT is                 Geiger et al. (2021), which can be placed under the broader
+      fully differentiable, flexibly combines with other             rubric of structural evaluations of neural models, which
+      objectives, and guarantees that the target causal              includes probing and many kinds of feature attribution. Our
+      model is a causal abstraction of the neural model              central point of differentiation from this prior work is that we
+      when its loss is zero. We evaluate IIT on a struc-             go beyond passive study of static models, by pushing them
+      tural vision task (MNIST-PVR), a navigational                  to learn specific causal structures as part of optimization.
+      language task (ReaSCAN), and a natural language                This allows for a productive interplay between model anal-
+      inference task (MQNLI). We compare IIT against                 ysis and model improvement: we not only assess whether
+      multi-task training objectives and data augmen-                models have systematic, interpretable internal structure but
+      tation. In all our experiments, IIT achieves the               also push them to acquire such structure.
+      best results and produces neural models that are
+      more interpretable in the sense that they more                 We evaluate IIT in three contexts: (1) ResNet trained on a
+      successfully realize the target causal model.                  vision task where one part of an image “points” to another
+                                                                     (MNIST-PVR), (2) a CNN-LSTM model trained to produce
+                                                                     action sequences in a grid world given a natural language
+1. Introduction                                                      command (ReaSCAN), and (3) a pretrained BERT model
+                                                                     fine-tuned to label the semantic relation between two sen-
+In many domains, we have well-founded insights about                 tences (MQNLI). For each context, we define a high-level
+causal structure that we can express in symbolic terms,              causal model that capture aspects of the task. We then align
+ranging from commonsense intuitions about how the world              high-level causal variables to low-level neural representa-
+works to advanced scientific knowledge. These insights               tions to define IIT training objectives.
+have the potential to make up for gaps in available data,
+or more generally to provide useful inductive biases. Can            For the three case studies, we report two kinds of evaluation:
+we bring these insights into our models while still allowing         traditional behavioral evaluations using systematic general-
+them to learn in a data-driven fashion?                              ization tasks that assess whether a model has learned a truly
+                                                                     general solution, and structural evaluations that directly as-
+  *
+   Equal contribution 1 Stanford University, Stanford, California.   sess the interpretability of our models by evaluating whether
+Correspondence to: Atticus Geiger <atticusg@stanford.edu>,           they realize the target causal model. We compare IIT against
+Zhengxuan Wu <wuzhengx@stanford.edu>.
+                                                                     multi-task training objectives and data augmentation meth-
+Proceedings of the 39 th International Conference on Machine         ods defined to make use of our causal models, finding that
+Learning, Baltimore, Maryland, USA, PMLR 162, 2022. Copy-            IIT leads to models that both perform better on systematic
+right 2022 by the author(s).
+                                 Inducing Causal Structure for Interpretable Neural Networks
+
+generalization benchmarks and are more interpretable.1             model frozen. In multi-task training, we allow the target
+                                                                   model’s parameters to be changed by the probing process.
+2. Related Work                                                    This provides a natural point of comparison with our pro-
+                                                                   posal for IIT, where we use our target symbolic causal model
+Probes Probes are supervised or unsupervised models that           to define multi-task training objectives.
+can be used to gain an understanding of what is encoded
+                                                                   Data Augmentation Data augmentation is the practice of
+in the internal representations of neural networks (Hupkes
+                                                                   enhancing training sets by modifying existing examples to
+et al., 2018; Peters et al., 2018; Tenney et al., 2019; Clark
+                                                                   generate new ones (Perez & Wang, 2017; Shorten & Khosh-
+et al., 2019). Probes have yielded important insights about
+                                                                   goftaar, 2019; Kaushik et al., 2019; Liu et al., 2021). For
+what models learn to encode. However, probes are funda-
+                                                                   us, data augmentation is another natural comparison point
+mentally limited in a way that is central to our present goals:
+                                                                   because we can use a target symbolic causal model to gen-
+there is no guarantee that probed information plays a causal
+                                                                   erate additional data. Crucially, IIT involves interchanging
+role in the network’s behavior (Ravichander et al., 2020;
+                                                                   internal network representations, while data augmentation
+Elazar et al., 2020; Geiger et al., 2021; 2020).
+                                                                   methods only involve the creation of inputs.
+Feature Attribution In contrast to probes, gradient-based
+feature attribution methods (Zeiler & Fergus, 2014; Sprin-         3. Interchange Intervention Training
+genberg et al., 2014; Shrikumar et al., 2016; Binder et al.,
+2016) generally do measure causal properties (Chattopad-           Our goal is to train a neural network to have an internal
+hyay et al., 2019). For example, Geiger et al. (2021) note         causal structure that realizes a high-level causal model. To
+that the integrated gradients method of Sundararajan et al.        concretize this goal, we draw on two strands of work on
+(2017) computes the individual causal effect of neurons (Im-       causality: (1) formal interventionist theories of causality
+bens & Rubin, 2015). In comparison with our proposal, the          (Spirtes et al., 2001; Pearl, 2009), in which causal processes
+main limitation of these methods is that (by definition) they      are associated with the effect of interventions, and (2) theo-
+passively study trained networks rather than allowing for          ries of abstraction (Beckers & Halpern, 2019; Beckers et al.,
+active improvements of them (though see Erion et al. 2021          2020; Chalupka et al., 2016; Rubenstein et al., 2017), where
+for a path from attribution to improved optimization).             relationships between two causal processes are determined
+                                                                   by the presence of systematic correspondences between the
+Intervention-Based Analyses In intervention-based analy-
+                                                                   effects of interventions. The key insight is that having a par-
+sis, one actively changes the values of model representations
+                                                                   ticular causal structure is a matter of satisfying a number of
+in systematic ways and studies the effects. Such interven-
+                                                                   counterfactual statements about the effect of interventions
+tions can be applied to input representations in order to
+                                                                   (Hitchcock, 2001). The present section defines this process
+measure the effect on the output representation (Feder et al.,
+                                                                   formally, and Figure 1 illustrates all the concepts with a
+2021; Pryzant et al., 2021), or on network internal represen-
+                                                                   self-contained example.
+tations to characterize how these representations mediate the
+causal relationships between inputs and outputs (Giulianelli       Structural Causal Models We introduce a minimal nota-
+et al., 2018; Bau et al., 2019; Vig et al., 2020; Soulos et al.,   tion for structural causal models here. We define a structural
+2020; Ravfogel et al., 2020; Elazar et al., 2020; Besserve         causal model M to consist of variables V, and, for each
+et al., 2020; Geiger et al., 2020; Csordás et al., 2021; Geiger   variable V ∈ V, a set of values Val(V ), a set of parents
+et al., 2021; Meng et al., 2022). In the context of neural         PAV , and a structural equation FV that sets the value of V
+network analysis, this provides a powerful tool-kit for un-        based on the setting of its parents. We denote the set of
+derstanding a model’s causal structure, since an enormous          variables with no parents as VIn and those with no children
+number of diverse and finely controlled intervention ex-           VOut . A structural causal model M = (V, PA, Val, F ) can
+periments can be performed. We build on these methods,             represent both symbolic computations and neural networks.
+extending them to the optimization process.
+                                                                   Given a setting of an input ∈ Val(VIn ) and variables
+Multi-Task Training Multi-task training is the practice of         V ⊆ V, we define G ET VALS(M, input, V) ∈ Val(V)
+jointly training a model against a set of learning tasks to im-    to be the setting of V determined by the setting input and
+prove data efficiency and increase model robustness (Ruder,        model M. For example, V could correspond to a layer in
+2017; Zhang & Yang, 2017; Crawshaw, 2020). This can                a neural network, and G ET VALS(M, input, V) then de-
+be thought of in terms of supervised probing. In standard          notes the particular values that V takes on when the model
+supervised probing, one trains the probe using internal rep-       M processes input.
+resentations from the target model while keeping the target
+                                                                   For a set of variables V and a setting for those variables
+   1
+    We release our code at https://github.com/frankaging/          v ∈ Val(V), we define MV←v to be the causal model
+Interchange-Intervention-Training.                                 identical to M, except that the structural equations for V
+                                 Inducing Causal Structure for Interpretable Neural Networks
+
+are set to constant values v. Because we overwrite neurons        Abstraction and Interpretability Causal abstraction anal-
+with v in-place, gradients can back-propagate through v.          ysis is not a story about the reasoning a neural network might
+This corresponds closely to the do operator of Pearl (2009),      use to achieve its behavior, but instead is an intervention-
+which characterizes interventions on models in the service        based method that determines how it does, in fact, achieve
+of exploring hypothetical or counterfactual states.               its behavior. We can interpret the semantic content of neu-
+                                                                  ral representations using the high-level variables they are
+Interchange Interventions With the above definitions in
+                                                                  aligned with, and understand how those neural representa-
+place, we can straightforwardly characterize the interchange
+                                                                  tions are composed using the high-level parenthood relation.
+interventions of Geiger et al. (2020), in which a model M
+                                                                  Simply put, when a high-level causal model is an abstraction
+is used to process two different inputs, source and base,
+                                                                  of a neural network, it is a faithful interpretation (Lipton,
+and then a particular internal state obtained by processing
+                                                                  2018; Jacovi & Goldberg, 2020) of the network.
+source is used in place of the corresponding internal state
+obtained by base. For a given set of variables V,                 Interchange Intervention Accuracy To quantify partial
+                                                                  success when it comes to causal abstraction relationships,
+                MV←G ET VALS(M,source,V)                          we measure the percentage of aligned interchange interven-
+                                                                  tions that produce the same output, reporting this as the
+is a version of M with the values of V set to those obtained
+                                                                  interchange intervention accuracy (I NT I NVACC):
+by processing source. In addition,
+                                                                                                        def
+                G ET VALS(M, base, VOut )                           I NT I NVACC(MH , ML , VH , Π) =
+                                                                           1          X          h
+is the setting of the outputs VOut obtained by processing                       2
+                                                                                                I I NT I NV(M∗H , b, s, VH ) =
+                                                                    |Val(VIn )|
+base with model M. When we put these two steps together,                          b,s∈Val(VIn )                           i
+we obtain the interchange intervention:                                                κ I NT I NV(ML , b, s, Π(VH ))          (3)
+
+                                     def
+                                                                  Where every pair of inputs b and s is considered, and
+  I NT I NV(M, base, source, V) =                                 I NT I NVACC is 1, the two models are in the causal abstrac-
+ G ET VALS(MV←G ET VALS(M,source,V) , base, VOut ) (1)            tion relationship. However, we often only approximate this
+                                                                  by evaluating a set of randomly sampled pairs of inputs, due
+In short, the interchange intervention provides the output of     to the enormous space of input pairs.
+the model M for the input base, except the variables V are
+set to the values they would have if source were the input.       I NT I NVACC provides a natural metric for quantifying the
+                                                                  interpretability of a neural network in the following sense:
+Causal Abstraction Relationships Suppose we have a                when I NT I NVACC is 1, the causal model is an explanation
+high-level model MH and a low-level model ML with                 of how the network behaves, providing a clear window into
+identical input spaces and a predetermined mapping of out-        the network itself. In practice, we rarely observe perfect
+put values from the low to high level, κ (for example, if         I NT I NVACC in complex networks, but we can still say that
+the low level model produces a probability distribution over      the higher the value of I NT I NVACC, the more we have li-
+output classes, then κ could be the arg max function, which       cense to reason about the high-level causal model instead of
+selects the highest probability class). Further suppose we        reasoning directly about the low-level network. The causal
+have an alignment Π mapping intermediate variables in VH          model provides an interpretable proxy for the network itself.
+to non-overlapping subsets of variables in VL . Consider
+some intermediate variable VH and define M∗H to be MH             IIT Loss Functions The definition of IIT for high-level
+with every variable marginalized other than VIn , VOut , and      models with one intermediate variable falls out directly
+VH . We can use the definition of interchange interventions       from the causal abstraction definition:
+to define what it means for ML and MH ∗ to be in a causal              X          
+                                                                             L OSS I NT I NV(C, b, s, V ),
+abstraction relationship, namely, for all b, s ∈ VIn :                                                                   
+                                                                     b,s∈VIn
+                                                                                             I NT I NV(N θ , b, s, Π(V ))  (4)
+  I NT I NV(M∗H , b, s, VH ) =
+                                                                 where C is the high-level causal model, V is a high-level
+                       κ I NT I NV(ML , b, s, Π(VH ))       (2)   variable, N θ is the low-level neural network with learned
+                                                                  parameters θ, Π(V ) is a set of low-level variables (neurons)
+This is in fact a constructive abstraction relationship in
+                                                                  that are aligned with V , and L OSS is some loss function.
+the sense of Beckers & Halpern (2019), in which aligned
+                                                                  Observe that we do not apply the output map κ, because the
+interventions on the low-level model and high-level model
+                                                                  loss function takes in the logits directly.
+have the same effect. This is especially suited for situations
+in which we seek to relate small symbolic models with large       The crucial feature of an IIT update is that the interchange
+neural models with high-dimensional representations.              intervention intertwines two computation graphs, one gener-
+                                                        Inducing Causal Structure for Interpretable Neural Networks
+
+                                                                                                                             FALSE                           FALSE                           FALSE               T RUE
+
+                                                                                                                               -1                              -0.5                          -0.45                 0.05
+
+
+                      Y = w[h1 ; h2 ] + b                                             O = b1 ∧ b2                        0            0                 0.45           0.05            0.05          0.5    0.5           0.55
+
+
+ H1 = W1 [x1 , x2 ]                         H2 = W2 [x1 , x2 ]             V1 = b1               V2 = b2                 0            0                  1              0               0            1       1             1
+
+                                                                                                                      FALSE         FALSE           T RUE             FALSE           FALSE        T RUE   T RUE         T RUE
+        X1                                         X2                            B1                 B2
+                                                                                                                  (b) We define a network with initial parameters W1 = [0.45, 0.05],
+(a) A linear network with unspecified weights (left) and a symbolic                                               W2 = [0.05, 0.5], output bias b = −1, and output weights w =
+causal model that computes boolean conjunction (right). An align-                                                 [1, 1]. Input values are 0 for False and 1 for True. With the initial
+ment between the two is denoted by dashed lines. The causal model                                                 weights, the network has perfect behavioral accuracy, predicting
+is an abstraction of the network when, for both V1 and V2 , aligned                                               true (red) iff both its inputs are 1, otherwise it predicts false (blue).
+interchange interventions on network and causal model result in                                                   Although correct when run on the four inputs (T, T), (T, F), (F, T),
+the same output on all 16 ordered pairs of inputs. (The aligned                                                   (F, F), the interchange intervention accuracy is 81.25%: between
+intervention pair (b, s) in general differs from (s, b).)                                                         the two high-level variables V1 and V2 , there are six ordered pairs of
+                                                                                                                  inputs where performing aligned interchange interventions results
+                                                                                                                  in the causal model and neural network producing different outputs
+                                                                                                                  (see figure 1c for one such pair).
+
+
+                              F                                              T
+                                                                                                                              Require: High-level and low-level models MH and ML
+                                                                                                                              with variables VH and VL , an alignment Π that maps a
+                        F           T                              T                  T                                       VH ∈ VH to a VL ⊆ VL , training dataset D
+                                                                                                                              1: MH .eval()
+                        F           T                              T                  F                                       2: ML .train()
+                                                                                                                              3: while not converged do
+                            FALSE                                      FALSE                                                  4: for (b, s) in enumerate(D × D) do // base and source
+                                                                                                                              5:     VH ∼ VH // sample a high-level variable
+                            -0.45                                       -0.05                                                 6:     VL = Π(VH ) // aligned low-level variables
+                                                                                                                              7:     with no grad:
+                                                                                                                              8:        aH = G ET VALS(MH , s, VH )
+                      0.05              0.5                      0.45                 0.5                                     9:        oH = G ET VALS(MH     VH ←aH , b, VOut ) // label
+                                                                                                                              10:     aL = G ET VALS(ML , s, VL )
+                                                                                                                              11:     oL = G ET VALS(ML    VL ←aL , b, VOut ) // pred
+                        0                1                        1                       0                                   12:    LIIT = L OSS(oH , oL )
+                                                                                                                              13:    L = LIIT + LOthers // combine with other losses
+                 FALSE             T RUE                    T RUE                 FALSE                                       14:    L.backward()
+                                                                                                                              15:    Update model parameters with gradients
+(c) An illustration of an interchange intervention training update,
+where an intervened network is trained to predict the intervened
+output of the causal model. It can be seen that the intervention puts                                                          (d) Pseudocode for interchange intervention training.
+the network in a state that could not be achieved with any input
+representation.
+                                         FALSE                             FALSE                              FALSE                             T RUE                               T RUE
+                                          -0.95                              -0.39                            -0.33                               0.23                                0.13
+
+
+                                     0              0                  0.5                0.05           0.05          0.55                0.55              0.6               0.5            0.55
+
+
+                                     0              0                  1                   0              0             1                   1                1                  1              0
+                                  T RUE           FALSE            T RUE              FALSE          FALSE            T RUE               T RUE          T RUE                T RUE          FALSE
+
+(e) The network defined in figure 1b after the IIT training update from figure 1c has been applied, resulting in a network with 100%
+interchange intervention accuracy (though still nonzero loss), while maintaining the same behavior. The new network has parameters
+W1 = [0.5012, 0.05], W2 = [0.05, 0.5512], bias b = −0.9488, and output weights w = [1.0231, 1.0256].
+
+Figure 1. Interchange intervention training example. Network N∧ performs boolean conjunction with perfect accuracy, or, equivalently, it
+agrees with C∧ on the four possible inputs (figure 1b). However, C∧ is not a causal abstraction of N∧ under this alignment, because there
+are aligned interchange interventions that result in N∧ and C∧ producing different outputs, meaning that the internal dynamics of the
+network do not realize the structure of the causal model. To quantify this, we note that the interchange intervention accuracy (Eqn. 3) is
+81.25%. After a single interchange intervention training update (figure 1c, figure 1d), this is fixed: all aligned interchange interventions
+result in the same output (the interchange intervention accuracy is now 1), so C∧ has become a causal abstraction of N∧ (figure 1e).
+                                  Inducing Causal Structure for Interpretable Neural Networks
+
+ated by the forward pass for the base input and one by the          images for the four input variables ITL , ITR , IBL , IBR , and
+forward pass for the source input. This means that when             the set of numbers 0–9 for all other variables. The parents
+backpropagation is performed with the IIT loss objective,           are defined such that PAIw = ∅ and PAYw = {Iw } for all
+updates are applied as they are in regular training, starting       w ∈ {TR, TL, BR, BL}, and PAO = {YTL , YTR , YBL , YBR }.
+from the output representation and proceeding towards the           The structural equations are
+input representations. However, when the intervention site
+is reached, this process bifurcates, and weights receive two          FYTL (iTL ) = OMNIST (iTL )    FO (yTL , yTR , yBL , yBR ) =
+                                                                                                     
+updates, once from N θ processing the input base, and once            FYTR (iTR ) = OMNIST (iTR )    yTR yTL ∈ {0, 1, 2, 3}
+                                                                                                     
+from N θ processing source. In our toy example (figure 1c),           FYBL (iBL ) = OMNIST (iBL )     yBL yTL ∈ {4, 5, 6}
+the network is too small to observe this double update, but           FYBR (iBR ) = OMNIST (iBR )
+                                                                                                     
+                                                                                                      yBR yTL ∈ {7, 8, 9}
+                                                                                                     
+the networks in our three case studies are not. (See figure 2,
+which exemplifies such a process.)
+                                                                    Systematic Generalization The train/test split designed by
+An important property of IIT is that, if Eqn. 4 is zero, then C     Zhang et al. (2021) creates a distributional shift between
+and N θ stand in the causal abstraction relation Eqn. 2. See        the training and testing data by removing training exam-
+Appendix A for a brief proof of this result. (The reverse does      ples where either OMNIST (iTR ) ∈ {1, 2, 3}, OMNIST (iBL ) ∈
+not hold; C can be a causal abstraction of N θ without the          {4, 5, 6}, or OMNIST (iBR ) ∈ {0, 7, 8, 9}. This evaluates
+loss being zero. Figure 1 is an example. This is a desirable        where models can systematically generalize, learning the
+property of the method, since we do not expect our loss             general structure of the problem rather than memorizing
+functions to be zero in general.)                                   many special cases.
+Example Figure 1 provides an example of interchange in-             Neural Network We trained ResNet18 from PyTorch vi-
+tervention training, in which a causal model C∧ of boolean          sion. This is the deep residual network (He et al., 2016)
+conjunction is aligned with a one-layer linear network N∧θ ,        baseline used by Zhang et al. (2021) on the MNIST-PVR
+where θ = {W1 , W2 , b, w}, as in figure 1b.                        dataset, and we adopt their hyperparameters. We call this
+                                                                              θ
+                                                                    model NPVR   , where θ abbreviates the parameters.
+At the start, N∧θ is perfect in terms of its input–output behav-
+ior but does not conform to the counterfactual behavior of          Alignments In our experiments, we align the neural repre-
+C∧ . In other words, the regular behavioral learning objective                       θ
+                                                                    sentations of NPVR   with the symbolic variables of CPVR by
+is met, but the interchange intervention training objective is      partitioning the layer resulting from the first application of
+not; interchange intervention accuracy (Eqn. 3) is 81.25.           max-pooling into quadrants QTL , QTR , QBL , QBR which are
+                                                                    aligned with the variables YTL , YTR , YBL , YBR . In initial ex-
+One interchange intervention training update (figure 1c) re-
+                                                                    perimentation, we found that the layers must be partitioned
+sults in a network that satisfies both objectives (figure 1e):
+                                                                    such that each quadrant is directly above its corresponding
+N∧θ now stands in the causal abstraction relation to C∧ (in-
+                                                                    input. This is likely due to the locality of convolution op-
+terchange intervention accuracy is now 1).
+                                                                    erators. We also found that aligning layers closer to the
+                                                                    classifier head was ineffective.
+4. MNIST Pointer-Value Retrieval
+                                                                    Interchange Intervention Training For each intermediate
+Our first benchmark is MNIST Pointer-Value Retrieval                variable Yw ∈ {YTL , YTR , YBL , YBR }, we introduce an IIT
+                                                                                                    θ                   w
+(MNIST-PVR; Zhang et al. 2021), a visual reasoning task             objective that optimizes for NPVR   implementing CPVR   the
+constructed using the MNIST dataset (LeCun et al., 2010).           submodel of CPVR where the three intermediate variables
+An input i = (iTL , iTR , iBL , iBR ) consists of four MNIST        that aren’t Yw are marginalized out:
+images (handwritten digits) arranged in a grid. The top left                             
+image iTL acts as a pointer that picks out one of the three
+                                                                             X
+                                                                                                     w
+                                                                                       CE I NT I NV(CPVR , b, s, Yw ),
+other images.                                                          b,s∈MNIST-PVR
+                                                                                                                            
+                                                                                                           θ
+                                                                                                I NT I NV(NPVR , b, s, Qw ))     (5)
+Symbolic Causal Structure Our target causal model will
+abstract away from the details of how to identify the hand-         where CE is the cross-entropy loss and MNIST-PVR is the
+written digit in an image, focusing just on the reasoning                                                   θ
+                                                                    dataset. We visualize an IIT update to NPVR in figure 2.
+about pointers. Formally, we define a causal model CPVR =
+(V, PA, Val, F ) that computes the label for each of the four       Typed Interchange Intervention Training We make fur-
+MNIST images using an oracle OMNIST with a look-up table            ther use of the causal model by observing that the intermedi-
+to select the correct label based on the pointer. The vari-         ate variables YTL , YTR , YBL , YBR can be treated as the same
+ables are V = {ITL , ITR , IBL , IBR , YTL , YTR , YBL , YBR , O}   type. They all share a value space, as do the neural represen-
+and the values assigned by Val are the MNIST training               tations QTL , QTR , QBL , QBR . This means we can perform
+                                                                    interchange interventions between different variables and
+                                         Inducing Causal Structure for Interpretable Neural Networks
+
+
+
+                        7                                    2
+                                                                                      LOGITS                         LOGITS
+
+
+                  9            9                        7          0
+                  9            7                        7          2
+
+
+
+
+Figure 2. An illustration of an IIT update where a neural network (right) is trained to realize a causal model (left) that solves the PVR-
+MNIST task. Solid lines are feed-forward connections, dashed lines are interchange interventions, red lines are the flow of backpropagation.
+Observe that when backpropagation reaches the interchange intervention, it flows into both the source input’s computation graph and the
+base input’s graph, updating the weights below the interchange intervention twice.
+
+
+extend our training objective to these interventions as well:                                      Behavioral           IIT
+                                                                                 Training
+                                                                                                   Accuracy          Accuracy
+                                        def
+   T-I NT I NV(M, b, s, V, V0 ) =                                                                 Train Test        Train Test
+           G ET VALS(MV0 ←G ET VALS(M,s,V) , b, VOut ) (6)                       S TANDARD        99.10 0.00 88.80 20.60
+           X                                                                    IIT              99.60 93.93 99.00 94.85
+              CE T-I NT I NV(CPVR , b, s, Yw , Yw0 ),                            M ULTI           99.64 0.00 89.35 20.50
+   w,w0 ∈{TL, TR, BL, BR}                                                        IIT + M ULTI     99.60 96.01 99.10 96.64
+   b,s∈PVR-MNIST                                               
+                                         θ                                       AUGMENT          99.40 90.90 98.90 92.00
+                            T-I NT I NV(NPVR , b, s, Qw , Qw0 )    (7)
+                                                                                 N O T YPING      99.41 0.09 99.47 16.88
+Multi-Task Objectives To compare against multi-task ob-                                        θ
+                                                                         Table 1. Results for NPVR (ResNet18) trained on the PVR-MNIST
+jectives, we train models to predict the value of intermediate                                                                          θ
+                                                                         dataset. Behavioral accuracy is the percentage of inputs that NPVR
+variables from the aligned neural representations, backprop-
+                                                                         agrees with CPVR on. Interchange intervention accuracy quantifies
+agating into the weights of the target model. Specifically,              the extent to which the interpretable causal model is a proxy for
+we train four linear classifiers P ϕw on the loss                        the network (section 3). IIT delivers the best results, especially
+          X                                                              when combined with multi-task objectives.
+               CE(P ϕw (G ET VALS(NPVR   θ
+                                            , input, Qw )),
+     input∈PVR-MNIST
+   w∈{TL,TR,BL,BR}              G ET VALS(CPVR , input, Yw ))      (8)
+                                                                         Neither the standard nor multi-task models learned the be-
+where the trained parameters are θ, the parameters of ResNet
+                                                                         havioral objective in a way that generalizes, with total failure
+and ϕw , the parameters of the linear classifiers.
+                                                                         on the testing data (0%). On the other hand, IIT solves the
+Data Augmentation We perform data augmentation by ran-                   generalization task (93.93%). However, multi-task training
+domly sampling two examples and swapping a random quad-                  does synergize with IIT, producing the model with the best
+rant of the base input with a random quadrant of the source              performance (96.01%). Data augmentation lessens the dis-
+input to produce a new example that is then labeled with                 tributional shift; however, the distributions remain skewed
+CPVR . This procedure is guided by the same causal structure             and model performance does not exceed 90.90%.
+used by our other models, but it is by definition restricted to
+                                                                         Our interchange intervention test set accuracies tell a similar
+input manipulations.
+                                                                         story. Neither the standard nor multi-task models learned
+Results Our results are in Table 1. The behavioral accuracy              the IIT objective in a way that generalizes, with total failure
+is the standard metric, while the interchange intervention               on the testing data (20.60% and 20.50%, respectively). On
+accuracy captures whether the symbolic causal model is an                the other hand, IIT learns a general solution to the inter-
+abstraction of the neural network.                                       change intervention objectives, achieving accuracy on the
+                                             Inducing Causal Structure for Interpretable Neural Networks
+
+                                                                                                                   Behavioral Exact Match %
+                                                                                  Training
+                                                                                                  Novel color     Novel size     Novel direction    Novel length
+        a1        a2    ...    an            a1        a2      ...          an
+                                                                                  S TANDARD       55.98 (6.31)   41.67 (6.24)      0.00 (0.00)        5.72 (3.44)
+                                             h0        h1      ...         hn     M ULTI          76.91 (5.02)   39.46 (7.68)      0.00 (0.00)        9.05 (5.28)
+                  Px∆   Py∆                  a0   ec   a1      ...    ec   an−1   IIT             74.12 (6.00)   65.65 (4.26)      0.26 (0.14)       10.20 (6.08)
+                                       ec                                         IIT+ M ULTI     80.37 (0.88)   74.84 (0.04)      14.72 (3.54)      25.82 (0.37)
+          Pt                   Pa
+                                                                                                            Interchange Intervention Exact Match %
+  TSize TColor TShape                  e1 ... eShape ... en          CNN
+                                                                                  S TANDARD       44.26 (2.76)   35.57 (2.64)      0.00 (0.00)        0.30 (0.21)
+                                             Bi-LSTM                              M ULTI          68.42 (0.20)   45.83 (2.45)      0.00 (0.00)        0.19 (0.05)
+       ICommand               IWorld        COMMAND           GRID WORLD          IIT             70.63 (9.33)   65.18 (2.84)      5.24 (3.07)        4.75 (2.06)
+                                                                                  IIT+ M ULTI     70.73 (6.86)   75.34 (0.91)      11.79 (2.57)       8.49 (1.53)
+(a) The causal model that solves ReaSCAN (left) and the neu-
+                                                             (b) Results for the CNN-LSTM on the ReaSCAN systematic generalization
+ral CNN-LSTM model trained on ReaSCAN (right). Dashed
+                                                             tasks. Only models that use IIT are able to consistently get traction on these
+lines align variables in the causal model with neural repre-
+                                                             tasks, and once again we see that IIT combines effectively with multi-task
+sentations.
+                                                             objectives, in both standard behavioral evaluations and evaluations that
+                                                             seek to quantify the extent to which the high-level causal model serves as
+                                                             an interpretable proxy for the network.
+
+                                                                                  Figure 3.
+
+
+test data (94.85%). Again, multi-task training synergizes                                Symbolic Causal Structure Our causal model CReaSCAN =
+with IIT, producing the model with the best performance                                  (V, PA, Val, F ) (see figure 3a bottom) is an oracle solver for
+on the IIT objective (96.64%). The causal model CPVR is                                  ReaSCAN that (1) parses the language command, identify-
+a near perfect abstraction of our best model, meaning the                                ing size, color, and shape properties of the target shape, (2)
+seemingly opaque and complex network dynamics have an                                    computes the location of the target object from these prop-
+interpretable and faithful abstract structure given by CPVR .                            erties and the grid world, (3) calculates the horizontal and
+                                                                                         vertical distances from the agent to the target, and, finally,
+We can see that Resnet has an inherently modular architec-
+                                                                                         (4) emits an action sequence that brings the agent to the
+ture from the fact that standard training produces a model
+                                                                                         target (We condense the action sequence to a single output
+with quite high (88.80%) interchange intervention accuracy
+                                                                                         variable). Formally, we define variables and values
+on the training data. However, without any structural train-
+ing objectives, ResNet does not generalize this modular                                      V = {ICom ,IWorld , TSize , TColor , TShape , Pt , Pa , Px∆ , Py∆ , O}
+solution to test data (20.60%). We believe this modularity is                                 Val(TShape ) = {circle, square, cylinder}
+the result of convolutions being operations that preserve lo-
+cality of information across layers. When the distributional                                  Val(TColor ) = {red, green, blue, yellow}
+shift between training and testing is lessened by data aug-                                    Val(TSize ) = {small, big}
+mentation, the ResNet model produces a model with near                                                                              x/y
+                                                                                                 Val(Pt ) = Val(Pa ) = Val(P∆ ) = {−5, . . . , 5}
+perfect (98.90%) interchange intervention accuracy on the
+training data, which generalizes better to test data (92.00%)                            with the values Val(ICom ), Val(Iworld ), and Val(O) being
+(but is still out performed by IIT).                                                     equal to the command space, world space, and action se-
+                                                                                         quence space. The parents are defined according to the
+Without our typed IIT objectives, behavioral and interchange
+                                                                                         topology of directed arrows pointing from parents to chil-
+intervention accuracy plummets on the test data. Typing our
+                                                                                         dren in figure 3a.
+variables is crucial for generalization.
+                                                                                         The structural equations for object properties, FTSize (iCom ),
+5. Navigation and Language (ReaSCAN)                                                     FTColor (iCom ), and FTShape (iCom ), are determined by
+                                                                                         parsing and interpreting the input language com-
+Our second benchmark is ReaSCAN (Wu et al., 2021), a                                     mand. The structural equations for position look-ups
+synthetic command-based navigation task that builds off                                  FPt (tSize , tColor , tShape , iWorld ) and FPa (iWorld ) determine the
+the SCAN (Lake & Baroni, 2018) and gSCAN (Ruis et al.,                                   target object and agent location from the target object proper-
+2020) benchmarks. The goal is to predict an action sequence                              ties and the input world. The position deltas FPx∆ (pt , pa ) and
+for the agent to reach the referred target and operate on it                             FPy∆ (pt , pa ) are determined to be the horizontal and vertical
+given a command and a grid world. For simplicity, we                                     distance between the target object and agent, respectively.
+experiment with the simplest command structure included                                  Finally, the equation for the output FO (Px∆ , Py∆ , icommand )
+in ReaSCAN, which excludes any relative clauses.                                         is the action sequence that takes the agent to the target object
+                                                                                         in the correct manner of movement, as determined by the
+                                    Inducing Causal Structure for Interpretable Neural Networks
+
+vertical and horizontal distances between the two and the              we train a single-layer linear classifier P ϕV on the loss
+adverb in the command.                                                       X             
+                                                                                                                  θ
+                                                                                 CEPosition P ϕV (G ET VALS(NCNN-LSTM      , i, NV ),
+Systematic Generalization ReaSCAN includes testing ex-                                                                        
+                                                                         i∈ReaSCAN
+amples that are systematically different from training exam-                                     G ET VALS(CReaSCAN , i, V )      (10)
+ples. Performance on those test sets provides insights into
+a model’s capabilities to generalize to unseen composites              where the trained parameters are θ, the parameters of the
+of seen concepts in a zero-shot fashion. In this experiment,           CNN-LSTM, and ϕV , the parameters of the classifiers.
+we generate four unseen testing splits investigating two dis-          Results Our results are shown in Table 3b. We use exact
+tinct generalization patterns by adapting ReaSCAN’s data               matches of action sequences as our evaluation metric for the
+generation framework. We investigate two splits focusing               behavioral and interchange intervention tasks.
+on novel attribute compositions in input commands (Novel
+color and Novel size), and two splits focusing on novel                We begin with our results on the behavioral task. Standard
+compositions in output action sequences (Novel direction               training produces models that fail to generalize across all
+and Novel length). See Appendix B for details on splits.               four tasks. IIT alone out-performs multi-task training on
+                                                                       novel sizes and lengths, and performs similarly on novel
+Neural Network We use the original baseline model for                  colors and lengths. Again, we observe that IIT and multi-
+                                                 θ
+ReaSCAN (Wu et al., 2021) as our neural model NCNN-LSTM   .            task synergize, producing the models that best generalize
+  θ
+NCNN-LSTM is a multimodal sequence-to-sequence model                   across all tasks. Overall, IIT is essential to this systematic
+which takes in a command and a grid world, and predicts an             generalization task.
+action sequence as shown in figure 3a. We include details
+about the model and experimental set-up in Appendix B.                 Our interchange intervention accuracy results suggest that
+                                                                       IIT delivers models that best conform to the interpretable
+Alignments In our experiments, we align neural represen-               causal model. Without any IIT objectives, both the standard
+              θ
+tations of NCNN-LSTM    with the variables TSize , TColor , TShape ,   and multi-task models achieve non-zero interchange inter-
+  x        y
+P∆ , and P∆ , in CReaSCAN . We choose the neural represen-             vention accuracy only for the two easier splits: novel colors
+tation eShape output by the LSTM encoder above the noun                and novel size. IIT achieves significant improvements over
+token (e.g., “circle”), which has 75 dimensions, to be evenly          these two tasks and gets traction on the two more difficult
+partitioned into three chunks of 25 dimensions, which are              ones, novel direction and novel length. And, once again,
+aligned with the target properties TSize , TColor , and TShape .       combining IIT with multi-task training delivers the best
+For the position deltas, we choose the initial hidden represen-        model by wide margins on all four tasks.
+tation h0 of the decoder LSTM, which has 100 dimensions,
+to be sliced into two evenly partitioned 50 dimension chunks
+where the first chunk represents the position difference by            6. Natural Language Inference (MQNLI)
+row Py∆ , and the second chunk represents the position differ-         Our final benchmark is MQNLI (Geiger et al., 2019), a
+ence by column Px∆ . We train the network to derive from the           synthetic natural language inference dataset where the task
+world and the command the horizontal and vertical distances            is to label the semantic relation between two sentences as
+between the target and agent, storing the horizontal distance          enailment, contradiction, or neutral. Here is an example:
+in one half of h0 and the vertical distance in the other.
+                                                                           ε every ε baker ε ε happily eats ε some stale bread
+Interchange Intervention Training For each variable V
+                                            θ                                                contradiction
+in CReaSCAN aligned with neurons NV in NCNN-LSTM   , we
+                                               θ                           ε some angry baker does not ε eat ε some ε bread
+introduce an IIT objective that optimizes for NCNN-LSTM
+                                          V
+implementing the marginalized submodel CReaSCAN  :                     where an ε denotes the absence of a word and is used to
+                                                                       align corresponding words in the two sentences.
+                                                                       Geiger et al. (2020) fine-tuned a BERT model on MQNLI,
+        X             
+                                    θ
+              CEAction I NT I NV(NCNN-LSTM    , b, s, NV ),
+                                                                      achieving state-of-the-art results (≈90% test accuracy).
+   b,s∈R EA SCAN                      V
+                          I NT I NV(CReaSCAN , b, s, V )    (9)        Their interchange intervention analysis revealed that this
+                                                                       model learns to partially represent the relation between
+                                                                       aligned subphrases in the two sentences (e.g. stale bread
+where CEAction is the cross-entropy loss over each action
+                                                                       and ε bread in the example above) We hypothesize that if
+token prediction over the complete action sequence.
+                                                                       we teach BERT to fully represent this information using IIT,
+Multi-task Objectives Similar to MNIST-PVR, we train                   the task will be solved perfectly.
+small models to predict the position offsets between the
+                                                                       Symbolic causal structure
+target and the agent from the aligned neural representations.
+Specifically, for each V ∈ {TSize , TColor , TShape , Px∆ , Py∆ },     Geiger et al. (2020) define a causal model that computes
+                                 Inducing Causal Structure for Interpretable Neural Networks
+
+the relation between aligned phrases in order to compute
+the relation between two sentences. We narrow our focus to
+                 QPObj
+the submodel CNatLog   , which (1) contains a single interme-
+diate variable QPObj that computes the relation between the
+quantified verb phrase (= adverb + verb + quantified object
+noun phrase) of each sentence, and (2) uses this to infer the
+relation between the two sentences. To label the MQNLI
+                    QPObj
+example above, CNatLog     would compute that QPObj = @
+because “happily eats ε some stale bread” entails “eat ε
+some ε bread”. Then, this information is used infer that the
+relation between the sentences is contradiction.
+Systematic Generalization The train-test split of MQNLI
+is constructed to be as difficult as possible while still being      Figure 4. Performance of a pretrained BERT natural language in-
+solved by a compositional memorization-based learning                ference model fine-tuned on the MQNLI dataset with the causal
+                                                                               QPObj
+model. This makes the task hard, but fair.                           model CNatLog   from Geiger et al. (2020). We report the results
+                                                                     on the evaluation set. While data augmentation leads to consis-
+Neural Network We fine-tune a pretrained BERT model                  tently excellent behavior accuracy (left) panel, it has very low
+  θ
+NNLI  on MQNLI. The architecture consists of 12 trans-               interchange intervention accuracy. In other words, IIT is necessary
+former layers that create a neural representations for each          for an interpretable model with high-performance.
+token in the input; the grid of neural representations has a
+column for each token and a row for each layer.
+                                                                     cases where performing an intervention on the neural model
+Alignments In our experiments, we align QPObj with the                                                                    QPObj
+                                                                     produced a same change in output as the submodel CNatLog   .
+neural representations above the verb in the first sentence
+from BERT layers {0, 2, 4, 6, 8, 10}.                                Our results, shown in figure 4, demonstrate that IIT training
+                                                                          QPObj
+                                                     QPObj           on CNatLog  solves MQNLI with near perfect accuracy and
+Interchange intervention training For QPObj in CNatLog
+                           θ
+                                                                     IIT accuracy (≈100%). Furthermore, we see that aligning
+aligned with neurons N in NNLI , we introduce an IIT objec-          QPObj to the first few layers of BERT results in lower ac-
+tive that optimizes for NNLI implementing the marginalized           curacy on MQNLI, with layer 6 and onward resulting in
+              QPObj
+submodel CNatLog    :                                                near perfect accuracy and interchange intervention accuracy.
+      X                                                             When QPObj is aligned with layer 6 or later, we again see
+                             θ                                       multi-task training synergizing with IIT to produce the best
+               CE I NT I NV(NNLI , b, s, N),
+   b,s∈MQNLI                      QPObj
+                                                                    models.
+                       I NT I NV(CNatLog , b, s, QPObj )    (11)
+                                                                     Data augmentation results in models with perfect behavioral
+                                                            ϕ        performance. This is unsurprising, as data augmentation
+Multi-task Objectives We train a linear classifier P            to
+predict the value of QPObj with loss:                                removes the out-of-domain generalization problem. IIT is
+                                                                     needed to produce a model with an interpretable solution.
+     X         
+                                θ
+             CE P ϕ (G ET VALS(NNLI , i, N),
+   i∈MQNLI                         QPObj
+                                                                    7. Conclusion
+                        G ET VALS(CNatLog , i, QPObj )      (12)
+                                                                     We introduced interchange intervention training as a method
+where the trained parameters are θ, the parameters of BERT,          to imbue neural networks with interpretable, systematic
+and ϕ, the parameters of the classifier.                             causal structure, and we conducted three case studies with
+Data Augmentation We perform data augmentation by ran-               IIT: a vision task (MNIST-PVR), a grounded language un-
+domly sampling two examples and replacing the quantified             derstanding task (ReaSCAN), and a natural language infer-
+verb phrase from the first example with those from the sec-          ence task (MQNLI). In all settings, models trained with IIT
+ond in order to produce a new example that is then labeled           perform best in standard (but very challenging) behavioral
+        QPObj                                                        evaluations and prove to be the most interpretable in the
+with CNatLog  . This procedure is guided by the same causal
+                                                                     sense that they conform best to our high-level causal models
+structure used by our other models, but it is by definition
+                                                                     of the tasks. In addition, our results show that IIT is easily
+restricted to input manipulations.
+                                                                     combined with multi-task objectives that further strengthen
+Results We compute the accuracy on the basic behavioral              the results. These initial findings suggest that IIT is a flex-
+task of predicting MQNLI labels, and interchange interven-           ible and powerful way to bring high-level insights about
+tion (IIT) accuracy, where we compute the percentage of              causal structure into a data-driven learning process.
+                                Inducing Causal Structure for Interpretable Neural Networks
+
+References                                                        BlackboxNLP: Analyzing and Interpreting Neural Net-
+                                                                  works for NLP, pp. 276–286, Florence, Italy, August
+Bau, D., Zhu, J., Strobelt, H., Zhou, B., Tenenbaum,
+                                                                  2019. Association for Computational Linguistics. doi:
+  J. B., Freeman, W. T., and Torralba, A. GAN dissec-
+                                                                  10.18653/v1/W19-4828. URL https://www.aclweb.
+  tion: Visualizing and understanding generative adver-
+                                                                  org/anthology/W19-4828.
+  sarial networks. In 7th International Conference on
+  Learning Representations, ICLR 2019, New Orleans,             Crawshaw, M. Multi-task learning with deep neural net-
+  LA, USA, May 6-9, 2019. OpenReview.net, 2019. URL               works: A survey. CoRR, abs/2009.09796, 2020. URL
+  https://openreview.net/forum?id=Hyg X2C5FX.                     https://arxiv.org/abs/2009.09796.
+Beckers, S. and Halpern, J. Y. Abstracting causal mod-          Csordás, R., van Steenkiste, S., and Schmidhuber, J. Are
+  els. Proceedings of the AAAI Conference on Artificial           neural nets modular? inspecting functional modularity
+  Intelligence, 33(01):2678–2685, Jul. 2019. doi: 10.1609/        through differentiable weight masks. In 9th Interna-
+  aaai.v33i01.33012678. URL https://ojs.aaai.org/                 tional Conference on Learning Representations, ICLR
+  index.php/AAAI/article/view/4117.                               2021, Virtual Event, Austria, May 3-7, 2021. Open-
+                                                                  Review.net, 2021. URL https://openreview.net/
+Beckers, S., Eberhardt, F., and Halpern, J. Y. Approximate
+                                                                  forum?id=7uVcpu-gMD.
+  causal abstractions. In Adams, R. P. and Gogate, V. (eds.),
+  Proceedings of The 35th Uncertainty in Artificial Intel-      Elazar, Y., Ravfogel, S., Jacovi, A., and Goldberg, Y. Am-
+  ligence Conference, volume 115 of Proceedings of Ma-            nesic probing: Behavioral explanation with amnesic coun-
+  chine Learning Research, pp. 606–615, Tel Aviv, Israel,         terfactuals. In Proceedings of the 2020 EMNLP Work-
+  22–25 Jul 2020. PMLR. URL http://proceedings.                   shop BlackboxNLP: Analyzing and Interpreting Neural
+  mlr.press/v115/beckers20a.html.                                 Networks for NLP. Association for Computational Lin-
+                                                                  guistics, November 2020. doi: 10.18653/v1/W18-5426.
+Besserve, M., Mehrjou, A., Sun, R., and Schölkopf, B.
+  Counterfactuals uncover the modular structure of deep         Erion, G., Janizek, J. D., Sturmfels, P., Lundberg, S. M.,
+  generative models. In 8th International Conference              and Lee, S.-I. Improving performance of deep learning
+  on Learning Representations, ICLR 2020, Addis Ababa,            models with axiomatic attribution priors and expected
+  Ethiopia, April 26-30, 2020. OpenReview.net, 2020. URL          gradients. Nature Machine Intelligence, 3(7):620–631,
+  https://openreview.net/forum?id=SJxDDpEKvH.                     2021. doi: 10.1038/s42256-021-00343-w. URL https:
+                                                                  //doi.org/10.1038/s42256-021-00343-w.
+Binder, A., Montavon, G., Bach, S., Müller, K., and Samek,
+  W. Layer-wise relevance propagation for neural networks       Feder, A., Oved, N., Shalit, U., and Reichart, R. CausaLM:
+  with local renormalization layers. CoRR, abs/1604.00825,        Causal Model Explanation Through Counterfactual Lan-
+  2016. URL http://arxiv.org/abs/1604.00825.                      guage Models. Computational Linguistics, pp. 1–54, 05
+                                                                  2021. ISSN 0891-2017. doi: 10.1162/coli a 00404. URL
+Chalupka, K., Eberhardt, F., and Perona, P. Multi-level           https://doi.org/10.1162/coli a 00404.
+  cause-effect systems. In Gretton, A. and Robert, C. C.
+  (eds.), Proceedings of the 19th International Conference      Fukushima, K. and Miyake, S. Neocognitron: A self-
+  on Artificial Intelligence and Statistics, volume 51 of         organizing neural network model for a mechanism of
+  Proceedings of Machine Learning Research, pp. 361–              visual pattern recognition. In Competition and coopera-
+  369, Cadiz, Spain, 09–11 May 2016. PMLR. URL http:              tion in neural nets, pp. 267–285. Springer, 1982.
+  //proceedings.mlr.press/v51/chalupka16.html.
+                                                                Geiger, A., Cases, I., Karttunen, L., and Potts, C. Pos-
+Chattopadhyay, A., Manupriya, P., Sarkar, A., and Bal-            ing fair generalization tasks for natural language infer-
+  asubramanian, V. N. Neural network attributions: A              ence. In Proceedings of the 2019 Conference on Em-
+  causal perspective. In Chaudhuri, K. and Salakhut-              pirical Methods in Natural Language Processing and
+  dinov, R. (eds.), Proceedings of the 36th Interna-              the 9th International Joint Conference on Natural Lan-
+  tional Conference on Machine Learning, volume 97 of             guage Processing (EMNLP-IJCNLP), pp. 4475–4485,
+  Proceedings of Machine Learning Research, pp. 981–              Stroudsburg, PA, November 2019. Association for Com-
+  990, Long Beach, California, USA, 09–15 Jun 2019.               putational Linguistics. doi: 10.18653/v1/D19-1456. URL
+  PMLR. URL http://proceedings.mlr.press/v97/                     https://www.aclweb.org/anthology/D19-1456.
+  chattopadhyay19a.html.
+                                                                Geiger, A., Richardson, K., and Potts, C. Neural nat-
+Clark, K., Khandelwal, U., Levy, O., and Manning, C. D.           ural language inference models partially embed theo-
+  What does BERT look at? an analysis of BERT’s at-               ries of lexical entailment and negation. In Proceed-
+  tention. In Proceedings of the 2019 ACL Workshop                ings of the Third BlackboxNLP Workshop on Analyz-
+                              Inducing Causal Structure for Interpretable Neural Networks
+
+  ing and Interpreting Neural Networks for NLP, pp. 163–     Jacovi, A. and Goldberg, Y. Towards faithfully inter-
+  173, Online, November 2020. Association for Computa-         pretable NLP systems: How should we define and eval-
+  tional Linguistics. doi: 10.18653/v1/2020.blackboxnlp-1.     uate faithfulness?    In Proceedings of the 58th An-
+  16. URL https://www.aclweb.org/anthology/2020.               nual Meeting of the Association for Computational Lin-
+  blackboxnlp-1.16.                                            guistics, pp. 4198–4205, Online, July 2020. Associa-
+                                                               tion for Computational Linguistics. doi: 10.18653/v1/
+Geiger, A., Lu, H., Icard, T., and Potts, C. Causal ab-        2020.acl-main.386. URL https://www.aclweb.org/
+  stractions of neural networks. In Advances in Neural         anthology/2020.acl-main.386.
+  Information Processing Systems, 2021. URL https:
+ //arxiv.org/abs/2109.08994.                                 Kaushik, D., Hovy, E. H., and Lipton, Z. C. Learning the
+                                                               difference that makes a difference with counterfactually-
+Giulianelli, M., Harding, J., Mohnert, F., Hupkes, D., and     augmented data. CoRR, abs/1909.12434, 2019. URL
+  Zuidema, W. Under the hood: Using diagnostic classi-         http://arxiv.org/abs/1909.12434.
+  fiers to investigate and improve how language models
+                                                             Kingma, D. P. and Ba, J. Adam: A method for stochastic
+  track agreement information. In Proceedings of the 2018
+                                                               optimization. In ICLR (Poster), 2015.
+  EMNLP Workshop BlackboxNLP: Analyzing and Inter-
+  preting Neural Networks for NLP, pp. 240–248, Brus-
+                                                             Lake, B. and Baroni, M. Generalization without systematic-
+  sels, Belgium, November 2018. Association for Compu-
+                                                               ity: On the compositional skills of sequence-to-sequence
+  tational Linguistics. doi: 10.18653/v1/W18-5426. URL
+                                                               recurrent networks. In International Conference on Ma-
+  https://www.aclweb.org/anthology/W18-5426.
+                                                               chine Learning, pp. 2873–2882. PMLR, 2018.
+He, K., Zhang, X., Ren, S., and Sun, J. Deep residual        LeCun, Y., Cortes, C., and Burges, C. Mnist hand-
+  learning for image recognition. In 2016 IEEE Conference      written digit database. ATT Labs [Online]. Available:
+  on Computer Vision and Pattern Recognition (CVPR), pp.       http://yann.lecun.com/exdb/mnist, 2, 2010.
+  770–778, 2016. doi: 10.1109/CVPR.2016.90.
+                                                             Lipton, Z. C. The mythos of model interpretability: In
+Hewitt, J. and Liang, P. Designing and interpreting probes     machine learning, the concept of interpretability is both
+  with control tasks. In Proceedings of the 2019 Con-          important and slippery. Queue, 16(3):31–57, jun 2018.
+  ference on Empirical Methods in Natural Language             ISSN 1542-7730. doi: 10.1145/3236386.3241340. URL
+  Processing and the 9th International Joint Conference        https://doi.org/10.1145/3236386.3241340.
+  on Natural Language Processing (EMNLP-IJCNLP),
+  pp. 2733–2743, Hong Kong, China, November 2019.            Liu, Q., Kusner, M., and Blunsom, P. Counterfactual data
+  Association for Computational Linguistics. doi: 10.          augmentation for neural machine translation. In Pro-
+ 18653/v1/D19-1275. URL https://www.aclweb.org/                ceedings of the 2021 Conference of the North Ameri-
+  anthology/D19-1275.                                          can Chapter of the Association for Computational Lin-
+                                                               guistics: Human Language Technologies, pp. 187–197,
+Hitchcock, C. The intransitivity of causation revealed in      Online, June 2021. Association for Computational Lin-
+  equations and graphs. Journal of Philosophy, 98(6):273–      guistics. doi: 10.18653/v1/2021.naacl-main.18. URL
+  299, 2001.                                                   https://aclanthology.org/2021.naacl-main.18.
+
+                                                             Meng, K., Bau, D., Andonian, A., and Belinkov, Y. Locating
+Hudson, D. A. and Manning, C. D. Compositional atten-
+                                                              and editing factual associations in gpt, 2022. URL https:
+  tion networks for machine reasoning. In International
+                                                              //arxiv.org/abs/2202.05262.
+ Conference on Learning Representations, 2018.
+                                                             Pearl, J. Causality: Models, Reasoning and Inference. Cam-
+Hupkes, D., Veldhoen, S., and Zuidema, W. H. Visu-             bridge University Press, USA, 2nd edition, 2009. ISBN
+  alisation and ’diagnostic classifiers’ reveal how recur-     052189560X.
+  rent and recursive neural networks process hierarchi-
+  cal structure. J. Artif. Intell. Res., 61:907–926, 2018.   Perez, L. and Wang, J. The effectiveness of data augmenta-
+  doi: 10.1613/jair.1.11196. URL https://doi.org/10.           tion in image classification using deep learning. CoRR,
+ 1613/jair.1.11196.                                            abs/1712.04621, 2017. URL http://arxiv.org/abs/
+                                                               1712.04621.
+Imbens, G. W. and Rubin, D. B. Causal inference in statis-
+  tics, social, and biomedical sciences. Cambridge Univer-   Peters, M., Neumann, M., Zettlemoyer, L., and Yih, W.-t.
+  sity Press, 2015.                                            Dissecting contextual word embeddings: Architecture
+                                Inducing Causal Structure for Interpretable Neural Networks
+
+  and representation. In Proceedings of the 2018 Confer-        Soulos, P., McCoy, R. T., Linzen, T., and Smolensky, P.
+  ence on Empirical Methods in Natural Language Pro-              Discovering the compositional structure of vector rep-
+  cessing, pp. 1499–1509, Brussels, Belgium, October-             resentations with role learning networks. In Proceed-
+  November 2018. Association for Computational Lin-               ings of the Third BlackboxNLP Workshop on Analyz-
+  guistics. doi: 10.18653/v1/D18-1179. URL https:                 ing and Interpreting Neural Networks for NLP, pp. 238–
+  //www.aclweb.org/anthology/D18-1179.                            254, Online, November 2020. Association for Computa-
+                                                                  tional Linguistics. doi: 10.18653/v1/2020.blackboxnlp-1.
+Pryzant, R., Card, D., Jurafsky, D., Veitch, V., and Sridhar,     23. URL https://www.aclweb.org/anthology/2020.
+  D. Causal effects of linguistic properties. In NAACL,           blackboxnlp-1.23.
+  2021.
+                                                                Spirtes, P., Glymour, C. N., and Scheines, R. Causation,
+Ravfogel, S., Elazar, Y., Gonen, H., Twiton, M., and Gold-        Prediction, and Search. MIT Press, 2nd edition, 2001.
+  berg, Y. Null it out: Guarding protected attributes by        Springenberg, J., Dosovitskiy, A., Brox, T., and Riedmiller,
+  iterative nullspace projection. In Proceedings of the 58th      M. Striving for simplicity: The all convolutional net.
+  Annual Meeting of the Association for Computational             CoRR, 12 2014.
+  Linguistics, pp. 7237–7256, Online, July 2020. Associ-
+  ation for Computational Linguistics. doi: 10.18653/v1/        Sundararajan, M., Taly, A., and Yan, Q. Axiomatic attri-
+  2020.acl-main.647. URL https://www.aclweb.org/                  bution for deep networks. In Precup, D. and Teh, Y. W.
+  anthology/2020.acl-main.647.                                    (eds.), Proceedings of the 34th International Conference
+                                                                  on Machine Learning, volume 70 of Proceedings of Ma-
+Ravichander, A., Belinkov, Y., and Hovy, E. Probing the           chine Learning Research, pp. 3319–3328, International
+  probing paradigm: Does probing accuracy entail task             Convention Centre, Sydney, Australia, 06–11 Aug 2017.
+  relevance?, 2020.                                               PMLR. URL http://proceedings.mlr.press/v70/
+                                                                  sundararajan17a.html.
+Rubenstein, P. K., Weichwald, S., Bongers, S., Mooij,
+                                                                Tenney, I., Das, D., and Pavlick, E. BERT rediscov-
+  J. M., Janzing, D., Grosse-Wentrup, M., and Schölkopf,
+                                                                  ers the classical NLP pipeline. In Proceedings of the
+  B. Causal consistency of structural equation mod-
+                                                                  57th Annual Meeting of the Association for Computa-
+  els. In Proceedings of the 33rd Conference on Uncer-
+                                                                  tional Linguistics, pp. 4593–4601, Florence, Italy, July
+  tainty in Artificial Intelligence (UAI). Association for
+                                                                  2019. Association for Computational Linguistics. doi:
+  Uncertainty in Artificial Intelligence (AUAI), August
+                                                                  10.18653/v1/P19-1452. URL https://www.aclweb.
+  2017. URL http://auai.org/uai2017/proceedings/
+                                                                  org/anthology/P19-1452.
+  papers/11.pdf. *equal contribution.
+                                                                Vig, J., Gehrmann, S., Belinkov, Y., Qian, S., Nevo, D.,
+Ruder, S. An overview of multi-task learning in deep neural       Singer, Y., and Shieber, S. Causal mediation analysis for
+  networks. CoRR, abs/1706.05098, 2017. URL http:                 interpreting neural nlp: The case of gender bias, 2020.
+  //arxiv.org/abs/1706.05098.
+                                                                Wu, Z., Kreiss, E., Ong, D. C., and Potts, C. ReaS-
+Ruis, L., Andreas, J., Baroni, M., Bouchacourt, D., and          CAN: Compositional reasoning in language grounding.
+  Lake, B. M. A benchmark for systematic generalization          NeurIPS 2021 Datasets and Benchmarks Track, 2021.
+  in grounded language understanding. Advances in Neural         URL https://arxiv.org/abs/2109.08994.
+  Information Processing Systems, 33, 2020.                     Zeiler, M. D. and Fergus, R. Visualizing and understanding
+                                                                  convolutional networks. In Fleet, D., Pajdla, T., Schiele,
+Schuster, M. and Paliwal, K. K. Bidirectional recurrent           B., and Tuytelaars, T. (eds.), Computer Vision – ECCV
+  neural networks. IEEE transactions on Signal Processing,        2014, pp. 818–833, Cham, 2014. Springer International
+  45(11):2673–2681, 1997.                                         Publishing. ISBN 978-3-319-10590-1.
+Shorten, C. and Khoshgoftaar, T. M. A survey on image           Zhang, C., Raghu, M., Kleinberg, J. M., and Bengio, S.
+  data augmentation for deep learning. Journal of Big Data,       Pointer value retrieval: A new benchmark for understand-
+  6:1–48, 2019.                                                   ing the limits of neural network generalization. CoRR,
+                                                                  abs/2107.12580, 2021. URL https://arxiv.org/abs/
+Shrikumar, A., Greenside, P., Shcherbina, A., and Kun-            2107.12580.
+  daje, A. Not just a black box: Learning important fea-
+                                                                Zhang, Y. and Yang, Q. A survey on multi-task learning.
+  tures through propagating activation differences. CoRR,
+                                                                  CoRR, abs/1707.08114, 2017. URL http://arxiv.org/
+  abs/1605.01713, 2016. URL http://arxiv.org/abs/
+                                                                  abs/1707.08114.
+  1605.01713.
+                                   Inducing Causal Structure for Interpretable Neural Networks
+
+A. Zero Loss Entails Causal Abstraction                            Split                 #Train      #Dev     #Test     #Zero-shot
+
+Claim Suppose we have a loss function L OSS that outputs           A1: novel color       76,102     3,816     3,774          7,195
+                                                                   A2: novel size        76,102     3,816     3,774          7,227
+a non-negative value. If L OSS(x, y) = 0 ⇒ x = κ(y), then          B1: novel direction   34,343     1,201       357          8,282
+the interchange intervention loss being zero guarantees that       B2: novel length      52,662     4,250     4,250          1,338
+then causal model C is a causal abstraction of the neural
+network N θ .                                                          Table 2. Statistics of all splits in our ReaSCAN dataset.
+Proof Suppose that
+                  
+    X
+             L OSS I NT I NV(C, b, s, V ),                         for the novel length split, as the allowed command pattern is
+   b,s∈VIn                                                        much smaller for this split, since we exclude all other verbs
+                       I NT I NV(N θ , b, s, Π(V )) = 0 (13)       except “walk to”.
+                                                                   The ReaSCAN dataset generation procedure leads to some
+Because our loss function outputs non-negative numbers,
+                                                                   artifacts, which are discussed in its original paper in detail.
+we know that, if the sum Eqn. 4 is 0, then each addend in
+                                                                   These are not especially relevant for our experiments.
+the sum is 0:
+                                                                  The data generation process takes approximately 30 min-
+   ∀ b, s ∈ VIn : L OSS I NT I NV(C, b, s, V ),                    utes on a multi-CPU cluster. Although we generate our
+                                                                  own datasets from an existing data generation engine, our
+                     I NT I NV(N θ , b, s, Π(V )) = 0 (14)         training paradigm can be extended to solve existing datasets.
+
+Because our loss function is such that L OSS(x, y) = 0 ⇒           Experiment Set-up
+x = κ(y), we conclude:                                             For our CNN-LSTM, we adapt code from the original repos-
+                                                                   itory.3 For all training objectives, we optimize for cross-
+  ∀ b, s ∈ VIn : I NT I NV(C, b, s, V ) =                          entropy loss using Adam with default parameters (Kingma
+                          κ(I NT I NV(N θ , b, s, Π(V )))   (15)   & Ba, 2015). The learning rate starts at 1e−4 and decays
+                                                                   by 0.9 every 20,000 steps. We train the model for a fixed
+This is exactly the condition for abstraction in Eqn. 2.           number of epochs (100,000) before stopping. The best
+                                                                   model is picked by performance on a smaller development
+B. ReaSCAN                                                         set of 2,000 examples, which is consistent with the training
+                                                                   pipeline proposed in Ruis et al. (2020) for gSCAN. The
+Dataset Generation                                                 training time is about 1 day on a Standard GeForce RTX
+                                                                   2080 Ti GPU with 11GB memory. To foster reproducibility,
+Table 2 shows dataset statistics. For the novel color and
+                                                                   we release our adapted evaluation scripts in our code reposi-
+novel size splits, we only train a single model which uses
+                                                                   tory. We repeat each experiment with three distinct random
+the same training set, but test on different testing sets, as
+                                                                   seeds to ensure a fair comparison.
+discussed in section 5. For the novel color, novel size and
+novel length splits, we use the ReaSCAN framework2 to              Training Procedure We release implementations for our
+generate Simple commands without any relative clause as            neural models with our symbolic causal structures in our
+discussed in its original paper (Wu et al., 2021). For the         code repository. Our released symbolic causal structures
+novel color and novel size splits, we have allowed verbs =         for solving ReaSCAN is not unique, and may not be the
+{“walk to”, “push”, “pull”}, and allowed adverbs = {“while         optimal one for improving generalizability. Additionally,
+zigzagging”, “while spinning”, “cautiously”, “hesitantly”}.        our variable mappings between two models are not unique.
+For the novel direction and novel length splits, we have al-       Ideally, a chosen casual variable can be mapped into any
+lowed verbs = {“walk to”}, and we disallow adverbs, as we          hidden states in the neural model. However, we find that
+are focusing on action length generalization, not command          the specific mapping chosen substantially affects model
+generalization.                                                    performance and generalizability.
+Our split B1 is derived from gSCAN with its novel direction        In contrast to a standard training pipeline, which takes in a
+testing split (Ruis et al., 2020), as the ReaSCAN framework        single input, our IIT takes pairs of examples as inputs. We
+cannot partition splits by relative agent-to-target direction.     found that the formulation of the pairs affects performance.
+We set 200 grid worlds per command for the novel color and         We leave this for future research into the effects of example
+novel size splits, and we set 1200 grid worlds per command         pairing on model performance.
+   2                                                                  3
+     The implementation is adapted from ReaSCAN’s public code           https://github.com/LauraRuis/multimodal seq2seq
+repository: https://github.com/frankaging/Reason-SCAN.             gSCAN
+                                 Inducing Causal Structure for Interpretable Neural Networks
+
+Generalization Splits To evaluate the generalization power         sentences. Only the QPObj labels are used to introduce IIT
+of models, ReaSCAN includes testing examples that are              and multi-task training objectives.
+systematically different from training examples. Specifi-
+cally, ReaSCAN generates unseen testing patterns to assess         Models For BERT, we use the same model architecture
+whether models can generalize to unseen composites of seen         for the uncased-base variant, with 12 layers and a hidden
+concepts in a zero-shot setting. We now describe each split        size of 768.
+in detail.
+                                                                   For the linear classifier that predicts the value of QPObj
+Novel Color Attribute (Novel color) allows models to see           given a neural representation, we use a similar model as the
+“yellow circle” (6,127 examples) and “red square” (6,111           probes used in Geiger et al. (2020). It is a single-layer soft-
+examples) during training but never allows any commands            max classifier: y ∝ softmax(Ah + b) where h is a hidden
+containing “yellow square” during training, and evaluates          representation and y is the predicted probability distribution
+models with commands containing “yellow square” during             of each class of QPObj . Following Hewitt & Liang (2019),
+test time.                                                         to control the dimensionality of A, we factorize it in the
+                                                                   form A = LR where L ∈ R|QPObj |×` and R ∈ R`×d where
+Novel Size Attribute (Novel size) holds out all commands
+                                                                   d is the dimensionality of h. We choose ` = 32.
+referring to small cylinders in any color, meaning that mod-
+els have not seen commands containing phrases such as
+“small cylinder” or “small yellow cylinder” during training.       Training Procedure We use a batch size of 32. We use
+On the other hand, models have seen commands containing            5.0 × 10−5 as our learning rate, and use adamw optimization.
+“big cylinder” (2,020 examples) or “small square” (2,093           We train for a maximum of 5 epochs. We warm up the
+examples). At test time, models need to generalize to the          learning rate linearly from 0 to the specified value in the
+hold-out examples.                                                 first 50% of steps of the first epoch, and linearly decrease
+                                                                   the learning rate to 0 following that until the end of training.
+Novel Direction (Novel direction) holds out any command
+and grid world pair where the referred target is initially         To construct each batch sample during training, we ran-
+located at the south west (SW) of the agent. At test time,         domly pick two samples from the MQNLI dataset. We
+models need to generate action sequence to reach to the            construct the augmented input by replacing the quantified
+target which is located SW of the agent. As our agent is           verb phrase in the first example with that in the second one.
+always facing to the right (i.e., east) in the beginning, models   For counterfactual training, we use antra package, which is
+need to generate action sequences containing three “turn           built off of the implementation in Geiger et al. (2020), which
+left” actions in order to reach any target positioning at SW       we construct an intervention with the first example as the
+of the agent.                                                      base, and the second example as the intervention source. For
+                                                                   multi-task training, we only use the hidden representation of
+Novel Action Sequence Length (Novel length) holds out              the first example as input to the linear classifier. We sample
+any command and grid world pair that requires models to            50000 base examples from the train set of MQNLI. For each
+predict action sequence that contains more than 10 actions.        base example we sample 20 intervention sources, and try to
+At test time, models need to generalize to examples that           ensure that 10 of them will be able to construct impactful
+require 11, 12, or 13 actions to reach at the target.              interventions with the base example, i.e. the logical model
+                                                                     QPObj
+CNN-LSTM The encoder contains two parts, a convolu-                CNatLog   computes that doing an intervention will change the
+tional network (CNN) (Fukushima & Miyake, 1982) for en-            final label. We use the same 50000 × 20 = 1M pairs for
+coding the grid world and a bi-directional LSTM (Schuster          each training epoch.
+& Paliwal, 1997; Hudson & Manning, 2018) for encoding                                             QPObj
+                                                                   We use the logical model CNatLog     as our oracle to obtain
+the command. The decoder is a LSTM with cross-modalitiy
+                                                                   all of the labels for the base output, counterfactual output,
+attention weights over the command and the grid world.
+                                                                   augmented output, and the value of QPObj used for the linear
+                                                                   classifier. For each of the experiment settings (base, IIT,
+C. Experiment Details of Multiply Quantified                       IIT+multitask, augment, multitask), we always assign a
+   Natural Language Inference (MQNLI)                              weight of 1.0 to the base objective plus each additional
+                                                                   objective, e.g. IIT + multitask uses a weight of 1.0 for each
+Dataset For our experiments, we used a train set with              of base, IIT and multitask.
+500K examples, a dev set with 60k examples, and a test
+set with 10K examples – the most difficult generalization
+scheme of Geiger et al. (2019). Unlike Geiger et al. (2020)
+we do not include extra augmented examples consisting of
+subphrases with labeled relations, but only include complete
+                                 Inducing Causal Structure for Interpretable Neural Networks
+
+
+
+
+                                                “pull to the red cylinder                 “push the small green
+             “walk the cylinder”
+                                                    while zigzagging”                     cylinder hesitantly”
+
+
+                                                'walk', 'turn left', 'walk',
+                                                                                       'turn left', 'turn left',
+                                                 'turn right', 'walk', 'turn
+            'turn left', 'turn left',                                                   'walk', 'stay', 'walk',
+                      'walk'
+                                                    left', 'walk', 'walk',
+                                                        'pull', 'pull'
+                                                                                        'stay', 'walk', 'stay'
+
+
+
+Figure 5. ReaSCAN examples with varying command patterns. The navigation commands and the target action sequences are in the grey
+boxes and green boxes respectively.
+

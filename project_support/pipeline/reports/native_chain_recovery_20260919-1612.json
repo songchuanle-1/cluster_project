@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "scope": "Event recovery of the interrupted 15:07 native-chain validation; no model forward, native score, queue mutation, training launch, admission, or efficacy claim",
+  "generated_at": "2026-09-19T16:12:15+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T16:11:28+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "memory_total_mib": 81559,
+    "memory_used_mib": 62483,
+    "memory_free_mib": 18597,
+    "utilization_percent": 93,
+    "process_count_on_gpu": 2,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_memory_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_memory_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_snapshot_progress": {
+    "observed_at": "2026-09-19T16:07:10+08:00",
+    "source": ".tick_context preflight",
+    "epoch": 23,
+    "total_epochs": 50,
+    "best_miou": 0.4918,
+    "no_improve": 0,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T16:11:28+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. Native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T17:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "recovered_artifact": {
+    "path": "pipeline/reports/referent_native_chain_selftest_20260919-1507.json",
+    "sha256": "90236f5a2f8111774b31a91e7da5aceaca994547bcdd68079af1b20b9d884aca",
+    "checks_passed": 6,
+    "source_entries": 12,
+    "source_hash_mismatches": 0,
+    "recovery_finding": "The interrupted 15:07 tick left a complete synthetic native-chain self-test with matching producer, projection, evaluator, coverage, and permutation-control hashes; the current 59-test contract suite passes."
+  },
+  "cpu_validation": {
+    "command": "python -m unittest test_referent_native_expression_producer_20260919 test_referent_object_rank_capture_20260919 test_referent_target_rank_evaluator_20260919 test_referent_query_coverage_control_20260919 test_referent_within_scene_permutation_20260919 test_referent_permutation_calibration_20260919",
+    "tests_passed": 59,
+    "tests_failed": 0
+  },
+  "native_capture_launched": false,
+  "recovery_status": "persisted"
+}

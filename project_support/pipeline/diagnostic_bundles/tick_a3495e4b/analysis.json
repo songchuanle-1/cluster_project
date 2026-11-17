@@ -1,0 +1,118 @@
+{
+  "observed_at": "2026-10-20T14:55:53.493116+00:00",
+  "candidate_id": "hierarchy-cross-leaf-physical-contact-exchange",
+  "revision": 3,
+  "outcome": "failed",
+  "failure_scope": "implementation",
+  "scientific_admission": false,
+  "human_authorization": {
+    "path": "pipeline/diagnostic_bundles/tick_a3495e4b/human_authorization.json",
+    "sha256": "2eaf2de7c9d9c40d2c0ec08ab41d581743c2d95a22c2d581ba1989abaee9f927"
+  },
+  "archival_repair": {
+    "path": "pipeline/diagnostic_bundles/tick_a3495e4b/archival_classification.json",
+    "sha256": "abf1f58c1d02f3204559af3f2d442d10997d6652340ee13cfd9a2aef88f60e9c"
+  },
+  "same_resource_input_sha256": "526079d667505fce5957a69797f328cf23fe42c34e1e9ddeca5a5deedbbccf90",
+  "resource_table": [
+    {
+      "target": "champion",
+      "parameters": 157484090,
+      "median_ms": 33.57898900139844,
+      "p90_ms": 36.78897410718491,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336,
+      "flops_g": 9.762532428
+    },
+    {
+      "target": "candidate",
+      "parameters": 157484090,
+      "median_ms": 465.4518660099711,
+      "p90_ms": 502.1686299020075,
+      "peak_allocated_bytes": 936763392,
+      "peak_reserved_bytes": 1191182336,
+      "flops_g": 9.762532428
+    }
+  ],
+  "latency_ratio_vs_fresh_M95": 13.861402021084874,
+  "latency_reduction_fraction_vs_R2": 0.2089608420423772,
+  "peak_allocated_ratio_vs_M95": 1.0,
+  "graph_controls": [
+    {
+      "case": "native_resource_geometry",
+      "exact_edge_arrays_equal": true,
+      "edges": [
+        4272
+      ],
+      "original_ms": 816.4117140113376,
+      "revised_ms": 364.7461209911853
+    },
+    {
+      "case": "cooccupied_multimembership_and_two_scenes",
+      "exact_edge_arrays_equal": true,
+      "edges": [
+        5,
+        3
+      ],
+      "original_ms": 0.12239099305588752,
+      "revised_ms": 0.17877299978863448
+    }
+  ],
+  "graph_exact": true,
+  "operator_maximum_error": 0.0,
+  "operator_equivalence_passed": true,
+  "full_source_controls": {
+    "full_source_identity_repeats": [
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 0.0
+      },
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 0.0
+      },
+      {
+        "language_max_abs": 0.0,
+        "inst_feats_max_abs": 0.0
+      }
+    ],
+    "full_source_row_permutation": {
+      "language_max_abs": 1.9073486328125e-06,
+      "inst_feats_max_abs": 2.86102294921875e-06
+    },
+    "deleted_contacts_vs_original_parent_gather": {
+      "language_max_abs": 0.0,
+      "inst_feats_max_abs": 2.86102294921875e-06
+    }
+  },
+  "maximum_full_source_error": 2.86102294921875e-06,
+  "frozen_tolerance": 1e-06,
+  "native_backward": {
+    "loss_forwards": 2,
+    "criterion_backwards": 1,
+    "finite_parameter_gradient_tensors": 642,
+    "all_observed_gradients_finite": true,
+    "inst_feats_change_vs_deleted": 0.5668866634368896
+  },
+  "interpretation": "Fixed pooling removes observed identity-repeat mismatch, but row and deleted-parent controls still fail. Language permutation error occurs before the bank in unchanged LIA; no attribution proof or numerical waiver. A passing local operator and finite gradients are not full-source admission or trained efficacy.",
+  "flops_caveat": "Original FVCore handlers unchanged. Unsupported new elementwise/sum/softmax and CSR operations are omitted; equal9.7625G does not establish zero added computation or lightweight Pareto pass.",
+  "baseline_harness_failure_preserved": {
+    "path": "pipeline/diagnostic_bundles/tick_a3495e4b/resources_champion_result.json",
+    "sha256": "5d438d70a7a00195eb8e6d3f0c8ab90ec204bf46deea45ad95640a0b466b901d"
+  },
+  "baseline_harness_repair": {
+    "path": "pipeline/diagnostic_bundles/tick_a3495e4b/m95_reference/harness_repair.json",
+    "sha256": "63d62a8f967f98fc7bdd76b288efba1c512b90cda7e5aa6f65d35394be6579ec"
+  },
+  "implementation_limitations": [
+    "Coincident physical centers are explicitly rejected; broader input coverage unverified",
+    "Full optimizer-state peak and original no-cluster resource delta unmeasured",
+    "Same2TRAINscenes/8expressions; population efficacy, harm, novelty and noise floor remain unknown"
+  ],
+  "additional_revisions_remaining": 0,
+  "new_training": 0,
+  "optimizer_steps": 0,
+  "commits": 0,
+  "production_deployment": false,
+  "next_action": "Park failed realization. No unchanged rerun or automatic fourth revision. A separate prediction-blind mainline diagnosis remains permitted but requires its own concrete independent evidence; no global exhaustion claim."
+}

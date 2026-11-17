@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "purpose": "cluster_resource_authorization",
+  "recorded_at": "2026-10-21T15:25:10.422833+00:00",
+  "source": "human",
+  "human_request": "gpu1可以使用",
+  "authorization_granted": true,
+  "owning_thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+  "project": "cluster_project",
+  "server": "server-4",
+  "host": "192.168.1.115",
+  "expected_hostname": "dl04-MS-7E06",
+  "allowed_gpus": [
+    0,
+    1
+  ],
+  "expected_gpu_uuids": {
+    "0": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "1": "GPU-7f82edb9-f620-8045-caea-a75232265cd1"
+  },
+  "max_tasks_per_gpu": 1,
+  "supersedes": "Prior GPU0-only restriction for server-4 GPU1 only; server-3/server-6 stay disabled",
+  "scope": "Existing cluster training and native diagnostics; prioritize SAME queued M206 full-checkpoint native resume on GPU1 while preserving M205 GPU0",
+  "no_cold_start_or_gate_schedule_data_changes": true,
+  "preflight": {
+    "path": "pipeline/manual_ops/20261021_gpu1_reenable_152505/initial_resource_checkpoint_check.json",
+    "sha256": "cab91e8122e4363d0ca24e515de76888d419db0288da91a76a63aace2ffe17c4"
+  }
+}

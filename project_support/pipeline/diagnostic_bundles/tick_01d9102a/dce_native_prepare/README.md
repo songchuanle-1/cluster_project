@@ -1,0 +1,7 @@
+# DCE native preparation
+
+Original M95 setup, fixed two natural TRAIN batches, criterion backward and optimizer once per batch, and entire original resources function are retained. Candidate observer captures the actual prepare/build, two mean and two exclusive-group calls, six Linear/GELU activations and original three skips→HCG→single inst/mask path. It returns original helper objects, never calls a learned/helper operator again or adds a backward. Detached captures only check subsequent cat and scatter references.
+
+Only the whole cavity aggregate original-loss finite/nonzero weight gradient and aggregate weight/module update are hard gates. Six map/edge/row/bias gradients and updates are descriptive; zero or unexercised individual map weights are legal. A fixed batch with no true supported path is INCONCLUSIVE before watches; no new singleton/multi-child coverage gate or resampling.
+
+Common dynamic names/shapes/count/hash exclude exactly original three FFN prefixes plus dec.cluster_att.cavity., retaining original three LN. Count is observed, not fixed. Original buffers/full RNG pairing not recorded. Source5c0c is actual childd0e2; runtime expectedd0e2. DRAFTFalse is reusable capability only;10 execution fields remain NULL and there is no native manifest/lease. Only a fresh reviewed catalogue, actual root owner/context/deadline, authorized idle GPU0 UUID, original assets and threeflocks may permit future execution. No native/resources or efficacy PASS is declared.

@@ -1,0 +1,519 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-21T02:17:42.632663+08:00",
+  "snapshot_generated_at": "2026-09-20T18:07:07.582253+00:00",
+  "resumed_due_ids": [
+    "referent-supervision-axis",
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/reports/host_preparation_progress_20260921-0115.json",
+      "sha256": "4cc058f72e178ad7d2676af5b19f980288400df0ec04b68d2d6be6a2d119f058"
+    },
+    {
+      "path": "pipeline/reports/saved_replay_migration_20260920-1015.json",
+      "sha256": "e9439c2ddd0f2913970a66353ca4e089014491ed5de66f3041f2fbc8143a4531"
+    },
+    {
+      "path": "pipeline/decisions/20260921-021714_other.md",
+      "sha256": "a652c078e148b02392ee4c6381064f2bf4850c53af5f5f0c4b06012f9eb3bb3b"
+    },
+    {
+      "path": "pipeline/goal.json",
+      "sha256": "4d645fb5c39f5dbd9e1a9d7773a86f1267e2d6637c22f1cf96ed8317d8ab1f38"
+    },
+    {
+      "path": "SERVERS.yaml",
+      "sha256": "4df853316bde84adef2adaf1f7dad63b0be8c57af011297d8154f5588893085c"
+    },
+    {
+      "path": "scripts/saved_dependency_inventory_20260921.py",
+      "sha256": "a606be9c0c764553656860abd84f1d5fd8178972b554f7d1410f9be307860761"
+    },
+    {
+      "path": "scripts/test_saved_dependency_inventory_20260921.py",
+      "sha256": "43cf0ae89f27f438b6bd3f7aed76886e69c52b10539e53a74dbb0dfb6a9e04ee"
+    },
+    {
+      "path": "scripts/persist_dependency_inventory_tick_20260921.py",
+      "sha256": "e3dca076a9d5ed35e468375b3740afbb274c7519fbe094b19f8ad1c67a6fd790"
+    },
+    {
+      "path": "scripts/relocated_native_factory_20260920.py",
+      "sha256": "4a1c3622a0033aa7d45009d4eb3fd4d8869454fa19ad9fb6759898441d2ddedb"
+    },
+    {
+      "path": "scripts/prepare_collation_handoff_20260921.py",
+      "sha256": "65d16b534699e58fdb81ee5a0b80ce62e2a86cc5255735dc6592e614d6575856"
+    },
+    {
+      "path": "scripts/bounded_collation_process_20260921.py",
+      "sha256": "99df935d9dd4c5d5b1e3e2842687b5c675ee78ac77e2b15db078e162ccfd6998"
+    },
+    {
+      "path": "Cluster/framework/__init__.py",
+      "sha256": "08a6daec10d4fb5e2599c9fe90d54001f06520c7e2119e8a92e17cc628f2b662"
+    },
+    {
+      "path": "Cluster/framework/dataset/__init__.py",
+      "sha256": "eb3f092f427ec70c62adfa5c7e4586335fbc925ea76d175ef33387f9fa4da33c"
+    },
+    {
+      "path": "Cluster/framework/dataset/scannetv2.py",
+      "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d"
+    },
+    {
+      "path": "Cluster/framework/lib/pointgroup_ops/__init__.py",
+      "sha256": "498642a22778538930c967721eda61c4eda5be6e5b0b85f95b0c9bc03ec402db"
+    },
+    {
+      "path": "Cluster/framework/lib/pointgroup_ops/pointgroup_ops.py",
+      "sha256": "33df62f4cea0b5a99e8e6346840b6ccdcf3703affa97fd26b613f7feef79a473"
+    }
+  ],
+  "connectivity": {
+    "server": "server-4",
+    "attempts": 1,
+    "returncode": 1,
+    "stderr": "ssh: connect to host 192.168.1.137 port 22: Connection refused",
+    "command": "ssh -o BatchMode=yes -o ConnectTimeout=10 -o ConnectionAttempts=1 songcl@192.168.1.137 hostname",
+    "evidence_basis": "Observed exec_command this tick; no scripted retry",
+    "runtime_verified": false,
+    "gpu_occupancy_verified": false
+  },
+  "dependency_audit": {
+    "contract": "saved-collation-static-requirements-v1",
+    "sources": [
+      {
+        "path": "framework/__init__.py",
+        "sha256": "08a6daec10d4fb5e2599c9fe90d54001f06520c7e2119e8a92e17cc628f2b662",
+        "imports": [
+          {
+            "module": "importlib",
+            "level": 0,
+            "names": [],
+            "line": 1
+          },
+          {
+            "module": "os",
+            "level": 0,
+            "names": [],
+            "line": 2
+          }
+        ],
+        "dynamic_imports": [
+          {
+            "line": 14,
+            "call": "importlib.import_module",
+            "literal": null,
+            "resolved": false
+          },
+          {
+            "line": 34,
+            "call": "importlib.import_module",
+            "literal": null,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "path": "framework/dataset/__init__.py",
+        "sha256": "eb3f092f427ec70c62adfa5c7e4586335fbc925ea76d175ef33387f9fa4da33c",
+        "imports": [
+          {
+            "module": "torch.utils.data",
+            "level": 0,
+            "names": [
+              "DataLoader"
+            ],
+            "line": 1
+          },
+          {
+            "module": "torch.utils.data.distributed",
+            "level": 0,
+            "names": [
+              "DistributedSampler"
+            ],
+            "line": 2
+          },
+          {
+            "module": "scannetv2",
+            "level": 1,
+            "names": [
+              "ScanNetDataset_sample_graph_edge"
+            ],
+            "line": 4
+          }
+        ],
+        "dynamic_imports": []
+      },
+      {
+        "path": "framework/dataset/scannetv2.py",
+        "sha256": "2fb59f598a05cd37cedbf883a5a47df02caf68e86776b097bfcb1d833b40829d",
+        "imports": [
+          {
+            "module": "glob",
+            "level": 0,
+            "names": [],
+            "line": 1
+          },
+          {
+            "module": "json",
+            "level": 0,
+            "names": [],
+            "line": 1
+          },
+          {
+            "module": "os",
+            "level": 0,
+            "names": [],
+            "line": 1
+          },
+          {
+            "module": "math",
+            "level": 0,
+            "names": [],
+            "line": 2
+          },
+          {
+            "module": "numpy",
+            "level": 0,
+            "names": [],
+            "line": 3
+          },
+          {
+            "module": "os.path",
+            "level": 0,
+            "names": [],
+            "line": 4
+          },
+          {
+            "module": "pointgroup_ops",
+            "level": 0,
+            "names": [],
+            "line": 5
+          },
+          {
+            "module": "scipy.interpolate",
+            "level": 0,
+            "names": [],
+            "line": 6
+          },
+          {
+            "module": "scipy.ndimage",
+            "level": 0,
+            "names": [],
+            "line": 7
+          },
+          {
+            "module": "torch",
+            "level": 0,
+            "names": [],
+            "line": 8
+          },
+          {
+            "module": "torch_scatter",
+            "level": 0,
+            "names": [],
+            "line": 9
+          },
+          {
+            "module": "torch.utils.data",
+            "level": 0,
+            "names": [
+              "Dataset"
+            ],
+            "line": 10
+          },
+          {
+            "module": "typing",
+            "level": 0,
+            "names": [
+              "Dict",
+              "Sequence",
+              "Tuple",
+              "Union"
+            ],
+            "line": 11
+          },
+          {
+            "module": "tqdm",
+            "level": 0,
+            "names": [
+              "tqdm"
+            ],
+            "line": 12
+          },
+          {
+            "module": "gorilla",
+            "level": 0,
+            "names": [
+              "is_main_process"
+            ],
+            "line": 13
+          },
+          {
+            "module": "dgl",
+            "level": 0,
+            "names": [],
+            "line": 14
+          },
+          {
+            "module": "scipy",
+            "level": 0,
+            "names": [
+              "sparse"
+            ],
+            "line": 15
+          },
+          {
+            "module": "sng_parser",
+            "level": 0,
+            "names": [],
+            "line": 16
+          },
+          {
+            "module": "torch_scatter",
+            "level": 0,
+            "names": [
+              "scatter_max",
+              "scatter_mean"
+            ],
+            "line": 17
+          },
+          {
+            "module": "transformers",
+            "level": 0,
+            "names": [
+              "RobertaTokenizerFast"
+            ],
+            "line": 18
+          }
+        ],
+        "dynamic_imports": []
+      },
+      {
+        "path": "framework/lib/pointgroup_ops/__init__.py",
+        "sha256": "498642a22778538930c967721eda61c4eda5be6e5b0b85f95b0c9bc03ec402db",
+        "imports": [
+          {
+            "module": "pointgroup_ops",
+            "level": 1,
+            "names": [
+              "ballquery_batch_p",
+              "bfs_cluster",
+              "get_iou",
+              "point_recover",
+              "roipool",
+              "sec_max",
+              "sec_mean",
+              "sec_min",
+              "voxelization",
+              "voxelization_idx"
+            ],
+            "line": 1
+          }
+        ],
+        "dynamic_imports": []
+      },
+      {
+        "path": "framework/lib/pointgroup_ops/pointgroup_ops.py",
+        "sha256": "33df62f4cea0b5a99e8e6346840b6ccdcf3703affa97fd26b613f7feef79a473",
+        "imports": [
+          {
+            "module": "torch",
+            "level": 0,
+            "names": [],
+            "line": 2
+          },
+          {
+            "module": "torch.autograd",
+            "level": 0,
+            "names": [
+              "Function"
+            ],
+            "line": 3
+          },
+          {
+            "module": "",
+            "level": 1,
+            "names": [
+              "pointgroup_ops_ext"
+            ],
+            "line": 6
+          }
+        ],
+        "dynamic_imports": []
+      }
+    ],
+    "direct_packages": [
+      "dgl",
+      "gorilla",
+      "numpy",
+      "scipy",
+      "sng_parser",
+      "torch",
+      "torch_scatter",
+      "tqdm",
+      "transformers"
+    ],
+    "local_package": "pointgroup_ops",
+    "native_extension": "pointgroup_ops.pointgroup_ops_ext",
+    "native_extension_requirements": [
+      "Resolve actual loaded extension path and hash on server-4.",
+      "Match project_cluster Python ABI, Torch ABI and shared-library dependencies.",
+      "Verify CPU voxelize_idx behavior inside the enforced scratch boundary.",
+      "Do not select an archived binary by filename alone or build while CUDA is hidden."
+    ],
+    "constructor_requirements": {
+      "required_assets": [
+        "roberta-base/merges.txt",
+        "roberta-base/tokenizer_config.json",
+        "roberta-base/vocab.json",
+        "scannetv2-labels.combined.tsv",
+        "scanrefer/ScanRefer_train_new.json",
+        "scanrefer/scene_graphs_new_train.json"
+      ],
+      "tokenizer_inventory": "Every existing file under roberta-base, including optional files.",
+      "scene_file_listing": {
+        "pattern": "scannetv2/train/*_refer.pth",
+        "minimum_entries": 1,
+        "contents_loaded_by_constructor": false,
+        "reason": "get_sp_filenames runs before TRAIN metadata and asserts nonempty."
+      },
+      "scene_graph_cache": "Must already exist; absent-cache path parses and writes.",
+      "data_source_policy": "Verify saved migration bytes before loading; never resample saved groups."
+    },
+    "scope": "Direct static imports and manually audited constructor requirements only.",
+    "native_environment_verified": false,
+    "external_dependency_attestation": false,
+    "native_execution_completed": false,
+    "scientific_validation_complete": false,
+    "admission": false,
+    "limitations": [
+      "Import names do not establish installed distribution names, versions or file hashes.",
+      "Transitive package imports, shared libraries and dynamic imports remain unresolved.",
+      "AST parsing includes nonexecuted branches and does not establish runtime reachability.",
+      "Stdlib classification uses the local interpreter, not the target Python runtime.",
+      "Constructor requirements are source-audited expectations, not destination observations.",
+      "A readable host root is not an exhaustive dependency boundary.",
+      "The original physical producer hash and saved registry are unchanged."
+    ]
+  },
+  "validation": {
+    "tests_run": 504,
+    "tests_passed": 500,
+    "skipped": [
+      {
+        "test": "test_descendant_pipe_is_closed_after_leader_exit (test_bounded_collation_process_20260921.ProcessTests.test_descendant_pipe_is_closed_after_leader_exit)",
+        "reason": "Linux process-group cleanup needs Linux"
+      },
+      {
+        "test": "test_symlink_source_rejected (test_pinned_diagnostic_imports_20260920.PinnedImportsTest.test_symlink_source_rejected)",
+        "reason": "Symlink creation unavailable: [WinError 1314] \u5ba2\u6237\u7aef\u6ca1\u6709\u6240\u9700\u7684\u7279\u6743\u3002: 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmp_a4u2qy6\\\\real.py' -> 'C:\\\\Users\\\\CHUANL~1\\\\AppData\\\\Local\\\\Temp\\\\tmp_a4u2qy6\\\\bundle\\\\_synthetic_pinned_producer.py'"
+      },
+      {
+        "test": "test_exception_removes_real_module_hook (test_geometry_torch_static_20260919.SyntheticTorchTest.test_exception_removes_real_module_hook)",
+        "reason": "Torch not installed locally"
+      },
+      {
+        "test": "test_strided_float_labels_real_module_hooks (test_geometry_torch_static_20260919.SyntheticTorchTest.test_strided_float_labels_real_module_hooks)",
+        "reason": "Torch not installed locally"
+      }
+    ],
+    "modules": [
+      "test_saved_dependency_inventory_20260921",
+      "test_prepare_collation_handoff_20260921",
+      "test_bounded_collation_process_20260921",
+      "test_host_collation_receipts_20260920",
+      "test_scratch_collation_launch_20260920",
+      "test_native_factory_bridge_20260920",
+      "test_relocated_native_factory_20260920",
+      "test_relocated_factory_core_20260920",
+      "test_same_child_collation_20260920",
+      "test_scratch_cpu_boundary_20260920",
+      "test_cpu_diagnostic_bootstrap_20260920",
+      "test_pinned_diagnostic_imports_20260920",
+      "test_native_saved_batch_validation_20260920",
+      "test_relocated_saved_collation_20260920",
+      "test_saved_physical_location_20260920",
+      "test_saved_replay_migration_20260920",
+      "test_recover_cpu_progress_20260920",
+      "test_probe_next_saved_replay_20260920",
+      "test_probe_next_physical_20260920",
+      "test_native_saved_geometry_driver_20260920",
+      "test_saved_geometry_replay_20260920",
+      "test_probe_saved_collation_20260920",
+      "test_probe_physical_items_20260920",
+      "test_stage_registry_diagnostic_20260920",
+      "test_remote_registry_inventory_20260920",
+      "test_registry_runner_cli_20260920",
+      "test_native_registry_geometry_runner_20260920",
+      "test_referent_registry_binding_20260919",
+      "test_referent_geometry_registry_20260919",
+      "test_geometry_torch_static_20260919",
+      "test_native_geometry_runtime_20260919",
+      "test_referent_geometry_capture_20260919",
+      "test_referent_geometry_control_20260919",
+      "test_referent_native_expression_producer_20260919",
+      "test_referent_object_rank_capture_20260919",
+      "test_referent_target_rank_evaluator_20260919",
+      "test_native_endpoint_capture_20260916",
+      "test_frozen_capture_contract_20260916"
+    ],
+    "new_tests": 10,
+    "output": "..........................s..................................................................................................................................................................s..................................................................................................................................................................................................ss......................................................................................................................\n----------------------------------------------------------------------\nRan 504 tests in 21.617s\n\nOK (skipped=4)\n",
+    "initial_failure": "Windows newline mismatch in missing-import fixture; corrected to text replacement.",
+    "native_data_loaded": false,
+    "bubblewrap_execution": false,
+    "linux_process_group_test_executed": false
+  },
+  "completed_work": [
+    "Five exact dataset/local-extension sources statically parsed and rehashed.",
+    "Nine direct external package roots enumerated with source/line evidence.",
+    "Relative pointgroup_ops extension and unresolved framework dynamic imports exposed.",
+    "Nonempty TRAIN *_refer.pth directory listing identified as constructor precondition.",
+    "Existing graph cache, all tokenizer files, label map and TRAIN annotations retained.",
+    "Ten new static/synthetic tests plus full bounded regression.",
+    "Original migration evidence rehashed; no original producer mutation."
+  ],
+  "registry_denominator": 31,
+  "physical_bindings_verified": 9,
+  "physical_bindings_missing": 22,
+  "model_geometry_captures": 0,
+  "external_dependency_attestation": false,
+  "destination_bytes_verified": false,
+  "native_cli_completed": false,
+  "native_cpu_execution": false,
+  "native_gpu_execution": false,
+  "checkpoint_transfer": false,
+  "training_tree_sync": false,
+  "training_launch": false,
+  "admission": false,
+  "scientific_validation_complete": false,
+  "queue_changed": false,
+  "queue_sha256": "1fb0bf22702581457204f05b95b1bf30c9e682534d605c34aaeb8ae7ff5a8746",
+  "blocker": "Scheduled server-4 SSH attempt refused port22. Destination runtime/GPU/data/extension ABI and bwrap/kernel remain unverified. Direct dependency checklist is finite but not complete transitive closure or checkpoint recovery.",
+  "next_action": "Continue the existing saved-only diagnostic, not a new mechanism. Static direct dependency/constructor requirements are now enumerated, not runtime-attested. Next implement and test a single host handoff adapter connecting prepare_handoff to complete_handoff with independent original binding/full31 digest/saved indices, without exposing native CLI or bypassing deployment checks. Retry server-4 once at/after 2026-09-21T03:07:00+08:00; verify runtime/code/data/work paths and GPU0/1 occupancy. On verified access, measure direct/transitive package and shared-library identity, actual pointgroup_ops extension ABI/hash, all tokenizer assets and nonempty TRAIN *_refer.pth listing; verify3 artifacts/6 data hashes. Validate Linux process-group cleanup/bwrap enforcement before saved3040/3893 collation; separate location-aware prepare_replay remains next. Then export3921/4278 retaining full31; never regenerate saved groups. Local remains static/synthetic only.",
+  "retry_after": "2026-09-21T03:07:00+08:00",
+  "pending_questions_24h": [],
+  "limitations": [
+    "Import names do not establish installed distribution names, versions or file hashes.",
+    "Transitive package imports, shared libraries and dynamic imports remain unresolved.",
+    "AST parsing includes nonexecuted branches and does not establish runtime reachability.",
+    "Stdlib classification uses the local interpreter, not the target Python runtime.",
+    "Constructor requirements are source-audited expectations, not destination observations.",
+    "A readable host root is not an exhaustive dependency boundary.",
+    "The original physical producer hash and saved registry are unchanged.",
+    "No local native execution, packages imported or datasets inspected.",
+    "Source checklist is not measured scientific diagnosis or dependency attestation.",
+    "M197 checkpoint recovery remains separate and blocked."
+  ]
+}

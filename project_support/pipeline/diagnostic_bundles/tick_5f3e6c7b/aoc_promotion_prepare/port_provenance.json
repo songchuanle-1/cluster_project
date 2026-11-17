@@ -1,0 +1,65 @@
+{
+  "origin_preparation": {
+    "path": "pipeline/diagnostic_bundles/tick_f8d84d12/aoc_promotion_prepare_r1/preparation.json",
+    "sha256": "38abf859f7ba669238f45a46c7cee654020be05b690caa60b5b0ad240d49522c"
+  },
+  "origin_schema_correction_history": {
+    "path": "pipeline/diagnostic_bundles/tick_f8d84d12/aoc_promotion_prepare_r1/superseded_static_interface_failure.json",
+    "sha256": "2f80642e67773d7b9156a0fee3025b0ba0008ba983072920b556bacd20820d61"
+  },
+  "current_owner": {
+    "token": "5f3e6c7bf05a445cbed49fa0243ee535",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-10-29T14:04:06.172709+00:00",
+    "deadline_at": "2026-10-29T15:04:06.172709+00:00",
+    "context_sha256": "9dee4135f941ebd5c3e5d0d1c5111c9df74d4600d2c430bd531baa6be6ef0cd2",
+    "pending_sha256": "f567ada3c23065fcbfa1ac2904ce8ec107963547cd9044a4ac40318d550cba31"
+  },
+  "changes": {
+    "aoc_evidence.py": {
+      "origin_sha256": "d1d6265a0e1e873c8689e48ea6543bc6d8ca942cecc8d78f2f4a014427d3a236",
+      "new_sha256": "d1d6265a0e1e873c8689e48ea6543bc6d8ca942cecc8d78f2f4a014427d3a236",
+      "byte_identical": true,
+      "exact_diff": ""
+    },
+    "summarize_aoc_actual.py": {
+      "origin_sha256": "843771207b359bcd4a2ad787d08cdd429a518c972e351ccdd0ad128c5bc4517a",
+      "new_sha256": "843771207b359bcd4a2ad787d08cdd429a518c972e351ccdd0ad128c5bc4517a",
+      "byte_identical": true,
+      "exact_diff": ""
+    },
+    "fast_forward_tested_aoc.py": {
+      "origin_sha256": "627206fb9778c3998624fb59862f3ce3a7f1a2182d278d1a93e69c6981a44bf3",
+      "new_sha256": "627206fb9778c3998624fb59862f3ce3a7f1a2182d278d1a93e69c6981a44bf3",
+      "byte_identical": true,
+      "exact_diff": ""
+    },
+    "admit_aoc_queue.py": {
+      "origin_sha256": "be04675a427899db503af08d1f4c323ae2ec2e75fa14e136a449f8ff2ad6b619",
+      "new_sha256": "027995e9de1e5f5bfd1c131a82a41bda3b5b9de71f115d27bf0ab99801fc0650",
+      "byte_identical": false,
+      "exact_diff": "--- origin/admit_aoc_queue.py\n+++ current/admit_aoc_queue.py\n@@ -56,7 +56,7 @@\n  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--execute-root',action='store_true');args=ap.parse_args()\n  if not args.execute_root:print('DEFAULT_READ_ONLY_NO_ADMISSION_QUEUE_WRITE');return\n  evidence.require_execution();evidence.reviewed()\n- owner=guard();assert owner['token']=='f8d84d124aa84f03be906a4057c52d3a' and os.environ.get('GIT_OPTIONAL_LOCKS')=='0' and sys.dont_write_bytecode\n+ owner=guard();assert owner['token']=='5f3e6c7bf05a445cbed49fa0243ee535' and os.environ.get('GIT_OPTIONAL_LOCKS')=='0' and sys.dont_write_bytecode\n  assert not any((HERE/n).exists() for n in ['aoc_admission_intent.json','aoc_admission_queue_result.json']) and not (ROOT/'pipeline/admissions/M222-AOC.json').exists(),'Existing/partial admission requires read-only reconciliation, never replay'\n  assert sha(REVIEW)==evidence.review_ref()['sha256'];local=read(REVIEW);assert local['review_status']=='RAW_SEMANTICS_VALIDATED_NOT_ADMISSION' and local['observations']['native_semantics_and_pairing_checked'] is True and local['observations']['resource_protocol_checked'] is True and local['standard_PASS_receipt_queue_written'] is False\n  identity={'id':EXP,'candidate_id':CID,'config':CONFIG,'code_commit':COMMIT,'goal_sha256':GOAL}\n"
+    },
+    "dispatch_aoc_once.py": {
+      "origin_sha256": "01bc1e12a8d8dea0ef312eeaebec2f55803d4a45b6ed1b3ce5c4e72c31957e27",
+      "new_sha256": "93b6a1b60b96b3cfb081d33ac79c3ae0c1183e7b0d1454381767239d860e1653",
+      "byte_identical": false,
+      "exact_diff": "--- origin/dispatch_aoc_once.py\n+++ current/dispatch_aoc_once.py\n@@ -15,7 +15,7 @@\n  if new:\n   with p.open('x',encoding='utf8') as f:json.dump(v,f,ensure_ascii=False,indent=2);f.write('\\n');f.flush();os.fsync(f.fileno())\n  else:\n-  tmp=Path(str(p)+'.f8d84d12.dispatch.tmp')\n+  tmp=Path(str(p)+'.5f3e6c7b.dispatch.tmp')\n   with tmp.open('x',encoding='utf8') as f:json.dump(v,f,ensure_ascii=False,indent=2);f.write('\\n');f.flush();os.fsync(f.fileno())\n   guard();os.replace(tmp,p)\n def protected():\n"
+    },
+    "source_bindings.json": {
+      "origin_sha256": "c9638d0429f0f2918f82eeef7317106fdc11cba66ea1fca448e548f5e21e253b",
+      "new_sha256": "c9638d0429f0f2918f82eeef7317106fdc11cba66ea1fca448e548f5e21e253b",
+      "byte_identical": true,
+      "exact_diff": ""
+    },
+    "evidence_bindings.json": {
+      "origin_sha256": "c82cd39003a5d44964b1008d830d5a39a61389e5d93b51c741367f46597b44cf",
+      "new_sha256": "c82cd39003a5d44964b1008d830d5a39a61389e5d93b51c741367f46597b44cf",
+      "byte_identical": true,
+      "exact_diff": ""
+    }
+  },
+  "scope": "Only admit literal currentowner token and dispatcher temp suffix differ; five helper numerical/evidence/canonical safety contracts otherwise unchanged. Dynamic SCRIPT.parent resolves new current tick. Source bindings remain original real0314/base9c/native9cf/op e45/proto a041; actual evidence refs remainNone. No generic substring replacement.",
+  "new_source_model_or_revision": false,
+  "actual_native_or_promotion_performed": false
+}

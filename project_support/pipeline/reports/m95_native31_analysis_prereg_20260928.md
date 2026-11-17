@@ -1,0 +1,7 @@
+# Frozen M95 31-expression native outcome analysis
+
+Scope: stable `m95-sample-context-support` diagnosis, not mechanism admission. The frozen manifest SHA256 is `85e108e8c86d65bcdbdc25061987e0a973fa45b35b00030d0721d359da720040`; the future native capture must have contract `m95_multiword_native_31_v1`, 31 exact identities, the same manifest hash and M95 checkpoint SHA256 `fe5e4a5fbd878175e2789a2fa0481e962ea3f83ba0a6515301aa4cf57197127e`.
+
+For each frozen exposed description, compare its selected-query native superpoint mask IoU and physical seed-target agreement with the mean of its *all_controls* descriptions on the same physical target. Within a scene/physical-target unit average exposed-level differences first; report all seven units and the mean of unit differences within each of the two scenes. A control reused by several exposed expressions may be used in each preregistered contrast, but is not an independent observation. Do not use a row-level standard error, a p-value or a two-scene confidence interval. Preserve the selected query, scene and target identity from native output.
+
+The phrase and control descriptions differ in multiple tokens; neither observed difference nor null effect identifies a context-support causal intervention. Stop the descriptive analysis on missing/duplicate rows, altered arm/target, mismatched checkpoint/manifest or nonfinite IoU. Next require a separately preregistered same-forward fixed-text intervention and placebo on the authorized GPU before any mechanism or training claim.

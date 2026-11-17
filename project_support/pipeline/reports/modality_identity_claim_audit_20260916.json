@@ -1,0 +1,74 @@
+{
+  "scope": "Static archived evidence and mathematical counterexample only.",
+  "rows": 33,
+  "unique_scenes": 17,
+  "rows_per_scene": {
+    "scene0493_00": 1,
+    "scene0481_00": 3,
+    "scene0288_00": 2,
+    "scene0289_00": 3,
+    "scene0220_00": 1,
+    "scene0076_00": 2,
+    "scene0421_00": 2,
+    "scene0223_00": 2,
+    "scene0319_00": 2,
+    "scene0192_00": 1,
+    "scene0110_00": 2,
+    "scene0632_00": 1,
+    "scene0420_00": 2,
+    "scene0416_00": 2,
+    "scene0320_00": 2,
+    "scene0452_00": 2,
+    "scene0588_00": 3
+  },
+  "paired_rank": {
+    "lower_2d": 20,
+    "higher_2d": 7,
+    "ties": 6
+  },
+  "collapsed_counterexample": {
+    "target_rank": 1,
+    "target_wrong_squared_distance": 0.0,
+    "scene_mean": [
+      0.0,
+      0.0
+    ]
+  },
+  "separated_counterexample": {
+    "target_rank": 1,
+    "target_wrong_squared_distance": 1.6,
+    "scene_mean": [
+      0.0,
+      0.0
+    ]
+  },
+  "native_filter_expressions": [
+    "float(iou[chosen]) > 0.5",
+    "winner in obj_ids",
+    "feats is None"
+  ],
+  "findings": [
+    "Rank is of target similarity to the wrong instance, not text-to-target discrimination.",
+    "Identical and distinguishable target/wrong features can both produce rank one.",
+    "The identity-loss conclusion is not identified; raw rank measurements remain valid.",
+    "The producer excludes successful selections and correct instance owners, but does not test oracle-best mask IoU.",
+    "Recoverable membership cannot be inferred from a matching aggregate count of 33.",
+    "Rows lack annotation ID, target IDs, physical support hashes, and per-query IoU/score arrays.",
+    "Cross-capture physical or annotation joins must not be inferred from scene and expression_slot alone."
+  ],
+  "required_single_capture": [
+    "scene, annotation ID, object IDs, point/superpoint support hashes and expression slot",
+    "selected and oracle-best IoU plus all query IoUs, indis and score ranks",
+    "native positive membership and best rank over every mask with IoU above .5",
+    "paired raw/projected/fused/final target and distractor features on identical support",
+    "same-class and different-class controls; phrase-conditioned contrast, not neighbour retrieval",
+    "owned/relocated/disabled endpoint map for seven connected controls; preserve twelve disconnected controls",
+    "report all 85/33/5 strata only after same-forward membership verification"
+  ],
+  "disposition": "Reject the current proof of identity loss, not the untested hypothesis. No admission.",
+  "sources": {
+    "pipeline/reports/modality_identity_separability_20260916.json": "61660620a3f00116fb02c0ed4f8199db4ae624c291d0aca4e5b3005abd63ba6a",
+    "scripts/modality_identity_separability_20260916.py": "52ec596aa71c7451dea3d915601fbd16d0d64f5de0259cb988d6f83ab57f6e94",
+    "scripts/modality_identity_claim_audit_20260916.py": "473bf23ee65d002e3165eacafebc1e422003b6e64b73270d07916afc0aeb3037"
+  }
+}

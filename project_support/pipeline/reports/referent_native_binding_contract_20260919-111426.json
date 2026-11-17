@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-19T11:14:31.414017+08:00",
+  "scope": "CPU-only synthetic integration evidence for the frozen M95 referent native pipeline; no model forward, native score, queue mutation, training launch, or efficacy claim",
+  "checks": [
+    {
+      "name": "native_projection",
+      "passed": true,
+      "expressions": 2
+    },
+    {
+      "name": "binding_provenance",
+      "passed": true,
+      "binding": {
+        "code_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "config_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "model_package_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "checkpoint_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    },
+    {
+      "name": "rank_evaluator_compatibility",
+      "passed": true,
+      "referent_target_rank": 2,
+      "objectness_target_rank": 1
+    },
+    {
+      "name": "coverage_gate",
+      "passed": true,
+      "status": "passed"
+    },
+    {
+      "name": "query_cost_provenance",
+      "passed": true,
+      "selection_verification": {
+        "verified_expressions": 2,
+        "verified_object_axes": 12,
+        "global_query_axes_verified": true,
+        "selected_cost_equals_native_score": true,
+        "selected_query_is_minimum": true,
+        "deterministic_tie_break_verified": true,
+        "failures": 0
+      }
+    },
+    {
+      "name": "within_scene_target_permutation",
+      "passed": true,
+      "contract": {
+        "permutation_unit": "target_identity_within_expression_same_class_pool",
+        "replacement_distribution": "uniform over the target plus every predeclared same-class candidate in the same expression",
+        "shared_assignment_across_scores": true,
+        "scene_balance": "equal scene means after target replacement",
+        "p_value_rule": "upper tail for top1 and paired top1 lift; lower tail for normalized excess and paired normalized-excess difference",
+        "multiplicity": "Holm adjustment over six diagnostic p-values",
+        "seed_sha256": "5b6e419d2ddebdb4212cefc0f35cdcd5b939e8b578edf04a8ab5adbe78549e8a",
+        "draws": 2048
+      },
+      "observed": {
+        "referent_top1": 0.0,
+        "referent_normalized_excess": 0.5,
+        "objectness_top1": 1.0,
+        "objectness_normalized_excess": 0.0,
+        "paired_top1_lift": -1.0,
+        "paired_normalized_excess_difference": 0.5
+      },
+      "holm_adjusted_p_values": {
+        "objectness_normalized_excess": 0.664714494875549,
+        "objectness_top1": 0.664714494875549,
+        "referent_normalized_excess": 1.0,
+        "paired_normalized_excess_difference": 1.0,
+        "paired_top1_lift": 1.0,
+        "referent_top1": 1.0
+      }
+    }
+  ],
+  "observed": {
+    "referent_target_rank": 2,
+    "objectness_target_rank": 1,
+    "coverage_summary": {
+      "complete_expressions": 2,
+      "complete_scenes": 2,
+      "rejected_expressions": 0,
+      "exact_coverage_match_expressions": 2,
+      "exact_coverage_match_rate": 1.0,
+      "mean_abs_candidate_coverage_delta": 0.0,
+      "max_abs_candidate_coverage_delta": 0,
+      "support_exact_match_expressions": 2,
+      "support_exact_match_rate": 1.0,
+      "dual_exact_match_expressions": 2,
+      "dual_exact_match_rate": 1.0,
+      "mean_abs_candidate_support_delta": 0.0,
+      "max_abs_candidate_support_delta": 0,
+      "mean_score_coverage_spearman": null,
+      "score_coverage_spearman_observations": 0,
+      "min_selected_query_cost_margin": null,
+      "singleton_query_pool_axes": 12
+    },
+    "selection_verification": {
+      "verified_expressions": 2,
+      "verified_object_axes": 12,
+      "global_query_axes_verified": true,
+      "selected_cost_equals_native_score": true,
+      "selected_query_is_minimum": true,
+      "deterministic_tie_break_verified": true,
+      "failures": 0
+    },
+    "permutation_control": {
+      "contract": {
+        "permutation_unit": "target_identity_within_expression_same_class_pool",
+        "replacement_distribution": "uniform over the target plus every predeclared same-class candidate in the same expression",
+        "shared_assignment_across_scores": true,
+        "scene_balance": "equal scene means after target replacement",
+        "p_value_rule": "upper tail for top1 and paired top1 lift; lower tail for normalized excess and paired normalized-excess difference",
+        "multiplicity": "Holm adjustment over six diagnostic p-values",
+        "seed_sha256": "5b6e419d2ddebdb4212cefc0f35cdcd5b939e8b578edf04a8ab5adbe78549e8a",
+        "draws": 2048
+      },
+      "cohort": {
+        "complete_rank_eligible_expressions": 2,
+        "complete_scenes": 2,
+        "rejected_rank_eligible_expressions": 0,
+        "pool_size_min": 3,
+        "pool_size_max": 3
+      },
+      "observed": {
+        "referent_top1": 0.0,
+        "referent_normalized_excess": 0.5,
+        "objectness_top1": 1.0,
+        "objectness_normalized_excess": 0.0,
+        "paired_top1_lift": -1.0,
+        "paired_normalized_excess_difference": 0.5
+      },
+      "null_distribution": {
+        "referent_top1": {
+          "draws": 2048,
+          "mean": 0.3359375,
+          "ci95": {
+            "low": 0.0,
+            "high": 1.0
+          },
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "referent_normalized_excess": {
+          "draws": 2048,
+          "mean": 0.4990234375,
+          "ci95": {
+            "low": 0.0,
+            "high": 1.0
+          },
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "objectness_top1": {
+          "draws": 2048,
+          "mean": 0.330078125,
+          "ci95": {
+            "low": 0.0,
+            "high": 1.0
+          },
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "objectness_normalized_excess": {
+          "draws": 2048,
+          "mean": 0.5029296875,
+          "ci95": {
+            "low": 0.0,
+            "high": 1.0
+          },
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "paired_top1_lift": {
+          "draws": 2048,
+          "mean": 0.005859375,
+          "ci95": {
+            "low": -1.0,
+            "high": 1.0
+          },
+          "minimum": -1.0,
+          "maximum": 1.0
+        },
+        "paired_normalized_excess_difference": {
+          "draws": 2048,
+          "mean": -0.00390625,
+          "ci95": {
+            "low": -1.0,
+            "high": 0.5
+          },
+          "minimum": -1.0,
+          "maximum": 0.5
+        }
+      },
+      "p_values": {
+        "referent_top1": 1.0,
+        "objectness_top1": 0.11078574914592484,
+        "referent_normalized_excess": 0.6686188384577842,
+        "objectness_normalized_excess": 0.11078574914592484,
+        "paired_top1_lift": 1.0,
+        "paired_normalized_excess_difference": 1.0
+      },
+      "holm_adjusted_p_values": {
+        "objectness_normalized_excess": 0.664714494875549,
+        "objectness_top1": 0.664714494875549,
+        "referent_normalized_excess": 1.0,
+        "paired_normalized_excess_difference": 1.0,
+        "paired_top1_lift": 1.0,
+        "referent_top1": 1.0
+      }
+    }
+  },
+  "source_hashes": [
+    {
+      "path": "scripts/referent_native_expression_producer_20260919.py",
+      "sha256": "d683d0c29078b65b3f4c3618cc5562adee9ee79769d993c3233c0c95995e97ec"
+    },
+    {
+      "path": "scripts/referent_object_rank_capture_20260919.py",
+      "sha256": "01546034eca2e208dacbf7187def34ed4c62c110a4c1975df39ab4e374982ba5"
+    },
+    {
+      "path": "scripts/referent_target_rank_evaluator_20260919.py",
+      "sha256": "32987438d71db5017a87b25d9c36da1268354aeebf7ed2fa303999e3caac2076"
+    },
+    {
+      "path": "scripts/referent_query_coverage_control_20260919.py",
+      "sha256": "38ca6b07075e40adbc1334b933f7a1f9a30055266d6a7562253d2629635e5715"
+    },
+    {
+      "path": "scripts/referent_within_scene_permutation_20260919.py",
+      "sha256": "1060c66e16014dc82b566d663eec6cb8be5ef93750640761dd992e724559f30b"
+    },
+    {
+      "path": "scripts/native_frozen_capture_20260916.py",
+      "sha256": "d85791b08754ce9d53213deb479c946234eddd7c347592eda90adbd6fed1bff3"
+    },
+    {
+      "path": "scripts/frozen_capture_contract_20260916.py",
+      "sha256": "cea431df835fb5ab0fe7acc88b5539c700cc3cd37a816ecdb9bf2fd1f843f788"
+    },
+    {
+      "path": "scripts/hierarchical_partition_contract_20260916.py",
+      "sha256": "1633e31d46109c7055c93b761dc43bdebcae131bdef8b04b611464981cb1537e"
+    },
+    {
+      "path": "scripts/native_endpoint_capture_20260916.py",
+      "sha256": "7da5b69f6cf27962a4d555b7f42f7f635a68caa65f1dd7847673ed73d3b639e7"
+    },
+    {
+      "path": "scripts/native_support_capture_v2_20260916.py",
+      "sha256": "458cc198d6d4a5d240f99d3c852ac41d5935edff2de3241463547a90a89b7915"
+    },
+    {
+      "path": "scripts/capture_support_20260916.py",
+      "sha256": "8ed9e62427981d7ad5a413ac8114ebf95c25f6bb517d7c6db741c799f5475975"
+    },
+    {
+      "path": "scripts/physical_mask_endpoints_20260916.py",
+      "sha256": "30c6706951110d1832b8bb1b1acbfe4d9c19a7ebd791b956b8c3526008239931"
+    }
+  ],
+  "limitations": [
+    "The fixture validates contract composition, not native model behavior.",
+    "Synthetic scores and query costs do not estimate target mIoU.",
+    "Synthetic permutation p-values validate the control contract, not native specificity.",
+    "Native candidate coverage and score separation remain unknown."
+  ]
+}

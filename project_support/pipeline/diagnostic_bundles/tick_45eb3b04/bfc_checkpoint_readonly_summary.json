@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-26T05:22:19.977033+00:00",
+  "status": "BFC_FIXED_FULL_CHECKPOINT_CPU_READ_SUCCEEDED_RESUME_NOT_AUTHORIZED_REPAIR_UNVERIFIED",
+  "candidate_id": "hierarchy-parent-butterfly-token-composition",
+  "experiment_id": "M213-BFC",
+  "source_commit": "48fc302c3c02ffef0b241be3593c386b6b65a72e",
+  "anchors": {
+    "first_strict_fullkey_inspection_failure": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_checkpoint_readonly_evidence.json",
+      "sha256": "d0d9045a64aedde18b8a0f3eb16263a78a3f1f55b2844b185a2cfed391f5f1f5"
+    },
+    "successful_CPU_inspection_r2": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_checkpoint_readonly_evidence_r2.json",
+      "sha256": "9b957f1021c29ba866875a2ee07ad1b607da1d279af6924f2d79261653de7c76"
+    },
+    "CPU_preflight": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_checkpoint_cpu_preflight.json",
+      "sha256": "f8d3cb856fe94d08fda0d0baee754594550209720d179e4fa19fb4eb2cd00904"
+    },
+    "original_save_load_entry": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_gorilla_checkpoint_entry_readonly.json",
+      "sha256": "38c2f79bd83bcf8fe2f3c1701f8e992211546b1edc671ed2d9969ede9fd4421c"
+    },
+    "serializer_key_difference_AST": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_gorilla_serializer_key_difference_r2.json",
+      "sha256": "b3644796a5b92ba0201cea6bce50fd590be1c5eceb2066b17ba0d861b32eedee"
+    },
+    "prior_local_diagnosis": {
+      "path": "pipeline/diagnostic_bundles/tick_45eb3b04/bfc_crash_diagnosis.json",
+      "sha256": "5d904778a487946dc8a3f8ac2359ff196add5d9fb228f433c485a3de7244c66e"
+    }
+  },
+  "checkpoint": {
+    "path": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bfc/20261026_003527/last.pth",
+    "sha256": "24b3424f0cdc3a6f004bf20ff49b1799e75b92382214b2590d90486192883777",
+    "bytes": 926798744,
+    "stable_during_CPU_load": true,
+    "meta": {
+      "epoch": 19,
+      "best_miou": 0.4992169439792633,
+      "epochs_no_improve": 4
+    },
+    "meta_original_types": {
+      "epoch": "builtins.int",
+      "best_miou": "numpy.float32",
+      "epochs_no_improve": "builtins.int"
+    },
+    "native_restart_epoch_if_separately_authorized": 20
+  },
+  "CPU_budget": {
+    "available_before_bytes": 188976467968,
+    "required_conservative_bytes": 17179869184,
+    "actual_process_peak_RSS_bytes": 1717047296,
+    "GPU_or_model_execution": false
+  },
+  "state_summary": {
+    "model_keys_and_all_shapes_enumerated": true,
+    "model_tensors": 1151,
+    "all_model_tensor_devices": [
+      "cpu"
+    ],
+    "all_model_tensors_finite": true,
+    "expected_native_state_keys": 1149,
+    "missing_native_keys": [],
+    "extra_saved_keys": [
+      "text_encoder.embeddings.position_ids",
+      "text_encoder.embeddings.token_type_ids"
+    ],
+    "key_shape_dtype_numel_sha256": "3104a81f2e66dcf0d108e33236f8aead157c207282de060bc5c31b2ae416822f",
+    "independent_complete_shape_reference": "NOT_RECORDED; no model was constructed",
+    "extra_key_explanation": "Installed gorilla._save_to_state_dict at361-377 iterates all non-None buffers and explicitly removes the _non_persistent_buffers_set check. Its serializer therefore may retain these two text embedding buffers excluded by current native model.state_dict; all1149 native keys are present. Native gorilla.load_checkpoint strict=False is unchanged, not patched by this diagnostic.",
+    "optimizer": {
+      "state_count": 640,
+      "group_count": 5,
+      "parameter_ID_count": 646,
+      "state_keys_belong_to_groups": true,
+      "moment_shapes_match": true,
+      "all_tensor_state_CPU_and_finite": true,
+      "tensor_count": 1920,
+      "tensor_elements": 64756980,
+      "step_range": [
+        87654.0,
+        89034.0
+      ],
+      "group_lengths": [
+        0,
+        1,
+        136,
+        2,
+        507
+      ],
+      "group_lrs": [
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05
+      ]
+    },
+    "scheduler": {
+      "keys": [
+        "max_iters",
+        "power",
+        "constant_ending",
+        "base_lrs",
+        "last_epoch",
+        "_step_count",
+        "_is_initial",
+        "_get_lr_called_within_step",
+        "_last_lr"
+      ],
+      "last_epoch": 19,
+      "base_lrs": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "_last_lr": [
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05,
+        2.817659725114537e-05
+      ]
+    },
+    "full_state_presence_nonempty_and_finite": true
+  },
+  "source_lineage": {
+    "hostname": "dl04-MS-7E06",
+    "original_same_BFC_run": "20261026_003527",
+    "run_config_matches_current_mapped_BFC_yaml": true,
+    "source48fc_eight_model_files_plus_dataset_and_train_match_commit_blobs": true,
+    "full_repository_integrity_validator": "NOT_RUN; future canonical exact-source check still required"
+  },
+  "reviewer_harness_corrections": [
+    "First inspection overly required equality with torch-native state_dict rather than the actually installed gorilla serializer; the original refusal artifact is retained. It is not checkpoint corruption or a candidate failure.",
+    "The first serializer metadata token test counted an explanatory comment as a check. Separate r2 AST evidence excludes comments and confirms no active nonpersistent-buffer filter; prior artifact retained."
+  ],
+  "true_remaining_gaps": [
+    "Original CPU scatter failure sample/tensor/layout has not been captured or reproduced; cloning is unvalidated.",
+    "No RNG/sampler/prefetch/partial-epoch20 iterator state was found in native resume/save code; full stochastic continuation from step3833 is not supported. Restart would be epoch20 from complete epoch19 state, best0.4992169439792633/noimprove4.",
+    "A later BFC-specific human authorization and exact checkpoint/source/runtime/resource dual-proof contract are still required. This CPU read grants none.",
+    "If actual main/root advances beyond48fc or shared dataset repair changes source, source compatibility/admission and a correct tested version must be explicitly resolved; do not relabel original48fc raw/receipt.",
+    "No actual model construction/load_state_dict/optimizer.load_state_dict call was executed. Shapes were enumerated and native key coverage confirmed; full independent all-parameter shape compatibility remains a future actual load check."
+  ],
+  "actions": {
+    "SSH_key_BatchMode_strict_host": true,
+    "CPU_checkpoint_load_only": true,
+    "CUDA_or_Torch_cuda_API": false,
+    "GPU_query": false,
+    "remote_write_or_signal": false,
+    "model_import_forward_backward": false,
+    "resume_or_training": false,
+    "shared_state_changed": false
+  },
+  "resume_authorized": false,
+  "repair_validated": false
+}

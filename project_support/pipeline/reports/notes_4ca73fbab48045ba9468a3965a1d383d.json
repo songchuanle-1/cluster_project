@@ -1,0 +1,15 @@
+{
+  "actions": [
+    "续接同一租约4ca73fbab48045ba9468a3965a1d383d，未重复begin或preflight；0至3段固定事实仍为2026-10-16北京时间11:18:05、容量1的旧快照，不代表后续资源授权。原deadline为12:18:05，12:18:52已核实到期；此后只保存此前实际动作和收尾，不延长截止或补跑研究。",
+    "按两条直接用户指令，已将授权资源更新为server3物理GPU1和server4物理GPU0，各1槽、总容量2。server4严格SSH身份dl04-MS-7E06匹配，双RTX5090恢复；新GPU0 UUID958e741a-e5cf-127e-ffe8-9b984e1f404c，旧卡现为GPU1，不使用它。",
+    "server4资源探针时间11:29:52：GPU0利用率0%、已用41MiB/总32607MiB、空闲32069MiB，无计算进程；三个旧锁均不存在，未创建或删除锁。server3本轮查询GPU1空闲24267MiB、利用率0%、无计算进程，既有3d-stmn环境PyTorch1.12+cu113可加载且CUDA未初始化；不把这些历史占用读数当作未来独占保证。",
+    "server4环境位于/home/songcl/.conda/envs/project_cluster，PyTorch2.8+cu128。普通导入失败；隔离旧字节码读取后导入成功、CUDA未初始化，原失败保留。项目独立隔离入口与部署校验脚本仅本地准备，尚未部署，也未修改SERVERS的conda_source，下一轮先完成该受控操作，不能称训练环境全面就绪。",
+    "将真实资源授权和新主机探针哈希归档到原稳定ID，仅更新资源续做说明。原四项通过门槛、10.034588748G超10G的失败、两次修订历史及其余99候选完整保留；没有新增机制测试、实现修订、准入、模型前后向、优化步数或训练启动。",
+    "科学状态仍blocked/human_authorization；执行状态POSTFLIGHT_PENDING。真实deadline已到，按tick_deadline_near归档未完事项；finish实际结果及随后租约核验决定是否COMPLETED，否则abort。收据用量此时未知，只统计begin至收据可见的局部日志，不含前读/延迟记录/最终答复；缓存含于输入、推理含于输出，不重复相加，不是账单。"
+  ],
+  "decisions": [
+    "保留server3 GPU1并新增server4 GPU0，不用其他卡、不重启M201、不驱逐或重置、不改调度。新资源容量不等于合格训练预算，不为填卡添加占位变体。",
+    "资源授权不等于第三次实现修订授权；当前模型10G门槛和两次修订限制仍有效。先完成环境隔离部署核验，再按明确授权和原门槛续做核心机制。",
+    "完整证据见pipeline/diagnostic_bundles/server4_gpu0_4ca73fba/resource_probe.json与资源授权文件；规范手动决策记录20261016-042103_manual.md的shell时间为UTC样式，用户可见本报告统一使用Asia/Shanghai。下次自动化精确触发时间未知。"
+  ]
+}

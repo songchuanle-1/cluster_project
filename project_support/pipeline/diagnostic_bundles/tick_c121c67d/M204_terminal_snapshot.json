@@ -1,0 +1,211 @@
+{
+  "id": "M204-CPA",
+  "candidate_id": "coarse-semantic-point-cross-attention",
+  "config": "configs/Quard/ctf_hcg_csort_cpa_r1/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1.yaml",
+  "server": "server-4",
+  "gpu": "0",
+  "status": "done_earlystop",
+  "label": "CPA-R1 coarse point attention (authorized checkpoint resume)",
+  "code_commit": "c31f45994f8d68b78dfe8bb4fef3f9aaefabe86e",
+  "manual_exploratory_authorization": {
+    "path": "pipeline/authorizations/cpa_exploratory_20261019_72695a5d.json",
+    "sha256": "2b139af1820c167dbb0a044518acbfa6a441543bb4b559b706439099583dd2ee"
+  },
+  "scientific_admission": false,
+  "launch_authorization_mode": "human_exploratory_resume_exception",
+  "automatic_restart": false,
+  "requires_exclusive_ownership": true,
+  "launch_verified": true,
+  "launch_verification": "training_progress",
+  "depends_on": [],
+  "patience": 10,
+  "note": "Same M204 interrupted by host reboot;one new explicit checkpoint-resume consent. No scientific PASS,tuning,cold restart or future automatic retry.",
+  "pid": 1085297,
+  "log": "/data/songcl/Project/Cluster_project/Cluster_m201_bps_f8457d3b/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1_resume_2546d803_native_serializer.log",
+  "launched": "2026-10-19T08:28:59.269570+00:00",
+  "history": [
+    {
+      "ts": "2026-10-19T01:29:58.532973+00:00",
+      "action": "human_authorized_exploratory_launch",
+      "gpu": "0"
+    },
+    {
+      "ts": "2026-10-19T01:30:53.755461+00:00",
+      "action": "native_training_steps_verified",
+      "steps": [
+        [
+          1,
+          105
+        ],
+        [
+          1,
+          106
+        ],
+        [
+          1,
+          106
+        ],
+        [
+          1,
+          107
+        ]
+      ]
+    },
+    {
+      "ts": "2026-10-19T06:39:41.543402+00:00",
+      "action": "reconciled_host_reboot_interruption",
+      "status": "stopped_unknown",
+      "observed_stopped_at": "2026-10-19T06:18:18.983759+00:00",
+      "host_boot_at": "2026-10-19T04:17:42+00:00",
+      "best_miou": 0.43399661779403687,
+      "best_epoch": 5,
+      "checkpoint_epoch": 5,
+      "original_launch_retained": true,
+      "restarted": false
+    },
+    {
+      "ts": "2026-10-19T08:09:27.473201+00:00",
+      "action": "human_authorized_same_experiment_checkpoint_resume",
+      "checkpoint_epoch": 5,
+      "start_epoch": 6,
+      "pid": 1002720,
+      "gpu": "0",
+      "checkpoint_sha256": "50ce84c115849e984966b95247e20bbea46c6df3983393802f451b44ff9f1537",
+      "authorization": {
+        "path": "pipeline/authorizations/cpa_resume_M204.json",
+        "sha256": "17b44b6e80d5595757d11074bbd22c593e64e444c96a955c0939b5a947808162"
+      }
+    },
+    {
+      "ts": "2026-10-19T08:22:33.602455+00:00",
+      "action": "pretraining_observer_false_mismatch_proved_on_cpu",
+      "pid": 1002720,
+      "native_training_steps": 0,
+      "native_serializer_tensor_equality": true,
+      "model_or_scientific_revision": false,
+      "failure_evidence": {
+        "path": "pipeline/diagnostic_bundles/tick_2546d803/resume_progress_verification.json",
+        "sha256": "aa5a52d88cae7b09eb4b5e0204ed64a7ac26aa4419fbdc2bf4263a6064f06dc1"
+      }
+    },
+    {
+      "ts": "2026-10-19T08:28:59.269570+00:00",
+      "action": "human_authorized_same_experiment_checkpoint_resume",
+      "checkpoint_epoch": 5,
+      "start_epoch": 6,
+      "pid": 1085297,
+      "gpu": "0",
+      "checkpoint_sha256": "50ce84c115849e984966b95247e20bbea46c6df3983393802f451b44ff9f1537",
+      "authorization": {
+        "path": "pipeline/authorizations/cpa_resume_M204.json",
+        "sha256": "17b44b6e80d5595757d11074bbd22c593e64e444c96a955c0939b5a947808162"
+      }
+    },
+    {
+      "ts": "2026-10-19T08:29:28.976616+00:00",
+      "action": "native_resume_states_and_progress_verified",
+      "steps": [
+        [
+          6,
+          10
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          11
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          6,
+          12
+        ],
+        [
+          6,
+          13
+        ]
+      ],
+      "saved_epoch": 5,
+      "optimizer_preserved": true,
+      "scheduler_preserved": true
+    },
+    {
+      "ts": "2026-10-20T08:10:38.352403",
+      "status": "done_earlystop",
+      "best_miou": "0.4993",
+      "epochs": "28/50"
+    }
+  ],
+  "launch_evidence": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/resume_progress_native_serializer.json",
+    "sha256": "4d8a48d1e16418671be57470e13708ad11267eb8ccd1652e82ed11429f1fa376"
+  },
+  "latest_training_observation": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/final_resume_after.json",
+    "sha256": "0d1ce459d65d059e7271f2ebe4dbe599ebc34d82f3bd97fd3b605d1359225382"
+  },
+  "observed_native_step": [
+    6,
+    1126
+  ],
+  "observed_native_best_miou": 0.43399661779403687,
+  "observed_native_best_epoch": 5,
+  "observed_validation_count": 5,
+  "partial_result_only": true,
+  "last_completed_epoch": 5,
+  "process_live": true,
+  "observed_stopped_at": "2026-10-19T06:18:18.983759+00:00",
+  "host_boot_at": "2026-10-19T04:17:42+00:00",
+  "interruption_reason": "host reboot after original launch;exact process absent in two fresh probes;native exit code unavailable",
+  "requires_resume_authorization": false,
+  "checkpoint_inspection": {
+    "path": "pipeline/diagnostic_bundles/tick_92463b56/checkpoint_cpu.json",
+    "sha256": "15060d78163a1f51f2e43467f0d8a8cb656e4558537bb0092e0affb4dc9bac5f"
+  },
+  "checkpoint_resume_contract": {
+    "path": "pipeline/diagnostic_bundles/tick_92463b56/resume_contract_cpu.json",
+    "sha256": "f380ad6a7486e9c935c3a1b4199348860e41c89ffc6f92cf02cf4406dc73082b"
+  },
+  "log_local": "",
+  "checkpoint_resume_authorization": {
+    "path": "pipeline/authorizations/cpa_resume_M204.json",
+    "sha256": "17b44b6e80d5595757d11074bbd22c593e64e444c96a955c0939b5a947808162"
+  },
+  "resume_checkpoint": "/data/songcl/Project/Cluster_project/Cluster_checkpoints/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_cpa_r1/20261019_093003/last.pth",
+  "resume_checkpoint_sha256": "50ce84c115849e984966b95247e20bbea46c6df3983393802f451b44ff9f1537",
+  "original_launched": "2026-10-19T01:29:58.532973+00:00",
+  "resumed_at": "2026-10-19T08:28:59.269570+00:00",
+  "previous_pid": 1002720,
+  "resume_authorization_pending_launch": false,
+  "interruption_snapshot": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/experiment_before_native_serializer_start.json",
+    "sha256": "c5cc043e16bb43b8e9449c84837c9f939e40672dbed801a2d77ce486f41e7eb4"
+  },
+  "resume_attempt_count": 2,
+  "pretraining_observer_failure": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/failed_startup_lifecycle.json",
+    "sha256": "97a08b328c21a27447a4e33c2d74b07480628e2b7f7e2b280b7a2bfdf423f34c"
+  },
+  "corrective_pretraining_operation": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/pretraining_correction_decision.json",
+    "sha256": "46adb8d667ecb6bf91ab93957914b71ba3149ad06ae5855b24ed862153e45bea"
+  },
+  "native_restore_verified": true,
+  "resume_remote_stage": "/data/songcl/Project/Cluster_project/pipeline/cpa_resume_2546d803_native_serializer",
+  "resume_runtime_manifest": {
+    "path": "pipeline/diagnostic_bundles/tick_2546d803/runtime_manifest_native_serializer.json",
+    "sha256": "0093131b9feba857e058a4efcff57fe3279b54b05c249df105b690a0f53355cd"
+  },
+  "verified_training_resume_count": 1,
+  "os_resume_startup_attempts": 2,
+  "pretraining_observer_failures": 1,
+  "final_best": "0.4993",
+  "finished_at": "2026-10-20T08:10:38.352403",
+  "epochs_final": "28/50",
+  "archive_id": "09c8112c04f44432b55e64bad656c0e0"
+}

@@ -1,0 +1,68 @@
+{
+  "id": "M201-BPS",
+  "candidate_id": "m95-native-between-pair-support",
+  "config": "configs/Quard/bps/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_bps.yaml",
+  "code_commit": "f8457d3b657e66306a7fce1afb3d81d8ab874669",
+  "goal_sha256": "d7296cbb4cfc0742e92ccccc65a17b36513dcd8940c98c90e38801e79f14b21b",
+  "decision": {
+    "path": "pipeline/decisions/20261014-095528_manual.md",
+    "sha256": "8dcc6adee3658cf8a1d2f50ce5031c9cf141ee3094d878ebb69e168ff0d42adf"
+  },
+  "gates": {
+    "diagnosis": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reviews/motivation_review_20261014_0209.md", "sha256": "d69bd0f7b69be17690839288bfc5234b0608f4b821d652490a7ea4b19929a0ea"},
+        {"path": "pipeline/reviews/bps_final_gates_20261014_0511.md", "sha256": "d109ce9c210fea122a4a7bb8c7c5426c00964f0be716146eb3994c547118ab39"}
+      ]
+    },
+    "controls": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reports/bps_controls_opt_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "44974925dfadd878f1601ceec2f2a359468f161a2aebe96670cc9cf9a5b562b8"},
+        {"path": "pipeline/reports/bps_tick_evidence_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "388d20bab2c280673cc35bbe725a87bb7bfc52260543b7c05733a8aff19cac06"}
+      ]
+    },
+    "native_backward": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reports/bps_native_current_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "31ab8e9b2e80ba7e28574e8b6dc63dd198df3e0f6470df13609a7e79db891cb6"}
+      ]
+    },
+    "resources": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reports/bps_tick_evidence_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "388d20bab2c280673cc35bbe725a87bb7bfc52260543b7c05733a8aff19cac06"},
+        {"path": "pipeline/reviews/bps_final_gates_20261014_0511.md", "sha256": "d109ce9c210fea122a4a7bb8c7c5426c00964f0be716146eb3994c547118ab39"}
+      ]
+    },
+    "independence": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reports/bps_source_manifest_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "26ca5a0c5ca4949cac668dc1f514b16e6b451412c51826588da10a5b90e0cbae"},
+        {"path": "pipeline/reports/bps_compare_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "b0db9d5d8a8d6783d3fcd827808c59f04efcde778aaa3d7a08a2fea85030abb4"}
+      ]
+    },
+    "constraints": {
+      "passed": true,
+      "evidence": [
+        {"path": "pipeline/reviews/bps_scope_constraints_20261014_0502.md", "sha256": "1185506f68d0c097a6543dc6f6509e08623f45ae4c328f6cb7f4eaa8bf226b42"},
+        {"path": "pipeline/reports/bps_geometry_c9de23ffb1804f1eaa81cf54b94b9d6a.json", "sha256": "0c5733322f3f7f78723a1150435f93a23fbac37d479c47941878fc765c53c4bf"},
+        {"path": "pipeline/designs/exp_design_bps_20261014_0319.md", "sha256": "5da9361b0d2ff23c6851420da7c7bd60bd7a97ed8461df851f1e1eb3c5586bcc"}
+      ]
+    }
+  },
+  "evaluation_plan": {
+    "primary_metric": "Original ScanRefer VAL mIoU",
+    "baseline": 0.4894,
+    "champion": 0.5020,
+    "sampling_unit": "scene",
+    "subgroups": ["BETWEEN-resolved", "BETWEEN-unknown", "non-BETWEEN", "same-class distractor", "mixed-boundary"],
+    "material_harm_rule": "Frozen subgroup harm 0.002; inadequate scenes or intervals crossing the boundary are inconclusive, not a single-scene veto.",
+    "noise_floor": "Not yet quantified",
+    "pareto": "Uniform FLOPs <=10G; peak memory +15% requires >=+0.003 trained mIoU to retain.",
+    "protocol": "seed1999, epochs50, max_iters70, no new dataset or seed sweep"
+  },
+  "limitations": "Execution and falsifiability only, not trained efficacy, harm, true witness labels or exhaustive novelty. Shared resource timing; worst measured TRAIN time overhead +36.02%. All historical failures retained.",
+  "authorization": "The owning user explicitly answered yes to scoped BPS code/config commit and gated GPU7 training."
+}

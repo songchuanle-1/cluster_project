@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-10-30T06:52:07.648249+00:00",
+  "status": "READONLY_FORMAL_VS_NATIVE_STARTUP_PATH_REVIEW_ROOT_CAUSE_UNKNOWN",
+  "candidate_id": "hierarchy-fine-coarse-complete-bipartite-composition",
+  "experiment_id": "M223-FCB",
+  "code_commit": "d4d062ef075abfe7cde93d4b4347ce146572762f",
+  "anchors": {
+    "formal_train": {
+      "path": "Cluster/tools/train.py",
+      "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40"
+    },
+    "native_worker": {
+      "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+      "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60"
+    },
+    "logger": {
+      "path": "Cluster/framework/utils/logger.py",
+      "sha256": "4a48e2dd80a231c5224135f241dce6299568b60a0343b68639b23aeca197f406"
+    },
+    "exact_launch_log": {
+      "path": "pipeline/diagnostic_bundles/tick_68d6c0e3/fcb_launch_exact_log/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_fcb_20261030_144020.log",
+      "sha256": "5289333a5ace29a777e0b1c5c331247de32cb53df279174c31442a8dd9fcfad9"
+    },
+    "exact_log_evidence": {
+      "path": "pipeline/diagnostic_bundles/tick_68d6c0e3/fcb_launch_exact_log/exact_log_evidence.json",
+      "sha256": "bb63a58636e645fa34da7a50dd74df69c01753393377cd766e4170839ca7f8a7"
+    },
+    "successful_actual_smoke": {
+      "path": "pipeline/diagnostic_bundles/tick_68d6c0e3/fcb_execution/smoke_candidate_execution.json",
+      "sha256": "7303e1ffb2387599138624dc806dc878cd49a5f3fff5c584fc759ade6b7f39f5"
+    },
+    "actual_dispatch": {
+      "path": "pipeline/diagnostic_bundles/tick_68d6c0e3/fcb_dispatch_result.json",
+      "sha256": "913c7320038ab51dc81c59acd2100051b3951edd91848dc6df9409595da59134"
+    },
+    "captured_launch_commands": {
+      "path": "pipeline/diagnostic_bundles/tick_68d6c0e3/fcb_dispatch_transport_calls.json",
+      "sha256": "4e9e39d89a6f5434d4e5d4fbe00dccccd943a791f6c5f4069f37b42f8e146b76"
+    }
+  },
+  "observed_log": {
+    "bytes": 41707,
+    "lines": 10,
+    "ends_in_newline": true,
+    "last_record": "2026-10-30 14:40:31.293 checkpoint state-dict mismatch WARNING; continued missing-key list only.",
+    "Traceback_present": false,
+    "native_TRAIN_marker_present": false,
+    "warning_is_exit_status": false,
+    "original_process_returncode": "UNKNOWN: detached training Popen not waited; wrapper returned0 only."
+  },
+  "explicit_exit_search": {
+    "scope": "AST of exact project tools/train.py only; not an exhaustive transitive third-party dependency analysis.",
+    "sys_exit_os_exit_exit_quit_SystemExit_calls": [],
+    "finding": "No such explicit exit call in the project training entry. The sole bare raise at train.py33 rethrows a non-weights_only TypeError in the torch.load compatibility wrapper and would normally propagate a traceback."
+  },
+  "matched_initialization_sequence": [
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 419
+      },
+      "native": {
+        "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+        "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60",
+        "line": 105
+      },
+      "operation": "Resolve original config-selected Network and construct model.cuda(). Native additionally asserts exact independent package identity/source hashes."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 421
+      },
+      "native": {
+        "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+        "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60",
+        "line": 107
+      },
+      "operation": "Optimizer construction then scheduler construction, before pretrain."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 452
+      },
+      "native": {
+        "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+        "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60",
+        "line": 115
+      },
+      "operation": "gorilla.load_checkpoint(model, pretrain, strict=False, map_location='cpu'); native coerces pretrain Path to str. Same intended native backbone path."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 26
+      },
+      "native": {
+        "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+        "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60",
+        "line": 45
+      },
+      "operation": "Formal installs torch.load weights_only=False compatibility at module execution; worker imports tools.train specifically to install that same compatibility."
+    }
+  ],
+  "pretrain_observation": {
+    "formal_YAML_path": "/home/songcl/data/data/sp_unet_backbone.pth",
+    "native_actual_initialization": {
+      "kind": "native_train_pretrain",
+      "path": "/home/songcl/data/data/sp_unet_backbone.pth",
+      "sha256": "a6f400bcf9bd722230d16ea7c3424b0d7658730126df604f67b4cccf42e25c1f",
+      "loader": "gorilla.load_checkpoint(strict=False,map_location=cpu)",
+      "trained_m95_checkpoint_loaded": false,
+      "seed": 1999
+    },
+    "successful_native_steps": 2,
+    "successful_native_losses": [
+      9.277865409851074,
+      13.892096519470215
+    ],
+    "finding": "The recorded real native run returned from this load call and completed TRAIN2. StrictFalse missing/unexpected/size-mismatch warning by itself is not evidence of fatal exit; this review did not read the checkpoint or third-party remote loader source."
+  },
+  "logging_boundary": {
+    "source": {
+      "path": "Cluster/framework/utils/logger.py",
+      "sha256": "4a48e2dd80a231c5224135f241dce6299568b60a0343b68639b23aeca197f406",
+      "line": 4
+    },
+    "file_handler": {
+      "path": "Cluster/framework/utils/logger.py",
+      "sha256": "4a48e2dd80a231c5224135f241dce6299568b60a0343b68639b23aeca197f406",
+      "line": 12
+    },
+    "propagate_false": {
+      "path": "Cluster/framework/utils/logger.py",
+      "sha256": "4a48e2dd80a231c5224135f241dce6299568b60a0343b68639b23aeca197f406",
+      "line": 16
+    },
+    "finding": "When this function installs the task FileHandler, spformer logger propagation is False. Main config/Loadpretrain/batch-size/Training/Profile INFO can be file-only rather than in the captured stdout/stderr log. Missing these markers in this stdout file does not locate the exact stop after checkpoint loading.",
+    "formal_log_construction": {
+      "workdir_lines": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 398
+      },
+      "timestamp_log_file": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 406
+      },
+      "native_yaml_workdir": "/home/songcl/3dres/project/cluster_project/Checkpoints",
+      "canonical_launch_adapter_workdir": "/data/songcl/Project/Cluster_project/Cluster_checkpoints",
+      "model_subdirectory": "model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_fcb",
+      "timestamp": "Actual tools.train main timestamp, not necessarily outer launch-log144020. Not fabricated from seed log time."
+    }
+  },
+  "real_formal_only_startup_differences": [
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 514
+      },
+      "description": "Formal enters through gorilla.set_cuda_visible_devices and gorilla.launch; worker directly calls setup and then native train(1,...), so launch/runtime context differs. Actual third-party launch behavior/child exit status is not inferred from local source."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 459
+      },
+      "description": "Formal builds full train dataset/loader and validation dataset/loader before the loop; worker smoke builds native train loader and takes only the two fixed batches."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 468
+      },
+      "description": "Formal invokes model_profile before first train epoch. It builds a val profiling loader, fvcore analysis and3warm/10timing calls. This exact formal startup path is not the separately measured original diagnostic resources function (no_grad, bs1/lang1,20warm/100repeat). This is a difference, not a proven failure cause."
+    },
+    {
+      "native": {
+        "path": "pipeline/diagnostic_bundles/tick_89d05b33/fcb_native_prepare/worker.py",
+        "sha256": "a0c97355af796eb96fdbd50acbbef4cadf68f32068b795a5c9a6db7120c38a60",
+        "line": 51
+      },
+      "description": "Worker explicitly sets one Torch CPU thread and per-process CUDA memory fraction0.75 and offline environment; formal entry does not set those same worker-only controls here. Their effect on this exit is UNKNOWN."
+    },
+    {
+      "formal": {
+        "path": "Cluster/tools/train.py",
+        "sha256": "4e870e9d24a184e59878c3bca2d70dfc1cc1c5cc66fe8ce6edf96fa364c10e40",
+        "line": 104
+      },
+      "description": "The Train[...] tqdm is created at epoch train entry. Its absence plus originalPID gone supports no observed TRAIN progress, but says neither normal completion nor why the process ended."
+    }
+  ],
+  "captured_formal_invocation": {
+    "argv": [
+      "python",
+      "tools/train.py",
+      "configs/Quard/ctf_hcg_csort_fcb/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_fcb.yaml",
+      "--gpu_ids",
+      "0",
+      "--num_gpus",
+      "1"
+    ],
+    "resume_flag_present": false,
+    "skip_training_flag_present": false,
+    "start_new_session": true,
+    "stdout_stderr_redirected_to_exact_log": true,
+    "wrapper_SystemExit_scope": "Outer SSH wrapper only propagates launch-command returncode; it does not wait for or obtain the detached training child final returncode."
+  },
+  "conclusion": "No explicit project-entry sys.exit found and no identified fatal difference in the intended model/optimizer/pretrain sequence. Actual exit cause remains UNKNOWN; do not label normal, OOM, checkpoint rejection or scientific mechanism failure from this evidence.",
+  "bounded_next_readonly_evidence_suggestions": [
+    "Have root inspect the original task own internal cfg.work_dir timestamp log identified from this exact launch, without sweeping unrelated logs or checkpoints. It may localize dataset/profile/train stage hidden by file-only logger.",
+    "If already captured, inspect the original child wait/exit/signal metadata or exact relevant host termination evidence. The current detached Popen wrapper rc0 is not that child exit code.",
+    "Only if needed, root can read the exact deployed gorilla.load_checkpoint/launch source for this environment; no dependency mutation, native rerun or automatic resume is implied."
+  ],
+  "operations_performed": "Local read-only source/actual-log/actual-result inspection plus this private report only. No model import/execute, training/native, Torch, SSH/GPU, checkpoint read, patch/source/Git/shared/queue/restart operation."
+}

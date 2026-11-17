@@ -1,0 +1,71 @@
+{
+  "scope": "Event-mode overdue capacity retry and fail-closed bound-identity hardening; no native capture or efficacy claim",
+  "timestamp": "2026-09-17T17:11:00+08:00",
+  "due_candidates": [
+    "referent-causality-audit",
+    "modality-identity-preservation",
+    "referent-discrimination",
+    "instance-identity-representation",
+    "referent-query-selection",
+    "input-modality-distinguishability",
+    "same-target-description-grounding"
+  ],
+  "remote_observation": {
+    "server": "server-6",
+    "gpu": 7,
+    "utilization_percent": 100,
+    "used_mib": 62483,
+    "total_mib": 81559,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ],
+    "capture_launched": false
+  },
+  "static_advance": {
+    "finding": "The frozen terminal evaluator validated that baseline and candidate used different model packages, but it did not require either package or config identity to match the currently bound source tree.",
+    "implementation": [
+      "Require each capture config hash to equal the bound baseline/PIRS config hash.",
+      "Require each capture model-source hash to equal the bound model-package hash.",
+      "Pass the bound identities into paired evaluation and fail closed on a mismatch."
+    ],
+    "tests": {
+      "pirs_preregistered_contract": 18,
+      "passed": true
+    },
+    "report": {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1711.json",
+      "sha256": "827fdc016cfc3e71f1002880303857beced8995cb61150f9c9af54b61e39c419"
+    }
+  },
+  "blocker": {
+    "blocker": "Authorized server-6 GPU7 capacity remains occupied by M197-PIRS plus one foreign process.",
+    "retry_after": "2026-09-17T18:10:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+    "alternatives_attempted": "Rechecked live GPU capacity once at the pre-registered retry time and advanced the bound-identity contract without touching the active or foreign workloads."
+  },
+  "evidence": [
+    {
+      "path": "scripts/pirs_preregistered_contract_20260917-1408.py",
+      "sha256": "8eeadf703fe645cb23cdc3ea02b79027e48b34f976fd71d373af31dbe80b2b82"
+    },
+    {
+      "path": "pipeline/reports/pirs_preregistered_contract_20260917-1711.json",
+      "sha256": "827fdc016cfc3e71f1002880303857beced8995cb61150f9c9af54b61e39c419"
+    }
+  ],
+  "limitations": [
+    "The capture identities are checked against the bound local source tree; they are not authenticated by an external signed manifest.",
+    "No paired native capture ran, so no P1/P2/P3 or efficacy result is claimed.",
+    "M197-PIRS remains prior-art engineering evidence and does not authorize a successor mechanism."
+  ]
+}

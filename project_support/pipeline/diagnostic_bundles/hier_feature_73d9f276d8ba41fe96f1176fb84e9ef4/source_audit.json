@@ -1,0 +1,31 @@
+{
+  "token": "73d9f276d8ba41fe96f1176fb84e9ef4",
+  "observed_at": "2026-10-15T08:19:28.228591+00:00",
+  "source_sha256": {
+    "dec.py": "6f7566bd02121fd218fd1360be7c7b1905c267de8a03f36473779ab4d66b9d3a",
+    "hier_postprocess.py": "7e1488f44a1690bb8b1c61fbf79e32971ddbb6a14412747ffbec1abed495347f"
+  },
+  "tests": {
+    "ctf_query_argument_not_loaded": true,
+    "ctf_child_maps_argument_not_loaded": true,
+    "ctf_no_scale_attention_call": true,
+    "ctf_per_scale_ffn_used": true,
+    "hcg_composed_parent_gather_used": true,
+    "hcg_unmasked_point_mean_present": true,
+    "encoder_cluster_point_writeback_used": true,
+    "decoder_mask_head_receives_inst_feats": true,
+    "actual_mask_feature_dependency": true,
+    "identity_source_control": true,
+    "disconnected_source_control_detected": true,
+    "csort_returns_super_feature_result": true
+  },
+  "mask_formula": "torch.einsum('bnd,bmd->bnm', query, mask_feats)",
+  "lines": {
+    "ctf_forward": 564,
+    "hcg_gather": 596,
+    "csort_forward": 695,
+    "encoder_forward": 182,
+    "mask_head": 267
+  },
+  "scope": "AST dependencies of the named unchanged methods, not whole-program proof or trained effect."
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "scope": "Capacity-only retry plus CPU-side query-coverage control derivation; no model forward, native capture, training, queue mutation, or efficacy claim",
+  "timestamp": "2026-09-19T06:12:00+08:00",
+  "remote_observation": {
+    "timestamp": "2026-09-19T06:09:34+08:00",
+    "server": "server-6",
+    "gpu": 7,
+    "used_mib": 62483,
+    "free_mib": 18597,
+    "processes": [
+      {
+        "pid": 1134192,
+        "process_name": "python",
+        "used_mib": 19956,
+        "role": "M197-PIRS"
+      },
+      {
+        "pid": 3827570,
+        "process_name": "/home/jiaoh/conda_envs/das_env/bin/python",
+        "used_mib": 42488,
+        "role": "foreign"
+      }
+    ]
+  },
+  "m197_snapshot_progress": {
+    "observed_at": "2026-09-19T06:07:11+08:00",
+    "source": ".tick_context preflight",
+    "epoch": 20,
+    "total_epochs": 50,
+    "best_miou": 0.4859,
+    "no_improve": 0,
+    "no_improve_limit": 10,
+    "process_alive": true
+  },
+  "blocker": {
+    "blocker": "At 2026-09-19T06:09:34+08:00, GPU7 remained at the two-process cap with M197-PIRS pid1134192 (19956 MiB) plus foreign pid3827570 (42488 MiB), with 18597 MiB free. The frozen registry, object-capture adapter, native-expression producer, and query-coverage control contract are implemented, but native candidate scoring remains unavailable.",
+    "retry_after": "2026-09-19T07:07:00+08:00",
+    "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory."
+  },
+  "attempted_alternatives": [
+    "Queried the live GPU7 process table and memory without touching any process.",
+    "Identified a matched-control gap: best-of-k object scores can be biased by unequal native query counts.",
+    "Implemented a fail-closed query-coverage audit that requires nonoverlapping per-object query pools and selected-query membership.",
+    "Added a predeclared exact-coverage matched subset and paired referent-minus-objectness contrast.",
+    "Ran all 37 producer, object-rank, evaluator, and coverage-control tests; kept native capture unlaunched."
+  ],
+  "native_capture_launched": false,
+  "static_research_progress": {
+    "status": "implemented_and_tested_this_tick",
+    "finding": "The frozen evaluator ignored recorded per-object query coverage. Best-of-k scores could therefore favor objects with more assigned queries. The new contract rejects incomplete or overlapping pools and predeclares an exact-coverage matched contrast before native data exist.",
+    "coverage_gate": {
+      "min_exact_match_rate": 0.75,
+      "max_mean_abs_coverage_delta": 1.0,
+      "min_matched_scenes": 2,
+      "consequence_if_not_met": "Do not promote the all-candidate rank contrast; retain the exact-coverage matched contrast as diagnostic evidence."
+    },
+    "source_hashes": [
+      {
+        "path": "scripts/referent_query_coverage_control_20260919.py",
+        "sha256": "f6fe1919b607be38276cc42e02e7e06bd495f7a58444ae3aec0be516ba5517d8"
+      },
+      {
+        "path": "scripts/test_referent_query_coverage_control_20260919.py",
+        "sha256": "c7c7693633969646eb93c6e88d3f619a33a5f76f081e9e092a045c865ada6839"
+      }
+    ]
+  },
+  "cpu_validation": {
+    "status": "passed_this_tick",
+    "command": "python -m unittest test_referent_native_expression_producer_20260919 test_referent_object_rank_capture_20260919 test_referent_target_rank_evaluator_20260919 test_referent_query_coverage_control_20260919",
+    "tests_passed": 37,
+    "tests_failed": 0,
+    "suites": [
+      {
+        "path": "scripts/test_referent_native_expression_producer_20260919.py",
+        "sha256": "ab7bced707570737594000a2f8748bff8103d1549f508e30a8a7dfca194ce73d"
+      },
+      {
+        "path": "scripts/test_referent_object_rank_capture_20260919.py",
+        "sha256": "e38d7623e67c49d01926ad2ac6d88bb78b99ddee858572e6017e6d7b6cdfe05b"
+      },
+      {
+        "path": "scripts/test_referent_target_rank_evaluator_20260919.py",
+        "sha256": "ac71125d9b79e53cfaa37e509eb07a29ba776ae702dbbd601fd1c827b2112b7f"
+      },
+      {
+        "path": "scripts/test_referent_query_coverage_control_20260919.py",
+        "sha256": "c7c7693633969646eb93c6e88d3f619a33a5f76f081e9e092a045c865ada6839"
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-09-17T07:11:00+08:00",
+  "scope": "Targeted server-6 GPU7 and M197 progress check plus static evaluator validation.",
+  "queue_task": "M197-PIRS",
+  "pid": 1134192,
+  "pid_alive": true,
+  "training_progress": {
+    "epoch": 11,
+    "total_epochs": 50,
+    "step": 1367,
+    "total_steps": 4686,
+    "best_miou": 0.4675
+  },
+  "gpu7_processes": [
+    {
+      "pid": 1134192,
+      "owner": "cluster_project",
+      "used_memory_mib": 19956
+    },
+    {
+      "pid": 3827570,
+      "owner": "foreign",
+      "used_memory_mib": 42488
+    }
+  ],
+  "process_count": 2,
+  "gpu_memory": {
+    "total_mib": 81559,
+    "used_mib": 62481,
+    "free_mib": 18599
+  },
+  "capacity_gate_open": false,
+  "native_execution_completed": false,
+  "static_progress": {
+    "script": "scripts/pirs_preregistered_contract_20260917.py",
+    "script_sha256": "edde27900da7cbbd4bae53251597f974b6ec9b3c3ea8af0394ff86c4106917d3",
+    "artifact": "pipeline/reports/pirs_preregistered_contract_20260917-0711.json",
+    "artifact_sha256": "21c0c25ba63be66997b17ef7ab8ec407ca4ad745765286b5a227eb23e028d8a8",
+    "tests_passed": 8,
+    "new_contract_evidence": "The terminal evaluator now persists selected-positive versus selected-mask failure incidence and paired fixed/broken transitions. These fields are descriptive and do not alter P1/P2/P3 or rejection thresholds."
+  },
+  "blocker": "GPU7 still has the running PIRS process and one foreign process.",
+  "retry_after": "2026-09-17T08:10:00+08:00",
+  "unblock_condition": "M197-PIRS reaches terminal state or GPU7 has fewer than two processes with sufficient measured free memory.",
+  "limitations": [
+    "Process count and training progress are not model efficacy evidence.",
+    "The evaluator component incidence has only passed synthetic contract tests.",
+    "No native capture, training launch, sync, admission, or queue mutation occurred."
+  ]
+}

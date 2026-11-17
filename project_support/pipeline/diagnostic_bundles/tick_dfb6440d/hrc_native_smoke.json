@@ -1,0 +1,124 @@
+{
+  "id": "M208-HRC",
+  "candidate_id": "hierarchy-bottom-up-refined-token-composition",
+  "config": "configs/Quard/ctf_hcg_csort_hrc/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc.yaml",
+  "code_commit": "74fcd21df0af9a971792038ffe251af1ffea2604",
+  "goal_sha256": "0441fecda02231f3af9abac3ca3e6e8f1a7e8ebce19f1f35293fdda01d765c85",
+  "steps": 2,
+  "losses": [
+    9.45667839050293,
+    13.928205490112305
+  ],
+  "native_data_loaded": true,
+  "backward_finite": true,
+  "intended_path_observed": true,
+  "split": "train",
+  "command": "tools.train.train(1, model, TwoNativeBatches(loader), optimizer, scheduler, cfg, logger, writer)",
+  "data_source": {
+    "data_root": "/home/songcl/data/data/",
+    "prefix": "train",
+    "type": "scannetv2_sample_graph_edge",
+    "training": true
+  },
+  "native_train_cli_reference": [
+    "python",
+    "tools/train.py",
+    "/data/songcl/Project/Cluster_project/pipeline/hrc_dfb6440d/runtime_config_smoke_candidate/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_hrc.yaml",
+    "--num_gpus",
+    "1",
+    "--skip_validate"
+  ],
+  "evidence": [
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/smoke_champion_execution.json",
+      "sha256": "40c1ccc335c6e9d4482f7e46c8ba5f90dab95cc35ecc7c8c942d40cf74ab0952"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/smoke_candidate_execution.json",
+      "sha256": "5d2db1e63267b63f60a71ae3a32a0e60a1ef17964a55a81d06b38afebe401604"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/resources_champion_execution.json",
+      "sha256": "5613d2f39de2a9710be979755f2d112d891c4689bcf56bbc2e991fa8c85b1220"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/resources_candidate_execution.json",
+      "sha256": "61cec065516d2a06a5169d6a6d9a8288897e5281004765e5c05571d0bb2aa7fb"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/execution_binding.json",
+      "sha256": "253f632426bf5baf3b317cd253fdfb931bbd9adb4d8403976c97d657edcfa9b2"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/native_manifest.json",
+      "sha256": "d4a8162d3977b124b688673148f5db31653a576c279894f903c05400ca42e759"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_execution/execution_lease.json",
+      "sha256": "6a6057ba58548a8a8508df589edf5cbdcbed80693dd44f1836b98f544dc90f38"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_result_review/actual_four_result_review_v2.json",
+      "sha256": "715e010daf41ac590cff719a5866f5a58fcaa92a1559977cd780a55955dd9b4d"
+    },
+    {
+      "path": "pipeline/diagnostic_bundles/tick_dfb6440d/hrc_native_resource_independent_review.json",
+      "sha256": "42eb6f8abde465ca0ae55a26fcb39f08b87975a8e86ac137f22db77468520607"
+    }
+  ],
+  "recorded_at": "2026-10-22T14:22:42.476846+00:00",
+  "native_mean_control_max_abs": 5.006790160244634e-07,
+  "mean_reference_tolerance": 1e-06,
+  "paired_initialization_scope": "Native pretrain/seed plus three FFN parameter fingerprints; not a measured full-state common-weight fingerprint.",
+  "paired_TRAIN_batches": [
+    {
+      "sha256": "3ba5145ce71bed4d60329379bba6eee6bd04acf23b4fa54347a250e3eeffe967",
+      "scan_ids": [
+        "scene0031_00",
+        "scene0673_00"
+      ],
+      "ann_ids": [
+        24,
+        25,
+        26,
+        27,
+        40,
+        41,
+        42,
+        43
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    },
+    {
+      "sha256": "17a99b6a2eb29e0c83ccaeae1e08e49bc9cb2338af1883d283527e34c0dbe42c",
+      "scan_ids": [
+        "scene0505_00",
+        "scene0315_00"
+      ],
+      "ann_ids": [
+        120,
+        121,
+        122,
+        123,
+        92,
+        93,
+        94,
+        95
+      ],
+      "scenes_len": [
+        4,
+        4
+      ]
+    }
+  ],
+  "limitations": {
+    "full_common_model_initial_state_hash": "NOT_RECORDED",
+    "nontrivial_internal_empty_child_and_padding_cases": "NOT_OBSERVED_IN_THESE_TWO_BATCHES",
+    "raw_and_map_cross_target_digests": "Different; not a preregistered exact-output equality gate. No unmeasured cause claimed.",
+    "pure_TRAIN_peak_memory": "UNKNOWN; smoke includes unchanged diagnostic/probe overhead",
+    "training_efficacy": "UNKNOWN"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "owner": {
+    "token": "49ca2d3a10604c3c96d16c3f607571fc",
+    "thread_id": "01a159c5-29ab-7a22-ba7f-e79174757253",
+    "generated_at": "2026-11-06T03:09:44.603262+00:00",
+    "deadline_at": "2026-11-06T04:09:44.603262+00:00",
+    "context_sha256": "b082d7de03d55a75fddd34a4171794456907649384621ff46b4fb78e1504524a",
+    "pending_sha256": "6054a7f606d17f03860eba8b9972febefb4618b61e07f208dcb69cadb8dfca4e"
+  },
+  "read_only": true,
+  "actual_command": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "songcl@192.168.1.115",
+    "PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 -B -"
+  ],
+  "stdin_program": "import socket,subprocess,json,os,re,hashlib\nfrom pathlib import Path\nfrom datetime import datetime,timezone\nassert socket.gethostname()=='dl04-MS-7E06'\npid=2881795\nroot='/data/songcl/Project/Cluster_project/Cluster_mic_20261105'\nlog=Path(root+'/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log')\nproc=Path('/proc')/str(pid)\nstat=proc.joinpath('stat').read_text();start=stat[stat.rfind(')')+2:].split()[19]\nargv=[v.decode(errors='replace') for v in proc.joinpath('cmdline').read_bytes().split(b'\\0') if v]\ncwd=os.readlink(proc/'cwd');assert cwd==root and 'tools/train.py' in argv;assert os.readlink(proc/'fd/1')==str(log)\nassert any('ctf_hcg_csort_mic.yaml' in a for a in argv)\nenv={k.decode(errors='replace'):v.decode(errors='replace') for item in proc.joinpath('environ').read_bytes().split(b'\\0') if b'=' in item for k,v in [item.split(b'=',1)]}\nwith log.open('rb') as f:\n size=f.seek(0,2);f.seek(max(0,size-65536));raw=f.read(65536)\ntext=raw.decode('utf-8',errors='replace');steps=[(int(a),int(b),int(c)) for a,b,c in re.findall(r'Train\\[(\\d+)/\\d+\\]:[^\\r\\n]*?\\|\\s*(\\d+)/(\\d+)',text)]\ninv=subprocess.check_output(['nvidia-smi','-i','0','--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total','--format=csv,noheader,nounits'],text=True).strip();row=[v.strip() for v in inv.split(',')];assert row[0]=='0' and row[1]=='GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c'\napps=subprocess.check_output(['nvidia-smi','-i','0','--query-compute-apps=pid,used_memory','--format=csv,noheader,nounits'],text=True).strip()\nfdlinks=[]\nfor fd in proc.joinpath('fd').iterdir():\n try:link=os.readlink(fd)\n except OSError:continue\n if 'cluster_project_gpu0_' in link:fdlinks.append({'fd':fd.name,'path':link})\nlocks=[];locktext=Path('/proc/locks').read_text()\nfor kind in ('training','diagnostic','exclusive'):\n path=Path('/tmp/cluster_project_gpu0_'+kind+'.lock')\n if not path.exists():locks.append({'kind':kind,'path':str(path),'exists':False});continue\n st=path.stat();key='%02x:%02x:%d'%(os.major(st.st_dev),os.minor(st.st_dev),st.st_ino)\n locks.append({'kind':kind,'path':str(path),'exists':True,'kernel_lock_entries':[line for line in locktext.splitlines() if key in line]})\nhead=subprocess.check_output(['git','-C',root,'rev-parse','HEAD'],text=True).strip();assert head=='07ef534a6e44f22bd7b2d083550ebd7823d1d3d3'\nshim=Path('/data/songcl/Project/Cluster_project/pipeline/runtime/server4_conda_4ca73fba.sh').read_text();shim_lines=[line for line in shim.splitlines() if any(x in line for x in ('flock','lock','PYTHONDONTWRITEBYTECODE','python()','PYTHON'))]\nprint(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'hostname':socket.gethostname(),'pid':pid,'starttime':start,'cwd':cwd,'argv':argv,'runtime_source_commit':head,'log':str(log),'log_bytes':size,'tail_bytes_read':len(raw),'tail_sha256':hashlib.sha256(raw).hexdigest(),'native_progress_samples':sorted(set(steps))[-5:],'latest_native_progress':max(steps) if steps else None,'fatal_error_markers':[x for x in ('Traceback','CUDA out of memory','RuntimeError') if x in text],'GPU0_inventory':inv,'GPU0_compute_contexts_raw':apps,'physical_gpu':0,'gpu_uuid':row[1],'memory_free_mib':int(row[4])-int(row[3]),'process_environment_selected':{k:env.get(k) for k in ('PYTHONDONTWRITEBYTECODE','CUDA_VISIBLE_DEVICES')},'process_cooperative_lock_fds':fdlinks,'cooperative_lock_kernel_observation':locks,'conda_shim_relevant_lines':shim_lines,'read_only':True,'GPU1_queried':False}))\n\nstage=Path('/data/songcl/Project/Cluster_project/pipeline/cooperative_guards/m229_fd2aae2a')\ns=json.loads((stage/'state.json').read_text());assert s['status']=='HOLDING' and s['guardian_pid']==3033165 and s['trainer_pid']==2881795 and s['trainer_starttime']=='152216088'\ngproc=Path('/proc/3033165');gstat=gproc.joinpath('stat').read_text();gfields=gstat[gstat.rfind(')')+2:].split();assert gfields[19]=='152434416' and gfields[0]!='Z'\ntable=Path('/proc/locks').read_text().splitlines();verified=[]\nfor item in s['locks']:\n key='%02x:%02x:%d'%(item['device_major'],item['device_minor'],item['inode'])\n rows=[line for line in table if len(line.split())>5 and line.split()[5]==key]\n assert len(rows)==1\n fields=rows[0].split();assert fields[1]=='FLOCK' and fields[3]=='WRITE' and int(fields[4])==3033165\n verified.append(rows[0])\nassert len(verified)==3\nprint(json.dumps({'observed_at':datetime.now(timezone.utc).isoformat(),'state':s,'guardian_alive_start_verified':True,'current_kernel_locks':verified,'trainer_identity_unchanged':True,'postlaunch_correction':True,'prelaunch_lock_check_proven':False,'GPU_or_signal_calls':False}))\n",
+  "returncode": 0,
+  "stderr": "",
+  "original_observer_producer": {
+    "path": "pipeline/diagnostic_bundles/tick_fd2aae2a/mic_post_guardian_live_observation.json",
+    "sha256": "64a084bf261843a94e5cfc4545cfc59f423aebe83bf3529542f3a1c813cced61"
+  },
+  "new_execution_lease_or_training_stage_created": false,
+  "trainer_observation": {
+    "observed_at": "2026-11-06T03:15:25.638278+00:00",
+    "hostname": "dl04-MS-7E06",
+    "pid": 2881795,
+    "starttime": "152216088",
+    "cwd": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+    "argv": [
+      "python",
+      "tools/train.py",
+      "configs/Quard/ctf_hcg_csort_mic/model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic.yaml",
+      "--gpu_ids",
+      "0",
+      "--num_gpus",
+      "1"
+    ],
+    "runtime_source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+    "log": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105/logs/train_model_base1_quard2_c2f_enc_lite_posA_l1_ctf_hcg_csort_mic_20261106_030700.log",
+    "log_bytes": 21904989,
+    "tail_bytes_read": 65536,
+    "tail_sha256": "f86a313a693e93efa20e71c2ad5bad73c4767d5773b9aa1ced24a3ec0352e971",
+    "native_progress_samples": [
+      [
+        17,
+        2649,
+        4686
+      ],
+      [
+        17,
+        2650,
+        4686
+      ],
+      [
+        17,
+        2651,
+        4686
+      ],
+      [
+        17,
+        2652,
+        4686
+      ],
+      [
+        17,
+        2653,
+        4686
+      ]
+    ],
+    "latest_native_progress": [
+      17,
+      2653,
+      4686
+    ],
+    "fatal_error_markers": [],
+    "GPU0_inventory": "0, GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c, 24, 19805, 32607",
+    "GPU0_compute_contexts_raw": "2881795, 19752",
+    "physical_gpu": 0,
+    "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+    "memory_free_mib": 12802,
+    "process_environment_selected": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "CUDA_VISIBLE_DEVICES": null
+    },
+    "process_cooperative_lock_fds": [],
+    "cooperative_lock_kernel_observation": [
+      {
+        "kind": "training",
+        "path": "/tmp/cluster_project_gpu0_training.lock",
+        "exists": true,
+        "kernel_lock_entries": [
+          "36: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF"
+        ]
+      },
+      {
+        "kind": "diagnostic",
+        "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+        "exists": true,
+        "kernel_lock_entries": [
+          "35: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF"
+        ]
+      },
+      {
+        "kind": "exclusive",
+        "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+        "exists": true,
+        "kernel_lock_entries": [
+          "34: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+        ]
+      }
+    ],
+    "conda_shim_relevant_lines": [
+      "export PYTHONDONTWRITEBYTECODE=1",
+      "export PYTHONPYCACHEPREFIX=/tmp/cluster_project_server4_4ca73fba"
+    ],
+    "read_only": true,
+    "GPU1_queried": false
+  },
+  "guardian_observation": {
+    "observed_at": "2026-11-06T03:15:25.639087+00:00",
+    "state": {
+      "status": "HOLDING",
+      "recorded_at": "2026-11-05T19:43:26.322484+00:00",
+      "operation": "postlaunch_existing_training_cooperative_lock_protection",
+      "binding_sha256": "08a1f752669db19b33f6f47cc16885e37ee0e58571eb1883b944ab232ac3bac2",
+      "guardian_pid": 3033165,
+      "guardian_starttime": "152434416",
+      "trainer_pid": 2881795,
+      "trainer_starttime": "152216088",
+      "runtime_root": "/data/songcl/Project/Cluster_project/Cluster_mic_20261105",
+      "source_commit": "07ef534a6e44f22bd7b2d083550ebd7823d1d3d3",
+      "physical_gpu": 0,
+      "gpu_uuid": "GPU-958e741a-e5cf-127e-ffe8-9b984e1f404c",
+      "locks": [
+        {
+          "kind": "training",
+          "path": "/tmp/cluster_project_gpu0_training.lock",
+          "inode": 92537152,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "31: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF"
+        },
+        {
+          "kind": "diagnostic",
+          "path": "/tmp/cluster_project_gpu0_diagnostic.lock",
+          "inode": 92537153,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "30: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF"
+        },
+        {
+          "kind": "exclusive",
+          "path": "/tmp/cluster_project_gpu0_exclusive.lock",
+          "inode": 92537154,
+          "device_major": 259,
+          "device_minor": 4,
+          "kernel_lock_entry": "29: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+        }
+      ],
+      "postlaunch_correction": true,
+      "prelaunch_lock_check_proven": false,
+      "GPU_model_or_NVML_calls": false,
+      "signals_sent": false,
+      "training_restarted": false,
+      "locks_acquired_at": "2026-11-05T19:43:26.322467+00:00"
+    },
+    "guardian_alive_start_verified": true,
+    "current_kernel_locks": [
+      "36: FLOCK  ADVISORY  WRITE 3033165 103:04:92537152 0 EOF",
+      "35: FLOCK  ADVISORY  WRITE 3033165 103:04:92537153 0 EOF",
+      "34: FLOCK  ADVISORY  WRITE 3033165 103:04:92537154 0 EOF"
+    ],
+    "trainer_identity_unchanged": true,
+    "postlaunch_correction": true,
+    "prelaunch_lock_check_proven": false,
+    "GPU_or_signal_calls": false
+  }
+}
